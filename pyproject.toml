@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fretwise"
+version = "0.1.0"
+description = "Guitar Fingering Optimization System"
+requires-python = ">=3.11"
+dependencies = [
+    "PyGuitarPro>=0.10",
+    "music21",
+    "mido",
+    "pretty_midi",
+    "numpy",
+    "mirdata",
+    "click",
+    "reportlab",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+[project.scripts]
+fretwise = "fretwise.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fretwise"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+strict = true
+python_version = "3.11"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.coverage.run]
+source = ["src/fretwise"]
+
+[tool.coverage.report]
+fail_under = 80
