@@ -82,9 +82,14 @@ class StateGenerator:
     def states_for(self, note: NoteEvent) -> list[FingeringState]:
         """Return all valid FingeringState objects for a single NoteEvent.
 
-        For each string on which the target pitch can be played within
-        ``max_fret``, one open-string state (fret 0) or up to four
-        fretted states (one per finger) are generated.
+        When the source file (GP) provides authoritative string/fret hints,
+        only states for that exact position are generated — the Viterbi then
+        optimises the finger assignment only, not the string/fret placement.
+        This guarantees chord voicings match the source tab and prevents the
+        optimizer from creating unplayable chords with gaps between strings.
+
+        When no hints are available (e.g. MIDI, MusicXML without tab data),
+        all physically valid (string, fret) positions are enumerated.
 
         Args:
             note: The note whose pitch we need to cover.
@@ -93,9 +98,22 @@ class StateGenerator:
             List of FingeringState.  May be empty for pitches outside
             the instrument's range.
         """
-        states: list[FingeringState] = []
         pitches = self._config.open_string_pitches
         max_fret = self._config.max_fret
+
+        # --- Hint-constrained mode (GP source tab) ---------------------------
+        # When both string and fret are known from the source, generate states
+        # for that single position only.  The hint overrides free exploration.
+        if (
+            note.string_hint is not None
+            and note.fret_hint is not None
+            and 1 <= note.string_hint <= len(pitches)
+            and 0 <= note.fret_hint <= max_fret
+        ):
+            return self._states_for_position(note.string_hint, note.fret_hint)
+
+        # --- Free-exploration mode (no source tab data) ----------------------
+        states: list[FingeringState] = []
 
         for string_idx, open_pitch in enumerate(pitches):
             string_num = string_idx + 1
@@ -104,69 +122,7 @@ class StateGenerator:
             if fret < 0 or fret > max_fret:
                 continue
 
-            if fret == 0:
-                states.append(
-                    FingeringState(
-                        string_num=string_num,
-                        fret=0,
-                        finger=Finger.OPEN,
-                        hand_position=1,
-                    )
-                )
-            else:
-                # Each of the four fingers can play the fret; the hand position
-                # is derived from the finger offset: hand_pos = fret - offset.
-                for finger in _FRETTING_FINGERS:
-                    hand_position = fret - _FINGER_OFFSET[finger]
-                    if hand_position < 1:
-                        # Hand would be at or below the nut — physically impossible.
-                        continue
-                    states.append(
-                        FingeringState(
-                            string_num=string_num,
-                            fret=fret,
-                            finger=finger,
-                            hand_position=hand_position,
-                        )
-                    )
-
-        # If the GP file provided authoritative string/fret hints not covered
-        # by the tuning-based generation (e.g. alternate tunings like Eb, Drop D),
-        # add states for those positions so no playable note is ever dropped.
-        if (
-            note.string_hint is not None
-            and note.fret_hint is not None
-            and 1 <= note.string_hint <= len(pitches)
-            and 0 <= note.fret_hint <= max_fret
-        ):
-            sh, fh = note.string_hint, note.fret_hint
-            # Check whether this exact position was already generated.
-            already_present = any(
-                s.string_num == sh and s.fret == fh for s in states
-            )
-            if not already_present:
-                logger.debug(
-                    "Hint-based fallback for pitch %d: string=%d fret=%d "
-                    "(tuning %s did not produce this position).",
-                    note.pitch, sh, fh, pitches,
-                )
-                if fh == 0:
-                    states.append(
-                        FingeringState(
-                            string_num=sh, fret=0,
-                            finger=Finger.OPEN, hand_position=1,
-                        )
-                    )
-                else:
-                    for finger in _FRETTING_FINGERS:
-                        hand_position = fh - _FINGER_OFFSET[finger]
-                        if hand_position >= 1:
-                            states.append(
-                                FingeringState(
-                                    string_num=sh, fret=fh,
-                                    finger=finger, hand_position=hand_position,
-                                )
-                            )
+            states.extend(self._states_for_position(string_num, fret))
 
         if not states:
             logger.debug(
@@ -176,6 +132,37 @@ class StateGenerator:
                 max_fret,
             )
 
+        return states
+
+    def _states_for_position(self, string_num: int, fret: int) -> list[FingeringState]:
+        """Return FingeringStates for a fixed (string, fret) position.
+
+        Generates one OPEN state for fret 0, or one state per finger for
+        fretted positions (the hand_position derives from the finger offset).
+        """
+        if fret == 0:
+            return [
+                FingeringState(
+                    string_num=string_num,
+                    fret=0,
+                    finger=Finger.OPEN,
+                    hand_position=1,
+                )
+            ]
+
+        states: list[FingeringState] = []
+        for finger in _FRETTING_FINGERS:
+            hand_position = fret - _FINGER_OFFSET[finger]
+            if hand_position < 1:
+                continue
+            states.append(
+                FingeringState(
+                    string_num=string_num,
+                    fret=fret,
+                    finger=finger,
+                    hand_position=hand_position,
+                )
+            )
         return states
 
     def states_for_sequence(

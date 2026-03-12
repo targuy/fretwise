@@ -13,7 +13,9 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.scoring import (
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
+    resolve_chord_finger_span,
     resolve_chord_stretch,
+    resolve_chord_string_diagonal,
     resolve_finger_continuity,
     resolve_section_consistency,
 )
@@ -76,10 +78,12 @@ def run_pipeline(
         valid_events, valid_states = zip(*valid_pairs)
         results = optimizer.solve(list(valid_events), list(valid_states))
         results = resolve_finger_continuity(results)
-        results = resolve_section_consistency(results)
         results = resolve_chord_conflicts(results)
         results = resolve_chord_stretch(results)
         results = resolve_chord_finger_ordering(results)
+        results = resolve_chord_finger_span(results)
+        results = resolve_chord_string_diagonal(results)
+        results = resolve_section_consistency(results)
         all_results.extend(results)
 
     # Sort by onset then voice for stable, predictable ordering.
@@ -90,6 +94,8 @@ def run_pipeline(
     if len(voices) > 1:
         all_results = resolve_chord_conflicts(all_results)
         all_results = resolve_chord_finger_ordering(all_results)
+        all_results = resolve_chord_finger_span(all_results)
+        all_results = resolve_chord_string_diagonal(all_results)
 
     for i, r in enumerate(all_results):
         r.note_id = i

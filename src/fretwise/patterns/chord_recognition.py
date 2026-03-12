@@ -45,12 +45,20 @@ def recognize_chord(pitches: Iterable[int]) -> str | None:
     Returns:
         Chord name string such as "Am", "G7", "Fmaj7", or None.
     """
-    pitch_classes = frozenset(p % 12 for p in pitches)
+    pitch_list = list(pitches)
+    pitch_classes = frozenset(p % 12 for p in pitch_list)
     n = len(pitch_classes)
     if n < 2:
         return None
 
-    # Exact match: all pitch classes match the pattern exactly.
+    # Prefer root = lowest sounding pitch class (standard bass-note convention).
+    lowest_pc = min(pitch_list) % 12 if pitch_list else 0
+
+    # Exact match — try lowest pitch class as root first, then any root.
+    for intervals, suffix in _CHORD_PATTERNS:
+        candidate = frozenset((lowest_pc + i) % 12 for i in intervals)
+        if candidate == pitch_classes:
+            return _NOTE_NAMES[lowest_pc] + suffix
     for intervals, suffix in _CHORD_PATTERNS:
         for root in range(12):
             candidate = frozenset((root + i) % 12 for i in intervals)
@@ -60,6 +68,10 @@ def recognize_chord(pitches: Iterable[int]) -> str | None:
     # Subset match: our pitch classes are a subset of the pattern.
     # Require at least 3 pitch classes to avoid false positives.
     if n >= 3:
+        for intervals, suffix in _CHORD_PATTERNS:
+            candidate = frozenset((lowest_pc + i) % 12 for i in intervals)
+            if pitch_classes < candidate:
+                return _NOTE_NAMES[lowest_pc] + suffix
         for intervals, suffix in _CHORD_PATTERNS:
             for root in range(12):
                 candidate = frozenset((root + i) % 12 for i in intervals)

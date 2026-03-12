@@ -14,17 +14,29 @@ Layout per system (top to bottom)
   STRING 6    ──────── low E
   BOTTOM PAD (6 pt)
 
-String spacing is 10 pt: compact yet leaves 2.3 pt below each finger
-annotation before the next string line. Both fret number and finger
-label are horizontally centred on the note column x.
-
 Note rendering
 ──────────────
-  • White oval  – erases the string line behind the fret number
-  • Fret number – Helvetica-Bold 6 pt, centred in oval (black)
-  • Finger char – Helvetica 4.5 pt, centred BELOW oval (dark red)
-                  omitted for open strings (fret == 0)
+  • White oval    – erases the string line behind the fret number
+  • Fret number   – Helvetica-Bold 6 pt, centred in oval (black)
+  • LH finger     – Helvetica-Bold 5 pt, SOUTH-WEST of oval (dark red)
+                    right edge of char aligns with left edge of oval;
+                    baseline at string_y - 5.5 pt so descender stays
+                    3 pt clear of the next string line.
+                    Omitted for open strings (fret == 0).
+  • RH finger     – reserved for Phase 2, SOUTH-EAST of oval (dark blue)
+                    left edge of char aligns with right edge of oval;
+                    same Y baseline as LH for visual symmetry.
   • Minimum column step 17 pt enforced by forward-pass constraint
+
+SW / SE finger placement diagram (string spacing = 10 pt)
+──────────────────────────────────────────────────────────
+  y + 3.5  ┌───────────┐
+  y        │     5     │   fret number centred in oval
+  y - 3.5  └───────────┘
+              ↑           ↑
+  y - 5.5   p·          ·p   LH at SW, RH at SE (same baseline)
+  y - 7.0   (descender bottom — 3 pt above next string line)
+  y - 10   ─────────────────  next string
 """
 
 from __future__ import annotations
@@ -83,13 +95,24 @@ _FRET_FONT = "Helvetica-Bold"
 _FRET_FS = 6.0
 # fret baseline = string_y - fret_fs*0.36  (centres the glyph vertically in oval)
 
-_FINGER_FONT = "Helvetica"
-_FINGER_FS = 4.5
-_FINGER_Y = -6.8     # finger baseline = string_y + this
-# cap-top ≈ string_y-3.65 (0.15 pt below oval-bottom string_y-3.5)
-# text-bottom ≈ string_y-7.7  →  gap to next string line = 2.3 pt
+# ── Left-hand (LH) finger annotation — south-west of note oval ──────────────
+# drawRightString(x - oval_w/2, string_y + _LH_FINGER_Y, char)
+#   → right edge of text aligns with left edge of oval  (SW corner)
+#   → cap-top  ≈ string_y - 2.0  (below the string line, outside the oval)
+#   → descender ≈ string_y - 7.0  (3 pt clear of the next string line) ✓
+_LH_FINGER_FONT = "Helvetica-Bold"
+_LH_FINGER_FS = 5.0
+_LH_FINGER_Y = -5.5       # baseline offset from string_y
+_LH_FINGER_COLOR = colors.Color(0.80, 0.05, 0.05)   # dark red
 
-_FINGER_COLOR = colors.Color(0.80, 0.05, 0.05)   # dark red
+# ── Right-hand (RH) finger annotation — south-east of note oval ─────────────
+# Reserved for Phase 2.  Mirror of LH:
+#   drawString(x + oval_w/2, string_y + _RH_FINGER_Y, char)
+#   → left edge of text aligns with right edge of oval  (SE corner)
+_RH_FINGER_FONT = "Helvetica-Bold"
+_RH_FINGER_FS = 5.0
+_RH_FINGER_Y = -5.5       # same baseline as LH for visual symmetry
+_RH_FINGER_COLOR = colors.Color(0.05, 0.05, 0.80)   # dark blue
 
 # Column layout
 _MIN_COL_STEP = 17.0   # minimum x step between consecutive onset columns
@@ -648,10 +671,14 @@ def _draw_note(
     """Draw one note at string position (x, y).
 
     Rendering order:
-    1.  White oval  — erases the string line behind the fret number.
-    2.  Fret number — Helvetica-Bold 6 pt, centred in oval, black.
-    3.  Finger char — Helvetica 4.8 pt, centred BELOW oval, dark red.
-                      Omitted for open strings (fret == 0).
+    1.  White oval   — erases the string line behind the fret number.
+    2.  Fret number  — Helvetica-Bold 6 pt, centred in oval, black.
+    3.  LH finger    — Helvetica-Bold 5 pt, SOUTH-WEST of oval, dark red.
+                       Right edge of char at oval left edge; baseline at
+                       string_y - 5.5 pt (descender clears next string by 3 pt).
+                       Omitted for open strings (fret == 0).
+    4.  RH finger    — reserved for Phase 2, SOUTH-EAST, dark blue.
+                       Symmetric: left edge of char at oval right edge.
     """
     oval_w = _OVAL_W2 if fret >= 10 else _OVAL_W1
 
@@ -669,12 +696,21 @@ def _draw_note(
     c.setFont(_FRET_FONT, _FRET_FS)
     c.drawCentredString(x, y - _FRET_FS * 0.36, str(fret))
 
-    # 3. Finger annotation — below oval, only for fretted notes
+    # 3. LH finger annotation — south-west of oval, fretted notes only.
+    #    drawRightString anchors the right edge of the glyph at the oval's
+    #    left edge, so the character sits cleanly to the left of the number.
     if fret > 0 and finger in _FINGER_CHAR:
-        c.setFillColor(_FINGER_COLOR)
-        c.setFont(_FINGER_FONT, _FINGER_FS)
-        c.drawCentredString(x, y + _FINGER_Y, _FINGER_CHAR[finger])
+        c.setFillColor(_LH_FINGER_COLOR)
+        c.setFont(_LH_FINGER_FONT, _LH_FINGER_FS)
+        c.drawRightString(x - oval_w / 2, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
         c.setFillColor(_COL_BLACK)
+
+    # 4. RH finger annotation — south-east (Phase 2 placeholder).
+    #    Uncomment and pass rh_finger_char when right-hand fingering is added:
+    #    c.setFillColor(_RH_FINGER_COLOR)
+    #    c.setFont(_RH_FINGER_FONT, _RH_FINGER_FS)
+    #    c.drawString(x + oval_w / 2, y + _RH_FINGER_Y, rh_finger_char)
+    #    c.setFillColor(_COL_BLACK)
 
 
 # ---------------------------------------------------------------------------

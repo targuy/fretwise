@@ -143,6 +143,50 @@ class TestStateGeneratorSequence:
         assert any(s.string_num == 2 and s.fret == 0 for s in results[1])
 
 
+class TestStateGeneratorHintFallback:
+    """Tests for hint-based fallback when string_hint/fret_hint don't match tuning."""
+
+    def test_hint_open_string_fallback_added(self) -> None:
+        """fret_hint=0 with a non-standard position triggers an OPEN fallback state."""
+        gen = StateGenerator()
+        # Use a pitch that won't produce a state at string 3 fret 0 in standard tuning.
+        # string 3 (G3=55): fret 0 → pitch 55. Use pitch 64 which won't be on str3 fret 0.
+        note = NoteEvent(
+            pitch=64, onset=0.0, duration=1.0, tempo=120.0,
+            string_hint=3, fret_hint=0,
+        )
+        states = gen.states_for(note)
+        # Should add fallback: string 3 open.
+        fallback = [s for s in states if s.string_num == 3 and s.fret == 0]
+        assert len(fallback) >= 1
+        assert fallback[0].finger == Finger.OPEN
+
+    def test_hint_fretted_fallback_added(self) -> None:
+        """fret_hint>0 with a hint that standard tuning wouldn't produce adds states."""
+        gen = StateGenerator()
+        # string 6 (E2=40), fret 3 → pitch 43 (G2).  Use pitch 44 with hint str6 fret 3.
+        # The standard generator would produce string 6 fret 4 for pitch 44, NOT fret 3.
+        note = NoteEvent(
+            pitch=44, onset=0.0, duration=1.0, tempo=120.0,
+            string_hint=6, fret_hint=3,
+        )
+        states = gen.states_for(note)
+        hint_states = [s for s in states if s.string_num == 6 and s.fret == 3]
+        assert len(hint_states) >= 1
+
+    def test_hint_already_present_not_duplicated(self) -> None:
+        """If the hint position is already in the standard states, no duplicate is added."""
+        gen = StateGenerator()
+        # E4 string 1 open — standard tuning already generates this.
+        note = NoteEvent(
+            pitch=64, onset=0.0, duration=1.0, tempo=120.0,
+            string_hint=1, fret_hint=0,
+        )
+        states = gen.states_for(note)
+        str1_open = [s for s in states if s.string_num == 1 and s.fret == 0]
+        assert len(str1_open) == 1  # exactly one, not duplicated
+
+
 class TestStateGeneratorCustomTuning:
     def test_drop_d_tuning(self) -> None:
         """With drop-D tuning, string 6 is D2 (38) instead of E2 (40)."""

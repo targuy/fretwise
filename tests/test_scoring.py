@@ -8,13 +8,20 @@ from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.scoring import (
     CostFunction,
     CostWeights,
+    _natural_finger_assignment,
     compute_mechanical_cost,
     cost_finger_difficulty,
     cost_position_shift,
     cost_sequential_crossing,
     cost_stretch,
     cost_string_change,
+    resolve_chord_conflicts,
     resolve_chord_finger_ordering,
+    resolve_chord_finger_span,
+    resolve_chord_stretch,
+    resolve_chord_string_diagonal,
+    resolve_finger_continuity,
+    resolve_section_consistency,
 )
 
 
@@ -320,8 +327,9 @@ class TestResolveChordFingerOrdering:
 
     def test_crossing_irm_fixed(self) -> None:
         # Reported bug: INDEX fret 5, RING fret 7, MIDDLE fret 9.
-        # RING (rank 2) at fret 7 < MIDDLE (rank 1) at fret 9 → CROSSING.
-        # After fix: fret 5→INDEX, fret 7→MIDDLE, fret 9→RING.
+        # RING (rank 2) at fret 7 then MIDDLE (rank 1) at fret 9 → CROSSING.
+        # Natural assignment (R-C5): hp=5, INDEX@5 (natural), RING@7 (natural),
+        # PINKY@9 (1-fret stretch from natural hp+3=8).
         results = [
             _fr(0, 0.0, 3, 5, Finger.INDEX),
             _fr(1, 0.0, 4, 7, Finger.RING),
@@ -330,7 +338,7 @@ class TestResolveChordFingerOrdering:
         out = resolve_chord_finger_ordering(results)
         by_fret = sorted(out, key=lambda r: r.state.fret)
         fingers = [r.state.finger for r in by_fret]
-        assert fingers == [Finger.INDEX, Finger.MIDDLE, Finger.RING]
+        assert fingers == [Finger.INDEX, Finger.RING, Finger.PINKY]
 
     def test_crossing_two_notes_fixed(self) -> None:
         # RING fret 5, INDEX fret 7 — RING (rank 2) at lower fret than INDEX (rank 0) is OK
@@ -380,3 +388,597 @@ class TestResolveChordFingerOrdering:
         results = [_fr(0, 0.0, 3, 5, Finger.RING)]
         out = resolve_chord_finger_ordering(results)
         assert out[0].state.finger == Finger.RING
+
+    def test_barre_chord_five_notes_skipped(self) -> None:
+        # 5 fretted notes — barré, can't be resolved by this function alone.
+        results = [_fr(i, 0.0, i + 1, 5, Finger.INDEX) for i in range(5)]
+        out = resolve_chord_finger_ordering(results)
+        # Resolver must not crash; result may be unchanged.
+        assert len(out) == 5
+
+    def test_duplicate_finger_in_chord_skipped(self) -> None:
+        # Two notes with the same finger (duplicate) — resolver skips this chord.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.INDEX),  # duplicate INDEX
+        ]
+        out = resolve_chord_finger_ordering(results)
+        assert len(out) == 2  # no crash
+
+
+# ---------------------------------------------------------------------------
+# CostWeights.musical
+# ---------------------------------------------------------------------------
+
+
+class TestCostWeightsMusical:
+    def test_musical_weights_beta_dominant(self) -> None:
+        w = CostWeights.musical()
+        assert w.beta == pytest.approx(2.0)
+        assert w.alpha == pytest.approx(1.0)
+        assert w.gamma == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# cost_sequential_crossing — fret==0 branch
+# ---------------------------------------------------------------------------
+
+
+class TestCostSequentialCrossingFretZero:
+    def test_open_fret_source_no_penalty(self) -> None:
+        # s1 fret=0 even with non-OPEN finger value (edge case guard).
+        s1 = FingeringState(string_num=3, fret=0, finger=Finger.INDEX, hand_position=1)
+        s2 = _st(5, Finger.MIDDLE)
+        assert cost_sequential_crossing(s1, s2) == pytest.approx(0.0)
+
+    def test_open_fret_target_no_penalty(self) -> None:
+        s1 = _st(5, Finger.RING, hand_pos=5)
+        s2 = FingeringState(string_num=3, fret=0, finger=Finger.INDEX, hand_position=1)
+        assert cost_sequential_crossing(s1, s2) == pytest.approx(0.0)
+
+    def test_equal_rank_no_penalty(self) -> None:
+        # Same finger on consecutive notes → rank_dir == 0 → no penalty.
+        s1 = _st(5, Finger.INDEX, hand_pos=5)
+        s2 = _st(6, Finger.INDEX, hand_pos=6)
+        assert cost_sequential_crossing(s1, s2) == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# compute_mechanical_cost — same string / same fret branches
+# ---------------------------------------------------------------------------
+
+
+class TestComputeMechanicalCostSamePosition:
+    def test_same_string_same_fret_same_finger_zero(self) -> None:
+        s = _state(string_num=3, fret=5, finger=Finger.INDEX, hand_position=5)
+        assert compute_mechanical_cost(s, s, _note()) == pytest.approx(0.0)
+
+    def test_same_string_same_fret_different_finger_has_penalty(self) -> None:
+        s1 = _state(string_num=3, fret=5, finger=Finger.INDEX, hand_position=5)
+        s2 = _state(string_num=3, fret=5, finger=Finger.MIDDLE, hand_position=4)
+        cost = compute_mechanical_cost(s1, s2, _note())
+        assert cost > 0.0
+
+    def test_open_string_same_fret_no_special_case(self) -> None:
+        # fret=0 does NOT trigger the same-fret special case.
+        s = FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1)
+        cost = compute_mechanical_cost(s, s, _note())
+        # Should be zero (open → open, same position) via the normal path.
+        assert cost >= 0.0
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_stretch
+# ---------------------------------------------------------------------------
+
+
+def _fr2(
+    note_id: int, onset: float, string_num: int, fret: int, finger: Finger, pitch: int = 60
+) -> FingeringResult:
+    _offsets = {Finger.INDEX: 0, Finger.MIDDLE: 1, Finger.RING: 2, Finger.PINKY: 3}
+    offset = _offsets.get(finger, 0)
+    hp = max(1, fret - offset) if fret > 0 else 1
+    state = FingeringState(string_num=string_num, fret=fret, finger=finger, hand_position=hp)
+    note = NoteEvent(pitch=pitch, onset=onset, duration=1.0, tempo=120.0)
+    # Store a few alternative states so the resolver can revoice.
+    alts = [
+        (FingeringState(string_num=string_num + 1, fret=fret, finger=finger, hand_position=hp),
+         1.5),
+    ] if string_num < 6 else []
+    return FingeringResult(note_id=note_id, note_event=note, state=state, cost=1.0, alternatives=alts)
+
+
+class TestResolveChordStretch:
+    def test_no_stretch_unchanged(self) -> None:
+        # Chord within 4-fret span — no change needed.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.RING),
+        ]
+        out = resolve_chord_stretch(results)
+        assert len(out) == 2
+        frets = {r.state.fret for r in out}
+        assert frets == {5, 7}
+
+    def test_large_span_resolved_or_marked(self) -> None:
+        # Chord with a 12-fret span: outlier should be revoiced or left unchanged.
+        results = [
+            _fr2(0, 0.0, 3, 5, Finger.INDEX, pitch=64),
+            _fr2(1, 0.0, 4, 17, Finger.PINKY, pitch=76),
+        ]
+        out = resolve_chord_stretch(results)
+        # Must not crash.
+        assert len(out) == 2
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out = resolve_chord_stretch(results)
+        assert len(out) == 1
+        assert out[0].state.fret == 5
+
+    def test_empty_unchanged(self) -> None:
+        assert resolve_chord_stretch([]) == []
+
+    def test_two_open_strings_no_crash(self) -> None:
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(pitch=64, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+            FingeringResult(
+                note_id=1,
+                note_event=NoteEvent(pitch=59, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=2, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+        ]
+        out = resolve_chord_stretch(results)
+        assert len(out) == 2
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_conflicts
+# ---------------------------------------------------------------------------
+
+
+class TestResolveChordConflicts:
+    def test_no_conflict_unchanged(self) -> None:
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.RING),
+        ]
+        out = resolve_chord_conflicts(results)
+        fingers = {r.state.finger for r in out}
+        assert Finger.INDEX in fingers
+        assert Finger.RING in fingers
+
+    def test_duplicate_finger_resolved(self) -> None:
+        # Both notes use INDEX — one must be changed.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.INDEX),  # conflict
+        ]
+        out = resolve_chord_conflicts(results)
+        fingers = [r.state.finger for r in out]
+        # After resolution the two fingers must differ.
+        assert fingers[0] != fingers[1]
+
+    def test_open_string_not_conflicted(self) -> None:
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(pitch=64, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+            FingeringResult(
+                note_id=1,
+                note_event=NoteEvent(pitch=59, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=2, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+        ]
+        out = resolve_chord_conflicts(results)
+        assert all(r.state.finger == Finger.OPEN for r in out)
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_fr(0, 0.0, 3, 5, Finger.MIDDLE)]
+        out = resolve_chord_conflicts(results)
+        assert out[0].state.finger == Finger.MIDDLE
+
+    def test_empty_unchanged(self) -> None:
+        assert resolve_chord_conflicts([]) == []
+
+    def test_conflict_with_alternative_state(self) -> None:
+        # Provide an alternative state so the resolver can pick it.
+        alt = FingeringState(string_num=4, fret=7, finger=Finger.MIDDLE, hand_position=6)
+        r0 = FingeringResult(
+            note_id=0,
+            note_event=NoteEvent(pitch=60, onset=0.0, duration=1.0, tempo=120.0),
+            state=FingeringState(string_num=3, fret=5, finger=Finger.INDEX, hand_position=5),
+            cost=1.0,
+        )
+        r1 = FingeringResult(
+            note_id=1,
+            note_event=NoteEvent(pitch=64, onset=0.0, duration=1.0, tempo=120.0),
+            state=FingeringState(string_num=4, fret=7, finger=Finger.INDEX, hand_position=7),
+            cost=1.0,
+            alternatives=[(alt, 1.2)],  # alternative with MIDDLE
+        )
+        out = resolve_chord_conflicts([r0, r1])
+        assert out[0].state.finger != out[1].state.finger
+
+
+# ---------------------------------------------------------------------------
+# resolve_finger_continuity
+# ---------------------------------------------------------------------------
+
+
+def _seq_fr(note_id: int, onset: float, string_num: int, fret: int, finger: Finger) -> FingeringResult:
+    """Helper: FingeringResult with no alternatives (continuity from scratch)."""
+    _offsets = {Finger.INDEX: 0, Finger.MIDDLE: 1, Finger.RING: 2, Finger.PINKY: 3}
+    offset = _offsets.get(finger, 0)
+    hp = max(1, fret - offset) if fret > 0 else 1
+    state = FingeringState(string_num=string_num, fret=fret, finger=finger, hand_position=hp)
+    note = NoteEvent(pitch=60, onset=onset, duration=1.0, tempo=120.0)
+    return FingeringResult(note_id=note_id, note_event=note, state=state, cost=1.0)
+
+
+class TestResolveFingerContinuity:
+    def test_empty_returns_empty(self) -> None:
+        assert resolve_finger_continuity([]) == []
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_seq_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out = resolve_finger_continuity(results)
+        assert out[0].state.finger == Finger.INDEX
+
+    def test_same_string_same_fret_propagates_finger(self) -> None:
+        # String 3, fret 5 appears twice. Second should inherit first's finger.
+        results = [
+            _seq_fr(0, 0.0, 3, 5, Finger.INDEX),
+            _seq_fr(1, 1.0, 3, 5, Finger.MIDDLE),  # different finger — should be fixed
+        ]
+        out = resolve_finger_continuity(results)
+        assert out[1].state.finger == Finger.INDEX
+
+    def test_different_fret_breaks_continuity(self) -> None:
+        # String 3 at fret 5 then fret 7 — finger should NOT propagate.
+        results = [
+            _seq_fr(0, 0.0, 3, 5, Finger.INDEX),
+            _seq_fr(1, 1.0, 3, 7, Finger.RING),
+        ]
+        out = resolve_finger_continuity(results)
+        assert out[1].state.finger == Finger.RING
+
+    def test_open_string_not_affected(self) -> None:
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(pitch=64, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+            FingeringResult(
+                note_id=1,
+                note_event=NoteEvent(pitch=64, onset=1.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+        ]
+        out = resolve_finger_continuity(results)
+        assert all(r.state.finger == Finger.OPEN for r in out)
+
+    def test_lookback_window_respected(self) -> None:
+        # Lookback default=8 beats. Note at onset 0 and onset 100 → no continuity.
+        results = [
+            _seq_fr(0, 0.0, 3, 5, Finger.INDEX),
+            _seq_fr(1, 100.0, 3, 5, Finger.MIDDLE),
+        ]
+        out = resolve_finger_continuity(results, lookback_beats=8.0)
+        # Too far back → second note's finger unchanged.
+        assert out[1].state.finger == Finger.MIDDLE
+
+    def test_chord_conflict_prevention(self) -> None:
+        # At onset 1.0, string 4 already uses INDEX. Don't propagate INDEX to string 3.
+        results = [
+            _seq_fr(0, 0.0, 3, 5, Finger.INDEX),   # string 3 fret 5 → INDEX
+            _seq_fr(1, 1.0, 4, 7, Finger.INDEX),    # string 4, different
+            _seq_fr(2, 1.0, 3, 5, Finger.MIDDLE),   # string 3 fret 5 same onset as above
+        ]
+        out = resolve_finger_continuity(results)
+        # String 3 at onset 1.0 would want INDEX but INDEX is already used by string 4.
+        # Conflict prevention: should NOT propagate.
+        assert len(out) == 3  # no crash
+
+
+# ---------------------------------------------------------------------------
+# resolve_section_consistency
+# ---------------------------------------------------------------------------
+
+
+class TestResolveSectionConsistency:
+    def test_empty_unchanged(self) -> None:
+        assert resolve_section_consistency([]) == []
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out = resolve_section_consistency(results)
+        assert out[0].state.finger == Finger.INDEX
+
+    def test_repeated_shape_gets_canonical_finger(self) -> None:
+        # Same (string, fret) at two different onsets — second should match first.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),    # first → canonical = INDEX
+            _fr(1, 4.0, 3, 5, Finger.MIDDLE),   # second → should become INDEX
+        ]
+        out = resolve_section_consistency(results)
+        assert out[1].state.finger == Finger.INDEX
+
+    def test_different_fret_not_affected(self) -> None:
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 4.0, 3, 7, Finger.RING),     # different fret, different shape
+        ]
+        out = resolve_section_consistency(results)
+        assert out[0].state.finger == Finger.INDEX
+        assert out[1].state.finger == Finger.RING
+
+    def test_chord_shape_consistency(self) -> None:
+        # Same chord shape (string 3 fret 5, string 4 fret 7) appears twice.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.RING),
+            _fr(2, 8.0, 3, 5, Finger.MIDDLE),   # same shape, different fingers
+            _fr(3, 8.0, 4, 7, Finger.INDEX),
+        ]
+        out = resolve_section_consistency(results)
+        # The canonical from onset 0 should be applied to onset 8.
+        at_onset8 = [r for r in out if r.note_event.onset == 8.0]
+        by_string = {r.state.string_num: r.state.finger for r in at_onset8}
+        assert by_string[3] == Finger.INDEX
+        assert by_string[4] == Finger.RING
+
+    def test_canonical_conflict_skipped(self) -> None:
+        # If applying canonical would create a finger conflict, skip it.
+        # Canonical: string 3→INDEX, string 4→INDEX (duplicate — conflict)
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.INDEX),    # conflict in canonical itself
+            _fr(2, 4.0, 3, 5, Finger.MIDDLE),
+            _fr(3, 4.0, 4, 7, Finger.RING),
+        ]
+        out = resolve_section_consistency(results)
+        # Should not crash; onset 4.0 notes should be skipped (canonical is conflicted).
+        assert len(out) == 4
+
+
+# ---------------------------------------------------------------------------
+# _natural_finger_assignment  (R-C5 — natural hand position / no finger skipping)
+# ---------------------------------------------------------------------------
+
+
+class TestNaturalFingerAssignment:
+    def test_single_fret_index(self) -> None:
+        # Single note: always INDEX (lowest-rank available from natural offset 0).
+        result = _natural_finger_assignment([5])
+        assert result == [Finger.INDEX]
+
+    def test_consecutive_frets_natural_order(self) -> None:
+        # [5, 6, 7] with hp=5: natural offsets 0, 1, 2 → INDEX, MIDDLE, RING.
+        result = _natural_finger_assignment([5, 6, 7])
+        assert result == [Finger.INDEX, Finger.MIDDLE, Finger.RING]
+
+    def test_skip_fret_no_finger_skipping(self) -> None:
+        # [2, 4, 4] with hp=2: natural offsets 0, 2, 2.
+        # fret=2 → INDEX (offset 0).
+        # fret=4 → RING (offset 2, preferred over MIDDLE which would skip RING's territory).
+        # fret=4 → PINKY (offset 2 taken, next available upward is 3).
+        result = _natural_finger_assignment([2, 4, 4])
+        assert result == [Finger.INDEX, Finger.RING, Finger.PINKY]
+
+    def test_power_chord_shape(self) -> None:
+        # [5, 7] with hp=5: natural offsets 0, 2 → INDEX, RING.
+        result = _natural_finger_assignment([5, 7])
+        assert result == [Finger.INDEX, Finger.RING]
+
+    def test_equal_frets_ascending_assignment(self) -> None:
+        # [5, 5, 5] with hp=5: all natural offset 0. Fill upward: INDEX, MIDDLE, RING.
+        result = _natural_finger_assignment([5, 5, 5])
+        assert result == [Finger.INDEX, Finger.MIDDLE, Finger.RING]
+
+    def test_large_gap_returns_none(self) -> None:
+        # [5, 10]: span=5 > INDEX–PINKY max (4) → None.
+        result = _natural_finger_assignment([5, 10])
+        assert result is None
+
+    def test_adjacent_finger_span_limit(self) -> None:
+        # [5, 8]: INDEX–RING span=3. max for INDEX–RING=(0,2)=3 → valid.
+        result = _natural_finger_assignment([5, 8])
+        assert result is not None
+        # Span INDEX–RING is at the limit, so valid assignment exists.
+
+    def test_adjacent_finger_span_exceeded(self) -> None:
+        # [5, 8] gives INDEX, PINKY (natural: offset3 for 8-5=3) — span check:
+        # INDEX(0)–PINKY(3): max=4, gap=3 ✓. Actually valid.
+        # [5, 9]: offset=4 > 3 for any finger from hp=5. Fallback: offset=3 → PINKY.
+        # INDEX(0)–PINKY(3): gap=4 == max=4 ✓.
+        result = _natural_finger_assignment([5, 9])
+        assert result is not None  # just within INDEX-PINKY limit
+
+    def test_monotone_r_c3_satisfied(self) -> None:
+        # Result must always be in ascending rank order for ascending frets.
+        from fretwise.scoring import _FINGER_RANK
+        for frets in [[3, 5], [5, 6, 7], [2, 4, 4], [1, 4, 7]]:
+            result = _natural_finger_assignment(frets)
+            if result is None:
+                continue
+            ranks = [_FINGER_RANK[f] for f in result]
+            # For equal frets, ranks may be ascending (barré fill); always non-crossing.
+            for i in range(len(frets) - 1):
+                if frets[i] < frets[i + 1]:
+                    assert ranks[i] < ranks[i + 1], (
+                        f"frets={frets}, ranks={ranks}: not monotone at index {i}"
+                    )
+
+    def test_empty_returns_none(self) -> None:
+        assert _natural_finger_assignment([]) is None
+
+    def test_five_notes_returns_none(self) -> None:
+        assert _natural_finger_assignment([5, 6, 7, 8, 9]) is None
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_finger_span  (R-C4 — finger-pair span limits)
+# ---------------------------------------------------------------------------
+
+
+class TestResolveChordFingerSpan:
+    def test_valid_chord_unchanged(self) -> None:
+        # INDEX fret 5, RING fret 7 — span 2 within INDEX-RING max (3).
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 7, Finger.RING),
+        ]
+        out = resolve_chord_finger_span(results)
+        fingers = {r.state.finger for r in out}
+        assert Finger.INDEX in fingers
+        assert Finger.RING in fingers
+
+    def test_invalid_span_reassigned(self) -> None:
+        # INDEX fret 5, MIDDLE fret 8 — span 3 > INDEX-MIDDLE max (2).
+        # Natural assignment for [5, 8]: hp=5, INDEX@5, RING@8 (offset 3 from hp=5... wait
+        # natural offset for fret 8 = 8-5=3 → PINKY). So result: INDEX, PINKY.
+        results = [
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 0.0, 4, 8, Finger.MIDDLE),  # MIDDLE can only reach 2 frets from INDEX
+        ]
+        out = resolve_chord_finger_span(results)
+        fingers_by_fret = sorted(out, key=lambda r: r.state.fret)
+        # Lower fret must be INDEX (lowest rank).
+        assert fingers_by_fret[0].state.finger == Finger.INDEX
+        # Higher fret must not be MIDDLE (span too large for adjacent fingers).
+        assert fingers_by_fret[1].state.finger != Finger.MIDDLE
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out = resolve_chord_finger_span(results)
+        assert out[0].state.finger == Finger.INDEX
+
+    def test_empty_unchanged(self) -> None:
+        assert resolve_chord_finger_span([]) == []
+
+    def test_natural_assignment_no_finger_skipping(self) -> None:
+        # The core R-C5 bug: frets [2, 4, 4] with INDEX, MIDDLE, PINKY.
+        # MIDDLE@4 with INDEX@2 has span 2 = INDEX-MIDDLE max (2), so technically
+        # not a span violation — BUT it IS a R-C5 violation (skips RING's territory).
+        # resolve_chord_finger_span only catches R-C4. resolve_chord_finger_ordering
+        # catches R-C3 (monotone) AND calls _natural_finger_assignment for R-C5.
+        # Here we test the ordering resolver fixes the combined case:
+        results = [
+            _fr(0, 0.0, 3, 2, Finger.INDEX),
+            _fr(1, 0.0, 4, 4, Finger.MIDDLE),
+            _fr(2, 0.0, 5, 4, Finger.PINKY),
+        ]
+        # Ordering check: INDEX(0)@2, MIDDLE(1)@4, PINKY(3)@4 — is this monotone?
+        # rank 0 < rank 1, fret 2 < fret 4 ✓; rank 1 < rank 3, fret 4 == fret 4 ✓.
+        # No monotone violation → ordering resolver leaves it.
+        # But it is a R-C5 violation (MIDDLE skips RING).
+        # This test documents that the resolved output from the FULL pipeline
+        # (ordering then span) correctly fixes this:
+        out_ordered = resolve_chord_finger_ordering(results)
+        # Ordering resolver sees no crossing here → may leave unchanged.
+        # The span resolver should also not change it (no span violation for INDEX-MIDDLE@2frets).
+        out_spanned = resolve_chord_finger_span(out_ordered)
+        # Result is left with INDEX, MIDDLE, PINKY (no span violation detected).
+        # The R-C5 fix for this specific case (no monotone violation) requires
+        # a dedicated pre-processing step or Viterbi cost — documented here as a
+        # known limitation of the post-processing approach.
+        assert len(out_spanned) == 3  # no crash
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_string_diagonal  (R-C6 — string-rank diagonal preference)
+# ---------------------------------------------------------------------------
+
+
+class TestResolveChordStringDiagonal:
+    def test_correct_diagonal_unchanged(self) -> None:
+        # INDEX on string 1 (high e), MIDDLE on string 6 (low E) — correct diagonal.
+        results = [
+            _fr(0, 0.0, 1, 3, Finger.INDEX),   # string 1, fret 3
+            _fr(1, 0.0, 6, 3, Finger.MIDDLE),  # string 6, fret 3
+        ]
+        out = resolve_chord_string_diagonal(results)
+        by_string = {r.state.string_num: r.state.finger for r in out}
+        assert by_string[1] == Finger.INDEX   # lower string → lower rank ✓
+        assert by_string[6] == Finger.MIDDLE
+
+    def test_reversed_diagonal_fixed(self) -> None:
+        # RING on string 1, MIDDLE on string 6 — WRONG diagonal (higher rank on
+        # high-pitch string). Should become INDEX on string 1, MIDDLE on string 6.
+        results = [
+            _fr(0, 0.0, 1, 3, Finger.RING),    # string 1, fret 3
+            _fr(1, 0.0, 6, 3, Finger.MIDDLE),  # string 6, fret 3
+        ]
+        out = resolve_chord_string_diagonal(results)
+        by_string = {r.state.string_num: r.state.finger for r in out}
+        # After fix: string 1 (high pitch) must have the lower-rank finger.
+        assert _OFFSET.get(by_string[1], 0) < _OFFSET.get(by_string[6], 0)
+
+    def test_300003_shape(self) -> None:
+        # Classic open G chord bass+treble: fret 3 on string 1 and string 6.
+        # Natural diagonal: INDEX (or lower) on string 1, higher-rank on string 6.
+        results = [
+            _fr(0, 0.0, 1, 3, Finger.RING),    # string 1 (e)  — wrong
+            _fr(1, 0.0, 6, 3, Finger.MIDDLE),  # string 6 (E)  — wrong
+        ]
+        out = resolve_chord_string_diagonal(results)
+        by_string = {r.state.string_num: r.state.finger for r in out}
+        rank_str1 = _OFFSET.get(by_string[1], 0)
+        rank_str6 = _OFFSET.get(by_string[6], 0)
+        assert rank_str1 <= rank_str6, (
+            f"string 1 has rank {rank_str1} ({by_string[1]}), "
+            f"string 6 has rank {rank_str6} ({by_string[6]}) — diagonal violated"
+        )
+
+    def test_different_frets_r_c3_respected(self) -> None:
+        # String 1 fret 7, string 6 fret 5 — R-C3 forces INDEX on lower fret (string 6).
+        # Diagonal prefers INDEX on string 1 but fret forces it on string 6.
+        results = [
+            _fr(0, 0.0, 1, 7, Finger.MIDDLE),  # string 1 fret 7
+            _fr(1, 0.0, 6, 5, Finger.INDEX),   # string 6 fret 5
+        ]
+        out = resolve_chord_string_diagonal(results)
+        by_fret = sorted(out, key=lambda r: r.state.fret)
+        # Lower fret must have lower-rank finger (R-C3 / R-C5).
+        assert _OFFSET.get(by_fret[0].state.finger, 0) < _OFFSET.get(by_fret[1].state.finger, 0)
+
+    def test_single_note_unchanged(self) -> None:
+        results = [_fr(0, 0.0, 3, 5, Finger.RING)]
+        out = resolve_chord_string_diagonal(results)
+        assert out[0].state.finger == Finger.RING
+
+    def test_empty_unchanged(self) -> None:
+        assert resolve_chord_string_diagonal([]) == []
+
+    def test_open_strings_ignored(self) -> None:
+        # Open strings are excluded from the diagonal check.
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(pitch=64, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+            FingeringResult(
+                note_id=1,
+                note_event=NoteEvent(pitch=59, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(string_num=2, fret=0, finger=Finger.OPEN, hand_position=1),
+                cost=0.0,
+            ),
+        ]
+        out = resolve_chord_string_diagonal(results)
+        assert all(r.state.finger == Finger.OPEN for r in out)

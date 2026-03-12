@@ -76,7 +76,7 @@ class GpifAdapter(BaseParser):
         return path.suffix.lower() in _SUPPORTED_EXTENSIONS
 
     def parse(self, path: Path) -> list[NoteEvent]:
-        """Parse a .gp file and return NoteEvents sorted by onset.
+        """Parse a .gp file and return NoteEvents for the best guitar track.
 
         Args:
             path: Path to a .gp (Guitar Pro 7/8) file.
@@ -120,6 +120,68 @@ class GpifAdapter(BaseParser):
         self.section_markers = _build_section_markers(root)
 
         return _extract_events(root, track_idx, open_pitches, tempo_map, rhythm_map, note_map)
+
+    def list_guitar_tracks(self, path: Path) -> list[tuple[int, str, list[int]]]:
+        """Return all guitar tracks in the file as (track_id, name, open_pitches).
+
+        Useful for multi-track export: iterate and call parse_track() for each.
+
+        Args:
+            path: Path to a .gp file.
+
+        Returns:
+            List of (track_id, track_name, open_string_pitches), ordered by
+            descending score (best track first).
+        """
+        if not path.exists():
+            raise ParseError(f"File not found: {path}")
+        try:
+            root = _load_gpif(path)
+        except Exception as exc:
+            raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
+        return _list_guitar_tracks(root)
+
+    def parse_track(self, path: Path, track_id: int) -> list[NoteEvent]:
+        """Parse a specific track by its numeric track_id.
+
+        Also sets :attr:`track_name` and :attr:`section_markers`.
+
+        Args:
+            path: Path to a .gp file.
+            track_id: Numeric track id as returned by :meth:`list_guitar_tracks`.
+
+        Returns:
+            List of NoteEvent ordered by onset time (ascending).
+        """
+        if not path.exists():
+            raise ParseError(f"File not found: {path}")
+        try:
+            root = _load_gpif(path)
+        except Exception as exc:
+            raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
+
+        # Find the tuning (open_pitches) for this specific track.
+        open_pitches: list[int] = []
+        self.track_name = ""
+        for track in root.findall("Tracks/Track"):
+            if track.get("id") == str(track_id):
+                self.track_name = track.findtext("Name", "").strip()
+                staff = track.find("Staves/Staff")
+                if staff is not None:
+                    props = {p.get("name", ""): p for p in staff.findall("Properties/Property")}
+                    pitches_text = props.get("Tuning", ET.Element("x")).findtext("Pitches") or ""
+                    open_pitches = [int(x) for x in pitches_text.split() if x.strip()]
+                break
+
+        if not open_pitches:
+            raise ParseError(f"Track {track_id} has no tuning data in '{path}'.")
+
+        tempo_map = _build_tempo_map(root)
+        rhythm_map = _build_rhythm_map(root)
+        note_map = _build_note_map(root)
+        self.section_markers = _build_section_markers(root)
+
+        return _extract_events(root, track_id, open_pitches, tempo_map, rhythm_map, note_map)
 
 
 # ---------------------------------------------------------------------------
@@ -291,6 +353,54 @@ def _parse_note_articulation(props: dict[str, ET.Element]) -> Articulation:
 # ---------------------------------------------------------------------------
 # Track selection
 # ---------------------------------------------------------------------------
+
+
+def _list_guitar_tracks(root: ET.Element) -> list[tuple[int, str, list[int]]]:
+    """Return all guitar tracks as (track_id, name, open_pitches), best first."""
+    _GUITAR_PROGRAMS = frozenset(range(24, 32))
+    _EXCLUDED_TYPES = frozenset(
+        {"drumkit", "voice", "electricbass", "acousticbass", "saxophone", "trumpet",
+         "trombone", "violin", "cello", "piano", "organ", "strings"}
+    )
+
+    results: list[tuple[tuple[int, int], int, str, list[int]]] = []
+
+    for track in root.findall("Tracks/Track"):
+        tid_str = track.get("id", "")
+        if not tid_str.isdigit():
+            continue
+        tid = int(tid_str)
+
+        inst_type = (track.findtext("InstrumentSet/Type") or "").lower()
+        if inst_type in _EXCLUDED_TYPES:
+            continue
+
+        program_text = track.findtext(".//MIDI/Program") or ""
+        program = int(program_text) if program_text.isdigit() else -1
+        explicit_guitar = "guitar" in inst_type
+        program_guitar = program in _GUITAR_PROGRAMS
+
+        if not explicit_guitar and not program_guitar:
+            continue
+
+        name = track.findtext("Name", "").strip()
+        staff = track.find("Staves/Staff")
+        if staff is None:
+            continue
+        props = {p.get("name", ""): p for p in staff.findall("Properties/Property")}
+        if "Tuning" not in props:
+            continue
+        pitches_text = props["Tuning"].findtext("Pitches") or ""
+        pitches = [int(x) for x in pitches_text.split() if x.strip()]
+        if not pitches or all(p == 0 for p in pitches):
+            continue
+
+        type_score = 2 if explicit_guitar else 1
+        string_score = 2 if len(pitches) == 6 else 1
+        results.append(((type_score, string_score), tid, name, pitches))
+
+    results.sort(key=lambda t: t[0], reverse=True)
+    return [(tid, name, pitches) for _, tid, name, pitches in results]
 
 
 def _find_guitar_track(root: ET.Element) -> tuple[int | None, list[int]]:

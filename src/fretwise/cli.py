@@ -1,22 +1,22 @@
-"""Command-line interface for FretWise (Sprint 1 — parse command).
+"""Command-line interface for FretWise.
 
 Usage:
     fretwise parse song.gp5
     fretwise solve song.gp5
-    fretwise solve song.gp5 --mode performance --output song_fingered.gp5
-
-Sprint 1 scope: ``parse`` command only.  ``solve`` and ``export`` are
-scaffolded here and will be implemented in Sprint 3.
+    fretwise solve song.gp5 --mode performance --output song_fingered.pdf
+    fretwise solve song.gp5 --mode learning --output song_fingered.txt
 """
 
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
 import click
 
+from fretwise.export import render_ascii_tab, render_pdf_tab, render_text_report
 from fretwise.generator import StateGenerator
 from fretwise.models import FingeringResult
 from fretwise.optimizer import ViterbiOptimizer
@@ -101,13 +101,19 @@ def parse(file: Path, verbose: bool) -> None:
     "-o",
     type=click.Path(path_type=Path),
     default=None,
-    help="Output file path (.gp5 or .json). Defaults to stdout JSON.",
+    help="Output file path (.json, .txt, .pdf). Defaults to stdout JSON.",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Print per-note cost details.")
 def solve(file: Path, mode: str, output: Path | None, verbose: bool) -> None:
     """Compute optimised fingerings for FILE and output a tablature.
 
     FILE must be a GuitarPro file (.gp3, .gp4, .gp5, .gp).
+
+    Output formats:\n
+      (none)       — JSON on stdout\n
+      .json        — full note-by-note JSON\n
+      .txt         — ASCII tablature + text report\n
+      .pdf         — PDF tablature with finger annotations
     """
     try:
         adapter = get_adapter(file)
@@ -134,22 +140,55 @@ def solve(file: Path, mode: str, output: Path | None, verbose: bool) -> None:
         click.echo("No valid fingering states could be generated.", err=True)
         sys.exit(1)
 
+    if verbose:
+        total_cost = sum(r.cost for r in results)
+        click.echo(
+            f"Parsed {stats['parsed']} notes  |  {len(results)} results  "
+            f"|  total cost = {total_cost:.2f}",
+            err=True,
+        )
+
     if output is None:
         _print_json(results)
-    elif output.suffix.lower() == ".json":
+        return
+
+    suffix = output.suffix.lower()
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", file.stem).strip()
+    parts = clean_stem.split("-", 1)
+    pdf_title = parts[1].strip() if len(parts) == 2 else clean_stem
+    pdf_artist = parts[0].strip() if len(parts) == 2 else ""
+
+    if suffix == ".json":
         output.write_text(_results_to_json(results), encoding="utf-8")
         click.echo(f"JSON written to '{output}'.")
+
+    elif suffix == ".txt":
+        title = f"{file.stem}  [{mode} mode]"
+        report = render_text_report(results, title=title)
+        tab = render_ascii_tab(results, title=title)
+        output.write_text(report + "\n\n" + tab, encoding="utf-8")
+        click.echo(f"Text report + ASCII tab written to '{output}'.")
+
+    elif suffix == ".pdf":
+        render_pdf_tab(
+            results,
+            output,
+            title=pdf_title,
+            artist=pdf_artist,
+            instrument=track_name,
+            mode_label=f"{mode} mode",
+            section_markers=section_markers or None,
+        )
+        click.echo(f"PDF written to '{output}'.")
+
     else:
         click.echo(
-            f"Output format '{output.suffix}' not yet supported in Sprint 1. "
-            "Use .json or omit --output for stdout.",
+            f"Unsupported output format '{suffix}'. Use .json, .txt or .pdf.",
             err=True,
         )
         sys.exit(1)
-
-    if verbose:
-        total_cost = sum(r.cost for r in results)
-        click.echo(f"\nTotal cost: {total_cost:.2f}  |  Notes: {len(results)}", err=True)
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:

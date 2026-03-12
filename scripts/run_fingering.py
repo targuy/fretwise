@@ -27,26 +27,29 @@ from fretwise.scoring import CostFunction, CostWeights
 _OUT_DIR = Path(__file__).parent.parent / "docs" / "benchmarks"
 
 
-def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> None:
-    print(f"\n{'='*60}")
-    print(f"File   : {gp_path.name}")
-    print(f"Mode   : {mode}")
-    print(f"{'='*60}")
+def _safe_track_slug(name: str) -> str:
+    """Turn a track name into a filesystem-safe slug."""
+    slug = re.sub(r"[^\w\- ]", "", name).strip()
+    slug = re.sub(r"\s+", "_", slug)
+    return slug[:60] or "track"
 
-    # -- Parse
-    adapter = get_adapter(gp_path)
-    events = adapter.parse(gp_path)
-    track_name: str = getattr(adapter, "track_name", "") or ""
-    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
-    print(f"Parsed : {len(events)} notes"
-          + (f"  [{track_name}]" if track_name else "")
-          + (f"  {len(section_markers)} section(s)" if section_markers else ""))
 
+def process_track(
+    gp_path: Path,
+    track_name: str,
+    events: list,
+    section_markers: dict,
+    pdf_artist: str,
+    pdf_title: str,
+    mode: str,
+    max_measures: int,
+    out_stem: str,
+) -> None:
+    """Run the pipeline on a single track's events and write output files."""
     if not events:
-        print("No notes found — skipping.")
+        print(f"  [skip] No notes found.")
         return
 
-    # -- Generate states, Viterbi, post-process (per voice)
     weights_cls = {
         "reference": CostWeights.reference,
         "performance": CostWeights.performance,
@@ -58,50 +61,34 @@ def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> N
     optimizer = ViterbiOptimizer(cost_fn)
     results, stats = run_pipeline(events, generator, optimizer)
 
-    print(f"States : {stats['valid_states']} total  "
-          f"({stats['valid_states']}/{stats['parsed']} notes have valid states)")
     total_cost = sum(r.cost for r in results)
-    print(f"Viterbi: {len(results)} results  |  total cost = {total_cost:.2f}")
+    print(f"  Notes  : {len(results)}  |  cost = {total_cost:.2f}")
 
-    # Degenerate track heuristic: warn if > 40% of results share the same pitch
-    # (likely a wrong track — keyboard pedal note, click track, etc.)
+    from collections import Counter
     if results:
-        from collections import Counter
         pitch_counts = Counter(r.note_event.pitch for r in results)
         most_common_pitch, most_common_count = pitch_counts.most_common(1)[0]
         ratio = most_common_count / len(results)
         if ratio > 0.4:
             print(
-                f"WARNING: {most_common_count}/{len(results)} notes share pitch "
-                f"{most_common_pitch} ({ratio:.0%}). "
-                "This may be the wrong track (keyboard/bass pedal note?)."
+                f"  WARNING: {most_common_count}/{len(results)} notes share pitch "
+                f"{most_common_pitch} ({ratio:.0%}) — may be wrong track."
             )
 
-    # -- Output paths
     _OUT_DIR.mkdir(parents=True, exist_ok=True)
-    stem = gp_path.stem
-    # Strip trailing Songsterr-style date suffix "-MM-DD-YYYY"
-    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", stem).strip()
-    # Split "Artist-Song" into artist / title on first dash
-    parts = clean_stem.split("-", 1)
-    pdf_title = parts[1].strip() if len(parts) == 2 else clean_stem
-    pdf_artist = parts[0].strip() if len(parts) == 2 else ""
-    title = f"{stem}  [{mode} mode]"
+    title = f"{out_stem}  [{mode} mode]"
 
-    # -- Text report (all notes)
-    report_path = _OUT_DIR / f"{stem}_report.txt"
-    report = render_text_report(results, title=title)
-    report_path.write_text(report, encoding="utf-8")
-    print(f"Report : {report_path}")
+    report_path = _OUT_DIR / f"{out_stem}_report.txt"
+    report_path.write_text(render_text_report(results, title=title), encoding="utf-8")
+    print(f"  Report : {report_path.name}")
 
-    # -- ASCII tab (first N measures)
-    tab_path = _OUT_DIR / f"{stem}_tab.txt"
-    tab = render_ascii_tab(results, title=title, max_measures=max_measures)
-    tab_path.write_text(tab, encoding="utf-8")
-    print(f"Tab    : {tab_path}  (first {max_measures} measures)")
+    tab_path = _OUT_DIR / f"{out_stem}_tab.txt"
+    tab_path.write_text(
+        render_ascii_tab(results, title=title, max_measures=max_measures), encoding="utf-8"
+    )
+    print(f"  Tab    : {tab_path.name}")
 
-    # -- PDF tab (full song)
-    pdf_path = _OUT_DIR / f"{stem}_tab.pdf"
+    pdf_path = _OUT_DIR / f"{out_stem}_tab.pdf"
     render_pdf_tab(
         results,
         pdf_path,
@@ -111,21 +98,64 @@ def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> N
         mode_label=f"{mode} mode",
         section_markers=section_markers or None,
     )
-    print(f"PDF    : {pdf_path}")
+    print(f"  PDF    : {pdf_path.name}")
 
-    # -- Quick preview (4 measures)
-    preview = render_ascii_tab(results, title=title, max_measures=4)
-    print("\n--- ASCII tab preview (4 measures) ---")
-    for line in preview.splitlines():
-        print(line)
-    print("...")
+
+def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> None:
+    print(f"\n{'='*60}")
+    print(f"File : {gp_path.name}  [{mode} mode]")
+    print(f"{'='*60}")
+
+    stem = gp_path.stem
+    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", stem).strip()
+    parts = clean_stem.split("-", 1)
+    pdf_title = parts[1].strip() if len(parts) == 2 else clean_stem
+    pdf_artist = parts[0].strip() if len(parts) == 2 else ""
+
+    adapter = get_adapter(gp_path)
+
+    # -- Multi-track: process every guitar track if the adapter supports it.
+    if hasattr(adapter, "list_guitar_tracks"):
+        tracks = adapter.list_guitar_tracks(gp_path)
+        if not tracks:
+            print("No guitar tracks found — skipping.")
+            return
+        print(f"Tracks : {len(tracks)} guitar track(s) found")
+        section_markers: dict[int, str] = {}
+        for track_id, track_name, _pitches in tracks:
+            slug = _safe_track_slug(track_name)
+            out_stem = f"{stem}_{slug}"
+            print(f"\n  Track [{track_id}] {track_name!r}")
+            events = adapter.parse_track(gp_path, track_id)
+            section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+            print(f"  Parsed : {len(events)} notes")
+            process_track(
+                gp_path, track_name, events, section_markers,
+                pdf_artist, pdf_title, mode, max_measures, out_stem,
+            )
+        return
+
+    # -- Single-track fallback (guitarpro_adapter, etc.)
+    events = adapter.parse(gp_path)
+    track_name_single: str = getattr(adapter, "track_name", "") or ""
+    section_markers_single: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    print(f"Parsed : {len(events)} notes"
+          + (f"  [{track_name_single}]" if track_name_single else ""))
+
+    if not events:
+        print("No notes found — skipping.")
+        return
+
+    process_track(
+        gp_path, track_name_single, events, section_markers_single,
+        pdf_artist, pdf_title, mode, max_measures, stem,
+    )
 
 
 def main() -> None:
     if len(sys.argv) > 1:
         paths = [Path(a) for a in sys.argv[1:]]
     else:
-        # Default: both fixture files
         fixture_dir = Path(__file__).parent.parent / "tests" / "fixtures"
         paths = sorted(fixture_dir.glob("*.gp"))
 

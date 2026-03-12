@@ -51,6 +51,98 @@ _FINGER_RANK: dict[Finger, int] = {
     Finger.PINKY: 3,
 }
 
+# ---------------------------------------------------------------------------
+# Biomechanical rules for chord finger assignment
+#
+# These rules define the physical constraints of the human hand on a guitar
+# neck. They are enforced by post-processing resolvers (M4) after Viterbi
+# (M5), because Viterbi optimises note-by-note (time axis) and cannot see
+# simultaneous chord constraints.
+#
+# Rule codes: R-C* = chord rules, R-S* = sequential rules, R-W* = wrist rules.
+#
+# R-C1  No-duplicate fingers
+#   Two simultaneously fretted notes cannot share the same finger.
+#   Exception: barré chords (one finger covering multiple strings at same fret).
+#   Enforced by: resolve_chord_conflicts()
+#
+# R-C2  Open strings
+#   Open strings (fret=0) require no fretting finger.  They are excluded from
+#   all chord finger checks.
+#
+# R-C3  Monotone ordering
+#   For any two simultaneously fretted notes A and B:
+#       rank(A) < rank(B)  →  fret(A) ≤ fret(B)
+#   where rank: INDEX=0, MIDDLE=1, RING=2, PINKY=3.
+#   Violation means fingers physically cross each other (impossible).
+#   Enforced by: resolve_chord_finger_ordering()
+#
+# R-C4  Finger-pair span limits (comfortable reach, not maximum stretch)
+#   Maximum comfortable fret gap = rank_diff + 1:
+#       INDEX  – MIDDLE : 2 frets  (rank_diff=1)
+#       INDEX  – RING   : 3 frets  (rank_diff=2)
+#       INDEX  – PINKY  : 4 frets  (rank_diff=3)
+#       MIDDLE – RING   : 2 frets  (rank_diff=1)
+#       MIDDLE – PINKY  : 3 frets  (rank_diff=2)
+#       RING   – PINKY  : 2 frets  (rank_diff=1)
+#   Enforced by: resolve_chord_finger_span()
+#
+# R-C5  Natural hand position / no finger skipping
+#   The natural hand position (hp) equals the fret of the lowest note.
+#   Each finger's natural fret = hp + its_offset, where
+#   natural_offset = {INDEX:0, MIDDLE:1, RING:2, PINKY:3}.
+#   A finger CANNOT skip over another finger's natural position.  For example:
+#       frets [2, 4, 4]:  hp=2
+#                         INDEX@2  (natural: hp+0=2)
+#                         RING@4   (natural: hp+2=4, not MIDDLE whose natural is hp+1=3)
+#                         PINKY@4  (stretch back 1 from natural hp+3=5)
+#       Wrong: INDEX@2, MIDDLE@4, PINKY@4
+#              (MIDDLE jumps from its natural position 3 to 4, skipping RING's territory)
+#       Correct: INDEX@2, RING@4, PINKY@4
+#   Implemented by: _natural_finger_assignment() used in both chord resolvers.
+#
+# R-C6  String-rank diagonal preference
+#   The left wrist bends more naturally inward (toward the player's body) than
+#   outward, producing a diagonal from high-pitch strings (string 1, high e) to
+#   low-pitch strings (string 6, low E).  Lower-rank fingers (INDEX, MIDDLE)
+#   align naturally with higher-pitch strings; higher-rank fingers (RING, PINKY)
+#   with lower-pitch strings.
+#   Rule: for any two simultaneously fretted notes at the SAME fret, the note on
+#   the lower string number (higher pitch) should have the lower-rank finger.
+#       Example 300003:  string 1 fret 3  →  INDEX (or MIDDLE)
+#                        string 6 fret 3  →  MIDDLE (or RING/PINKY)
+#       Wrong:  RING on string 1, MIDDLE on string 6
+#       Correct: INDEX on string 1, MIDDLE on string 6
+#   When frets differ, R-C3 takes absolute priority; R-C6 only applies as a
+#   tiebreaker within equal-fret subgroups.
+#   Implemented by: _natural_finger_assignment() with notes sorted by
+#   (fret, string_num) in resolve_chord_string_diagonal().
+#
+# R-S1  Sequential crossing penalty
+#   In a melodic run within the same hand position, finger rank direction must
+#   match fret direction (ascending frets → ascending rank, and vice versa).
+#   Penalty: _SEQUENTIAL_CROSS_PENALTY (2.0) added to C_méca.
+#   Exempt when the hand position shifts > _SHIFT_EXEMPT_THRESHOLD frets.
+#   Implemented by: cost_sequential_crossing(), in compute_mechanical_cost()
+#
+# R-S2  Section / shape consistency
+#   Identical chord shapes (same string+fret positions) receive the same finger
+#   assignment throughout the piece.  Shape-equivalent chords (same relative
+#   pattern at different neck positions, e.g. 442→664→886) also share the same
+#   relative finger assignment.
+#   Enforced by: resolve_section_consistency()
+#
+# R-W1  Total chord fret span ≤ 4 frets
+#   All fretted notes in a chord must lie within a 4-fret window.
+#   Outlier notes are revoiced to alternative positions when possible.
+#   Enforced by: resolve_chord_stretch()
+#
+# R-W2  Tempo-weighted wrist shift cost
+#   Shifting the hand position between consecutive notes costs:
+#   C_shift = |Δposition| / max(duration_seconds, 0.1)
+#   Implemented by: cost_position_shift(), in compute_mechanical_cost()
+# ---------------------------------------------------------------------------
+
 
 @dataclass
 class CostWeights:
@@ -496,23 +588,18 @@ def resolve_chord_finger_ordering(results: list[FingeringResult]) -> list[Finger
 
     Fingers have a fixed anatomical order on the neck:
     INDEX (rank 0) < MIDDLE (1) < RING (2) < PINKY (3).
-    When two or more notes are pressed simultaneously, a finger of lower rank
-    MUST be placed at a lower-or-equal fret than any finger of higher rank —
-    otherwise the fingers would have to physically cross, which is impossible.
+    For ANY two simultaneously fretted notes A and B:
+        rank(A) < rank(B)  →  fret(A) ≤ fret(B)
+    Violation means fingers would physically cross (impossible).
 
-    Algorithm per chord:
-    1. Collect all fretted notes (fret > 0, finger != OPEN).
-    2. Sort notes by fret ascending.
-    3. Sort the set of assigned fingers by rank ascending.
-    4. Re-assign fingers to notes in matching order (lowest-rank finger to
-       lowest fret, …).  Notes tied on the same fret share a group; the
-       relative finger order within a group is unconstrained (partial barré).
-    5. If the assignment is already monotone, leave it unchanged.
+    The check uses all-pairs comparison so equal-fret groups containing a
+    low-rank finger alongside a high-rank finger are correctly flagged when a
+    LOWER fret note exists in the chord (the bug in the old sequential algo).
+
+    Correction: re-sort the existing set of fingers by rank and assign them to
+    notes sorted by fret (lowest-rank → lowest-fret).
 
     Open strings and notes already at fret 0 are never touched.
-
-    This resolver must run AFTER resolve_chord_stretch (stretch fixes can
-    alter fret positions and accidentally re-introduce crossing assignments).
     """
     onset_groups: dict[float, list[int]] = defaultdict(list)
     for idx, r in enumerate(results):
@@ -525,55 +612,254 @@ def resolve_chord_finger_ordering(results: list[FingeringResult]) -> list[Finger
             continue
 
         fretted = [
-            (idx, resolved[idx].state.fret, resolved[idx].state.finger)
+            (idx, resolved[idx].state.fret, resolved[idx].state.finger,
+             resolved[idx].state.string_num)
             for idx in indices
             if resolved[idx].state.fret > 0 and resolved[idx].state.finger != Finger.OPEN
         ]
         if len(fretted) < 2:
             continue
 
-        # If more fretted notes than available fingers the chord needs a barré
-        # model to be resolved — skip it here (already flagged '!' by chord_stretch).
-        unique_fingers = {f for _, _, f in fretted}
+        # Skip barré chords (duplicate fingers or more notes than fingers available).
+        unique_fingers = {f for _, _, f, _ in fretted}
         if len(fretted) > len(unique_fingers) or len(fretted) > 4:
             continue
 
-        # Check monotone: as fret increases, finger rank must be non-decreasing.
-        fretted_by_fret = sorted(fretted, key=lambda t: t[1])
+        # All-pairs monotone check (R-C3): for every pair (A, B),
+        # rank(A) < rank(B) must imply fret(A) ≤ fret(B).
         is_monotone = True
-        max_rank = -1
-        prev_fret = -1
-        for _, fret, finger in fretted_by_fret:
-            rank = _FINGER_RANK.get(finger, 0)
-            if fret > prev_fret:
-                if rank < max_rank:
+        for i in range(len(fretted)):
+            _, fret_a, finger_a, _ = fretted[i]
+            rank_a = _FINGER_RANK.get(finger_a, 0)
+            for j in range(i + 1, len(fretted)):
+                _, fret_b, finger_b, _ = fretted[j]
+                rank_b = _FINGER_RANK.get(finger_b, 0)
+                if (rank_a < rank_b and fret_a > fret_b) or (
+                    rank_b < rank_a and fret_b > fret_a
+                ):
                     is_monotone = False
                     break
-                max_rank = rank
-            # Equal fret: partial barré — skip rank check, don't update max_rank
-            prev_fret = fret
+            if not is_monotone:
+                break
 
         if is_monotone:
             continue
 
-        # Build corrected assignment: sort fingers by rank, assign to fret groups.
-        fingers_sorted = sorted(
-            {f for _, _, f in fretted},
-            key=lambda f: _FINGER_RANK.get(f, 0),
-        )
-        finger_pool = list(fingers_sorted)
+        # Correction: use natural hand position algorithm (R-C5 + R-C6).
+        # Sort by (fret, string_num): within equal frets, high-pitch strings
+        # (low string_num) come first so lower-rank fingers land there (diagonal).
+        fretted_by_fret = sorted(fretted, key=lambda t: (t[1], t[3]))
+        frets_sorted = [t[1] for t in fretted_by_fret]
+        note_indices_sorted = [t[0] for t in fretted_by_fret]
 
-        fret_groups: dict[int, list[int]] = {}
-        for idx, fret, _ in fretted_by_fret:
-            fret_groups.setdefault(fret, []).append(idx)
+        valid_fingers = _natural_finger_assignment(frets_sorted)
+        if valid_fingers is None:
+            onset_val = resolved[fretted[0][0]].note_event.onset
+            logger.warning(
+                "No valid finger assignment for chord at onset %.3f "
+                "(frets %s) — leaving current assignment.",
+                onset_val, frets_sorted,
+            )
+            continue
 
-        new_finger_map: dict[int, Finger] = {}
-        for fret_val in sorted(fret_groups):
-            for note_idx in fret_groups[fret_val]:
-                if finger_pool:
-                    new_finger_map[note_idx] = finger_pool.pop(0)
+        new_finger_map = dict(zip(note_indices_sorted, valid_fingers))
 
         for note_idx, new_finger in new_finger_map.items():
+            r = resolved[note_idx]
+            if r.state.finger == new_finger:
+                continue
+            offset = _FINGER_OFFSET.get(new_finger, 0)
+            hp = max(1, r.state.fret - offset)
+            new_state = FingeringState(
+                string_num=r.state.string_num,
+                fret=r.state.fret,
+                finger=new_finger,
+                hand_position=hp,
+            )
+            resolved[note_idx] = FingeringResult(
+                note_id=r.note_id,
+                note_event=r.note_event,
+                state=new_state,
+                cost=r.cost,
+                alternatives=r.alternatives,
+            )
+
+    return resolved
+
+
+# Maximum comfortable fret span between two fingers in a chord.
+# Formula: max_span = rank_diff + 1  (1 fret slack beyond the natural offset gap).
+# Adjacent fingers (rank_diff=1): max 2 frets.
+# Skip-one  fingers (rank_diff=2): max 3 frets.
+# Index–Pinky       (rank_diff=3): max 4 frets (= chord stretch limit).
+_MAX_FINGER_PAIR_SPAN: dict[tuple[int, int], int] = {
+    (0, 1): 2,  # index–middle
+    (0, 2): 3,  # index–ring
+    (0, 3): 4,  # index–pinky
+    (1, 2): 2,  # middle–ring
+    (1, 3): 3,  # middle–pinky
+    (2, 3): 2,  # ring–pinky
+}
+
+_FRETTED_FINGERS: list[Finger] = [Finger.INDEX, Finger.MIDDLE, Finger.RING, Finger.PINKY]
+
+
+def _natural_finger_assignment(frets: list[int]) -> list[Finger] | None:
+    """Assign fingers to sorted frets using the natural hand position algorithm (R-C5).
+
+    The natural hand position (hp) is derived from the lowest fret::
+
+        hp = frets[0]
+
+    For each fret (ascending), the preferred finger is the one whose natural
+    position equals the fret::
+
+        natural_offset = fret - hp
+        preferred: _FRETTED_FINGERS[natural_offset]  (INDEX=0, MIDDLE=1, RING=2, PINKY=3)
+
+    If the naturally preferred finger is already taken, the next higher-rank
+    finger is tried first (toward pinky) — preventing a lower-rank finger from
+    jumping over a higher-rank finger's natural territory (R-C5).  Only if no
+    higher-rank finger is available does the algorithm fall back to lower-rank
+    fingers (stretch toward headstock).
+
+    After assignment, all finger-pair span limits (R-C4) are validated.
+
+    Args:
+        frets: Fret values sorted ascending (ties allowed), length 1–4.
+
+    Returns:
+        List of Finger values (same length as frets), or None if no valid
+        assignment exists within anatomical limits.
+    """
+    n = len(frets)
+    if n == 0 or n > 4:
+        return None
+
+    hp = frets[0]
+    available = list(range(4))  # 0=INDEX, 1=MIDDLE, 2=RING, 3=PINKY offsets
+    result_offsets: list[int] = []
+
+    for fret in frets:
+        natural = fret - hp
+        chosen: int | None = None
+
+        # Prefer natural offset or the first available higher offset (toward pinky).
+        for off in range(max(0, natural), 4):
+            if off in available:
+                chosen = off
+                available.remove(off)
+                break
+
+        # Fallback: try lower offsets (stretch toward headstock).
+        if chosen is None:
+            for off in range(max(0, natural) - 1, -1, -1):
+                if off in available:
+                    chosen = off
+                    available.remove(off)
+                    break
+
+        if chosen is None:
+            return None  # no finger left
+
+        result_offsets.append(chosen)
+
+    fingers = [_FRETTED_FINGERS[o] for o in result_offsets]
+
+    # Validate R-C4: all finger-pair span limits.
+    for i in range(n):
+        for j in range(i + 1, n):
+            ri = _FINGER_RANK[fingers[i]]
+            rj = _FINGER_RANK[fingers[j]]
+            low_rank, high_rank = (ri, rj) if ri < rj else (rj, ri)
+            gap = abs(frets[j] - frets[i])
+            if gap > _MAX_FINGER_PAIR_SPAN.get((low_rank, high_rank), 4):
+                return None
+
+    return fingers
+
+
+def resolve_chord_finger_span(results: list[FingeringResult]) -> list[FingeringResult]:
+    """Enforce per-finger-pair fret-span limits within simultaneous chords.
+
+    Even after monotone ordering is correct, a chord can still be unplayable
+    if two anatomically adjacent fingers are assigned frets that are too far
+    apart.  The biomechanical limits (comfortable reach, not extreme stretch):
+
+        Adjacent fingers  (rank diff 1): max 2 frets
+        Skip-one fingers  (rank diff 2): max 3 frets
+        Index–Pinky       (rank diff 3): max 4 frets
+
+    Derivation: natural spacing between consecutive fingers = 1 fret (the
+    1-finger-per-fret rule), so allowing 1 extra fret of stretch gives the
+    max = rank_diff + 1.
+
+    When a violation is detected the algorithm searches for the lexicographically
+    smallest valid finger assignment (index preferred) that satisfies both
+    monotone ordering and all pair-span limits.  If none exists the chord is
+    left unchanged and a warning is logged.
+
+    This resolver must run AFTER resolve_chord_finger_ordering.
+    """
+    onset_groups: dict[float, list[int]] = defaultdict(list)
+    for idx, r in enumerate(results):
+        onset_groups[round(r.note_event.onset, 6)].append(idx)
+
+    resolved = list(results)
+
+    for indices in onset_groups.values():
+        if len(indices) < 2:
+            continue
+
+        fretted = [
+            (idx, resolved[idx].state.fret, resolved[idx].state.finger,
+             resolved[idx].state.string_num)
+            for idx in indices
+            if resolved[idx].state.fret > 0 and resolved[idx].state.finger != Finger.OPEN
+        ]
+        if len(fretted) < 2:
+            continue
+
+        unique_fingers = {f for _, _, f, _ in fretted}
+        if len(fretted) > len(unique_fingers) or len(fretted) > 4:
+            continue
+
+        # Check all pairs for span violations (R-C4).
+        has_violation = False
+        for i in range(len(fretted)):
+            _, fret_a, finger_a, _ = fretted[i]
+            rank_a = _FINGER_RANK.get(finger_a, 0)
+            for j in range(i + 1, len(fretted)):
+                _, fret_b, finger_b, _ = fretted[j]
+                rank_b = _FINGER_RANK.get(finger_b, 0)
+                if rank_a >= rank_b:
+                    continue
+                gap = abs(fret_b - fret_a)
+                if gap > _MAX_FINGER_PAIR_SPAN.get((rank_a, rank_b), 4):
+                    has_violation = True
+                    break
+            if has_violation:
+                break
+
+        if not has_violation:
+            continue
+
+        # Search for a valid reassignment using natural algorithm (R-C5 + R-C6).
+        fretted_by_fret = sorted(fretted, key=lambda t: (t[1], t[3]))
+        frets_sorted = [t[1] for t in fretted_by_fret]
+        note_indices_sorted = [t[0] for t in fretted_by_fret]
+
+        valid_fingers = _natural_finger_assignment(frets_sorted)
+        if valid_fingers is None:
+            onset_val = resolved[fretted[0][0]].note_event.onset
+            logger.warning(
+                "No valid finger assignment for chord at onset %.3f "
+                "(frets %s) — leaving current assignment.",
+                onset_val, frets_sorted,
+            )
+            continue
+
+        for note_idx, new_finger in zip(note_indices_sorted, valid_fingers):
             r = resolved[note_idx]
             if r.state.finger == new_finger:
                 continue
@@ -717,21 +1003,124 @@ def resolve_finger_continuity(
     return resolved
 
 
-def resolve_section_consistency(results: list[FingeringResult]) -> list[FingeringResult]:
-    """Enforce consistent finger assignments for identical chord shapes.
+def resolve_chord_string_diagonal(results: list[FingeringResult]) -> list[FingeringResult]:
+    """Apply the string-rank diagonal preference within simultaneous chords (R-C6).
 
-    Groups all occurrences of the same (string_num, fret) pattern across the
-    whole song.  The first occurrence of each shape sets the canonical finger
-    assignment; subsequent occurrences adopt it.  This prevents the optimizer
-    from drifting and producing different fingerings for the same repeated
-    passage (verse/chorus repeats).
+    The left wrist's natural inward bend aligns lower-rank fingers with
+    higher-pitch strings (string 1 = high e) and higher-rank fingers with
+    lower-pitch strings (string 6 = low E).
 
-    Single-note onsets use per-(string, fret) canonical fingers.
-    Multi-note onsets (chords) use the full shape canonical assignment,
-    skipping application when it would create new finger conflicts.
+    This resolver sorts fretted notes by ``(fret, string_num)`` and calls
+    ``_natural_finger_assignment``:
+
+    - For **equal-fret** notes the sort puts lower string numbers first, so
+      lower-rank fingers land on higher-pitch strings.  Example: ``300003``
+      → INDEX on string 1, MIDDLE on string 6 (not RING/MIDDLE reversed).
+    - For **different-fret** notes R-C3 already forces the correct rank order
+      via fret sorting; this resolver reinforces the same outcome.
+
+    Barré chords (duplicate fingers or > 4 fretted notes) are skipped.
+    This resolver must run **after** resolve_chord_finger_ordering and
+    resolve_chord_finger_span, and **before** resolve_section_consistency.
+    """
+    onset_groups: dict[float, list[int]] = defaultdict(list)
+    for idx, r in enumerate(results):
+        onset_groups[round(r.note_event.onset, 6)].append(idx)
+
+    resolved = list(results)
+
+    for indices in onset_groups.values():
+        if len(indices) < 2:
+            continue
+
+        fretted = [
+            (idx, resolved[idx].state.fret, resolved[idx].state.finger,
+             resolved[idx].state.string_num)
+            for idx in indices
+            if resolved[idx].state.fret > 0 and resolved[idx].state.finger != Finger.OPEN
+        ]
+        if len(fretted) < 2:
+            continue
+
+        # Skip barré chords.
+        unique_fingers = {f for _, _, f, _ in fretted}
+        if len(fretted) > len(unique_fingers) or len(fretted) > 4:
+            continue
+
+        # Sort by (fret, string_num) — canonical diagonal order.
+        fretted_sorted = sorted(fretted, key=lambda t: (t[1], t[3]))
+        current_fingers = [t[2] for t in fretted_sorted]
+        frets_sorted = [t[1] for t in fretted_sorted]
+        note_indices_sorted = [t[0] for t in fretted_sorted]
+
+        valid_fingers = _natural_finger_assignment(frets_sorted)
+        if valid_fingers is None or valid_fingers == current_fingers:
+            continue
+
+        for note_idx, new_finger in zip(note_indices_sorted, valid_fingers):
+            r = resolved[note_idx]
+            if r.state.finger == new_finger:
+                continue
+            offset = _FINGER_OFFSET.get(new_finger, 0)
+            hp = max(1, r.state.fret - offset)
+            resolved[note_idx] = FingeringResult(
+                note_id=r.note_id,
+                note_event=r.note_event,
+                state=FingeringState(
+                    string_num=r.state.string_num,
+                    fret=r.state.fret,
+                    finger=new_finger,
+                    hand_position=hp,
+                ),
+                cost=r.cost,
+                alternatives=r.alternatives,
+            )
+
+    return resolved
+
+
+def _chord_relative_shape(
+    notes: list[tuple[int, int]],
+) -> frozenset[tuple[int, int]]:
+    """Return the relative shape of a chord as (string_delta, fret_delta) from anchor.
+
+    The anchor is the note with the lowest fret (ties broken by lowest string
+    number, i.e. highest-pitch string).  This makes chords at different
+    positions on the neck share the same shape key when they use the same
+    fingering pattern — e.g. a power-chord shape is the same regardless of
+    which position it is played at.
 
     Args:
-        results: Post-processed FingeringResult list.
+        notes: List of (string_num, fret) for each note in the chord.
+
+    Returns:
+        Frozenset of (string_delta, fret_delta) tuples.
+    """
+    anchor_fret = min(f for _, f in notes if f > 0) if any(f > 0 for _, f in notes) else 0
+    anchor_str = min(s for s, f in notes if f == anchor_fret) if anchor_fret > 0 else min(s for s, _ in notes)
+    return frozenset((s - anchor_str, f - anchor_fret) for s, f in notes)
+
+
+def resolve_section_consistency(results: list[FingeringResult]) -> list[FingeringResult]:
+    """Enforce consistent finger assignments for identical and shape-equivalent chords.
+
+    Two passes:
+
+    **Pass 1 — Exact match**: chords sharing the same absolute (string, fret)
+    positions across the song get the same finger assignment.  The first fully
+    resolved occurrence sets the canonical.
+
+    **Pass 2 — Shape match**: chords with the same *relative* shape
+    (string_delta, fret_delta from the lowest-fret anchor note) but at
+    different positions on the neck get the same *relative* finger assignment.
+    For example, a power-chord shape played at fret 2 and again at fret 6 will
+    receive the same finger roles (index on root, ring+pinky on the fifth).
+
+    This resolver must run **after** all chord-conflict, stretch, ordering, and
+    span resolvers so the canonical is always taken from a fully-valid chord.
+
+    Args:
+        results: Fully post-processed FingeringResult list.
 
     Returns:
         New list with cross-song fingering consistency enforced.
@@ -742,59 +1131,87 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
     for idx, r in enumerate(resolved):
         onset_to_indices[round(r.note_event.onset, 6)].append(idx)
 
-    # canonical[shape] = {(string_num, fret): Finger}
-    canonical: dict[frozenset[tuple[int, int]], dict[tuple[int, int], Finger]] = {}
-
-    for onset in sorted(onset_to_indices.keys()):
-        indices = onset_to_indices[onset]
-        shape = frozenset(
-            (resolved[i].state.string_num, resolved[i].state.fret)
-            for i in indices
-        )
-
-        if shape not in canonical:
-            # First occurrence — record as canonical.
-            canonical[shape] = {
-                (resolved[i].state.string_num, resolved[i].state.fret): resolved[i].state.finger
-                for i in indices
-            }
-            continue
-
-        canon = canonical[shape]
-
-        # Check that applying the canonical assignment won't introduce conflicts.
-        desired_fingers = [canon[(resolved[i].state.string_num, resolved[i].state.fret)]
-                           for i in indices]
-        fretted_desired = [f for f in desired_fingers if f != Finger.OPEN]
-        if len(fretted_desired) != len(set(fretted_desired)):
-            continue  # canonical assignment itself has conflicts — skip
-
-        for i in indices:
+    def _apply_canon(
+        indices: list[int],
+        finger_map: dict[tuple[int, int], Finger],
+    ) -> None:
+        """Apply a canonical finger map {(string, fret): Finger} to a chord."""
+        desired = [finger_map.get(
+            (resolved[i].state.string_num, resolved[i].state.fret), resolved[i].state.finger
+        ) for i in indices]
+        fretted = [f for f in desired if f != Finger.OPEN]
+        if len(fretted) != len(set(fretted)):
+            return  # would introduce conflicts — skip
+        for i, new_finger in zip(indices, desired):
             r = resolved[i]
-            pos = (r.state.string_num, r.state.fret)
-            desired = canon[pos]
-            if r.state.finger == desired:
+            if r.state.finger == new_finger:
                 continue
-
-            # Apply canonical finger.
-            if desired != Finger.OPEN:
-                offset = _FINGER_OFFSET.get(desired, 0)
-                hp = max(1, r.state.fret - offset)
-            else:
-                hp = r.state.hand_position
-            new_state = FingeringState(
-                string_num=r.state.string_num,
-                fret=r.state.fret,
-                finger=desired,
-                hand_position=hp,
-            )
+            offset = _FINGER_OFFSET.get(new_finger, 0) if new_finger != Finger.OPEN else 0
+            hp = max(1, r.state.fret - offset) if new_finger != Finger.OPEN else r.state.hand_position
             resolved[i] = FingeringResult(
                 note_id=r.note_id,
                 note_event=r.note_event,
-                state=new_state,
+                state=FingeringState(
+                    string_num=r.state.string_num,
+                    fret=r.state.fret,
+                    finger=new_finger,
+                    hand_position=hp,
+                ),
                 cost=r.cost,
                 alternatives=r.alternatives,
             )
+
+    # ── Pass 1: exact (string, fret) shape ──────────────────────────────────
+    # canonical_exact: frozenset{(str,fret)} → {(str,fret): Finger}
+    canonical_exact: dict[frozenset[tuple[int, int]], dict[tuple[int, int], Finger]] = {}
+
+    for onset in sorted(onset_to_indices.keys()):
+        indices = onset_to_indices[onset]
+        abs_shape = frozenset(
+            (resolved[i].state.string_num, resolved[i].state.fret) for i in indices
+        )
+        if abs_shape not in canonical_exact:
+            canonical_exact[abs_shape] = {
+                (resolved[i].state.string_num, resolved[i].state.fret): resolved[i].state.finger
+                for i in indices
+            }
+        else:
+            _apply_canon(indices, canonical_exact[abs_shape])
+
+    # ── Pass 2: relative shape (transposed patterns) ─────────────────────────
+    # relative_canon: frozenset{(dstr,dfret)} → {(dstr,dfret): Finger}
+    # Applied only to multi-note chords (shape shift is only meaningful there).
+    relative_canon: dict[frozenset[tuple[int, int]], dict[tuple[int, int], Finger]] = {}
+
+    for onset in sorted(onset_to_indices.keys()):
+        indices = onset_to_indices[onset]
+        if len(indices) < 2:
+            continue  # single notes handled by pass 1
+
+        notes = [(resolved[i].state.string_num, resolved[i].state.fret) for i in indices]
+        rel_shape = _chord_relative_shape(notes)
+
+        # Compute anchor for this occurrence.
+        anchor_fret = min(f for _, f in notes if f > 0) if any(f > 0 for _, f in notes) else 0
+        anchor_str = (
+            min(s for s, f in notes if f == anchor_fret) if anchor_fret > 0
+            else min(s for s, _ in notes)
+        )
+
+        if rel_shape not in relative_canon:
+            # Record canonical relative assignment: (dstr, dfret) → Finger.
+            relative_canon[rel_shape] = {
+                (s - anchor_str, f - anchor_fret): resolved[i].state.finger
+                for i, (s, f) in zip(indices, notes)
+            }
+        else:
+            # Build absolute finger map for this occurrence from the relative canon.
+            rel_c = relative_canon[rel_shape]
+            abs_map: dict[tuple[int, int], Finger] = {
+                (anchor_str + ds, anchor_fret + df): finger
+                for (ds, df), finger in rel_c.items()
+            }
+            _apply_canon(indices, abs_map)
 
     return resolved
 
