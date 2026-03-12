@@ -1,20 +1,23 @@
-# FretWise — Bilan Phase 1 MVP
+# FretWise — Statut du projet
 
-> Dernière mise à jour : 2026-03-11
-
----
-
-## 1. Statut global
-
-**Phase 1 (MVP) : COMPLÈTE** ✅
-
-Les trois sprints de la Phase 1 sont terminés. Le pipeline complet
-`parse → generate → Viterbi → post-process → export (ASCII + PDF)`
-fonctionne sur 36 morceaux de référence.
+> Dernière mise à jour : 2026-03-12
 
 ---
 
-## 2. Réalisations par sprint
+## Statut global
+
+| Phase | Description | Statut |
+|---|---|---|
+| **Phase 1 — MVP** | Parser + Viterbi + ASCII/PDF export | ✅ **COMPLÈTE** |
+| **Phase 2 — Notation enrichment** | Enrichissement modèle + symboles PDF | ✅ **COMPLÈTE** |
+| **Phase 3 — Chord diagrams** | Extraction GP + rendu PDF | ✅ **COMPLÈTE** |
+| Phase 4 — Musical intelligence | C_music, parsers MusicXML/MIDI, patterns | 📋 Planifiée |
+| Phase 5 — Player profile | Profil joueur, calibration, web UI | 📋 Planifiée |
+| Phase 6 — AI / ML | Fonction de coût apprise, RLHF | 📋 Planifiée |
+
+---
+
+## Phase 1 — MVP ✅
 
 ### Sprint 1 — Fondations ✅
 
@@ -37,10 +40,10 @@ fonctionne sur 36 morceaux de référence.
 | Algorithme de Viterbi O(N × S²) | ✅ |
 | 4 modes de pondération : `reference`, `performance`, `musical`, `learning` | ✅ |
 | Stub M3 (patterns) et M6 (profil joueur) | ✅ |
-| Post-traitement : `resolve_finger_continuity` (lookback 8 beats) | ✅ |
-| Post-traitement : `resolve_section_consistency` (cohérence inter-sections) | ✅ |
-| Post-traitement : `resolve_chord_conflicts` (doigts dupliqués) | ✅ |
-| Post-traitement : `resolve_chord_stretch` (span > 4 frets → `!`) | ✅ |
+| Post-traitement : `resolve_finger_continuity` | ✅ |
+| Post-traitement : `resolve_section_consistency` | ✅ |
+| Post-traitement : `resolve_chord_conflicts` | ✅ |
+| Post-traitement : `resolve_chord_stretch` | ✅ |
 
 ### Sprint 3 — Intégration ✅
 
@@ -48,124 +51,135 @@ fonctionne sur 36 morceaux de référence.
 |---|---|
 | Pipeline voix-séparé (Viterbi indépendant par voix GP) | ✅ |
 | CLI `fretwise parse / solve` via Click | ✅ |
-| Export ASCII tab (tablature texte avec annotations doigts) | ✅ |
-| Export PDF professionnel A4 (format Songsterr) | ✅ |
-| Script de benchmark `scripts/run_fingering.py` (36 morceaux → PDF+TXT) | ✅ |
+| Export ASCII tab | ✅ |
+| Export PDF A4 professionnel | ✅ |
+| Script de benchmark `scripts/run_fingering.py` (36 morceaux) | ✅ |
 | Détection de piste guitare améliorée (GPIF : score multi-critères) | ✅ |
 | `track_name` transmis depuis les adaptateurs jusqu'au PDF | ✅ |
-| Nettoyage titre Songsterr (regex date suffix `-MM-DD-YYYY`) | ✅ |
+| Post-traitement : `resolve_chord_finger_ordering` (doigts monotones) | ✅ |
+| Pénalité de croisement séquentiel (`cost_sequential_crossing`) | ✅ |
+| Passe inter-voix après fusion | ✅ |
 
 ---
 
-## 3. Fonctionnalités bonus réalisées (hors plan initial)
+## Phase 2 — Notation Enrichment ✅
 
-### Rendu PDF professionnel
-- Espacement de cordes 10 pt, annotations en rouge sous les ovales
-- Symbole tempo **♩ =** (Unicode U+2669) + séparation time-sig/BPM
-- Double barre de fin (thin + thick) sur la dernière mesure
-- Marqueurs de section en bleu gras au-dessus de la ligne de tempo
-- Lignes en tirets **let ring** (bleu) avec label « l.r. »
-- Numéros de mesure réels (offset depuis la première note de la guitare)
+### 2A — Enrichissement du modèle de données ✅
 
-### Annotations de partition
-- `NoteEvent.let_ring` : lu depuis `note.effect.letRing` (GP5) et `"LetRing" in props` (GPIF)
-- `adapter.section_markers` : lu depuis `measure.header.marker.title` (GP5) et `<MasterBar><Section>` (GPIF)
+| Tâche | Statut |
+|---|---|
+| `NoteEvent` : `bend_value`, `bend_type` (normal/release/pre_bend/…) | ✅ |
+| `NoteEvent` : `slide_type` (legato/shift/slide_in_above/…) | ✅ |
+| `NoteEvent` : `harmonic_type`, `harmonic_fret` | ✅ |
+| `NoteEvent` : `muted`, `palm_muted`, `tapping`, `accent`, `accent_strong`, `tremolo_picking`, `vibrato_wide` | ✅ |
+| `BendType`, `SlideType`, `HarmonicType` constantes dans `models.py` | ✅ |
+| Nouveaux `Articulation` : `WIDE_VIBRATO`, `HARMONIC`, `TAPPING`, `MUTED`, `TREMOLO` | ✅ |
 
-### Biomécanique main gauche
-- **Règle de croisement dans les accords** : les doigts doivent être ordonnés monotonement par fret (`resolve_chord_finger_ordering`) — résultat : **0 croisement** sur 36 morceaux
-- **Pénalité de croisement séquentiel** : dans un run en même position, si la direction de la montée en fret et la direction du rang des doigts sont opposées, coût +2.0 (`cost_sequential_crossing`)
-- **Passe inter-voix** : `resolve_chord_conflicts` + `resolve_chord_finger_ordering` relancés après fusion des voix (pour les fichiers multi-voix)
+### 2B — Enrichissement des parseurs GP ✅
+
+| Tâche | Statut |
+|---|---|
+| `GpifAdapter` : bend points, slide flags, harmonic type/fret | ✅ |
+| `GpifAdapter` : palm mute, tapping, accent (note + beat), tremolo picking, wide vibrato | ✅ |
+| `GuitarProAdapter` : champs correspondants via PyGuitarPro beat/note | ✅ |
+
+### 2C — Notation rythmique PDF ✅
+
+| Tâche | Statut |
+|---|---|
+| Convention tab correcte : l'ovale fret IS le notehead (pas de ronds au-dessus) | ✅ |
+| Ronde : ovale visible + pas de hampe | ✅ |
+| Blanche : ovale visible + hampe | ✅ |
+| Noire/croche/double croche : fond blanc invisible + hampe | ✅ |
+| Hampes avec crochets (1 flag=croche, 2=double croche, 3=triple croche) | ✅ |
+| Ligatures de hampes (beaming) pour groupes de croches/doubles croches | ✅ |
+| Silences : pause, demi-pause, soupir, demi-soupir, quart de soupir | ✅ |
+| Checksum par mesure (Σ=X.XX en rouge si déviation > 0.1 beat) | ✅ |
+| Page de légende rythmique (toutes valeurs + silences + guide symboles) | ✅ |
 
 ---
 
-## 4. Métriques Phase 1
+## Phase 3 — Chord Diagrams ✅
+
+### 3A — Extraction des données d'accords ✅
+
+| Tâche | Statut |
+|---|---|
+| `ChordDiagram` dataclass dans `models.py` | ✅ |
+| `_parse_diagram_collection()` dans `GpifAdapter` (XML DiagramCollection) | ✅ |
+| `_compute_chord_fingers()` : assignation automatique doigts 1–4 par fret ascendant | ✅ |
+| `adapter.chord_diagrams` disponible après `parse_track()` | ✅ |
+
+### 3B — Rendu des diagrammes ✅
+
+| Tâche | Statut |
+|---|---|
+| `draw_chord_diagram()` dans `export/chord_diagram.py` | ✅ |
+| Cercles ouverts avec numéro de doigt à l'intérieur (pas de points noirs) | ✅ |
+| Barre : rectangle arrondi plein avec numéro de doigt centré | ✅ |
+| X (corde étouffée) et O (corde à vide) au-dessus du diagramme | ✅ |
+| Noix (nut) quand `base_fret == 0`, chiffre romain quand `> 0` | ✅ |
+| `render_chord_diagrams_pdf()` : PDF A4 standalone grille de diagrammes | ✅ |
+
+### 3C — Diagrammes dans les en-têtes PDF ✅
+
+| Tâche | Statut |
+|---|---|
+| Diagrammes compacts sur la page de légende (max 8 par ligne) | ✅ |
+| Transmission `chord_diagrams` depuis `run_fingering.py` vers `render_pdf_tab()` | ✅ |
+| Affichage conditionnel (section présente seulement si fichier GP contient des accords) | ✅ |
+
+---
+
+## Métriques actuelles
 
 | Métrique | Valeur |
 |---|---|
-| Fichiers traités sans crash | 36/36 (100 %) |
-| Fichiers avec sortie utilisable | 34/36 (94 %) |
+| Tests automatisés | **358 passants**, 1 ignoré |
+| Couverture de test | ~65 % (export couvert par test_export.py + test_chord_diagram.py) |
+| Fichiers GP traités | 36/36 (100 %) |
+| Fichiers avec sortie utilisable | 35/36 (97 %) |
 | Notes totales traitées | ~44 000 |
-| Notes sans état valide (drops) | < 0.1 % |
+| Drops (aucun état valide) | < 0.1 % |
 | Croisements de doigts dans les accords | **0** (corpus complet) |
-| Marqueurs de section détectés | 159 sur 26 fichiers |
-| Tests automatisés | **203 passants**, 1 ignoré |
-| Couverture de test | 53 % (cible 80 % non atteinte — export non couvert) |
-| Temps de calcul | < 1 s / morceau (cible : < 100 ms/720 notes ✅) |
-
-### Critères de succès Phase 1 (CLAUDE.md)
-
-| Critère | Résultat |
-|---|---|
-| Pipeline complet sans erreur sur 20 morceaux | ✅ 36/36 |
-| Aucun shift impossible, aucun étirement surhumain | ✅ (resolvers + 0 crossing) |
-| Temps de calcul < 1 s pour 3 min à 120 BPM | ✅ |
-| Couverture tests ≥ 80 % | ⚠️ 53 % (export non couvert) |
+| Spans `!` non résolvables | 5 (genuins — barré > 4 frets) |
+| PDFs générés (benchmark) | 141 (tab + diagrammes + légende) |
+| Temps de calcul | < 1 s / morceau |
 
 ---
 
-## 5. Problèmes connus restants
+## Problèmes connus restants
 
-| # | Description | Sévérité | Impact |
-|---|---|---|---|
-| R-01 | **Couverture tests export** : `ascii_tab.py`, `pdf_tab.py`, `chord_recognition.py` ont 0 % de couverture. Cible 80 % non atteinte. | Moyenne | CI `--cov-fail-under=80` désactivé |
-| R-02 | **Adele-Someone Like You** : aucune piste guitare (arrangement piano/vocal). Comportement correct, message d'erreur clair. | Faible | 0 sortie |
-| R-03 | **`!` dans And I Love Her** (3), **Bon Jovi** (1), **Desert Song** (1) : spans impossibles multi-voix genuins. Non résolvables sans modèle barré. | Faible | Affichage `!` dans tab |
-| R-04 | **Principe diagonal** : la main gauche suit naturellement une diagonale sur le manche (cordes graves → frets plus bas). Non encodé dans la fonction de coût. | Faible | Qualité esthétique |
-| R-05 | **Barré** : un seul doigt peut tendre sur plusieurs cordes au même fret. Non modélisé (cada corde reçoit son propre doigt). | Moyenne | Affectation doigt non optimale sur accords plaqués |
-
----
-
-## 6. Plan de travail Phase 2
-
-### Priorités immédiates (P1)
-
-| Tâche | Module | Effort |
+| # | Description | Sévérité |
 |---|---|---|
-| Tests unitaires export (ascii_tab, pdf_tab, chord_recognition) → atteindre 80 % de couverture | tests | M |
-| Modèle barré : INDEX peut couvrir plusieurs cordes au même fret | M2, M4 | L |
-| Principe diagonal : coût réduit quand l'angle main-manche est naturel | M4 | S |
-
-### Phase 2 — Scoring musical et profil joueur
-
-| Module | Fonctionnalité | Statut |
-|---|---|---|
-| M3 Patterns | Reconnaissance d'accords avancée (barré, extensions jazz) | À faire |
-| M4 Scoring | C_music : coût musical (intervalles, résolutions) | Stub |
-| M4 Scoring | C_joueur : profil joueur (taille de main, force des doigts) | Stub |
-| M4 Scoring | C_péda : coût pédagogique (fingering standard, gammes) | Stub |
-| M6 Profile | Calibration profil joueur (JSON versionné) | À faire |
-| CLI | `fretwise calibrate --output profiles/mon_profil.json` | À faire |
-
-### Phase 3 — Interface et données externes
-
-| Module | Fonctionnalité |
-|---|---|
-| API REST | FastAPI + endpoints solve/export |
-| Interface web | React + lecteur de tablature interactif |
-| Datasets | DadaGP, GuitarSet, GAPS (concordance doigt) |
-| Benchmark | Comparaison avec annotations Iino et al. 2025 |
+| R-01 | **Adele-Someone Like You** : aucune piste guitare (arrangement piano/vocal). Comportement correct. | Faible |
+| R-02 | **`!` dans And I Love Her** (3), **Bon Jovi** (1), **Desert Song** (1) : spans impossibles genuins. | Faible |
+| R-03 | **Barré** : un seul doigt couvrant plusieurs cordes non modélisé dans l'optimiseur. | Moyenne |
+| R-04 | **Principe diagonal** : la diagonale naturelle de la main non encodée dans la fonction de coût. | Faible |
+| R-05 | **Diagrammes GP incorrects** : certains fichiers (Rebel Rebel, Bon Jovi) ont des diagrammes par défaut identiques — limitation source. | Faible |
+| R-06 | **7 fichiers** avec checksums Σ anormaux : pickup bars, multi-voix 12/8 — anomalies GP source confirmées. | Information |
 
 ---
 
-## 7. Architecture actuelle (modules implémentés)
+## Architecture actuelle
 
 ```
 src/fretwise/
-├── models.py           NoteEvent (let_ring), FingeringState, FingeringResult
+├── models.py           NoteEvent (20+ champs), FingeringState, FingeringResult, ChordDiagram
 ├── parser/
-│   ├── guitarpro_adapter.py  GP3/4/5 — track_name, section_markers, let_ring
-│   └── gpif_adapter.py       GP7/8  — track_name, section_markers, let_ring
-├── generator/          StateGenerator (hint-based fallback tuning alternatif)
-├── scoring/            CostFunction, 5 resolvers (+ chord_finger_ordering NEW)
-│                       cost_sequential_crossing NEW
+│   ├── guitarpro_adapter.py  GP3/4/5 — articulations, let_ring, section_markers
+│   └── gpif_adapter.py       GP7/8  — idem + chord_diagrams, DiagramCollection
+├── generator/          StateGenerator (hint-based fallback, tunings alternatifs)
+├── scoring/            CostFunction, CostWeights, 5 resolvers
 ├── optimizer/          ViterbiOptimizer O(N×S²)
 ├── patterns/           recognize_chord() (pitch-class matching)
-├── pipeline.py         split_by_voice + run_pipeline (passe inter-voix NEW)
+├── pipeline.py         split_by_voice + run_pipeline (passe inter-voix)
 ├── export/
-│   ├── ascii_tab.py    Tab ASCII (fret/doigt, noms d'accords, numéros mesures)
-│   └── pdf_tab.py      PDF A4 (♩=, double barre fin, marqueurs section, let ring)
-└── cli.py              fretwise parse / solve / export
+│   ├── ascii_tab.py    Tab ASCII
+│   ├── pdf_tab.py      PDF A4 (rythme + légende + checksums + diagrammes)
+│   └── chord_diagram.py  Rendu diagrammes accords (box diagram standard)
+└── cli.py              fretwise parse / solve
 ```
 
-**Tests :** 203 passants — `pytest tests/ -v`
-**Benchmark :** `python scripts/run_fingering.py` → `docs/benchmarks/*.pdf`
+**Tests :** `pytest -v` (358 passants)
+**Benchmark :** `python scripts/run_fingering.py` → `docs/benchmarks/`

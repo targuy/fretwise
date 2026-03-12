@@ -44,6 +44,7 @@ def process_track(
     mode: str,
     max_measures: int,
     out_stem: str,
+    chord_diagrams: list | None = None,
 ) -> None:
     """Run the pipeline on a single track's events and write output files."""
     if not events:
@@ -97,8 +98,11 @@ def process_track(
         instrument=track_name,
         mode_label=f"{mode} mode",
         section_markers=section_markers or None,
+        chord_diagrams=chord_diagrams or None,
     )
     print(f"  PDF    : {pdf_path.name}")
+    if chord_diagrams:
+        print(f"  Chords : {len(chord_diagrams)} diagram(s) embedded in PDF")
 
 
 def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> None:
@@ -128,10 +132,12 @@ def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> N
             print(f"\n  Track [{track_id}] {track_name!r}")
             events = adapter.parse_track(gp_path, track_id)
             section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+            diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
             print(f"  Parsed : {len(events)} notes")
             process_track(
                 gp_path, track_name, events, section_markers,
                 pdf_artist, pdf_title, mode, max_measures, out_stem,
+                chord_diagrams=diagrams or None,
             )
         return
 
@@ -139,6 +145,7 @@ def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> N
     events = adapter.parse(gp_path)
     track_name_single: str = getattr(adapter, "track_name", "") or ""
     section_markers_single: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    diagrams_single: list = list(getattr(adapter, "chord_diagrams", []) or [])
     print(f"Parsed : {len(events)} notes"
           + (f"  [{track_name_single}]" if track_name_single else ""))
 
@@ -149,6 +156,7 @@ def process(gp_path: Path, mode: str = "reference", max_measures: int = 20) -> N
     process_track(
         gp_path, track_name_single, events, section_markers_single,
         pdf_artist, pdf_title, mode, max_measures, stem,
+        chord_diagrams=diagrams_single or None,
     )
 
 

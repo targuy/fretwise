@@ -47,7 +47,8 @@ from pathlib import Path
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas as rl_canvas
 
-from fretwise.models import Finger, FingeringResult
+from fretwise.export.chord_diagram import draw_chord_diagram
+from fretwise.models import Articulation, ChordDiagram, Finger, FingeringResult, SlideType
 from fretwise.patterns.chord_recognition import recognize_chord
 
 # ---------------------------------------------------------------------------
@@ -69,19 +70,19 @@ _STRINGS_HEIGHT = (_NUM_STRINGS - 1) * _STRING_SPACING   # 50 pt
 
 # Rhythm notation (above sys_y = y of string 1)
 _STEM_GAP = 2.5      # gap between string-1 and stem base
-_STEM_H = 11.0       # total stem height above string-1
+_STEM_H = 16.0       # total stem height above string-1
 
 # Text belt heights above sys_y
-_CHORD_Y = 24.0      # chord-name baseline above sys_y
-_TEMPO_Y = 33.0      # tempo/timesig baseline above sys_y
+_CHORD_Y = 30.0      # chord-name baseline above sys_y  (was 24)
+_TEMPO_Y = 42.0      # tempo/timesig baseline above sys_y  (was 33)
 
 # System vertical extents
 _TOP_PAD = 4.0
-_ABOVE_STRINGS = _TEMPO_Y + 7.0 + _TOP_PAD    # ~44 pt
+_ABOVE_STRINGS = _TEMPO_Y + 7.0 + _TOP_PAD    # ~53 pt (was 44)
 _BELOW_STRINGS = 6.0
-_SYSTEM_H = _ABOVE_STRINGS + _STRINGS_HEIGHT + _BELOW_STRINGS   # ~100 pt
-_INTER_SYSTEM_GAP = 10.0
-_SYSTEM_PITCH = _SYSTEM_H + _INTER_SYSTEM_GAP   # ~110 pt  →  7 systems/page
+_SYSTEM_H = _ABOVE_STRINGS + _STRINGS_HEIGHT + _BELOW_STRINGS   # ~109 pt (was 100)
+_INTER_SYSTEM_GAP = 8.0
+_SYSTEM_PITCH = _SYSTEM_H + _INTER_SYSTEM_GAP   # ~117 pt  →  6 systems/page
 
 # Note rendering
 # With 10 pt string spacing:
@@ -154,6 +155,7 @@ def render_pdf_tab(
     instrument: str = "",
     measures_per_system: int | None = None,
     section_markers: dict[int, str] | None = None,
+    chord_diagrams: list[ChordDiagram] | None = None,
 ) -> None:
     """Render fingering results as a professional A4 PDF tablature file.
 
@@ -165,8 +167,11 @@ def render_pdf_tab(
         beats_per_measure: Numerator of the time signature (default 4.0).
         mode_label: Optional label below artist (e.g. "reference mode").
         instrument: Name of the instrument / track (e.g. "Electric Guitar").
+        measures_per_system: Optional override for measures per system.
         section_markers: Optional mapping of 1-based measure number → section
             title (e.g. {1: "Intro", 9: "Verse 1"}).
+        chord_diagrams: Optional list of ChordDiagram objects to render in a
+            compact strip at the top of the first page (up to 12 diagrams).
     """
     c = rl_canvas.Canvas(str(output_path), pagesize=(_PAGE_W, _PAGE_H))
     _section_markers: dict[int, str] = section_markers or {}
@@ -183,9 +188,16 @@ def render_pdf_tab(
     mps = max(_MPS_MIN, min(_MPS_MAX, mps))
     first_song_measure = int(results[0].note_event.onset / beats_per_measure) + 1
 
+    # ── Page 1: rhythm legend (+ chord diagrams when present)
+    legend_bottom = _draw_rhythm_legend(c, _PAGE_H - _MARGIN)
+    if chord_diagrams:
+        # Draw chord diagrams below the legend on the same page.
+        _draw_chord_diagram_header(c, chord_diagrams, legend_bottom)
+    c.showPage()
+
     current_top = _PAGE_H - _MARGIN
 
-    # ── Title block on page 1
+    # ── Title block on page 2 (first tab page)
     if title or artist or mode_label or instrument:
         current_top = _draw_title_block(c, title, artist, instrument, mode_label, current_top)
 
@@ -274,6 +286,69 @@ def _draw_title_block(
     return y - 12
 
 
+# Chord diagram header constants (compact, first-page-only strip)
+_CD_CELL_W = 7.0   # small cell width for header diagrams
+_CD_CELL_H = 7.0   # small cell height
+_CD_FRET_ROWS = 5
+_CD_MAX = 12       # cap displayed diagrams
+_CD_COLS = 8       # diagrams per row in the header strip
+
+
+def _draw_chord_diagram_header(
+    c: rl_canvas.Canvas,
+    diagrams: list[ChordDiagram],
+    top_y: float,
+) -> float:
+    """Draw a compact chord-diagram strip at the top of the first page.
+
+    Uses small diagrams (cell_w=7, cell_h=7).  Shows up to _CD_MAX diagrams
+    in 1–2 rows.  Adds a thin separator line below the strip.
+
+    Args:
+        c: ReportLab Canvas.
+        diagrams: Chord diagrams to render.
+        top_y: Y coordinate of the top of the available area.
+
+    Returns:
+        Y coordinate immediately below the rendered strip.
+    """
+    shown = diagrams[:_CD_MAX]
+    if not shown:
+        return top_y
+
+    n_strings = 6  # assume standard
+    box_w = (n_strings - 1) * _CD_CELL_W
+    slot_w = box_w + 22.0   # per-diagram slot width (includes right margin)
+    slot_h = 12.0 + 7.0 + _CD_FRET_ROWS * _CD_CELL_H + 4.0  # per-row height
+
+    usable_w = _PAGE_W - 2 * _MARGIN
+    cols_per_row = max(1, int(usable_w / slot_w))
+    cols_per_row = min(cols_per_row, _CD_COLS)
+
+    # Determine rows needed.
+    rows = math.ceil(len(shown) / cols_per_row)
+    total_strip_h = rows * slot_h + 8.0  # 8 pt bottom padding before separator
+
+    # Place diagrams top-down.
+    for i, diagram in enumerate(shown):
+        row = i // cols_per_row
+        col = i % cols_per_row
+        dx = _MARGIN + col * slot_w + (slot_w - box_w) / 2
+        # y = top of box for this diagram
+        dy = top_y - 12.0 - row * slot_h
+        draw_chord_diagram(c, diagram, dx, dy, cell_w=_CD_CELL_W, cell_h=_CD_CELL_H,
+                           fret_rows=_CD_FRET_ROWS)
+
+    # Separator line below the strip.
+    sep_y = top_y - total_strip_h
+    c.setLineWidth(0.5)
+    c.setStrokeColor(_COL_LGREY)
+    c.line(_MARGIN, sep_y, _PAGE_W - _MARGIN, sep_y)
+    c.setStrokeColor(_COL_BLACK)
+
+    return sep_y - 6.0
+
+
 # ---------------------------------------------------------------------------
 # System-level rendering
 # ---------------------------------------------------------------------------
@@ -342,10 +417,10 @@ def _draw_system(
             c.setStrokeColor(_COL_BLACK)
             c.line(x0, sys_y + 1, x0, sys_y - _STRINGS_HEIGHT - 1)
 
-        # Measure number (small grey above stem area)
+        # Measure number (small grey, between chord belt and tempo line)
         c.setFont("Helvetica", 5.5)
         c.setFillColor(_COL_GREY)
-        c.drawString(x0 + 3, sys_y + _STEM_H + 1, str(song_m_start + slot))
+        c.drawString(x0 + 3, sys_y + _CHORD_Y + 5, str(song_m_start + slot))
         c.setFillColor(_COL_BLACK)
 
         # Section label (bold, above tempo line)
@@ -432,15 +507,20 @@ def _draw_measure(
         beat_groups.setdefault(beat, []).append(onset)
 
     prev_chord: str | None = None
+    prev_chord_x_right: float = -999.0   # right edge of the last drawn chord name
     for beat in sorted(beat_groups):
         pitches = [r.note_event.pitch for o in beat_groups[beat] for r in onset_map[o]]
         chord = recognize_chord(pitches)
         if chord and chord != prev_chord:
             cx = onset_x[beat_groups[beat][0]]
-            c.setFont("Helvetica-Bold", 7.0)
-            c.setFillColor(_COL_BLACK)
-            c.drawString(cx - 2, sys_y + _CHORD_Y, chord)
-            prev_chord = chord
+            c.setFont("Helvetica-Bold", 6.5)
+            chord_w = c.stringWidth(chord, "Helvetica-Bold", 6.5)
+            # Skip if this chord name would overlap the previous one
+            if cx - 2 > prev_chord_x_right + 2:
+                c.setFillColor(_COL_BLACK)
+                c.drawString(cx - 2, sys_y + _CHORD_Y, chord)
+                prev_chord_x_right = cx - 2 + chord_w
+                prev_chord = chord
 
     # ── Build stem info list
     stem_info: list[tuple[float, float, float]] = []   # (x, onset, min_duration)
@@ -452,19 +532,45 @@ def _draw_measure(
     # ── Beaming analysis
     beamed = _get_beamed_onsets(stem_info)
 
-    # ── Draw stems  (before notes so ovals cover them)
+    # ── Draw stems  (before notes so note ovals cover the stem base)
+    # Convention (confirmed by Guitar Pro / standard tab publishers):
+    #   • Whole  note (≥ 2 beats) : fret number enclosed in visible oval — NO stem
+    #   • Half   note (≥ 1 beat)  : fret number enclosed in visible oval + stem (no flag)
+    #   • Quarter note (≥ 0.5)    : fret number, white-bg oval (no stroke) + stem (no flag)
+    #   • 8th   note (≥ 0.25)     : same + one flag OR single beam bar
+    #   • 16th  note (< 0.25)     : same + two flags OR two beam bars
+    # No notehead shape at the top of the stem — the fret-number oval IS the notehead.
     stem_bot = sys_y + _STEM_GAP
     stem_top = sys_y + _STEM_H
     c.setStrokeColor(_COL_BLACK)
+    c.setFillColor(_COL_BLACK)
     for nx, onset, dur in stem_info:
+        if dur >= 4.0:
+            continue          # whole note: no stem (visible oval on fret number is enough)
         c.setLineWidth(0.8)
         c.line(nx, stem_bot, nx, stem_top)
-        if onset not in beamed:
+        if dur < 1.0 and onset not in beamed:   # unbeamed 8th / 16th / 32nd: draw flags
             for fi in range(_num_flags(dur)):
                 _draw_flag(c, nx, stem_top - fi * 4.0)
 
     # ── Draw beams
     _draw_beams(c, stem_info, beamed, stem_top)
+
+    # ── Draw rests (gaps in the measure timeline)
+    rests = _compute_rests(sorted_onsets, onset_map, measure_onset, beats_per_measure)
+    for rest_onset, rest_dur in rests:
+        rel = max(0.0, rest_onset - measure_onset)
+        frac = min(rel / beats_per_measure, 0.97)
+        rx = x0 + _LEFT_PAD + frac * (measure_w - _LEFT_PAD - 5.0)
+        _draw_rest(c, rx, stem_top, rest_dur)
+
+    # ── Per-measure rhythm checksum
+    # Compute coverage = beats actually covered by note attacks + rest gaps.
+    # Uses max(duration) per onset column (chord notes all share the same beat duration).
+    # A mismatch > 0.1 beat indicates a GP-file quantisation oddity — shown in red.
+    _draw_measure_checksum(
+        c, sorted_onsets, onset_map, rests, measure_onset, beats_per_measure, x0, sys_y
+    )
 
     # ── Let-ring lines  (before notes so ovals cover the line start)
     _draw_let_ring(c, onset_map, onset_x, x1, sys_y)
@@ -474,7 +580,12 @@ def _draw_measure(
         nx = onset_x[onset]
         for r in onset_map[onset]:
             sy = sys_y - (r.state.string_num - 1) * _STRING_SPACING
-            _draw_note(c, nx, sy, r.state.fret, r.state.finger)
+            _draw_note(c, nx, sy, r)
+
+    # ── Draw notation symbols (after notes so they appear on top)
+    _draw_slide_lines(c, onset_map, onset_x, sys_y)
+    _draw_slur_arcs(c, onset_map, onset_x, sys_y)
+    _draw_pm_brackets(c, onset_map, onset_x, x0, x1, sys_y)
 
 
 _LET_RING_COLOR = colors.Color(0.25, 0.25, 0.70)   # muted blue
@@ -572,14 +683,20 @@ def _compute_onset_x(
 
 
 def _num_flags(duration: float) -> int:
-    """Number of stem flags for a given duration in beats."""
+    """Number of stem flags for a given duration in beats.
+
+    Quarter note (1.0 beat) and longer → 0 flags.
+    Eighth note (0.5 beat)            → 1 flag.
+    Sixteenth note (0.25 beat)        → 2 flags.
+    Thirty-second note (0.125 beat)   → 3 flags.
+    """
+    if duration >= 1.0:
+        return 0
     if duration >= 0.5:
-        return 0    # quarter note or longer — no flags
+        return 1
     if duration >= 0.25:
-        return 1    # 8th note
-    if duration >= 0.125:
-        return 2    # 16th note
-    return 3        # 32nd note or shorter
+        return 2
+    return 3
 
 
 def _draw_flag(c: rl_canvas.Canvas, x: float, y: float) -> None:
@@ -595,22 +712,23 @@ def _draw_flag(c: rl_canvas.Canvas, x: float, y: float) -> None:
 def _get_beamed_onsets(
     stem_info: list[tuple[float, float, float]],
 ) -> set[float]:
-    """Return onset values that belong to a beam group (≥2 consecutive beamable notes).
+    """Return onset values that belong to a beam group (≥ 2 consecutive beamable notes).
 
-    Notes with duration < 0.5 beats (8th note threshold) can be beamed.
+    Notes with duration < 1.0 beat (shorter than a quarter note) can be beamed.
+    Groups of single sub-quarter notes are not beamed (they keep their flags).
     """
     beamed: set[float] = set()
     i = 0
     while i < len(stem_info):
         _, onset_i, dur_i = stem_info[i]
-        if dur_i >= 0.5:
+        if dur_i >= 1.0:          # quarter note or longer: not beamable
             i += 1
             continue
         group = [onset_i]
         j = i + 1
         while j < len(stem_info):
             _, onset_j, dur_j = stem_info[j]
-            if dur_j >= 0.5:
+            if dur_j >= 1.0:
                 break
             group.append(onset_j)
             j += 1
@@ -647,8 +765,8 @@ def _draw_beams(
             gx0, gx1 = group[0][0], group[-1][0]
             # Primary beam (8th note)
             c.rect(gx0, beam_y - BEAM_H, gx1 - gx0, BEAM_H, fill=1, stroke=0)
-            # Secondary beam (16th note) if all notes qualify
-            if all(d < 0.25 for _, d in group):
+            # Secondary beam (16th note) if all notes in the group qualify
+            if all(d < 0.5 for _, d in group):
                 c.rect(
                     gx0, beam_y - BEAM_H - BEAM_GAP - BEAM_H,
                     gx1 - gx0, BEAM_H, fill=1, stroke=0,
@@ -657,39 +775,439 @@ def _draw_beams(
 
 
 # ---------------------------------------------------------------------------
+# Rest computation and rendering
+# ---------------------------------------------------------------------------
+
+# Standard note values in descending order (beats), used for subdivision.
+_REST_VALUES: tuple[float, ...] = (4.0, 2.0, 1.0, 0.5, 0.25, 0.125)
+
+
+def _subdivide_rest(onset: float, duration: float) -> list[tuple[float, float]]:
+    """Split *duration* beats into the largest standard values that fit.
+
+    Returns a list of (onset, value) pairs in chronological order.
+    """
+    result: list[tuple[float, float]] = []
+    cur = onset
+    remaining = duration
+    for val in _REST_VALUES:
+        while remaining >= val - 0.01:
+            result.append((cur, val))
+            cur += val
+            remaining = max(0.0, remaining - val)
+    return result
+
+
+def _compute_rests(
+    sorted_onsets: list[float],
+    onset_map: dict[float, list[FingeringResult]],
+    measure_onset: float,
+    beats_per_measure: float,
+) -> list[tuple[float, float]]:
+    """Compute rests needed to fill the gaps inside a measure.
+
+    For each gap between consecutive note onsets (or between the last note
+    and the measure end) that is ≥ 1/32nd note (0.125 beats), subdivide
+    the gap into standard rest values.
+
+    Returns a list of (onset, duration) pairs sorted by onset.
+    """
+    rests: list[tuple[float, float]] = []
+    cur = measure_onset
+
+    for onset in sorted_onsets:
+        gap = onset - cur
+        if gap >= 0.115:   # slightly under 1/32 to tolerate floating-point drift
+            rests.extend(_subdivide_rest(cur, gap))
+        # Advance cursor to end of this beat (use longest note at this onset)
+        max_dur = max(r.note_event.duration for r in onset_map[onset])
+        cur = max(cur, onset + max_dur)
+
+    # Gap between last note end and measure end
+    measure_end = measure_onset + beats_per_measure
+    if cur < measure_end - 0.05:
+        rests.extend(_subdivide_rest(cur, measure_end - cur))
+
+    return rests
+
+
+def _draw_rest(c: rl_canvas.Canvas, rx: float, y_top: float, duration: float) -> None:
+    """Draw one rest symbol centred at x = *rx*, using *y_top* (≈ stem top) as anchor.
+
+    Symbols follow standard music notation conventions adapted for tab:
+      Whole rest  — filled black rectangle hanging below a ledger line
+      Half rest   — filled black rectangle sitting on top of a ledger line
+      Quarter rest — squiggly vertical symbol (approximated path)
+      Eighth rest — diagonal stem with filled dot
+      16th rest   — diagonal stem with two filled dots
+    """
+    c.setFillColor(_COL_BLACK)
+    c.setStrokeColor(_COL_BLACK)
+
+    # Reference heights relative to y_top
+    ref = y_top - 4.0          # vertical midpoint of rest zone
+
+    if duration >= 4.0:
+        # Whole rest: solid rect hanging below ledger line
+        c.setLineWidth(0.4)
+        c.line(rx - 5.5, ref, rx + 5.5, ref)          # ledger line
+        c.rect(rx - 4, ref - 3.5, 8, 3, fill=1, stroke=0)
+
+    elif duration >= 2.0:
+        # Half rest: solid rect sitting on ledger line
+        c.setLineWidth(0.4)
+        c.line(rx - 5.5, ref - 3.5, rx + 5.5, ref - 3.5)   # ledger line
+        c.rect(rx - 4, ref - 3.5, 8, 3, fill=1, stroke=0)
+
+    elif duration >= 1.0:
+        # Quarter rest: squiggly path (simplified standard symbol)
+        c.setLineWidth(0.8)
+        yt = ref + 4.0
+        yb = ref - 5.0
+        p = c.beginPath()
+        p.moveTo(rx - 2.0, yt)
+        p.lineTo(rx + 2.5, yt - 2.5)
+        p.curveTo(rx + 4.0, yt - 3.5, rx - 3.5, yt - 6.0, rx + 0.5, yt - 7.0)
+        p.curveTo(rx + 2.5, yt - 8.0, rx - 1.0, yb + 1.5, rx + 0.5, yb)
+        c.drawPath(p, stroke=1, fill=0)
+
+    elif duration >= 0.5:
+        # Eighth rest: diagonal line + one filled dot
+        c.setLineWidth(0.8)
+        yt = ref + 3.0
+        yb = ref - 4.0
+        c.line(rx - 1.5, yb, rx + 1.5, yt - 2.0)
+        c.setLineWidth(0.0)
+        c.circle(rx + 2.5, yt - 1.0, 1.6, fill=1, stroke=0)
+
+    elif duration >= 0.25:
+        # 16th rest: diagonal line + two stacked filled dots
+        c.setLineWidth(0.8)
+        yt = ref + 4.0
+        yb = ref - 5.0
+        c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
+        c.setLineWidth(0.0)
+        c.circle(rx + 2.5, yt - 1.0, 1.5, fill=1, stroke=0)
+        c.circle(rx + 0.5, ref - 0.5, 1.5, fill=1, stroke=0)
+
+    else:
+        # 32nd rest: three dots (rare; fallback to 16th symbol)
+        c.setLineWidth(0.8)
+        yt = ref + 4.0
+        yb = ref - 6.0
+        c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
+        c.setLineWidth(0.0)
+        c.circle(rx + 2.5, yt - 1.0, 1.4, fill=1, stroke=0)
+        c.circle(rx + 0.5, ref - 0.5, 1.4, fill=1, stroke=0)
+        c.circle(rx - 1.0, ref - 2.5, 1.4, fill=1, stroke=0)
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setFillColor(_COL_BLACK)
+
+
+def _draw_measure_checksum(
+    c: rl_canvas.Canvas,
+    sorted_onsets: list[float],
+    onset_map: dict[float, list[FingeringResult]],
+    rests: list[tuple[float, float]],
+    measure_onset: float,
+    beats_per_measure: float,
+    x0: float,
+    sys_y: float,
+) -> None:
+    """Draw a small red checksum label above the measure when rhythm is inconsistent.
+
+    The checksum is the total time covered by note attacks (one beat per onset
+    column, using the max duration at that onset) plus explicit rests computed
+    by ``_compute_rests``.  If this deviates from ``beats_per_measure`` by more
+    than 0.1 beat, a red "Σ=X.XX" label is drawn just above the measure.
+
+    This visually flags measures where the source GP file has quantisation
+    oddities (beats overflowing the time signature), making QA easy.
+    """
+    # Compute onset-based coverage: advance a cursor through all note attacks.
+    # For each onset column, advance the cursor by the max duration at that onset
+    # (chord notes share one beat, so we must not sum all notes).
+    # Gaps between note attacks are already covered by ``_compute_rests``, so
+    # total_coverage = (furthest cursor position) - measure_onset.
+    cur = measure_onset
+    for onset in sorted_onsets:
+        cur = max(cur, onset)          # skip forward if there's a gap (rest fills it)
+        max_dur = max(r.note_event.duration for r in onset_map[onset])
+        cur = max(cur, onset + max_dur)
+
+    total_coverage = cur - measure_onset
+
+    delta = total_coverage - beats_per_measure
+    if abs(delta) > 0.10:
+        c.setFillColor(colors.red)
+        c.setFont("Helvetica", 4.0)
+        label = f"\u03a3={total_coverage:.2f}"
+        c.drawString(x0 + 2, sys_y + _ABOVE_STRINGS - 2, label)
+        c.setFillColor(_COL_BLACK)
+
+
+# ---------------------------------------------------------------------------
+# Rhythm legend
+# ---------------------------------------------------------------------------
+
+_LEGEND_NOTE_VALUES: tuple[tuple[str, float], ...] = (
+    ("Whole", 4.0),
+    ("Half", 2.0),
+    ("Quarter", 1.0),
+    ("8th", 0.5),
+    ("16th", 0.25),
+    ("32nd", 0.125),
+)
+
+
+def _draw_rhythm_legend(c: rl_canvas.Canvas, top_y: float) -> float:
+    """Draw a compact rhythm legend on a dedicated legend page.
+
+    Shows all standard note values (stems + ovals in tab style) and their
+    corresponding rest symbols, with French labels.  Returns the y coordinate
+    immediately below the legend.
+
+    Args:
+        c: ReportLab canvas (current page).
+        top_y: Y coordinate of the top of the available area.
+
+    Returns:
+        Y coordinate immediately below the rendered legend block.
+    """
+    # ── Section title
+    title_y = top_y - 8.0
+    c.setFont("Helvetica-Bold", 11)
+    c.setFillColor(_COL_BLACK)
+    c.drawString(_MARGIN, title_y - 11, "Légende des symboles rythmiques")
+    c.setLineWidth(0.5)
+    c.setStrokeColor(_COL_LGREY)
+    c.line(_MARGIN, title_y - 15, _PAGE_W - _MARGIN, title_y - 15)
+    c.setStrokeColor(_COL_BLACK)
+    y = title_y - 22
+
+    # ── French labels for note values
+    _LABEL_FR: dict[str, str] = {
+        "Whole": "Ronde",
+        "Half": "Blanche",
+        "Quarter": "Noire",
+        "8th": "Croche",
+        "16th": "D. croche",
+        "32nd": "T. croche",
+    }
+    _LABEL_REST_FR: dict[str, str] = {
+        "Whole": "Pause",
+        "Half": "Demi-pause",
+        "Quarter": "Soupir",
+        "8th": "½ soupir",
+        "16th": "¼ soupir",
+        "32nd": "⅛ soupir",
+    }
+
+    # ── Layout: two rows (note values / rest symbols), 6 columns each
+    col_w = (_PAGE_W - 2 * _MARGIN) / len(_LEGEND_NOTE_VALUES)
+
+    # Column headers
+    c.setFont("Helvetica-Bold", 6.0)
+    c.setFillColor(_COL_GREY)
+    c.drawString(_MARGIN, y, "Valeurs de note :")
+    y -= 4
+
+    # Stem + note symbol row (mini tab representation)
+    MINI_SYS_Y = y - 4        # "string 1" reference for mini tab
+    MINI_STEM_BOT = MINI_SYS_Y + _STEM_GAP
+    MINI_STEM_TOP = MINI_SYS_Y + _STEM_H
+    MINI_OVAL_H = _OVAL_H
+    MINI_OVAL_W = _OVAL_W1
+    MINI_FRET_LABEL = "5"     # representative fret number inside oval
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setFillColor(_COL_BLACK)
+
+    for col_idx, (name, dur) in enumerate(_LEGEND_NOTE_VALUES):
+        cx = _MARGIN + col_w * col_idx + col_w / 2
+
+        # ── Draw a short mock string line
+        c.setLineWidth(0.3)
+        c.setStrokeColor(_COL_LGREY)
+        c.line(cx - MINI_OVAL_W / 2 - 3, MINI_SYS_Y, cx + MINI_OVAL_W / 2 + 3, MINI_SYS_Y)
+        c.setStrokeColor(_COL_BLACK)
+
+        # ── Stem (not for whole notes)
+        if dur < 4.0:
+            c.setLineWidth(0.8)
+            c.line(cx, MINI_STEM_BOT, cx, MINI_STEM_TOP)
+            # Flags (unbeamed eighths and shorter)
+            if dur < 1.0:
+                for fi in range(_num_flags(dur)):
+                    _draw_flag(c, cx, MINI_STEM_TOP - fi * 4.0)
+
+        # ── Oval (visible stroke for half/whole)
+        is_open = dur >= 2.0
+        c.setFillColor(colors.white)
+        if is_open:
+            c.setStrokeColor(_COL_BLACK)
+            c.setLineWidth(0.6)
+            c.ellipse(
+                cx - MINI_OVAL_W / 2, MINI_SYS_Y - MINI_OVAL_H / 2,
+                cx + MINI_OVAL_W / 2, MINI_SYS_Y + MINI_OVAL_H / 2,
+                fill=1, stroke=1,
+            )
+        else:
+            c.setStrokeColor(colors.white)
+            c.ellipse(
+                cx - MINI_OVAL_W / 2, MINI_SYS_Y - MINI_OVAL_H / 2,
+                cx + MINI_OVAL_W / 2, MINI_SYS_Y + MINI_OVAL_H / 2,
+                fill=1, stroke=0,
+            )
+
+        # ── Fret number
+        c.setFillColor(_COL_BLACK)
+        c.setFont(_FRET_FONT, _FRET_FS)
+        c.drawCentredString(cx, MINI_SYS_Y - _FRET_FS * 0.36, MINI_FRET_LABEL)
+
+        # ── French label below
+        c.setFont("Helvetica", 5.5)
+        c.setFillColor(_COL_GREY)
+        c.drawCentredString(cx, MINI_SYS_Y - MINI_OVAL_H / 2 - 7, _LABEL_FR[name])
+
+        c.setFillColor(_COL_BLACK)
+
+    # ── Rest symbols row
+    REST_ROW_Y = MINI_SYS_Y - MINI_OVAL_H / 2 - 20
+    REST_STEM_TOP = REST_ROW_Y + _STEM_H - 4
+
+    c.setFont("Helvetica-Bold", 6.0)
+    c.setFillColor(_COL_GREY)
+    c.drawString(_MARGIN, REST_ROW_Y + 10, "Silences correspondants :")
+    c.setFillColor(_COL_BLACK)
+
+    for col_idx, (name, dur) in enumerate(_LEGEND_NOTE_VALUES):
+        cx = _MARGIN + col_w * col_idx + col_w / 2
+        _draw_rest(c, cx, REST_STEM_TOP, dur)
+
+        # ── French label below
+        c.setFont("Helvetica", 5.5)
+        c.setFillColor(_COL_GREY)
+        c.drawCentredString(cx, REST_STEM_TOP - _STEM_H - 3, _LABEL_REST_FR[name])
+        c.setFillColor(_COL_BLACK)
+
+    # ── Additional notation symbols row
+    NOTATIONS_Y = REST_STEM_TOP - _STEM_H - 18
+
+    c.setFont("Helvetica-Bold", 6.0)
+    c.setFillColor(_COL_GREY)
+    c.drawString(_MARGIN, NOTATIONS_Y + 4, "Symboles de notation :")
+    c.setFillColor(_COL_BLACK)
+
+    notation_items = [
+        ("H", _HP_COLOR, "Hammer-on"),
+        ("P", _HP_COLOR, "Pull-off"),
+        ("T", colors.Color(0.05, 0.05, 0.80), "Tapping"),
+        (">", _COL_BLACK, "Accent"),
+        (">>", _COL_BLACK, "Accent fort"),
+        ("!", colors.red, "Accord impossible"),
+    ]
+
+    icon_col_w = (_PAGE_W - 2 * _MARGIN) / len(notation_items)
+    for i, (symbol, col, label) in enumerate(notation_items):
+        ix = _MARGIN + icon_col_w * i + icon_col_w / 2
+        iy = NOTATIONS_Y - 6
+        c.setFillColor(col)
+        c.setFont("Helvetica-Bold", 8.0)
+        c.drawCentredString(ix, iy, symbol)
+        c.setFont("Helvetica", 5.5)
+        c.setFillColor(_COL_GREY)
+        c.drawCentredString(ix, iy - 8, label)
+        c.setFillColor(_COL_BLACK)
+
+    # ── Checksum note
+    bottom_y = NOTATIONS_Y - 24
+    c.setFont("Helvetica-Oblique", 6.0)
+    c.setFillColor(_COL_GREY)
+    c.drawString(_MARGIN, bottom_y,
+                 "\u03a3=X.XX en rouge au-dessus d'une mesure = anomalie rythmique du fichier source (quantification GP)")
+    c.setFillColor(_COL_BLACK)
+
+    return bottom_y - 8
+
+
+# ---------------------------------------------------------------------------
 # Note rendering
 # ---------------------------------------------------------------------------
+
+
+_BEND_COLOR = colors.Color(0.80, 0.05, 0.05)       # dark red (same as LH finger)
+_TAPPING_COLOR = colors.Color(0.05, 0.05, 0.80)    # dark blue
+_VIBRATO_COLOR = colors.Color(0.15, 0.45, 0.15)    # dark green
+_PM_COLOR = colors.Color(0.30, 0.30, 0.30)         # dark grey
+_HP_COLOR = colors.Color(0.30, 0.30, 0.30)         # dark grey for H/P labels
+_HARMONIC_STROKE = colors.Color(0.0, 0.0, 0.0)     # black
 
 
 def _draw_note(
     c: rl_canvas.Canvas,
     x: float,
     y: float,
-    fret: int,
-    finger: Finger,
+    r: FingeringResult,
 ) -> None:
     """Draw one note at string position (x, y).
 
     Rendering order:
-    1.  White oval   — erases the string line behind the fret number.
+    1.  Oval (or diamond for harmonic, 'x' for muted).
+        • Half/whole note  → oval with visible black stroke (open notehead).
+        • Quarter or less  → plain white oval, no stroke (background clearance only).
     2.  Fret number  — Helvetica-Bold 6 pt, centred in oval, black.
     3.  LH finger    — Helvetica-Bold 5 pt, SOUTH-WEST of oval, dark red.
-                       Right edge of char at oval left edge; baseline at
-                       string_y - 5.5 pt (descender clears next string by 3 pt).
-                       Omitted for open strings (fret == 0).
-    4.  RH finger    — reserved for Phase 2, SOUTH-EAST, dark blue.
-                       Symmetric: left edge of char at oval right edge.
+                       Omitted for open strings (fret == 0) and muted notes.
+    4.  Notation overlays: bend, tapping T, accent >, vibrato.
     """
+    fret = r.state.fret
+    finger = r.state.finger
+    ne = r.note_event
+
     oval_w = _OVAL_W2 if fret >= 10 else _OVAL_W1
 
-    # 1. White oval
+    # ── Muted note: draw 'x' instead of oval + number
+    if getattr(ne, "muted", False):
+        c.setFillColor(colors.white)
+        c.setStrokeColor(colors.white)
+        c.ellipse(
+            x - oval_w / 2, y - _OVAL_H / 2,
+            x + oval_w / 2, y + _OVAL_H / 2,
+            fill=1, stroke=0,
+        )
+        c.setFillColor(_COL_BLACK)
+        c.setFont("Helvetica-Bold", 7.0)
+        c.drawCentredString(x, y - 7.0 * 0.36, "x")
+        return
+
+    # ── Natural harmonic: diamond shape instead of oval
+    if getattr(ne, "harmonic_type", None) is not None:
+        _draw_harmonic_note(c, x, y, fret, finger, ne)
+        return
+
+    # 1. Oval around fret number.
+    # Convention: visible oval stroke = half note or whole note (open notehead).
+    #             invisible (white-on-white) oval = quarter note or shorter (background only).
+    dur = ne.duration
+    is_open_notehead = dur >= 2.0   # half note (≥ 2 beats) or whole note gets visible oval
     c.setFillColor(colors.white)
-    c.setStrokeColor(colors.white)
-    c.ellipse(
-        x - oval_w / 2, y - _OVAL_H / 2,
-        x + oval_w / 2, y + _OVAL_H / 2,
-        fill=1, stroke=0,
-    )
+    if is_open_notehead:
+        c.setStrokeColor(_COL_BLACK)
+        c.setLineWidth(0.6)
+        c.ellipse(
+            x - oval_w / 2, y - _OVAL_H / 2,
+            x + oval_w / 2, y + _OVAL_H / 2,
+            fill=1, stroke=1,
+        )
+    else:
+        c.setStrokeColor(colors.white)
+        c.ellipse(
+            x - oval_w / 2, y - _OVAL_H / 2,
+            x + oval_w / 2, y + _OVAL_H / 2,
+            fill=1, stroke=0,
+        )
 
     # 2. Fret number — centred vertically in oval
     c.setFillColor(_COL_BLACK)
@@ -697,20 +1215,376 @@ def _draw_note(
     c.drawCentredString(x, y - _FRET_FS * 0.36, str(fret))
 
     # 3. LH finger annotation — south-west of oval, fretted notes only.
-    #    drawRightString anchors the right edge of the glyph at the oval's
-    #    left edge, so the character sits cleanly to the left of the number.
     if fret > 0 and finger in _FINGER_CHAR:
         c.setFillColor(_LH_FINGER_COLOR)
         c.setFont(_LH_FINGER_FONT, _LH_FINGER_FS)
         c.drawRightString(x - oval_w / 2, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
         c.setFillColor(_COL_BLACK)
 
-    # 4. RH finger annotation — south-east (Phase 2 placeholder).
-    #    Uncomment and pass rh_finger_char when right-hand fingering is added:
-    #    c.setFillColor(_RH_FINGER_COLOR)
-    #    c.setFont(_RH_FINGER_FONT, _RH_FINGER_FS)
-    #    c.drawString(x + oval_w / 2, y + _RH_FINGER_Y, rh_finger_char)
-    #    c.setFillColor(_COL_BLACK)
+    # 4. Notation overlays
+    # ── Bend arrow
+    bend_value = getattr(ne, "bend_value", None)
+    bend_type = getattr(ne, "bend_type", None)
+    if bend_value is not None:
+        _draw_bend(c, x, y, oval_w, bend_value, bend_type)
+
+    # ── Tapping marker
+    if getattr(ne, "tapping", False):
+        c.setFillColor(_TAPPING_COLOR)
+        c.setFont("Helvetica-Bold", 6.0)
+        c.drawCentredString(x, y + _OVAL_H / 2 + 2.5, "T")
+        c.setFillColor(_COL_BLACK)
+
+    # ── Accent marks
+    accent = getattr(ne, "accent", False)
+    accent_strong = getattr(ne, "accent_strong", False)
+    if accent_strong:
+        c.setFillColor(_COL_BLACK)
+        c.setFont("Helvetica", 6.0)
+        c.drawCentredString(x, y + _OVAL_H / 2 + 2.5, ">>")
+        c.setFillColor(_COL_BLACK)
+    elif accent:
+        c.setFillColor(_COL_BLACK)
+        c.setFont("Helvetica", 6.0)
+        c.drawCentredString(x, y + _OVAL_H / 2 + 2.5, ">")
+        c.setFillColor(_COL_BLACK)
+
+    # ── Vibrato wavy line
+    articulation = getattr(ne, "articulation", None)
+    vibrato_wide = getattr(ne, "vibrato_wide", False)
+    if articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO) or vibrato_wide:
+        _draw_vibrato(c, x, y, oval_w, wide=vibrato_wide or articulation == Articulation.WIDE_VIBRATO)
+
+
+def _draw_harmonic_note(
+    c: rl_canvas.Canvas,
+    x: float,
+    y: float,
+    fret: int,
+    finger: Finger,
+    ne: object,
+) -> None:
+    """Draw a harmonic note: diamond shape + fret number inside."""
+    # Diamond: 4-point polygon centred at (x, y)
+    d_half_w = 5.5
+    d_half_h = 3.5
+    # White fill to erase string line
+    c.setFillColor(colors.white)
+    p = c.beginPath()
+    p.moveTo(x, y + d_half_h)
+    p.lineTo(x + d_half_w, y)
+    p.lineTo(x, y - d_half_h)
+    p.lineTo(x - d_half_w, y)
+    p.close()
+    c.drawPath(p, fill=1, stroke=0)
+
+    # Black outline
+    c.setStrokeColor(_HARMONIC_STROKE)
+    c.setLineWidth(0.5)
+    p2 = c.beginPath()
+    p2.moveTo(x, y + d_half_h)
+    p2.lineTo(x + d_half_w, y)
+    p2.lineTo(x, y - d_half_h)
+    p2.lineTo(x - d_half_w, y)
+    p2.close()
+    c.drawPath(p2, fill=0, stroke=1)
+    c.setLineWidth(0.4)
+
+    # Fret number inside diamond
+    c.setFillColor(_COL_BLACK)
+    c.setFont(_FRET_FONT, _FRET_FS)
+    c.drawCentredString(x, y - _FRET_FS * 0.36, str(fret))
+
+    # LH finger below
+    oval_w = _OVAL_W2 if fret >= 10 else _OVAL_W1
+    if fret > 0 and finger in _FINGER_CHAR:
+        c.setFillColor(_LH_FINGER_COLOR)
+        c.setFont(_LH_FINGER_FONT, _LH_FINGER_FS)
+        c.drawRightString(x - oval_w / 2, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
+        c.setFillColor(_COL_BLACK)
+
+
+def _draw_bend(
+    c: rl_canvas.Canvas,
+    x: float,
+    y: float,
+    oval_w: float,
+    bend_value: float,
+    bend_type: str | None,
+) -> None:
+    """Draw a bend arrow above a note oval."""
+    # Bend label
+    if bend_value >= 1.75:
+        label = "2"
+    elif bend_value >= 1.25:
+        label = "1\u00bd"
+    elif bend_value >= 0.75:
+        label = "1"
+    else:
+        label = "\u00bd"
+
+    arrow_base_y = y + _OVAL_H / 2 + 1.0
+    arrow_tip_y = arrow_base_y + 9.0
+    arrow_x_offset = 4.0
+
+    # For pre-bend: show label in parentheses, no upward arrow needed
+    if bend_type in ("pre_bend", "pre_bend_release"):
+        label = f"({label})"
+        c.setFillColor(_BEND_COLOR)
+        c.setFont("Helvetica-Bold", 4.8)
+        c.drawCentredString(x, arrow_tip_y, label)
+        c.setFillColor(_COL_BLACK)
+        return
+
+    # Draw curved arrow line
+    c.setStrokeColor(_BEND_COLOR)
+    c.setLineWidth(0.7)
+    p = c.beginPath()
+    p.moveTo(x, arrow_base_y)
+    p.curveTo(x, arrow_base_y + 4.0, x + arrow_x_offset, arrow_tip_y - 3.0,
+              x + arrow_x_offset, arrow_tip_y)
+    c.drawPath(p, stroke=1, fill=0)
+
+    # Arrow tip (small filled triangle)
+    c.setFillColor(_BEND_COLOR)
+    tip_x = x + arrow_x_offset
+    tip_y = arrow_tip_y
+    c.beginPath()
+    p2 = c.beginPath()
+    p2.moveTo(tip_x, tip_y)
+    p2.lineTo(tip_x - 2.0, tip_y - 3.5)
+    p2.lineTo(tip_x + 2.0, tip_y - 3.5)
+    p2.close()
+    c.drawPath(p2, fill=1, stroke=0)
+
+    # Label above arrow tip
+    c.setFont("Helvetica-Bold", 4.8)
+    c.drawCentredString(tip_x, tip_y + 1.5, label)
+    c.setFillColor(_COL_BLACK)
+    c.setStrokeColor(_COL_BLACK)
+
+
+def _draw_vibrato(
+    c: rl_canvas.Canvas,
+    x: float,
+    y: float,
+    oval_w: float,
+    wide: bool = False,
+) -> None:
+    """Draw a vibrato wavy line to the right of the note oval."""
+    amplitude = 2.5 if wide else 1.5
+    wave_w = 3.5   # width of each half-cycle
+    num_cycles = 4
+    start_x = x + oval_w / 2 + 2.0
+    wave_y = y + 1.0  # 1 pt above string line
+
+    c.setStrokeColor(_VIBRATO_COLOR)
+    c.setLineWidth(0.6)
+    p = c.beginPath()
+    p.moveTo(start_x, wave_y)
+    cx = start_x
+    up = True
+    for _ in range(num_cycles * 2):
+        ctrl_x = cx + wave_w / 2
+        end_x = cx + wave_w
+        ctrl_y = wave_y + (amplitude if up else -amplitude)
+        p.curveTo(ctrl_x - wave_w / 4, ctrl_y, ctrl_x + wave_w / 4, ctrl_y, end_x, wave_y)
+        cx = end_x
+        up = not up
+    c.drawPath(p, stroke=1, fill=0)
+    c.setStrokeColor(_COL_BLACK)
+    c.setLineWidth(0.4)
+
+
+def _draw_slide_lines(
+    c: rl_canvas.Canvas,
+    onset_map: dict[float, list[FingeringResult]],
+    onset_x: dict[float, float],
+    sys_y: float,
+) -> None:
+    """Draw diagonal slide lines between consecutive notes with slide articulation."""
+    sorted_onsets = sorted(onset_map.keys())
+
+    # Build per-string list of (onset, x, r) for easy lookup
+    string_notes: dict[int, list[tuple[float, float, FingeringResult]]] = {}
+    for onset in sorted_onsets:
+        nx = onset_x[onset]
+        for r in onset_map[onset]:
+            s = r.state.string_num
+            string_notes.setdefault(s, []).append((onset, nx, r))
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setLineWidth(0.7)
+
+    for s, notes in string_notes.items():
+        sy = sys_y - (s - 1) * _STRING_SPACING
+        for i, (onset, nx, r) in enumerate(notes):
+            ne = r.note_event
+            slide_type = getattr(ne, "slide_type", None)
+            articulation = getattr(ne, "articulation", None)
+
+            if slide_type is None and articulation != Articulation.SLIDE:
+                continue
+
+            oval_w = _OVAL_W2 if r.state.fret >= 10 else _OVAL_W1
+            src_x = nx + oval_w / 2 + 1.0
+
+            # slide_in types: draw short line from above/below INTO the note
+            if slide_type in (SlideType.SLIDE_IN_ABOVE, SlideType.SLIDE_IN_BELOW):
+                direction = 1 if slide_type == SlideType.SLIDE_IN_ABOVE else -1
+                c.setDash([2.0, 1.5])
+                p = c.beginPath()
+                p.moveTo(nx - oval_w / 2 - 8.0, sy + direction * 5.0)
+                p.lineTo(nx - oval_w / 2 - 1.0, sy)
+                c.drawPath(p, stroke=1, fill=0)
+                c.setDash([])
+                continue
+
+            # slide_out types: draw short line from note going up/down
+            if slide_type in (SlideType.SLIDE_OUT_UP, SlideType.SLIDE_OUT_DOWN):
+                direction = 1 if slide_type == SlideType.SLIDE_OUT_UP else -1
+                c.setDash([2.0, 1.5])
+                p = c.beginPath()
+                p.moveTo(src_x, sy)
+                p.lineTo(src_x + 8.0, sy + direction * 5.0)
+                c.drawPath(p, stroke=1, fill=0)
+                c.setDash([])
+                continue
+
+            # Legato/shift slides: draw diagonal line to next note on same string
+            if i + 1 < len(notes):
+                next_onset, next_nx, next_r = notes[i + 1]
+                next_oval_w = _OVAL_W2 if next_r.state.fret >= 10 else _OVAL_W1
+                dst_x = next_nx - next_oval_w / 2 - 1.0
+
+                # Direction: upward (/) or downward (\) based on fret change
+                src_fret = r.state.fret
+                dst_fret = next_r.state.fret
+                if src_fret < dst_fret:
+                    # ascending: line goes up
+                    src_y = sy - 1.5
+                    dst_y = sy + 1.5
+                elif src_fret > dst_fret:
+                    # descending: line goes down
+                    src_y = sy + 1.5
+                    dst_y = sy - 1.5
+                else:
+                    src_y = sy
+                    dst_y = sy
+
+                if dst_x > src_x + 2.0:
+                    p = c.beginPath()
+                    p.moveTo(src_x, src_y)
+                    p.lineTo(dst_x, dst_y)
+                    c.drawPath(p, stroke=1, fill=0)
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setLineWidth(0.4)
+    c.setDash([])
+
+
+def _draw_slur_arcs(
+    c: rl_canvas.Canvas,
+    onset_map: dict[float, list[FingeringResult]],
+    onset_x: dict[float, float],
+    sys_y: float,
+) -> None:
+    """Draw H/P arcs between consecutive hammer-on / pull-off notes."""
+    sorted_onsets = sorted(onset_map.keys())
+
+    # Build per-string list of (onset, x, r)
+    string_notes: dict[int, list[tuple[float, float, FingeringResult]]] = {}
+    for onset in sorted_onsets:
+        nx = onset_x[onset]
+        for r in onset_map[onset]:
+            s = r.state.string_num
+            string_notes.setdefault(s, []).append((onset, nx, r))
+
+    c.setStrokeColor(_HP_COLOR)
+    c.setLineWidth(0.7)
+
+    for s, notes in string_notes.items():
+        sy = sys_y - (s - 1) * _STRING_SPACING
+        for i, (onset, nx, r) in enumerate(notes):
+            articulation = getattr(r.note_event, "articulation", None)
+            if articulation not in (Articulation.HAMMER_ON, Articulation.PULL_OFF):
+                continue
+            label = "H" if articulation == Articulation.HAMMER_ON else "P"
+
+            if i + 1 < len(notes):
+                next_onset, next_nx, next_r = notes[i + 1]
+                oval_w = _OVAL_W2 if r.state.fret >= 10 else _OVAL_W1
+                next_oval_w = _OVAL_W2 if next_r.state.fret >= 10 else _OVAL_W1
+
+                arc_x0 = nx + oval_w / 2
+                arc_x1 = next_nx - next_oval_w / 2
+                arc_mid_x = (arc_x0 + arc_x1) / 2
+                arc_top_y = sy + 6.0  # arc bows above the string
+
+                if arc_x1 > arc_x0 + 3.0:
+                    p = c.beginPath()
+                    p.moveTo(arc_x0, sy)
+                    p.curveTo(arc_x0 + (arc_x1 - arc_x0) * 0.25, arc_top_y,
+                              arc_x1 - (arc_x1 - arc_x0) * 0.25, arc_top_y,
+                              arc_x1, sy)
+                    c.drawPath(p, stroke=1, fill=0)
+
+                    # Label at arc midpoint
+                    c.setFillColor(_HP_COLOR)
+                    c.setFont("Helvetica", 4.0)
+                    c.drawCentredString(arc_mid_x, arc_top_y - 0.5, label)
+                    c.setFillColor(_COL_BLACK)
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setLineWidth(0.4)
+
+
+def _draw_pm_brackets(
+    c: rl_canvas.Canvas,
+    onset_map: dict[float, list[FingeringResult]],
+    onset_x: dict[float, float],
+    x0: float,
+    x1: float,
+    sys_y: float,
+) -> None:
+    """Draw P.M.-- brackets below string 6 for palm-muted notes."""
+    # Find runs of palm-muted notes on string 6 (lowest)
+    string6_y = sys_y - (_NUM_STRINGS - 1) * _STRING_SPACING
+    pm_y = string6_y - 5.0  # 5 pt below string 6
+
+    # Gather all pm note x positions
+    pm_xs: list[float] = []
+    sorted_onsets = sorted(onset_map.keys())
+    for onset in sorted_onsets:
+        for r in onset_map[onset]:
+            if getattr(r.note_event, "palm_muted", False):
+                pm_xs.append(onset_x[onset])
+
+    if not pm_xs:
+        return
+
+    pm_start = min(pm_xs)
+    pm_end = max(pm_xs)
+
+    c.setStrokeColor(_PM_COLOR)
+    c.setFillColor(_PM_COLOR)
+    c.setLineWidth(0.6)
+    c.setFont("Helvetica", 5.0)
+    label = "P.M."
+    label_w = c.stringWidth(label, "Helvetica", 5.0)
+    c.drawString(pm_start - 1.0, pm_y - 1.5, label)
+
+    # Dashed line after "P.M."
+    dash_x0 = pm_start + label_w + 1.0
+    dash_x1 = pm_end + 4.0
+    if dash_x1 > dash_x0:
+        c.setDash([2.5, 1.5])
+        c.line(dash_x0, pm_y, dash_x1, pm_y)
+        c.setDash([])
+
+    c.setStrokeColor(_COL_BLACK)
+    c.setFillColor(_COL_BLACK)
+    c.setLineWidth(0.4)
 
 
 # ---------------------------------------------------------------------------

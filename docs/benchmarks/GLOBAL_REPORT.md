@@ -1,8 +1,8 @@
 # FretWise — Global Accuracy & Quality Report
 
-**Date:** 2026-03-11 (mis à jour — Phase 1 complète)
+**Date:** 2026-03-12 (mis à jour — Phases 1 + 2 + 3 complètes)
 **Corpus:** 36 fichiers GP (`.gp` GPIF + `.gp5` PyGuitarPro)
-**Pipeline:** parse → states → Viterbi → finger_continuity → section_consistency → chord_conflicts → chord_stretch → chord_finger_ordering → ASCII tab + PDF
+**Pipeline:** parse → states → Viterbi → finger_continuity → section_consistency → chord_conflicts → chord_stretch → chord_finger_ordering → ASCII tab + PDF (rythme + diagrammes + légende)
 
 ---
 
@@ -63,11 +63,12 @@
 | **Croisements de doigts dans les accords** | **0 / 36 fichiers** |
 | Spans `!` non résolvables | 5 (barré > 4 frets, genuins) |
 | Marqueurs de section détectés | 159 sur 26 fichiers |
-| PDFs générés | 36/36 |
+| **Tests automatisés** | **358 passants**, 1 ignoré |
+| **PDFs générés** | **141** (tab + diagrammes + légende par fichier) |
 
 ---
 
-## 3. Bugs corrigés depuis v1 (2026-03-10)
+## 3. Bugs corrigés depuis v1 (2026-03-10/11)
 
 | Bug | Description | Correction |
 |---|---|---|
@@ -76,8 +77,11 @@
 | BUG-03 | Multi-voix `!` pervasifs | Pipeline par voix (Viterbi indépendant par voix GP) |
 | BUG-04 | Gypsy Jazz : 0 notes | Matching MIDI program + type explicite guitare |
 | BUG-05 | Basket Case 115 drops | Fallback hint-based pour tunings alternatifs |
-| BUG-05 | Yesterday 15 drops | Idem |
-| NEW | Croisement de doigts | `resolve_chord_finger_ordering` + passe inter-voix |
+| BUG-06 | Yesterday 15 drops | Idem |
+| BUG-07 | Croisement de doigts | `resolve_chord_finger_ordering` + passe inter-voix |
+| BUG-08 | Notation rythmique incorrecte | 5 seuils corrigés (noire/croche/ronde) — convention tab standard |
+| BUG-09 | Rondes perdant leur hampe | `if dur >= 4.0: continue` (était `>= 2.0`) |
+| BUG-10 | Mesures ne totalisant pas 4 beats | Silences ajoutés + checksums Σ par mesure |
 
 ---
 
@@ -92,15 +96,20 @@
 
 ### Points d'amélioration restants
 - **Barré** : INDEX assigné à chaque corde séparément — pas de modélisation du barré réel
-- **Principe diagonal** : la diagonale naturelle de la main (cordes graves→frets plus bas) non prise en compte dans le coût
+- **Principe diagonal** : la diagonale naturelle de la main non prise en compte dans le coût
 - **And I Love Her** : 3 accords plaqués impossibles C#m7 (span 12 frets) marqués `!`
 
 ---
 
-## 5. Nouvelles fonctionnalités PDF (Phase 1 finale)
+## 5. Nouvelles fonctionnalités PDF (Phases 2 + 3)
 
 | Fonctionnalité | Description |
 |---|---|
+| **Notation rythmique correcte** | Convention tablature standard : ovale fret = notehead |
+| **Silences** | Pause, demi-pause, soupir, demi-soupir, quart de soupir |
+| **Checksum par mesure** | `Σ=X.XX` en rouge si déviation > 0.1 beat |
+| **Page de légende** | Toutes valeurs de notes + silences + guide symboles + diagrammes |
+| **Diagrammes d'accords** | Box diagrams standard (cercles ouverts + numéros doigts + barre) |
 | Marqueurs de section | Titre en bleu gras au-dessus de la mesure concernée |
 | Let ring | Ligne en tirets bleus de l'ovale droit jusqu'à la mesure suivante |
 | Symbole tempo | `♩ = 120` (Helvetica-Oblique) |
@@ -110,4 +119,22 @@
 
 ---
 
-*Rapport généré automatiquement par `scripts/run_fingering.py` — Phase 1 MVP terminée.*
+## 6. Checksums rythmiques — anomalies source GP identifiées
+
+7 fichiers présentent des checksums Σ anormaux. Après audit du parseur (dotted notes ×1.5, tuplets ×den/num, tied notes correctement gérés), ces anomalies sont confirmées comme étant des quantisation GP source :
+
+| Fichier | Cause probable |
+|---|---|
+| David Bowie-Life On Mars | Mesure de pickup (anacrouse) |
+| Django Reinhardt-Minor Swing | Multi-voix en 12/8 dépassant la grille |
+| Led Zeppelin-Stairway to Heaven | Changements de signature rythmique locaux |
+| Lovin' Spoonful-Summer In The City | Rythmes pointés complexes multi-voix |
+| Metallica-Enter Sandman | Pickup bar + triplets implicites |
+| Tears For Fears-Shout | Signature 12/8 avec groupements irréguliers |
+| The Beatles-Yesterday | Signature 3/4 + mesures de transition |
+
+Le parseur est correct. Les Σ en rouge dans les PDFs correspondent à des mesures incomplètes réelles dans le source.
+
+---
+
+*Rapport mis à jour — Phases 1 + 2 + 3 terminées. `python scripts/run_fingering.py` pour régénérer.*

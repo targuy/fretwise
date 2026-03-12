@@ -21,6 +21,11 @@ class Articulation(StrEnum):
     PULL_OFF = "pull_off"
     BEND = "bend"
     VIBRATO = "vibrato"
+    WIDE_VIBRATO = "wide_vibrato"
+    HARMONIC = "harmonic"
+    TAPPING = "tapping"
+    MUTED = "muted"
+    TREMOLO = "tremolo"
 
 
 class Dynamic(StrEnum):
@@ -77,6 +82,64 @@ class NoteEvent:
     voice_hint: int | None = None
     let_ring: bool = False
 
+    # ── Bend ──────────────────────────────────────────────────────────────────
+    # bend_value: max bend in semitones (0.5=half step, 1.0=whole, 1.5, 2.0)
+    # bend_type: "normal" | "release" | "pre_bend" | "pre_bend_release" |
+    #            "unison" | "grace" | None
+    bend_value: float | None = None
+    bend_type: str | None = None
+
+    # ── Slide ─────────────────────────────────────────────────────────────────
+    # slide_type: "legato" (destination not re-struck) |
+    #             "shift"  (destination IS re-struck) |
+    #             "slide_in_above" | "slide_in_below" |
+    #             "slide_out_up" | "slide_out_down" | None
+    slide_type: str | None = None
+
+    # ── Vibrato ───────────────────────────────────────────────────────────────
+    vibrato_wide: bool = False          # wide vibrato (larger amplitude)
+
+    # ── Harmonics ─────────────────────────────────────────────────────────────
+    # harmonic_type: "natural" | "pinch" | "harp" | "artificial" | None
+    harmonic_type: str | None = None
+    harmonic_fret: int | None = None    # overtone fret (natural harmonic)
+
+    # ── Performance modifiers ─────────────────────────────────────────────────
+    muted: bool = False                 # x note — percussive, no clear pitch
+    palm_muted: bool = False            # P.M. — pick-hand palm rests on strings
+    tapping: bool = False               # T — pick-hand tap on fretboard
+    accent: bool = False                # > accent mark
+    accent_strong: bool = False         # >> heavy accent
+    tremolo_picking: bool = False       # rapid continuous alternate picking
+
+
+# Bend type string constants (used in NoteEvent.bend_type)
+class BendType:
+    NORMAL = "normal"
+    RELEASE = "release"
+    PRE_BEND = "pre_bend"
+    PRE_BEND_RELEASE = "pre_bend_release"
+    UNISON = "unison"
+    GRACE = "grace"
+
+
+# Slide type string constants (used in NoteEvent.slide_type)
+class SlideType:
+    LEGATO = "legato"
+    SHIFT = "shift"
+    SLIDE_IN_ABOVE = "slide_in_above"
+    SLIDE_IN_BELOW = "slide_in_below"
+    SLIDE_OUT_UP = "slide_out_up"
+    SLIDE_OUT_DOWN = "slide_out_down"
+
+
+# Harmonic type string constants (used in NoteEvent.harmonic_type)
+class HarmonicType:
+    NATURAL = "natural"
+    PINCH = "pinch"
+    HARP = "harp"
+    ARTIFICIAL = "artificial"
+
 
 @dataclass
 class FingeringState:
@@ -121,3 +184,32 @@ class FingeringResult:
     state: FingeringState
     cost: float
     alternatives: list[tuple[FingeringState, float]] = field(default_factory=list)
+
+
+@dataclass
+class ChordDiagram:
+    """Chord diagram extracted from the source GP file.
+
+    Represents a chord fingering diagram (box diagram) as stored in the
+    DiagramCollection of a Guitar Pro file.
+
+    Attributes:
+        name: Chord name (e.g. "Am", "F#m7", "Dsus2").
+        string_count: Number of strings shown (6 for standard guitar).
+        base_fret: If 0, diagram starts at fret 1.  If >0, the leftmost
+            fret column corresponds to this fret number (shown as a Roman
+            numeral or Arabic number beside the diagram).
+        frets: Fret pressed per string. Index 0 = string 1 (high e),
+            index 5 = string 6 (low E).  -1 = muted (X), 0 = open (O).
+        source_id: Original integer id in the DiagramCollection (for
+            matching beat-level chord references).
+        fingers: Finger number per string (same indexing as frets).
+            0 = unspecified, 1 = index, 2 = middle, 3 = ring, 4 = pinky.
+    """
+
+    name: str
+    frets: list[int]          # len == string_count
+    string_count: int = 6
+    base_fret: int = 0
+    source_id: int = 0
+    fingers: list[int] = field(default_factory=list)

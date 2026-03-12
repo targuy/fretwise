@@ -25,7 +25,9 @@ import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
-from fretwise.models import Articulation, Dynamic, NoteEvent
+from fretwise.models import (
+    Articulation, BendType, ChordDiagram, Dynamic, HarmonicType, NoteEvent, SlideType,
+)
 from fretwise.parser.base import BaseParser, ParseError, UnsupportedFormatError
 
 logger = logging.getLogger(__name__)
@@ -49,6 +51,33 @@ _NOTE_VALUE_BEATS: dict[str, float] = {
 _SLIDE_OUT_FLAGS: frozenset[int] = frozenset({1, 2, 4, 32, 64})
 
 
+def _compute_chord_fingers(frets: list[int]) -> list[int]:
+    """Assign finger numbers to chord diagram dots.
+
+    Returns a list parallel to *frets* where each element is:
+    0 = unspecified, 1 = index, 2 = middle, 3 = ring, 4 = pinky.
+
+    Algorithm:
+    - Ignore muted (-1) and open (0) strings.
+    - Sort fretted strings by (fret ASC, string_index ASC).
+      Equal fret ⟹ same finger (barre) — the same number is reused.
+    - Assign finger numbers 1, 2, 3, 4 in order of ascending fret.
+    """
+    fingers: list[int] = [0] * len(frets)
+    fretted = [(s_idx, fv) for s_idx, fv in enumerate(frets) if fv > 0]
+    if not fretted:
+        return fingers
+    fretted_sorted = sorted(fretted, key=lambda t: (t[1], t[0]))
+    fret_to_finger: dict[int, int] = {}
+    next_f = 1
+    for s_idx, fv in fretted_sorted:
+        if fv not in fret_to_finger:
+            fret_to_finger[fv] = min(next_f, 4)
+            next_f += 1
+        fingers[s_idx] = fret_to_finger[fv]
+    return fingers
+
+
 class GpifAdapter(BaseParser):
     """Parse Guitar Pro 7/8 files (.gp) into NoteEvent sequences.
 
@@ -70,6 +99,9 @@ class GpifAdapter(BaseParser):
     #: Section/rehearsal markers: {1-based measure number → section title}.
     #: Set after each call to parse().
     section_markers: dict[int, str] = {}
+    #: Chord diagrams from the DiagramCollection of the selected track.
+    #: Set after each call to parse() or parse_track().
+    chord_diagrams: list[ChordDiagram] = []
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp files (Guitar Pro 7/8)."""
@@ -107,11 +139,13 @@ class GpifAdapter(BaseParser):
             self.track_name = ""
             return []
 
-        # Capture track name for callers
+        # Capture track name and chord diagrams for callers
         self.track_name = ""
+        self.chord_diagrams = []
         for _trk in root.findall("Tracks/Track"):
             if _trk.get("id") == str(track_idx):
                 self.track_name = _trk.findtext("Name", "").strip()
+                self.chord_diagrams = self._parse_diagram_collection(_trk)
                 break
 
         tempo_map = _build_tempo_map(root)
@@ -181,7 +215,91 @@ class GpifAdapter(BaseParser):
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
 
+        # Extract chord diagrams for this track.
+        for track in root.findall("Tracks/Track"):
+            if track.get("id") == str(track_id):
+                self.chord_diagrams = self._parse_diagram_collection(track)
+                break
+
         return _extract_events(root, track_id, open_pitches, tempo_map, rhythm_map, note_map)
+
+    def _parse_diagram_collection(self, track_el: ET.Element) -> list[ChordDiagram]:
+        """Parse the DiagramCollection from a Track element.
+
+        Args:
+            track_el: The ``<Track>`` XML element for the selected track.
+
+        Returns:
+            List of ChordDiagram objects, one per ``<Item>`` in the collection.
+            Returns an empty list if no DiagramCollection is found.
+        """
+        diagrams: list[ChordDiagram] = []
+
+        staff = track_el.find("Staves/Staff")
+        if staff is None:
+            return diagrams
+
+        # Find the DiagramCollection property among the Staff properties.
+        diagram_prop: ET.Element | None = None
+        for prop in staff.findall("Properties/Property"):
+            if prop.get("name") == "DiagramCollection":
+                diagram_prop = prop
+                break
+
+        if diagram_prop is None:
+            return diagrams
+
+        for item in diagram_prop.findall("Items/Item"):
+            item_id_str = item.get("id", "0")
+            item_name = item.get("name", "")
+
+            diagram_el = item.find("Diagram")
+            if diagram_el is None:
+                continue
+
+            try:
+                base_fret = int(diagram_el.get("baseFret", "0"))
+            except ValueError:
+                base_fret = 0
+            try:
+                string_count = int(diagram_el.get("stringCount", "6"))
+            except ValueError:
+                string_count = 6
+
+            # Initialize all strings as muted (-1).
+            frets: list[int] = [-1] * string_count
+
+            for fret_el in diagram_el.findall("Fret"):
+                try:
+                    # GPIF string index 1 = high e (index 0 in our frets list).
+                    s_idx = int(fret_el.get("string", "1")) - 1
+                    f_val = int(fret_el.get("fret", "-1"))
+                except ValueError:
+                    continue
+                if 0 <= s_idx < string_count:
+                    frets[s_idx] = f_val
+
+            try:
+                source_id = int(item_id_str)
+            except ValueError:
+                source_id = 0
+
+            fingers = _compute_chord_fingers(frets)
+            diagrams.append(
+                ChordDiagram(
+                    name=item_name,
+                    frets=frets,
+                    string_count=string_count,
+                    base_fret=base_fret,
+                    source_id=source_id,
+                    fingers=fingers,
+                )
+            )
+
+        logger.debug(
+            "Parsed %d chord diagram(s) from DiagramCollection.", len(diagrams)
+        )
+        return diagrams
 
 
 # ---------------------------------------------------------------------------
@@ -273,7 +391,12 @@ def _build_rhythm_map(root: ET.Element) -> dict[str, float]:
 class _NoteData:
     """Lightweight parsed representation of a GPIF Note element."""
 
-    __slots__ = ("gpif_string", "fret", "midi_pitch", "is_tie_dest", "articulation", "let_ring")
+    __slots__ = (
+        "gpif_string", "fret", "midi_pitch", "is_tie_dest", "articulation", "let_ring",
+        "bend_value", "bend_type", "slide_type", "harmonic_type", "harmonic_fret",
+        "muted", "palm_muted", "tapping", "accent", "accent_strong", "tremolo_picking",
+        "vibrato_wide",
+    )
 
     def __init__(
         self,
@@ -283,6 +406,18 @@ class _NoteData:
         is_tie_dest: bool,
         articulation: Articulation,
         let_ring: bool = False,
+        bend_value: float | None = None,
+        bend_type: str | None = None,
+        slide_type: str | None = None,
+        harmonic_type: str | None = None,
+        harmonic_fret: int | None = None,
+        muted: bool = False,
+        palm_muted: bool = False,
+        tapping: bool = False,
+        accent: bool = False,
+        accent_strong: bool = False,
+        tremolo_picking: bool = False,
+        vibrato_wide: bool = False,
     ) -> None:
         self.gpif_string = gpif_string
         self.fret = fret
@@ -290,6 +425,18 @@ class _NoteData:
         self.is_tie_dest = is_tie_dest
         self.articulation = articulation
         self.let_ring = let_ring
+        self.bend_value = bend_value
+        self.bend_type = bend_type
+        self.slide_type = slide_type
+        self.harmonic_type = harmonic_type
+        self.harmonic_fret = harmonic_fret
+        self.muted = muted
+        self.palm_muted = palm_muted
+        self.tapping = tapping
+        self.accent = accent
+        self.accent_strong = accent_strong
+        self.tremolo_picking = tremolo_picking
+        self.vibrato_wide = vibrato_wide
 
 
 def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
@@ -325,29 +472,227 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
         midi_el = props.get("Midi")
         midi_pitch = int(midi_el.findtext("Number") or "0") if midi_el is not None else 0
 
-        articulation = _parse_note_articulation(props)
-        let_ring = "LetRing" in props
+        note_props = _parse_note_properties(props)
 
-        result[nid] = _NoteData(gpif_string, fret, midi_pitch, is_tie_dest, articulation, let_ring)
+        result[nid] = _NoteData(
+            gpif_string, fret, midi_pitch, is_tie_dest,
+            articulation=note_props["articulation"],
+            let_ring="LetRing" in props,
+            bend_value=note_props["bend_value"],
+            bend_type=note_props["bend_type"],
+            slide_type=note_props["slide_type"],
+            harmonic_type=note_props["harmonic_type"],
+            harmonic_fret=note_props["harmonic_fret"],
+            muted=note_props["muted"],
+            palm_muted=note_props["palm_muted"],
+            tapping=note_props["tapping"],
+            accent=note_props["accent"],
+            accent_strong=note_props["accent_strong"],
+            tremolo_picking=note_props["tremolo_picking"],
+            vibrato_wide=note_props["vibrato_wide"],
+        )
     return result
 
 
 def _parse_note_articulation(props: dict[str, ET.Element]) -> Articulation:
-    """Derive an Articulation from note Properties."""
-    if "HammerOn" in props:
-        return Articulation.HAMMER_ON
-    if "PullOff" in props:
-        return Articulation.PULL_OFF
+    """Derive an Articulation from note Properties.
+
+    Backward-compatible wrapper around :func:`_parse_note_properties`.
+    """
+    return _parse_note_properties(props)["articulation"]  # type: ignore[return-value]
+
+
+def _parse_note_properties(props: dict[str, ET.Element]) -> dict:  # type: ignore[type-arg]
+    """Extract all notation properties from note Properties dict."""
+    result: dict = {  # type: ignore[type-arg]
+        "articulation": Articulation.NORMAL,
+        "bend_value": None,
+        "bend_type": None,
+        "slide_type": None,
+        "harmonic_type": None,
+        "harmonic_fret": None,
+        "muted": False,
+        "palm_muted": False,
+        "tapping": False,
+        "accent": False,
+        "accent_strong": False,
+        "tremolo_picking": False,
+        "vibrato_wide": False,
+    }
+
+    # Muted (x note)
+    if "Muted" in props:
+        result["muted"] = True
+        result["articulation"] = Articulation.MUTED
+
+    # Hammer-on / Pull-off
+    elif "HammerOn" in props:
+        result["articulation"] = Articulation.HAMMER_ON
+    elif "PullOff" in props:
+        result["articulation"] = Articulation.PULL_OFF
+
+    # Slide: parse flags for type
     if "Slide" in props:
         flags_text = props["Slide"].findtext("Flags") or "0"
-        flags = int(flags_text)
-        if flags & sum(_SLIDE_OUT_FLAGS):
-            return Articulation.SLIDE
+        try:
+            flags = int(flags_text)
+        except ValueError:
+            flags = 0
+        slide_type, art = _parse_slide_flags(flags)
+        result["slide_type"] = slide_type
+        if result["articulation"] == Articulation.NORMAL:
+            result["articulation"] = art
+
+    # Vibrato — only override articulation if not already set to a more specific value
     if "Vibrato" in props:
-        return Articulation.VIBRATO
+        vib_type = props["Vibrato"].findtext("Type") or ""
+        if "Wide" in vib_type or "Tremolo" in vib_type.lower():
+            result["vibrato_wide"] = True
+            if result["articulation"] == Articulation.NORMAL:
+                result["articulation"] = Articulation.WIDE_VIBRATO
+        else:
+            if result["articulation"] == Articulation.NORMAL:
+                result["articulation"] = Articulation.VIBRATO
+
+    # Bend
     if "Bend" in props:
-        return Articulation.BEND
-    return Articulation.NORMAL
+        if result["articulation"] == Articulation.NORMAL:
+            result["articulation"] = Articulation.BEND
+        bend_val, bend_type = _parse_bend(props["Bend"])
+        result["bend_value"] = bend_val
+        result["bend_type"] = bend_type
+
+    # Harmonic
+    if "Harmonic" in props:
+        h_type, h_fret = _parse_harmonic(props["Harmonic"])
+        result["harmonic_type"] = h_type
+        result["harmonic_fret"] = h_fret
+        if result["articulation"] == Articulation.NORMAL:
+            result["articulation"] = Articulation.HARMONIC
+
+    # Palm mute
+    if "PalmMuted" in props:
+        result["palm_muted"] = True
+
+    # Tapping
+    if "Tapping" in props:
+        result["tapping"] = True
+        if result["articulation"] == Articulation.NORMAL:
+            result["articulation"] = Articulation.TAPPING
+
+    # Accent (may be on beat element, but sometimes on note)
+    if "Accent" in props:
+        try:
+            accent_val = int(props["Accent"].findtext("Flags") or "0")
+        except ValueError:
+            accent_val = 0
+        result["accent"] = bool(accent_val & 1)
+        result["accent_strong"] = bool(accent_val & 2)
+
+    # Tremolo picking
+    if "TremoloPicking" in props or "Tremolo" in props:
+        result["tremolo_picking"] = True
+        if result["articulation"] == Articulation.NORMAL:
+            result["articulation"] = Articulation.TREMOLO
+
+    return result
+
+
+def _parse_slide_flags(flags: int) -> tuple[str | None, Articulation]:
+    """Parse GPIF Slide flags into (slide_type, Articulation).
+
+    GP7/8 slide flags (may vary by version):
+      1 = ShiftSlide (destination IS re-struck)
+      2 = LegatoSlide (destination NOT re-struck)
+      4 = SlideOutDown
+      8 = SlideOutUp
+      16 = SlideInFromAbove
+      32 = SlideInFromBelow
+    """
+    if flags & 1:
+        return SlideType.SHIFT, Articulation.SLIDE
+    if flags & 2:
+        return SlideType.LEGATO, Articulation.SLIDE
+    if flags & 4:
+        return SlideType.SLIDE_OUT_DOWN, Articulation.SLIDE
+    if flags & 8:
+        return SlideType.SLIDE_OUT_UP, Articulation.SLIDE
+    if flags & 16:
+        return SlideType.SLIDE_IN_ABOVE, Articulation.SLIDE
+    if flags & 32:
+        return SlideType.SLIDE_IN_BELOW, Articulation.SLIDE
+    return None, Articulation.SLIDE
+
+
+def _parse_bend(bend_prop: ET.Element) -> tuple[float | None, str | None]:
+    """Parse a Bend Property element into (max_value_semitones, bend_type)."""
+    bend_el = bend_prop.find("Bend")
+    if bend_el is None:
+        return None, None
+    points = []
+    for pt in bend_el.findall("Points/Point"):
+        try:
+            pos = int(pt.findtext("Position") or "0")
+            val = int(pt.findtext("Value") or "0")
+            points.append((pos, val))
+        except ValueError:
+            continue
+    if not points:
+        return None, None
+
+    max_val = max(v for _, v in points)
+    semitones = max_val / 100.0  # 100 = 1 semitone in GPIF
+
+    if not semitones:
+        return None, None
+
+    # Classify bend type by point pattern
+    starts_bent = points[0][1] >= max_val * 0.9 if points else False
+    ends_at_zero = points[-1][1] == 0 if len(points) > 1 else False
+
+    if starts_bent and ends_at_zero:
+        bend_type: str = BendType.PRE_BEND_RELEASE
+    elif starts_bent:
+        bend_type = BendType.PRE_BEND
+    elif ends_at_zero:
+        bend_type = BendType.RELEASE
+    elif semitones < 0.3:
+        bend_type = BendType.GRACE
+    else:
+        bend_type = BendType.NORMAL
+
+    return semitones, bend_type
+
+
+def _parse_harmonic(harm_prop: ET.Element) -> tuple[str | None, int | None]:
+    """Parse a Harmonic Property element into (harmonic_type, fret)."""
+    harm_el = harm_prop.find("HarmonicType")
+    if harm_el is None:
+        # Try direct type text
+        type_text = harm_prop.findtext("Type") or harm_prop.text or ""
+    else:
+        type_text = harm_el.text or ""
+    type_text = type_text.strip()
+
+    fret_text = harm_prop.findtext("Fret") or harm_prop.findtext("HarmonicFret") or ""
+    try:
+        harm_fret: int | None = int(fret_text)
+    except ValueError:
+        harm_fret = None
+
+    type_map: dict[str, str] = {
+        "Natural": HarmonicType.NATURAL,
+        "NaturalHarmonic": HarmonicType.NATURAL,
+        "Artificial": HarmonicType.ARTIFICIAL,
+        "ArtificialHarmonic": HarmonicType.ARTIFICIAL,
+        "Pinch": HarmonicType.PINCH,
+        "PinchHarmonic": HarmonicType.PINCH,
+        "Tapped": HarmonicType.HARP,
+        "Harp": HarmonicType.HARP,
+        "Semi": HarmonicType.NATURAL,
+    }
+    h_type: str | None = type_map.get(type_text, HarmonicType.NATURAL)
+    return h_type, harm_fret
 
 
 # ---------------------------------------------------------------------------
@@ -566,6 +911,19 @@ def _extract_events(
                         extra /= 2.0
                         beat_duration += extra
 
+                # Beat-level properties
+                beat_props = {p.get("name", ""): p for p in beat_el.findall("Properties/Property")}
+                beat_accent = False
+                beat_accent_strong = False
+                if "Accent" in beat_props:
+                    try:
+                        acc_flags = int(beat_props["Accent"].findtext("Flags") or "0")
+                    except ValueError:
+                        acc_flags = 0
+                    beat_accent = bool(acc_flags & 1)
+                    beat_accent_strong = bool(acc_flags & 2)
+                beat_tremolo = "TremoloPicking" in beat_props
+
                 notes_text = beat_el.findtext("Notes") or ""
                 for note_id in notes_text.split():
                     nd = note_map.get(note_id)
@@ -587,6 +945,19 @@ def _extract_events(
                             fret_hint=nd.fret,
                             voice_hint=voice_idx,
                             let_ring=nd.let_ring,
+                            # New notation fields
+                            bend_value=nd.bend_value,
+                            bend_type=nd.bend_type,
+                            slide_type=nd.slide_type,
+                            harmonic_type=nd.harmonic_type,
+                            harmonic_fret=nd.harmonic_fret,
+                            muted=nd.muted,
+                            palm_muted=nd.palm_muted,
+                            tapping=nd.tapping,
+                            accent=nd.accent or beat_accent,
+                            accent_strong=nd.accent_strong or beat_accent_strong,
+                            tremolo_picking=nd.tremolo_picking or beat_tremolo,
+                            vibrato_wide=nd.vibrato_wide,
                         )
                     )
 
