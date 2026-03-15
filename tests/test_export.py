@@ -541,3 +541,477 @@ class TestRenderPdfTab:
         out_path = tmp_path / "long.pdf"
         render_pdf_tab(results, str(out_path), title="Long Song")
         assert out_path.exists()
+
+
+# ---------------------------------------------------------------------------
+# _get_beam_groups — RENDER-02 + RENDER-03
+# ---------------------------------------------------------------------------
+
+
+class TestGetBeamGroups:
+    """Unit tests for the beat-aware, rest-aware beam grouping algorithm."""
+
+    def _stem(self, x: float, onset: float, dur: float) -> tuple[float, float, float]:
+        return (x, onset, dur)
+
+    def test_four_quarter_notes_no_beams(self) -> None:
+        """Quarter notes (dur=1.0) are never beamable."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        stems = [self._stem(i * 20.0, float(i), 1.0) for i in range(4)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        assert groups == []
+
+    def test_two_eighth_notes_one_beat_one_group(self) -> None:
+        """Two eighth notes within the same beat form one group."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        stems = [self._stem(10.0, 0.0, 0.5), self._stem(27.0, 0.5, 0.5)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        assert len(groups) == 1
+        assert len(groups[0]) == 2
+
+    def test_eight_eighth_notes_4_4_four_groups(self) -> None:
+        """8 eighth notes in 4/4 must produce 4 groups of 2 (one per beat)."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        stems = [self._stem(i * 17.0, i * 0.5, 0.5) for i in range(8)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        assert len(groups) == 4
+        for g in groups:
+            assert len(g) == 2
+
+    def test_rest_between_two_eighth_notes_no_beam(self) -> None:
+        """A rest gap >= 1/32 beat between notes must break the beam group."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        # note at beat 0, dur 0.5 → ends at 0.5; next note starts at 1.5 → gap = 1.0
+        stems = [self._stem(10.0, 0.0, 0.5), self._stem(40.0, 1.5, 0.5)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        # gap of 1.0 beat = rest → each note is alone → no group of ≥ 2
+        assert groups == []
+
+    def test_rest_interrupts_otherwise_same_beat_group(self) -> None:
+        """Even within the same beat, a rest must split the beam."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        # beat 0: note(0.0, dur=0.25) → end=0.25; gap=0.125 (>=0.115); note(0.375, dur=0.25)
+        stems = [
+            self._stem(10.0, 0.0, 0.25),
+            self._stem(27.0, 0.375, 0.25),
+        ]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        # gap = 0.375 - 0.25 = 0.125 >= 0.115 → rest → no single group
+        assert groups == []
+
+    def test_no_rest_consecutive_sixteenth_notes_same_beat(self) -> None:
+        """4 consecutive 16th notes in beat 0 form one group."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        stems = [self._stem(i * 14.0, i * 0.25, 0.25) for i in range(4)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        assert len(groups) == 1
+        assert len(groups[0]) == 4
+
+    def test_mixed_eighth_and_quarter_splits_correctly(self) -> None:
+        """A quarter note inside a sequence terminates the current beam group."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        # [8th, 8th, quarter, 8th, 8th] in one measure
+        stems = [
+            self._stem(10.0, 0.0, 0.5),
+            self._stem(27.0, 0.5, 0.5),
+            self._stem(44.0, 1.0, 1.0),   # quarter — not beamable
+            self._stem(61.0, 2.0, 0.5),
+            self._stem(78.0, 2.5, 0.5),
+        ]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
+        assert len(groups) == 2
+        assert len(groups[0]) == 2
+        assert len(groups[1]) == 2
+
+    def test_non_zero_measure_onset(self) -> None:
+        """Beat boundaries are computed from measure_onset, not from 0."""
+        from fretwise.export.pdf_tab import _get_beam_groups
+
+        # Measure starts at beat 8 (e.g. measure 3 in 4/4)
+        mo = 8.0
+        stems = [self._stem(i * 17.0, mo + i * 0.5, 0.5) for i in range(4)]
+        groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=mo)
+        # Should produce 2 groups of 2 (only 2 beats worth of 8ths here)
+        assert len(groups) == 2
+
+
+# ---------------------------------------------------------------------------
+# _draw_secondary_beam — partial secondary beam logic
+# ---------------------------------------------------------------------------
+
+
+class TestDrawSecondaryBeam:
+    """Verify that _draw_secondary_beam runs without errors for all cases."""
+
+    def _mock_canvas(self) -> object:
+        """Return a minimal mock that accepts any drawing call."""
+        from unittest.mock import MagicMock
+        return MagicMock()
+
+    def test_all_sixteenth_draws_without_error(self) -> None:
+        from fretwise.export.pdf_tab import _draw_secondary_beam
+
+        group = [(i * 14.0, i * 0.25, 0.25) for i in range(4)]
+        _draw_secondary_beam(self._mock_canvas(), group, 100.0, 2.5, 3.0)
+
+    def test_mixed_eighth_sixteenth_draws_without_error(self) -> None:
+        from fretwise.export.pdf_tab import _draw_secondary_beam
+
+        group = [
+            (10.0, 0.0, 0.5),    # eighth
+            (27.0, 0.5, 0.25),   # sixteenth
+            (41.0, 0.75, 0.25),  # sixteenth
+        ]
+        _draw_secondary_beam(self._mock_canvas(), group, 100.0, 2.5, 3.0)
+
+    def test_all_eighth_no_secondary(self) -> None:
+        """All-eighth group: secondary beam draws nothing (no rect call)."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_secondary_beam
+
+        c = MagicMock()
+        group = [(i * 17.0, i * 0.5, 0.5) for i in range(2)]
+        _draw_secondary_beam(c, group, 100.0, 2.5, 3.0)
+        c.rect.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# _draw_rest — RENDER-01: position + disc rendering
+# ---------------------------------------------------------------------------
+
+
+class TestDrawRest:
+    """Verify _draw_rest uses sys_y reference and draws discs for small rests."""
+
+    def _recording_canvas(self) -> object:
+        from unittest.mock import MagicMock
+        return MagicMock()
+
+    def test_quarter_rest_draws_disc(self) -> None:
+        """Quarter rest (dur=1.0) must call canvas.circle for the white disc."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_rest
+
+        c = MagicMock()
+        _draw_rest(c, rx=100.0, sys_y=200.0, duration=1.0)
+        # circle() should be called once for the white disc
+        assert c.circle.called
+
+    def test_eighth_rest_draws_disc(self) -> None:
+        """Eighth rest (dur=0.5) must draw a disc."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_rest, _REST_CENTER_Y
+
+        c = MagicMock()
+        _draw_rest(c, rx=100.0, sys_y=200.0, duration=0.5)
+        assert c.circle.called
+        # Verify the disc is centred at sys_y - _REST_CENTER_Y
+        disc_call_args = c.circle.call_args_list[0][0]  # positional args
+        assert abs(disc_call_args[1] - (200.0 - _REST_CENTER_Y)) < 0.5
+
+    def test_whole_rest_no_disc(self) -> None:
+        """Whole rest (dur=4.0) must NOT draw a disc (uses rect instead)."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_rest
+
+        c = MagicMock()
+        _draw_rest(c, rx=100.0, sys_y=200.0, duration=4.0)
+        c.circle.assert_not_called()
+        assert c.rect.called
+
+    def test_half_rest_no_disc(self) -> None:
+        """Half rest (dur=2.0) must NOT draw a disc."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_rest
+
+        c = MagicMock()
+        _draw_rest(c, rx=100.0, sys_y=200.0, duration=2.0)
+        c.circle.assert_not_called()
+        assert c.rect.called
+
+    def test_rest_centre_is_below_sys_y(self) -> None:
+        """The disc centre must be exactly sys_y - _REST_CENTER_Y."""
+        from unittest.mock import MagicMock
+        from fretwise.export.pdf_tab import _draw_rest, _REST_CENTER_Y
+
+        c = MagicMock()
+        sys_y = 300.0
+        _draw_rest(c, rx=50.0, sys_y=sys_y, duration=0.25)
+        # First circle() call is the disc
+        args = c.circle.call_args_list[0][0]
+        expected_cy = sys_y - _REST_CENTER_Y
+        assert abs(args[1] - expected_cy) < 0.1
+
+
+# ---------------------------------------------------------------------------
+# render_staff_pdf — smoke tests
+# ---------------------------------------------------------------------------
+
+
+class TestRenderStaffPdf:
+    def test_renders_to_file(self, tmp_path: Path) -> None:
+        """render_staff_pdf produces a valid PDF file."""
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out_path = tmp_path / "staff.pdf"
+        render_staff_pdf(results, out_path, title="Staff Test")
+        assert out_path.exists()
+        assert out_path.read_bytes()[:4] == b"%PDF"
+
+    def test_empty_results(self, tmp_path: Path) -> None:
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        out_path = tmp_path / "empty.pdf"
+        render_staff_pdf([], out_path)
+        assert out_path.exists()
+
+    def test_multiple_measures(self, tmp_path: Path) -> None:
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        results = [_fr(i, float(i * 4), 3, 5 + i % 3, Finger.INDEX, pitch=60 + i)
+                    for i in range(12)]
+        out_path = tmp_path / "multi_staff.pdf"
+        render_staff_pdf(results, out_path, title="Multi")
+        assert out_path.exists()
+        assert out_path.stat().st_size > 200
+
+    def test_with_section_markers(self, tmp_path: Path) -> None:
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX), _fr(1, 4.0, 3, 7, Finger.RING)]
+        out_path = tmp_path / "sections_staff.pdf"
+        render_staff_pdf(results, out_path, section_markers={1: "Intro", 2: "Verse"})
+        assert out_path.exists()
+
+    def test_accidentals_render(self, tmp_path: Path) -> None:
+        """Notes with sharps (C#, F#) render without error."""
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        results = [
+            _fr(0, 0.0, 3, 6, Finger.INDEX, pitch=61),   # C#4
+            _fr(1, 1.0, 2, 2, Finger.INDEX, pitch=66),    # F#4
+        ]
+        out_path = tmp_path / "accidentals.pdf"
+        render_staff_pdf(results, out_path, title="Accidentals")
+        assert out_path.exists()
+
+    def test_ledger_lines_below(self, tmp_path: Path) -> None:
+        """Middle C (MIDI 60) — needs ledger line below staff."""
+        from fretwise.export.staff_renderer import render_staff_pdf
+
+        results = [_fr(0, 0.0, 5, 3, Finger.RING, pitch=60)]
+        out_path = tmp_path / "ledger.pdf"
+        render_staff_pdf(results, out_path, title="Ledger Below")
+        assert out_path.exists()
+
+
+# ---------------------------------------------------------------------------
+# render_combined_pdf — smoke tests
+# ---------------------------------------------------------------------------
+
+
+class TestRenderCombinedPdf:
+    def test_renders_to_file(self, tmp_path: Path) -> None:
+        """render_combined_pdf produces a valid PDF file."""
+        from fretwise.export.combined_renderer import render_combined_pdf
+
+        results = [_fr(0, 0.0, 3, 5, Finger.INDEX)]
+        out_path = tmp_path / "combined.pdf"
+        render_combined_pdf(results, out_path, title="Combined Test")
+        assert out_path.exists()
+        assert out_path.read_bytes()[:4] == b"%PDF"
+
+    def test_empty_results(self, tmp_path: Path) -> None:
+        from fretwise.export.combined_renderer import render_combined_pdf
+
+        out_path = tmp_path / "empty_combined.pdf"
+        render_combined_pdf([], out_path)
+        assert out_path.exists()
+
+    def test_multiple_measures(self, tmp_path: Path) -> None:
+        from fretwise.export.combined_renderer import render_combined_pdf
+
+        results = [_fr(i, float(i * 4), 3, 5 + i % 3, Finger.INDEX, pitch=60 + i)
+                    for i in range(12)]
+        out_path = tmp_path / "multi_combined.pdf"
+        render_combined_pdf(results, out_path, title="Multi Combined")
+        assert out_path.exists()
+        assert out_path.stat().st_size > 200
+
+
+# ---------------------------------------------------------------------------
+# StaffRenderer — unit tests for helpers
+# ---------------------------------------------------------------------------
+
+
+class TestStaffRendererHelpers:
+    def test_midi_to_staff_pos_middle_c(self) -> None:
+        from fretwise.export.staff_renderer import _midi_to_staff_pos
+        pos, acc = _midi_to_staff_pos(60)
+        assert pos == 0   # C4
+        assert acc == 0
+
+    def test_midi_to_staff_pos_e4(self) -> None:
+        from fretwise.export.staff_renderer import _midi_to_staff_pos
+        pos, acc = _midi_to_staff_pos(64)
+        assert pos == 2   # E4 = bottom staff line
+        assert acc == 0
+
+    def test_midi_to_staff_pos_g4(self) -> None:
+        from fretwise.export.staff_renderer import _midi_to_staff_pos
+        pos, acc = _midi_to_staff_pos(67)
+        assert pos == 4   # G4 = line 2 (treble clef)
+        assert acc == 0
+
+    def test_midi_to_staff_pos_csharp(self) -> None:
+        from fretwise.export.staff_renderer import _midi_to_staff_pos
+        pos, acc = _midi_to_staff_pos(61)
+        assert pos == 0   # C#4 → same as C4 position
+        assert acc == 1   # sharp
+
+    def test_midi_to_staff_pos_octave_above(self) -> None:
+        from fretwise.export.staff_renderer import _midi_to_staff_pos
+        pos, acc = _midi_to_staff_pos(72)
+        assert pos == 7   # C5
+        assert acc == 0
+
+    def test_staff_pos_to_y_bottom_line(self) -> None:
+        from fretwise.export.staff_renderer import _staff_pos_to_y, _STAFF_SPACING
+        y = _staff_pos_to_y(100.0, 2)  # E4 = bottom line
+        assert y == 100.0
+
+    def test_staff_pos_to_y_top_line(self) -> None:
+        from fretwise.export.staff_renderer import _staff_pos_to_y, _STAFF_SPACING
+        y = _staff_pos_to_y(100.0, 10)  # F5 = top line
+        expected = 100.0 + 8 * (_STAFF_SPACING / 2.0)
+        assert abs(y - expected) < 0.01
+
+    def test_num_flags_quarter(self) -> None:
+        from fretwise.export.staff_renderer import _num_flags
+        assert _num_flags(1.0) == 0
+
+    def test_num_flags_eighth(self) -> None:
+        from fretwise.export.staff_renderer import _num_flags
+        assert _num_flags(0.5) == 1
+
+    def test_num_flags_sixteenth(self) -> None:
+        from fretwise.export.staff_renderer import _num_flags
+        assert _num_flags(0.25) == 2
+
+    def test_is_filled_quarter(self) -> None:
+        from fretwise.export.staff_renderer import _is_filled
+        assert _is_filled(1.0) is True
+
+    def test_is_filled_half(self) -> None:
+        from fretwise.export.staff_renderer import _is_filled
+        assert _is_filled(2.0) is False
+
+    def test_is_filled_whole(self) -> None:
+        from fretwise.export.staff_renderer import _is_filled
+        assert _is_filled(4.0) is False
+
+
+# ---------------------------------------------------------------------------
+# Concordance validation tests
+# ---------------------------------------------------------------------------
+
+
+class TestConcordanceValidation:
+    def test_import(self) -> None:
+        from fretwise.validation import ConcordanceReport, compute_concordance
+        assert callable(compute_concordance)
+
+    def test_empty_results(self) -> None:
+        from fretwise.validation import compute_concordance
+        report = compute_concordance([])
+        assert report.total_notes == 0
+        assert report.position_concordance == 0.0  # no notes → 0/0 → 0.0
+
+    def test_perfect_concordance(self) -> None:
+        from fretwise.validation import compute_concordance
+
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(
+                    pitch=60, onset=0.0, duration=1.0, tempo=120.0,
+                    string_hint=3, fret_hint=5,
+                ),
+                state=FingeringState(
+                    string_num=3, fret=5, finger=Finger.INDEX, hand_position=5,
+                ),
+                cost=1.0,
+            ),
+        ]
+        report = compute_concordance(results)
+        assert report.total_notes == 1
+        assert report.hinted_notes == 1
+        assert report.string_matches == 1
+        assert report.fret_matches == 1
+        assert report.position_matches == 1
+        assert report.position_concordance == 1.0
+        assert report.string_concordance == 1.0
+        assert report.fret_concordance == 1.0
+        assert len(report.deviations) == 0
+
+    def test_deviation_detected(self) -> None:
+        from fretwise.validation import compute_concordance
+
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(
+                    pitch=60, onset=0.0, duration=1.0, tempo=120.0,
+                    string_hint=3, fret_hint=5,
+                ),
+                state=FingeringState(
+                    string_num=4, fret=10, finger=Finger.INDEX, hand_position=10,
+                ),
+                cost=1.0,
+            ),
+        ]
+        report = compute_concordance(results)
+        assert report.hinted_notes == 1
+        assert report.string_matches == 0
+        assert report.fret_matches == 0
+        assert report.position_matches == 0
+        assert report.position_concordance == 0.0
+        assert len(report.deviations) == 1
+
+    def test_unhinted_notes_excluded(self) -> None:
+        from fretwise.validation import compute_concordance
+
+        results = [
+            FingeringResult(
+                note_id=0,
+                note_event=NoteEvent(pitch=60, onset=0.0, duration=1.0, tempo=120.0),
+                state=FingeringState(
+                    string_num=3, fret=5, finger=Finger.INDEX, hand_position=5,
+                ),
+                cost=1.0,
+            ),
+        ]
+        report = compute_concordance(results)
+        assert report.total_notes == 1
+        assert report.hinted_notes == 0  # no hints → not counted
+        assert report.position_concordance == 0.0  # 0/0 → 0.0
+
+    def test_format_report(self) -> None:
+        from fretwise.validation import ConcordanceReport, format_concordance_report
+
+        report = ConcordanceReport(
+            total_notes=10, hinted_notes=8,
+            string_matches=8, fret_matches=7, position_matches=7,
+            deviations=[],
+        )
+        text = format_concordance_report(report, title="Test")
+        assert "Test" in text
+        assert "Position" in text

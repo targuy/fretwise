@@ -102,6 +102,9 @@ class GpifAdapter(BaseParser):
     #: Chord diagrams from the DiagramCollection of the selected track.
     #: Set after each call to parse() or parse_track().
     chord_diagrams: list[ChordDiagram] = []
+    #: Time signature numerator of the first MasterBar (e.g. 4 for 4/4).
+    #: Set after each call to parse() or parse_track().
+    beats_per_measure: float = 4.0
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp files (Guitar Pro 7/8)."""
@@ -152,6 +155,7 @@ class GpifAdapter(BaseParser):
         rhythm_map = _build_rhythm_map(root)
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
+        self.beats_per_measure = _get_beats_per_measure(root)
 
         return _extract_events(root, track_idx, open_pitches, tempo_map, rhythm_map, note_map)
 
@@ -214,6 +218,7 @@ class GpifAdapter(BaseParser):
         rhythm_map = _build_rhythm_map(root)
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
+        self.beats_per_measure = _get_beats_per_measure(root)
 
         # Extract chord diagrams for this track.
         for track in root.findall("Tracks/Track"):
@@ -299,6 +304,18 @@ class GpifAdapter(BaseParser):
         logger.debug(
             "Parsed %d chord diagram(s) from DiagramCollection.", len(diagrams)
         )
+
+        # Detect and repair corrupted diagram sets (all entries share identical frets).
+        from fretwise.patterns.chord_library import is_corrupt_diagram_set, repair_diagrams
+
+        if is_corrupt_diagram_set(diagrams):
+            logger.warning(
+                "Chord diagram data appears corrupted (all %d diagrams have identical "
+                "frets). Replacing with library voicings.",
+                len(diagrams),
+            )
+            diagrams = repair_diagrams(diagrams)
+
         return diagrams
 
 
@@ -322,6 +339,19 @@ def _load_gpif(path: Path) -> ET.Element:
 # ---------------------------------------------------------------------------
 # Lookup maps
 # ---------------------------------------------------------------------------
+
+
+def _get_beats_per_measure(root: ET.Element) -> float:
+    """Return the time-signature numerator of the first MasterBar (e.g. 4 for 4/4)."""
+    first_bar = root.find("MasterBars/MasterBar")
+    if first_bar is None:
+        return 4.0
+    time_str = first_bar.findtext("Time", "4/4")
+    try:
+        numerator, _ = time_str.split("/")
+        return float(numerator)
+    except (ValueError, AttributeError):
+        return 4.0
 
 
 def _build_section_markers(root: ET.Element) -> dict[int, str]:
@@ -396,6 +426,7 @@ class _NoteData:
         "bend_value", "bend_type", "slide_type", "harmonic_type", "harmonic_fret",
         "muted", "palm_muted", "tapping", "accent", "accent_strong", "tremolo_picking",
         "vibrato_wide",
+        "ghost", "staccato", "strum_direction", "slap", "pop", "rasgueado", "golpe",
     )
 
     def __init__(
@@ -418,6 +449,13 @@ class _NoteData:
         accent_strong: bool = False,
         tremolo_picking: bool = False,
         vibrato_wide: bool = False,
+        ghost: bool = False,
+        staccato: bool = False,
+        strum_direction: str | None = None,
+        slap: bool = False,
+        pop: bool = False,
+        rasgueado: bool = False,
+        golpe: bool = False,
     ) -> None:
         self.gpif_string = gpif_string
         self.fret = fret
@@ -437,6 +475,13 @@ class _NoteData:
         self.accent_strong = accent_strong
         self.tremolo_picking = tremolo_picking
         self.vibrato_wide = vibrato_wide
+        self.ghost = ghost
+        self.staccato = staccato
+        self.strum_direction = strum_direction
+        self.slap = slap
+        self.pop = pop
+        self.rasgueado = rasgueado
+        self.golpe = golpe
 
 
 def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
@@ -490,6 +535,11 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
             accent_strong=note_props["accent_strong"],
             tremolo_picking=note_props["tremolo_picking"],
             vibrato_wide=note_props["vibrato_wide"],
+            ghost=note_props["ghost"],
+            staccato=note_props["staccato"],
+            slap=note_props["slap"],
+            pop=note_props["pop"],
+            golpe=note_props["golpe"],
         )
     return result
 
@@ -518,6 +568,11 @@ def _parse_note_properties(props: dict[str, ET.Element]) -> dict:  # type: ignor
         "accent_strong": False,
         "tremolo_picking": False,
         "vibrato_wide": False,
+        "ghost": False,
+        "staccato": False,
+        "slap": False,
+        "pop": False,
+        "golpe": False,
     }
 
     # Muted (x note)
@@ -594,6 +649,24 @@ def _parse_note_properties(props: dict[str, ET.Element]) -> dict:  # type: ignor
         result["tremolo_picking"] = True
         if result["articulation"] == Articulation.NORMAL:
             result["articulation"] = Articulation.TREMOLO
+
+    # Ghost note — fret shown in parentheses
+    if "Ghost" in props or "IsGhost" in props:
+        result["ghost"] = True
+
+    # Staccato — short detached note
+    if "Staccato" in props:
+        result["staccato"] = True
+
+    # Slap / Pop
+    if "Slap" in props:
+        result["slap"] = True
+    if "Popping" in props or "Pop" in props:
+        result["pop"] = True
+
+    # Golpe — percussive tap on guitar body
+    if "Golpe" in props:
+        result["golpe"] = True
 
     return result
 
@@ -923,6 +996,16 @@ def _extract_events(
                     beat_accent = bool(acc_flags & 1)
                     beat_accent_strong = bool(acc_flags & 2)
                 beat_tremolo = "TremoloPicking" in beat_props
+                beat_strum: str | None = None
+                if "PickStroke" in beat_props:
+                    stroke_val = (beat_props["PickStroke"].findtext("Value") or
+                                  beat_props["PickStroke"].findtext("direction") or "").lower()
+                    if stroke_val in ("up", "u", "1"):
+                        beat_strum = "up"
+                    elif stroke_val in ("down", "d", "2"):
+                        beat_strum = "down"
+                beat_rasgueado = "Rasgueado" in beat_props
+                beat_golpe = "Golpe" in beat_props
 
                 notes_text = beat_el.findtext("Notes") or ""
                 for note_id in notes_text.split():
@@ -958,6 +1041,13 @@ def _extract_events(
                             accent_strong=nd.accent_strong or beat_accent_strong,
                             tremolo_picking=nd.tremolo_picking or beat_tremolo,
                             vibrato_wide=nd.vibrato_wide,
+                            ghost=nd.ghost,
+                            staccato=nd.staccato,
+                            strum_direction=nd.strum_direction or beat_strum,
+                            slap=nd.slap,
+                            pop=nd.pop,
+                            rasgueado=nd.rasgueado or beat_rasgueado,
+                            golpe=nd.golpe or beat_golpe,
                         )
                     )
 

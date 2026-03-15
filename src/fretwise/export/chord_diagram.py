@@ -95,12 +95,13 @@ def draw_chord_diagram(
     c.setFillColor(colors.black)
     c.drawCentredString(x + box_w / 2, y + name_offset, diagram.name)
 
-    # ----- Nut (thick bar at top when base_fret == 0) -------------------------
-    if diagram.base_fret == 0:
+    # ----- Nut (thick bar at top for open-position chords) -------------------
+    # base_fret <= 1 means open position (fret 1 = first fret, no capo/position shift).
+    if diagram.base_fret <= 1:
         c.setFillColor(colors.black)
         c.rect(x, y - 1.5, box_w, 1.5, fill=1, stroke=0)
     else:
-        # Base fret label to the right of the diagram
+        # Barre/position chord: show fret number to the right instead of a nut.
         c.setFont("Helvetica", 6.0)
         c.setFillColor(colors.black)
         label = _to_roman(diagram.base_fret) + "fr"
@@ -142,7 +143,7 @@ def draw_chord_diagram(
             barre_fret = min_fret
 
     if barre_fret is not None:
-        barre_row = barre_fret - diagram.base_fret if diagram.base_fret > 0 else barre_fret - 1
+        barre_row = barre_fret - max(diagram.base_fret, 1)
         if 0 <= barre_row < fret_rows:
             barre_y = y - barre_row * cell_h - cell_h / 2
             # x positions: str_x returns rightmost for s_idx=0
@@ -166,7 +167,7 @@ def draw_chord_diagram(
     for s_idx, fret_val in enumerate(diagram.frets):
         if fret_val <= 0 or s_idx in barre_set:
             continue
-        row = fret_val - diagram.base_fret if diagram.base_fret > 0 else fret_val - 1
+        row = fret_val - max(diagram.base_fret, 1)
         if row < 0 or row >= fret_rows:
             continue
         sx = str_x(s_idx)

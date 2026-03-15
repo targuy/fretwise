@@ -42,16 +42,16 @@
 - **Checksum par mesure** : `Σ=X.XX` en rouge au-dessus si déviation > 0.1 beat
 - **Page de légende** : toutes les valeurs de notes + silences + guide symboles (H, P, T, >, >>, !)
 
-### 2D — Standard Music Notation PDF
-- Treble clef staff, notes, stems, beams, accidentals, ties, slurs
-- Time signature, key signature, barlines, dynamics, articulation marks
+### 2D — Standard Music Notation PDF ✅
+- Treble clef staff, notes, stems, flags, accidentals, ledger lines
+- Time signature, barlines, measure numbers, section markers
 - Architecture: `StaffRenderer` in `fretwise/export/staff_renderer.py`
-- **Status: Planned (Phase 4)**
+- **Status: Implemented in Sprint 4D**
 
-### 2E — Combined Notation + Tablature PDF
+### 2E — Combined Notation + Tablature PDF ✅
 - Top half: standard notation staff; bottom half: tab (aligned beat columns)
 - Module: `fretwise/export/combined_renderer.py`
-- **Status: Planned (Phase 4)**
+- **Status: Implemented in Sprint 4D**
 
 ---
 
@@ -78,6 +78,30 @@
 
 ---
 
+## ✅ Phase 3.5 — PDF Rendering v2 (DONE)
+
+> Full specification in `docs/rendering_spec_v2.md`. All 12 RENDER tasks implemented.
+
+### P0 — Critical Readability Bugs ✅
+- **RENDER-01**: Rests drawn inside staff vertically (at `sys_y - REST_CENTER_Y` = midpoint strings 3–4), white disc for small rests erases string lines
+- **RENDER-02**: Rests break beam groups — `_get_beam_groups()` detects gaps ≥ 0.115 beats between note end and next onset
+- **RENDER-03**: Beat-aware beam grouping — groups split at beat boundaries (max 2 eighths or 4 sixteenths per beat in 4/4)
+
+### P1 — Layout & Proportionality ✅
+- **RENDER-04**: Variable measure widths — `_measure_w_raw()` computes density-based width, `_normalize_measure_widths()` scales to fill page
+- **RENDER-05**: Variable measures per system — `_build_systems()` greedy algorithm packs measures until they exceed `available_w × 1.05`
+- **RENDER-06**: Partial secondary beams — `_draw_secondary_beam()` renders 16th-note bars only over consecutive sub-eighth runs within a group
+- **RENDER-07**: Text zone separation — `CHORD_Y=22pt`, `MNUM_Y=31pt`, `SECTION_Y=ABOVE_STRINGS-4pt`; chord name truncation with `…`
+
+### P2 — Visual Quality ✅
+- **RENDER-08**: Finger annotation collision avoidance — clearance check against next string's oval; shift 3.5pt left when tight
+- **RENDER-09**: Stem height reduced — `STEM_H = 14pt` (was 16pt)
+- **RENDER-10**: Legend layout spacing fixed — REST_ROW_Y properly offset from dotted-notes row
+- **RENDER-11**: Rest symbols in legend use same `_draw_rest()` with white disc as real rendering
+- **RENDER-12**: Post-render collision checker — `collision_checker.py` with BBox tracking
+
+---
+
 ## Architecture Principles
 
 1. **M5/Viterbi interface is stable** — never modify its public API. The cost function is always injected, never hardcoded.
@@ -88,14 +112,57 @@
 
 ---
 
-## Phase 4 — Musical Intelligence
+## Phase 4 — Musical Intelligence ✅
 
-- `C_music` cost function: articulation matching bonus (hammer-on prefers same string, slide prefers adjacent), same-string legato bonus, vibrato position reward
-- Pattern database M3: chord shape library (`data/patterns/chords.yaml`), scale pattern library (`data/patterns/scales.yaml`), recognition via pitch-class matching
-- MusicXML parser (M1v2): `music21`-based adapter for `.xml` and `.mxl` files
-- MIDI parser: `mido`/`pretty_midi` adapter for `.mid` files
-- Standard notation PDF (`StaffRenderer`) + combined notation+tab PDF
-- Concordance validation against Iino et al. 2025 benchmark (40 annotated études)
+### Sprint 4A — Musical Cost Function `C_music` ✅
+- ✅ **Legato same-string requirement**: hammer-on, pull-off, and legato penalised when crossing strings (penalty 5.0)
+- ✅ **Slide same-string requirement**: all slide types penalised across strings (penalty 5.0)
+- ✅ **Vibrato position quality**: open string impossible (4.0), low frets awkward (1.5), wide vibrato extra penalty (1.0)
+- ✅ **Bend feasibility**: open string impossible (6.0), wound strings scaled by bend value (1.5× for strings 5-6, 0.8× for string 4)
+- ✅ **Natural harmonic matching**: wrong fret for harmonic_fret penalised (4.0)
+- ✅ **Tapping low-fret penalty**: tapping near the nut harder (1.5 when fret < 5)
+- ✅ Implementation: `compute_musical_cost(s1, s2, note) -> float` in `scoring/__init__.py`
+- ✅ Wired into `CostFunction.transition_cost()` via β weight (replaces `c_music = 0.0` stub)
+- ✅ 20+ unit tests + 2 integration tests (393 total, 5 skipped, 0 regressions)
+
+### Sprint 4B — Pattern Database M3 ✅
+- ✅ **Chord voicings expanded**: +15 entries in `chord_voicings.yaml` — diminished (Bdim, C#dim), augmented (Caug, Eaug), ninth (G9, A9, E9), barre shapes (F#, F#m, Bb, Bbm, C#, C#m, Eb, Ebm, Ab). Now ~80+ voicings.
+- ✅ **Scale pattern library**: `data/patterns/scales.yaml` — 10 scale types (major, natural_minor, harmonic_minor, minor/major_pentatonic, blues, dorian, mixolydian, phrygian, lydian) with box positions
+- ✅ **Scale recognition**: `scale_library.py` — `recognize_scale(pitches)` tries 12 roots × 10 patterns, confidence scoring, prefers 7-note specificity over pentatonic subsets
+- ✅ **PatternMatcher rewrite**: `patterns/__init__.py` — full `PatternMatcher` with chord promotion (group by onset → recognize chord → lookup voicing → reorder states) and scale promotion (detect prevailing scale → promote in-scale pitch-class states). Never removes states, only reorders.
+- ✅ **Pipeline wiring**: `PatternMatcher` injected into `run_pipeline()` (optional, backward-compatible), wired in `cli.py` and `run_fingering.py`
+- ✅ 33 tests across 8 classes (422 total, 5 skipped, 0 regressions)
+
+### Sprint 4C — Multi-Format Parsers ✅
+- ✅ **MusicXML adapter**: `MusicXmlAdapter` in `musicxml_adapter.py` — parses `.xml`, `.mxl`, `.musicxml` via music21. Guitar part selection (MIDI program → name → first). Handles chords, tied notes (skips continuations), rehearsal marks, tempo changes, velocity→Dynamic mapping.
+- ✅ **MIDI adapter**: `MidiAdapter` in `midi_adapter.py` — parses `.mid`, `.midi` via pretty_midi. Guitar instrument selection (MIDI program → name → pitch range → first non-drum). Seconds-to-beats conversion with tempo change tracking. Velocity→Dynamic mapping.
+- ✅ **Auto-detection**: `get_adapter()` updated to route `.xml/.mxl/.musicxml` → MusicXmlAdapter, `.mid/.midi` → MidiAdapter
+- ✅ **CLI updated**: `_SUPPORTED_INPUT` expanded, help text and docstrings updated for all commands
+- ✅ **No string/fret hints**: MusicXML and MIDI carry no tab data — `string_hint` and `fret_hint` are None; the state generator enumerates all valid positions
+- ✅ 59 new tests (21 MusicXML + 38 MIDI): supports, errors, integration with real files, dynamic mapping, pure functions, get_adapter routing (481 total, 5 skipped, 0 regressions)
+
+### Sprint 4D — Validation & Standard Notation ✅
+- ✅ **Concordance validation framework**: `validation.py` — `ConcordanceReport` dataclass with string/fret/position concordance metrics; `compute_concordance()` compares optimizer output vs source tab hints; `format_concordance_report()` human-readable output with deviation table
+- ✅ **Validation script**: `scripts/validate_concordance.py` — processes all GP fixtures, per-track + aggregate reporting
+- ✅ **Baseline result**: **99.98% position concordance** — 36,223/36,230 hinted notes match across 23 tracks (6 GP files). Only 3 tracks with minor deviations: Ziggy Stardust Guitar II (99.3%), Green Day Lead (99.9%), Metallica Lead (99.7%)
+- ✅ **StaffRenderer**: `export/staff_renderer.py` — standard music notation PDF with treble clef, 5-line staff, filled/open noteheads, stems (up/down by pitch), flags (eighth/sixteenth/32nd), accidentals (sharps), ledger lines (above/below), bar lines, time signature, measure numbers, section markers. Same page geometry as pdf_tab.py for alignment.
+- ✅ **CombinedRenderer**: `export/combined_renderer.py` — stacks treble clef staff above tab for each system. Delegates to StaffRenderer (notation) and pdf_tab (tab) drawing helpers. Shares measure grouping/packing for column alignment.
+- ✅ **CLI wiring**: `--format staff` and `--format combined` output options added to `fretwise solve`. Updated format list and help text.
+- ✅ **Export `__init__.py` updated**: `render_staff_pdf` and `render_combined_pdf` exported
+- ✅ 28 new tests: 6 staff smoke (file creation, empty, multi-measure, sections, accidentals, ledger lines) + 3 combined smoke + 12 staff helper unit tests (midi_to_staff_pos, staff_pos_to_y, num_flags, is_filled) + 7 concordance validation tests (import, empty, perfect, deviation, unhinted, format_report)
+- ✅ **509 total tests**, 5 skipped, 0 regressions
+
+### Sprint 4E — Songsterr-style Web Interface ✅
+- ✅ **FastAPI backend** (`web/app.py`): `create_app(fixtures_dir)` factory; endpoints: GET `/api/files` (list score files), GET `/api/tracks/{filename}` (multi-track listing via list_guitar_tracks), GET `/api/solve/{filename}?track_id=N&mode=M` (full pipeline execution → JSON). Path traversal protection. Serializes all 20+ notation fields per note + chord diagrams + section markers.
+- ✅ **HTML5 SPA** (`web/static/index.html`): 3-page routing (file selector → track selector → tab viewer), dark header bar, Songsterr-style green accents, responsive CSS, bottom toolbar with playback controls.
+- ✅ **Canvas tab renderer** (`web/static/js/renderer.js`): 6-string tab staff with TAB label, string names, fret numbers in white ovals, measure grouping, tempo/time signature display, section markers, chord names, measure numbers, barlines, cursor highlight. System-based layout with greedy measure packing.
+- ✅ **Notation symbols**: hammer-on/pull-off arcs with H/P label, bend arrows with fraction labels (½, 1, 1½, 2), slide diagonal lines (legato + shift + in/out), vibrato waves (normal + wide), harmonics (diamond shape), palm mute (P.M.), tapping (T), accents (>/∧), staccato (dot), tremolo picking (slashes on stem), let-ring dashed lines, dotted notes, finger annotations (dark red SW), muted notes (X). Same visual conventions as PDF renderer.
+- ✅ **Rhythm below tab** (Songsterr convention): stems, beams (primary + secondary for 16ths), flags, rest symbols (whole/half/quarter/eighth/sixteenth). Beams grouped by beat.
+- ✅ **Visual playback** (`web/static/js/playback.js`): `PlaybackEngine` — measure-by-measure cursor at song tempo, speed scaling (25–125%), loop mode, metronome (Web Audio API click), keyboard shortcuts (Space=play, ←→=prev/next, Home/End, M=metronome), auto-scroll to cursor.
+- ✅ **Tab notation legend**: interactive overlay canvas showing all symbols (techniques, rhythm, dynamics, structure) with French + English descriptions.
+- ✅ **CLI command**: `fretwise web [--dir DIR] [--port PORT] [--host HOST]` launches the uvicorn server serving the full SPA.
+- ✅ Dependencies: FastAPI ≥ 0.110, uvicorn[standard] ≥ 0.29 (added to pyproject.toml dev extras)
+- ✅ 509 tests still passing, 0 regressions
 
 ---
 

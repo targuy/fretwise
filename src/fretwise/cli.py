@@ -5,6 +5,8 @@ Usage:
     fretwise solve song.gp5
     fretwise solve song.gp5 --mode performance --output song_fingered.pdf
     fretwise solve song.gp5 --mode learning --output song_fingered.txt
+    fretwise info song.gp5
+    fretwise formats
 """
 
 from __future__ import annotations
@@ -16,12 +18,19 @@ from pathlib import Path
 
 import click
 
-from fretwise.export import render_ascii_tab, render_pdf_tab, render_text_report
+from fretwise.export import (
+    render_ascii_tab,
+    render_combined_pdf,
+    render_pdf_tab,
+    render_staff_pdf,
+    render_text_report,
+)
 from fretwise.generator import StateGenerator
 from fretwise.models import FingeringResult
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
+from fretwise.patterns import PatternMatcher
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights
 
@@ -32,20 +41,81 @@ _MODES = {
     "learning": CostWeights.learning,
 }
 
+_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined")
+
+_SUPPORTED_INPUT = {
+    ".gp3": "GuitarPro 3",
+    ".gp4": "GuitarPro 4",
+    ".gp5": "GuitarPro 5",
+    ".gp": "GuitarPro 7/8 (GPIF)",
+    ".xml": "MusicXML",
+    ".mxl": "MusicXML (compressed)",
+    ".musicxml": "MusicXML",
+    ".mid": "MIDI",
+    ".midi": "MIDI",
+}
+
+_SUPPORTED_OUTPUT = {
+    "json": "Full note-by-note JSON (all alternatives, costs, fingerings)",
+    "txt": "ASCII tablature + text report (plain text, UTF-8)",
+    "pdf": "Professional A4 PDF tablature with LH finger annotations",
+    "staff": "Standard music notation (treble clef) PDF",
+    "combined": "Standard notation + tab stacked PDF",
+}
+
 
 @click.group()
 @click.version_option()
 def main() -> None:
-    """FretWise — Guitar Fingering Optimization System."""
+    """FretWise - Guitar Fingering Optimization System.
+
+    Computes ergonomically optimal left-hand fingerings for guitar tablature
+    using a Viterbi shortest-path algorithm over a biomechanical cost function.
+
+    \b
+    Quick start:
+      fretwise info song.gp5          # inspect tracks and metadata
+      fretwise parse song.gp5         # list all notes with candidate states
+      fretwise solve song.gp5         # print JSON fingerings to stdout
+      fretwise solve song.gp5 -o out.pdf   # export PDF tablature
+      fretwise formats                # list supported file formats
+    """
 
 
-@main.command()
+# ---------------------------------------------------------------------------
+# parse
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise parse song.gp5\n"
+        "  fretwise parse song.gp5 --verbose\n"
+        "  fretwise parse song.gp5 --limit 50\n"
+        "  fretwise parse song.gp5 -v -l 20 --quiet\n"
+    )
+)
 @click.argument("file", type=click.Path(exists=True, path_type=Path))
 @click.option("--verbose", "-v", is_flag=True, help="Show all fields per note.")
-def parse(file: Path, verbose: bool) -> None:
+@click.option(
+    "--limit",
+    "-l",
+    type=int,
+    default=0,
+    metavar="N",
+    help="Print only the first N notes (0 = all).",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress the header line (useful for piping or scripting).",
+)
+def parse(file: Path, verbose: bool, limit: int, quiet: bool) -> None:
     """Parse FILE and display the note sequence with candidate states.
 
-    FILE must be a GuitarPro file (.gp3, .gp4, .gp5, .gp).
+    FILE may be GuitarPro (.gp3/.gp4/.gp5/.gp), MusicXML (.xml/.mxl), or MIDI (.mid).
     """
     try:
         adapter = get_adapter(file)
@@ -67,9 +137,13 @@ def parse(file: Path, verbose: bool) -> None:
         click.echo("No notes found.")
         return
 
-    click.echo(f"Parsed {len(events)} note(s) from '{file.name}'.\n")
+    if not quiet:
+        track_name: str = getattr(adapter, "track_name", "") or ""
+        track_info = f"  track: {track_name}" if track_name else ""
+        click.echo(f"Parsed {len(events)} note(s) from '{file.name}'.{track_info}\n")
 
-    for i, event in enumerate(events):
+    displayed = events if limit <= 0 else events[:limit]
+    for i, event in enumerate(displayed):
         states = generator.states_for(event)
         if verbose:
             click.echo(
@@ -86,44 +160,134 @@ def parse(file: Path, verbose: bool) -> None:
                 f"states={len(states)}"
             )
 
+    if limit > 0 and len(events) > limit:
+        click.echo(f"\n... {len(events) - limit} more note(s) not shown (use --limit 0 for all).")
 
-@main.command()
+
+# ---------------------------------------------------------------------------
+# solve
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise solve song.gp5                           # JSON to stdout\n"
+        "  fretwise solve song.gp5 -o out.pdf                # PDF tablature\n"
+        "  fretwise solve song.gp5 -o out.txt                # ASCII tab + report\n"
+        "  fretwise solve song.gp5 -o out.json               # JSON file\n"
+        "  fretwise solve song.gp5 -f pdf -o out.tab         # force PDF format\n"
+        "  fretwise solve song.gp5 --mode performance -o fingered.pdf\n"
+        "  fretwise solve song.gp5 --title 'My Song' --artist 'Artist'\n"
+        "  fretwise solve song.gp5 --measures-per-system 4 -o out.pdf\n"
+        "  fretwise solve song.gp5 --beats-per-measure 3 -o out.pdf\n"
+    )
+)
 @click.argument("file", type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--mode",
     type=click.Choice(list(_MODES.keys())),
     default="reference",
     show_default=True,
-    help="Weighting mode for the cost function.",
+    help="Weighting mode for the cost function. See 'fretwise formats' for details.",
 )
 @click.option(
     "--output",
     "-o",
     type=click.Path(path_type=Path),
     default=None,
-    help="Output file path (.json, .txt, .pdf). Defaults to stdout JSON.",
+    help=(
+        "Output file path. Format is inferred from the extension unless "
+        "--format is given. Omit to print JSON to stdout."
+    ),
 )
-@click.option("--verbose", "-v", is_flag=True, help="Print per-note cost details.")
-def solve(file: Path, mode: str, output: Path | None, verbose: bool) -> None:
+@click.option(
+    "--format",
+    "-f",
+    "fmt",
+    type=click.Choice(list(_OUTPUT_FORMATS)),
+    default=None,
+    help=(
+        "Force output format, overriding the file extension. "
+        "Choices: json, txt, pdf."
+    ),
+)
+@click.option(
+    "--title",
+    default=None,
+    metavar="TEXT",
+    help="Song title for PDF/report header (default: parsed from filename).",
+)
+@click.option(
+    "--artist",
+    default=None,
+    metavar="TEXT",
+    help="Artist/composer name for PDF/report header (default: parsed from filename).",
+)
+@click.option(
+    "--measures-per-system",
+    "--mps",
+    "measures_per_system",
+    type=int,
+    default=None,
+    metavar="N",
+    help="PDF: number of measures per system row (default: auto from note density).",
+)
+@click.option(
+    "--beats-per-measure",
+    "--bpm-ts",
+    "beats_per_measure",
+    type=float,
+    default=4.0,
+    show_default=True,
+    metavar="N",
+    help="Time signature numerator used for bar lines and PDF layout (e.g. 3 for 3/4).",
+)
+@click.option("--verbose", "-v", is_flag=True, help="Print per-note cost summary to stderr.")
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress progress messages (useful for scripting; errors still go to stderr).",
+)
+def solve(
+    file: Path,
+    mode: str,
+    output: Path | None,
+    fmt: str | None,
+    title: str | None,
+    artist: str | None,
+    measures_per_system: int | None,
+    beats_per_measure: float,
+    verbose: bool,
+    quiet: bool,
+) -> None:
     """Compute optimised fingerings for FILE and output a tablature.
 
-    FILE must be a GuitarPro file (.gp3, .gp4, .gp5, .gp).
+    FILE may be GuitarPro (.gp3/.gp4/.gp5/.gp), MusicXML (.xml/.mxl), or MIDI (.mid).
 
-    Output formats:\n
-      (none)       — JSON on stdout\n
-      .json        — full note-by-note JSON\n
-      .txt         — ASCII tablature + text report\n
-      .pdf         — PDF tablature with finger annotations
+    \b
+    Output formats:
+      (none / stdout)  - JSON
+      .json            - full note-by-note JSON (fingering + alternatives + cost)
+      .txt             - ASCII tablature + text report (plain text)
+      .pdf             - A4 PDF tablature with LH finger annotations
+
+    Use --format / -f to override the format inferred from the output extension.
+    Use --format staff or --format combined with a .pdf output path
+    for standard notation or combined staff+tab PDFs.
     """
     try:
         adapter = get_adapter(file)
     except UnsupportedFormatError as exc:
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
+
     generator = StateGenerator()
     weights = _MODES[mode]()
     cost_fn = CostFunction(weights=weights)
     optimizer = ViterbiOptimizer(cost_fn)
+    matcher = PatternMatcher()
 
     try:
         events = adapter.parse(file)
@@ -135,7 +299,7 @@ def solve(file: Path, mode: str, output: Path | None, verbose: bool) -> None:
         click.echo("No notes found.")
         return
 
-    results, stats = run_pipeline(events, generator, optimizer)
+    results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
     if not results:
         click.echo("No valid fingering states could be generated.", err=True)
         sys.exit(1)
@@ -148,47 +312,278 @@ def solve(file: Path, mode: str, output: Path | None, verbose: bool) -> None:
             err=True,
         )
 
-    if output is None:
+    # --- resolve output format -----------------------------------------------
+    if output is None and fmt is None:
         _print_json(results)
         return
 
-    suffix = output.suffix.lower()
+    # Determine the effective format
+    if fmt is not None:
+        effective_fmt = fmt
+    elif output is not None:
+        effective_fmt = output.suffix.lstrip(".").lower()
+        if effective_fmt not in _OUTPUT_FORMATS:
+            click.echo(
+                f"Error: Cannot infer format from extension '{output.suffix}'. "
+                f"Use --format ({', '.join(_OUTPUT_FORMATS)}) or rename the file.",
+                err=True,
+            )
+            sys.exit(1)
+    else:
+        effective_fmt = "json"
+
+    # --- resolve metadata ----------------------------------------------------
     track_name: str = getattr(adapter, "track_name", "") or ""
     section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+
     clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", file.stem).strip()
     parts = clean_stem.split("-", 1)
-    pdf_title = parts[1].strip() if len(parts) == 2 else clean_stem
-    pdf_artist = parts[0].strip() if len(parts) == 2 else ""
+    auto_title = parts[1].strip() if len(parts) == 2 else clean_stem
+    auto_artist = parts[0].strip() if len(parts) == 2 else ""
 
-    if suffix == ".json":
+    pdf_title = title if title is not None else auto_title
+    pdf_artist = artist if artist is not None else auto_artist
+
+    # --- write output --------------------------------------------------------
+    if output is None:
+        # Format forced via --format, no output path: write to stdout where possible
+        if effective_fmt == "json":
+            _print_json(results)
+        elif effective_fmt == "txt":
+            hdr = f"{file.stem}  [{mode} mode]"
+            click.echo(render_text_report(results, title=hdr))
+            click.echo()
+            click.echo(render_ascii_tab(results, title=hdr))
+        else:
+            click.echo(
+                f"Error: --format {effective_fmt} requires an --output path "
+                f"(PDF cannot be written to stdout).",
+                err=True,
+            )
+            sys.exit(1)
+        return
+
+    if effective_fmt == "json":
         output.write_text(_results_to_json(results), encoding="utf-8")
-        click.echo(f"JSON written to '{output}'.")
+        if not quiet:
+            click.echo(f"JSON written to '{output}'.")
 
-    elif suffix == ".txt":
-        title = f"{file.stem}  [{mode} mode]"
-        report = render_text_report(results, title=title)
-        tab = render_ascii_tab(results, title=title)
+    elif effective_fmt == "txt":
+        hdr = f"{pdf_title}  [{mode} mode]"
+        report = render_text_report(results, title=hdr)
+        tab = render_ascii_tab(results, title=hdr)
         output.write_text(report + "\n\n" + tab, encoding="utf-8")
-        click.echo(f"Text report + ASCII tab written to '{output}'.")
+        if not quiet:
+            click.echo(f"Text report + ASCII tab written to '{output}'.")
 
-    elif suffix == ".pdf":
+    elif effective_fmt == "pdf":
+        chord_diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
         render_pdf_tab(
             results,
             output,
             title=pdf_title,
             artist=pdf_artist,
+            beats_per_measure=beats_per_measure,
             instrument=track_name,
             mode_label=f"{mode} mode",
             section_markers=section_markers or None,
+            measures_per_system=measures_per_system,
+            chord_diagrams=chord_diagrams or None,
         )
-        click.echo(f"PDF written to '{output}'.")
+        if not quiet:
+            click.echo(f"PDF written to '{output}'.")
+
+    elif effective_fmt == "staff":
+        render_staff_pdf(
+            results,
+            output,
+            title=pdf_title,
+            artist=pdf_artist,
+            beats_per_measure=beats_per_measure,
+            instrument=track_name,
+            mode_label=f"{mode} mode",
+            section_markers=section_markers or None,
+            measures_per_system=measures_per_system,
+        )
+        if not quiet:
+            click.echo(f"Staff PDF written to '{output}'.")
+
+    elif effective_fmt == "combined":
+        chord_diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
+        render_combined_pdf(
+            results,
+            output,
+            title=pdf_title,
+            artist=pdf_artist,
+            beats_per_measure=beats_per_measure,
+            instrument=track_name,
+            mode_label=f"{mode} mode",
+            section_markers=section_markers or None,
+            measures_per_system=measures_per_system,
+            chord_diagrams=chord_diagrams or None,
+        )
+        if not quiet:
+            click.echo(f"Combined PDF written to '{output}'.")
 
     else:
-        click.echo(
-            f"Unsupported output format '{suffix}'. Use .json, .txt or .pdf.",
-            err=True,
-        )
+        click.echo(f"Error: Unsupported format '{effective_fmt}'.", err=True)
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# info
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise info song.gp5\n"
+        "  fretwise info song.gp\n"
+    )
+)
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+def info(file: Path) -> None:
+    """Display metadata for FILE without computing fingerings.
+
+    Shows track name, note count, tempo range, estimated duration,
+    and section markers.  Useful for inspecting a file before solving.
+
+    FILE may be GuitarPro (.gp3/.gp4/.gp5/.gp), MusicXML (.xml/.mxl), or MIDI (.mid).
+    """
+    try:
+        adapter = get_adapter(file)
+    except UnsupportedFormatError as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    try:
+        events = adapter.parse(file)
+    except (UnsupportedFormatError, ParseError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    track_name: str = getattr(adapter, "track_name", "") or "(unknown)"
+    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+
+    click.echo(f"File    : {file.name}")
+    click.echo(f"Format  : {_SUPPORTED_INPUT.get(file.suffix.lower(), file.suffix)}")
+    click.echo(f"Track   : {track_name}")
+
+    if not events:
+        click.echo("Notes   : 0  (no playable notes found)")
+        return
+
+    tempos = sorted({round(e.tempo) for e in events})
+    tempo_str = (
+        f"{tempos[0]} BPM"
+        if len(tempos) == 1
+        else f"{tempos[0]}-{tempos[-1]} BPM  ({len(tempos)} changes)"
+    )
+
+    onsets = [e.onset for e in events]
+    # Estimate duration in seconds using last note's onset + duration
+    last = max(events, key=lambda e: e.onset + e.duration)
+    duration_beats = last.onset + last.duration
+    duration_sec = duration_beats / last.tempo * 60.0 if last.tempo > 0 else 0.0
+    duration_str = f"{int(duration_sec // 60)}m {int(duration_sec % 60):02d}s"
+
+    # Pitch range
+    pitches = [e.pitch for e in events]
+    lo_note = _midi_to_note(min(pitches))
+    hi_note = _midi_to_note(max(pitches))
+
+    click.echo(f"Notes   : {len(events)}")
+    click.echo(f"Tempo   : {tempo_str}")
+    click.echo(f"Duration: ~{duration_str}  ({duration_beats:.1f} beats)")
+    click.echo(f"Pitch   : {lo_note} to {hi_note}  (MIDI {min(pitches)}-{max(pitches)})")
+
+    if section_markers:
+        click.echo(f"Sections: {len(section_markers)}")
+        for measure, name in sorted(section_markers.items()):
+            click.echo(f"  m{measure:03d}  {name}")
+    else:
+        click.echo("Sections: (none)")
+
+
+# ---------------------------------------------------------------------------
+# formats
+# ---------------------------------------------------------------------------
+
+
+@main.command()
+def formats() -> None:
+    """List all supported input and output file formats."""
+    click.echo("Input formats (score files):")
+    for ext, desc in _SUPPORTED_INPUT.items():
+        click.echo(f"  {ext:<8}  {desc}")
+
+    click.echo()
+    click.echo("Output formats (--output / --format):")
+    for fmt, desc in _SUPPORTED_OUTPUT.items():
+        click.echo(f"  {fmt:<8}  {desc}")
+
+    click.echo()
+    click.echo("Weighting modes (--mode):  [mech / musical / player / pedagogical]")
+    click.echo("  reference    1.0 / 1.0 / 0.0 / 0.0    benchmark / neutral")
+    click.echo("  performance  1.0 / 0.5 / 2.0 / 0.0    concert / studio comfort")
+    click.echo("  musical      1.0 / 2.0 / 1.0 / 0.0    phrasing / legato focus")
+    click.echo("  learning     1.0 / 0.5 / 1.0 / 1.5    pedagogical / technique")
+
+
+# ---------------------------------------------------------------------------
+# web
+# ---------------------------------------------------------------------------
+
+
+@main.command()
+@click.option(
+    "--port", "-p", default=8080, show_default=True,
+    help="Port to serve the web interface on.",
+)
+@click.option(
+    "--dir", "-d", "fixtures_dir", default=".",
+    type=click.Path(exists=True, file_okay=False),
+    help="Directory containing score files to browse.",
+)
+@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+def web(port: int, fixtures_dir: str, host: str) -> None:
+    """Launch the interactive Songsterr-style web tab viewer.
+
+    \b
+    Opens a browser-based interface for viewing and playing guitar tablature.
+    Supports all input formats (GP, MusicXML, MIDI).
+
+    \b
+    Example:
+      fretwise web --dir ./tests/fixtures --port 8080
+    """
+    try:
+        import uvicorn  # type: ignore[import-untyped]
+    except ImportError:
+        click.echo("Error: uvicorn is required.  pip install uvicorn[standard]", err=True)
+        raise SystemExit(1)
+
+    from fretwise.web.app import create_app
+
+    app = create_app(Path(fixtures_dir).resolve())
+    click.echo(f"FretWise web → http://{host}:{port}")
+    click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
+    click.echo("Press Ctrl+C to stop.\n")
+    uvicorn.run(app, host=host, port=port, log_level="warning")
+
+
+# ---------------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------------
+
+
+_NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def _midi_to_note(midi: int) -> str:
+    """Convert a MIDI pitch number to a human-readable note name (e.g. 64 → 'E4')."""
+    return f"{_NOTE_NAMES[midi % 12]}{midi // 12 - 1}"
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:

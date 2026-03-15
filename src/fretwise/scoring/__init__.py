@@ -1,11 +1,16 @@
-"""Scoring module (M4) — mechanical cost function C_méca.
+"""Scoring module (M4) — cost functions C_méca and C_music.
 
 Implements the composite cost function:
 
     C(s1, s2) = α·C_méca(s1, s2) + β·C_music(s1, s2) + γ·C_joueur(s1, s2) + δ·C_péda(s1, s2)
 
-Sprint 1 scope: C_méca only (α=1, β=0, γ=0, δ=0).
-C_music, C_joueur, C_péda are stubs returning 0.0.
+Active components:
+- C_méca: mechanical cost (position shift, stretch, string change, finger difficulty)
+- C_music: musical cost (legato, slide, vibrato, bend, harmonic, tapping)
+
+Stubs (returning 0.0):
+- C_joueur: player feasibility cost (Phase 3)
+- C_péda: pedagogical cost (Phase 3)
 
 The coefficients α, β, γ, δ are **never** hardcoded in Viterbi (M5);
 they are injected here as parameters so every mode (performance, musical,
@@ -20,7 +25,7 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
+from fretwise.models import Articulation, Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.profile import PlayerProfile, default_profile
 
 # ---------------------------------------------------------------------------
@@ -218,7 +223,7 @@ class CostFunction:
         """
         w = self._weights
         c_meca = compute_mechanical_cost(s1, s2, note)
-        c_music = 0.0   # stub — Phase 2
+        c_music = compute_musical_cost(s1, s2, note)
         c_joueur = 0.0  # stub — Phase 3
         c_peda = 0.0    # stub — Phase 3
         return w.alpha * c_meca + w.beta * c_music + w.gamma * c_joueur + w.delta * c_peda
@@ -1214,6 +1219,92 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
             _apply_canon(indices, abs_map)
 
     return resolved
+
+
+def compute_musical_cost(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+) -> float:
+    """Aggregate musical cost C_music(s1, s2).
+
+    Penalises fingering choices that conflict with the note's articulation.
+    Each sub-component returns a non-negative cost; their sum is the total
+    C_music for the transition.
+
+    Components:
+    1. Legato same-string requirement (hammer-on, pull-off, legato)
+    2. Slide same-string requirement
+    3. Vibrato position quality (open-string penalty, low-fret penalty)
+    4. Bend feasibility (open-string impossible, thick-string difficulty)
+    5. Harmonic position matching (natural harmonics at specific frets)
+
+    Args:
+        s1: Previous (source) fingering state.
+        s2: Next (target) fingering state.
+        note: NoteEvent for s2 (provides articulation context).
+
+    Returns:
+        Non-negative musical cost.
+    """
+    cost = 0.0
+
+    # --- 1. Legato same-string requirement ---
+    # Hammer-on, pull-off, and legato are physically impossible across strings.
+    if note.articulation in (
+        Articulation.HAMMER_ON,
+        Articulation.PULL_OFF,
+        Articulation.LEGATO,
+    ):
+        if s1.string_num != s2.string_num:
+            cost += 5.0  # strong penalty: technique impossible across strings
+
+    # --- 2. Slide same-string requirement ---
+    # Slides require the finger to glide along a single string.
+    if note.slide_type is not None:
+        if s1.string_num != s2.string_num:
+            cost += 5.0  # slide impossible across strings
+
+    # --- 3. Vibrato position quality ---
+    # Vibrato is achieved by oscillating the fretting finger. Open strings
+    # cannot be vibrated (no fretting finger); very low frets near the nut
+    # have less room for finger oscillation.
+    if note.articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO):
+        if s2.fret == 0:
+            cost += 4.0  # open string: vibrato impossible
+        elif s2.fret <= 2:
+            cost += 1.5  # frets 1-2: vibrato awkward near the nut
+    # Wide vibrato needs more finger travel; penalise further on low frets.
+    if note.vibrato_wide and 0 < s2.fret <= 3:
+        cost += 1.0
+
+    # --- 4. Bend feasibility ---
+    # Bending requires pushing/pulling the string sideways.  Open strings
+    # cannot be bent.  Wound strings (6, 5, 4) are harder to bend,
+    # especially for larger bend values.
+    if note.bend_value is not None and note.bend_value > 0:
+        if s2.fret == 0:
+            cost += 6.0  # open string: bend impossible
+        else:
+            # Wound strings (low E=6, A=5, D=4) require more force.
+            if s2.string_num >= 5:
+                cost += 1.5 * note.bend_value  # strings 5-6: heavy wound
+            elif s2.string_num == 4:
+                cost += 0.8 * note.bend_value  # string 4: medium wound
+
+    # --- 5. Natural harmonic position matching ---
+    # Natural harmonics ring at specific fret positions (5, 7, 12, 19).
+    # If the source specifies a harmonic_fret, the fingering should match.
+    if note.harmonic_type == "natural" and note.harmonic_fret is not None:
+        if s2.fret != note.harmonic_fret:
+            cost += 4.0  # wrong fret for the harmonic node
+
+    # --- 6. Muted / tapping modifiers ---
+    # Tapping is easier at higher frets where the action is lower.
+    if note.tapping and s2.fret < 5:
+        cost += 1.5  # tapping near the nut is harder
+
+    return cost
 
 
 def compute_mechanical_cost(

@@ -1,0 +1,275 @@
+"""FastAPI application — serves the FretWise tab viewer."""
+
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import asdict
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+
+from fretwise.generator import StateGenerator
+from fretwise.models import (
+    ChordDiagram,
+    FingeringResult,
+    FingeringState,
+    NoteEvent,
+)
+from fretwise.optimizer import ViterbiOptimizer
+from fretwise.parser import get_adapter
+from fretwise.parser.base import ParseError, UnsupportedFormatError
+from fretwise.patterns import PatternMatcher
+from fretwise.pipeline import run_pipeline
+from fretwise.scoring import CostFunction, CostWeights
+
+# ---------------------------------------------------------------------------
+# App factory
+# ---------------------------------------------------------------------------
+
+_STATIC_DIR = Path(__file__).parent / "static"
+
+
+def create_app(fixtures_dir: Path | None = None) -> FastAPI:
+    """Create and configure the FastAPI application.
+
+    Args:
+        fixtures_dir: Directory containing GP/MusicXML/MIDI files.
+                      Defaults to tests/fixtures/.
+    """
+    app = FastAPI(title="FretWise", version="0.1.0")
+
+    # Prevent browser from caching JS/CSS during development
+    @app.middleware("http")
+    async def _no_cache_static(request: Request, call_next: Any) -> Any:
+        response = await call_next(request)
+        path = request.url.path
+        if path.startswith("/static/") and (path.endswith(".js") or path.endswith(".css")):
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
+    if fixtures_dir is None:
+        # Default to project's test fixtures
+        fixtures_dir = Path(__file__).parents[3] / "tests" / "fixtures"
+
+    # Mount static files
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+    # Store config
+    app.state.fixtures_dir = fixtures_dir
+
+    _register_routes(app)
+    return app
+
+
+def _register_routes(app: FastAPI) -> None:
+    """Register all API and page routes."""
+
+    @app.get("/", response_class=HTMLResponse)
+    async def index() -> HTMLResponse:
+        """Serve the main single-page app."""
+        html_path = _STATIC_DIR / "index.html"
+        return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
+    @app.get("/api/files")
+    async def list_files() -> list[dict[str, str]]:
+        """List available score files."""
+        fixtures: Path = app.state.fixtures_dir
+        if not fixtures.exists():
+            return []
+
+        supported = {
+            ".gp3", ".gp4", ".gp5", ".gp",
+            ".xml", ".mxl", ".musicxml",
+            ".mid", ".midi",
+        }
+        files = []
+        for f in sorted(fixtures.iterdir()):
+            if f.suffix.lower() in supported and f.is_file():
+                files.append({
+                    "name": f.name,
+                    "stem": f.stem,
+                    "format": f.suffix.lstrip(".").upper(),
+                })
+        return files
+
+    @app.get("/api/tracks/{filename}")
+    async def list_tracks(filename: str) -> list[dict[str, Any]]:
+        """List guitar tracks in a file."""
+        filepath = _resolve_file(app, filename)
+
+        try:
+            adapter = get_adapter(filepath)
+        except UnsupportedFormatError as exc:
+            raise HTTPException(400, str(exc))
+
+        tracks = []
+        if hasattr(adapter, "list_guitar_tracks"):
+            raw_tracks = adapter.list_guitar_tracks(filepath)
+            for track_id, name, tuning in raw_tracks:
+                tracks.append({
+                    "id": track_id,
+                    "name": name,
+                    "tuning": tuning,
+                })
+        else:
+            # MusicXML/MIDI: single-track
+            tracks.append({"id": 0, "name": "Guitar", "tuning": [40, 45, 50, 55, 59, 64]})
+
+        return tracks
+
+    @app.get("/api/solve/{filename}")
+    async def solve_file(
+        filename: str,
+        track_id: int | None = Query(None),
+        mode: str = Query("reference"),
+    ) -> dict[str, Any]:
+        """Run the full pipeline and return results as JSON."""
+        filepath = _resolve_file(app, filename)
+        modes = {
+            "reference": CostWeights.reference,
+            "performance": CostWeights.performance,
+            "musical": CostWeights.musical,
+            "learning": CostWeights.learning,
+        }
+        if mode not in modes:
+            raise HTTPException(400, f"Unknown mode: {mode}")
+
+        try:
+            adapter = get_adapter(filepath)
+        except UnsupportedFormatError as exc:
+            raise HTTPException(400, str(exc))
+
+        try:
+            if track_id is not None and hasattr(adapter, "parse_track"):
+                events = adapter.parse_track(filepath, track_id)
+            else:
+                events = adapter.parse(filepath)
+        except (ParseError, UnsupportedFormatError) as exc:
+            raise HTTPException(400, str(exc))
+
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        generator = StateGenerator()
+        weights = modes[mode]()
+        cost_fn = CostFunction(weights=weights)
+        optimizer = ViterbiOptimizer(cost_fn)
+        matcher = PatternMatcher()
+
+        results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+
+        # Extract metadata from adapter
+        track_name: str = getattr(adapter, "track_name", "") or ""
+        section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+        chord_diagrams: list[ChordDiagram] = list(
+            getattr(adapter, "chord_diagrams", []) or []
+        )
+
+        # Parse artist/title from filename
+        import re
+        clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", filepath.stem).strip()
+        parts = clean_stem.split("-", 1)
+        auto_artist = parts[0].strip() if len(parts) == 2 else ""
+        auto_title = parts[1].strip() if len(parts) == 2 else clean_stem
+
+        # Determine tempo and time signature
+        tempo = events[0].tempo if events else 120.0
+        beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
+
+        return {
+            "title": auto_title,
+            "artist": auto_artist,
+            "track_name": track_name,
+            "mode": mode,
+            "tempo": tempo,
+            "beats_per_measure": beats_per_measure,
+            "section_markers": section_markers,
+            "chord_diagrams": [_serialize_chord_diagram(cd) for cd in chord_diagrams],
+            "stats": stats,
+            "results": [_serialize_result(r) for r in results],
+        }
+
+    @app.post("/api/upload")
+    async def upload_file(file: UploadFile = File(...)) -> dict[str, str]:
+        """Upload a score file to the fixtures directory."""
+        safe_name = Path(file.filename or "upload").name
+        if not safe_name:
+            raise HTTPException(400, "Invalid filename")
+        supported = {".gp3", ".gp4", ".gp5", ".gp", ".xml", ".mxl", ".musicxml", ".mid", ".midi"}
+        if Path(safe_name).suffix.lower() not in supported:
+            raise HTTPException(400, f"Unsupported file type: {Path(safe_name).suffix}")
+        dest: Path = app.state.fixtures_dir / safe_name
+        content = await file.read()
+        dest.write_bytes(content)
+        return {"name": safe_name, "status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_file(app: FastAPI, filename: str) -> Path:
+    """Resolve a filename to a safe path within fixtures_dir."""
+    # Sanitize: only allow the filename component
+    safe_name = Path(filename).name
+    filepath = app.state.fixtures_dir / safe_name
+    if not filepath.exists():
+        raise HTTPException(404, f"File not found: {safe_name}")
+    # Prevent path traversal
+    try:
+        filepath.resolve().relative_to(app.state.fixtures_dir.resolve())
+    except ValueError:
+        raise HTTPException(403, "Access denied")
+    return filepath
+
+
+def _serialize_result(r: FingeringResult) -> dict[str, Any]:
+    """Serialize a FingeringResult to a JSON-friendly dict."""
+    ne = r.note_event
+    st = r.state
+    return {
+        "note_id": r.note_id,
+        "pitch": ne.pitch,
+        "onset": ne.onset,
+        "duration": ne.duration,
+        "tempo": ne.tempo,
+        "articulation": str(ne.articulation),
+        "dynamic": str(ne.dynamic),
+        "string": st.string_num,
+        "fret": st.fret,
+        "finger": str(st.finger),
+        "hand_position": st.hand_position,
+        "cost": r.cost,
+        # Notation fields
+        "let_ring": ne.let_ring,
+        "bend_value": ne.bend_value,
+        "bend_type": ne.bend_type,
+        "slide_type": ne.slide_type,
+        "vibrato_wide": ne.vibrato_wide,
+        "harmonic_type": ne.harmonic_type,
+        "harmonic_fret": ne.harmonic_fret,
+        "muted": ne.muted,
+        "palm_muted": ne.palm_muted,
+        "tapping": ne.tapping,
+        "accent": ne.accent,
+        "accent_strong": ne.accent_strong,
+        "tremolo_picking": ne.tremolo_picking,
+    }
+
+
+def _serialize_chord_diagram(cd: ChordDiagram) -> dict[str, Any]:
+    """Serialize a ChordDiagram to JSON."""
+    return {
+        "name": cd.name,
+        "frets": cd.frets,
+        "string_count": cd.string_count,
+        "base_fret": cd.base_fret,
+        "fingers": cd.fingers,
+    }

@@ -1,15 +1,16 @@
-"""Tests for fretwise.scoring — C_méca cost functions."""
+"""Tests for fretwise.scoring — C_méca and C_music cost functions."""
 
 from __future__ import annotations
 
 import pytest
 
-from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
+from fretwise.models import Articulation, Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.scoring import (
     CostFunction,
     CostWeights,
     _natural_finger_assignment,
     compute_mechanical_cost,
+    compute_musical_cost,
     cost_finger_difficulty,
     cost_position_shift,
     cost_sequential_crossing,
@@ -982,3 +983,208 @@ class TestResolveChordStringDiagonal:
         ]
         out = resolve_chord_string_diagonal(results)
         assert all(r.state.finger == Finger.OPEN for r in out)
+
+
+# ---------------------------------------------------------------------------
+# compute_musical_cost (C_music)
+# ---------------------------------------------------------------------------
+
+
+def _note_art(
+    articulation: Articulation = Articulation.NORMAL,
+    tempo: float = 120.0,
+    duration: float = 1.0,
+    **kwargs: object,
+) -> NoteEvent:
+    """Helper to build a NoteEvent with specific articulation fields."""
+    return NoteEvent(
+        pitch=60, onset=0.0, duration=duration, tempo=tempo,
+        articulation=articulation, **kwargs,  # type: ignore[arg-type]
+    )
+
+
+class TestMusicalCostLegatoSameString:
+    """Hammer-on, pull-off, and legato require same string."""
+
+    def test_hammer_on_same_string_zero(self) -> None:
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=3, fret=7)
+        note = _note_art(articulation=Articulation.HAMMER_ON)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_hammer_on_different_string_penalty(self) -> None:
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=2, fret=7)
+        note = _note_art(articulation=Articulation.HAMMER_ON)
+        assert compute_musical_cost(s1, s2, note) >= 5.0
+
+    def test_pull_off_same_string_zero(self) -> None:
+        s1 = _state(string_num=2, fret=7)
+        s2 = _state(string_num=2, fret=5)
+        note = _note_art(articulation=Articulation.PULL_OFF)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_pull_off_different_string_penalty(self) -> None:
+        s1 = _state(string_num=2, fret=7)
+        s2 = _state(string_num=3, fret=5)
+        note = _note_art(articulation=Articulation.PULL_OFF)
+        assert compute_musical_cost(s1, s2, note) >= 5.0
+
+    def test_legato_same_string_zero(self) -> None:
+        s1 = _state(string_num=1, fret=3)
+        s2 = _state(string_num=1, fret=5)
+        note = _note_art(articulation=Articulation.LEGATO)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_legato_different_string_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=3)
+        s2 = _state(string_num=2, fret=5)
+        note = _note_art(articulation=Articulation.LEGATO)
+        assert compute_musical_cost(s1, s2, note) >= 5.0
+
+
+class TestMusicalCostSlide:
+    """Slides require same string."""
+
+    def test_slide_same_string_zero(self) -> None:
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=3, fret=9)
+        note = _note_art(slide_type="legato")
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_slide_different_string_penalty(self) -> None:
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=2, fret=9)
+        note = _note_art(slide_type="shift")
+        assert compute_musical_cost(s1, s2, note) >= 5.0
+
+
+class TestMusicalCostVibrato:
+    """Vibrato position quality."""
+
+    def test_vibrato_open_string_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1)
+        s2 = _state(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1)
+        note = _note_art(articulation=Articulation.VIBRATO)
+        assert compute_musical_cost(s1, s2, note) >= 4.0
+
+    def test_vibrato_mid_fret_zero(self) -> None:
+        s1 = _state(string_num=1, fret=7)
+        s2 = _state(string_num=1, fret=7)
+        note = _note_art(articulation=Articulation.VIBRATO)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_vibrato_low_fret_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=1, hand_position=1)
+        s2 = _state(string_num=1, fret=1, hand_position=1)
+        note = _note_art(articulation=Articulation.VIBRATO)
+        assert compute_musical_cost(s1, s2, note) > 0.0
+
+    def test_wide_vibrato_low_fret_extra_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=2, hand_position=1)
+        s2 = _state(string_num=1, fret=2, hand_position=1)
+        note_normal = _note_art(articulation=Articulation.VIBRATO)
+        note_wide = _note_art(articulation=Articulation.WIDE_VIBRATO, vibrato_wide=True)
+        cost_normal = compute_musical_cost(s1, s2, note_normal)
+        cost_wide = compute_musical_cost(s1, s2, note_wide)
+        assert cost_wide > cost_normal
+
+
+class TestMusicalCostBend:
+    """Bend feasibility."""
+
+    def test_bend_open_string_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1)
+        s2 = _state(string_num=1, fret=0, finger=Finger.OPEN, hand_position=1)
+        note = _note_art(bend_value=1.0, bend_type="normal")
+        assert compute_musical_cost(s1, s2, note) >= 6.0
+
+    def test_bend_plain_string_no_wound_penalty(self) -> None:
+        s1 = _state(string_num=2, fret=7)
+        s2 = _state(string_num=2, fret=7)
+        note = _note_art(bend_value=1.0, bend_type="normal")
+        # String 2 (B) is a plain string — no wound penalty.
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_bend_wound_string_penalty(self) -> None:
+        s1 = _state(string_num=5, fret=7)
+        s2 = _state(string_num=5, fret=7)
+        note = _note_art(bend_value=1.0, bend_type="normal")
+        # String 5 (A) is wound — should carry a penalty.
+        assert compute_musical_cost(s1, s2, note) > 0.0
+
+    def test_larger_bend_costs_more_on_wound(self) -> None:
+        s1 = _state(string_num=6, fret=7)
+        s2 = _state(string_num=6, fret=7)
+        half = _note_art(bend_value=0.5, bend_type="normal")
+        full = _note_art(bend_value=2.0, bend_type="normal")
+        assert compute_musical_cost(s1, s2, full) > compute_musical_cost(s1, s2, half)
+
+
+class TestMusicalCostHarmonic:
+    """Natural harmonic position matching."""
+
+    def test_harmonic_correct_fret_zero(self) -> None:
+        s1 = _state(string_num=1, fret=12, hand_position=12)
+        s2 = _state(string_num=1, fret=12, hand_position=12)
+        note = _note_art(harmonic_type="natural", harmonic_fret=12)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_harmonic_wrong_fret_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=11, hand_position=11)
+        s2 = _state(string_num=1, fret=11, hand_position=11)
+        note = _note_art(harmonic_type="natural", harmonic_fret=12)
+        assert compute_musical_cost(s1, s2, note) >= 4.0
+
+
+class TestMusicalCostTapping:
+    """Tapping modifier."""
+
+    def test_tapping_high_fret_zero(self) -> None:
+        s1 = _state(string_num=1, fret=12, hand_position=12)
+        s2 = _state(string_num=1, fret=12, hand_position=12)
+        note = _note_art(tapping=True)
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+    def test_tapping_low_fret_penalty(self) -> None:
+        s1 = _state(string_num=1, fret=3, hand_position=3)
+        s2 = _state(string_num=1, fret=3, hand_position=3)
+        note = _note_art(tapping=True)
+        assert compute_musical_cost(s1, s2, note) >= 1.5
+
+
+class TestMusicalCostNormal:
+    """Normal articulation should add zero musical cost."""
+
+    def test_normal_note_zero_cost(self) -> None:
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=2, fret=7)
+        note = _note_art()
+        assert compute_musical_cost(s1, s2, note) == pytest.approx(0.0)
+
+
+class TestMusicalCostIntegration:
+    """C_music influences transition_cost via β weight."""
+
+    def test_reference_mode_includes_c_music(self) -> None:
+        """Reference mode (β=1.0): C_music is active."""
+        cf = CostFunction(weights=CostWeights.reference())
+        s1 = _state(string_num=3, fret=5)
+        s2_same = _state(string_num=3, fret=7)
+        s2_diff = _state(string_num=2, fret=7)
+        note = _note_art(articulation=Articulation.HAMMER_ON)
+        cost_same = cf.transition_cost(s1, s2_same, note)
+        cost_diff = cf.transition_cost(s1, s2_diff, note)
+        assert cost_diff > cost_same
+
+    def test_zero_beta_ignores_c_music(self) -> None:
+        """With β=0, musical cost is ignored."""
+        cf = CostFunction(weights=CostWeights(alpha=1.0, beta=0.0))
+        s1 = _state(string_num=3, fret=5)
+        s2 = _state(string_num=2, fret=7)
+        note_normal = _note_art()
+        note_ho = _note_art(articulation=Articulation.HAMMER_ON)
+        # Different articulations should produce the same total cost when β=0.
+        assert cf.transition_cost(s1, s2, note_normal) == pytest.approx(
+            cf.transition_cost(s1, s2, note_ho)
+        )

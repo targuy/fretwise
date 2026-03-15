@@ -21,6 +21,7 @@ from fretwise.export import render_ascii_tab, render_pdf_tab, render_text_report
 from fretwise.generator import StateGenerator
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
+from fretwise.patterns import PatternMatcher
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights
 
@@ -60,7 +61,8 @@ def process_track(
     cost_fn = CostFunction(weights=weights_cls())
     generator = StateGenerator()
     optimizer = ViterbiOptimizer(cost_fn)
-    results, stats = run_pipeline(events, generator, optimizer)
+    matcher = PatternMatcher()
+    results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
 
     total_cost = sum(r.cost for r in results)
     print(f"  Notes  : {len(results)}  |  cost = {total_cost:.2f}")

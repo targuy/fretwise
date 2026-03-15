@@ -70,11 +70,11 @@ _STRINGS_HEIGHT = (_NUM_STRINGS - 1) * _STRING_SPACING   # 50 pt
 
 # Rhythm notation (above sys_y = y of string 1)
 _STEM_GAP = 2.5      # gap between string-1 and stem base
-_STEM_H = 16.0       # total stem height above string-1
+_STEM_H = 14.0       # total stem height above string-1  (was 16, reduced for R09)
 
 # Text belt heights above sys_y
-_CHORD_Y = 30.0      # chord-name baseline above sys_y  (was 24)
-_TEMPO_Y = 42.0      # tempo/timesig baseline above sys_y  (was 33)
+_CHORD_Y = 22.0      # chord-name baseline above sys_y  (was 30)
+_TEMPO_Y = 38.0      # tempo/timesig baseline above sys_y  (was 42)
 
 # System vertical extents
 _TOP_PAD = 4.0
@@ -102,7 +102,7 @@ _FRET_FS = 6.0
 #   → cap-top  ≈ string_y - 2.0  (below the string line, outside the oval)
 #   → descender ≈ string_y - 7.0  (3 pt clear of the next string line) ✓
 _LH_FINGER_FONT = "Helvetica-Bold"
-_LH_FINGER_FS = 5.0
+_LH_FINGER_FS = 4.5
 _LH_FINGER_Y = -5.5       # baseline offset from string_y
 _LH_FINGER_COLOR = colors.Color(0.80, 0.05, 0.05)   # dark red
 
@@ -116,8 +116,18 @@ _RH_FINGER_Y = -5.5       # same baseline as LH for visual symmetry
 _RH_FINGER_COLOR = colors.Color(0.05, 0.05, 0.80)   # dark blue
 
 # Column layout
-_MIN_COL_STEP = 17.0   # minimum x step between consecutive onset columns
+_MIN_COL_STEP = 14.0   # minimum x step between consecutive onset columns
 _LEFT_PAD = 9.0        # padding inside measure left edge
+
+_MNUM_Y = 31.0         # measure-number baseline above sys_y (between chord and tempo)
+_UNIT_W = 11.0         # pt per rhythmic unit for variable measure widths
+_MIN_MEASURE_W = 42.0  # minimum measure width (whole-note measure)
+_MAX_MEASURE_W = 200.0 # maximum measure width (very dense measure)
+
+# Rest rendering — centred inside the staff
+_REST_CENTER_Y = 25.0   # offset below sys_y: rest centre = midpoint between strings 3 and 4
+_REST_DISC_R = 6.0       # radius of white disc drawn around small rest symbols
+_REST_DISC_LW = 0.7      # linewidth of the black ring on the disc
 
 # Default / caps
 _MPS_MIN, _MPS_MAX = 2, 6
@@ -184,9 +194,14 @@ def render_pdf_tab(
         return
 
     measures = _group_by_measure(results, beats_per_measure)
-    mps = measures_per_system if measures_per_system is not None else _calc_mps(measures)
-    mps = max(_MPS_MIN, min(_MPS_MAX, mps))
     first_song_measure = int(results[0].note_event.onset / beats_per_measure) + 1
+    _available_w = _PAGE_W - _MARGIN - _STRINGS_X0
+
+    forced_mps: int | None = None
+    if measures_per_system is not None:
+        forced_mps = max(_MPS_MIN, min(_MPS_MAX, measures_per_system))
+
+    systems = _build_systems(measures, beats_per_measure, _available_w, forced_mps)
 
     # ── Page 1: rhythm legend (+ chord diagrams when present)
     legend_bottom = _draw_rhythm_legend(c, _PAGE_H - _MARGIN)
@@ -206,12 +221,10 @@ def render_pdf_tab(
     first_system_on_page = True
     prev_tempo: float = -1.0
 
-    while m_idx < len(measures):
-        sys_measures = measures[m_idx : m_idx + mps]
+    for sys_idx, (sys_measures, measure_widths) in enumerate(systems):
         song_m_start = first_song_measure + m_idx
         m_idx += len(sys_measures)
 
-        # Representative tempo for this system (first note's tempo)
         sys_tempo = _system_tempo(sys_measures, results[0].note_event.tempo)
         show_tempo = (sys_tempo != prev_tempo)
 
@@ -225,10 +238,10 @@ def render_pdf_tab(
             sys_y = current_top - _ABOVE_STRINGS
             system_bottom = sys_y - _STRINGS_HEIGHT - _BELOW_STRINGS
 
-        is_last = m_idx >= len(measures)
+        is_last = sys_idx == len(systems) - 1
         _draw_system(
             c, sys_measures, sys_y, song_m_start,
-            beats_per_measure, mps, sys_tempo, show_tempo,
+            beats_per_measure, measure_widths, sys_tempo, show_tempo,
             first_system_on_page, _section_markers, is_last,
         )
         prev_tempo = sys_tempo
@@ -360,7 +373,7 @@ def _draw_system(
     sys_y: float,
     song_m_start: int,
     beats_per_measure: float,
-    mps: int,
+    measure_widths: list[float],
     sys_tempo: float,
     show_tempo: bool,
     first_on_page: bool,
@@ -372,10 +385,8 @@ def _draw_system(
     Args:
         sys_y: y-coordinate of string 1 (high e) in ReportLab coords.
     """
-    n = len(sys_measures)
     strings_x1 = _PAGE_W - _MARGIN
-    measure_w = (strings_x1 - _STRINGS_X0) / mps
-    x_right = _STRINGS_X0 + n * measure_w
+    x_right = _STRINGS_X0 + sum(measure_widths)
 
     # ── TAB label + string names on the left
     _draw_tab_label(c, sys_y, first_on_page)
@@ -401,9 +412,13 @@ def _draw_system(
         c.setFillColor(_COL_BLACK)
 
     # ── Measures
+    cumulative_x = [_STRINGS_X0]
+    for w in measure_widths:
+        cumulative_x.append(cumulative_x[-1] + w)
+
     for slot, measure_results in enumerate(sys_measures):
-        x0 = _STRINGS_X0 + slot * measure_w
-        x1 = x0 + measure_w
+        x0 = cumulative_x[slot]
+        x1 = cumulative_x[slot + 1]
 
         # Bar line (double for first measure of system)
         if slot == 0:
@@ -420,7 +435,7 @@ def _draw_system(
         # Measure number (small grey, between chord belt and tempo line)
         c.setFont("Helvetica", 5.5)
         c.setFillColor(_COL_GREY)
-        c.drawString(x0 + 3, sys_y + _CHORD_Y + 5, str(song_m_start + slot))
+        c.drawString(x0 + 3, sys_y + _MNUM_Y, str(song_m_start + slot))
         c.setFillColor(_COL_BLACK)
 
         # Section label (bold, above tempo line)
@@ -518,7 +533,15 @@ def _draw_measure(
             # Skip if this chord name would overlap the previous one
             if cx - 2 > prev_chord_x_right + 2:
                 c.setFillColor(_COL_BLACK)
-                c.drawString(cx - 2, sys_y + _CHORD_Y, chord)
+                # Truncate if chord name overflows into the right margin of the measure
+                max_w = (x0 + measure_w) - (cx - 2) - 3.0
+                display_chord = chord
+                if chord_w > max_w:
+                    while c.stringWidth(display_chord + "\u2026", "Helvetica-Bold", 6.5) > max_w and len(display_chord) > 1:
+                        display_chord = display_chord[:-1]
+                    display_chord += "\u2026"
+                    chord_w = c.stringWidth(display_chord, "Helvetica-Bold", 6.5)
+                c.drawString(cx - 2, sys_y + _CHORD_Y, display_chord)
                 prev_chord_x_right = cx - 2 + chord_w
                 prev_chord = chord
 
@@ -529,8 +552,12 @@ def _draw_measure(
         dur = min(r.note_event.duration for r in onset_map[onset])
         stem_info.append((nx, onset, dur))
 
-    # ── Beaming analysis
-    beamed = _get_beamed_onsets(stem_info)
+    # ── Compute rests first — needed for beat-aware beaming analysis
+    rests = _compute_rests(sorted_onsets, onset_map, measure_onset, beats_per_measure)
+
+    # ── Beaming analysis (beat-aware, rest-aware)
+    beam_groups = _get_beam_groups(stem_info, beats_per_measure, measure_onset)
+    beamed: set[float] = {onset for grp in beam_groups for _, onset, _ in grp}
 
     # ── Draw stems  (before notes so note ovals cover the stem base)
     # Convention (confirmed by Guitar Pro / standard tab publishers):
@@ -545,24 +572,24 @@ def _draw_measure(
     c.setStrokeColor(_COL_BLACK)
     c.setFillColor(_COL_BLACK)
     for nx, onset, dur in stem_info:
-        if dur >= 4.0:
-            continue          # whole note: no stem (visible oval on fret number is enough)
+        base_dur = _dotted_base(dur)
+        if base_dur >= 4.0:
+            continue          # whole note (or dotted whole): no stem
         c.setLineWidth(0.8)
         c.line(nx, stem_bot, nx, stem_top)
-        if dur < 1.0 and onset not in beamed:   # unbeamed 8th / 16th / 32nd: draw flags
+        if base_dur < 1.0 and onset not in beamed:   # unbeamed 8th / 16th / 32nd: draw flags
             for fi in range(_num_flags(dur)):
                 _draw_flag(c, nx, stem_top - fi * 4.0)
 
     # ── Draw beams
-    _draw_beams(c, stem_info, beamed, stem_top)
+    _draw_beams(c, beam_groups, stem_top)
 
-    # ── Draw rests (gaps in the measure timeline)
-    rests = _compute_rests(sorted_onsets, onset_map, measure_onset, beats_per_measure)
+    # ── Draw rests inside the staff (centred vertically, white disc for small values)
     for rest_onset, rest_dur in rests:
         rel = max(0.0, rest_onset - measure_onset)
         frac = min(rel / beats_per_measure, 0.97)
         rx = x0 + _LEFT_PAD + frac * (measure_w - _LEFT_PAD - 5.0)
-        _draw_rest(c, rx, stem_top, rest_dur)
+        _draw_rest(c, rx, sys_y, rest_dur)
 
     # ── Per-measure rhythm checksum
     # Compute coverage = beats actually covered by note attacks + rest gaps.
@@ -681,20 +708,40 @@ def _compute_onset_x(
 # Rhythm helpers
 # ---------------------------------------------------------------------------
 
+# Standard undotted base values in beats.
+_STANDARD_BASES: tuple[float, ...] = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
+
+
+def _is_dotted(dur: float) -> bool:
+    """Return True if *dur* matches a dotted note value (base × 1.5)."""
+    return any(abs(dur - b * 1.5) < 0.01 for b in _STANDARD_BASES)
+
+
+def _dotted_base(dur: float) -> float:
+    """Return the undotted base duration for a dotted note, else *dur* unchanged."""
+    for b in _STANDARD_BASES:
+        if abs(dur - b * 1.5) < 0.01:
+            return b
+    return dur
+
 
 def _num_flags(duration: float) -> int:
     """Number of stem flags for a given duration in beats.
+
+    Dotted notes use the flag count of their undotted base (e.g. dotted eighth
+    = 1 flag, same as a plain eighth).
 
     Quarter note (1.0 beat) and longer → 0 flags.
     Eighth note (0.5 beat)            → 1 flag.
     Sixteenth note (0.25 beat)        → 2 flags.
     Thirty-second note (0.125 beat)   → 3 flags.
     """
-    if duration >= 1.0:
+    base = _dotted_base(duration)  # no-op if not dotted
+    if base >= 1.0:
         return 0
-    if duration >= 0.5:
+    if base >= 0.5:
         return 1
-    if duration >= 0.25:
+    if base >= 0.25:
         return 2
     return 3
 
@@ -709,69 +756,156 @@ def _draw_flag(c: rl_canvas.Canvas, x: float, y: float) -> None:
     c.drawPath(p, stroke=1, fill=0)
 
 
-def _get_beamed_onsets(
+def _get_beam_groups(
     stem_info: list[tuple[float, float, float]],
-) -> set[float]:
-    """Return onset values that belong to a beam group (≥ 2 consecutive beamable notes).
+    beats_per_measure: float,
+    measure_onset: float,
+) -> list[list[tuple[float, float, float]]]:
+    """Return beam groups for the notes in a measure.
 
-    Notes with duration < 1.0 beat (shorter than a quarter note) can be beamed.
-    Groups of single sub-quarter notes are not beamed (they keep their flags).
+    Each group is a list of ``(x, onset, duration)`` tuples for notes that
+    should be connected by a primary beam bar.  A group requires ≥ 2 notes.
+
+    Rules applied:
+    - Only notes with ``duration < 1.0`` beat (shorter than a quarter note)
+      can be beamed.
+    - A group is **broken at each beat boundary** (``measure_onset + N`` for
+      integer N in ``[1, beats_per_measure)``).  In 4/4 this means groups of
+      at most 2 eighth notes or 4 sixteenth notes per beat.
+    - A group is **broken when a rest gap ≥ 1/32 beat (0.115 b)** exists
+      between the end of one note and the start of the next.
+    - A group with a single note is dropped; the note keeps its flags.
+
+    Args:
+        stem_info: List of ``(x, onset, duration)`` sorted by onset.
+        beats_per_measure: Time-signature numerator (e.g. 4.0 for 4/4).
+        measure_onset: Absolute beat onset of the first beat of this measure.
+
+    Returns:
+        List of beam groups; each group is a non-empty list of
+        ``(x, onset, duration)`` tuples.
     """
-    beamed: set[float] = set()
-    i = 0
-    while i < len(stem_info):
-        _, onset_i, dur_i = stem_info[i]
-        if dur_i >= 1.0:          # quarter note or longer: not beamable
-            i += 1
+    # Beat boundaries within this measure (exclusive of measure start)
+    beat_boundaries = frozenset(
+        round(measure_onset + k, 9)
+        for k in range(1, int(beats_per_measure + 0.5))
+    )
+
+    groups: list[list[tuple[float, float, float]]] = []
+    current: list[tuple[float, float, float]] = []
+
+    for x, onset, dur in stem_info:
+        if dur >= 1.0:
+            # Quarter note or longer: not beamable — close the current group
+            if len(current) >= 2:
+                groups.append(current)
+            current = []
             continue
-        group = [onset_i]
-        j = i + 1
-        while j < len(stem_info):
-            _, onset_j, dur_j = stem_info[j]
-            if dur_j >= 1.0:
-                break
-            group.append(onset_j)
-            j += 1
-        if len(group) >= 2:
-            beamed.update(group)
-        i = max(i + 1, j)
-    return beamed
+
+        if current:
+            _, prev_onset, prev_dur = current[-1]
+            prev_end = prev_onset + prev_dur
+
+            # Rest gap: gap between end of previous note and start of this one
+            has_rest = (onset - prev_end) >= 0.115
+
+            # Beat crossing: a beat boundary falls between the two onsets
+            crosses_beat = any(prev_onset < bb <= onset for bb in beat_boundaries)
+
+            if has_rest or crosses_beat:
+                if len(current) >= 2:
+                    groups.append(current)
+                current = [(x, onset, dur)]
+            else:
+                current.append((x, onset, dur))
+        else:
+            current.append((x, onset, dur))
+
+    if len(current) >= 2:
+        groups.append(current)
+
+    return groups
 
 
 def _draw_beams(
     c: rl_canvas.Canvas,
-    stem_info: list[tuple[float, float, float]],
-    beamed: set[float],
+    groups: list[list[tuple[float, float, float]]],
     beam_y: float,
 ) -> None:
-    """Draw filled beam bars connecting groups of beamed stems."""
-    if not beamed:
+    """Draw filled beam bars for each beam group.
+
+    For each group:
+    - A **primary beam** (8th-note bar) spans from the first to the last stem.
+    - A **partial secondary beam** (16th-note bar) is drawn only over
+      consecutive runs of notes with ``duration < 0.5`` (16th notes or
+      shorter) within the group.  This correctly handles mixed groups that
+      contain both eighth and sixteenth notes.
+
+    Args:
+        c: ReportLab canvas.
+        groups: Beam groups as returned by :func:`_get_beam_groups`.
+        beam_y: Y coordinate of the top of the primary beam bar.
+    """
+    if not groups:
         return
     BEAM_H = 2.5
     BEAM_GAP = 3.0
     c.setFillColor(_COL_BLACK)
 
-    i = 0
-    while i < len(stem_info):
-        x_i, onset_i, _ = stem_info[i]
-        if onset_i not in beamed:
-            i += 1
+    for group in groups:
+        if len(group) < 2:
             continue
-        j = i + 1
-        while j < len(stem_info) and stem_info[j][1] in beamed:
-            j += 1
-        group = [(stem_info[k][0], stem_info[k][2]) for k in range(i, j)]
-        if len(group) >= 2:
-            gx0, gx1 = group[0][0], group[-1][0]
-            # Primary beam (8th note)
-            c.rect(gx0, beam_y - BEAM_H, gx1 - gx0, BEAM_H, fill=1, stroke=0)
-            # Secondary beam (16th note) if all notes in the group qualify
-            if all(d < 0.5 for _, d in group):
-                c.rect(
-                    gx0, beam_y - BEAM_H - BEAM_GAP - BEAM_H,
-                    gx1 - gx0, BEAM_H, fill=1, stroke=0,
-                )
-        i = j
+        gx0 = group[0][0]
+        gx1 = group[-1][0]
+
+        # Primary beam (8th-note bar): full span of the group
+        c.rect(gx0, beam_y - BEAM_H, gx1 - gx0, BEAM_H, fill=1, stroke=0)
+
+        # Secondary beam (16th-note bar): partial, only over runs of dur < 0.5
+        _draw_secondary_beam(c, group, beam_y, BEAM_H, BEAM_GAP)
+
+
+def _draw_secondary_beam(
+    c: rl_canvas.Canvas,
+    group: list[tuple[float, float, float]],
+    beam_y: float,
+    beam_h: float,
+    beam_gap: float,
+) -> None:
+    """Draw partial secondary beam segments for 16th-note runs within a group.
+
+    Scans the group for consecutive sub-eighth notes (``duration < 0.5``).
+    Each such run gets its own secondary bar at ``beam_y - beam_h - beam_gap``.
+    A run of length 1 (isolated 16th inside a predominantly-eighth group) still
+    gets a short partial bar spanning half the column step on each side.
+
+    Args:
+        c: ReportLab canvas.
+        group: Beam group (list of ``(x, onset, duration)`` tuples).
+        beam_y: Y of primary beam top edge.
+        beam_h: Height of each beam bar.
+        beam_gap: Vertical gap between primary and secondary bars.
+    """
+    y2_top = beam_y - beam_h - beam_gap
+    run: list[float] = []   # x positions of current 16th-note run
+
+    def flush() -> None:
+        if not run:
+            return
+        if len(run) >= 2:
+            c.rect(run[0], y2_top - beam_h, run[-1] - run[0], beam_h, fill=1, stroke=0)
+        else:
+            # Isolated 16th: draw a short stub (half min-col-step on each side)
+            stub = _MIN_COL_STEP * 0.4
+            c.rect(run[0] - stub, y2_top - beam_h, stub * 2, beam_h, fill=1, stroke=0)
+
+    for x, _, dur in group:
+        if dur < 0.5:
+            run.append(x)
+        else:
+            flush()
+            run = []
+    flush()
 
 
 # ---------------------------------------------------------------------------
@@ -831,75 +965,94 @@ def _compute_rests(
     return rests
 
 
-def _draw_rest(c: rl_canvas.Canvas, rx: float, y_top: float, duration: float) -> None:
-    """Draw one rest symbol centred at x = *rx*, using *y_top* (≈ stem top) as anchor.
+def _draw_rest(c: rl_canvas.Canvas, rx: float, sys_y: float, duration: float) -> None:
+    """Draw one rest symbol centred at the staff vertical midpoint.
 
-    Symbols follow standard music notation conventions adapted for tab:
-      Whole rest  — filled black rectangle hanging below a ledger line
-      Half rest   — filled black rectangle sitting on top of a ledger line
-      Quarter rest — squiggly vertical symbol (approximated path)
-      Eighth rest — diagonal stem with filled dot
-      16th rest   — diagonal stem with two filled dots
+    The rest centre is ``sys_y - _REST_CENTER_Y``, placing it exactly between
+    strings 3 (G) and 4 (D) regardless of note density above or below.
+
+    Rendering strategy
+    ------------------
+    - **Pause (≥ 4 beats)** and **demi-pause (≥ 2 beats)**: horizontal filled
+      rectangles.  Their shape does not overlap string lines at the centre
+      position so no disc is needed.
+    - **Soupir, ½ soupir, ¼ soupir, ⅛ soupir** (< 2 beats): a white disc
+      with a black ring is drawn first to erase the string lines behind the
+      symbol; the rest glyph is then drawn inside the disc.
+
+    Args:
+        c: ReportLab canvas.
+        rx: Horizontal centre of the rest symbol.
+        sys_y: Y-coordinate of string 1 — the system reference line.
+        duration: Duration in beats (4.0 = whole, 2.0 = half, 1.0 = quarter…).
     """
+    ref = sys_y - _REST_CENTER_Y      # vertical centre of the staff
+
     c.setFillColor(_COL_BLACK)
     c.setStrokeColor(_COL_BLACK)
 
-    # Reference heights relative to y_top
-    ref = y_top - 4.0          # vertical midpoint of rest zone
-
     if duration >= 4.0:
-        # Whole rest: solid rect hanging below ledger line
+        # Pause: filled rect hanging below a ledger line — no disc needed
         c.setLineWidth(0.4)
-        c.line(rx - 5.5, ref, rx + 5.5, ref)          # ledger line
+        c.line(rx - 5.5, ref, rx + 5.5, ref)
         c.rect(rx - 4, ref - 3.5, 8, 3, fill=1, stroke=0)
 
     elif duration >= 2.0:
-        # Half rest: solid rect sitting on ledger line
+        # Demi-pause: filled rect sitting on a ledger line — no disc needed
         c.setLineWidth(0.4)
-        c.line(rx - 5.5, ref - 3.5, rx + 5.5, ref - 3.5)   # ledger line
+        c.line(rx - 5.5, ref - 3.5, rx + 5.5, ref - 3.5)
         c.rect(rx - 4, ref - 3.5, 8, 3, fill=1, stroke=0)
 
-    elif duration >= 1.0:
-        # Quarter rest: squiggly path (simplified standard symbol)
-        c.setLineWidth(0.8)
-        yt = ref + 4.0
-        yb = ref - 5.0
-        p = c.beginPath()
-        p.moveTo(rx - 2.0, yt)
-        p.lineTo(rx + 2.5, yt - 2.5)
-        p.curveTo(rx + 4.0, yt - 3.5, rx - 3.5, yt - 6.0, rx + 0.5, yt - 7.0)
-        p.curveTo(rx + 2.5, yt - 8.0, rx - 1.0, yb + 1.5, rx + 0.5, yb)
-        c.drawPath(p, stroke=1, fill=0)
-
-    elif duration >= 0.5:
-        # Eighth rest: diagonal line + one filled dot
-        c.setLineWidth(0.8)
-        yt = ref + 3.0
-        yb = ref - 4.0
-        c.line(rx - 1.5, yb, rx + 1.5, yt - 2.0)
-        c.setLineWidth(0.0)
-        c.circle(rx + 2.5, yt - 1.0, 1.6, fill=1, stroke=0)
-
-    elif duration >= 0.25:
-        # 16th rest: diagonal line + two stacked filled dots
-        c.setLineWidth(0.8)
-        yt = ref + 4.0
-        yb = ref - 5.0
-        c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
-        c.setLineWidth(0.0)
-        c.circle(rx + 2.5, yt - 1.0, 1.5, fill=1, stroke=0)
-        c.circle(rx + 0.5, ref - 0.5, 1.5, fill=1, stroke=0)
-
     else:
-        # 32nd rest: three dots (rare; fallback to 16th symbol)
-        c.setLineWidth(0.8)
-        yt = ref + 4.0
-        yb = ref - 6.0
-        c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
-        c.setLineWidth(0.0)
-        c.circle(rx + 2.5, yt - 1.0, 1.4, fill=1, stroke=0)
-        c.circle(rx + 0.5, ref - 0.5, 1.4, fill=1, stroke=0)
-        c.circle(rx - 1.0, ref - 2.5, 1.4, fill=1, stroke=0)
+        # Small rest symbols: draw white disc first to erase string lines
+        c.setFillColor(colors.white)
+        c.setStrokeColor(_COL_BLACK)
+        c.setLineWidth(_REST_DISC_LW)
+        c.circle(rx, ref, _REST_DISC_R, fill=1, stroke=1)
+        c.setFillColor(_COL_BLACK)
+        c.setStrokeColor(_COL_BLACK)
+
+        if duration >= 1.0:
+            # Soupir (quarter rest): squiggly path centred at ref
+            c.setLineWidth(0.8)
+            yt = ref + 4.0
+            yb = ref - 4.5
+            p = c.beginPath()
+            p.moveTo(rx - 2.0, yt)
+            p.lineTo(rx + 2.5, yt - 2.5)
+            p.curveTo(rx + 4.0, yt - 3.5, rx - 3.5, yt - 6.0, rx + 0.5, yt - 7.0)
+            p.curveTo(rx + 2.5, yt - 8.0, rx - 1.0, yb + 1.5, rx + 0.5, yb)
+            c.drawPath(p, stroke=1, fill=0)
+
+        elif duration >= 0.5:
+            # Demi-soupir (eighth rest): diagonal stem + one filled dot
+            c.setLineWidth(0.8)
+            yt = ref + 3.0
+            yb = ref - 3.5
+            c.line(rx - 1.5, yb, rx + 1.5, yt - 2.0)
+            c.setLineWidth(0.0)
+            c.circle(rx + 2.5, yt - 1.0, 1.5, fill=1, stroke=0)
+
+        elif duration >= 0.25:
+            # Quart de soupir (16th rest): diagonal stem + two stacked dots
+            c.setLineWidth(0.8)
+            yt = ref + 3.5
+            yb = ref - 3.5
+            c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
+            c.setLineWidth(0.0)
+            c.circle(rx + 2.5, yt - 1.0, 1.4, fill=1, stroke=0)
+            c.circle(rx + 0.5, ref - 0.5, 1.4, fill=1, stroke=0)
+
+        else:
+            # Huitième de soupir (32nd rest): diagonal stem + three dots
+            c.setLineWidth(0.8)
+            yt = ref + 3.5
+            yb = ref - 4.0
+            c.line(rx - 1.5, yb, rx + 2.0, yt - 2.0)
+            c.setLineWidth(0.0)
+            c.circle(rx + 2.5, yt - 1.0, 1.3, fill=1, stroke=0)
+            c.circle(rx + 0.5, ref - 0.5, 1.3, fill=1, stroke=0)
+            c.circle(rx - 1.0, ref - 2.0, 1.3, fill=1, stroke=0)
 
     c.setStrokeColor(_COL_BLACK)
     c.setFillColor(_COL_BLACK)
@@ -1073,27 +1226,89 @@ def _draw_rhythm_legend(c: rl_canvas.Canvas, top_y: float) -> float:
 
         c.setFillColor(_COL_BLACK)
 
-    # ── Rest symbols row
-    REST_ROW_Y = MINI_SYS_Y - MINI_OVAL_H / 2 - 20
-    REST_STEM_TOP = REST_ROW_Y + _STEM_H - 4
+    # ── Dotted notes row (half·, quarter·, eighth·)
+    _DOTTED_LEGEND: tuple[tuple[str, float], ...] = (
+        ("Blanche pointee", 3.0),
+        ("Noire pointee", 1.5),
+        ("Croche pointee", 0.75),
+    )
+    DOTTED_SYS_Y = MINI_SYS_Y - MINI_OVAL_H / 2 - 28
 
     c.setFont("Helvetica-Bold", 6.0)
     c.setFillColor(_COL_GREY)
-    c.drawString(_MARGIN, REST_ROW_Y + 10, "Silences correspondants :")
+    c.drawString(_MARGIN, DOTTED_SYS_Y + _STEM_H + 4, "Notes pointees (duree x 1.5) :")
+    c.setFillColor(_COL_BLACK)
+
+    dotted_col_w = (_PAGE_W - 2 * _MARGIN) / len(_DOTTED_LEGEND)
+    for col_idx, (label, dur) in enumerate(_DOTTED_LEGEND):
+        cx = _MARGIN + dotted_col_w * col_idx + dotted_col_w / 2
+        base = _dotted_base(dur)
+
+        # string line
+        c.setLineWidth(0.3)
+        c.setStrokeColor(_COL_LGREY)
+        c.line(cx - MINI_OVAL_W / 2 - 3, DOTTED_SYS_Y, cx + MINI_OVAL_W / 2 + 7, DOTTED_SYS_Y)
+        c.setStrokeColor(_COL_BLACK)
+
+        # stem
+        if base < 4.0:
+            c.setLineWidth(0.8)
+            c.line(cx, DOTTED_SYS_Y + _STEM_GAP, cx, DOTTED_SYS_Y + _STEM_H)
+            if base < 1.0:
+                for fi in range(_num_flags(dur)):
+                    _draw_flag(c, cx, DOTTED_SYS_Y + _STEM_H - fi * 4.0)
+
+        # oval
+        is_open = base >= 2.0
+        c.setFillColor(colors.white)
+        if is_open:
+            c.setStrokeColor(_COL_BLACK)
+            c.setLineWidth(0.6)
+            c.ellipse(cx - MINI_OVAL_W / 2, DOTTED_SYS_Y - MINI_OVAL_H / 2,
+                      cx + MINI_OVAL_W / 2, DOTTED_SYS_Y + MINI_OVAL_H / 2, fill=1, stroke=1)
+        else:
+            c.setStrokeColor(colors.white)
+            c.ellipse(cx - MINI_OVAL_W / 2, DOTTED_SYS_Y - MINI_OVAL_H / 2,
+                      cx + MINI_OVAL_W / 2, DOTTED_SYS_Y + MINI_OVAL_H / 2, fill=1, stroke=0)
+
+        # fret number
+        c.setFillColor(_COL_BLACK)
+        c.setFont(_FRET_FONT, _FRET_FS)
+        c.drawCentredString(cx, DOTTED_SYS_Y - _FRET_FS * 0.36, MINI_FRET_LABEL)
+
+        # augmentation dot
+        c.circle(cx + MINI_OVAL_W / 2 + 2.5, DOTTED_SYS_Y, 1.3, fill=1, stroke=0)
+
+        # label
+        c.setFont("Helvetica", 5.5)
+        c.setFillColor(_COL_GREY)
+        c.drawCentredString(cx, DOTTED_SYS_Y - MINI_OVAL_H / 2 - 7, label.replace("pointee", "pt."))
+        c.setFillColor(_COL_BLACK)
+
+    # ── Rest symbols row
+    # REST_ROW_Y is the visual centre of each rest symbol in the legend.
+    # We pass (REST_ROW_Y + _REST_CENTER_Y) as sys_y so that
+    # _draw_rest places the symbol at sys_y - _REST_CENTER_Y = REST_ROW_Y.
+    REST_ROW_Y = DOTTED_SYS_Y - MINI_OVAL_H / 2 - 28
+    _REST_LEGEND_SYS_Y = REST_ROW_Y + _REST_CENTER_Y
+
+    c.setFont("Helvetica-Bold", 6.0)
+    c.setFillColor(_COL_GREY)
+    c.drawString(_MARGIN, REST_ROW_Y + _REST_DISC_R + 6, "Silences correspondants :")
     c.setFillColor(_COL_BLACK)
 
     for col_idx, (name, dur) in enumerate(_LEGEND_NOTE_VALUES):
         cx = _MARGIN + col_w * col_idx + col_w / 2
-        _draw_rest(c, cx, REST_STEM_TOP, dur)
+        _draw_rest(c, cx, _REST_LEGEND_SYS_Y, dur)
 
-        # ── French label below
+        # ── French label below the disc / symbol
         c.setFont("Helvetica", 5.5)
         c.setFillColor(_COL_GREY)
-        c.drawCentredString(cx, REST_STEM_TOP - _STEM_H - 3, _LABEL_REST_FR[name])
+        c.drawCentredString(cx, REST_ROW_Y - _REST_DISC_R - 5, _LABEL_REST_FR[name])
         c.setFillColor(_COL_BLACK)
 
     # ── Additional notation symbols row
-    NOTATIONS_Y = REST_STEM_TOP - _STEM_H - 18
+    NOTATIONS_Y = REST_ROW_Y - _REST_DISC_R - 20
 
     c.setFont("Helvetica-Bold", 6.0)
     c.setFillColor(_COL_GREY)
@@ -1191,7 +1406,10 @@ def _draw_note(
     # Convention: visible oval stroke = half note or whole note (open notehead).
     #             invisible (white-on-white) oval = quarter note or shorter (background only).
     dur = ne.duration
-    is_open_notehead = dur >= 2.0   # half note (≥ 2 beats) or whole note gets visible oval
+    # Open notehead (visible oval stroke) for half note and longer.
+    # Use the undotted base so a dotted quarter (1.5) stays filled,
+    # and a dotted half (3.0) gets an open oval.
+    is_open_notehead = _dotted_base(dur) >= 2.0
     c.setFillColor(colors.white)
     if is_open_notehead:
         c.setStrokeColor(_COL_BLACK)
@@ -1214,11 +1432,24 @@ def _draw_note(
     c.setFont(_FRET_FONT, _FRET_FS)
     c.drawCentredString(x, y - _FRET_FS * 0.36, str(fret))
 
+    # 2a. Augmentation dot — small filled circle to the right of the oval
+    if _is_dotted(dur):
+        dot_x = x + oval_w / 2 + 2.5
+        c.setFillColor(_COL_BLACK)
+        c.circle(dot_x, y, 1.3, fill=1, stroke=0)
+
     # 3. LH finger annotation — south-west of oval, fretted notes only.
+    #    Collision check (RENDER-08): if the annotation bottom would overlap
+    #    the oval of the next string below, shift the annotation 3.5 pt to the left.
     if fret > 0 and finger in _FINGER_CHAR:
         c.setFillColor(_LH_FINGER_COLOR)
         c.setFont(_LH_FINGER_FONT, _LH_FINGER_FS)
-        c.drawRightString(x - oval_w / 2, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
+        annot_x = x - oval_w / 2
+        annot_bottom = y + _LH_FINGER_Y - 2.0          # bottom of descender
+        next_string_oval_top = (y - _STRING_SPACING) + _OVAL_H / 2  # top of oval on next string
+        if annot_bottom < next_string_oval_top + 2.0:
+            annot_x -= 3.5                              # shift left to avoid overlap
+        c.drawRightString(annot_x, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
         c.setFillColor(_COL_BLACK)
 
     # 4. Notation overlays
@@ -1295,12 +1526,17 @@ def _draw_harmonic_note(
     c.setFont(_FRET_FONT, _FRET_FS)
     c.drawCentredString(x, y - _FRET_FS * 0.36, str(fret))
 
-    # LH finger below
+    # LH finger below — with collision check (same rule as _draw_note)
     oval_w = _OVAL_W2 if fret >= 10 else _OVAL_W1
     if fret > 0 and finger in _FINGER_CHAR:
         c.setFillColor(_LH_FINGER_COLOR)
         c.setFont(_LH_FINGER_FONT, _LH_FINGER_FS)
-        c.drawRightString(x - oval_w / 2, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
+        annot_x = x - oval_w / 2
+        annot_bottom = y + _LH_FINGER_Y - 2.0
+        next_oval_top = (y - _STRING_SPACING) + _OVAL_H / 2
+        if annot_bottom < next_oval_top + 2.0:
+            annot_x -= 3.5
+        c.drawRightString(annot_x, y + _LH_FINGER_Y, _FINGER_CHAR[finger])
         c.setFillColor(_COL_BLACK)
 
 
@@ -1635,6 +1871,128 @@ def _calc_mps(measures: list[list[FingeringResult]]) -> int:
     strings_w = _PAGE_W - _MARGIN - _STRINGS_X0    # ≈ 504 pt
     raw = int(strings_w / req_w)
     return max(_MPS_MIN, min(_MPS_MAX, raw))
+
+
+def _measure_w_raw(results: list[FingeringResult], beats_per_measure: float) -> float:
+    """Compute raw measure width from rhythmic density.
+
+    Sums 1/duration for every rhythmic event (notes + rest gaps) and converts
+    to points using _UNIT_W.  Larger = denser = wider measure.
+    """
+    if not results:
+        return _MIN_MEASURE_W
+
+    measure_onset = (
+        math.floor(results[0].note_event.onset / beats_per_measure) * beats_per_measure
+    )
+
+    # Minimum duration per unique onset column (= notated rhythm value)
+    onset_min_dur: dict[float, float] = {}
+    for r in results:
+        key = round(r.note_event.onset, 6)
+        onset_min_dur[key] = min(onset_min_dur.get(key, 999.0), r.note_event.duration)
+
+    sorted_onsets = sorted(onset_min_dur.keys())
+    units = 0.0
+    prev_end = measure_onset
+
+    for onset in sorted_onsets:
+        dur = onset_min_dur[onset]
+        gap = onset - prev_end
+        if gap >= 0.115:  # rest gap >= 1/32 beat
+            units += 1.0 / max(gap, 0.125)
+        units += 1.0 / max(dur, 0.125)
+        prev_end = onset + dur
+
+    # Rest at end of measure
+    end_gap = (measure_onset + beats_per_measure) - prev_end
+    if end_gap >= 0.115:
+        units += 1.0 / max(end_gap, 0.125)
+
+    if units == 0.0:
+        units = 1.0 / beats_per_measure
+
+    return _LEFT_PAD + units * _UNIT_W + 5.0
+
+
+def _normalize_measure_widths(raw_widths: list[float], available_w: float) -> list[float]:
+    """Scale measure widths proportionally to fill available_w.
+
+    Iteratively scales all unclamped widths, clamping outliers to [MIN, MAX].
+    Excess/deficit from clamped measures is redistributed to remaining ones.
+    """
+    widths = list(raw_widths)
+    clamped = [False] * len(widths)
+
+    for _ in range(len(widths)):
+        free = [i for i in range(len(widths)) if not clamped[i]]
+        if not free:
+            break
+        total_free = sum(widths[i] for i in free)
+        total_fixed = sum(widths[i] for i in range(len(widths)) if clamped[i])
+        target = available_w - total_fixed
+        if total_free <= 0.0:
+            break
+        scale = target / total_free
+        changed = False
+        for i in free:
+            scaled = widths[i] * scale
+            clamped_val = max(_MIN_MEASURE_W, min(_MAX_MEASURE_W, scaled))
+            if abs(clamped_val - scaled) > 0.5:
+                widths[i] = clamped_val
+                clamped[i] = True
+                changed = True
+            else:
+                widths[i] = scaled
+        if not changed:
+            break
+
+    return widths
+
+
+def _build_systems(
+    measures: list[list[FingeringResult]],
+    beats_per_measure: float,
+    available_w: float,
+    forced_mps: int | None = None,
+) -> list[tuple[list[list[FingeringResult]], list[float]]]:
+    """Group measures into systems with proportional measure widths.
+
+    Returns a list of (sys_measures, normalized_widths) pairs, one per system.
+
+    When forced_mps is given, each system has exactly that many measures
+    (last system may have fewer).  Otherwise a greedy algorithm packs measures
+    until the system would exceed available_w.
+    """
+    if not measures:
+        return []
+
+    raw_widths = [_measure_w_raw(m, beats_per_measure) for m in measures]
+    systems: list[tuple[list[list[FingeringResult]], list[float]]] = []
+    i = 0
+
+    while i < len(measures):
+        if forced_mps is not None:
+            chunk = measures[i : i + forced_mps]
+            raw_chunk = raw_widths[i : i + forced_mps]
+            i += len(chunk)
+        else:
+            chunk = []
+            raw_chunk = []
+            total = 0.0
+            while i < len(measures):
+                w = raw_widths[i]
+                if chunk and total + w > available_w * 1.05:
+                    break
+                chunk.append(measures[i])
+                raw_chunk.append(w)
+                total += w
+                i += 1
+
+        norm = _normalize_measure_widths(raw_chunk, available_w)
+        systems.append((chunk, norm))
+
+    return systems
 
 
 def _system_tempo(

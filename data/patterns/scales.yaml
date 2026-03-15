@@ -1,0 +1,269 @@
+# Guitar Scale Pattern Library
+#
+# Each scale defines:
+#   name       : human-readable label (e.g. "major", "minor_pentatonic")
+#   intervals  : semitone intervals from the root (chromatic pitch classes)
+#   positions  : list of common fretboard box positions for each scale
+#
+# Position format:
+#   name       : position label (e.g. "position_1", "open_position")
+#   root_string: string number (1–6) where the root falls in this position
+#   root_fret  : fret offset relative to the key root (0 = open/nut)
+#   pattern    : per-string fret offsets relative to hand_position
+#                [str1(high_e), str2(B), str3(G), str4(D), str5(A), str6(low_E)]
+#                Each string has a list of fret offsets played in this position.
+#                An empty list [] means the string is not used in this position.
+#
+# Usage: to find the actual frets for key of G (root = fret 3 on string 6),
+#   add the key's base fret to each fret offset in the pattern.
+#
+# Standard tuning: E2 A2 D3 G3 B3 E4 (strings 6 to 1)
+
+scales:
+
+  # ── Major scale (Ionian) ─────────────────────────────────────────────────
+  # Intervals: W W H W W W H → 0 2 4 5 7 9 11
+
+  - name: major
+    intervals: [0, 2, 4, 5, 7, 9, 11]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2, 4]      # str 6 (low E)
+          - [0, 2, 4]      # str 5 (A)
+          - [1, 2, 4]      # str 4 (D)
+          - [1, 2, 4]      # str 3 (G)
+          - [1, 3, 4]      # str 2 (B)
+          - [0, 2, 4]      # str 1 (high E)
+
+      - name: position_2
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2, 3]      # str 6
+          - [0, 2, 3]      # str 5
+          - [0, 2, 3]      # str 4
+          - [0, 2, 4]      # str 3
+          - [0, 1, 3]      # str 2
+          - [0, 2, 3]      # str 1
+
+  # ── Natural minor (Aeolian) ──────────────────────────────────────────────
+  # Intervals: W H W W H W W → 0 2 3 5 7 8 10
+
+  - name: natural_minor
+    intervals: [0, 2, 3, 5, 7, 8, 10]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 1, 3]      # str 6
+          - [0, 1, 3]      # str 5
+          - [0, 2, 3]      # str 4
+          - [0, 2, 3]      # str 3
+          - [0, 1, 3]      # str 2
+          - [0, 1, 3]      # str 1
+
+      - name: position_2
+        root_string: 5
+        root_fret: 0
+        pattern:
+          - [0, 2, 3]      # str 6
+          - [0, 2, 3]      # str 5
+          - [0, 1, 3]      # str 4
+          - [0, 2, 3]      # str 3
+          - [0, 2, 3]      # str 2
+          - [0, 2, 3]      # str 1
+
+  # ── Harmonic minor ───────────────────────────────────────────────────────
+  # Intervals: W H W W H WH H → 0 2 3 5 7 8 11
+
+  - name: harmonic_minor
+    intervals: [0, 2, 3, 5, 7, 8, 11]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 1, 3]      # str 6
+          - [0, 1, 3]      # str 5
+          - [0, 2, 3]      # str 4
+          - [0, 2, 3]      # str 3
+          - [0, 1, 4]      # str 2
+          - [0, 1, 3]      # str 1
+
+  # ── Minor pentatonic ─────────────────────────────────────────────────────
+  # Intervals: 0 3 5 7 10
+
+  - name: minor_pentatonic
+    intervals: [0, 3, 5, 7, 10]
+    positions:
+      - name: box_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 3]         # str 6
+          - [0, 3]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 3]         # str 2
+          - [0, 3]         # str 1
+
+      - name: box_2
+        root_string: 6
+        root_fret: 3
+        pattern:
+          - [0, 2]         # str 6
+          - [0, 2]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 2]         # str 2
+          - [0, 2]         # str 1
+
+      - name: box_3
+        root_string: 5
+        root_fret: 0
+        pattern:
+          - [0, 2]         # str 6
+          - [0, 2]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 2]         # str 2
+          - [0, 2]         # str 1
+
+      - name: box_4
+        root_string: 5
+        root_fret: 2
+        pattern:
+          - [0, 3]         # str 6
+          - [0, 2]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 3]         # str 2
+          - [0, 3]         # str 1
+
+      - name: box_5
+        root_string: 4
+        root_fret: 0
+        pattern:
+          - [0, 2]         # str 6
+          - [0, 3]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 2]         # str 2
+          - [0, 2]         # str 1
+
+  # ── Major pentatonic ─────────────────────────────────────────────────────
+  # Intervals: 0 2 4 7 9
+
+  - name: major_pentatonic
+    intervals: [0, 2, 4, 7, 9]
+    positions:
+      - name: box_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2]         # str 6
+          - [0, 2]         # str 5
+          - [1, 2]         # str 4
+          - [1, 2]         # str 3
+          - [0, 2]         # str 2
+          - [0, 2]         # str 1
+
+      - name: box_2
+        root_string: 6
+        root_fret: 2
+        pattern:
+          - [0, 2]         # str 6
+          - [0, 2]         # str 5
+          - [0, 2]         # str 4
+          - [0, 2]         # str 3
+          - [0, 2]         # str 2
+          - [0, 2]         # str 1
+
+  # ── Blues scale ──────────────────────────────────────────────────────────
+  # Intervals: 0 3 5 6 7 10 (minor pentatonic + b5)
+
+  - name: blues
+    intervals: [0, 3, 5, 6, 7, 10]
+    positions:
+      - name: box_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 3]         # str 6
+          - [0, 3]         # str 5
+          - [0, 1, 2]      # str 4  (includes b5)
+          - [0, 2]         # str 3
+          - [0, 3]         # str 2
+          - [0, 3]         # str 1
+
+  # ── Dorian mode ──────────────────────────────────────────────────────────
+  # Intervals: 0 2 3 5 7 9 10
+
+  - name: dorian
+    intervals: [0, 2, 3, 5, 7, 9, 10]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2, 3]      # str 6
+          - [0, 2, 3]      # str 5
+          - [0, 2, 4]      # str 4
+          - [0, 2, 4]      # str 3
+          - [0, 2, 3]      # str 2
+          - [0, 2, 3]      # str 1
+
+  # ── Mixolydian mode ──────────────────────────────────────────────────────
+  # Intervals: 0 2 4 5 7 9 10
+
+  - name: mixolydian
+    intervals: [0, 2, 4, 5, 7, 9, 10]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2, 3]      # str 6
+          - [0, 2, 4]      # str 5
+          - [1, 2, 4]      # str 4
+          - [1, 2, 4]      # str 3
+          - [1, 3, 4]      # str 2
+          - [0, 2, 3]      # str 1
+
+  # ── Phrygian mode ────────────────────────────────────────────────────────
+  # Intervals: 0 1 3 5 7 8 10
+
+  - name: phrygian
+    intervals: [0, 1, 3, 5, 7, 8, 10]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 1, 3]      # str 6
+          - [0, 1, 3]      # str 5
+          - [0, 2, 3]      # str 4
+          - [0, 2, 3]      # str 3
+          - [0, 1, 3]      # str 2
+          - [0, 1, 3]      # str 1
+
+  # ── Lydian mode ──────────────────────────────────────────────────────────
+  # Intervals: 0 2 4 6 7 9 11
+
+  - name: lydian
+    intervals: [0, 2, 4, 6, 7, 9, 11]
+    positions:
+      - name: position_1
+        root_string: 6
+        root_fret: 0
+        pattern:
+          - [0, 2, 4]      # str 6
+          - [0, 2, 4]      # str 5
+          - [1, 3, 4]      # str 4
+          - [1, 2, 4]      # str 3
+          - [1, 3, 4]      # str 2
+          - [0, 2, 4]      # str 1

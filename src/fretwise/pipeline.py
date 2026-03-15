@@ -10,6 +10,7 @@ from __future__ import annotations
 from fretwise.generator import StateGenerator
 from fretwise.models import FingeringResult, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
+from fretwise.patterns import PatternMatcher
 from fretwise.scoring import (
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
@@ -42,8 +43,9 @@ def run_pipeline(
     events: list[NoteEvent],
     generator: StateGenerator,
     optimizer: ViterbiOptimizer,
+    pattern_matcher: PatternMatcher | None = None,
 ) -> tuple[list[FingeringResult], dict[str, int]]:
-    """Run generate → Viterbi → post-process with per-voice separation.
+    """Run generate → pattern-match → Viterbi → post-process with per-voice separation.
 
     Each GP voice is optimised independently (its own Viterbi path and own
     post-processing passes), then all voice results are merged and sorted by
@@ -53,6 +55,7 @@ def run_pipeline(
         events: All NoteEvents (possibly from multiple voices).
         generator: StateGenerator instance.
         optimizer: ViterbiOptimizer instance.
+        pattern_matcher: Optional PatternMatcher to reorder states before Viterbi.
 
     Returns:
         Tuple of:
@@ -76,7 +79,12 @@ def run_pipeline(
             continue
 
         valid_events, valid_states = zip(*valid_pairs)
-        results = optimizer.solve(list(valid_events), list(valid_states))
+        valid_states_list = list(valid_states)
+        if pattern_matcher is not None:
+            valid_states_list = pattern_matcher.apply(
+                list(valid_events), valid_states_list,
+            )
+        results = optimizer.solve(list(valid_events), valid_states_list)
         results = resolve_finger_continuity(results)
         results = resolve_chord_conflicts(results)
         results = resolve_chord_stretch(results)

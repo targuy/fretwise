@@ -111,6 +111,13 @@ class NoteEvent:
     accent: bool = False                # > accent mark
     accent_strong: bool = False         # >> heavy accent
     tremolo_picking: bool = False       # rapid continuous alternate picking
+    ghost: bool = False                 # (n) — parentheses around fret, very soft note
+    staccato: bool = False              # • — short detached note
+    strum_direction: str | None = None  # "up" = V upstroke | "down" = ⊓ downstroke
+    slap: bool = False                  # S — thumb slap on string
+    pop: bool = False                   # P (popping) — pluck string upward with finger
+    rasgueado: bool = False             # Rasp. — rapid flamenco strum across strings
+    golpe: bool = False                 # * — percussive tap on guitar top/body
 
 
 # Bend type string constants (used in NoteEvent.bend_type)
