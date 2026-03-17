@@ -205,6 +205,7 @@ def layout_to_render_scene(
                                 "pitch": pitch,
                                 "techniques": techniques,
                                 "stem_direction": stem_direction,
+                                "voice_number": voice_number,
                             }
                         )
             if has_standard and standard_rhythm_events:
@@ -515,55 +516,65 @@ def _append_standard_connections(
     if len(events) < 2:
         return
 
-    ordered = sorted(events, key=lambda item: float(item.get("onset", 0.0)))
-    for prev, curr in zip(ordered, ordered[1:]):
-        prev_onset = float(prev.get("onset", 0.0))
-        prev_duration = float(prev.get("duration", 0.0))
-        curr_onset = float(curr.get("onset", 0.0))
-        expected_next = prev_onset + prev_duration
-        contiguous = abs(expected_next - curr_onset) <= _ARC_ONSET_TOLERANCE
-        if not contiguous:
-            continue
+    by_voice: dict[int, list[dict[str, object]]] = {}
+    for event in events:
+        voice_number = _safe_int(event.get("voice_number")) or 0
+        by_voice.setdefault(voice_number, []).append(event)
 
-        prev_pitch = int(prev.get("pitch", 64))
-        curr_pitch = int(curr.get("pitch", 64))
-        prev_techniques = set(prev.get("techniques", set()))
-        stem_direction = str(prev.get("stem_direction", "up"))
-        arc_x0 = float(prev.get("x", 0.0)) + 3.0
-        arc_x1 = float(curr.get("x", 0.0)) - 3.0
-        if arc_x1 <= arc_x0 + 1.0:
-            continue
-        if stem_direction == "down":
-            arc_y0 = float(prev.get("y", 0.0)) - 4.0
-            arc_y1 = float(curr.get("y", 0.0)) - 4.0
-            curvature = -8.0
-            slur_curvature = -10.0
-        else:
-            arc_y0 = float(prev.get("y", 0.0)) + 4.0
-            arc_y1 = float(curr.get("y", 0.0)) + 4.0
-            curvature = 8.0
-            slur_curvature = 10.0
+    for voice_number, voice_events in by_voice.items():
+        ordered = sorted(voice_events, key=lambda item: float(item.get("onset", 0.0)))
+        for prev, curr in zip(ordered, ordered[1:]):
+            prev_onset = float(prev.get("onset", 0.0))
+            prev_duration = float(prev.get("duration", 0.0))
+            curr_onset = float(curr.get("onset", 0.0))
+            expected_next = prev_onset + prev_duration
+            contiguous = abs(expected_next - curr_onset) <= _ARC_ONSET_TOLERANCE
+            if not contiguous:
+                continue
 
-        if prev_pitch == curr_pitch:
-            layer.recipe_instances.append(
-                RecipeInstance(
-                    recipe_id="tie_arc",
-                    params={
-                        "x0": arc_x0,
-                        "y0": arc_y0,
-                        "x1": arc_x1,
-                        "y1": arc_y1,
-                        "curvature": curvature,
-                    },
-                    metadata={
-                        "start_event_id": str(prev.get("event_id")),
-                        "end_event_id": str(curr.get("event_id")),
-                    },
-                )
+            prev_pitch = int(prev.get("pitch", 64))
+            curr_pitch = int(curr.get("pitch", 64))
+            prev_techniques = set(prev.get("techniques", set()))
+            stem_direction = str(prev.get("stem_direction", _stem_direction(voice_number)))
+            arc_x0 = float(prev.get("x", 0.0)) + 3.0
+            arc_x1 = float(curr.get("x", 0.0)) - 3.0
+            if arc_x1 <= arc_x0 + 1.0:
+                continue
+            is_tie = prev_pitch == curr_pitch
+            is_slur = not is_tie and bool(prev_techniques.intersection(_SLUR_TECHNIQUES))
+            if not is_tie and not is_slur:
+                continue
+
+            arc_y_offset, arc_curvature = _arc_profile(
+                x0=arc_x0,
+                x1=arc_x1,
+                stem_direction=stem_direction,
+                voice_number=voice_number,
+                is_slur=is_slur,
             )
-            continue
+            arc_y0 = float(prev.get("y", 0.0)) + arc_y_offset
+            arc_y1 = float(curr.get("y", 0.0)) + arc_y_offset
 
-        if prev_techniques.intersection(_SLUR_TECHNIQUES):
+            if is_tie:
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="tie_arc",
+                        params={
+                            "x0": arc_x0,
+                            "y0": arc_y0,
+                            "x1": arc_x1,
+                            "y1": arc_y1,
+                            "curvature": arc_curvature,
+                        },
+                        metadata={
+                            "start_event_id": str(prev.get("event_id")),
+                            "end_event_id": str(curr.get("event_id")),
+                            "voice_number": str(voice_number),
+                        },
+                    )
+                )
+                continue
+
             layer.recipe_instances.append(
                 RecipeInstance(
                     recipe_id="slur_arc",
@@ -572,14 +583,36 @@ def _append_standard_connections(
                         "y0": arc_y0,
                         "x1": arc_x1,
                         "y1": arc_y1,
-                        "curvature": slur_curvature,
+                        "curvature": arc_curvature,
                     },
                     metadata={
                         "start_event_id": str(prev.get("event_id")),
                         "end_event_id": str(curr.get("event_id")),
+                        "voice_number": str(voice_number),
                     },
                 )
             )
+
+
+def _arc_profile(
+    *,
+    x0: float,
+    x1: float,
+    stem_direction: str,
+    voice_number: int,
+    is_slur: bool,
+) -> tuple[float, float]:
+    span = max(0.0, x1 - x0)
+    side = -1.0 if stem_direction == "down" else 1.0
+    offset_base = 4.0 + min(2.5, max(0, voice_number) * 1.5)
+    offset_span_boost = min(2.0, span / 64.0)
+    y_offset = side * (offset_base + offset_span_boost)
+
+    curve_base = 8.0 + min(4.0, span / 24.0)
+    if is_slur:
+        curve_base += 1.5
+    curvature = side * curve_base
+    return y_offset, curvature
 
 
 def _beam_groups(

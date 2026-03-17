@@ -232,6 +232,58 @@ def test_canonical_to_render_scene_standard_down_voice_tie_curves_upward() -> No
     assert float(tie_recipes[0].params.get("curvature", 0.0)) < 0.0
 
 
+def test_canonical_to_render_scene_standard_does_not_connect_across_voices() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=1.0,
+                articulation=Articulation.LEGATO,
+                voice_hint=0,
+                string_hint=1,
+                fret_hint=0,
+            ),
+            _note(
+                pitch=67,
+                onset=1.0,
+                duration=1.0,
+                voice_hint=1,
+                string_hint=2,
+                fret_hint=3,
+            ),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[1].recipe_instances]
+
+    assert "tie_arc" not in recipe_ids
+    assert "slur_arc" not in recipe_ids
+
+
+def test_canonical_to_render_scene_standard_adapts_tie_profile_for_long_span() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=55, onset=0.0, duration=2.0, voice_hint=1, string_hint=4, fret_hint=5),
+            _note(pitch=55, onset=2.0, duration=1.0, voice_hint=1, string_hint=4, fret_hint=5),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    tie_recipes = [
+        recipe for recipe in staff.layer_groups[1].recipe_instances if recipe.recipe_id == "tie_arc"
+    ]
+
+    assert tie_recipes
+    assert float(tie_recipes[0].params.get("curvature", 0.0)) < -8.0
+    assert tie_recipes[0].metadata.get("voice_number") == "1"
+
+
 def test_canonical_to_render_scene_standard_contains_accidental_glyph() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
