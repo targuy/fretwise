@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `d0b942a`.
-- Base de non-regression actuelle: `563 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `8bc1bf2`.
+- Base de non-regression actuelle: `568 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -197,10 +197,12 @@
   - `8ef2ad9` en-tetes de conformite API PDF + statut d'export en toolbar.
   - `7854998` scene: modes `standard` et `standard_tablature` avec plans explicites.
   - `d0b942a` checks de conformite hybrides (presence + alignement horizontal par `event_id`).
+  - `ae89c9d` scene standard: glyphes `clef`, `time_signature`, `rest` dans RenderScene + SVG/PDF.
+  - `8bc1bf2` conformance hybride: checks verticaux stricts (plans, overlap, string rows).
 - Prochains commits recommandes
-  - `feat(scene-standard): add clef/time-signature/rest glyph mapping in standard plane`.
   - `feat(layout-engine): migrate stem/beam/tie/tab-span placement rules into core layout`.
-  - `test(conformance): add strict vertical alignment and spacing checks in hybrid mode`.
+  - `feat(scene-standard): add accidentals/stems/flags baseline in standard plane`.
+  - `test(conformance): add stem/beam collision and spacing checks`.
   - `feat(integration): route legacy export progressively through core canonical/layout scene`.
 
 ## 12. Proposition de branche principale et sous-branches
