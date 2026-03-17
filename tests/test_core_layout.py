@@ -7,7 +7,7 @@ from pathlib import Path
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.canonical import completed_to_canonical_score
 from fretwise.core.ingest import legacy_parse_to_raw_score
-from fretwise.core.layout import canonical_to_page_layout
+from fretwise.core.layout import canonical_to_page_layout, default_layout_rules
 from fretwise.core.scene import layout_to_render_scene
 from fretwise.models import Articulation, Dynamic, NoteEvent
 
@@ -101,3 +101,29 @@ def test_layout_to_render_scene_uses_layout_event_coordinates() -> None:
     assert note_texts[0].x == first_event.x
     assert note_texts[0].y == first_event.y
     assert note_texts[0].text == "5"
+
+
+def test_layout_enforces_min_spacing_and_reports_collision_issues() -> None:
+    # Two very close onsets in the same measure force spacing correction.
+    raw_score = legacy_parse_to_raw_score(
+        Path("dense.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.00, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=0.05, string_hint=1, fret_hint=2),
+            _note(pitch=67, onset=0.10, string_hint=1, fret_hint=3),
+        ],
+    )
+    completed = run_core_pipeline_from_raw(raw_score).completed_score
+    canonical = completed_to_canonical_score(completed)
+    rules = default_layout_rules()
+    page_layout = canonical_to_page_layout(canonical, rules=rules)
+
+    measure = page_layout.systems[0].staves[0].measure_layouts[0]
+    events = measure.event_layouts
+    assert measure.collision_issues
+    assert all(issue.code == "LAY-COLL-001" for issue in measure.collision_issues)
+
+    # Events are ordered and spaced according to the active policy.
+    for i in range(1, len(events)):
+        assert events[i].x - events[i - 1].x >= rules.min_event_spacing - 1e-6

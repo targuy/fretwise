@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 
 
 @dataclass(frozen=True)
@@ -17,6 +18,25 @@ class EventLayout:
     metadata: dict[str, str] = field(default_factory=dict)
 
 
+class CollisionSeverity(StrEnum):
+    """Collision severity for layout issues."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+@dataclass(frozen=True)
+class CollisionIssue:
+    """Traceable collision or spacing correction."""
+
+    code: str
+    severity: CollisionSeverity
+    message: str
+    event_ids: tuple[str, ...] = ()
+    metadata: dict[str, str] = field(default_factory=dict)
+
+
 @dataclass
 class MeasureLayout:
     """Placed measure region inside a staff."""
@@ -28,6 +48,7 @@ class MeasureLayout:
     height: float
     beats_per_measure: int
     event_layouts: list[EventLayout] = field(default_factory=list)
+    collision_issues: list[CollisionIssue] = field(default_factory=list)
     metadata: dict[str, str] = field(default_factory=dict)
 
 
@@ -66,4 +87,3 @@ class PageLayout:
     height: float
     systems: list[SystemLayout] = field(default_factory=list)
     metadata: dict[str, str] = field(default_factory=dict)
-
