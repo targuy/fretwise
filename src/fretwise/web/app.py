@@ -2,21 +2,24 @@
 
 from __future__ import annotations
 
-import json
-import os
-from dataclasses import asdict
+import re
+import tempfile
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 
+from fretwise.core import run_core_pipeline_from_raw
+from fretwise.core.backends import render_scene_to_pdf_bytes
+from fretwise.core.graphics import RepresentationMode
+from fretwise.core.ingest import legacy_parse_to_raw_score
+from fretwise.export import render_pdf_tab
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
     FingeringResult,
-    FingeringState,
     NoteEvent,
 )
 from fretwise.optimizer import ViterbiOptimizer
@@ -131,38 +134,16 @@ def _register_routes(app: FastAPI) -> None:
     ) -> dict[str, Any]:
         """Run the full pipeline and return results as JSON."""
         filepath = _resolve_file(app, filename)
-        modes = {
-            "reference": CostWeights.reference,
-            "performance": CostWeights.performance,
-            "musical": CostWeights.musical,
-            "learning": CostWeights.learning,
-        }
+        modes = _solve_modes()
         if mode not in modes:
             raise HTTPException(400, f"Unknown mode: {mode}")
 
-        try:
-            adapter = get_adapter(filepath)
-        except UnsupportedFormatError as exc:
-            raise HTTPException(400, str(exc))
-
-        try:
-            if track_id is not None and hasattr(adapter, "parse_track"):
-                events = adapter.parse_track(filepath, track_id)
-            else:
-                events = adapter.parse(filepath)
-        except (ParseError, UnsupportedFormatError) as exc:
-            raise HTTPException(400, str(exc))
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
 
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        generator = StateGenerator()
-        weights = modes[mode]()
-        cost_fn = CostFunction(weights=weights)
-        optimizer = ViterbiOptimizer(cost_fn)
-        matcher = PatternMatcher()
-
-        results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+        results, stats = _run_legacy_pipeline(events, mode=mode)
 
         # Extract metadata from adapter
         track_name: str = getattr(adapter, "track_name", "") or ""
@@ -175,11 +156,7 @@ def _register_routes(app: FastAPI) -> None:
         )
 
         # Parse artist/title from filename
-        import re
-        clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", filepath.stem).strip()
-        parts = clean_stem.split("-", 1)
-        auto_artist = parts[0].strip() if len(parts) == 2 else ""
-        auto_title = parts[1].strip() if len(parts) == 2 else clean_stem
+        auto_title, auto_artist = _infer_title_artist(filepath)
 
         # Determine tempo and time signature
         tempo = events[0].tempo if events else 120.0
@@ -198,6 +175,39 @@ def _register_routes(app: FastAPI) -> None:
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
         }
+
+    @app.get("/api/export/pdf/{filename}")
+    async def export_pdf(
+        filename: str,
+        track_id: int | None = Query(None),
+        mode: str = Query("reference"),
+        engine: str = Query("legacy"),
+    ) -> Response:
+        """Render and download a PDF using legacy or notation-core engine."""
+        filepath = _resolve_file(app, filename)
+        modes = _solve_modes()
+        if mode not in modes:
+            raise HTTPException(400, f"Unknown mode: {mode}")
+        if engine not in {"legacy", "core"}:
+            raise HTTPException(400, f"Unknown engine: {engine}")
+
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        if engine == "core":
+            pdf_bytes = _render_core_pdf_bytes(filepath, adapter, events)
+        else:
+            pdf_bytes = _render_legacy_pdf_bytes(filepath, adapter, events, mode=mode)
+
+        auto_title, auto_artist = _infer_title_artist(filepath)
+        filename_base = auto_title if not auto_artist else f"{auto_artist} - {auto_title}"
+        safe_name = _safe_pdf_filename(filename_base)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+        )
 
     @app.post("/api/upload")
     async def upload_file(file: UploadFile = File(...)) -> dict[str, str]:
@@ -232,6 +242,128 @@ def _resolve_file(app: FastAPI, filename: str) -> Path:
     except ValueError:
         raise HTTPException(403, "Access denied")
     return filepath
+
+
+def _solve_modes() -> dict[str, Any]:
+    return {
+        "reference": CostWeights.reference,
+        "performance": CostWeights.performance,
+        "musical": CostWeights.musical,
+        "learning": CostWeights.learning,
+    }
+
+
+def _load_adapter_and_events(
+    filepath: Path,
+    *,
+    track_id: int | None = None,
+) -> tuple[Any, list[NoteEvent]]:
+    try:
+        adapter = get_adapter(filepath)
+    except UnsupportedFormatError as exc:
+        raise HTTPException(400, str(exc))
+
+    try:
+        if track_id is not None and hasattr(adapter, "parse_track"):
+            events = adapter.parse_track(filepath, track_id)
+        else:
+            events = adapter.parse(filepath)
+    except (ParseError, UnsupportedFormatError) as exc:
+        raise HTTPException(400, str(exc))
+    return adapter, events
+
+
+def _run_legacy_pipeline(
+    events: list[NoteEvent], *, mode: str
+) -> tuple[list[FingeringResult], dict[str, int]]:
+    weights = _solve_modes()[mode]()
+    generator = StateGenerator()
+    cost_fn = CostFunction(weights=weights)
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher = PatternMatcher()
+    return run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+
+
+def _infer_title_artist(filepath: Path) -> tuple[str, str]:
+    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", filepath.stem).strip()
+    parts = clean_stem.split("-", 1)
+    auto_artist = parts[0].strip() if len(parts) == 2 else ""
+    auto_title = parts[1].strip() if len(parts) == 2 else clean_stem
+    return auto_title, auto_artist
+
+
+def _infer_source_format(path: Path) -> str:
+    suffix = path.suffix.lower().lstrip(".")
+    if suffix in {"xml", "mxl"}:
+        return "musicxml"
+    if suffix == "gp":
+        return "gpif"
+    return suffix
+
+
+def _render_core_pdf_bytes(filepath: Path, adapter: Any, events: list[NoteEvent]) -> bytes:
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    chord_markers: dict[str, str] = dict(getattr(adapter, "chord_markers", {}) or {})
+    chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
+    raw_score = legacy_parse_to_raw_score(
+        filepath,
+        source_format=_infer_source_format(filepath),
+        events=events,
+        track_name=track_name,
+        beats_per_measure=source_beats_per_measure,
+        section_markers=section_markers,
+        chord_markers=chord_markers,
+        chord_diagrams=chord_diagrams,
+    )
+    core_result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.TAB,
+    )
+    return render_scene_to_pdf_bytes(core_result.render_scene)
+
+
+def _render_legacy_pdf_bytes(
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+    *,
+    mode: str,
+) -> bytes:
+    results, _stats = _run_legacy_pipeline(events, mode=mode)
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
+    beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    title, artist = _infer_title_artist(filepath)
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        temp_path = Path(tmp.name)
+    try:
+        render_pdf_tab(
+            results,
+            temp_path,
+            title=title,
+            artist=artist,
+            beats_per_measure=beats_per_measure,
+            instrument=track_name,
+            mode_label=f"{mode} mode",
+            section_markers=section_markers or None,
+            chord_diagrams=chord_diagrams or None,
+        )
+        return temp_path.read_bytes()
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+
+def _safe_pdf_filename(label: str) -> str:
+    safe = re.sub(r"[^a-zA-Z0-9._ -]+", "_", label).strip()
+    if not safe:
+        safe = "fretwise-export"
+    if not safe.lower().endswith(".pdf"):
+        safe += ".pdf"
+    return safe
 
 
 def _serialize_result(r: FingeringResult) -> dict[str, Any]:
