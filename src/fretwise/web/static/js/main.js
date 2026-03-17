@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { fetchFiles, fetchTracks, fetchSolve, uploadFile } from './api.js';
+import { fetchExportPdf, fetchFiles, fetchSolve, fetchTracks, uploadFile } from './api.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 
@@ -43,6 +43,7 @@ const btnLoopClear  = $('#btn-loop-clear');
 const btnMetronome  = $('#btn-metronome');
 const btnSound      = $('#btn-sound');
 const btnExportPdf  = $('#btn-export-pdf');
+const pdfEngineSelect = $('#pdf-engine-select');
 const btnBackFiles  = $('#btn-back-files');
 const btnBackViewer  = $('#btn-back-viewer');
 const trackSwitcher  = $('#track-switcher');
@@ -180,54 +181,91 @@ async function selectTrack(trackId, trackName) {
   }
 }
 
-function exportPDF() {
+async function exportPDF() {
+  if (!renderer || !currentFile) return;
+
+  const originalLabel = btnExportPdf?.textContent || '📄 PDF';
+  if (btnExportPdf) {
+    btnExportPdf.disabled = true;
+    btnExportPdf.textContent = 'Export…';
+  }
+
+  try {
+    const mode = selMode?.value || 'reference';
+    const engine = pdfEngineSelect?.value || 'core';
+    const { blob, filename } = await fetchExportPdf(currentFile, currentTrackId, mode, engine);
+    _downloadBlob(blob, filename);
+  } catch (err) {
+    console.warn('API PDF export failed, falling back to local canvas export:', err);
+    exportPDFLegacyCanvas();
+  } finally {
+    if (btnExportPdf) {
+      btnExportPdf.disabled = false;
+      btnExportPdf.textContent = originalLabel;
+    }
+  }
+}
+
+function _downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename || 'fretwise-export.pdf';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function exportPDFLegacyCanvas() {
   if (!tabCanvas || !renderer) return;
 
-  // ── 1. Render a clean copy without the cursor/measure highlight ──────────
   const savedCursor = renderer.cursorMeasure;
-  renderer.cursorMeasure = -1;   // hide green cursor band
-  renderer.render();             // redraw tabCanvas without highlight
+  renderer.cursorMeasure = -1;
+  renderer.render();
 
   const w = renderer.systemWidth;
   const h = renderer.totalHeight;
-
-  // ── 2. Build print canvas with title baked in ────────────────────────────
-  const artist   = songArtist.textContent.trim();
-  const title    = songTitle.textContent.trim();
-  const TITLE_H  = artist ? 56 : 38;   // header height in canvas px
+  const artist = songArtist.textContent.trim();
+  const title = songTitle.textContent.trim();
+  const titleHeight = artist ? 56 : 38;
 
   const printCanvas = document.createElement('canvas');
-  printCanvas.width  = Math.round(w);
-  printCanvas.height = Math.round(h) + TITLE_H;
+  printCanvas.width = Math.round(w);
+  printCanvas.height = Math.round(h) + titleHeight;
   const ctx = printCanvas.getContext('2d');
 
-  // White background behind header
   ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, printCanvas.width, TITLE_H);
+  ctx.fillRect(0, 0, printCanvas.width, titleHeight);
 
-  // Title text
-  ctx.fillStyle  = '#000000';
-  ctx.textAlign  = 'center';
-  ctx.font       = 'bold 22px sans-serif';
+  ctx.fillStyle = '#000000';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 22px sans-serif';
   ctx.fillText(title, printCanvas.width / 2, 26);
 
   if (artist) {
-    ctx.font      = '14px sans-serif';
+    ctx.font = '14px sans-serif';
     ctx.fillStyle = '#555555';
     ctx.fillText(artist, printCanvas.width / 2, 46);
   }
 
-  // Tab image directly below the header — no separate HTML element
-  ctx.drawImage(tabCanvas, 0, 0, tabCanvas.width, tabCanvas.height,
-                0, TITLE_H, Math.round(w), Math.round(h));
+  ctx.drawImage(
+    tabCanvas,
+    0,
+    0,
+    tabCanvas.width,
+    tabCanvas.height,
+    0,
+    titleHeight,
+    Math.round(w),
+    Math.round(h),
+  );
 
-  // Restore the live view immediately
   renderer.cursorMeasure = savedCursor;
   renderer.render();
 
-  // ── 3. Encode the single combined image synchronously ───────────────────
   const imgDataUrl = printCanvas.toDataURL('image/png');
-  const safeTitle  = artist ? `${title} — ${artist}` : title;
+  const safeTitle = artist ? `${title} — ${artist}` : title;
 
   const html = `<!DOCTYPE html><html><head>
 <meta charset="utf-8"><title>${sanitize(safeTitle)}</title>
@@ -242,25 +280,22 @@ function exportPDF() {
 </body></html>`;
 
   const blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-
-  // ── 4. Hidden iframe — print is called from the PARENT context so it is   ─
-  //       never blocked by popup-blockers or blob: origin restrictions.       ─
   const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:0;';
+  iframe.style.cssText =
+    'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:0;';
   document.body.appendChild(iframe);
 
   iframe.onload = () => {
     try {
       iframe.contentWindow.focus();
       iframe.contentWindow.print();
-    } catch (e) {
-      // Fallback: open in a new tab so user can Ctrl+P manually
+    } catch (_e) {
       window.open(blobUrl, '_blank');
     }
     setTimeout(() => {
       if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
       URL.revokeObjectURL(blobUrl);
-    }, 30_000);
+    }, 30000);
   };
 
   iframe.src = blobUrl;
