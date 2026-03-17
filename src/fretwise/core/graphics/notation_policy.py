@@ -182,11 +182,23 @@ def default_notation_policy() -> NotationPolicy:
             anchor=SymbolAnchor.TAB,
             notes="Instrumental effect marker anchored to tablature plane.",
         ),
+        "let_ring_span": SymbolRule(
+            symbol_id="let_ring_span",
+            allowed_modes=tab_modes,
+            anchor=SymbolAnchor.TAB,
+            notes="Instrumental effect span anchored to tablature plane.",
+        ),
         "tapping": SymbolRule(
             symbol_id="tapping",
             allowed_modes=tab_modes,
             anchor=SymbolAnchor.TAB,
             notes="Instrumental effect marker anchored to tablature plane.",
+        ),
+        "palm_mute_span": SymbolRule(
+            symbol_id="palm_mute_span",
+            allowed_modes=tab_modes,
+            anchor=SymbolAnchor.TAB,
+            notes="Instrumental effect span anchored to tablature plane.",
         ),
     }
 

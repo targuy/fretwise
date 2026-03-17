@@ -36,6 +36,25 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                         out.append(_render_stem_line(recipe.params))
                     elif recipe.recipe_id == "beam_group":
                         out.append(_render_beam_group(recipe.params))
+                    elif recipe.recipe_id == "let_ring_span":
+                        out.extend(
+                            _render_tab_span(
+                                recipe.params,
+                                label="L.R.",
+                                stroke="#446",
+                                dy=-1.0,
+                            )
+                        )
+                    elif recipe.recipe_id == "palm_mute_span":
+                        label = str(recipe.params.get("label", "P.M."))
+                        out.extend(
+                            _render_tab_span(
+                                recipe.params,
+                                label=label,
+                                stroke="#111",
+                                dy=-1.0,
+                            )
+                        )
                 for text in layer.text_instances:
                     out.append(
                         f'<text x="{text.x:.2f}" y="{text.y:.2f}" '
@@ -97,6 +116,29 @@ def _render_beam_group(params: dict[str, object]) -> str:
         f'<rect x="{x0:.2f}" y="{(y - thickness):.2f}" '
         f'width="{width:.2f}" height="{max(1.0, thickness):.2f}" fill="black"/>'
     )
+
+
+def _render_tab_span(
+    params: dict[str, object],
+    *,
+    label: str,
+    stroke: str,
+    dy: float,
+) -> list[str]:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    if x1 <= x0:
+        return []
+    text = (
+        f'<text x="{x0:.2f}" y="{(y + dy):.2f}" '
+        f'font-family="Helvetica" font-size="6">{escape(label)}</text>'
+    )
+    line = (
+        f'<line x1="{x0:.2f}" y1="{y:.2f}" x2="{x1:.2f}" y2="{y:.2f}" '
+        f'stroke="{stroke}" stroke-width="0.8" stroke-dasharray="3 2"/>'
+    )
+    return [text, line]
 
 
 def _render_glyph(

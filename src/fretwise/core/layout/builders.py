@@ -167,6 +167,10 @@ def _measure_event_layouts(
                 if event.tab_info is not None and event.tab_info.fret is not None:
                     metadata["tab_fret"] = str(event.tab_info.fret)
                 metadata["tab_string"] = str(string_num)
+                if event.techniques:
+                    metadata["techniques"] = ",".join(
+                        sorted({tech.name for tech in event.techniques})
+                    )
 
             layouts.append(
                 EventLayout(

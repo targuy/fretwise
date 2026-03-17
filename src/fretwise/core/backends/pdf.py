@@ -77,6 +77,23 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_stem_line(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "beam_group":
                             _draw_beam_group(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "let_ring_span":
+                            _draw_tab_span(
+                                canvas,
+                                page_h,
+                                recipe.params,
+                                label="L.R.",
+                                color=(0.3, 0.3, 0.6),
+                            )
+                        elif recipe.recipe_id == "palm_mute_span":
+                            label = str(recipe.params.get("label", "P.M."))
+                            _draw_tab_span(
+                                canvas,
+                                page_h,
+                                recipe.params,
+                                label=label,
+                                color=(0.1, 0.1, 0.1),
+                            )
                     for text in layer.text_instances:
                         canvas.setFont(text.font_family, text.font_size)
                         canvas.setFillColorRGB(0, 0, 0)
@@ -152,6 +169,31 @@ def _draw_beam_group(
         fill=1,
         stroke=0,
     )
+
+
+def _draw_tab_span(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+    *,
+    label: str,
+    color: tuple[float, float, float],
+) -> None:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    if x1 <= x0:
+        return
+
+    y_pdf = _to_pdf_y(page_h, y)
+    canvas.setStrokeColorRGB(*color)
+    canvas.setFillColorRGB(*color)
+    canvas.setLineWidth(0.8)
+    canvas.setDash(3, 2)
+    canvas.line(x0, y_pdf, x1, y_pdf)
+    canvas.setDash()
+    canvas.setFont("Helvetica", 6)
+    canvas.drawString(x0, y_pdf + 1.0, label)
 
 
 def _to_pdf_y(page_h: float, scene_y: float) -> float:

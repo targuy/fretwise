@@ -88,7 +88,9 @@ def _map_note(note_index: int, note: LegacyNoteEvent) -> CanonicalNoteEvent:
     if note.tapping:
         techniques.append(Technique(name="tapping"))
     if note.palm_muted:
-        techniques.append(Technique(name="palm_muted"))
+        techniques.append(Technique(name="palm_mute"))
+    if note.let_ring:
+        techniques.append(Technique(name="let_ring"))
     if note.bend_value is not None:
         techniques.append(Technique(name="bend", value=str(note.bend_value)))
 

@@ -30,6 +30,7 @@ _STAFF_STD_Y = _MARGIN_Y - 8.0
 _STAFF_STD_SPACING = 12.0
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 10.0
 _REST_GAP_BREAK = 0.115
+_TAB_SPAN_PAD = 6.0
 _MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
 _MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 
@@ -102,6 +103,7 @@ def layout_to_render_scene(
         first_staff_layout = page_layout.systems[0].staves[0]
         for measure_layout in first_staff_layout.measure_layouts:
             standard_rhythm_events: list[tuple[float, float, float, float]] = []
+            tab_span_events: list[dict[str, object]] = []
             # Measure marker.
             notes_layer.text_instances.append(
                 TextInstance(
@@ -129,6 +131,17 @@ def layout_to_render_scene(
                                 "tab_string": event_layout.metadata.get("tab_string", "3"),
                             },
                         )
+                    )
+                    techniques = _parse_techniques(event_layout.metadata.get("techniques"))
+                    tab_span_events.append(
+                        {
+                            "event_id": event_layout.event_id,
+                            "x": event_layout.x,
+                            "y": event_layout.y,
+                            "onset": event_layout.onset,
+                            "tab_string": _safe_int(event_layout.metadata.get("tab_string")) or 3,
+                            "techniques": techniques,
+                        }
                     )
                 if has_standard:
                     event_type = event_layout.metadata.get("event_type")
@@ -158,6 +171,13 @@ def layout_to_render_scene(
                     measure_number=measure_layout.measure_number,
                     beats_per_measure=measure_layout.beats_per_measure,
                     events=standard_rhythm_events,
+                )
+            if has_tab and tab_span_events:
+                _append_tab_technique_spans(
+                    notes_layer,
+                    measure_x=measure_layout.x,
+                    measure_width=measure_layout.width,
+                    events=tab_span_events,
                 )
     else:
         # Fallback path for empty/unplaced layouts.
@@ -393,3 +413,71 @@ def _base_duration(duration: float) -> float:
         if abs(duration - base * 1.5) < 0.01:
             return base
     return duration
+
+
+def _append_tab_technique_spans(
+    layer: LayerGroup,
+    *,
+    measure_x: float,
+    measure_width: float,
+    events: list[dict[str, object]],
+) -> None:
+    by_string: dict[int, list[dict[str, object]]] = {}
+    for event in events:
+        string_num = int(event.get("tab_string", 3))
+        by_string.setdefault(string_num, []).append(event)
+
+    for string_num, notes in by_string.items():
+        notes_sorted = sorted(notes, key=lambda item: float(item.get("onset", 0.0)))
+        for idx, event in enumerate(notes_sorted):
+            techs = set(event.get("techniques", set()))
+            if not techs.intersection({"let_ring", "palm_mute"}):
+                continue
+
+            x = float(event.get("x", 0.0))
+            y = float(event.get("y", 0.0))
+            x0 = x + _TAB_SPAN_PAD
+            next_x = (
+                float(notes_sorted[idx + 1].get("x", x))
+                if idx + 1 < len(notes_sorted)
+                else measure_x + measure_width - 4.0
+            )
+            x1 = min(measure_x + measure_width - 4.0, next_x - _TAB_SPAN_PAD)
+            if x1 <= x0 + 1.0:
+                continue
+
+            if "let_ring" in techs:
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="let_ring_span",
+                        params={"x0": x0, "x1": x1, "y": y - 8.0, "dash": "2,2"},
+                        metadata={
+                            "string": str(string_num),
+                            "event_id": str(event.get("event_id")),
+                        },
+                    )
+                )
+            if "palm_mute" in techs:
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="palm_mute_span",
+                        params={"x0": x0, "x1": x1, "y": y - 14.0, "label": "P.M.", "dash": "3,2"},
+                        metadata={
+                            "string": str(string_num),
+                            "event_id": str(event.get("event_id")),
+                        },
+                    )
+                )
+
+
+def _parse_techniques(value: str | None) -> set[str]:
+    if not value:
+        return set()
+    return {item.strip() for item in value.split(",") if item.strip()}
+
+
+def _safe_int(value: str | None) -> int | None:
+    try:
+        return int(value) if value is not None else None
+    except ValueError:
+        return None

@@ -16,6 +16,8 @@ def _note(
     string_hint: int | None = None,
     fret_hint: int | None = None,
     tapping: bool = False,
+    let_ring: bool = False,
+    palm_muted: bool = False,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
@@ -28,6 +30,8 @@ def _note(
         string_hint=string_hint,
         fret_hint=fret_hint,
         tapping=tapping,
+        let_ring=let_ring,
+        palm_muted=palm_muted,
     )
 
 
@@ -79,6 +83,21 @@ def test_completed_to_canonical_score_extracts_techniques() -> None:
     technique_names = {tech.name for tech in event.techniques}
 
     assert "tapping" in technique_names
+
+
+def test_completed_to_canonical_score_extracts_span_techniques() -> None:
+    completed = CompletedScore(
+        source_path="song.gp",
+        source_format="gpif",
+        notes=[_note(pitch=64, onset=0.0, let_ring=True, palm_muted=True)],
+    )
+
+    score = completed_to_canonical_score(completed)
+    event = score.tracks[0].staff_groups[0].staves[0].measures[0].voices[0].events[0]
+    technique_names = {tech.name for tech in event.techniques}
+
+    assert "let_ring" in technique_names
+    assert "palm_mute" in technique_names
 
 
 def test_completed_to_canonical_score_handles_empty_input() -> None:

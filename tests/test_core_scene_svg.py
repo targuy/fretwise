@@ -32,6 +32,8 @@ def _note(
     duration: float = 1.0,
     string_hint: int | None = None,
     fret_hint: int | None = None,
+    let_ring: bool = False,
+    palm_muted: bool = False,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
@@ -43,6 +45,8 @@ def _note(
         voice_hint=0,
         string_hint=string_hint,
         fret_hint=fret_hint,
+        let_ring=let_ring,
+        palm_muted=palm_muted,
     )
 
 
@@ -116,6 +120,37 @@ def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
     assert "stem_line" in recipe_ids
     assert "beam_group" in recipe_ids
     assert "<rect " in svg
+
+
+def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=1.0,
+                string_hint=1,
+                fret_hint=0,
+                let_ring=True,
+                palm_muted=True,
+            ),
+            _note(pitch=66, onset=1.0, duration=1.0, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[1].recipe_instances]
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert "let_ring_span" in recipe_ids
+    assert "palm_mute_span" in recipe_ids
+    assert "L.R." in svg
+    assert "P.M." in svg
 
 
 def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> None:
