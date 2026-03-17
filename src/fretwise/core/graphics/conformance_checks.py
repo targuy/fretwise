@@ -74,6 +74,7 @@ def check_scene_conformance(
                             symbol_id=glyph.glyph_id,
                             context={"glyph_id": glyph.glyph_id},
                         )
+    issues.extend(_check_rhythm_recipe_consistency(scene))
     if (
         mode == RepresentationMode.STANDARD_TAB
         and policy.metadata.get("standard_tab_alignment_required") == "true"
@@ -330,6 +331,135 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
     return issues
 
 
+def _check_rhythm_recipe_consistency(scene: RenderScene) -> list[ConformanceIssue]:
+    issues: list[ConformanceIssue] = []
+
+    for page_index, page in enumerate(scene.document_scene.pages):
+        for system_index, system in enumerate(page.systems):
+            for staff_index, staff in enumerate(system.staves):
+                for layer in staff.layer_groups:
+                    for recipe in layer.recipe_instances:
+                        if recipe.recipe_id == "stem_line":
+                            direction = str(
+                                recipe.metadata.get(
+                                    "direction",
+                                    recipe.params.get("direction", ""),
+                                )
+                            )
+                            if direction not in {"up", "down"}:
+                                issues.append(
+                                    ConformanceIssue(
+                                        code="CONF-201",
+                                        severity=ConformanceSeverity.HIGH,
+                                        message="Stem recipe has invalid direction metadata.",
+                                        symbol_id="stem_line",
+                                        context={
+                                            "direction": direction,
+                                            "page_index": page_index,
+                                            "system_index": system_index,
+                                            "staff_index": staff_index,
+                                        },
+                                    )
+                                )
+                                continue
+
+                            y0 = _safe_float(recipe.params.get("y0"))
+                            y1 = _safe_float(recipe.params.get("y1"))
+                            if y0 is None or y1 is None:
+                                continue
+                            if direction == "up" and y1 >= y0:
+                                issues.append(
+                                    ConformanceIssue(
+                                        code="CONF-202",
+                                        severity=ConformanceSeverity.MEDIUM,
+                                        message="Up-stem geometry does not point upward.",
+                                        symbol_id="stem_line",
+                                        context={
+                                            "direction": direction,
+                                            "y0": y0,
+                                            "y1": y1,
+                                            "page_index": page_index,
+                                            "system_index": system_index,
+                                            "staff_index": staff_index,
+                                        },
+                                    )
+                                )
+                            if direction == "down" and y1 <= y0:
+                                issues.append(
+                                    ConformanceIssue(
+                                        code="CONF-202",
+                                        severity=ConformanceSeverity.MEDIUM,
+                                        message="Down-stem geometry does not point downward.",
+                                        symbol_id="stem_line",
+                                        context={
+                                            "direction": direction,
+                                            "y0": y0,
+                                            "y1": y1,
+                                            "page_index": page_index,
+                                            "system_index": system_index,
+                                            "staff_index": staff_index,
+                                        },
+                                    )
+                                )
+
+                        if recipe.recipe_id in {"beam_group", "flag_stack"}:
+                            direction = str(recipe.params.get("direction", ""))
+                            if direction not in {"up", "down"}:
+                                issues.append(
+                                    ConformanceIssue(
+                                        code="CONF-203",
+                                        severity=ConformanceSeverity.HIGH,
+                                        message=(
+                                            f"{recipe.recipe_id} recipe has invalid direction "
+                                            "parameter."
+                                        ),
+                                        symbol_id=recipe.recipe_id,
+                                        context={
+                                            "direction": direction,
+                                            "page_index": page_index,
+                                            "system_index": system_index,
+                                            "staff_index": staff_index,
+                                        },
+                                    )
+                                )
+                                continue
+                            if recipe.recipe_id == "beam_group":
+                                level = _safe_int(recipe.params.get("level"))
+                                if level is None or level < 1:
+                                    issues.append(
+                                        ConformanceIssue(
+                                            code="CONF-204",
+                                            severity=ConformanceSeverity.MEDIUM,
+                                            message="beam_group recipe level must be >= 1.",
+                                            symbol_id="beam_group",
+                                            context={
+                                                "level": recipe.params.get("level"),
+                                                "page_index": page_index,
+                                                "system_index": system_index,
+                                                "staff_index": staff_index,
+                                            },
+                                        )
+                                    )
+                            if recipe.recipe_id == "flag_stack":
+                                count = _safe_int(recipe.params.get("count"))
+                                if count is None or count < 1:
+                                    issues.append(
+                                        ConformanceIssue(
+                                            code="CONF-205",
+                                            severity=ConformanceSeverity.MEDIUM,
+                                            message="flag_stack recipe count must be >= 1.",
+                                            symbol_id="flag_stack",
+                                            context={
+                                                "count": recipe.params.get("count"),
+                                                "page_index": page_index,
+                                                "system_index": system_index,
+                                                "staff_index": staff_index,
+                                            },
+                                        )
+                                    )
+    return issues
+
+
 def _recipe_frame(staff: Any, recipe_id: str) -> tuple[float, float, float] | None:
     for layer in staff.layer_groups:
         for recipe in layer.recipe_instances:
@@ -346,5 +476,12 @@ def _recipe_frame(staff: Any, recipe_id: str) -> tuple[float, float, float] | No
 def _safe_int(value: Any) -> int | None:
     try:
         return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_float(value: Any) -> float | None:
+    try:
+        return float(value)
     except (TypeError, ValueError):
         return None

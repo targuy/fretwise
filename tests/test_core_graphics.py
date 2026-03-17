@@ -18,12 +18,17 @@ from fretwise.models import Articulation, Dynamic, NoteEvent
 
 
 def _note(
-    *, pitch: int, onset: float, string_hint: int | None = None, fret_hint: int | None = None
+    *,
+    pitch: int,
+    onset: float,
+    duration: float = 1.0,
+    string_hint: int | None = None,
+    fret_hint: int | None = None,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
         onset=onset,
-        duration=1.0,
+        duration=duration,
         tempo=120.0,
         articulation=Articulation.NORMAL,
         dynamic=Dynamic.MF,
@@ -294,3 +299,99 @@ def test_scene_conformance_flags_tab_string_row_mismatch_in_hybrid_mode() -> Non
     )
 
     assert any(issue.code == "CONF-109" for issue in issues)
+
+
+def test_scene_conformance_flags_invalid_stem_direction_in_standard_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    stem_idx = next(
+        idx
+        for idx, recipe in enumerate(notes_layer.recipe_instances)
+        if recipe.recipe_id == "stem_line"
+    )
+    stem = notes_layer.recipe_instances[stem_idx]
+    metadata = dict(stem.metadata)
+    metadata["direction"] = "sideways"
+    notes_layer.recipe_instances[stem_idx] = replace(stem, metadata=metadata)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-201" for issue in issues)
+
+
+def test_scene_conformance_flags_invalid_stem_geometry_in_standard_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    stem_idx = next(
+        idx
+        for idx, recipe in enumerate(notes_layer.recipe_instances)
+        if recipe.recipe_id == "stem_line"
+    )
+    stem = notes_layer.recipe_instances[stem_idx]
+    params = dict(stem.params)
+    params["y1"] = float(params.get("y0", 0.0)) + 5.0
+    notes_layer.recipe_instances[stem_idx] = replace(stem, params=params)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-202" for issue in issues)
+
+
+def test_scene_conformance_flags_invalid_beam_direction_in_standard_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=0.5, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=0.5, duration=0.5, string_hint=1, fret_hint=2),
+        ],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    beam_idx = next(
+        idx
+        for idx, recipe in enumerate(notes_layer.recipe_instances)
+        if recipe.recipe_id == "beam_group"
+    )
+    beam = notes_layer.recipe_instances[beam_idx]
+    params = dict(beam.params)
+    params["direction"] = "sideways"
+    notes_layer.recipe_instances[beam_idx] = replace(beam, params=params)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-203" for issue in issues)
