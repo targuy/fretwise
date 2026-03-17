@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
+from fretwise.core.canonical import RestEvent as CanonicalRestEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
 from fretwise.core.scene.models import (
@@ -46,6 +47,27 @@ def layout_to_render_scene(
 
     staff_layer = LayerGroup(layer_id="staff")
     notes_layer = LayerGroup(layer_id="notes")
+    time_num, time_den = _score_time_signature(score)
+
+    staff_layer.glyph_instances.append(
+        GlyphInstance(
+            glyph_id="time_signature",
+            x=_MARGIN_X + 30.0,
+            y=_STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING,
+            size=12.0,
+            metadata={"numerator": time_num, "denominator": time_den},
+        )
+    )
+    if has_standard:
+        staff_layer.glyph_instances.append(
+            GlyphInstance(
+                glyph_id="clef",
+                x=_MARGIN_X + 10.0,
+                y=_STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING,
+                size=14.0,
+                metadata={"clef": "treble"},
+            )
+        )
 
     if has_standard:
         staff_layer.recipe_instances.append(
@@ -102,15 +124,23 @@ def layout_to_render_scene(
                         )
                     )
                 if has_standard:
-                    notes_layer.glyph_instances.append(
-                        GlyphInstance(
-                            glyph_id="notehead",
+                    event_type = event_layout.metadata.get("event_type")
+                    if event_type == "RestEvent":
+                        _append_rest_glyph(
+                            notes_layer,
                             x=event_layout.x,
-                            y=_standard_note_y(event_layout.metadata),
-                            size=3.0,
-                            metadata={"event_id": event_layout.event_id},
+                            event_id=event_layout.event_id,
                         )
-                    )
+                    else:
+                        notes_layer.glyph_instances.append(
+                            GlyphInstance(
+                                glyph_id="notehead",
+                                x=event_layout.x,
+                                y=_standard_note_y(event_layout.metadata),
+                                size=3.0,
+                                metadata={"event_id": event_layout.event_id},
+                            )
+                        )
     else:
         # Fallback path for empty/unplaced layouts.
         if score.tracks:
@@ -145,6 +175,12 @@ def layout_to_render_scene(
                                             metadata={"event_id": event.event_id},
                                         )
                                     )
+                            elif isinstance(event, CanonicalRestEvent) and has_standard:
+                                _append_rest_glyph(
+                                    notes_layer,
+                                    x=measure_x + (event.onset % 4.0) * 36.0 + 28.0,
+                                    event_id=event.event_id,
+                                )
 
     staff_scene = StaffScene(
         staff_id="staff-1",
@@ -207,3 +243,24 @@ def _standard_note_y(metadata: dict[str, str]) -> float:
     low = _STAFF_STD_Y - 12.0
     high = _STAFF_STD_Y + 4 * _STAFF_STD_SPACING + 12.0
     return max(low, min(high, y))
+
+
+def _append_rest_glyph(layer: LayerGroup, *, x: float, event_id: str) -> None:
+    layer.glyph_instances.append(
+        GlyphInstance(
+            glyph_id="rest",
+            x=x,
+            y=_STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING,
+            size=11.0,
+            metadata={"event_id": event_id},
+        )
+    )
+
+
+def _score_time_signature(score: Score) -> tuple[int, int]:
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                for measure in staff.measures:
+                    return measure.time_signature.numerator, measure.time_signature.denominator
+    return 4, 4

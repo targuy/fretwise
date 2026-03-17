@@ -78,9 +78,15 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                         canvas.setFillColorRGB(0, 0, 0)
                         canvas.drawString(text.x, _to_pdf_y(page_h, text.y), text.text)
                     for glyph in layer.glyph_instances:
-                        radius = max(1.0, glyph.size)
-                        canvas.setStrokeColorRGB(0, 0, 0)
-                        canvas.circle(glyph.x, _to_pdf_y(page_h, glyph.y), radius, fill=0, stroke=1)
+                        _draw_glyph(
+                            canvas,
+                            page_h,
+                            glyph_id=glyph.glyph_id,
+                            x=glyph.x,
+                            y=glyph.y,
+                            size=glyph.size,
+                            metadata=glyph.metadata,
+                        )
 
         canvas.showPage()
 
@@ -107,3 +113,38 @@ def _draw_lines(
 
 def _to_pdf_y(page_h: float, scene_y: float) -> float:
     return page_h - scene_y
+
+
+def _draw_glyph(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    *,
+    glyph_id: str,
+    x: float,
+    y: float,
+    size: float,
+    metadata: dict[str, object],
+) -> None:
+    y_pdf = _to_pdf_y(page_h, y)
+    canvas.setFillColorRGB(0, 0, 0)
+    canvas.setStrokeColorRGB(0, 0, 0)
+
+    if glyph_id == "clef":
+        canvas.setFont("Times-Roman", max(10.0, size))
+        canvas.drawString(x, y_pdf, "G")
+        return
+
+    if glyph_id == "time_signature":
+        numerator = int(metadata.get("numerator", 4))
+        denominator = int(metadata.get("denominator", 4))
+        canvas.setFont("Helvetica", max(9.0, size))
+        canvas.drawString(x, y_pdf, f"{numerator}/{denominator}")
+        return
+
+    if glyph_id == "rest":
+        canvas.setFont("Times-Roman", max(9.0, size))
+        canvas.drawString(x, y_pdf, "rest")
+        return
+
+    radius = max(1.0, size)
+    canvas.circle(x, y_pdf, radius, fill=0, stroke=1)

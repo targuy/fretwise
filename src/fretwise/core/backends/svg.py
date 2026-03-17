@@ -41,9 +41,13 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                     )
                 for glyph in layer.glyph_instances:
                     out.append(
-                        f'<circle cx="{glyph.x:.2f}" cy="{glyph.y:.2f}" '
-                        f'r="{max(1.0, glyph.size):.2f}" '
-                        'fill="none" stroke="black"/>'
+                        _render_glyph(
+                            glyph.glyph_id,
+                            x=glyph.x,
+                            y=glyph.y,
+                            size=glyph.size,
+                            metadata=glyph.metadata,
+                        )
                     )
 
     out.append("</svg>")
@@ -64,3 +68,38 @@ def _render_lines(params: dict[str, object], *, stroke: str) -> list[str]:
             f'y2="{line_y:.2f}" stroke="{stroke}" stroke-width="1"/>'
         )
     return lines
+
+
+def _render_glyph(
+    glyph_id: str,
+    *,
+    x: float,
+    y: float,
+    size: float,
+    metadata: dict[str, object],
+) -> str:
+    if glyph_id == "clef":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Times New Roman" font-size="{max(10.0, size):.2f}">'
+            "𝄞</text>"
+        )
+    if glyph_id == "time_signature":
+        numerator = int(metadata.get("numerator", 4))
+        denominator = int(metadata.get("denominator", 4))
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Helvetica" font-size="{max(9.0, size):.2f}">'
+            f"{numerator}/{denominator}</text>"
+        )
+    if glyph_id == "rest":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Times New Roman" font-size="{max(9.0, size):.2f}">'
+            "𝄽</text>"
+        )
+    return (
+        f'<circle cx="{x:.2f}" cy="{y:.2f}" '
+        f'r="{max(1.0, size):.2f}" '
+        'fill="none" stroke="black"/>'
+    )

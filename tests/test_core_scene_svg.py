@@ -6,7 +6,19 @@ from pathlib import Path
 
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_svg
-from fretwise.core.canonical import completed_to_canonical_score
+from fretwise.core.canonical import (
+    KeySignature,
+    Measure,
+    RestEvent,
+    Score,
+    Staff,
+    StaffGroup,
+    TempoMark,
+    TimeSignature,
+    Track,
+    Voice,
+    completed_to_canonical_score,
+)
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.scene import canonical_to_render_scene
@@ -81,6 +93,65 @@ def test_canonical_to_render_scene_standard_tablature_has_both_planes() -> None:
     assert "tab_lines" in recipe_ids
     assert any(g.glyph_id == "notehead" for g in staff.layer_groups[1].glyph_instances)
     assert any(t.metadata.get("kind") == "note" for t in staff.layer_groups[1].text_instances)
+    staff_glyph_ids = {g.glyph_id for g in staff.layer_groups[0].glyph_instances}
+    assert "clef" in staff_glyph_ids
+    assert "time_signature" in staff_glyph_ids
+
+
+def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> None:
+    score = Score(
+        score_id="s1",
+        title="rest-song",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=3, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r1",
+                                                        onset=0.0,
+                                                        duration=1.0,
+                                                        voice=0,
+                                                    )
+                                                ],
+                                            )
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+        tempo_marks=[TempoMark(onset=0.0, bpm=90.0)],
+        key_signature=KeySignature(),
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.STANDARD.value)
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    staff_glyph_ids = {g.glyph_id for g in staff.layer_groups[0].glyph_instances}
+    notes_glyph_ids = {g.glyph_id for g in staff.layer_groups[1].glyph_instances}
+    svg = render_scene_to_svg(scene)
+
+    assert "clef" in staff_glyph_ids
+    assert "time_signature" in staff_glyph_ids
+    assert "rest" in notes_glyph_ids
+    assert "3/4" in svg
 
 
 def test_run_core_pipeline_from_raw_end_to_end() -> None:
