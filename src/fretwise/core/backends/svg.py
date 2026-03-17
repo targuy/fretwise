@@ -29,7 +29,9 @@ def render_scene_to_svg(scene: RenderScene) -> str:
             for layer in staff.layer_groups:
                 for recipe in layer.recipe_instances:
                     if recipe.recipe_id == "tab_lines":
-                        out.extend(_render_tab_lines(recipe.params))
+                        out.extend(_render_lines(recipe.params, stroke="#666"))
+                    elif recipe.recipe_id == "staff_lines":
+                        out.extend(_render_lines(recipe.params, stroke="#222"))
                 for text in layer.text_instances:
                     out.append(
                         f'<text x="{text.x:.2f}" y="{text.y:.2f}" '
@@ -48,7 +50,7 @@ def render_scene_to_svg(scene: RenderScene) -> str:
     return "\n".join(out)
 
 
-def _render_tab_lines(params: dict[str, object]) -> list[str]:
+def _render_lines(params: dict[str, object], *, stroke: str) -> list[str]:
     x = float(params.get("x", 0.0))
     y = float(params.get("y", 0.0))
     width = float(params.get("width", 100.0))
@@ -59,6 +61,6 @@ def _render_tab_lines(params: dict[str, object]) -> list[str]:
         line_y = y + idx * spacing
         lines.append(
             f'<line x1="{x:.2f}" y1="{line_y:.2f}" x2="{x + width:.2f}" '
-            f'y2="{line_y:.2f}" stroke="#666" stroke-width="1"/>'
+            f'y2="{line_y:.2f}" stroke="{stroke}" stroke-width="1"/>'
         )
     return lines

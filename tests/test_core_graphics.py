@@ -35,9 +35,11 @@ def _note(
 def test_default_notation_policy_symbol_rules() -> None:
     policy = default_notation_policy()
     assert policy.is_allowed(RepresentationMode.TAB, "tab_lines")
+    assert policy.is_allowed(RepresentationMode.STANDARD, "staff_lines")
     assert policy.is_allowed(RepresentationMode.TAB_RHYTHM, "tab_digit")
     assert not policy.is_allowed(RepresentationMode.STANDARD, "tab_digit")
     assert not policy.is_allowed(RepresentationMode.STANDARD, "tab_lines")
+    assert not policy.is_allowed(RepresentationMode.TAB, "staff_lines")
 
 
 def test_default_reference_glyph_set_has_expected_glyphs() -> None:
@@ -98,5 +100,18 @@ def test_pipeline_exposes_conformance_issues_for_standard_mode() -> None:
         representation_mode=RepresentationMode.STANDARD,
     )
 
-    assert result.conformance_issues
-    assert any(issue.symbol_id == "tab_lines" for issue in result.conformance_issues)
+    assert result.conformance_issues == []
+
+
+def test_pipeline_standard_tablature_mode_is_conformant() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+
+    assert result.conformance_issues == []

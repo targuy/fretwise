@@ -46,7 +46,10 @@ def run_core_pipeline_from_raw(
     validation_report = validate_completed_score(completed_score)
     decision_outcome = decide_from_validation(validation_report, policy=decision_policy)
     canonical_score = completed_to_canonical_score(completed_score)
-    render_scene = canonical_to_render_scene(canonical_score)
+    render_scene = canonical_to_render_scene(
+        canonical_score,
+        mode=representation_mode.value,
+    )
     conformance_issues = check_scene_conformance(
         render_scene,
         mode=representation_mode,

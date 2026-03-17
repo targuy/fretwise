@@ -108,6 +108,11 @@ def default_notation_policy() -> NotationPolicy:
             allowed_modes=tab_modes,
             anchor=SymbolAnchor.TAB,
         ),
+        "staff_lines": SymbolRule(
+            symbol_id="staff_lines",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
         "tab_digit": SymbolRule(
             symbol_id="tab_digit",
             allowed_modes=tab_modes,
@@ -176,4 +181,3 @@ def default_notation_policy() -> NotationPolicy:
             "standard_tab_alignment_required": "true",
         },
     )
-

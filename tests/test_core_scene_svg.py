@@ -7,6 +7,7 @@ from pathlib import Path
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_svg
 from fretwise.core.canonical import completed_to_canonical_score
+from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.scene import canonical_to_render_scene
 from fretwise.models import Articulation, Dynamic, NoteEvent
@@ -62,6 +63,24 @@ def test_render_scene_to_svg_outputs_svg_document() -> None:
     assert "<line " in svg
     assert "<text " in svg
     assert "song" in svg
+
+
+def test_canonical_to_render_scene_standard_tablature_has_both_planes() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    completed_score = run_core_pipeline_from_raw(raw_score).completed_score
+    canonical_score = completed_to_canonical_score(completed_score)
+    scene = canonical_to_render_scene(canonical_score, mode=RepresentationMode.STANDARD_TAB.value)
+
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[0].recipe_instances]
+    assert "staff_lines" in recipe_ids
+    assert "tab_lines" in recipe_ids
+    assert any(g.glyph_id == "notehead" for g in staff.layer_groups[1].glyph_instances)
+    assert any(t.metadata.get("kind") == "note" for t in staff.layer_groups[1].text_instances)
 
 
 def test_run_core_pipeline_from_raw_end_to_end() -> None:

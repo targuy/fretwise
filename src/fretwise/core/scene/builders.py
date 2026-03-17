@@ -7,6 +7,7 @@ from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
 from fretwise.core.scene.models import (
     DocumentScene,
+    GlyphInstance,
     LayerGroup,
     PageScene,
     RecipeInstance,
@@ -22,32 +23,56 @@ _MARGIN_X = 60.0
 _MARGIN_Y = 40.0
 _STAFF_W = 1080.0
 _STAFF_H = 240.0
+_TAB_Y = _MARGIN_Y + 60.0
+_TAB_SPACING = 18.0
+_STAFF_STD_Y = _MARGIN_Y + 18.0
+_STAFF_STD_SPACING = 12.0
+_MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
+_MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 
 
-def canonical_to_render_scene(score: Score) -> RenderScene:
+def canonical_to_render_scene(score: Score, *, mode: str = "tablature") -> RenderScene:
     """Build a scene representation from canonical score through layout."""
     page_layout = canonical_to_page_layout(score)
-    return layout_to_render_scene(page_layout=page_layout, score=score)
+    return layout_to_render_scene(page_layout=page_layout, score=score, mode=mode)
 
 
-def layout_to_render_scene(*, page_layout: PageLayout, score: Score) -> RenderScene:
+def layout_to_render_scene(
+    *, page_layout: PageLayout, score: Score, mode: str = "tablature"
+) -> RenderScene:
     """Build render scene from explicit page layout contract."""
+    has_tab = mode in _MODES_WITH_TAB
+    has_standard = mode in _MODES_WITH_STANDARD
+
     staff_layer = LayerGroup(layer_id="staff")
     notes_layer = LayerGroup(layer_id="notes")
 
-    # Add baseline tab lines recipe.
-    staff_layer.recipe_instances.append(
-        RecipeInstance(
-            recipe_id="tab_lines",
-            params={
-                "x": _MARGIN_X,
-                "y": _MARGIN_Y + 60.0,
-                "width": _STAFF_W,
-                "count": 6,
-                "spacing": 18.0,
-            },
+    if has_standard:
+        staff_layer.recipe_instances.append(
+            RecipeInstance(
+                recipe_id="staff_lines",
+                params={
+                    "x": _MARGIN_X,
+                    "y": _STAFF_STD_Y,
+                    "width": _STAFF_W,
+                    "count": 5,
+                    "spacing": _STAFF_STD_SPACING,
+                },
+            )
         )
-    )
+    if has_tab:
+        staff_layer.recipe_instances.append(
+            RecipeInstance(
+                recipe_id="tab_lines",
+                params={
+                    "x": _MARGIN_X,
+                    "y": _TAB_Y,
+                    "width": _STAFF_W,
+                    "count": 6,
+                    "spacing": _TAB_SPACING,
+                },
+            )
+        )
 
     if page_layout.systems and page_layout.systems[0].staves:
         first_staff_layout = page_layout.systems[0].staves[0]
@@ -63,18 +88,29 @@ def layout_to_render_scene(*, page_layout: PageLayout, score: Score) -> RenderSc
                 )
             )
             for event_layout in measure_layout.event_layouts:
-                text = event_layout.metadata.get("tab_fret") or event_layout.metadata.get(
-                    "pitch_notated", "0"
-                )
-                notes_layer.text_instances.append(
-                    TextInstance(
-                        text=str(text),
-                        x=event_layout.x,
-                        y=event_layout.y,
-                        font_size=11.0,
-                        metadata={"kind": "note", "event_id": event_layout.event_id},
+                if has_tab:
+                    text = event_layout.metadata.get("tab_fret") or event_layout.metadata.get(
+                        "pitch_notated", "0"
                     )
-                )
+                    notes_layer.text_instances.append(
+                        TextInstance(
+                            text=str(text),
+                            x=event_layout.x,
+                            y=event_layout.y,
+                            font_size=11.0,
+                            metadata={"kind": "note", "event_id": event_layout.event_id},
+                        )
+                    )
+                if has_standard:
+                    notes_layer.glyph_instances.append(
+                        GlyphInstance(
+                            glyph_id="notehead",
+                            x=event_layout.x,
+                            y=_standard_note_y(event_layout.metadata),
+                            size=3.0,
+                            metadata={"event_id": event_layout.event_id},
+                        )
+                    )
     else:
         # Fallback path for empty/unplaced layouts.
         if score.tracks:
@@ -95,7 +131,20 @@ def layout_to_render_scene(*, page_layout: PageLayout, score: Score) -> RenderSc
                     for voice in measure.voices:
                         for event in voice.events:
                             if isinstance(event, CanonicalNoteEvent):
-                                _append_note_text(notes_layer, event, measure_x)
+                                if has_tab:
+                                    _append_note_text(notes_layer, event, measure_x)
+                                if has_standard:
+                                    notes_layer.glyph_instances.append(
+                                        GlyphInstance(
+                                            glyph_id="notehead",
+                                            x=measure_x + (event.onset % 4.0) * 36.0 + 28.0,
+                                            y=_standard_note_y(
+                                                {"pitch_notated": str(event.pitch_notated)}
+                                            ),
+                                            size=3.0,
+                                            metadata={"event_id": event.event_id},
+                                        )
+                                    )
 
     staff_scene = StaffScene(
         staff_id="staff-1",
@@ -144,3 +193,17 @@ def _append_note_text(layer: LayerGroup, event: CanonicalNoteEvent, measure_x: f
             metadata={"kind": "note", "event_id": event.event_id},
         )
     )
+
+
+def _standard_note_y(metadata: dict[str, str]) -> float:
+    pitch_raw = metadata.get("pitch_notated", "64")
+    try:
+        pitch = int(pitch_raw)
+    except ValueError:
+        pitch = 64
+
+    # Simple linear projection for a proof-of-contract staff placement.
+    y = _STAFF_STD_Y + 4 * _STAFF_STD_SPACING - (pitch - 64) * 2.0
+    low = _STAFF_STD_Y - 12.0
+    high = _STAFF_STD_Y + 4 * _STAFF_STD_SPACING + 12.0
+    return max(low, min(high, y))

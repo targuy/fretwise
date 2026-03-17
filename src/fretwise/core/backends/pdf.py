@@ -70,7 +70,9 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                 for layer in staff.layer_groups:
                     for recipe in layer.recipe_instances:
                         if recipe.recipe_id == "tab_lines":
-                            _draw_tab_lines(canvas, page_h, recipe.params)
+                            _draw_lines(canvas, page_h, recipe.params, color=(0.4, 0.4, 0.4))
+                        elif recipe.recipe_id == "staff_lines":
+                            _draw_lines(canvas, page_h, recipe.params, color=(0.1, 0.1, 0.1))
                     for text in layer.text_instances:
                         canvas.setFont(text.font_family, text.font_size)
                         canvas.setFillColorRGB(0, 0, 0)
@@ -83,15 +85,19 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
         canvas.showPage()
 
 
-def _draw_tab_lines(
-    canvas: rl_canvas.Canvas, page_h: float, params: dict[str, object]
+def _draw_lines(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+    *,
+    color: tuple[float, float, float],
 ) -> None:
     x = float(params.get("x", 0.0))
     y = float(params.get("y", 0.0))
     width = float(params.get("width", 100.0))
     count = int(params.get("count", 6))
     spacing = float(params.get("spacing", 16.0))
-    canvas.setStrokeColorRGB(0.4, 0.4, 0.4)
+    canvas.setStrokeColorRGB(*color)
     canvas.setLineWidth(1.0)
     for idx in range(count):
         line_y = y + idx * spacing
@@ -101,4 +107,3 @@ def _draw_tab_lines(
 
 def _to_pdf_y(page_h: float, scene_y: float) -> float:
     return page_h - scene_y
-
