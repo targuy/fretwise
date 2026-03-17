@@ -240,7 +240,7 @@ class TestSolveCommand:
 
         runner = CliRunner()
         with (
-            patch("fretwise.cli._shadow_core_conformance_issues", return_value=2),
+            patch("fretwise.cli._shadow_core_conformance_outcome", return_value=(2, False)),
             patch("fretwise.cli.render_pdf_tab", side_effect=_fake_render_pdf_tab),
         ):
             result = runner.invoke(

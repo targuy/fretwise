@@ -36,6 +36,10 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
+from fretwise.pdf_conformance import (
+    core_pdf_conformance_report,
+    legacy_shadow_pdf_conformance_report,
+)
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights
 
@@ -398,9 +402,10 @@ def solve(
                 representation_mode=RepresentationMode.TAB,
             )
             render_scene_to_pdf_file(core_result.render_scene, output)
-            if core_result.conformance_issues and not quiet:
+            report = core_pdf_conformance_report(len(core_result.conformance_issues))
+            if report.issue_count > 0 and not quiet:
                 click.echo(
-                    f"Core PDF conformance issues: {len(core_result.conformance_issues)}",
+                    f"Core PDF conformance issues: {report.issue_count}",
                     err=True,
                 )
         else:
@@ -417,10 +422,19 @@ def solve(
                 measures_per_system=measures_per_system,
                 chord_diagrams=chord_diagrams or None,
             )
-            shadow_issues = _shadow_core_conformance_issues(file, adapter, events)
-            if shadow_issues and not quiet:
+            shadow_issues, shadow_failed = _shadow_core_conformance_outcome(file, adapter, events)
+            report = legacy_shadow_pdf_conformance_report(
+                shadow_issues,
+                shadow_failed=shadow_failed,
+            )
+            if report.shadow_failed and not quiet:
                 click.echo(
-                    f"Legacy PDF shadow core conformance issues: {shadow_issues}",
+                    "Legacy PDF shadow core conformance unavailable.",
+                    err=True,
+                )
+            elif report.issue_count > 0 and not quiet:
+                click.echo(
+                    f"Legacy PDF shadow core conformance issues: {report.issue_count}",
                     err=True,
                 )
         if not quiet:
@@ -630,9 +644,9 @@ def _infer_source_format(path: Path) -> str:
     return suffix
 
 
-def _shadow_core_conformance_issues(
+def _shadow_core_conformance_outcome(
     path: Path, adapter: Any, events: list[Any]
-) -> int:
+) -> tuple[int, bool]:
     """Run core pipeline in shadow mode for legacy PDF diagnostics."""
     try:
         core_result = _run_core_pipeline_for_events(
@@ -642,8 +656,8 @@ def _shadow_core_conformance_issues(
             representation_mode=RepresentationMode.TAB,
         )
     except Exception:
-        return 0
-    return len(core_result.conformance_issues)
+        return 0, True
+    return len(core_result.conformance_issues), False
 
 
 def _run_core_pipeline_for_events(

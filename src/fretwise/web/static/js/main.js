@@ -195,7 +195,13 @@ async function exportPDF() {
   try {
     const mode = selMode?.value || 'reference';
     const engine = pdfEngineSelect?.value || 'core';
-    const { blob, filename, engine: usedEngine, conformanceIssues } = await fetchExportPdf(
+    const {
+      blob,
+      filename,
+      engine: usedEngine,
+      conformanceIssues,
+      conformanceReport,
+    } = await fetchExportPdf(
       currentFile,
       currentTrackId,
       mode,
@@ -209,7 +215,13 @@ async function exportPDF() {
         _setPdfExportStatus('Core: conformance OK', 'ok');
       }
     } else {
-      _setPdfExportStatus('Legacy export complete', 'ok');
+      if (conformanceReport?.shadow_failed) {
+        _setPdfExportStatus('Legacy: shadow core unavailable', 'warn');
+      } else if (conformanceIssues > 0) {
+        _setPdfExportStatus(`Legacy: shadow core ${conformanceIssues} issue(s)`, 'warn');
+      } else {
+        _setPdfExportStatus('Legacy export complete', 'ok');
+      }
     }
   } catch (err) {
     console.warn('API PDF export failed, falling back to local canvas export:', err);

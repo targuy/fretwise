@@ -77,7 +77,7 @@ def test_render_legacy_pdf_payload_returns_pdf_and_zero_conformance_count(
     file_path = tmp_path / "song.gp"
     file_path.touch()
 
-    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
         file_path,
         adapter,
         adapter.parse(file_path),
@@ -86,6 +86,7 @@ def test_render_legacy_pdf_payload_returns_pdf_and_zero_conformance_count(
     assert pdf_bytes.startswith(b"%PDF-")
     assert b"/Type /Page" in pdf_bytes
     assert conformance_issues == 0
+    assert shadow_failed is False
 
 
 def test_render_legacy_pdf_payload_reports_shadow_core_conformance_count(
@@ -100,7 +101,7 @@ def test_render_legacy_pdf_payload_reports_shadow_core_conformance_count(
 
     monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_run_core)
 
-    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
         file_path,
         adapter,
         adapter.parse(file_path),
@@ -108,6 +109,7 @@ def test_render_legacy_pdf_payload_reports_shadow_core_conformance_count(
     )
     assert pdf_bytes.startswith(b"%PDF-")
     assert conformance_issues == 2
+    assert shadow_failed is False
 
 
 def test_render_legacy_pdf_payload_ignores_shadow_core_failures(
@@ -122,7 +124,7 @@ def test_render_legacy_pdf_payload_ignores_shadow_core_failures(
 
     monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _raise)
 
-    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
         file_path,
         adapter,
         adapter.parse(file_path),
@@ -130,6 +132,7 @@ def test_render_legacy_pdf_payload_ignores_shadow_core_failures(
     )
     assert pdf_bytes.startswith(b"%PDF-")
     assert conformance_issues == 0
+    assert shadow_failed is True
 
 
 def test_load_adapter_and_events_uses_parse_track_when_requested(

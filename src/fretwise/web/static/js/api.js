@@ -54,6 +54,15 @@ export async function fetchExportPdf(filename, trackId, mode, engine) {
   const usedEngine = res.headers.get('x-fretwise-pdf-engine') || engine || 'legacy';
   const conformanceIssuesRaw = res.headers.get('x-fretwise-conformance-issues') || '0';
   const conformanceIssues = Number.parseInt(conformanceIssuesRaw, 10) || 0;
+  const conformanceReportRaw = res.headers.get('x-fretwise-conformance-report') || '';
+  let conformanceReport = null;
+  if (conformanceReportRaw) {
+    try {
+      conformanceReport = JSON.parse(conformanceReportRaw);
+    } catch (_err) {
+      conformanceReport = null;
+    }
+  }
   let filenameOut = 'fretwise-export.pdf';
   const m = /filename=\"?([^\";]+)\"?/i.exec(contentDisposition);
   if (m && m[1]) filenameOut = m[1];
@@ -63,5 +72,6 @@ export async function fetchExportPdf(filename, trackId, mode, engine) {
     filename: filenameOut,
     engine: usedEngine,
     conformanceIssues,
+    conformanceReport,
   };
 }

@@ -26,6 +26,10 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
+from fretwise.pdf_conformance import (
+    core_pdf_conformance_report,
+    legacy_shadow_pdf_conformance_report,
+)
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights
 
@@ -197,9 +201,14 @@ def _register_routes(app: FastAPI) -> None:
 
         if engine == "core":
             pdf_bytes, conformance_issues = _render_core_pdf_payload(filepath, adapter, events)
+            conformance_report = core_pdf_conformance_report(conformance_issues)
         else:
-            pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+            pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
                 filepath, adapter, events, mode=mode
+            )
+            conformance_report = legacy_shadow_pdf_conformance_report(
+                conformance_issues,
+                shadow_failed=shadow_failed,
             )
 
         auto_title, auto_artist = _infer_title_artist(filepath)
@@ -211,7 +220,8 @@ def _register_routes(app: FastAPI) -> None:
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}"',
                 "X-Fretwise-Pdf-Engine": engine,
-                "X-Fretwise-Conformance-Issues": str(conformance_issues),
+                "X-Fretwise-Conformance-Issues": str(conformance_report.issue_count),
+                "X-Fretwise-Conformance-Report": conformance_report.to_header_value(),
             },
         )
 
@@ -325,7 +335,7 @@ def _render_legacy_pdf_payload(
     events: list[NoteEvent],
     *,
     mode: str,
-) -> tuple[bytes, int]:
+) -> tuple[bytes, int, bool]:
     results, _stats = _run_legacy_pipeline(events, mode=mode)
     track_name: str = getattr(adapter, "track_name", "") or ""
     section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
@@ -347,8 +357,10 @@ def _render_legacy_pdf_payload(
             section_markers=section_markers or None,
             chord_diagrams=chord_diagrams or None,
         )
-        conformance_issues = _shadow_core_conformance_issues(filepath, adapter, events)
-        return temp_path.read_bytes(), conformance_issues
+        conformance_issues, shadow_failed = _shadow_core_conformance_outcome(
+            filepath, adapter, events
+        )
+        return temp_path.read_bytes(), conformance_issues, shadow_failed
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -362,9 +374,9 @@ def _safe_pdf_filename(label: str) -> str:
     return safe
 
 
-def _shadow_core_conformance_issues(
+def _shadow_core_conformance_outcome(
     filepath: Path, adapter: Any, events: list[NoteEvent]
-) -> int:
+) -> tuple[int, bool]:
     """Run core pipeline in shadow mode for legacy export diagnostics."""
     try:
         core_result = _run_core_pipeline_for_events(
@@ -375,8 +387,8 @@ def _shadow_core_conformance_issues(
         )
     except Exception:
         # Legacy PDF export must remain non-blocking while core integration hardens.
-        return 0
-    return len(core_result.conformance_issues)
+        return 0, True
+    return len(core_result.conformance_issues), False
 
 
 def _run_core_pipeline_for_events(
