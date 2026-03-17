@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `3d2ea71`.
-- Base de non-regression actuelle: `529 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `d0b942a`.
+- Base de non-regression actuelle: `563 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -65,7 +65,7 @@
 ## 4. Ecarts entre Fretwise actuel et la cible normative
 
 - Bloquant
-  - Le nouveau pipeline core n'implemente pas encore le mode hybride standard+tablature complet conforme.
+  - Le nouveau pipeline core couvre des plans standard/tab minimaux, mais la gravure standard complete (cles, alter, hampes/flags) n'est pas encore migree dans `core`.
   - Les regles normatives sont encore dispersees (surtout dans `export/pdf_tab.py`), pas centralisees dans `notation_policy` + `layout_rules` + `conformance_checks`.
   - Pas encore de `reference_glyph_set` ni `parametric_recipes` normatives explicites.
 - Important
@@ -186,11 +186,22 @@
   - `6aa22cb` decision policy-based.
   - `c4cabaf` canonical model + mapper.
   - `3d2ea71` render scene + backend SVG + pipeline minimal end-to-end.
+  - `365ce57` registries explicites input/output/glyph/recipe/validator/transform.
+  - `1176786` contrats de layout page/system/staff + bridge scene.
+  - `5c0b80a` `notation_policy` + glyph set + recipe catalog + conformance checks.
+  - `bb13e7a` regles de layout centralisees et collision policies explicites.
+  - `25c9057` backend PDF vectoriel pour `RenderScene` + tests de contrat.
+  - `139c0e0` CLI `--pdf-engine` (legacy/core) avec cohabitation.
+  - `1625c5e` endpoint web `/api/export/pdf` (legacy/core) + fallback.
+  - `b83cb5d` UI web: branchement export PDF API + selecteur d'engine.
+  - `8ef2ad9` en-tetes de conformite API PDF + statut d'export en toolbar.
+  - `7854998` scene: modes `standard` et `standard_tablature` avec plans explicites.
+  - `d0b942a` checks de conformite hybrides (presence + alignement horizontal par `event_id`).
 - Prochains commits recommandes
-  - `feat(registries): add explicit registries for input/output/glyph/recipe/validator/transform`.
-  - `feat(layout-contracts): introduce page/system/staff layout contracts`.
-  - `feat(graphics-policy): add notation_policy + reference_glyph_set + parametric_recipes`.
-  - `test(conformance): add normative conformance checks for hybrid notation`.
+  - `feat(scene-standard): add clef/time-signature/rest glyph mapping in standard plane`.
+  - `feat(layout-engine): migrate stem/beam/tie/tab-span placement rules into core layout`.
+  - `test(conformance): add strict vertical alignment and spacing checks in hybrid mode`.
+  - `feat(integration): route legacy export progressively through core canonical/layout scene`.
 
 ## 12. Proposition de branche principale et sous-branches
 
