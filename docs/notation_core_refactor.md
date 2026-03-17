@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `01eabf2`.
-- Base de non-regression actuelle: `581 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `c537a37`.
+- Base de non-regression actuelle: `583 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -208,8 +208,8 @@
   - `dafa113` layout voix-aware: directions de hampes + orientation beams/flags + arcs tie/slur cote oppose.
   - `c1b8437` conformance rhythmique: checks explicites sur direction/geometrie des hampes + direction beams/flags.
   - `01eabf2` scene standard: placement des silences affine par voix (haut/bas) + trace `voice_number`.
+  - `c537a37` layout standard: liaisons tie/slur groupees par voix + profil de courbure/offset adapte a la portee.
 - Prochains commits recommandes
-  - `feat(layout-engine): refine tie/slur collision avoidance and voice-aware placement`.
   - `feat(integration): route legacy export progressively through core canonical/layout scene`.
 
 ## 12. Proposition de branche principale et sous-branches
