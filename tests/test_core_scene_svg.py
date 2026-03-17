@@ -29,13 +29,14 @@ def _note(
     *,
     pitch: int,
     onset: float,
+    duration: float = 1.0,
     string_hint: int | None = None,
     fret_hint: int | None = None,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
         onset=onset,
-        duration=1.0,
+        duration=duration,
         tempo=120.0,
         articulation=Articulation.NORMAL,
         dynamic=Dynamic.MF,
@@ -96,6 +97,25 @@ def test_canonical_to_render_scene_standard_tablature_has_both_planes() -> None:
     staff_glyph_ids = {g.glyph_id for g in staff.layer_groups[0].glyph_instances}
     assert "clef" in staff_glyph_ids
     assert "time_signature" in staff_glyph_ids
+
+
+def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=0.5, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=0.5, duration=0.5, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[1].recipe_instances]
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert "stem_line" in recipe_ids
+    assert "beam_group" in recipe_ids
+    assert "<rect " in svg
 
 
 def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> None:

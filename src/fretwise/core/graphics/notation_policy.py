@@ -81,6 +81,13 @@ def default_notation_policy() -> NotationPolicy:
             RepresentationMode.STANDARD_TAB,
         }
     )
+    rhythm_modes = frozenset(
+        {
+            RepresentationMode.STANDARD,
+            RepresentationMode.STANDARD_TAB,
+            RepresentationMode.TAB_RHYTHM,
+        }
+    )
 
     rules = {
         "notehead": SymbolRule(
@@ -111,6 +118,16 @@ def default_notation_policy() -> NotationPolicy:
         "staff_lines": SymbolRule(
             symbol_id="staff_lines",
             allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "stem_line": SymbolRule(
+            symbol_id="stem_line",
+            allowed_modes=rhythm_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "beam_group": SymbolRule(
+            symbol_id="beam_group",
+            allowed_modes=rhythm_modes,
             anchor=SymbolAnchor.STANDARD,
         ),
         "tab_digit": SymbolRule(

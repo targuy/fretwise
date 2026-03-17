@@ -73,6 +73,10 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_lines(canvas, page_h, recipe.params, color=(0.4, 0.4, 0.4))
                         elif recipe.recipe_id == "staff_lines":
                             _draw_lines(canvas, page_h, recipe.params, color=(0.1, 0.1, 0.1))
+                        elif recipe.recipe_id == "stem_line":
+                            _draw_stem_line(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "beam_group":
+                            _draw_beam_group(canvas, page_h, recipe.params)
                     for text in layer.text_instances:
                         canvas.setFont(text.font_family, text.font_size)
                         canvas.setFillColorRGB(0, 0, 0)
@@ -109,6 +113,45 @@ def _draw_lines(
         line_y = y + idx * spacing
         y_pdf = _to_pdf_y(page_h, line_y)
         canvas.line(x, y_pdf, x + width, y_pdf)
+
+
+def _draw_stem_line(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x = float(params.get("x", 0.0))
+    y0 = float(params.get("y0", 0.0))
+    y1 = float(params.get("y1", 0.0))
+    width = float(params.get("width", 0.8))
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(max(0.5, width))
+    canvas.line(x, _to_pdf_y(page_h, y0), x, _to_pdf_y(page_h, y1))
+
+
+def _draw_beam_group(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    thickness = float(params.get("thickness", 2.5))
+    width = x1 - x0
+    if width <= 0.0:
+        return
+    y_top_pdf = _to_pdf_y(page_h, y)
+    canvas.setFillColorRGB(0, 0, 0)
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.rect(
+        x0,
+        y_top_pdf - max(1.0, thickness),
+        width,
+        max(1.0, thickness),
+        fill=1,
+        stroke=0,
+    )
 
 
 def _to_pdf_y(page_h: float, scene_y: float) -> float:

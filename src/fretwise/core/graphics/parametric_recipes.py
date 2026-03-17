@@ -24,6 +24,17 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
             required_params=("x", "y", "width", "count", "spacing"),
             tags=("tab", "grid"),
         ),
+        "staff_lines": RecipeDefinition(
+            recipe_id="staff_lines",
+            required_params=("x", "y", "width", "count", "spacing"),
+            tags=("standard", "grid"),
+        ),
+        "stem_line": RecipeDefinition(
+            recipe_id="stem_line",
+            required_params=("x", "y0", "y1"),
+            optional_params=("width",),
+            tags=("rhythm", "standard"),
+        ),
         "tie_arc": RecipeDefinition(
             recipe_id="tie_arc",
             required_params=("x0", "y0", "x1", "y1"),
@@ -61,4 +72,3 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
             tags=("tab", "technique", "span"),
         ),
     }
-
