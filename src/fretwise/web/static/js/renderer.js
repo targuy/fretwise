@@ -22,7 +22,7 @@ const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E'];
 
 // System vertical layout
 const ABOVE_STRINGS = 80;     // space above string 1 (tempo, chord, section, stems)
-const BELOW_STRINGS = 40;     // space below string 6 (rhythm, lyrics)
+const BELOW_STRINGS = 55;     // space below string 6 (rhythm, lyrics)
 const SYSTEM_H = ABOVE_STRINGS + STRINGS_H + BELOW_STRINGS;
 const INTER_SYSTEM = 16;
 
@@ -124,6 +124,7 @@ export class TabRenderer {
     this.tempo = data.tempo || 120;
     this.sectionMarkers = data.section_markers || {};
     this.chordDiagrams = data.chord_diagrams || [];
+    this.chordMarkers = data.chord_markers || {};  // onset_str → chord name from file
     this.dpr = window.devicePixelRatio || 1;
 
     // Derived from result grouping
@@ -481,12 +482,12 @@ export class TabRenderer {
         ctx.font = FONT_DYNAMIC;
         ctx.fillStyle = COL_GREY;
         ctx.textAlign = 'center';
-        ctx.fillText(col.dynamic, dx, sysY + ABOVE_STRINGS + STRINGS_H + 34);
+        ctx.fillText(col.dynamic, dx, sysY + ABOVE_STRINGS + STRINGS_H + 47);
       }
     }
 
     // Draw rhythm below
-    this._drawRhythm(ctx, notePositions, sysY);
+    this._drawRhythm(ctx, notePositions, sysY, mX, mW);
   }
 
   // ── Single note rendering ─────────────────────────────────────────
@@ -915,7 +916,7 @@ export class TabRenderer {
   _drawChordName(ctx, notes, mX, mW, sysY) {
     if (!notes.length) return;
 
-    // Build onset→group map (same as _drawMeasureNotes)
+    // Build onset→group map
     const onsetMap = new Map();
     for (const n of notes) {
       const key = n.onset.toFixed(6);
@@ -925,35 +926,36 @@ export class TabRenderer {
     const sortedKeys = [...onsetMap.keys()].sort((a, b) => parseFloat(a) - parseFloat(b));
 
     let drawn = 0;
-    const drawnNames = new Set();  // deduplicate within the measure
+    const drawnNames = new Set();
     sortedKeys.forEach((key, colIdx) => {
       const group = onsetMap.get(key);
-      if (group.length >= 2 && drawn < 3) {   // 2+ notes = potential chord
-        const name = this._matchChordName(group);
-        if (name && !drawnNames.has(name)) {
-          drawnNames.add(name);
-          // Use the same fixed column x as the notes
-          const nx = mX + LEFT_PAD + colIdx * COL_STEP;
-          const ly = sysY + 38;
-          ctx.font = FONT_CHORD;
-          const textW = ctx.measureText(name).width;
-          const labelLeft = nx - 4;
-          // Skip if this label would overlap the previous chord label
-          const lastLabel = this.chordLabelPositions.at(-1);
-          if (lastLabel && Math.abs(ly - lastLabel.y) < 14 && labelLeft < lastLabel.rightEdge + 3) {
-            return;  // too close to previous label on the same line
-          }
-          ctx.fillStyle = COL_CHORD;
-          ctx.textAlign = 'left';
-          ctx.fillText(name, labelLeft, ly);
-          this.chordLabelPositions.push({
-            x: labelLeft + textW / 2,
-            y: ly,
-            name,
-            rightEdge: labelLeft + textW,
-          });
-          drawn++;
+      // 1. Try explicit chord marker from the file (any group size)
+      let name = this.chordMarkers[key] || null;
+      // 2. Fall back to auto-detection (2+ simultaneous notes matching a diagram)
+      if (!name && group.length >= 2) {
+        name = this._matchChordName(group);
+      }
+      if (name && !drawnNames.has(name) && drawn < 3) {
+        drawnNames.add(name);
+        const nx = mX + LEFT_PAD + colIdx * COL_STEP;
+        const ly = sysY + 38;
+        ctx.font = FONT_CHORD;
+        const textW = ctx.measureText(name).width;
+        const labelLeft = nx - 4;
+        const lastLabel = this.chordLabelPositions.at(-1);
+        if (lastLabel && Math.abs(ly - lastLabel.y) < 14 && labelLeft < lastLabel.rightEdge + 3) {
+          return;
         }
+        ctx.fillStyle = COL_CHORD;
+        ctx.textAlign = 'left';
+        ctx.fillText(name, labelLeft, ly);
+        this.chordLabelPositions.push({
+          x: labelLeft + textW / 2,
+          y: ly,
+          name,
+          rightEdge: labelLeft + textW,
+        });
+        drawn++;
       }
     });
   }
@@ -982,7 +984,7 @@ export class TabRenderer {
 
   // ── Rhythm notation below tab ─────────────────────────────────────
 
-  _drawRhythm(ctx, notePositions, sysY) {
+  _drawRhythm(ctx, notePositions, sysY, mX = 0, mW = Infinity) {
     const baseY = sysY + ABOVE_STRINGS + STRINGS_H + STEM_GAP;
 
     // Group by onset for beam grouping
@@ -1040,6 +1042,83 @@ export class TabRenderer {
           this._drawFlag(ctx, col.x, baseY + STEM_H, fi);
         }
       }
+    }
+
+    // ── Rest symbols for gaps within the measure ──────────────────────
+    const measureEnd = measureOnset + this.bpm;
+    const rightBound = mX + mW - RIGHT_PAD - 4;
+    for (let i = 0; i <= cols.length; i++) {
+      const gapStart = i === 0 ? measureOnset
+        : cols[i - 1].onset + cols[i - 1].duration;
+      const gapEnd   = i === cols.length ? measureEnd : cols[i].onset;
+      const gapDur   = gapEnd - gapStart;
+      if (gapDur < 0.12) continue;  // too small (< 1/32 beat) — skip
+
+      let restX;
+      if (i === 0) {
+        // Leading rest: place before first note
+        restX = cols.length > 0 ? cols[0].x - COL_STEP * 0.6 : mX + LEFT_PAD;
+      } else if (i === cols.length) {
+        // Trailing rest: place after last note
+        restX = cols[cols.length - 1].x + COL_STEP;
+      } else {
+        // Mid-measure rest: midpoint between surrounding note columns
+        restX = (cols[i - 1].x + cols[i].x) / 2;
+      }
+      // Clamp to measure boundaries
+      if (restX < mX + LEFT_PAD || restX > rightBound) continue;
+      this._drawRhythmRest(ctx, restX, baseY, gapDur);
+    }
+  }
+
+  // ── Rest symbol in the rhythm zone (below tab, at stem level) ─────
+
+  _drawRhythmRest(ctx, x, baseY, duration) {
+    // Place rest at mid-stem height so it aligns visually with stems
+    const y = baseY + STEM_H * 0.45;
+    ctx.fillStyle = COL_TEXT;
+    ctx.strokeStyle = COL_TEXT;
+
+    if (duration >= 1.0) {
+      // Quarter rest: small zigzag
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + 2, y - 5);
+      ctx.lineTo(x - 1, y - 2);
+      ctx.lineTo(x + 1, y + 1);
+      ctx.lineTo(x - 2, y + 4);
+      ctx.lineTo(x + 1, y + 7);
+      ctx.stroke();
+      ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
+    } else if (duration >= 0.5) {
+      // Eighth rest: diagonal stroke + dot
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + 2, y - 4);
+      ctx.lineTo(x - 2, y + 5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + 2, y - 4, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineCap = 'butt';
+    } else {
+      // Sixteenth rest: diagonal stroke + two dots
+      ctx.lineWidth = 1.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + 2, y - 5);
+      ctx.lineTo(x - 2, y + 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(x + 2, y - 5, 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x, y, 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineCap = 'butt';
     }
   }
 

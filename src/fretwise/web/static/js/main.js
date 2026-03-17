@@ -47,6 +47,7 @@ const btnBackFiles  = $('#btn-back-files');
 const btnBackViewer  = $('#btn-back-viewer');
 const trackSwitcher  = $('#track-switcher');
 const selSpeed       = $('#speed-select');
+const bpmInput       = $('#bpm-input');
 const selMode        = $('#mode-select');
 const uploadInput    = $('#upload-input');
 const uploadStatus   = $('#upload-status');
@@ -275,6 +276,7 @@ function initRenderer(data) {
   if (data.title) songTitle.textContent = data.title;
   if (data.artist) songArtist.textContent = data.artist;
   if (metaTempo) metaTempo.textContent = `♩ = ${Math.round(data.tempo || 120)}`;
+  if (bpmInput) bpmInput.value = Math.round(data.tempo || 120);
 
   renderer = new TabRenderer(tabCanvas, data);
   renderer.render();
@@ -351,6 +353,17 @@ function initRenderer(data) {
       const s = parseInt(selSpeed.value, 10) / 100;
       playback.setSpeed(s);
     };
+  }
+
+  if (bpmInput) {
+    bpmInput.onchange = () => {
+      const bpm = Math.max(20, Math.min(300, parseInt(bpmInput.value, 10) || 120));
+      bpmInput.value = bpm;
+      if (playback) playback.tempo = bpm;
+      if (renderer) { renderer.tempo = bpm; renderer.render(); }
+      if (metaTempo) metaTempo.textContent = `♩ = ${bpm}`;
+    };
+    bpmInput.onkeydown = (e) => { if (e.key === 'Enter') bpmInput.onchange(); };
   }
 
   updatePlayButton(false);

@@ -1144,6 +1144,11 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
         desired = [finger_map.get(
             (resolved[i].state.string_num, resolved[i].state.fret), resolved[i].state.finger
         ) for i in indices]
+        # Guard: never assign OPEN to a fretted note, or a fretting finger to an open string.
+        desired = [
+            f if (f == Finger.OPEN) == (resolved[i].state.fret == 0) else resolved[i].state.finger
+            for i, f in zip(indices, desired)
+        ]
         fretted = [f for f in desired if f != Finger.OPEN]
         if len(fretted) != len(set(fretted)):
             return  # would introduce conflicts — skip
@@ -1204,11 +1209,13 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
         )
 
         if rel_shape not in relative_canon:
-            # Record canonical relative assignment: (dstr, dfret) → Finger.
-            relative_canon[rel_shape] = {
-                (s - anchor_str, f - anchor_fret): resolved[i].state.finger
-                for i, (s, f) in zip(indices, notes)
-            }
+            # Only store as canonical if the chord has at least one fretted note.
+            # All-open chords should never dictate fingers for fretted chords.
+            if any(f > 0 for _, f in notes):
+                relative_canon[rel_shape] = {
+                    (s - anchor_str, f - anchor_fret): resolved[i].state.finger
+                    for i, (s, f) in zip(indices, notes)
+                }
         else:
             # Build absolute finger map for this occurrence from the relative canon.
             rel_c = relative_canon[rel_shape]

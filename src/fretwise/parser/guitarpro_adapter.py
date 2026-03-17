@@ -63,6 +63,9 @@ class GuitarProAdapter(BaseParser):
     #: Section/rehearsal markers: {1-based measure number → section title}.
     #: Set after each call to parse().
     section_markers: dict[int, str] = {}
+    #: Beat-level chord name annotations: {onset_str → chord_name}.
+    #: Set after each call to parse().
+    chord_markers: dict[str, str] = {}
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp3, .gp4, and .gp5 files."""
@@ -110,6 +113,7 @@ class GuitarProAdapter(BaseParser):
 
         self.track_name = getattr(track, "name", "") or ""
         self.section_markers = _extract_section_markers(track)
+        self.chord_markers = _extract_beat_chord_markers(song, track)
         return _extract_note_events(song, track)
 
 
@@ -254,6 +258,34 @@ def _duration_in_beats(duration: guitarpro.Duration) -> float:  # type: ignore[n
     if tuplet.enters != tuplet.times:
         beats = beats * tuplet.times / tuplet.enters
     return beats
+
+
+def _extract_beat_chord_markers(
+    song: guitarpro.Song,  # type: ignore[name-defined]
+    track: guitarpro.Track,  # type: ignore[name-defined]
+) -> dict[str, str]:
+    """Return {onset_str → chord_name} from beat-level chord annotations (voice 0 only)."""
+    markers: dict[str, str] = {}
+    current_tempo = float(song.tempo)
+    onset = 0.0
+    for measure in track.measures:
+        current_tempo = _measure_tempo(measure, current_tempo)
+        measure_onset = onset
+        measure_duration = 0.0
+        voice = measure.voices[0] if measure.voices else None
+        beat_onset = measure_onset
+        if voice:
+            for beat in voice.beats:
+                beat_duration = _duration_in_beats(beat.duration)
+                chord = getattr(getattr(beat, "effect", None), "chord", None)
+                if chord is not None:
+                    name = getattr(chord, "name", None) or ""
+                    if name.strip():
+                        markers[f"{beat_onset:.6f}"] = name.strip()
+                beat_onset += beat_duration
+            measure_duration = beat_onset - measure_onset
+        onset = measure_onset + (measure_duration or 4.0)
+    return markers
 
 
 def _extract_section_markers(

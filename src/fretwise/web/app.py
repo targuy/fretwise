@@ -170,6 +170,9 @@ def _register_routes(app: FastAPI) -> None:
         chord_diagrams: list[ChordDiagram] = list(
             getattr(adapter, "chord_diagrams", []) or []
         )
+        chord_markers: dict[str, str] = dict(
+            getattr(adapter, "chord_markers", {}) or {}
+        )
 
         # Parse artist/title from filename
         import re
@@ -191,6 +194,7 @@ def _register_routes(app: FastAPI) -> None:
             "beats_per_measure": beats_per_measure,
             "section_markers": section_markers,
             "chord_diagrams": [_serialize_chord_diagram(cd) for cd in chord_diagrams],
+            "chord_markers": chord_markers,
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
         }

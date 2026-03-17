@@ -102,6 +102,9 @@ class GpifAdapter(BaseParser):
     #: Chord diagrams from the DiagramCollection of the selected track.
     #: Set after each call to parse() or parse_track().
     chord_diagrams: list[ChordDiagram] = []
+    #: Beat-level chord name annotations: {onset_str → chord_name}.
+    #: Set after each call to parse() or parse_track().
+    chord_markers: dict[str, str] = {}
     #: Time signature numerator of the first MasterBar (e.g. 4 for 4/4).
     #: Set after each call to parse() or parse_track().
     beats_per_measure: float = 4.0
@@ -156,6 +159,10 @@ class GpifAdapter(BaseParser):
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
         self.beats_per_measure = _get_beats_per_measure(root)
+        diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
+        self.chord_markers = _extract_gpif_beat_chord_markers(
+            root, track_idx, rhythm_map, diag_name_map
+        )
 
         return _extract_events(root, track_idx, open_pitches, tempo_map, rhythm_map, note_map)
 
@@ -225,6 +232,11 @@ class GpifAdapter(BaseParser):
             if track.get("id") == str(track_id):
                 self.chord_diagrams = self._parse_diagram_collection(track)
                 break
+
+        diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
+        self.chord_markers = _extract_gpif_beat_chord_markers(
+            root, track_id, rhythm_map, diag_name_map
+        )
 
         return _extract_events(root, track_id, open_pitches, tempo_map, rhythm_map, note_map)
 
@@ -903,6 +915,64 @@ def _find_guitar_track(root: ET.Element) -> tuple[int | None, list[int]]:
 # ---------------------------------------------------------------------------
 # Event extraction
 # ---------------------------------------------------------------------------
+
+
+def _extract_gpif_beat_chord_markers(
+    root: ET.Element,
+    track_idx: int,
+    rhythm_map: dict[str, float],
+    diag_name_map: dict[str, str],
+) -> dict[str, str]:
+    """Return {onset_str → chord_name} from beat-level <Chord> annotations (voice 0 only)."""
+    markers: dict[str, str] = {}
+    bars_index = {b.get("id"): b for b in root.findall("Bars/Bar")}
+    voices_index = {v.get("id"): v for v in root.findall("Voices/Voice")}
+    beats_index = {b.get("id"): b for b in root.findall("Beats/Beat")}
+    onset = 0.0
+
+    for masterbar in root.findall("MasterBars/MasterBar"):
+        measure_duration = _measure_beats(masterbar)
+        bar_ids_text = masterbar.findtext("Bars") or ""
+        bar_ids = bar_ids_text.split()
+        if track_idx >= len(bar_ids):
+            onset += measure_duration
+            continue
+
+        bar_id = bar_ids[track_idx]
+        bar_el = bars_index.get(bar_id)
+        if bar_el is None:
+            onset += measure_duration
+            continue
+
+        voice_ids = (bar_el.findtext("Voices") or "").split()
+        if not voice_ids or voice_ids[0] == "-1":
+            onset += measure_duration
+            continue
+
+        voice_el = voices_index.get(voice_ids[0])  # voice 0 only
+        if voice_el is None:
+            onset += measure_duration
+            continue
+
+        beat_onset = onset
+        for beat_id in (voice_el.findtext("Beats") or "").split():
+            beat_el = beats_index.get(beat_id)
+            if beat_el is None:
+                continue
+            rhythm_ref = beat_el.find("Rhythm")
+            rid = rhythm_ref.get("ref", "") if rhythm_ref is not None else ""
+            beat_duration = rhythm_map.get(rid, 1.0)
+            chord_el = beat_el.find("Chord")
+            if chord_el is not None:
+                ref = chord_el.get("ref", "")
+                name = diag_name_map.get(ref, "")
+                if name:
+                    markers[f"{beat_onset:.6f}"] = name
+            beat_onset += beat_duration
+
+        onset += measure_duration
+
+    return markers
 
 
 def _extract_events(
