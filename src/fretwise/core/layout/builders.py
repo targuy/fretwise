@@ -158,6 +158,7 @@ def _measure_event_layouts(
             )
             y = string_row_y(string_num=3, rules=rules)
             metadata: dict[str, str] = {"event_type": event.__class__.__name__}
+            metadata["voice_number"] = str(getattr(voice, "number", 0))
             if isinstance(event, CanonicalNoteEvent):
                 string_num = 3
                 if event.tab_info is not None and event.tab_info.string is not None:

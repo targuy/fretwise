@@ -29,6 +29,7 @@ _TAB_SPACING = 18.0
 _STAFF_STD_Y = _MARGIN_Y - 8.0
 _STAFF_STD_SPACING = 12.0
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 10.0
+_STANDARD_STEM_BOTTOM_Y = _STAFF_STD_Y + 4 * _STAFF_STD_SPACING + 10.0
 _REST_GAP_BREAK = 0.115
 _TAB_SPAN_PAD = 6.0
 _BEAM_GAP = 3.0
@@ -105,7 +106,7 @@ def layout_to_render_scene(
     if page_layout.systems and page_layout.systems[0].staves:
         first_staff_layout = page_layout.systems[0].staves[0]
         for measure_layout in first_staff_layout.measure_layouts:
-            standard_rhythm_events: list[tuple[float, float, float, float]] = []
+            standard_rhythm_events: list[tuple[float, float, float, float, str]] = []
             standard_connection_events: list[dict[str, object]] = []
             tab_span_events: list[dict[str, object]] = []
             # Measure marker.
@@ -159,6 +160,8 @@ def layout_to_render_scene(
                         note_y = _standard_note_y(event_layout.metadata)
                         techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                         pitch = _safe_int(event_layout.metadata.get("pitch_notated")) or 64
+                        voice_number = _safe_int(event_layout.metadata.get("voice_number")) or 0
+                        stem_direction = _stem_direction(voice_number)
                         accidental = _accidental_glyph_for_pitch(pitch)
                         if accidental is not None:
                             notes_layer.glyph_instances.append(
@@ -180,7 +183,13 @@ def layout_to_render_scene(
                             )
                         )
                         standard_rhythm_events.append(
-                            (event_layout.x, event_layout.onset, event_layout.duration, note_y)
+                            (
+                                event_layout.x,
+                                event_layout.onset,
+                                event_layout.duration,
+                                note_y,
+                                stem_direction,
+                            )
                         )
                         standard_connection_events.append(
                             {
@@ -191,6 +200,7 @@ def layout_to_render_scene(
                                 "duration": event_layout.duration,
                                 "pitch": pitch,
                                 "techniques": techniques,
+                                "stem_direction": stem_direction,
                             }
                         )
             if has_standard and standard_rhythm_events:
@@ -257,17 +267,22 @@ def layout_to_render_scene(
                                         )
                                     )
                                     if _base_duration(event.duration) < 4.0:
+                                        stem_direction = _stem_direction(voice.number)
+                                        if stem_direction == "down":
+                                            stem_y0 = note_y + 3.0
+                                            stem_y1 = _STANDARD_STEM_BOTTOM_Y
+                                        else:
+                                            stem_y0 = note_y - 3.0
+                                            stem_y1 = _STANDARD_STEM_TOP_Y
                                         notes_layer.recipe_instances.append(
                                             RecipeInstance(
                                                 recipe_id="stem_line",
                                                 params={
                                                     "x": note_x,
-                                                    "y0": _standard_note_y(
-                                                        {"pitch_notated": str(event.pitch_notated)}
-                                                    )
-                                                    - 3.0,
-                                                    "y1": _STANDARD_STEM_TOP_Y,
+                                                    "y0": stem_y0,
+                                                    "y1": stem_y1,
                                                     "width": 0.8,
+                                                    "direction": stem_direction,
                                                 },
                                             )
                                         )
@@ -371,78 +386,181 @@ def _append_standard_rhythm(
     *,
     measure_number: int,
     beats_per_measure: int,
-    events: list[tuple[float, float, float, float]],
+    events: list[tuple[float, float, float, float, str]],
 ) -> None:
-    short_stems: list[tuple[float, float, float, int]] = []
-    for x, onset, duration, note_y in sorted(events, key=lambda item: item[1]):
+    short_stems: list[tuple[float, float, float, int, str]] = []
+    for x, onset, duration, note_y, stem_direction in sorted(events, key=lambda item: item[1]):
         base_dur = _base_duration(duration)
         if base_dur >= 4.0:
             continue
+        if stem_direction == "down":
+            stem_y0 = note_y + 3.0
+            stem_y1 = _STANDARD_STEM_BOTTOM_Y
+        else:
+            stem_y0 = note_y - 3.0
+            stem_y1 = _STANDARD_STEM_TOP_Y
         layer.recipe_instances.append(
             RecipeInstance(
                 recipe_id="stem_line",
                 params={
                     "x": x,
-                    "y0": note_y - 3.0,
-                    "y1": _STANDARD_STEM_TOP_Y,
+                    "y0": stem_y0,
+                    "y1": stem_y1,
                     "width": 0.8,
                 },
-                metadata={"onset": onset, "duration": duration},
+                metadata={
+                    "onset": onset,
+                    "duration": duration,
+                    "direction": stem_direction,
+                },
             )
         )
         if base_dur < 1.0:
-            short_stems.append((x, onset, duration, _flag_count(duration)))
+            short_stems.append((x, onset, duration, _flag_count(duration), stem_direction))
 
-    beam_groups = _beam_groups(
-        [(x, onset, duration) for x, onset, duration, _flag_count_ in short_stems],
-        beats_per_measure=beats_per_measure,
-        measure_number=measure_number,
-    )
-    flag_by_onset: dict[float, int] = {
-        onset: flags for _x, onset, _duration, flags in short_stems
-    }
-    beamed_onsets = {onset for group in beam_groups for _x, onset, _duration in group}
-    for x, onset, _duration, flag_count in short_stems:
-        if onset in beamed_onsets or flag_count <= 0:
+    beamed_keys: set[tuple[float, str]] = set()
+    for direction in ("up", "down"):
+        directional_short = [
+            (x, onset, duration, flags)
+            for x, onset, duration, flags, stem_direction in short_stems
+            if stem_direction == direction
+        ]
+        beam_groups = _beam_groups(
+            [(x, onset, duration) for x, onset, duration, _flags in directional_short],
+            beats_per_measure=beats_per_measure,
+            measure_number=measure_number,
+        )
+        flag_by_onset: dict[float, int] = {
+            onset: flags for _x, onset, _duration, flags in directional_short
+        }
+        for group in beam_groups:
+            for _x, onset, _duration in group:
+                beamed_keys.add((onset, direction))
+            layer.recipe_instances.append(
+                RecipeInstance(
+                    recipe_id="beam_group",
+                    params={
+                        "x0": group[0][0],
+                        "x1": group[-1][0],
+                        "y": _beam_anchor_y(direction),
+                        "level": 1,
+                        "thickness": 2.5,
+                        "gap": _BEAM_GAP,
+                        "direction": direction,
+                    },
+                )
+            )
+            for level, x0, x1 in _secondary_beam_segments(group, flag_by_onset=flag_by_onset):
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="beam_group",
+                        params={
+                            "x0": x0,
+                            "x1": x1,
+                            "y": _beam_anchor_y(direction),
+                            "level": level,
+                            "thickness": 2.5,
+                            "gap": _BEAM_GAP,
+                            "direction": direction,
+                        },
+                    )
+                )
+
+    for x, onset, _duration, flag_count, stem_direction in short_stems:
+        if (onset, stem_direction) in beamed_keys or flag_count <= 0:
             continue
         layer.recipe_instances.append(
             RecipeInstance(
                 recipe_id="flag_stack",
                 params={
                     "x": x,
-                    "y": _STANDARD_STEM_TOP_Y,
+                    "y": _beam_anchor_y(stem_direction),
                     "count": flag_count,
                     "spacing": 4.0,
+                    "direction": stem_direction,
                 },
-                metadata={"onset": onset},
+                metadata={"onset": onset, "direction": stem_direction},
             )
         )
 
-    for group in beam_groups:
-        layer.recipe_instances.append(
-            RecipeInstance(
-                recipe_id="beam_group",
-                params={
-                    "x0": group[0][0],
-                    "x1": group[-1][0],
-                    "y": _STANDARD_STEM_TOP_Y,
-                    "level": 1,
-                    "thickness": 2.5,
-                    "gap": _BEAM_GAP,
-                },
-            )
-        )
-        for level, x0, x1 in _secondary_beam_segments(group, flag_by_onset=flag_by_onset):
+
+def _beam_anchor_y(direction: str) -> float:
+    return _STANDARD_STEM_BOTTOM_Y if direction == "down" else _STANDARD_STEM_TOP_Y
+
+
+def _stem_direction(voice_number: int) -> str:
+    return "down" if voice_number >= 1 else "up"
+
+
+def _append_standard_connections(
+    layer: LayerGroup,
+    events: list[dict[str, object]],
+) -> None:
+    if len(events) < 2:
+        return
+
+    ordered = sorted(events, key=lambda item: float(item.get("onset", 0.0)))
+    for prev, curr in zip(ordered, ordered[1:]):
+        prev_onset = float(prev.get("onset", 0.0))
+        prev_duration = float(prev.get("duration", 0.0))
+        curr_onset = float(curr.get("onset", 0.0))
+        expected_next = prev_onset + prev_duration
+        contiguous = abs(expected_next - curr_onset) <= _ARC_ONSET_TOLERANCE
+        if not contiguous:
+            continue
+
+        prev_pitch = int(prev.get("pitch", 64))
+        curr_pitch = int(curr.get("pitch", 64))
+        prev_techniques = set(prev.get("techniques", set()))
+        stem_direction = str(prev.get("stem_direction", "up"))
+        arc_x0 = float(prev.get("x", 0.0)) + 3.0
+        arc_x1 = float(curr.get("x", 0.0)) - 3.0
+        if arc_x1 <= arc_x0 + 1.0:
+            continue
+        if stem_direction == "down":
+            arc_y0 = float(prev.get("y", 0.0)) - 4.0
+            arc_y1 = float(curr.get("y", 0.0)) - 4.0
+            curvature = -8.0
+            slur_curvature = -10.0
+        else:
+            arc_y0 = float(prev.get("y", 0.0)) + 4.0
+            arc_y1 = float(curr.get("y", 0.0)) + 4.0
+            curvature = 8.0
+            slur_curvature = 10.0
+
+        if prev_pitch == curr_pitch:
             layer.recipe_instances.append(
                 RecipeInstance(
-                    recipe_id="beam_group",
+                    recipe_id="tie_arc",
                     params={
-                        "x0": x0,
-                        "x1": x1,
-                        "y": _STANDARD_STEM_TOP_Y,
-                        "level": level,
-                        "thickness": 2.5,
-                        "gap": _BEAM_GAP,
+                        "x0": arc_x0,
+                        "y0": arc_y0,
+                        "x1": arc_x1,
+                        "y1": arc_y1,
+                        "curvature": curvature,
+                    },
+                    metadata={
+                        "start_event_id": str(prev.get("event_id")),
+                        "end_event_id": str(curr.get("event_id")),
+                    },
+                )
+            )
+            continue
+
+        if prev_techniques.intersection(_SLUR_TECHNIQUES):
+            layer.recipe_instances.append(
+                RecipeInstance(
+                    recipe_id="slur_arc",
+                    params={
+                        "x0": arc_x0,
+                        "y0": arc_y0,
+                        "x1": arc_x1,
+                        "y1": arc_y1,
+                        "curvature": slur_curvature,
+                    },
+                    metadata={
+                        "start_event_id": str(prev.get("event_id")),
+                        "end_event_id": str(curr.get("event_id")),
                     },
                 )
             )
@@ -582,71 +700,6 @@ def _append_tab_technique_spans(
                         },
                     )
                 )
-
-
-def _append_standard_connections(
-    layer: LayerGroup,
-    events: list[dict[str, object]],
-) -> None:
-    if len(events) < 2:
-        return
-
-    ordered = sorted(events, key=lambda item: float(item.get("onset", 0.0)))
-    for prev, curr in zip(ordered, ordered[1:]):
-        prev_onset = float(prev.get("onset", 0.0))
-        prev_duration = float(prev.get("duration", 0.0))
-        curr_onset = float(curr.get("onset", 0.0))
-        expected_next = prev_onset + prev_duration
-        contiguous = abs(expected_next - curr_onset) <= _ARC_ONSET_TOLERANCE
-        if not contiguous:
-            continue
-
-        prev_pitch = int(prev.get("pitch", 64))
-        curr_pitch = int(curr.get("pitch", 64))
-        prev_techniques = set(prev.get("techniques", set()))
-        arc_x0 = float(prev.get("x", 0.0)) + 3.0
-        arc_x1 = float(curr.get("x", 0.0)) - 3.0
-        if arc_x1 <= arc_x0 + 1.0:
-            continue
-        arc_y0 = float(prev.get("y", 0.0)) + 4.0
-        arc_y1 = float(curr.get("y", 0.0)) + 4.0
-
-        if prev_pitch == curr_pitch:
-            layer.recipe_instances.append(
-                RecipeInstance(
-                    recipe_id="tie_arc",
-                    params={
-                        "x0": arc_x0,
-                        "y0": arc_y0,
-                        "x1": arc_x1,
-                        "y1": arc_y1,
-                        "curvature": 8.0,
-                    },
-                    metadata={
-                        "start_event_id": str(prev.get("event_id")),
-                        "end_event_id": str(curr.get("event_id")),
-                    },
-                )
-            )
-            continue
-
-        if prev_techniques.intersection(_SLUR_TECHNIQUES):
-            layer.recipe_instances.append(
-                RecipeInstance(
-                    recipe_id="slur_arc",
-                    params={
-                        "x0": arc_x0,
-                        "y0": arc_y0,
-                        "x1": arc_x1,
-                        "y1": arc_y1,
-                        "curvature": 10.0,
-                    },
-                    metadata={
-                        "start_event_id": str(prev.get("event_id")),
-                        "end_event_id": str(curr.get("event_id")),
-                    },
-                )
-            )
 
 
 def _parse_techniques(value: str | None) -> set[str]:

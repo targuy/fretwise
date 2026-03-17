@@ -161,22 +161,33 @@ def _draw_flag_stack(
     y = float(params.get("y", 0.0))
     count = int(params.get("count", 0))
     spacing = float(params.get("spacing", 4.0))
+    direction = str(params.get("direction", "up"))
     if count <= 0:
         return
     canvas.setStrokeColorRGB(0, 0, 0)
     canvas.setLineWidth(0.8)
     for index in range(count):
-        yi = y - index * spacing
+        yi = y + index * spacing if direction == "down" else y - index * spacing
         path = canvas.beginPath()
         path.moveTo(x, _to_pdf_y(page_h, yi))
-        path.curveTo(
-            x + 5.2,
-            _to_pdf_y(page_h, yi + 2.0),
-            x + 5.4,
-            _to_pdf_y(page_h, yi + 5.0),
-            x + 3.4,
-            _to_pdf_y(page_h, yi + 8.0),
-        )
+        if direction == "down":
+            path.curveTo(
+                x - 5.2,
+                _to_pdf_y(page_h, yi - 2.0),
+                x - 5.4,
+                _to_pdf_y(page_h, yi - 5.0),
+                x - 3.4,
+                _to_pdf_y(page_h, yi - 8.0),
+            )
+        else:
+            path.curveTo(
+                x + 5.2,
+                _to_pdf_y(page_h, yi + 2.0),
+                x + 5.4,
+                _to_pdf_y(page_h, yi + 5.0),
+                x + 3.4,
+                _to_pdf_y(page_h, yi + 8.0),
+            )
         canvas.drawPath(path, stroke=1, fill=0)
 
 
@@ -191,16 +202,20 @@ def _draw_beam_group(
     level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
     gap = float(params.get("gap", 3.0))
+    direction = str(params.get("direction", "up"))
     width = x1 - x0
     if width <= 0.0:
         return
-    y_top = y - (max(1, level) - 1) * (thickness + gap)
-    y_top_pdf = _to_pdf_y(page_h, y_top)
+    if direction == "down":
+        y_rect = y + (max(1, level) - 1) * (thickness + gap)
+    else:
+        y_rect = y - (max(1, level) - 1) * (thickness + gap) - thickness
+    y_rect_pdf = _to_pdf_y(page_h, y_rect)
     canvas.setFillColorRGB(0, 0, 0)
     canvas.setStrokeColorRGB(0, 0, 0)
     canvas.rect(
         x0,
-        y_top_pdf - max(1.0, thickness),
+        y_rect_pdf - max(1.0, thickness),
         width,
         max(1.0, thickness),
         fill=1,

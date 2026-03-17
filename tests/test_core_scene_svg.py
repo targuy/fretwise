@@ -31,6 +31,7 @@ def _note(
     onset: float,
     duration: float = 1.0,
     articulation: Articulation = Articulation.NORMAL,
+    voice_hint: int = 0,
     string_hint: int | None = None,
     fret_hint: int | None = None,
     let_ring: bool = False,
@@ -43,7 +44,7 @@ def _note(
         tempo=120.0,
         articulation=articulation,
         dynamic=Dynamic.MF,
-        voice_hint=0,
+        voice_hint=voice_hint,
         string_hint=string_hint,
         fret_hint=fret_hint,
         let_ring=let_ring,
@@ -148,6 +149,28 @@ def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_gr
     assert svg.count("<rect ") >= 2
 
 
+def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=2, fret_hint=5),
+            _note(pitch=52, onset=1.0, duration=1.0, voice_hint=1, string_hint=5, fret_hint=3),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    stem_recipes = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "stem_line"
+    ]
+    directions = {str(recipe.metadata.get("direction", "up")) for recipe in stem_recipes}
+
+    assert "up" in directions
+    assert "down" in directions
+
+
 def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
@@ -188,6 +211,25 @@ def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None
     assert "slur_arc" in recipe_ids
     assert "tie_arc" in recipe_ids
     assert "<path " in svg
+
+
+def test_canonical_to_render_scene_standard_down_voice_tie_curves_upward() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=55, onset=0.0, duration=0.5, voice_hint=1, string_hint=4, fret_hint=5),
+            _note(pitch=55, onset=0.5, duration=0.5, voice_hint=1, string_hint=4, fret_hint=5),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    tie_recipes = [
+        recipe for recipe in staff.layer_groups[1].recipe_instances if recipe.recipe_id == "tie_arc"
+    ]
+
+    assert tie_recipes
+    assert float(tie_recipes[0].params.get("curvature", 0.0)) < 0.0
 
 
 def test_canonical_to_render_scene_standard_contains_accidental_glyph() -> None:

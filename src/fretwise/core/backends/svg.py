@@ -115,15 +115,23 @@ def _render_flag_stack(params: dict[str, object]) -> list[str]:
     y = float(params.get("y", 0.0))
     count = int(params.get("count", 0))
     spacing = float(params.get("spacing", 4.0))
+    direction = str(params.get("direction", "up"))
     if count <= 0:
         return []
     paths: list[str] = []
     for index in range(count):
-        yi = y - index * spacing
-        path_d = (
-            f"M{x:.2f},{yi:.2f} "
-            f"Q{x + 5.2:.2f},{yi + 2.0:.2f} {x + 3.4:.2f},{yi + 8.0:.2f}"
-        )
+        if direction == "down":
+            yi = y + index * spacing
+            path_d = (
+                f"M{x:.2f},{yi:.2f} "
+                f"Q{x - 5.2:.2f},{yi - 2.0:.2f} {x - 3.4:.2f},{yi - 8.0:.2f}"
+            )
+        else:
+            yi = y - index * spacing
+            path_d = (
+                f"M{x:.2f},{yi:.2f} "
+                f"Q{x + 5.2:.2f},{yi + 2.0:.2f} {x + 3.4:.2f},{yi + 8.0:.2f}"
+            )
         paths.append(
             f'<path d="{path_d}" '
             'fill="none" stroke="black" stroke-width="0.8"/>'
@@ -138,12 +146,16 @@ def _render_beam_group(params: dict[str, object]) -> str:
     level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
     gap = float(params.get("gap", 3.0))
+    direction = str(params.get("direction", "up"))
     width = max(0.0, x1 - x0)
     if width <= 0.0:
         return ""
-    y_top = y - (max(1, level) - 1) * (thickness + gap)
+    if direction == "down":
+        y_rect = y + (max(1, level) - 1) * (thickness + gap)
+    else:
+        y_rect = y - (max(1, level) - 1) * (thickness + gap) - thickness
     return (
-        f'<rect x="{x0:.2f}" y="{(y_top - thickness):.2f}" '
+        f'<rect x="{x0:.2f}" y="{y_rect:.2f}" '
         f'width="{width:.2f}" height="{max(1.0, thickness):.2f}" fill="black"/>'
     )
 
