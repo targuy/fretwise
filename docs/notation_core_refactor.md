@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `f4c006e`.
-- Base de non-regression actuelle: `574 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `3ad73d2`.
+- Base de non-regression actuelle: `575 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -204,8 +204,9 @@
   - `f9bacc3` arcs standard core: `tie_arc` et `slur_arc` dans scene + rendu SVG/PDF.
   - `2c45c1c` accidentals standard core: `accidental_sharp/flat` policy + scene + SVG/PDF.
   - `f4c006e` flags standard core: recipe `flag_stack` + rendu SVG/PDF.
+  - `3ad73d2` beams secondaires partiels: niveaux `beam_group` 2+ pour groupes mixtes.
 - Prochains commits recommandes
-  - `feat(scene-standard): refine rhythmic grouping rules and partial secondary beams`.
+  - `feat(scene-standard): add voice-aware stem direction and arc-side decisions`.
   - `feat(layout-engine): refine tie/slur collision avoidance and voice-aware placement`.
   - `test(conformance): add stem/beam collision and spacing checks`.
   - `feat(integration): route legacy export progressively through core canonical/layout scene`.
