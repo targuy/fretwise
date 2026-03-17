@@ -77,6 +77,10 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_stem_line(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "beam_group":
                             _draw_beam_group(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "tie_arc":
+                            _draw_arc(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "slur_arc":
+                            _draw_arc(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "let_ring_span":
                             _draw_tab_span(
                                 canvas,
@@ -194,6 +198,39 @@ def _draw_tab_span(
     canvas.setDash()
     canvas.setFont("Helvetica", 6)
     canvas.drawString(x0, y_pdf + 1.0, label)
+
+
+def _draw_arc(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x0 = float(params.get("x0", 0.0))
+    y0 = float(params.get("y0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y1 = float(params.get("y1", y0))
+    curvature = float(params.get("curvature", 8.0))
+    if x1 <= x0:
+        return
+
+    cy = max(y0, y1) + curvature
+    dx = x1 - x0
+    c1x = x0 + dx / 3.0
+    c2x = x0 + 2.0 * dx / 3.0
+
+    path = canvas.beginPath()
+    path.moveTo(x0, _to_pdf_y(page_h, y0))
+    path.curveTo(
+        c1x,
+        _to_pdf_y(page_h, cy),
+        c2x,
+        _to_pdf_y(page_h, cy),
+        x1,
+        _to_pdf_y(page_h, y1),
+    )
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(1.0)
+    canvas.drawPath(path, stroke=1, fill=0)
 
 
 def _to_pdf_y(page_h: float, scene_y: float) -> float:

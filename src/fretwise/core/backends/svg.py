@@ -36,6 +36,10 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                         out.append(_render_stem_line(recipe.params))
                     elif recipe.recipe_id == "beam_group":
                         out.append(_render_beam_group(recipe.params))
+                    elif recipe.recipe_id == "tie_arc":
+                        out.append(_render_arc(recipe.params, stroke="#111"))
+                    elif recipe.recipe_id == "slur_arc":
+                        out.append(_render_arc(recipe.params, stroke="#111"))
                     elif recipe.recipe_id == "let_ring_span":
                         out.extend(
                             _render_tab_span(
@@ -115,6 +119,22 @@ def _render_beam_group(params: dict[str, object]) -> str:
     return (
         f'<rect x="{x0:.2f}" y="{(y - thickness):.2f}" '
         f'width="{width:.2f}" height="{max(1.0, thickness):.2f}" fill="black"/>'
+    )
+
+
+def _render_arc(params: dict[str, object], *, stroke: str) -> str:
+    x0 = float(params.get("x0", 0.0))
+    y0 = float(params.get("y0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y1 = float(params.get("y1", y0))
+    curvature = float(params.get("curvature", 8.0))
+    if x1 <= x0:
+        return ""
+    cx = (x0 + x1) / 2.0
+    cy = max(y0, y1) + curvature
+    return (
+        f'<path d="M{x0:.2f},{y0:.2f} Q{cx:.2f},{cy:.2f} {x1:.2f},{y1:.2f}" '
+        f'fill="none" stroke="{stroke}" stroke-width="1"/>'
     )
 
 

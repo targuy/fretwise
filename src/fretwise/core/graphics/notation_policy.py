@@ -125,6 +125,16 @@ def default_notation_policy() -> NotationPolicy:
             allowed_modes=rhythm_modes,
             anchor=SymbolAnchor.STANDARD,
         ),
+        "tie_arc": SymbolRule(
+            symbol_id="tie_arc",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "slur_arc": SymbolRule(
+            symbol_id="slur_arc",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
         "beam_group": SymbolRule(
             symbol_id="beam_group",
             allowed_modes=rhythm_modes,

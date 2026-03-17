@@ -31,6 +31,8 @@ _STAFF_STD_SPACING = 12.0
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 10.0
 _REST_GAP_BREAK = 0.115
 _TAB_SPAN_PAD = 6.0
+_ARC_ONSET_TOLERANCE = 0.06
+_SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
 _MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
 _MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 
@@ -103,6 +105,7 @@ def layout_to_render_scene(
         first_staff_layout = page_layout.systems[0].staves[0]
         for measure_layout in first_staff_layout.measure_layouts:
             standard_rhythm_events: list[tuple[float, float, float, float]] = []
+            standard_connection_events: list[dict[str, object]] = []
             tab_span_events: list[dict[str, object]] = []
             # Measure marker.
             notes_layer.text_instances.append(
@@ -153,6 +156,7 @@ def layout_to_render_scene(
                         )
                     else:
                         note_y = _standard_note_y(event_layout.metadata)
+                        techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                         notes_layer.glyph_instances.append(
                             GlyphInstance(
                                 glyph_id="notehead",
@@ -165,6 +169,19 @@ def layout_to_render_scene(
                         standard_rhythm_events.append(
                             (event_layout.x, event_layout.onset, event_layout.duration, note_y)
                         )
+                        standard_connection_events.append(
+                            {
+                                "event_id": event_layout.event_id,
+                                "x": event_layout.x,
+                                "y": note_y,
+                                "onset": event_layout.onset,
+                                "duration": event_layout.duration,
+                                "pitch": (
+                                    _safe_int(event_layout.metadata.get("pitch_notated")) or 64
+                                ),
+                                "techniques": techniques,
+                            }
+                        )
             if has_standard and standard_rhythm_events:
                 _append_standard_rhythm(
                     notes_layer,
@@ -172,6 +189,8 @@ def layout_to_render_scene(
                     beats_per_measure=measure_layout.beats_per_measure,
                     events=standard_rhythm_events,
                 )
+            if has_standard and standard_connection_events:
+                _append_standard_connections(notes_layer, standard_connection_events)
             if has_tab and tab_span_events:
                 _append_tab_technique_spans(
                     notes_layer,
@@ -468,6 +487,71 @@ def _append_tab_technique_spans(
                         },
                     )
                 )
+
+
+def _append_standard_connections(
+    layer: LayerGroup,
+    events: list[dict[str, object]],
+) -> None:
+    if len(events) < 2:
+        return
+
+    ordered = sorted(events, key=lambda item: float(item.get("onset", 0.0)))
+    for prev, curr in zip(ordered, ordered[1:]):
+        prev_onset = float(prev.get("onset", 0.0))
+        prev_duration = float(prev.get("duration", 0.0))
+        curr_onset = float(curr.get("onset", 0.0))
+        expected_next = prev_onset + prev_duration
+        contiguous = abs(expected_next - curr_onset) <= _ARC_ONSET_TOLERANCE
+        if not contiguous:
+            continue
+
+        prev_pitch = int(prev.get("pitch", 64))
+        curr_pitch = int(curr.get("pitch", 64))
+        prev_techniques = set(prev.get("techniques", set()))
+        arc_x0 = float(prev.get("x", 0.0)) + 3.0
+        arc_x1 = float(curr.get("x", 0.0)) - 3.0
+        if arc_x1 <= arc_x0 + 1.0:
+            continue
+        arc_y0 = float(prev.get("y", 0.0)) + 4.0
+        arc_y1 = float(curr.get("y", 0.0)) + 4.0
+
+        if prev_pitch == curr_pitch:
+            layer.recipe_instances.append(
+                RecipeInstance(
+                    recipe_id="tie_arc",
+                    params={
+                        "x0": arc_x0,
+                        "y0": arc_y0,
+                        "x1": arc_x1,
+                        "y1": arc_y1,
+                        "curvature": 8.0,
+                    },
+                    metadata={
+                        "start_event_id": str(prev.get("event_id")),
+                        "end_event_id": str(curr.get("event_id")),
+                    },
+                )
+            )
+            continue
+
+        if prev_techniques.intersection(_SLUR_TECHNIQUES):
+            layer.recipe_instances.append(
+                RecipeInstance(
+                    recipe_id="slur_arc",
+                    params={
+                        "x0": arc_x0,
+                        "y0": arc_y0,
+                        "x1": arc_x1,
+                        "y1": arc_y1,
+                        "curvature": 10.0,
+                    },
+                    metadata={
+                        "start_event_id": str(prev.get("event_id")),
+                        "end_event_id": str(curr.get("event_id")),
+                    },
+                )
+            )
 
 
 def _parse_techniques(value: str | None) -> set[str]:

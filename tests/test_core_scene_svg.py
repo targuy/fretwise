@@ -30,6 +30,7 @@ def _note(
     pitch: int,
     onset: float,
     duration: float = 1.0,
+    articulation: Articulation = Articulation.NORMAL,
     string_hint: int | None = None,
     fret_hint: int | None = None,
     let_ring: bool = False,
@@ -40,7 +41,7 @@ def _note(
         onset=onset,
         duration=duration,
         tempo=120.0,
-        articulation=Articulation.NORMAL,
+        articulation=articulation,
         dynamic=Dynamic.MF,
         voice_hint=0,
         string_hint=string_hint,
@@ -120,6 +121,33 @@ def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
     assert "stem_line" in recipe_ids
     assert "beam_group" in recipe_ids
     assert "<rect " in svg
+
+
+def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=0.5,
+                articulation=Articulation.LEGATO,
+                string_hint=1,
+                fret_hint=0,
+            ),
+            _note(pitch=66, onset=0.5, duration=0.5, string_hint=1, fret_hint=2),
+            _note(pitch=66, onset=1.0, duration=0.5, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[1].recipe_instances]
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert "slur_arc" in recipe_ids
+    assert "tie_arc" in recipe_ids
+    assert "<path " in svg
 
 
 def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:

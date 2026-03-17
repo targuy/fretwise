@@ -39,12 +39,15 @@ def test_default_notation_policy_symbol_rules() -> None:
     assert policy.is_allowed(RepresentationMode.STANDARD, "staff_lines")
     assert policy.is_allowed(RepresentationMode.STANDARD, "stem_line")
     assert policy.is_allowed(RepresentationMode.STANDARD, "beam_group")
+    assert policy.is_allowed(RepresentationMode.STANDARD, "tie_arc")
+    assert policy.is_allowed(RepresentationMode.STANDARD, "slur_arc")
     assert policy.is_allowed(RepresentationMode.TAB, "let_ring_span")
     assert policy.is_allowed(RepresentationMode.TAB, "palm_mute_span")
     assert policy.is_allowed(RepresentationMode.TAB_RHYTHM, "tab_digit")
     assert not policy.is_allowed(RepresentationMode.STANDARD, "tab_digit")
     assert not policy.is_allowed(RepresentationMode.STANDARD, "tab_lines")
     assert not policy.is_allowed(RepresentationMode.TAB, "stem_line")
+    assert not policy.is_allowed(RepresentationMode.TAB, "tie_arc")
     assert not policy.is_allowed(RepresentationMode.TAB, "staff_lines")
 
 
