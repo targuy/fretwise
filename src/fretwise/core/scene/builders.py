@@ -30,6 +30,8 @@ _STAFF_STD_Y = _MARGIN_Y - 8.0
 _STAFF_STD_SPACING = 12.0
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 10.0
 _STANDARD_STEM_BOTTOM_Y = _STAFF_STD_Y + 4 * _STAFF_STD_SPACING + 10.0
+_STANDARD_REST_CENTER_Y = _STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING
+_STANDARD_REST_VOICE_OFFSET = 0.75 * _STAFF_STD_SPACING
 _REST_GAP_BREAK = 0.115
 _TAB_SPAN_PAD = 6.0
 _BEAM_GAP = 3.0
@@ -151,10 +153,12 @@ def layout_to_render_scene(
                 if has_standard:
                     event_type = event_layout.metadata.get("event_type")
                     if event_type == "RestEvent":
+                        voice_number = _safe_int(event_layout.metadata.get("voice_number")) or 0
                         _append_rest_glyph(
                             notes_layer,
                             x=event_layout.x,
                             event_id=event_layout.event_id,
+                            voice_number=voice_number,
                         )
                     else:
                         note_y = _standard_note_y(event_layout.metadata)
@@ -291,6 +295,7 @@ def layout_to_render_scene(
                                     notes_layer,
                                     x=measure_x + (event.onset % 4.0) * 36.0 + 28.0,
                                     event_id=event.event_id,
+                                    voice_number=voice.number,
                                 )
 
     staff_scene = StaffScene(
@@ -360,16 +365,27 @@ def _standard_note_y(metadata: dict[str, str]) -> float:
     return max(low, min(high, y))
 
 
-def _append_rest_glyph(layer: LayerGroup, *, x: float, event_id: str) -> None:
+def _append_rest_glyph(
+    layer: LayerGroup, *, x: float, event_id: str, voice_number: int
+) -> None:
     layer.glyph_instances.append(
         GlyphInstance(
             glyph_id="rest",
             x=x,
-            y=_STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING,
+            y=_standard_rest_y(voice_number),
             size=11.0,
-            metadata={"event_id": event_id},
+            metadata={
+                "event_id": event_id,
+                "voice_number": str(voice_number),
+            },
         )
     )
+
+
+def _standard_rest_y(voice_number: int) -> float:
+    if voice_number >= 1:
+        return _STANDARD_REST_CENTER_Y + _STANDARD_REST_VOICE_OFFSET
+    return _STANDARD_REST_CENTER_Y - _STANDARD_REST_VOICE_OFFSET
 
 
 def _score_time_signature(score: Score) -> tuple[int, int]:

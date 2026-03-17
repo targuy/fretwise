@@ -334,6 +334,74 @@ def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> 
     assert "3/4" in svg
 
 
+def test_canonical_to_render_scene_standard_places_rests_by_voice() -> None:
+    score = Score(
+        score_id="s2",
+        title="voice-rests",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=4, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r-up",
+                                                        onset=0.0,
+                                                        duration=1.0,
+                                                        voice=0,
+                                                    )
+                                                ],
+                                            ),
+                                            Voice(
+                                                number=1,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r-down",
+                                                        onset=1.0,
+                                                        duration=1.0,
+                                                        voice=1,
+                                                    )
+                                                ],
+                                            ),
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.STANDARD.value)
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    rests = {
+        str(glyph.metadata.get("event_id")): glyph
+        for glyph in staff.layer_groups[1].glyph_instances
+        if glyph.glyph_id == "rest"
+    }
+
+    assert "r-up" in rests
+    assert "r-down" in rests
+    assert rests["r-up"].y < rests["r-down"].y
+    assert rests["r-up"].metadata.get("voice_number") == "0"
+    assert rests["r-down"].metadata.get("voice_number") == "1"
+
+
 def test_run_core_pipeline_from_raw_end_to_end() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
