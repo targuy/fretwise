@@ -104,7 +104,7 @@ class BaseRegistry(Generic[T]):
 
 
 InputExtractor = Callable[[Path], RawScore]
-OutputBackend = Callable[[RenderScene], str]
+OutputBackend = Callable[[RenderScene], str | bytes]
 GlyphFactory = Callable[..., object]
 RecipeFactory = Callable[..., object]
 Transformation = Callable[[Score], Score]
@@ -137,9 +137,23 @@ class ValidatorRegistry(BaseRegistry[Validator]):
 
 def build_default_registries() -> dict[str, BaseRegistry[Any]]:
     """Create the default registry set used by notation-core."""
+    from fretwise.core.backends import render_scene_to_pdf_bytes, render_scene_to_svg
+
+    output_backends = OutputBackendRegistry("output_backends")
+    output_backends.register(
+        "svg",
+        render_scene_to_svg,
+        metadata={"media_type": "image/svg+xml", "vector": True},
+    )
+    output_backends.register(
+        "pdf",
+        render_scene_to_pdf_bytes,
+        metadata={"media_type": "application/pdf", "vector": True},
+    )
+
     return {
         "input_formats": InputFormatRegistry("input_formats"),
-        "output_backends": OutputBackendRegistry("output_backends"),
+        "output_backends": output_backends,
         "glyphs": GlyphRegistry("glyphs"),
         "recipes": RecipeRegistry("recipes"),
         "transformations": TransformationRegistry("transformations"),
