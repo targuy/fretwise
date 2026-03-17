@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `8bc1bf2`.
-- Base de non-regression actuelle: `568 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `885d7c3`.
+- Base de non-regression actuelle: `569 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -199,8 +199,9 @@
   - `d0b942a` checks de conformite hybrides (presence + alignement horizontal par `event_id`).
   - `ae89c9d` scene standard: glyphes `clef`, `time_signature`, `rest` dans RenderScene + SVG/PDF.
   - `8bc1bf2` conformance hybride: checks verticaux stricts (plans, overlap, string rows).
+  - `885d7c3` layout rhythm core: recipes `stem_line` et `beam_group` + rendu SVG/PDF.
 - Prochains commits recommandes
-  - `feat(layout-engine): migrate stem/beam/tie/tab-span placement rules into core layout`.
+  - `feat(layout-engine): migrate ties/slurs/tab-spans placement rules into core layout`.
   - `feat(scene-standard): add accidentals/stems/flags baseline in standard plane`.
   - `test(conformance): add stem/beam collision and spacing checks`.
   - `feat(integration): route legacy export progressively through core canonical/layout scene`.
