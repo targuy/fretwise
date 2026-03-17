@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `f9bacc3`.
-- Base de non-regression actuelle: `572 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `2c45c1c`.
+- Base de non-regression actuelle: `573 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -202,8 +202,9 @@
   - `885d7c3` layout rhythm core: recipes `stem_line` et `beam_group` + rendu SVG/PDF.
   - `fcb5985` spans tab core: `let_ring_span` et `palm_mute_span` de canonical->layout->scene->SVG/PDF.
   - `f9bacc3` arcs standard core: `tie_arc` et `slur_arc` dans scene + rendu SVG/PDF.
+  - `2c45c1c` accidentals standard core: `accidental_sharp/flat` policy + scene + SVG/PDF.
 - Prochains commits recommandes
-  - `feat(scene-standard): add accidentals/stems/flags baseline in standard plane`.
+  - `feat(scene-standard): add stem flags baseline and rhythmic grouping refinements`.
   - `feat(layout-engine): refine tie/slur collision avoidance and voice-aware placement`.
   - `test(conformance): add stem/beam collision and spacing checks`.
   - `feat(integration): route legacy export progressively through core canonical/layout scene`.
