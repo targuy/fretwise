@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
 
-from fretwise.cli import main
+from fretwise.cli import _infer_source_format, main
 
 
 def _make_mock_note(string: int, fret: int, note_type_value: int = 1) -> MagicMock:
@@ -194,3 +194,37 @@ class TestSolveCommand:
         result = runner.invoke(main, ["solve", str(gp_file)])
         assert result.exit_code == 0
         assert "No notes found" in result.output
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_solve_pdf_core_engine_writes_pdf(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        mock_parse.return_value = _make_mock_song(note_specs=[(1, 0), (1, 2)])
+        gp_file = tmp_path / "song.gp5"
+        gp_file.touch()
+        out_file = tmp_path / "out_core.pdf"
+
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            [
+                "solve",
+                str(gp_file),
+                "--output",
+                str(out_file),
+                "--pdf-engine",
+                "core",
+            ],
+        )
+        assert result.exit_code == 0
+        assert out_file.exists()
+        assert out_file.read_bytes().startswith(b"%PDF-")
+
+
+class TestCliHelpers:
+    def test_infer_source_format(self) -> None:
+        assert _infer_source_format(Path("a.gp")) == "gpif"
+        assert _infer_source_format(Path("a.gp5")) == "gp5"
+        assert _infer_source_format(Path("a.xml")) == "musicxml"
+        assert _infer_source_format(Path("a.mxl")) == "musicxml"
+        assert _infer_source_format(Path("a.mid")) == "mid"

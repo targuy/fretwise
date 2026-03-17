@@ -18,6 +18,10 @@ from pathlib import Path
 
 import click
 
+from fretwise.core import run_core_pipeline_from_raw
+from fretwise.core.backends import render_scene_to_pdf_file
+from fretwise.core.graphics import RepresentationMode
+from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.export import (
     render_ascii_tab,
     render_combined_pdf,
@@ -243,6 +247,13 @@ def parse(file: Path, verbose: bool, limit: int, quiet: bool) -> None:
     metavar="N",
     help="Time signature numerator used for bar lines and PDF layout (e.g. 3 for 3/4).",
 )
+@click.option(
+    "--pdf-engine",
+    type=click.Choice(["legacy", "core"]),
+    default="legacy",
+    show_default=True,
+    help="PDF only: legacy renderer or notation-core RenderScene backend.",
+)
 @click.option("--verbose", "-v", is_flag=True, help="Print per-note cost summary to stderr.")
 @click.option(
     "--quiet",
@@ -259,6 +270,7 @@ def solve(
     artist: str | None,
     measures_per_system: int | None,
     beats_per_measure: float,
+    pdf_engine: str,
     verbose: bool,
     quiet: bool,
 ) -> None:
@@ -377,19 +389,44 @@ def solve(
             click.echo(f"Text report + ASCII tab written to '{output}'.")
 
     elif effective_fmt == "pdf":
-        chord_diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
-        render_pdf_tab(
-            results,
-            output,
-            title=pdf_title,
-            artist=pdf_artist,
-            beats_per_measure=beats_per_measure,
-            instrument=track_name,
-            mode_label=f"{mode} mode",
-            section_markers=section_markers or None,
-            measures_per_system=measures_per_system,
-            chord_diagrams=chord_diagrams or None,
-        )
+        if pdf_engine == "core":
+            source_beats_per_measure = float(
+                getattr(adapter, "beats_per_measure", beats_per_measure) or beats_per_measure
+            )
+            raw_score = legacy_parse_to_raw_score(
+                file,
+                source_format=_infer_source_format(file),
+                events=events,
+                track_name=track_name,
+                beats_per_measure=source_beats_per_measure,
+                section_markers=section_markers,
+                chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
+                chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),
+            )
+            core_result = run_core_pipeline_from_raw(
+                raw_score,
+                representation_mode=RepresentationMode.TAB,
+            )
+            render_scene_to_pdf_file(core_result.render_scene, output)
+            if core_result.conformance_issues and not quiet:
+                click.echo(
+                    f"Core PDF conformance issues: {len(core_result.conformance_issues)}",
+                    err=True,
+                )
+        else:
+            chord_diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
+            render_pdf_tab(
+                results,
+                output,
+                title=pdf_title,
+                artist=pdf_artist,
+                beats_per_measure=beats_per_measure,
+                instrument=track_name,
+                mode_label=f"{mode} mode",
+                section_markers=section_markers or None,
+                measures_per_system=measures_per_system,
+                chord_diagrams=chord_diagrams or None,
+            )
         if not quiet:
             click.echo(f"PDF written to '{output}'.")
 
@@ -481,7 +518,6 @@ def info(file: Path) -> None:
         else f"{tempos[0]}-{tempos[-1]} BPM  ({len(tempos)} changes)"
     )
 
-    onsets = [e.onset for e in events]
     # Estimate duration in seconds using last note's onset + duration
     last = max(events, key=lambda e: e.onset + e.duration)
     duration_beats = last.onset + last.duration
@@ -584,6 +620,18 @@ _NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 def _midi_to_note(midi: int) -> str:
     """Convert a MIDI pitch number to a human-readable note name (e.g. 64 → 'E4')."""
     return f"{_NOTE_NAMES[midi % 12]}{midi // 12 - 1}"
+
+
+def _infer_source_format(path: Path) -> str:
+    """Infer source format key from file extension."""
+    suffix = path.suffix.lower().lstrip(".")
+    if suffix == "mxl":
+        return "musicxml"
+    if suffix == "xml":
+        return "musicxml"
+    if suffix == "gp":
+        return "gpif"
+    return suffix
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:
