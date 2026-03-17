@@ -10,6 +10,8 @@ from fretwise.core.graphics.notation_policy import NotationPolicy, Representatio
 from fretwise.core.scene import RenderScene
 
 _HYBRID_ALIGNMENT_X_TOLERANCE = 1.5
+_HYBRID_ALIGNMENT_Y_TOLERANCE = 2.0
+_HYBRID_MIN_PLANE_GAP = 4.0
 
 
 class ConformanceSeverity(StrEnum):
@@ -119,8 +121,59 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
     for page_index, page in enumerate(scene.document_scene.pages):
         for system_index, system in enumerate(page.systems):
             for staff_index, staff in enumerate(system.staves):
-                tab_positions: dict[str, float] = {}
-                standard_positions: dict[str, float] = {}
+                staff_frame = _recipe_frame(staff, "staff_lines")
+                tab_frame = _recipe_frame(staff, "tab_lines")
+                if staff_frame is None:
+                    issues.append(
+                        ConformanceIssue(
+                            code="CONF-104",
+                            severity=ConformanceSeverity.HIGH,
+                            message="Hybrid mode is missing standard staff lines.",
+                            symbol_id="staff_lines",
+                            context={
+                                "page_index": page_index,
+                                "system_index": system_index,
+                                "staff_index": staff_index,
+                            },
+                        )
+                    )
+                if tab_frame is None:
+                    issues.append(
+                        ConformanceIssue(
+                            code="CONF-105",
+                            severity=ConformanceSeverity.HIGH,
+                            message="Hybrid mode is missing tablature lines.",
+                            symbol_id="tab_lines",
+                            context={
+                                "page_index": page_index,
+                                "system_index": system_index,
+                                "staff_index": staff_index,
+                            },
+                        )
+                    )
+                if staff_frame is not None and tab_frame is not None:
+                    _, staff_bottom, _ = staff_frame
+                    tab_top, _, _ = tab_frame
+                    if staff_bottom + _HYBRID_MIN_PLANE_GAP > tab_top:
+                        issues.append(
+                            ConformanceIssue(
+                                code="CONF-106",
+                                severity=ConformanceSeverity.MEDIUM,
+                                message="Hybrid standard/tab planes overlap vertically.",
+                                symbol_id="standard_tab_planes",
+                                context={
+                                    "staff_bottom": staff_bottom,
+                                    "tab_top": tab_top,
+                                    "min_gap": _HYBRID_MIN_PLANE_GAP,
+                                    "page_index": page_index,
+                                    "system_index": system_index,
+                                    "staff_index": staff_index,
+                                },
+                            )
+                        )
+
+                tab_positions: dict[str, tuple[float, float, int | None]] = {}
+                standard_positions: dict[str, tuple[float, float]] = {}
 
                 for layer in staff.layer_groups:
                     for text in layer.text_instances:
@@ -129,7 +182,11 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                         event_id = text.metadata.get("event_id")
                         if event_id is None:
                             continue
-                        tab_positions[str(event_id)] = text.x
+                        tab_positions[str(event_id)] = (
+                            text.x,
+                            text.y,
+                            _safe_int(text.metadata.get("tab_string")),
+                        )
 
                     for glyph in layer.glyph_instances:
                         if glyph.glyph_id != "notehead":
@@ -137,7 +194,7 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                         event_id = glyph.metadata.get("event_id")
                         if event_id is None:
                             continue
-                        standard_positions[str(event_id)] = glyph.x
+                        standard_positions[str(event_id)] = (glyph.x, glyph.y)
 
                 all_event_ids = set(tab_positions) | set(standard_positions)
                 for event_id in sorted(all_event_ids):
@@ -174,8 +231,8 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                         )
                         continue
 
-                    tab_x = tab_positions[event_id]
-                    standard_x = standard_positions[event_id]
+                    tab_x, tab_y, tab_string = tab_positions[event_id]
+                    standard_x, standard_y = standard_positions[event_id]
                     delta = abs(tab_x - standard_x)
                     if delta > _HYBRID_ALIGNMENT_X_TOLERANCE:
                         issues.append(
@@ -196,4 +253,98 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                                 },
                             )
                         )
+                    if staff_frame is not None:
+                        staff_top, staff_bottom, _ = staff_frame
+                        if not (
+                            staff_top - _HYBRID_ALIGNMENT_Y_TOLERANCE
+                            <= standard_y
+                            <= staff_bottom + _HYBRID_ALIGNMENT_Y_TOLERANCE
+                        ):
+                            issues.append(
+                                ConformanceIssue(
+                                    code="CONF-107",
+                                    severity=ConformanceSeverity.MEDIUM,
+                                    message="Standard notehead is outside standard staff plane.",
+                                    symbol_id="notehead",
+                                    context={
+                                        "event_id": event_id,
+                                        "notehead_y": standard_y,
+                                        "staff_top": staff_top,
+                                        "staff_bottom": staff_bottom,
+                                        "tolerance": _HYBRID_ALIGNMENT_Y_TOLERANCE,
+                                        "page_index": page_index,
+                                        "system_index": system_index,
+                                        "staff_index": staff_index,
+                                    },
+                                )
+                            )
+                    if tab_frame is not None:
+                        tab_top, tab_bottom, tab_spacing = tab_frame
+                        if not (
+                            tab_top - _HYBRID_ALIGNMENT_Y_TOLERANCE
+                            <= tab_y
+                            <= tab_bottom + 4.0 + _HYBRID_ALIGNMENT_Y_TOLERANCE
+                        ):
+                            issues.append(
+                                ConformanceIssue(
+                                    code="CONF-108",
+                                    severity=ConformanceSeverity.MEDIUM,
+                                    message="Tab anchor is outside tablature plane.",
+                                    symbol_id="tab_digit",
+                                    context={
+                                        "event_id": event_id,
+                                        "tab_y": tab_y,
+                                        "tab_top": tab_top,
+                                        "tab_bottom": tab_bottom,
+                                        "tolerance": _HYBRID_ALIGNMENT_Y_TOLERANCE,
+                                        "page_index": page_index,
+                                        "system_index": system_index,
+                                        "staff_index": staff_index,
+                                    },
+                                )
+                            )
+                        if tab_string is not None:
+                            string_num = max(1, min(6, tab_string))
+                            expected_y = tab_top + (string_num - 1) * tab_spacing + 4.0
+                            if abs(tab_y - expected_y) > _HYBRID_ALIGNMENT_Y_TOLERANCE:
+                                issues.append(
+                                ConformanceIssue(
+                                    code="CONF-109",
+                                    severity=ConformanceSeverity.MEDIUM,
+                                    message=(
+                                        "Tab anchor is not aligned with declared string row."
+                                    ),
+                                    symbol_id="tab_digit",
+                                    context={
+                                            "event_id": event_id,
+                                            "tab_string": string_num,
+                                            "tab_y": tab_y,
+                                            "expected_y": expected_y,
+                                            "tolerance": _HYBRID_ALIGNMENT_Y_TOLERANCE,
+                                            "page_index": page_index,
+                                            "system_index": system_index,
+                                            "staff_index": staff_index,
+                                        },
+                                    )
+                                )
     return issues
+
+
+def _recipe_frame(staff: Any, recipe_id: str) -> tuple[float, float, float] | None:
+    for layer in staff.layer_groups:
+        for recipe in layer.recipe_instances:
+            if recipe.recipe_id != recipe_id:
+                continue
+            y = float(recipe.params.get("y", 0.0))
+            count = int(recipe.params.get("count", 1))
+            spacing = float(recipe.params.get("spacing", 16.0))
+            bottom = y + max(0, count - 1) * spacing
+            return (y, bottom, spacing)
+    return None
+
+
+def _safe_int(value: Any) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None

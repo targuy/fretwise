@@ -165,3 +165,118 @@ def test_scene_conformance_flags_horizontal_misalignment_in_hybrid_mode() -> Non
     )
 
     assert any(issue.code == "CONF-103" for issue in issues)
+
+
+def test_scene_conformance_flags_missing_tab_plane_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    staff_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[0]
+    staff_layer.recipe_instances = [
+        recipe for recipe in staff_layer.recipe_instances if recipe.recipe_id != "tab_lines"
+    ]
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-105" for issue in issues)
+
+
+def test_scene_conformance_flags_plane_overlap_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    staff_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[0]
+    tab_idx = next(
+        idx
+        for idx, recipe in enumerate(staff_layer.recipe_instances)
+        if recipe.recipe_id == "tab_lines"
+    )
+    tab_recipe = staff_layer.recipe_instances[tab_idx]
+    tab_params = dict(tab_recipe.params)
+    tab_params["y"] = 70.0
+    staff_layer.recipe_instances[tab_idx] = replace(tab_recipe, params=tab_params)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-106" for issue in issues)
+
+
+def test_scene_conformance_flags_tab_anchor_outside_plane_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    note_idx = next(
+        idx
+        for idx, text in enumerate(notes_layer.text_instances)
+        if text.metadata.get("kind") == "note"
+    )
+    notes_layer.text_instances[note_idx] = replace(notes_layer.text_instances[note_idx], y=72.0)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-108" for issue in issues)
+
+
+def test_scene_conformance_flags_tab_string_row_mismatch_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    note_idx = next(
+        idx
+        for idx, text in enumerate(notes_layer.text_instances)
+        if text.metadata.get("kind") == "note"
+    )
+    note = notes_layer.text_instances[note_idx]
+    metadata = dict(note.metadata)
+    metadata["tab_string"] = "6"
+    notes_layer.text_instances[note_idx] = replace(note, metadata=metadata)
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-109" for issue in issues)

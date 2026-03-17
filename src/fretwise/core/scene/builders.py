@@ -26,7 +26,7 @@ _STAFF_W = 1080.0
 _STAFF_H = 240.0
 _TAB_Y = _MARGIN_Y + 60.0
 _TAB_SPACING = 18.0
-_STAFF_STD_Y = _MARGIN_Y + 18.0
+_STAFF_STD_Y = _MARGIN_Y - 8.0
 _STAFF_STD_SPACING = 12.0
 _MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
 _MODES_WITH_STANDARD = {"standard", "standard_tablature"}
@@ -120,7 +120,11 @@ def layout_to_render_scene(
                             x=event_layout.x,
                             y=event_layout.y,
                             font_size=11.0,
-                            metadata={"kind": "note", "event_id": event_layout.event_id},
+                            metadata={
+                                "kind": "note",
+                                "event_id": event_layout.event_id,
+                                "tab_string": event_layout.metadata.get("tab_string", "3"),
+                            },
                         )
                     )
                 if has_standard:
@@ -226,7 +230,11 @@ def _append_note_text(layer: LayerGroup, event: CanonicalNoteEvent, measure_x: f
             x=column_x,
             y=y,
             font_size=11.0,
-            metadata={"kind": "note", "event_id": event.event_id},
+            metadata={
+                "kind": "note",
+                "event_id": event.event_id,
+                "tab_string": str(string_num),
+            },
         )
     )
 
