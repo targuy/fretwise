@@ -310,23 +310,10 @@ def _infer_source_format(path: Path) -> str:
 def _render_core_pdf_payload(
     filepath: Path, adapter: Any, events: list[NoteEvent]
 ) -> tuple[bytes, int]:
-    track_name: str = getattr(adapter, "track_name", "") or ""
-    source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
-    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
-    chord_markers: dict[str, str] = dict(getattr(adapter, "chord_markers", {}) or {})
-    chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
-    raw_score = legacy_parse_to_raw_score(
+    core_result = _run_core_pipeline_for_events(
         filepath,
-        source_format=_infer_source_format(filepath),
-        events=events,
-        track_name=track_name,
-        beats_per_measure=source_beats_per_measure,
-        section_markers=section_markers,
-        chord_markers=chord_markers,
-        chord_diagrams=chord_diagrams,
-    )
-    core_result = run_core_pipeline_from_raw(
-        raw_score,
+        adapter,
+        events,
         representation_mode=RepresentationMode.TAB,
     )
     return render_scene_to_pdf_bytes(core_result.render_scene), len(core_result.conformance_issues)
@@ -360,7 +347,8 @@ def _render_legacy_pdf_payload(
             section_markers=section_markers or None,
             chord_diagrams=chord_diagrams or None,
         )
-        return temp_path.read_bytes(), 0
+        conformance_issues = _shadow_core_conformance_issues(filepath, adapter, events)
+        return temp_path.read_bytes(), conformance_issues
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -372,6 +360,51 @@ def _safe_pdf_filename(label: str) -> str:
     if not safe.lower().endswith(".pdf"):
         safe += ".pdf"
     return safe
+
+
+def _shadow_core_conformance_issues(
+    filepath: Path, adapter: Any, events: list[NoteEvent]
+) -> int:
+    """Run core pipeline in shadow mode for legacy export diagnostics."""
+    try:
+        core_result = _run_core_pipeline_for_events(
+            filepath,
+            adapter,
+            events,
+            representation_mode=RepresentationMode.TAB,
+        )
+    except Exception:
+        # Legacy PDF export must remain non-blocking while core integration hardens.
+        return 0
+    return len(core_result.conformance_issues)
+
+
+def _run_core_pipeline_for_events(
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+    *,
+    representation_mode: RepresentationMode,
+) -> Any:
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
+    chord_markers: dict[str, str] = dict(getattr(adapter, "chord_markers", {}) or {})
+    chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
+    raw_score = legacy_parse_to_raw_score(
+        filepath,
+        source_format=_infer_source_format(filepath),
+        events=events,
+        track_name=track_name,
+        beats_per_measure=source_beats_per_measure,
+        section_markers=section_markers,
+        chord_markers=chord_markers,
+        chord_diagrams=chord_diagrams,
+    )
+    return run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=representation_mode,
+    )
 
 
 def _serialize_result(r: FingeringResult) -> dict[str, Any]:

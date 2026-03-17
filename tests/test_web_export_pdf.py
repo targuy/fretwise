@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -84,6 +85,50 @@ def test_render_legacy_pdf_payload_returns_pdf_and_zero_conformance_count(
     )
     assert pdf_bytes.startswith(b"%PDF-")
     assert b"/Type /Page" in pdf_bytes
+    assert conformance_issues == 0
+
+
+def test_render_legacy_pdf_payload_reports_shadow_core_conformance_count(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    adapter = _DummyAdapter()
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+
+    def _fake_run_core(*_args: Any, **_kwargs: Any) -> Any:
+        return SimpleNamespace(conformance_issues=[object(), object()])
+
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_run_core)
+
+    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+        file_path,
+        adapter,
+        adapter.parse(file_path),
+        mode="reference",
+    )
+    assert pdf_bytes.startswith(b"%PDF-")
+    assert conformance_issues == 2
+
+
+def test_render_legacy_pdf_payload_ignores_shadow_core_failures(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    adapter = _DummyAdapter()
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+
+    def _raise(*_args: Any, **_kwargs: Any) -> Any:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _raise)
+
+    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+        file_path,
+        adapter,
+        adapter.parse(file_path),
+        mode="reference",
+    )
+    assert pdf_bytes.startswith(b"%PDF-")
     assert conformance_issues == 0
 
 
