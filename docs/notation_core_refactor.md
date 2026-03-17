@@ -3,8 +3,8 @@
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.
-- Etat git au moment de cet audit: propre apres commit `c8b2c61`.
-- Base de non-regression actuelle: `586 passed, 5 skipped` (pytest), lint core OK (ruff).
+- Etat git au moment de cet audit: propre apres commit `35c9973`.
+- Base de non-regression actuelle: `588 passed, 5 skipped` (pytest), lint core OK (ruff).
 - Stack actuelle: Python 3.11, CLI Click, parsing GP/GPIF/MusicXML/MIDI, rendu PDF ReportLab, UI FastAPI + frontend statique.
 - Architecture existante historique encore en production:
   - `parser` -> `pipeline` (generator + optimizer + scoring resolvers) -> `export` / `web`.
@@ -211,8 +211,9 @@
   - `c537a37` layout standard: liaisons tie/slur groupees par voix + profil de courbure/offset adapte a la portee.
   - `19bed8b` integration web: export PDF legacy avec shadow core pour remonter les issues de conformite sans casser l'existant.
   - `c8b2c61` integration CLI: export PDF legacy avec diagnostics shadow core de conformite (non bloquant).
+  - `35c9973` contrat partage CLI/web: `PdfConformanceReport` structure + header web `X-Fretwise-Conformance-Report` + statut UI legacy/core harmonise.
 - Prochains commits recommandes
-  - `feat(integration): align conformance-report contract between CLI and web pdf exports`.
+  - `test(integration): add API-level tests for structured pdf conformance headers`.
 
 ## 12. Proposition de branche principale et sous-branches
 
