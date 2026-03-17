@@ -196,9 +196,11 @@ def _register_routes(app: FastAPI) -> None:
             raise HTTPException(404, "No notes found in file")
 
         if engine == "core":
-            pdf_bytes = _render_core_pdf_bytes(filepath, adapter, events)
+            pdf_bytes, conformance_issues = _render_core_pdf_payload(filepath, adapter, events)
         else:
-            pdf_bytes = _render_legacy_pdf_bytes(filepath, adapter, events, mode=mode)
+            pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
+                filepath, adapter, events, mode=mode
+            )
 
         auto_title, auto_artist = _infer_title_artist(filepath)
         filename_base = auto_title if not auto_artist else f"{auto_artist} - {auto_title}"
@@ -206,7 +208,11 @@ def _register_routes(app: FastAPI) -> None:
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
-            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}"',
+                "X-Fretwise-Pdf-Engine": engine,
+                "X-Fretwise-Conformance-Issues": str(conformance_issues),
+            },
         )
 
     @app.post("/api/upload")
@@ -301,7 +307,9 @@ def _infer_source_format(path: Path) -> str:
     return suffix
 
 
-def _render_core_pdf_bytes(filepath: Path, adapter: Any, events: list[NoteEvent]) -> bytes:
+def _render_core_pdf_payload(
+    filepath: Path, adapter: Any, events: list[NoteEvent]
+) -> tuple[bytes, int]:
     track_name: str = getattr(adapter, "track_name", "") or ""
     source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
     section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
@@ -321,16 +329,16 @@ def _render_core_pdf_bytes(filepath: Path, adapter: Any, events: list[NoteEvent]
         raw_score,
         representation_mode=RepresentationMode.TAB,
     )
-    return render_scene_to_pdf_bytes(core_result.render_scene)
+    return render_scene_to_pdf_bytes(core_result.render_scene), len(core_result.conformance_issues)
 
 
-def _render_legacy_pdf_bytes(
+def _render_legacy_pdf_payload(
     filepath: Path,
     adapter: Any,
     events: list[NoteEvent],
     *,
     mode: str,
-) -> bytes:
+) -> tuple[bytes, int]:
     results, _stats = _run_legacy_pipeline(events, mode=mode)
     track_name: str = getattr(adapter, "track_name", "") or ""
     section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
@@ -352,7 +360,7 @@ def _render_legacy_pdf_bytes(
             section_markers=section_markers or None,
             chord_diagrams=chord_diagrams or None,
         )
-        return temp_path.read_bytes()
+        return temp_path.read_bytes(), 0
     finally:
         temp_path.unlink(missing_ok=True)
 

@@ -51,9 +51,17 @@ export async function fetchExportPdf(filename, trackId, mode, engine) {
 
   const blob = await res.blob();
   const contentDisposition = res.headers.get('content-disposition') || '';
+  const usedEngine = res.headers.get('x-fretwise-pdf-engine') || engine || 'legacy';
+  const conformanceIssuesRaw = res.headers.get('x-fretwise-conformance-issues') || '0';
+  const conformanceIssues = Number.parseInt(conformanceIssuesRaw, 10) || 0;
   let filenameOut = 'fretwise-export.pdf';
   const m = /filename=\"?([^\";]+)\"?/i.exec(contentDisposition);
   if (m && m[1]) filenameOut = m[1];
 
-  return { blob, filename: filenameOut };
+  return {
+    blob,
+    filename: filenameOut,
+    engine: usedEngine,
+    conformanceIssues,
+  };
 }

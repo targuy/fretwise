@@ -44,6 +44,7 @@ const btnMetronome  = $('#btn-metronome');
 const btnSound      = $('#btn-sound');
 const btnExportPdf  = $('#btn-export-pdf');
 const pdfEngineSelect = $('#pdf-engine-select');
+const pdfExportStatus = $('#pdf-export-status');
 const btnBackFiles  = $('#btn-back-files');
 const btnBackViewer  = $('#btn-back-viewer');
 const trackSwitcher  = $('#track-switcher');
@@ -189,14 +190,30 @@ async function exportPDF() {
     btnExportPdf.disabled = true;
     btnExportPdf.textContent = 'Export…';
   }
+  _setPdfExportStatus('Exporting…', 'neutral');
 
   try {
     const mode = selMode?.value || 'reference';
     const engine = pdfEngineSelect?.value || 'core';
-    const { blob, filename } = await fetchExportPdf(currentFile, currentTrackId, mode, engine);
+    const { blob, filename, engine: usedEngine, conformanceIssues } = await fetchExportPdf(
+      currentFile,
+      currentTrackId,
+      mode,
+      engine,
+    );
     _downloadBlob(blob, filename);
+    if (usedEngine === 'core') {
+      if (conformanceIssues > 0) {
+        _setPdfExportStatus(`Core: ${conformanceIssues} issue(s)`, 'warn');
+      } else {
+        _setPdfExportStatus('Core: conformance OK', 'ok');
+      }
+    } else {
+      _setPdfExportStatus('Legacy export complete', 'ok');
+    }
   } catch (err) {
     console.warn('API PDF export failed, falling back to local canvas export:', err);
+    _setPdfExportStatus('API failed, using local fallback', 'warn');
     exportPDFLegacyCanvas();
   } finally {
     if (btnExportPdf) {
@@ -215,6 +232,24 @@ function _downloadBlob(blob, filename) {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function _setPdfExportStatus(message, level = 'neutral') {
+  if (!pdfExportStatus) return;
+  pdfExportStatus.textContent = message;
+  if (level === 'ok') {
+    pdfExportStatus.style.color = '#9be7a0';
+    return;
+  }
+  if (level === 'warn') {
+    pdfExportStatus.style.color = '#ffd180';
+    return;
+  }
+  if (level === 'error') {
+    pdfExportStatus.style.color = '#ef9a9a';
+    return;
+  }
+  pdfExportStatus.style.color = 'rgba(255,255,255,0.75)';
 }
 
 function exportPDFLegacyCanvas() {

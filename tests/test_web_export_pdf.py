@@ -13,8 +13,8 @@ from fretwise.parser.base import UnsupportedFormatError
 from fretwise.web.app import (
     _infer_source_format,
     _load_adapter_and_events,
-    _render_core_pdf_bytes,
-    _render_legacy_pdf_bytes,
+    _render_core_pdf_payload,
+    _render_legacy_pdf_payload,
     _safe_pdf_filename,
 )
 
@@ -56,22 +56,27 @@ class _DummyAdapter:
         return self.parse(path)
 
 
-def test_render_core_pdf_bytes_returns_pdf(tmp_path: Path) -> None:
+def test_render_core_pdf_payload_returns_pdf_and_conformance_count(tmp_path: Path) -> None:
     adapter = _DummyAdapter()
     file_path = tmp_path / "song.gp"
     file_path.touch()
 
-    pdf_bytes = _render_core_pdf_bytes(file_path, adapter, adapter.parse(file_path))
+    pdf_bytes, conformance_issues = _render_core_pdf_payload(
+        file_path, adapter, adapter.parse(file_path)
+    )
     assert pdf_bytes.startswith(b"%PDF-")
     assert b"/Type /Page" in pdf_bytes
+    assert conformance_issues == 0
 
 
-def test_render_legacy_pdf_bytes_returns_pdf(tmp_path: Path) -> None:
+def test_render_legacy_pdf_payload_returns_pdf_and_zero_conformance_count(
+    tmp_path: Path,
+) -> None:
     adapter = _DummyAdapter()
     file_path = tmp_path / "song.gp"
     file_path.touch()
 
-    pdf_bytes = _render_legacy_pdf_bytes(
+    pdf_bytes, conformance_issues = _render_legacy_pdf_payload(
         file_path,
         adapter,
         adapter.parse(file_path),
@@ -79,6 +84,7 @@ def test_render_legacy_pdf_bytes_returns_pdf(tmp_path: Path) -> None:
     )
     assert pdf_bytes.startswith(b"%PDF-")
     assert b"/Type /Page" in pdf_bytes
+    assert conformance_issues == 0
 
 
 def test_load_adapter_and_events_uses_parse_track_when_requested(
@@ -115,4 +121,3 @@ def test_source_format_and_safe_pdf_filename_helpers() -> None:
     assert _infer_source_format(Path("a.mxl")) == "musicxml"
     assert _infer_source_format(Path("a.mid")) == "mid"
     assert _safe_pdf_filename("A/B:C*D") == "A_B_C_D.pdf"
-
