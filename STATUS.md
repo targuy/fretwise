@@ -265,7 +265,7 @@
 
 | Métrique | Valeur |
 |---|---|
-| Tests automatisés | **575 passants**, 5 ignorés |
+| Tests automatisés | **577 passants**, 5 ignorés |
 | Couverture de test | ~65 % |
 | Fichiers GP de test (fixtures) | 6 (corpus de référence) |
 | Notes totales traitées (benchmark) | ~44 000 |
@@ -324,5 +324,5 @@ src/fretwise/
 └── cli.py              fretwise parse / solve / web
 ```
 
-**Tests :** `pytest -v` (575 passants, 5 ignorés)
+**Tests :** `pytest -v` (577 passants, 5 ignorés)
 **Benchmark :** `python scripts/run_fingering.py` → `docs/benchmarks/`
