@@ -8,6 +8,12 @@ from fretwise.core.backends import render_scene_to_svg
 from fretwise.core.canonical import Score, completed_to_canonical_score
 from fretwise.core.complete import complete_normalized_score
 from fretwise.core.decision import DecisionOutcome, DecisionPolicy, decide_from_validation
+from fretwise.core.graphics import (
+    ConformanceIssue,
+    RepresentationMode,
+    check_scene_conformance,
+    default_notation_policy,
+)
 from fretwise.core.ingest import CompletedScore, NormalizedScore, RawScore
 from fretwise.core.normalize import normalize_raw_score
 from fretwise.core.scene import RenderScene, canonical_to_render_scene
@@ -24,6 +30,7 @@ class CorePipelineResult:
     decision_outcome: DecisionOutcome
     canonical_score: Score
     render_scene: RenderScene
+    conformance_issues: list[ConformanceIssue]
     svg: str
 
 
@@ -31,6 +38,7 @@ def run_core_pipeline_from_raw(
     raw_score: RawScore,
     *,
     decision_policy: DecisionPolicy | None = None,
+    representation_mode: RepresentationMode = RepresentationMode.TAB,
 ) -> CorePipelineResult:
     """Execute the minimal core chain from raw input to SVG output."""
     normalized_score = normalize_raw_score(raw_score)
@@ -39,6 +47,11 @@ def run_core_pipeline_from_raw(
     decision_outcome = decide_from_validation(validation_report, policy=decision_policy)
     canonical_score = completed_to_canonical_score(completed_score)
     render_scene = canonical_to_render_scene(canonical_score)
+    conformance_issues = check_scene_conformance(
+        render_scene,
+        mode=representation_mode,
+        policy=default_notation_policy(),
+    )
     svg = render_scene_to_svg(render_scene)
     return CorePipelineResult(
         normalized_score=normalized_score,
@@ -47,5 +60,6 @@ def run_core_pipeline_from_raw(
         decision_outcome=decision_outcome,
         canonical_score=canonical_score,
         render_scene=render_scene,
+        conformance_issues=conformance_issues,
         svg=svg,
     )

@@ -78,4 +78,5 @@ def test_run_core_pipeline_from_raw_end_to_end() -> None:
     assert result.validation_report.checked_notes == 2
     assert result.decision_outcome.action.value == "accept"
     assert result.canonical_score.tracks
+    assert result.conformance_issues == []
     assert "<svg" in result.svg
