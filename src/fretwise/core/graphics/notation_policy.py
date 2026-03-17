@@ -120,6 +120,16 @@ def default_notation_policy() -> NotationPolicy:
             allowed_modes=standard_modes,
             anchor=SymbolAnchor.STANDARD,
         ),
+        "accidental_sharp": SymbolRule(
+            symbol_id="accidental_sharp",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "accidental_flat": SymbolRule(
+            symbol_id="accidental_flat",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
         "stem_line": SymbolRule(
             symbol_id="stem_line",
             allowed_modes=rhythm_modes,

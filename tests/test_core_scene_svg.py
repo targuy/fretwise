@@ -150,6 +150,21 @@ def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None
     assert "<path " in svg
 
 
+def test_canonical_to_render_scene_standard_contains_accidental_glyph() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=61, onset=0.0, duration=1.0, string_hint=2, fret_hint=2)],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    note_glyph_ids = [g.glyph_id for g in staff.layer_groups[1].glyph_instances]
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert "accidental_sharp" in note_glyph_ids
+    assert "♯" in svg
+
+
 def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),

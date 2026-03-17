@@ -189,6 +189,18 @@ def _render_glyph(
             f'font-family="Times New Roman" font-size="{max(9.0, size):.2f}">'
             "𝄽</text>"
         )
+    if glyph_id == "accidental_sharp":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Helvetica" font-size="{max(8.0, size):.2f}">'
+            "♯</text>"
+        )
+    if glyph_id == "accidental_flat":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Helvetica" font-size="{max(8.0, size):.2f}">'
+            "♭</text>"
+        )
     return (
         f'<circle cx="{x:.2f}" cy="{y:.2f}" '
         f'r="{max(1.0, size):.2f}" '

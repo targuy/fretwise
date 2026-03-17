@@ -267,6 +267,14 @@ def _draw_glyph(
         canvas.setFont("Times-Roman", max(9.0, size))
         canvas.drawString(x, y_pdf, "rest")
         return
+    if glyph_id == "accidental_sharp":
+        canvas.setFont("Helvetica", max(8.0, size))
+        canvas.drawString(x, y_pdf, "#")
+        return
+    if glyph_id == "accidental_flat":
+        canvas.setFont("Helvetica", max(8.0, size))
+        canvas.drawString(x, y_pdf, "b")
+        return
 
     radius = max(1.0, size)
     canvas.circle(x, y_pdf, radius, fill=0, stroke=1)

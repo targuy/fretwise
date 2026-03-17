@@ -157,6 +157,18 @@ def layout_to_render_scene(
                     else:
                         note_y = _standard_note_y(event_layout.metadata)
                         techniques = _parse_techniques(event_layout.metadata.get("techniques"))
+                        pitch = _safe_int(event_layout.metadata.get("pitch_notated")) or 64
+                        accidental = _accidental_glyph_for_pitch(pitch)
+                        if accidental is not None:
+                            notes_layer.glyph_instances.append(
+                                GlyphInstance(
+                                    glyph_id=accidental,
+                                    x=event_layout.x - 9.0,
+                                    y=note_y + 0.5,
+                                    size=9.0,
+                                    metadata={"event_id": event_layout.event_id},
+                                )
+                            )
                         notes_layer.glyph_instances.append(
                             GlyphInstance(
                                 glyph_id="notehead",
@@ -176,9 +188,7 @@ def layout_to_render_scene(
                                 "y": note_y,
                                 "onset": event_layout.onset,
                                 "duration": event_layout.duration,
-                                "pitch": (
-                                    _safe_int(event_layout.metadata.get("pitch_notated")) or 64
-                                ),
+                                "pitch": pitch,
                                 "techniques": techniques,
                             }
                         )
@@ -222,13 +232,25 @@ def layout_to_render_scene(
                                     _append_note_text(notes_layer, event, measure_x)
                                 if has_standard:
                                     note_x = measure_x + (event.onset % 4.0) * 36.0 + 28.0
+                                    note_y = _standard_note_y(
+                                        {"pitch_notated": str(event.pitch_notated)}
+                                    )
+                                    accidental = _accidental_glyph_for_pitch(event.pitch_notated)
+                                    if accidental is not None:
+                                        notes_layer.glyph_instances.append(
+                                            GlyphInstance(
+                                                glyph_id=accidental,
+                                                x=note_x - 9.0,
+                                                y=note_y + 0.5,
+                                                size=9.0,
+                                                metadata={"event_id": event.event_id},
+                                            )
+                                        )
                                     notes_layer.glyph_instances.append(
                                         GlyphInstance(
                                             glyph_id="notehead",
                                             x=note_x,
-                                            y=_standard_note_y(
-                                                {"pitch_notated": str(event.pitch_notated)}
-                                            ),
+                                            y=note_y,
                                             size=3.0,
                                             metadata={"event_id": event.event_id},
                                         )
@@ -565,3 +587,12 @@ def _safe_int(value: str | None) -> int | None:
         return int(value) if value is not None else None
     except ValueError:
         return None
+
+
+def _accidental_glyph_for_pitch(pitch: int) -> str | None:
+    pitch_class = pitch % 12
+    if pitch_class in {1, 6}:
+        return "accidental_sharp"
+    if pitch_class in {3, 8, 10}:
+        return "accidental_flat"
+    return None
