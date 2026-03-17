@@ -15,6 +15,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 import click
 
@@ -390,21 +391,10 @@ def solve(
 
     elif effective_fmt == "pdf":
         if pdf_engine == "core":
-            source_beats_per_measure = float(
-                getattr(adapter, "beats_per_measure", beats_per_measure) or beats_per_measure
-            )
-            raw_score = legacy_parse_to_raw_score(
+            core_result = _run_core_pipeline_for_events(
                 file,
-                source_format=_infer_source_format(file),
-                events=events,
-                track_name=track_name,
-                beats_per_measure=source_beats_per_measure,
-                section_markers=section_markers,
-                chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
-                chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),
-            )
-            core_result = run_core_pipeline_from_raw(
-                raw_score,
+                adapter,
+                events,
                 representation_mode=RepresentationMode.TAB,
             )
             render_scene_to_pdf_file(core_result.render_scene, output)
@@ -427,6 +417,12 @@ def solve(
                 measures_per_system=measures_per_system,
                 chord_diagrams=chord_diagrams or None,
             )
+            shadow_issues = _shadow_core_conformance_issues(file, adapter, events)
+            if shadow_issues and not quiet:
+                click.echo(
+                    f"Legacy PDF shadow core conformance issues: {shadow_issues}",
+                    err=True,
+                )
         if not quiet:
             click.echo(f"PDF written to '{output}'.")
 
@@ -632,6 +628,48 @@ def _infer_source_format(path: Path) -> str:
     if suffix == "gp":
         return "gpif"
     return suffix
+
+
+def _shadow_core_conformance_issues(
+    path: Path, adapter: Any, events: list[Any]
+) -> int:
+    """Run core pipeline in shadow mode for legacy PDF diagnostics."""
+    try:
+        core_result = _run_core_pipeline_for_events(
+            path,
+            adapter,
+            events,
+            representation_mode=RepresentationMode.TAB,
+        )
+    except Exception:
+        return 0
+    return len(core_result.conformance_issues)
+
+
+def _run_core_pipeline_for_events(
+    path: Path,
+    adapter: Any,
+    events: list[Any],
+    *,
+    representation_mode: RepresentationMode,
+) -> Any:
+    source_beats_per_measure = float(
+        getattr(adapter, "beats_per_measure", 4.0) or 4.0
+    )
+    raw_score = legacy_parse_to_raw_score(
+        path,
+        source_format=_infer_source_format(path),
+        events=events,
+        track_name=getattr(adapter, "track_name", "") or "",
+        beats_per_measure=source_beats_per_measure,
+        section_markers=dict(getattr(adapter, "section_markers", {}) or {}),
+        chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
+        chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),
+    )
+    return run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=representation_mode,
+    )
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:

@@ -220,6 +220,45 @@ class TestSolveCommand:
         assert out_file.exists()
         assert out_file.read_bytes().startswith(b"%PDF-")
 
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_solve_pdf_legacy_reports_shadow_core_conformance(
+        self,
+        mock_parse: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        mock_parse.return_value = _make_mock_song(note_specs=[(1, 0), (1, 2)])
+        gp_file = tmp_path / "song.gp5"
+        gp_file.touch()
+        out_file = tmp_path / "out_legacy.pdf"
+
+        def _fake_render_pdf_tab(
+            _results: list[object],
+            output_path: Path,
+            **_kwargs: object,
+        ) -> None:
+            output_path.write_bytes(b"%PDF-1.4\n%shadow-test\n")
+
+        runner = CliRunner()
+        with (
+            patch("fretwise.cli._shadow_core_conformance_issues", return_value=2),
+            patch("fretwise.cli.render_pdf_tab", side_effect=_fake_render_pdf_tab),
+        ):
+            result = runner.invoke(
+                main,
+                [
+                    "solve",
+                    str(gp_file),
+                    "--output",
+                    str(out_file),
+                    "--pdf-engine",
+                    "legacy",
+                ],
+            )
+        assert result.exit_code == 0
+        assert out_file.exists()
+        assert out_file.read_bytes().startswith(b"%PDF-")
+        assert "Legacy PDF shadow core conformance issues: 2" in result.output
+
 
 class TestCliHelpers:
     def test_infer_source_format(self) -> None:
