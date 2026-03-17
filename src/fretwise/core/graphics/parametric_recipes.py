@@ -35,6 +35,12 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
             optional_params=("width",),
             tags=("rhythm", "standard"),
         ),
+        "flag_stack": RecipeDefinition(
+            recipe_id="flag_stack",
+            required_params=("x", "y", "count"),
+            optional_params=("spacing",),
+            tags=("rhythm", "standard"),
+        ),
         "tie_arc": RecipeDefinition(
             recipe_id="tie_arc",
             required_params=("x0", "y0", "x1", "y1"),

@@ -123,6 +123,21 @@ def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
     assert "<rect " in svg
 
 
+def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=0.5, string_hint=1, fret_hint=0)],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for r in staff.layer_groups[1].recipe_instances]
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert "flag_stack" in recipe_ids
+    assert svg.count("<path ") >= 1
+
+
 def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),

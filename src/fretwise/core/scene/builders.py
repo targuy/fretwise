@@ -372,7 +372,7 @@ def _append_standard_rhythm(
     beats_per_measure: int,
     events: list[tuple[float, float, float, float]],
 ) -> None:
-    stems: list[tuple[float, float, float]] = []
+    short_stems: list[tuple[float, float, float, int]] = []
     for x, onset, duration, note_y in sorted(events, key=lambda item: item[1]):
         base_dur = _base_duration(duration)
         if base_dur >= 4.0:
@@ -390,13 +390,31 @@ def _append_standard_rhythm(
             )
         )
         if base_dur < 1.0:
-            stems.append((x, onset, duration))
+            short_stems.append((x, onset, duration, _flag_count(duration)))
 
-    for group in _beam_groups(
-        stems,
+    beam_groups = _beam_groups(
+        [(x, onset, duration) for x, onset, duration, _flag_count_ in short_stems],
         beats_per_measure=beats_per_measure,
         measure_number=measure_number,
-    ):
+    )
+    beamed_onsets = {onset for group in beam_groups for _x, onset, _duration in group}
+    for x, onset, _duration, flag_count in short_stems:
+        if onset in beamed_onsets or flag_count <= 0:
+            continue
+        layer.recipe_instances.append(
+            RecipeInstance(
+                recipe_id="flag_stack",
+                params={
+                    "x": x,
+                    "y": _STANDARD_STEM_TOP_Y,
+                    "count": flag_count,
+                    "spacing": 4.0,
+                },
+                metadata={"onset": onset},
+            )
+        )
+
+    for group in beam_groups:
         layer.recipe_instances.append(
             RecipeInstance(
                 recipe_id="beam_group",
@@ -454,6 +472,17 @@ def _base_duration(duration: float) -> float:
         if abs(duration - base * 1.5) < 0.01:
             return base
     return duration
+
+
+def _flag_count(duration: float) -> int:
+    base = _base_duration(duration)
+    if base >= 1.0:
+        return 0
+    if base >= 0.5:
+        return 1
+    if base >= 0.25:
+        return 2
+    return 3
 
 
 def _append_tab_technique_spans(

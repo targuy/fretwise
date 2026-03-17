@@ -40,6 +40,7 @@ def test_default_notation_policy_symbol_rules() -> None:
     assert policy.is_allowed(RepresentationMode.STANDARD, "accidental_sharp")
     assert policy.is_allowed(RepresentationMode.STANDARD, "accidental_flat")
     assert policy.is_allowed(RepresentationMode.STANDARD, "stem_line")
+    assert policy.is_allowed(RepresentationMode.STANDARD, "flag_stack")
     assert policy.is_allowed(RepresentationMode.STANDARD, "beam_group")
     assert policy.is_allowed(RepresentationMode.STANDARD, "tie_arc")
     assert policy.is_allowed(RepresentationMode.STANDARD, "slur_arc")
@@ -51,6 +52,7 @@ def test_default_notation_policy_symbol_rules() -> None:
     assert not policy.is_allowed(RepresentationMode.TAB, "stem_line")
     assert not policy.is_allowed(RepresentationMode.TAB, "tie_arc")
     assert not policy.is_allowed(RepresentationMode.TAB, "accidental_sharp")
+    assert not policy.is_allowed(RepresentationMode.TAB, "flag_stack")
     assert not policy.is_allowed(RepresentationMode.TAB, "staff_lines")
 
 
@@ -66,6 +68,7 @@ def test_default_recipe_catalog_has_expected_recipes() -> None:
     assert "tab_lines" in recipes
     assert "tie_arc" in recipes
     assert "beam_group" in recipes
+    assert "flag_stack" in recipes
     assert "bend_curve" in recipes
 
 

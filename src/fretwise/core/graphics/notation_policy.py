@@ -135,6 +135,11 @@ def default_notation_policy() -> NotationPolicy:
             allowed_modes=rhythm_modes,
             anchor=SymbolAnchor.STANDARD,
         ),
+        "flag_stack": SymbolRule(
+            symbol_id="flag_stack",
+            allowed_modes=rhythm_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
         "tie_arc": SymbolRule(
             symbol_id="tie_arc",
             allowed_modes=standard_modes,

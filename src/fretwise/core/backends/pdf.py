@@ -75,6 +75,8 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_lines(canvas, page_h, recipe.params, color=(0.1, 0.1, 0.1))
                         elif recipe.recipe_id == "stem_line":
                             _draw_stem_line(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "flag_stack":
+                            _draw_flag_stack(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "beam_group":
                             _draw_beam_group(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "tie_arc":
@@ -148,6 +150,34 @@ def _draw_stem_line(
     canvas.setStrokeColorRGB(0, 0, 0)
     canvas.setLineWidth(max(0.5, width))
     canvas.line(x, _to_pdf_y(page_h, y0), x, _to_pdf_y(page_h, y1))
+
+
+def _draw_flag_stack(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x = float(params.get("x", 0.0))
+    y = float(params.get("y", 0.0))
+    count = int(params.get("count", 0))
+    spacing = float(params.get("spacing", 4.0))
+    if count <= 0:
+        return
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(0.8)
+    for index in range(count):
+        yi = y - index * spacing
+        path = canvas.beginPath()
+        path.moveTo(x, _to_pdf_y(page_h, yi))
+        path.curveTo(
+            x + 5.2,
+            _to_pdf_y(page_h, yi + 2.0),
+            x + 5.4,
+            _to_pdf_y(page_h, yi + 5.0),
+            x + 3.4,
+            _to_pdf_y(page_h, yi + 8.0),
+        )
+        canvas.drawPath(path, stroke=1, fill=0)
 
 
 def _draw_beam_group(

@@ -34,6 +34,8 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                         out.extend(_render_lines(recipe.params, stroke="#222"))
                     elif recipe.recipe_id == "stem_line":
                         out.append(_render_stem_line(recipe.params))
+                    elif recipe.recipe_id == "flag_stack":
+                        out.extend(_render_flag_stack(recipe.params))
                     elif recipe.recipe_id == "beam_group":
                         out.append(_render_beam_group(recipe.params))
                     elif recipe.recipe_id == "tie_arc":
@@ -106,6 +108,27 @@ def _render_stem_line(params: dict[str, object]) -> str:
         f'<line x1="{x:.2f}" y1="{y0:.2f}" x2="{x:.2f}" y2="{y1:.2f}" '
         f'stroke="black" stroke-width="{max(0.5, width):.2f}"/>'
     )
+
+
+def _render_flag_stack(params: dict[str, object]) -> list[str]:
+    x = float(params.get("x", 0.0))
+    y = float(params.get("y", 0.0))
+    count = int(params.get("count", 0))
+    spacing = float(params.get("spacing", 4.0))
+    if count <= 0:
+        return []
+    paths: list[str] = []
+    for index in range(count):
+        yi = y - index * spacing
+        path_d = (
+            f"M{x:.2f},{yi:.2f} "
+            f"Q{x + 5.2:.2f},{yi + 2.0:.2f} {x + 3.4:.2f},{yi + 8.0:.2f}"
+        )
+        paths.append(
+            f'<path d="{path_d}" '
+            'fill="none" stroke="black" stroke-width="0.8"/>'
+        )
+    return paths
 
 
 def _render_beam_group(params: dict[str, object]) -> str:
