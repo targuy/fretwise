@@ -1,0 +1,64 @@
+"""SVG backend for canonical RenderScene."""
+
+from __future__ import annotations
+
+from html import escape
+
+from fretwise.core.scene import RenderScene
+
+
+def render_scene_to_svg(scene: RenderScene) -> str:
+    """Render a scene into a minimal SVG string."""
+    if not scene.document_scene.pages:
+        return (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380">'
+            "</svg>"
+        )
+
+    page = scene.document_scene.pages[0]
+    out: list[str] = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{page.width}" '
+        f'height="{page.height}" viewBox="0 0 {page.width} {page.height}">',
+        '<rect x="0" y="0" width="100%" height="100%" fill="white"/>',
+        f'<text x="30" y="24" font-family="Helvetica" font-size="14">'
+        f"{escape(scene.document_scene.title)}</text>",
+    ]
+
+    for system in page.systems:
+        for staff in system.staves:
+            for layer in staff.layer_groups:
+                for recipe in layer.recipe_instances:
+                    if recipe.recipe_id == "tab_lines":
+                        out.extend(_render_tab_lines(recipe.params))
+                for text in layer.text_instances:
+                    out.append(
+                        f'<text x="{text.x:.2f}" y="{text.y:.2f}" '
+                        f'font-family="{escape(text.font_family)}" '
+                        f'font-size="{text.font_size:.2f}">'
+                        f"{escape(text.text)}</text>"
+                    )
+                for glyph in layer.glyph_instances:
+                    out.append(
+                        f'<circle cx="{glyph.x:.2f}" cy="{glyph.y:.2f}" '
+                        f'r="{max(1.0, glyph.size):.2f}" '
+                        'fill="none" stroke="black"/>'
+                    )
+
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+def _render_tab_lines(params: dict[str, object]) -> list[str]:
+    x = float(params.get("x", 0.0))
+    y = float(params.get("y", 0.0))
+    width = float(params.get("width", 100.0))
+    count = int(params.get("count", 6))
+    spacing = float(params.get("spacing", 16.0))
+    lines: list[str] = []
+    for idx in range(count):
+        line_y = y + idx * spacing
+        lines.append(
+            f'<line x1="{x:.2f}" y1="{line_y:.2f}" x2="{x + width:.2f}" '
+            f'y2="{line_y:.2f}" stroke="#666" stroke-width="1"/>'
+        )
+    return lines

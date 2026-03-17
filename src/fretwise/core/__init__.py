@@ -5,4 +5,9 @@ ingest -> normalize -> complete -> validate -> decision -> canonical ->
 layout -> graphics -> scene -> backends.
 """
 
-__all__: list[str] = []
+from fretwise.core.pipeline import CorePipelineResult, run_core_pipeline_from_raw
+
+__all__ = [
+    "CorePipelineResult",
+    "run_core_pipeline_from_raw",
+]
