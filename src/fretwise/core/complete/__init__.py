@@ -1,3 +1,5 @@
 """Prudent completion layer."""
 
-__all__: list[str] = []
+from fretwise.core.complete.pipeline import complete_normalized_score
+
+__all__ = ["complete_normalized_score"]

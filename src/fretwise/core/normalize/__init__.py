@@ -1,3 +1,5 @@
 """Normalization layer."""
 
-__all__: list[str] = []
+from fretwise.core.normalize.pipeline import normalize_raw_score
+
+__all__ = ["normalize_raw_score"]
