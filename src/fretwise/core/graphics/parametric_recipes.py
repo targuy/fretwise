@@ -56,7 +56,7 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
         "beam_group": RecipeDefinition(
             recipe_id="beam_group",
             required_params=("x0", "x1", "y", "level"),
-            optional_params=("thickness",),
+            optional_params=("thickness", "gap"),
             tags=("rhythm", "deformable"),
         ),
         "bend_curve": RecipeDefinition(

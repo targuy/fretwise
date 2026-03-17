@@ -123,6 +123,31 @@ def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
     assert "<rect " in svg
 
 
+def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_group() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=0.5, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=0.5, duration=0.25, string_hint=1, fret_hint=2),
+            _note(pitch=67, onset=0.75, duration=0.25, string_hint=1, fret_hint=3),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    beam_recipes = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "beam_group"
+    ]
+    levels = {int(recipe.params.get("level", 1)) for recipe in beam_recipes}
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert 1 in levels
+    assert 2 in levels
+    assert svg.count("<rect ") >= 2
+
+
 def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),

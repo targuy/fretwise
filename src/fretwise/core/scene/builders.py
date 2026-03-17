@@ -31,6 +31,7 @@ _STAFF_STD_SPACING = 12.0
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 10.0
 _REST_GAP_BREAK = 0.115
 _TAB_SPAN_PAD = 6.0
+_BEAM_GAP = 3.0
 _ARC_ONSET_TOLERANCE = 0.06
 _SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
 _MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
@@ -397,6 +398,9 @@ def _append_standard_rhythm(
         beats_per_measure=beats_per_measure,
         measure_number=measure_number,
     )
+    flag_by_onset: dict[float, int] = {
+        onset: flags for _x, onset, _duration, flags in short_stems
+    }
     beamed_onsets = {onset for group in beam_groups for _x, onset, _duration in group}
     for x, onset, _duration, flag_count in short_stems:
         if onset in beamed_onsets or flag_count <= 0:
@@ -424,9 +428,24 @@ def _append_standard_rhythm(
                     "y": _STANDARD_STEM_TOP_Y,
                     "level": 1,
                     "thickness": 2.5,
+                    "gap": _BEAM_GAP,
                 },
             )
         )
+        for level, x0, x1 in _secondary_beam_segments(group, flag_by_onset=flag_by_onset):
+            layer.recipe_instances.append(
+                RecipeInstance(
+                    recipe_id="beam_group",
+                    params={
+                        "x0": x0,
+                        "x1": x1,
+                        "y": _STANDARD_STEM_TOP_Y,
+                        "level": level,
+                        "thickness": 2.5,
+                        "gap": _BEAM_GAP,
+                    },
+                )
+            )
 
 
 def _beam_groups(
@@ -483,6 +502,31 @@ def _flag_count(duration: float) -> int:
     if base >= 0.25:
         return 2
     return 3
+
+
+def _secondary_beam_segments(
+    group: list[tuple[float, float, float]],
+    *,
+    flag_by_onset: dict[float, int],
+) -> list[tuple[int, float, float]]:
+    max_level = max((flag_by_onset.get(onset, 0) for _x, onset, _dur in group), default=0)
+    if max_level < 2:
+        return []
+
+    segments: list[tuple[int, float, float]] = []
+    for level in range(2, max_level + 1):
+        run: list[tuple[float, float, float]] = []
+        for note in group:
+            x, onset, _dur = note
+            if flag_by_onset.get(onset, 0) >= level:
+                run.append(note)
+                continue
+            if len(run) >= 2:
+                segments.append((level, run[0][0], run[-1][0]))
+            run = []
+        if len(run) >= 2:
+            segments.append((level, run[0][0], run[-1][0]))
+    return segments
 
 
 def _append_tab_technique_spans(

@@ -188,11 +188,14 @@ def _draw_beam_group(
     x0 = float(params.get("x0", 0.0))
     x1 = float(params.get("x1", x0))
     y = float(params.get("y", 0.0))
+    level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
+    gap = float(params.get("gap", 3.0))
     width = x1 - x0
     if width <= 0.0:
         return
-    y_top_pdf = _to_pdf_y(page_h, y)
+    y_top = y - (max(1, level) - 1) * (thickness + gap)
+    y_top_pdf = _to_pdf_y(page_h, y_top)
     canvas.setFillColorRGB(0, 0, 0)
     canvas.setStrokeColorRGB(0, 0, 0)
     canvas.rect(

@@ -135,12 +135,15 @@ def _render_beam_group(params: dict[str, object]) -> str:
     x0 = float(params.get("x0", 0.0))
     x1 = float(params.get("x1", x0))
     y = float(params.get("y", 0.0))
+    level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
+    gap = float(params.get("gap", 3.0))
     width = max(0.0, x1 - x0)
     if width <= 0.0:
         return ""
+    y_top = y - (max(1, level) - 1) * (thickness + gap)
     return (
-        f'<rect x="{x0:.2f}" y="{(y - thickness):.2f}" '
+        f'<rect x="{x0:.2f}" y="{(y_top - thickness):.2f}" '
         f'width="{width:.2f}" height="{max(1.0, thickness):.2f}" fill="black"/>'
     )
 
