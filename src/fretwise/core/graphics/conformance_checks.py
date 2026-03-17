@@ -9,6 +9,8 @@ from typing import Any
 from fretwise.core.graphics.notation_policy import NotationPolicy, RepresentationMode
 from fretwise.core.scene import RenderScene
 
+_HYBRID_ALIGNMENT_X_TOLERANCE = 1.5
+
 
 class ConformanceSeverity(StrEnum):
     """Severity level for conformance violations."""
@@ -70,6 +72,11 @@ def check_scene_conformance(
                             symbol_id=glyph.glyph_id,
                             context={"glyph_id": glyph.glyph_id},
                         )
+    if (
+        mode == RepresentationMode.STANDARD_TAB
+        and policy.metadata.get("standard_tab_alignment_required") == "true"
+    ):
+        issues.extend(_check_hybrid_alignment(scene))
     return issues
 
 
@@ -105,3 +112,88 @@ def _maybe_add_issue(
         )
     )
 
+
+def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
+    issues: list[ConformanceIssue] = []
+
+    for page_index, page in enumerate(scene.document_scene.pages):
+        for system_index, system in enumerate(page.systems):
+            for staff_index, staff in enumerate(system.staves):
+                tab_positions: dict[str, float] = {}
+                standard_positions: dict[str, float] = {}
+
+                for layer in staff.layer_groups:
+                    for text in layer.text_instances:
+                        if text.metadata.get("kind") != "note":
+                            continue
+                        event_id = text.metadata.get("event_id")
+                        if event_id is None:
+                            continue
+                        tab_positions[str(event_id)] = text.x
+
+                    for glyph in layer.glyph_instances:
+                        if glyph.glyph_id != "notehead":
+                            continue
+                        event_id = glyph.metadata.get("event_id")
+                        if event_id is None:
+                            continue
+                        standard_positions[str(event_id)] = glyph.x
+
+                all_event_ids = set(tab_positions) | set(standard_positions)
+                for event_id in sorted(all_event_ids):
+                    if event_id not in tab_positions:
+                        issues.append(
+                            ConformanceIssue(
+                                code="CONF-101",
+                                severity=ConformanceSeverity.HIGH,
+                                message="Hybrid mode note is missing tablature anchor.",
+                                symbol_id="tab_digit",
+                                context={
+                                    "event_id": event_id,
+                                    "page_index": page_index,
+                                    "system_index": system_index,
+                                    "staff_index": staff_index,
+                                },
+                            )
+                        )
+                        continue
+                    if event_id not in standard_positions:
+                        issues.append(
+                            ConformanceIssue(
+                                code="CONF-102",
+                                severity=ConformanceSeverity.HIGH,
+                                message="Hybrid mode note is missing standard-note anchor.",
+                                symbol_id="notehead",
+                                context={
+                                    "event_id": event_id,
+                                    "page_index": page_index,
+                                    "system_index": system_index,
+                                    "staff_index": staff_index,
+                                },
+                            )
+                        )
+                        continue
+
+                    tab_x = tab_positions[event_id]
+                    standard_x = standard_positions[event_id]
+                    delta = abs(tab_x - standard_x)
+                    if delta > _HYBRID_ALIGNMENT_X_TOLERANCE:
+                        issues.append(
+                            ConformanceIssue(
+                                code="CONF-103",
+                                severity=ConformanceSeverity.MEDIUM,
+                                message="Hybrid mode note anchors are not horizontally aligned.",
+                                symbol_id="standard_tab_alignment",
+                                context={
+                                    "event_id": event_id,
+                                    "tab_x": tab_x,
+                                    "standard_x": standard_x,
+                                    "delta_x": delta,
+                                    "tolerance": _HYBRID_ALIGNMENT_X_TOLERANCE,
+                                    "page_index": page_index,
+                                    "system_index": system_index,
+                                    "staff_index": staff_index,
+                                },
+                            )
+                        )
+    return issues

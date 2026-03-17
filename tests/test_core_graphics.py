@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from fretwise.core import run_core_pipeline_from_raw
@@ -115,3 +116,52 @@ def test_pipeline_standard_tablature_mode_is_conformant() -> None:
     )
 
     assert result.conformance_issues == []
+
+
+def test_scene_conformance_flags_missing_standard_anchor_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    notes_layer.glyph_instances = []
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-102" for issue in issues)
+
+
+def test_scene_conformance_flags_horizontal_misalignment_in_hybrid_mode() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, string_hint=1, fret_hint=0)],
+    )
+    scene = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    ).render_scene
+
+    notes_layer = scene.document_scene.pages[0].systems[0].staves[0].layer_groups[1]
+    notes_layer.glyph_instances[0] = replace(
+        notes_layer.glyph_instances[0],
+        x=notes_layer.glyph_instances[0].x + 5.0,
+    )
+
+    issues = check_scene_conformance(
+        scene,
+        mode=RepresentationMode.STANDARD_TAB,
+        policy=default_notation_policy(),
+    )
+
+    assert any(issue.code == "CONF-103" for issue in issues)
