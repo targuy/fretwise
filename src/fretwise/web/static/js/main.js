@@ -146,21 +146,8 @@ async function selectFile(filename) {
 
 // ── Tab viewer ──────────────────────────────────────────────────────
 
-function populateTrackSwitcher(trackId) {
-  if (!trackSwitcher) return;
-  trackSwitcher.innerHTML = '';
-  if (currentTracks.length <= 1) {
-    trackSwitcher.style.display = 'none';
-    return;
-  }
-  trackSwitcher.style.display = '';
-  for (const t of currentTracks) {
-    const opt = document.createElement('option');
-    opt.value = t.id;
-    opt.textContent = t.name || `Track ${t.id}`;
-    if (t.id === trackId) opt.selected = true;
-    trackSwitcher.appendChild(opt);
-  }
+function populateTrackSwitcher(_trackId) {
+  // Track switching is now handled by the multi-track bar name clicks — no-op
 }
 
 async function selectTrack(trackId, trackName) {
@@ -555,21 +542,49 @@ function _rebuildMultiTrackBar(primaryTrackId) {
   }
   _multiTrackBar.style.display = '';
   document.body.classList.add('has-multitrack-bar');
-  _multiTrackBar.innerHTML = '<span class="mt-label">🏛 Pistes audio :</span>';
+  _multiTrackBar.innerHTML = '<span class="mt-label">🏛 Pistes :</span>';
   const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
   for (const t of currentTracks) {
     const isPrimary = t.id === primaryTrackId;
     const isMuted   = !isPrimary && muted.has(t.id);
+    const icon = isPrimary ? '▶' : isMuted ? '🔇' : '🔈';
+    const label = sanitize(t.name || `Piste ${t.id}`);
+
     const btn = document.createElement('button');
     btn.className = 'mt-track-btn' +
       (isPrimary ? ' mt-primary' : '') +
       (!isPrimary && !isMuted ? ' mt-active' : '');
-    btn.textContent = (isPrimary ? '▶ ' : isMuted ? '🔇 ' : '🔈 ') +
-      sanitize(t.name || `Piste ${t.id}`);
     btn.dataset.trackId = t.id;
+    btn.title = isPrimary
+      ? `Piste principale : ${label}`
+      : (isMuted ? `Activer ${label}` : `Muter ${label}`) + ` — cliquer le nom pour basculer la vue`;
+
+    // Icon span: click = mute/unmute (secondary only)
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'mt-icon';
+    iconSpan.textContent = icon;
     if (!isPrimary) {
-      btn.addEventListener('click', () => _toggleSecondaryTrack(t.id, t.name || '', btn));
+      iconSpan.title = isMuted ? `Activer ${label}` : `Muter ${label}`;
+      iconSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _toggleSecondaryTrack(t.id, t.name || '', btn);
+      });
     }
+
+    // Name span: click = switch primary track
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'mt-name';
+    nameSpan.textContent = label;
+    if (!isPrimary) {
+      nameSpan.title = `Basculer la vue sur ${label}`;
+      nameSpan.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectTrack(t.id, t.name || '');
+      });
+    }
+
+    btn.appendChild(iconSpan);
+    btn.appendChild(nameSpan);
     _multiTrackBar.appendChild(btn);
   }
 }
@@ -577,17 +592,18 @@ function _rebuildMultiTrackBar(primaryTrackId) {
 async function _toggleSecondaryTrack(trackId, trackName, btn) {
   if (!playback) return;
   const isMuted = !playback._secondaryChannels.some(c => c.trackId === trackId);
+  const iconSpan = btn.querySelector('.mt-icon');
   if (!isMuted) {
     // Currently playing → mute it
     playback.removeSecondaryChannel(trackId);
     if (!_mutedSecondaryTracks.has(currentTrackId)) _mutedSecondaryTracks.set(currentTrackId, new Set());
     _mutedSecondaryTracks.get(currentTrackId).add(trackId);
     btn.className = 'mt-track-btn';
-    btn.textContent = '🔇 ' + sanitize(trackName);
+    if (iconSpan) { iconSpan.textContent = '🔇'; iconSpan.title = `Activer ${sanitize(trackName)}`; }
     return;
   }
   // Currently muted → unmute
-  btn.textContent = '⏳ ' + sanitize(trackName);
+  if (iconSpan) iconSpan.textContent = '⏳';
   btn.disabled = true;
   try {
     const cacheKey = `${currentFile}#${trackId}`;
@@ -596,17 +612,14 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
       notesData = await fetchNotes(currentFile, trackId, selMode?.value || 'reference');
       _notesCache.set(cacheKey, notesData);
     }
-    playback.addSecondaryChannel(
-      trackId, trackName, notesData.results, notesData.beats_per_measure
-    );
-    // Remove from muted set
+    playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure);
     _mutedSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn mt-active';
-    btn.textContent = '🔈 ' + sanitize(trackName);
+    if (iconSpan) { iconSpan.textContent = '🔈'; iconSpan.title = `Muter ${sanitize(trackName)}`; }
   } catch (err) {
     console.error('[FretWise] secondary track load failed:', err);
-    btn.textContent = '❌ ' + sanitize(trackName);
-    setTimeout(() => { btn.textContent = '🔇 ' + sanitize(trackName); }, 2000);
+    if (iconSpan) iconSpan.textContent = '❌';
+    setTimeout(() => { if (iconSpan) { iconSpan.textContent = '🔇'; iconSpan.title = `Activer ${sanitize(trackName)}`; } }, 2000);
   } finally {
     btn.disabled = false;
   }
@@ -616,8 +629,8 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
 async function _restoreSecondaryTracks(primaryTrackId) {
   const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
   for (const t of currentTracks) {
-    if (t.id === primaryTrackId) continue; // skip primary
-    if (muted.has(t.id)) continue;         // skip explicitly muted
+    if (t.id === primaryTrackId) continue;
+    if (muted.has(t.id)) continue;
     const btn = _multiTrackBar?.querySelector(`[data-track-id="${t.id}"]`);
     if (btn) await _toggleSecondaryTrack(t.id, t.name || '', btn);
   }
@@ -765,18 +778,6 @@ document.addEventListener('input', (e) => {
     playback.goToMeasure(m);
   }
 });
-
-// ── Track switcher ──────────────────────────────────────────────────
-
-if (trackSwitcher) {
-  trackSwitcher.addEventListener('change', () => {
-    const id = parseInt(trackSwitcher.value, 10);
-    const t = currentTracks.find(x => x.id === id);
-    if (t && id !== currentTrackId) {
-      selectTrack(t.id, t.name);
-    }
-  });
-}
 
 // ── Mode change re-solve ────────────────────────────────────────────
 
