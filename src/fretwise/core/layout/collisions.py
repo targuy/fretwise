@@ -19,10 +19,21 @@ def enforce_min_event_spacing(
     adjusted: list[EventLayout] = []
     issues: list[CollisionIssue] = []
     prev_x: float | None = None
+    prev_onset: float | None = None
+    onset_anchor_x: dict[float, float] = {}
 
     for event in sorted_events:
         target_x = event.x
-        if prev_x is not None and target_x < prev_x + min_spacing:
+        onset_key = round(event.onset, 6)
+        if onset_key in onset_anchor_x:
+            # Keep true chord columns vertically aligned on the same onset.
+            target_x = onset_anchor_x[onset_key]
+        elif (
+            prev_x is not None
+            and prev_onset is not None
+            and abs(event.onset - prev_onset) > 1e-6
+            and target_x < prev_x + min_spacing
+        ):
             new_x = prev_x + min_spacing
             shift = new_x - target_x
             issues.append(
@@ -36,6 +47,8 @@ def enforce_min_event_spacing(
             )
             target_x = new_x
 
+        onset_anchor_x.setdefault(onset_key, target_x)
+
         adjusted.append(
             EventLayout(
                 event_id=event.event_id,
@@ -47,6 +60,6 @@ def enforce_min_event_spacing(
             )
         )
         prev_x = target_x
+        prev_onset = event.onset
 
     return adjusted, issues
-

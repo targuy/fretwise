@@ -146,6 +146,9 @@ class RawScore:
     notes: list[NoteEvent]
     track_name: str = ""
     beats_per_measure: float = 4.0
+    time_denominator: int = 4
+    key_signature_fifths: int = 0
+    has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
@@ -162,6 +165,9 @@ class NormalizedScore:
     notes: list[NoteEvent]
     track_name: str = ""
     beats_per_measure: float = 4.0
+    time_denominator: int = 4
+    key_signature_fifths: int = 0
+    has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
@@ -178,6 +184,9 @@ class CompletedScore:
     notes: list[NoteEvent]
     track_name: str = ""
     beats_per_measure: float = 4.0
+    time_denominator: int = 4
+    key_signature_fifths: int = 0
+    has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)

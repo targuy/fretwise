@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 from click.testing import CliRunner
 
 from fretwise.cli import _infer_source_format, main
+from fretwise.core.graphics import RepresentationMode
 
 
 def _make_mock_note(string: int, fret: int, note_type_value: int = 1) -> MagicMock:
@@ -219,6 +220,51 @@ class TestSolveCommand:
         assert result.exit_code == 0
         assert out_file.exists()
         assert out_file.read_bytes().startswith(b"%PDF-")
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_solve_pdf_core_engine_passes_representation_mode(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        mock_parse.return_value = _make_mock_song(note_specs=[(1, 0), (1, 2)])
+        gp_file = tmp_path / "song.gp5"
+        gp_file.touch()
+        out_file = tmp_path / "out_core_mode.pdf"
+
+        fake_core_result = MagicMock()
+        fake_core_result.render_scene = object()
+        fake_core_result.conformance_issues = []
+
+        def _fake_render_scene(_scene: object, output_path: Path) -> None:
+            output_path.write_bytes(b"%PDF-1.4\n%mode-test\n")
+
+        runner = CliRunner()
+        with (
+            patch("fretwise.cli._run_core_pipeline_for_events", return_value=fake_core_result)
+            as run_core,
+            patch("fretwise.cli.render_scene_to_pdf_file", side_effect=_fake_render_scene),
+        ):
+            result = runner.invoke(
+                main,
+                [
+                    "solve",
+                    str(gp_file),
+                    "--output",
+                    str(out_file),
+                    "--pdf-engine",
+                    "core",
+                    "--representation-mode",
+                    "tablature_rhythm",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert out_file.exists()
+        assert out_file.read_bytes().startswith(b"%PDF-")
+        assert run_core.call_count == 1
+        assert (
+            run_core.call_args.kwargs["representation_mode"]
+            == RepresentationMode.TAB_RHYTHM
+        )
 
     @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
     def test_solve_pdf_legacy_reports_shadow_core_conformance(

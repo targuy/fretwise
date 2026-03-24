@@ -168,6 +168,7 @@ class Measure:
     voices: list[Voice] = field(default_factory=list)
     barline: Barline = field(default_factory=Barline)
     repeat: RepeatStructure | None = None
+    section_name: str = ""
 
 
 @dataclass

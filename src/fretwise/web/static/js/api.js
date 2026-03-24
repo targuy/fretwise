@@ -23,8 +23,10 @@ export async function uploadFile(file) {
   return res.json();
 }
 
-export async function fetchSolve(filename, trackId, mode) {
-  let url = `/api/solve/${encodeURIComponent(filename)}?mode=${mode}`;
+export async function fetchSolve(filename, trackId, mode, representationMode) {
+  let url =
+    `/api/solve/${encodeURIComponent(filename)}?mode=${encodeURIComponent(mode)}` +
+    `&representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}`;
   if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -34,11 +36,12 @@ export async function fetchSolve(filename, trackId, mode) {
   return res.json();
 }
 
-export async function fetchExportPdf(filename, trackId, mode, engine) {
+export async function fetchExportPdf(filename, trackId, mode, engine, representationMode) {
   let url =
     `/api/export/pdf/${encodeURIComponent(filename)}` +
     `?mode=${encodeURIComponent(mode)}` +
-    `&engine=${encodeURIComponent(engine)}`;
+    `&engine=${encodeURIComponent(engine)}` +
+    `&representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}`;
   if (trackId !== null && trackId !== undefined) {
     url += `&track_id=${trackId}`;
   }

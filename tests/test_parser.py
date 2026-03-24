@@ -227,6 +227,23 @@ class TestParseMockedSong:
         assert events[0].articulation == Articulation.HAMMER_ON
 
     @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_parse_extracts_beat_strum_direction(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        note = _make_mock_note(string=2, fret=3)
+        beat = _make_mock_beat([note])
+        beat.effect.stroke.down = 1
+        beat.effect.stroke.up = 0
+        song = _make_mock_song(beats_per_measure=[[beat]])
+        mock_parse.return_value = song
+
+        gp_file = tmp_path / "test.gp5"
+        gp_file.touch()
+
+        events = self.adapter.parse(gp_file)
+        assert events[0].strum_direction == "down"
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
     def test_no_guitar_track_returns_empty(
         self, mock_parse: MagicMock, tmp_path: Path
     ) -> None:
@@ -242,6 +259,100 @@ class TestParseMockedSong:
 
         events = self.adapter.parse(gp_file)
         assert events == []
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_parse_advances_measure_by_longest_voice(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        """When voice 0 is shorter, next measure onset must still advance to full bar."""
+        song = MagicMock()
+        song.tempo = 120
+        track = MagicMock()
+        track.isPercussionTrack = False
+        track.strings = []
+
+        m1 = MagicMock()
+        m1.header.tempo.value = 120
+        m1.header.timeSignature.numerator = 4
+        m1.header.timeSignature.denominator.value = 4
+        v0_m1 = MagicMock()
+        v1_m1 = MagicMock()
+        v0_m1.beats = [_make_mock_beat([_make_mock_note(string=1, fret=0)])]
+        v1_m1.beats = [
+            _make_mock_beat([_make_mock_note(string=2, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=3, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=4, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=5, fret=0)]),
+        ]
+        m1.voices = [v0_m1, v1_m1]
+
+        m2 = MagicMock()
+        m2.header.tempo.value = 120
+        m2.header.timeSignature.numerator = 4
+        m2.header.timeSignature.denominator.value = 4
+        v0_m2 = MagicMock()
+        v0_m2.beats = [_make_mock_beat([_make_mock_note(string=1, fret=5)])]
+        m2.voices = [v0_m2]
+
+        track.measures = [m1, m2]
+        song.tracks = [track]
+        mock_parse.return_value = song
+
+        gp_file = tmp_path / "test.gp5"
+        gp_file.touch()
+
+        events = self.adapter.parse(gp_file)
+        onsets = sorted({round(event.onset, 6) for event in events})
+        assert 0.0 in onsets
+        assert 4.0 in onsets
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_parse_keeps_chord_marker_measure_alignment_with_short_voice0(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        """Chord markers should not drift when voice 0 has fewer beats than another voice."""
+        song = MagicMock()
+        song.tempo = 120
+        track = MagicMock()
+        track.isPercussionTrack = False
+        track.strings = []
+
+        m1 = MagicMock()
+        m1.header.tempo.value = 120
+        m1.header.timeSignature.numerator = 4
+        m1.header.timeSignature.denominator.value = 4
+        beat_m1 = _make_mock_beat([_make_mock_note(string=1, fret=0)])
+        beat_m1.effect.chord = None
+        v0_m1 = MagicMock()
+        v0_m1.beats = [beat_m1]
+        v1_m1 = MagicMock()
+        v1_m1.beats = [
+            _make_mock_beat([_make_mock_note(string=2, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=3, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=4, fret=0)]),
+            _make_mock_beat([_make_mock_note(string=5, fret=0)]),
+        ]
+        m1.voices = [v0_m1, v1_m1]
+
+        m2 = MagicMock()
+        m2.header.tempo.value = 120
+        m2.header.timeSignature.numerator = 4
+        m2.header.timeSignature.denominator.value = 4
+        beat_m2 = _make_mock_beat([_make_mock_note(string=1, fret=5)])
+        beat_m2.effect.chord.name = "A5"
+        v0_m2 = MagicMock()
+        v0_m2.beats = [beat_m2]
+        m2.voices = [v0_m2]
+
+        track.measures = [m1, m2]
+        song.tracks = [track]
+        mock_parse.return_value = song
+
+        gp_file = tmp_path / "test.gp5"
+        gp_file.touch()
+
+        _events = self.adapter.parse(gp_file)
+        assert self.adapter.chord_markers.get("4.000000") == "A5"
 
 
 # ---------------------------------------------------------------------------

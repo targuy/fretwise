@@ -75,6 +75,7 @@ def check_scene_conformance(
                             context={"glyph_id": glyph.glyph_id},
                         )
     issues.extend(_check_rhythm_recipe_consistency(scene))
+    issues.extend(_check_duration_dot_consistency(scene))
     if (
         mode == RepresentationMode.STANDARD_TAB
         and policy.metadata.get("standard_tab_alignment_required") == "true"
@@ -173,8 +174,9 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                             )
                         )
 
-                tab_positions: dict[str, tuple[float, float, int | None]] = {}
-                standard_positions: dict[str, tuple[float, float]] = {}
+                tab_positions: dict[str, tuple[float, float, int | None, float | None, int | None]] = {}
+                standard_positions: dict[str, tuple[float, float, bool, float]] = {}
+                standard_by_signature: dict[tuple[float, int], tuple[float, float, bool, float]] = {}
 
                 for layer in staff.layer_groups:
                     for text in layer.text_instances:
@@ -187,6 +189,8 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                             text.x,
                             text.y,
                             _safe_int(text.metadata.get("tab_string")),
+                            _safe_float(text.metadata.get("onset")),
+                            _safe_int(text.metadata.get("pitch_notated")),
                         )
 
                     for glyph in layer.glyph_instances:
@@ -195,7 +199,15 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                         event_id = glyph.metadata.get("event_id")
                         if event_id is None:
                             continue
-                        standard_positions[str(event_id)] = (glyph.x, glyph.y)
+                        displaced = str(glyph.metadata.get("head_displaced", "")).lower() == "true"
+                        head_dx = _safe_float(glyph.metadata.get("head_dx")) or 0.0
+                        standard_entry = (glyph.x, glyph.y, displaced, head_dx)
+                        standard_positions[str(event_id)] = standard_entry
+                        onset = _safe_float(glyph.metadata.get("onset"))
+                        pitch = _safe_int(glyph.metadata.get("pitch_notated"))
+                        if onset is not None and pitch is not None:
+                            signature = (round(onset, 6), pitch)
+                            standard_by_signature.setdefault(signature, standard_entry)
 
                 all_event_ids = set(tab_positions) | set(standard_positions)
                 for event_id in sorted(all_event_ids):
@@ -215,7 +227,11 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                             )
                         )
                         continue
-                    if event_id not in standard_positions:
+                    tab_x, tab_y, tab_string, tab_onset, tab_pitch = tab_positions[event_id]
+                    standard_entry = standard_positions.get(event_id)
+                    if standard_entry is None and tab_onset is not None and tab_pitch is not None:
+                        standard_entry = standard_by_signature.get((round(tab_onset, 6), tab_pitch))
+                    if standard_entry is None:
                         issues.append(
                             ConformanceIssue(
                                 code="CONF-102",
@@ -232,10 +248,12 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                         )
                         continue
 
-                    tab_x, tab_y, tab_string = tab_positions[event_id]
-                    standard_x, standard_y = standard_positions[event_id]
+                    standard_x, standard_y, head_displaced, head_dx = standard_entry
                     delta = abs(tab_x - standard_x)
-                    if delta > _HYBRID_ALIGNMENT_X_TOLERANCE:
+                    x_tolerance = _HYBRID_ALIGNMENT_X_TOLERANCE
+                    if head_displaced:
+                        x_tolerance = max(x_tolerance, abs(head_dx) + 1.5)
+                    if delta > x_tolerance:
                         issues.append(
                             ConformanceIssue(
                                 code="CONF-103",
@@ -247,7 +265,9 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                                     "tab_x": tab_x,
                                     "standard_x": standard_x,
                                     "delta_x": delta,
-                                    "tolerance": _HYBRID_ALIGNMENT_X_TOLERANCE,
+                                    "tolerance": x_tolerance,
+                                    "head_displaced": head_displaced,
+                                    "head_dx": head_dx,
                                     "page_index": page_index,
                                     "system_index": system_index,
                                     "staff_index": staff_index,
@@ -255,11 +275,12 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                             )
                         )
                     if staff_frame is not None:
-                        staff_top, staff_bottom, _ = staff_frame
+                        staff_top, staff_bottom, staff_spacing = staff_frame
+                        ledger_margin = max(0.0, 7.0 * staff_spacing)
                         if not (
-                            staff_top - _HYBRID_ALIGNMENT_Y_TOLERANCE
+                            staff_top - ledger_margin - _HYBRID_ALIGNMENT_Y_TOLERANCE
                             <= standard_y
-                            <= staff_bottom + _HYBRID_ALIGNMENT_Y_TOLERANCE
+                            <= staff_bottom + ledger_margin + _HYBRID_ALIGNMENT_Y_TOLERANCE
                         ):
                             issues.append(
                                 ConformanceIssue(
@@ -272,6 +293,7 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                                         "notehead_y": standard_y,
                                         "staff_top": staff_top,
                                         "staff_bottom": staff_bottom,
+                                        "ledger_margin": ledger_margin,
                                         "tolerance": _HYBRID_ALIGNMENT_Y_TOLERANCE,
                                         "page_index": page_index,
                                         "system_index": system_index,
@@ -306,7 +328,7 @@ def _check_hybrid_alignment(scene: RenderScene) -> list[ConformanceIssue]:
                             )
                         if tab_string is not None:
                             string_num = max(1, min(6, tab_string))
-                            expected_y = tab_top + (string_num - 1) * tab_spacing + 4.0
+                            expected_y = tab_top + (string_num - 1) * tab_spacing
                             if abs(tab_y - expected_y) > _HYBRID_ALIGNMENT_Y_TOLERANCE:
                                 issues.append(
                                 ConformanceIssue(
@@ -460,6 +482,48 @@ def _check_rhythm_recipe_consistency(scene: RenderScene) -> list[ConformanceIssu
     return issues
 
 
+def _check_duration_dot_consistency(scene: RenderScene) -> list[ConformanceIssue]:
+    issues: list[ConformanceIssue] = []
+    for page_index, page in enumerate(scene.document_scene.pages):
+        for system_index, system in enumerate(page.systems):
+            for staff_index, staff in enumerate(system.staves):
+                for layer in staff.layer_groups:
+                    for glyph in layer.glyph_instances:
+                        if glyph.glyph_id not in {"notehead", "rest"}:
+                            continue
+                        duration = _safe_float(glyph.metadata.get("duration"))
+                        if duration is None:
+                            continue
+                        expected_dots = _duration_dot_count(duration)
+                        dot_count = _safe_int(glyph.metadata.get("dot_count"))
+                        if dot_count is None:
+                            dot_count = 0
+                        if str(glyph.metadata.get("is_measure_rest", "")).lower() == "true":
+                            expected_dots = 0
+                        if dot_count != expected_dots:
+                            issues.append(
+                                ConformanceIssue(
+                                    code="CONF-301",
+                                    severity=ConformanceSeverity.LOW,
+                                    message=(
+                                        "Glyph dotted-duration metadata is inconsistent with "
+                                        "its duration."
+                                    ),
+                                    symbol_id=glyph.glyph_id,
+                                    context={
+                                        "duration": duration,
+                                        "dot_count": dot_count,
+                                        "expected_dot_count": expected_dots,
+                                        "event_id": glyph.metadata.get("event_id"),
+                                        "page_index": page_index,
+                                        "system_index": system_index,
+                                        "staff_index": staff_index,
+                                    },
+                                )
+                            )
+    return issues
+
+
 def _recipe_frame(staff: Any, recipe_id: str) -> tuple[float, float, float] | None:
     for layer in staff.layer_groups:
         for recipe in layer.recipe_instances:
@@ -485,3 +549,14 @@ def _safe_float(value: Any) -> float | None:
         return float(value)
     except (TypeError, ValueError):
         return None
+
+
+def _duration_dot_count(duration: float) -> int:
+    known_bases = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
+    tol = 0.01
+    for base in known_bases:
+        if abs(duration - base * 1.5) <= tol:
+            return 1
+        if abs(duration - base * 1.75) <= tol:
+            return 2
+    return 0

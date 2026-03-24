@@ -1,5 +1,9 @@
 # Refactorisation Notation Core (Audit + Plan d'execution)
 
+> Mise a jour 2026-03-17:
+> un audit complementaire de conformite normative et de couverture visuelle
+> est disponible dans `docs/core_notation_gap_audit.md`.
+
 ## 1. Audit du depot actuel
 
 - Branche de travail active: `refactor/notation-core-hardening`.

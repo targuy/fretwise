@@ -8,9 +8,7 @@ Notes on format support
 * GP6/GP7/GP8 (.gpx, .gp without version suffix) are **not** supported by
   PyGuitarPro.  Convert via MuseScore (File → Export → Guitar Pro 5) or via
   Guitar Pro itself (File → Export → Guitar Pro 5) before parsing.
-* Only the primary voice (voice 0) of the first non-percussion track is
-  processed in the MVP.  Polyphony and multi-track arrangements are deferred
-  to a later sprint.
+* All voices (0–3) of the selected non-percussion track are processed.
 """
 
 from __future__ import annotations
@@ -173,13 +171,14 @@ def _extract_note_events(
     for measure in track.measures:
         current_tempo = _measure_tempo(measure, current_tempo)
         measure_onset = onset
-        measure_duration = 0.0  # determined from voice 0
+        measure_duration = _measure_nominal_duration_in_beats(measure)
 
         for voice_idx, voice in enumerate(measure.voices):
             beat_onset = measure_onset
 
             for beat in voice.beats:
                 beat_duration = _duration_in_beats(beat.duration)
+                strum_direction = _beat_strum_direction(beat)
 
                 for note in beat.notes:
                     # Skip rests (0) and tied notes (2); process only normal notes (1).
@@ -202,13 +201,15 @@ def _extract_note_events(
                             fret_hint=fret,
                             voice_hint=voice_idx,
                             let_ring=bool(getattr(getattr(note, "effect", None), "letRing", False)),
+                            strum_direction=strum_direction,
                         )
                     )
 
                 beat_onset += beat_duration
 
-            if voice_idx == 0:
-                measure_duration = beat_onset - measure_onset
+            voice_duration = beat_onset - measure_onset
+            if voice_duration > 0.0:
+                measure_duration = max(measure_duration, voice_duration)
 
         onset = measure_onset + measure_duration
 
@@ -271,7 +272,7 @@ def _extract_beat_chord_markers(
     for measure in track.measures:
         current_tempo = _measure_tempo(measure, current_tempo)
         measure_onset = onset
-        measure_duration = 0.0
+        measure_duration = _measure_nominal_duration_in_beats(measure)
         voice = measure.voices[0] if measure.voices else None
         beat_onset = measure_onset
         if voice:
@@ -283,9 +284,55 @@ def _extract_beat_chord_markers(
                     if name.strip():
                         markers[f"{beat_onset:.6f}"] = name.strip()
                 beat_onset += beat_duration
-            measure_duration = beat_onset - measure_onset
-        onset = measure_onset + (measure_duration or 4.0)
+            voice_duration = beat_onset - measure_onset
+            if voice_duration > 0.0:
+                measure_duration = max(measure_duration, voice_duration)
+        onset = measure_onset + measure_duration
     return markers
+
+
+def _measure_nominal_duration_in_beats(
+    measure: guitarpro.Measure,  # type: ignore[name-defined]
+) -> float:
+    """Return nominal measure duration from the time signature (quarter-note beats)."""
+    try:
+        ts = measure.header.timeSignature
+        numerator = int(getattr(ts, "numerator", 4) or 4)
+        denominator_obj = getattr(ts, "denominator", 4)
+        denominator = int(getattr(denominator_obj, "value", denominator_obj) or 4)
+        if numerator > 0 and denominator > 0:
+            return float(numerator) * (4.0 / float(denominator))
+    except Exception:
+        pass
+    return 4.0
+
+
+def _beat_strum_direction(
+    beat: guitarpro.Beat,  # type: ignore[name-defined]
+) -> str | None:
+    """Extract strum direction from beat-level stroke metadata when present."""
+    effect = getattr(beat, "effect", None)
+    stroke = getattr(effect, "stroke", None)
+    if stroke is not None:
+        try:
+            down = int(getattr(stroke, "down", 0) or 0)
+        except (TypeError, ValueError):
+            down = 0
+        try:
+            up = int(getattr(stroke, "up", 0) or 0)
+        except (TypeError, ValueError):
+            up = 0
+        if down > 0:
+            return "down"
+        if up > 0:
+            return "up"
+
+    pick_stroke = str(getattr(effect, "pickStroke", "") or "").lower()
+    if "down" in pick_stroke:
+        return "down"
+    if "up" in pick_stroke:
+        return "up"
+    return None
 
 
 def _extract_section_markers(

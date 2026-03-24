@@ -135,12 +135,14 @@ def _register_routes(app: FastAPI) -> None:
         filename: str,
         track_id: int | None = Query(None),
         mode: str = Query("reference"),
+        representation_mode: str = Query("standard_tablature"),
     ) -> dict[str, Any]:
         """Run the full pipeline and return results as JSON."""
         filepath = _resolve_file(app, filename)
         modes = _solve_modes()
         if mode not in modes:
             raise HTTPException(400, f"Unknown mode: {mode}")
+        view_mode = _parse_representation_mode(representation_mode)
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
 
@@ -148,6 +150,12 @@ def _register_routes(app: FastAPI) -> None:
             raise HTTPException(404, "No notes found in file")
 
         results, stats = _run_legacy_pipeline(events, mode=mode)
+        core_result = _run_core_pipeline_for_events(
+            filepath,
+            adapter,
+            events,
+            representation_mode=view_mode,
+        )
 
         # Extract metadata from adapter
         track_name: str = getattr(adapter, "track_name", "") or ""
@@ -171,11 +179,14 @@ def _register_routes(app: FastAPI) -> None:
             "artist": auto_artist,
             "track_name": track_name,
             "mode": mode,
+            "representation_mode": view_mode.value,
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
             "section_markers": section_markers,
             "chord_diagrams": [_serialize_chord_diagram(cd) for cd in chord_diagrams],
             "chord_markers": chord_markers,
+            "core_svg": core_result.svg,
+            "core_conformance_issues": len(core_result.conformance_issues),
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
         }
@@ -186,6 +197,7 @@ def _register_routes(app: FastAPI) -> None:
         track_id: int | None = Query(None),
         mode: str = Query("reference"),
         engine: str = Query("legacy"),
+        representation_mode: str = Query("standard_tablature"),
     ) -> Response:
         """Render and download a PDF using legacy or notation-core engine."""
         filepath = _resolve_file(app, filename)
@@ -194,17 +206,27 @@ def _register_routes(app: FastAPI) -> None:
             raise HTTPException(400, f"Unknown mode: {mode}")
         if engine not in {"legacy", "core"}:
             raise HTTPException(400, f"Unknown engine: {engine}")
+        view_mode = _parse_representation_mode(representation_mode)
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
         if not events:
             raise HTTPException(404, "No notes found in file")
 
         if engine == "core":
-            pdf_bytes, conformance_issues = _render_core_pdf_payload(filepath, adapter, events)
+            pdf_bytes, conformance_issues = _render_core_pdf_payload(
+                filepath,
+                adapter,
+                events,
+                representation_mode=view_mode,
+            )
             conformance_report = core_pdf_conformance_report(conformance_issues)
         else:
             pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
-                filepath, adapter, events, mode=mode
+                filepath,
+                adapter,
+                events,
+                mode=mode,
+                representation_mode=view_mode,
             )
             conformance_report = legacy_shadow_pdf_conformance_report(
                 conformance_issues,
@@ -289,6 +311,33 @@ def _load_adapter_and_events(
     return adapter, events
 
 
+def _parse_representation_mode(value: str | None) -> RepresentationMode:
+    """Parse a notation view mode from user input."""
+    normalized = re.sub(r"[^a-z0-9]+", "_", (value or "").strip().lower()).strip("_")
+    alias_map = {
+        "": RepresentationMode.STANDARD_TAB,
+        "tab": RepresentationMode.TAB,
+        "tablature": RepresentationMode.TAB,
+        "staff": RepresentationMode.STANDARD,
+        "standard": RepresentationMode.STANDARD,
+        "notation": RepresentationMode.STANDARD,
+        "standard_tab": RepresentationMode.STANDARD_TAB,
+        "standard_tablature": RepresentationMode.STANDARD_TAB,
+        "hybrid": RepresentationMode.STANDARD_TAB,
+        "mixed": RepresentationMode.STANDARD_TAB,
+        "tab_rhythm": RepresentationMode.TAB_RHYTHM,
+        "tablature_rhythm": RepresentationMode.TAB_RHYTHM,
+        "tab_and_rhythm": RepresentationMode.TAB_RHYTHM,
+        "tablature_and_rhythm": RepresentationMode.TAB_RHYTHM,
+    }
+    if normalized in alias_map:
+        return alias_map[normalized]
+    try:
+        return RepresentationMode(normalized)
+    except ValueError as exc:
+        raise HTTPException(400, f"Unknown representation_mode: {value}") from exc
+
+
 def _run_legacy_pipeline(
     events: list[NoteEvent], *, mode: str
 ) -> tuple[list[FingeringResult], dict[str, int]]:
@@ -318,13 +367,17 @@ def _infer_source_format(path: Path) -> str:
 
 
 def _render_core_pdf_payload(
-    filepath: Path, adapter: Any, events: list[NoteEvent]
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+    *,
+    representation_mode: RepresentationMode,
 ) -> tuple[bytes, int]:
     core_result = _run_core_pipeline_for_events(
         filepath,
         adapter,
         events,
-        representation_mode=RepresentationMode.TAB,
+        representation_mode=representation_mode,
     )
     return render_scene_to_pdf_bytes(core_result.render_scene), len(core_result.conformance_issues)
 
@@ -335,6 +388,7 @@ def _render_legacy_pdf_payload(
     events: list[NoteEvent],
     *,
     mode: str,
+    representation_mode: RepresentationMode,
 ) -> tuple[bytes, int, bool]:
     results, _stats = _run_legacy_pipeline(events, mode=mode)
     track_name: str = getattr(adapter, "track_name", "") or ""
@@ -358,7 +412,10 @@ def _render_legacy_pdf_payload(
             chord_diagrams=chord_diagrams or None,
         )
         conformance_issues, shadow_failed = _shadow_core_conformance_outcome(
-            filepath, adapter, events
+            filepath,
+            adapter,
+            events,
+            representation_mode=representation_mode,
         )
         return temp_path.read_bytes(), conformance_issues, shadow_failed
     finally:
@@ -375,7 +432,11 @@ def _safe_pdf_filename(label: str) -> str:
 
 
 def _shadow_core_conformance_outcome(
-    filepath: Path, adapter: Any, events: list[NoteEvent]
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+    *,
+    representation_mode: RepresentationMode,
 ) -> tuple[int, bool]:
     """Run core pipeline in shadow mode for legacy export diagnostics."""
     try:
@@ -383,7 +444,7 @@ def _shadow_core_conformance_outcome(
             filepath,
             adapter,
             events,
-            representation_mode=RepresentationMode.TAB,
+            representation_mode=representation_mode,
         )
     except Exception:
         # Legacy PDF export must remain non-blocking while core integration hardens.
@@ -409,6 +470,8 @@ def _run_core_pipeline_for_events(
         events=events,
         track_name=track_name,
         beats_per_measure=source_beats_per_measure,
+        time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
+        has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=section_markers,
         chord_markers=chord_markers,
         chord_diagrams=chord_diagrams,

@@ -12,17 +12,33 @@ class LayoutRules:
     page_width: float = 1200.0
     page_height: float = 380.0
     margin_x: float = 60.0
-    margin_y: float = 40.0
+    margin_y: float = 72.0
     content_width: float = 1080.0
-    system_height: float = 240.0
-    staff_height: float = 240.0
+    system_height: float = 168.0
+    system_gap: float = 14.0
+    staff_height: float = 168.0
     measure_min_width: float = 120.0
-    measure_max_width: float = 240.0
+    measure_max_width: float = 480.0
     measure_lr_pad: float = 20.0
-    row_top: float = 100.0
-    row_spacing: float = 18.0
-    width_per_onset: float = 40.0
+    row_top: float = 88.0
+    row_spacing: float = 10.0
+    # Proportional spacing: each beat occupies space_per_beat pt horizontally.
+    # When a gap between consecutive onsets would fall below min_note_width, the
+    # measure widens so every onset has at least min_note_width pt allocated.
+    space_per_beat: float = 32.0
+    min_note_width: float = 14.0
     min_event_spacing: float = 14.0
+    system_leading_inset: float = 52.0
+    standard_staff_spacing: float = 8.0
+    tab_staff_spacing: float = 10.0
+    standard_tab_gap: float = 40.0
+    notehead_rx: float = 3.9
+    notehead_ry: float = 2.8
+    notehead_rotation_deg: float = -20.0
+    notehead_stroke_width: float = 0.8
+    stem_notehead_dx: float = 3.3
+    rest_block_width: float = 8.0
+    rest_block_height: float = 3.0
 
 
 def default_layout_rules() -> LayoutRules:
@@ -30,14 +46,38 @@ def default_layout_rules() -> LayoutRules:
     return LayoutRules()
 
 
-def raw_measure_width(unique_onset_count: int, rules: LayoutRules) -> float:
-    """Compute a raw measure width from rhythmic density."""
+def raw_measure_width(
+    onset_beat_positions: list[float],
+    beats_per_measure: int,
+    rules: LayoutRules,
+) -> float:
+    """Compute measure width from gap-based proportional onset spacing.
+
+    For each onset the allocated horizontal space is::
+
+        max(min_note_width, space_per_beat * gap_to_next_onset_in_beats)
+
+    where the last onset's gap extends to the measure end.
+
+    Fundamental invariant: any combination of note values that fills the
+    measure completely produces the same width.  A whole note, four quarter
+    notes, a half note plus two quarters all give identical widths.  A
+    measure widens only when rhythmic density would push individual gaps
+    below ``min_note_width`` (typically 16th notes and shorter).
+    """
+    if not onset_beat_positions:
+        return rules.measure_min_width
+    positions = sorted(set(onset_beat_positions))
+    beats = max(1, beats_per_measure)
+    total_usable = 0.0
+    for i, pos in enumerate(positions):
+        next_pos = positions[i + 1] if i < len(positions) - 1 else float(beats)
+        gap_beats = max(0.0, next_pos - pos)
+        ideal = rules.space_per_beat * gap_beats
+        total_usable += max(rules.min_note_width, ideal)
     return min(
         rules.measure_max_width,
-        max(
-            rules.measure_min_width,
-            rules.measure_lr_pad * 2 + max(1, unique_onset_count) * rules.width_per_onset,
-        ),
+        max(rules.measure_min_width, total_usable + 2.0 * rules.measure_lr_pad),
     )
 
 
@@ -59,4 +99,3 @@ def string_row_y(*, string_num: int, rules: LayoutRules) -> float:
     """Return y anchor for one tablature string row."""
     s = max(1, min(6, string_num))
     return rules.row_top + (s - 1) * rules.row_spacing + 4.0
-

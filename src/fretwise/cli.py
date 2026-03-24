@@ -259,6 +259,16 @@ def parse(file: Path, verbose: bool, limit: int, quiet: bool) -> None:
     show_default=True,
     help="PDF only: legacy renderer or notation-core RenderScene backend.",
 )
+@click.option(
+    "--representation-mode",
+    type=click.Choice([mode.value for mode in RepresentationMode]),
+    default=RepresentationMode.STANDARD_TAB.value,
+    show_default=True,
+    help=(
+        "Core notation view mode for PDF/shadow checks: "
+        "standard, standard_tablature, tablature_rhythm, tablature."
+    ),
+)
 @click.option("--verbose", "-v", is_flag=True, help="Print per-note cost summary to stderr.")
 @click.option(
     "--quiet",
@@ -276,6 +286,7 @@ def solve(
     measures_per_system: int | None,
     beats_per_measure: float,
     pdf_engine: str,
+    representation_mode: str,
     verbose: bool,
     quiet: bool,
 ) -> None:
@@ -360,6 +371,7 @@ def solve(
 
     pdf_title = title if title is not None else auto_title
     pdf_artist = artist if artist is not None else auto_artist
+    resolved_representation_mode = RepresentationMode(representation_mode)
 
     # --- write output --------------------------------------------------------
     if output is None:
@@ -399,7 +411,7 @@ def solve(
                 file,
                 adapter,
                 events,
-                representation_mode=RepresentationMode.TAB,
+                representation_mode=resolved_representation_mode,
             )
             render_scene_to_pdf_file(core_result.render_scene, output)
             report = core_pdf_conformance_report(len(core_result.conformance_issues))
@@ -422,7 +434,12 @@ def solve(
                 measures_per_system=measures_per_system,
                 chord_diagrams=chord_diagrams or None,
             )
-            shadow_issues, shadow_failed = _shadow_core_conformance_outcome(file, adapter, events)
+            shadow_issues, shadow_failed = _shadow_core_conformance_outcome(
+                file,
+                adapter,
+                events,
+                representation_mode=resolved_representation_mode,
+            )
             report = legacy_shadow_pdf_conformance_report(
                 shadow_issues,
                 shadow_failed=shadow_failed,
@@ -645,7 +662,11 @@ def _infer_source_format(path: Path) -> str:
 
 
 def _shadow_core_conformance_outcome(
-    path: Path, adapter: Any, events: list[Any]
+    path: Path,
+    adapter: Any,
+    events: list[Any],
+    *,
+    representation_mode: RepresentationMode,
 ) -> tuple[int, bool]:
     """Run core pipeline in shadow mode for legacy PDF diagnostics."""
     try:
@@ -653,7 +674,7 @@ def _shadow_core_conformance_outcome(
             path,
             adapter,
             events,
-            representation_mode=RepresentationMode.TAB,
+            representation_mode=representation_mode,
         )
     except Exception:
         return 0, True
@@ -676,6 +697,8 @@ def _run_core_pipeline_for_events(
         events=events,
         track_name=getattr(adapter, "track_name", "") or "",
         beats_per_measure=source_beats_per_measure,
+        time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
+        has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=dict(getattr(adapter, "section_markers", {}) or {}),
         chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
         chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),

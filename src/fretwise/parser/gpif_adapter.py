@@ -15,7 +15,7 @@ Format notes
   instrument transpose (guitar sounds an octave lower than written).
 * Tied notes (``<Tie destination="true">``) are skipped — they extend the
   previous note's duration acoustically but are not new attacks.
-* Only voice 0 (primary voice) of each measure is processed in Sprint 1.
+* All voices present in the selected track are processed.
 """
 
 from __future__ import annotations
@@ -105,9 +105,18 @@ class GpifAdapter(BaseParser):
     #: Beat-level chord name annotations: {onset_str → chord_name}.
     #: Set after each call to parse() or parse_track().
     chord_markers: dict[str, str] = {}
-    #: Time signature numerator of the first MasterBar (e.g. 4 for 4/4).
+    #: Measure duration in quarter-note beats (e.g. 3.0 for 6/8, 4.0 for 4/4).
     #: Set after each call to parse() or parse_track().
     beats_per_measure: float = 4.0
+    #: Time signature denominator of the first MasterBar (e.g. 8 for 6/8, 4 for 4/4).
+    #: Set after each call to parse() or parse_track().
+    time_denominator: int = 4
+    #: Key signature expressed as fifths: positive = sharps, negative = flats.
+    #: Set after each call to parse() or parse_track().
+    key_signature_fifths: int = 0
+    #: True if the first MasterBar is a pickup bar (anacrusis/upbeat).
+    #: Set after each call to parse() or parse_track().
+    has_anacrusis: bool = False
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp files (Guitar Pro 7/8)."""
@@ -139,17 +148,20 @@ class GpifAdapter(BaseParser):
         except Exception as exc:
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
 
-        track_idx, open_pitches = _find_guitar_track(root)
-        if track_idx is None:
+        track_id, open_pitches = _find_guitar_track(root)
+        if track_id is None:
             logger.warning("No guitar track found in '%s'. Returning empty sequence.", path)
             self.track_name = ""
             return []
+        track_index = _track_bar_index(root, track_id)
+        if track_index is None:
+            raise ParseError(f"Selected track id={track_id} not found in '{path}'.")
 
         # Capture track name and chord diagrams for callers
         self.track_name = ""
         self.chord_diagrams = []
         for _trk in root.findall("Tracks/Track"):
-            if _trk.get("id") == str(track_idx):
+            if _trk.get("id") == str(track_id):
                 self.track_name = _trk.findtext("Name", "").strip()
                 self.chord_diagrams = self._parse_diagram_collection(_trk)
                 break
@@ -159,12 +171,15 @@ class GpifAdapter(BaseParser):
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
         self.beats_per_measure = _get_beats_per_measure(root)
+        self.time_denominator = _get_time_denominator(root)
+        self.key_signature_fifths = _get_key_signature_fifths(root)
+        self.has_anacrusis = root.find("MasterTrack/Anacrusis") is not None
         diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
         self.chord_markers = _extract_gpif_beat_chord_markers(
-            root, track_idx, rhythm_map, diag_name_map
+            root, track_index, rhythm_map, diag_name_map
         )
 
-        return _extract_events(root, track_idx, open_pitches, tempo_map, rhythm_map, note_map)
+        return _extract_events(root, track_index, open_pitches, tempo_map, rhythm_map, note_map)
 
     def list_guitar_tracks(self, path: Path) -> list[tuple[int, str, list[int]]]:
         """Return all guitar tracks in the file as (track_id, name, open_pitches).
@@ -220,12 +235,18 @@ class GpifAdapter(BaseParser):
 
         if not open_pitches:
             raise ParseError(f"Track {track_id} has no tuning data in '{path}'.")
+        track_index = _track_bar_index(root, track_id)
+        if track_index is None:
+            raise ParseError(f"Track {track_id} not found in '{path}'.")
 
         tempo_map = _build_tempo_map(root)
         rhythm_map = _build_rhythm_map(root)
         note_map = _build_note_map(root)
         self.section_markers = _build_section_markers(root)
         self.beats_per_measure = _get_beats_per_measure(root)
+        self.time_denominator = _get_time_denominator(root)
+        self.key_signature_fifths = _get_key_signature_fifths(root)
+        self.has_anacrusis = root.find("MasterTrack/Anacrusis") is not None
 
         # Extract chord diagrams for this track.
         for track in root.findall("Tracks/Track"):
@@ -235,10 +256,10 @@ class GpifAdapter(BaseParser):
 
         diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
         self.chord_markers = _extract_gpif_beat_chord_markers(
-            root, track_id, rhythm_map, diag_name_map
+            root, track_index, rhythm_map, diag_name_map
         )
 
-        return _extract_events(root, track_id, open_pitches, tempo_map, rhythm_map, note_map)
+        return _extract_events(root, track_index, open_pitches, tempo_map, rhythm_map, note_map)
 
     def _parse_diagram_collection(self, track_el: ET.Element) -> list[ChordDiagram]:
         """Parse the DiagramCollection from a Track element.
@@ -354,16 +375,57 @@ def _load_gpif(path: Path) -> ET.Element:
 
 
 def _get_beats_per_measure(root: ET.Element) -> float:
-    """Return the time-signature numerator of the first MasterBar (e.g. 4 for 4/4)."""
+    """Return measure duration in quarter-note beats (e.g. 3.0 for 6/8, 4.0 for 4/4).
+
+    The internal timing model uses quarter-note beats throughout.  For compound
+    meters (6/8, 9/8, 12/8 …) the numerator alone is NOT a correct measure
+    duration: 6/8 = 6 eighth notes = 3.0 quarter beats.  Formula:
+        quarter_beats = numerator * (4 / denominator)
+    """
     first_bar = root.find("MasterBars/MasterBar")
     if first_bar is None:
         return 4.0
     time_str = first_bar.findtext("Time", "4/4")
     try:
-        numerator, _ = time_str.split("/")
-        return float(numerator)
+        numerator_str, denominator_str = time_str.split("/")
+        numerator = int(numerator_str)
+        denominator = int(denominator_str)
+        if denominator <= 0:
+            return 4.0
+        return numerator * 4.0 / denominator
     except (ValueError, AttributeError):
         return 4.0
+
+
+def _get_time_denominator(root: ET.Element) -> int:
+    """Return the denominator of the first MasterBar's time signature (e.g. 8 for 6/8)."""
+    first_bar = root.find("MasterBars/MasterBar")
+    if first_bar is None:
+        return 4
+    time_str = first_bar.findtext("Time", "4/4")
+    try:
+        _, denominator_str = time_str.split("/")
+        denominator = int(denominator_str)
+        return max(1, denominator)
+    except (ValueError, AttributeError):
+        return 4
+
+
+def _get_key_signature_fifths(root: ET.Element) -> int:
+    """Return the key signature as fifths from the first MasterBar.
+
+    Reads ``<MasterBar><Key><AccidentalCount>`` where a positive value means
+    sharps and a negative value means flats, matching the SMuFL/music21 fifths
+    convention (e.g. +2 = D major, -3 = Eb major).
+    """
+    first_bar = root.find("MasterBars/MasterBar")
+    if first_bar is None:
+        return 0
+    acc_text = first_bar.findtext("Key/AccidentalCount", "0").strip()
+    try:
+        return int(acc_text)
+    except (ValueError, AttributeError):
+        return 0
 
 
 def _build_section_markers(root: ET.Element) -> dict[int, str]:
@@ -438,6 +500,7 @@ class _NoteData:
         "bend_value", "bend_type", "slide_type", "harmonic_type", "harmonic_fret",
         "muted", "palm_muted", "tapping", "accent", "accent_strong", "tremolo_picking",
         "vibrato_wide",
+        "pitch_step", "pitch_accidental", "pitch_octave",
         "ghost", "staccato", "strum_direction", "slap", "pop", "rasgueado", "golpe",
     )
 
@@ -461,6 +524,9 @@ class _NoteData:
         accent_strong: bool = False,
         tremolo_picking: bool = False,
         vibrato_wide: bool = False,
+        pitch_step: str | None = None,
+        pitch_accidental: str | None = None,
+        pitch_octave: int | None = None,
         ghost: bool = False,
         staccato: bool = False,
         strum_direction: str | None = None,
@@ -487,6 +553,9 @@ class _NoteData:
         self.accent_strong = accent_strong
         self.tremolo_picking = tremolo_picking
         self.vibrato_wide = vibrato_wide
+        self.pitch_step = pitch_step
+        self.pitch_accidental = pitch_accidental
+        self.pitch_octave = pitch_octave
         self.ghost = ghost
         self.staccato = staccato
         self.strum_direction = strum_direction
@@ -530,6 +599,7 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
         midi_pitch = int(midi_el.findtext("Number") or "0") if midi_el is not None else 0
 
         note_props = _parse_note_properties(props)
+        pitch_step, pitch_accidental, pitch_octave = _parse_notated_pitch(props)
 
         result[nid] = _NoteData(
             gpif_string, fret, midi_pitch, is_tie_dest,
@@ -547,6 +617,9 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
             accent_strong=note_props["accent_strong"],
             tremolo_picking=note_props["tremolo_picking"],
             vibrato_wide=note_props["vibrato_wide"],
+            pitch_step=pitch_step,
+            pitch_accidental=pitch_accidental,
+            pitch_octave=pitch_octave,
             ghost=note_props["ghost"],
             staccato=note_props["staccato"],
             slap=note_props["slap"],
@@ -707,6 +780,45 @@ def _parse_slide_flags(flags: int) -> tuple[str | None, Articulation]:
     if flags & 32:
         return SlideType.SLIDE_IN_BELOW, Articulation.SLIDE
     return None, Articulation.SLIDE
+
+
+def _parse_notated_pitch(
+    props: dict[str, ET.Element],
+) -> tuple[str | None, str | None, int | None]:
+    """Return explicit GPIF pitch spelling as (step, accidental, octave).
+
+    Preference order:
+    1. ``TransposedPitch`` (written score pitch)
+    2. ``ConcertPitch`` (fallback when transposed spelling is absent)
+    """
+    pitch_prop = props.get("TransposedPitch") or props.get("ConcertPitch")
+    if pitch_prop is None:
+        return None, None, None
+
+    pitch_el = pitch_prop.find("Pitch")
+    if pitch_el is None:
+        return None, None, None
+
+    step_raw = (pitch_el.findtext("Step") or "").strip().upper()
+    step = step_raw if step_raw in {"A", "B", "C", "D", "E", "F", "G"} else None
+
+    accidental_raw = (pitch_el.findtext("Accidental") or "").strip()
+    if accidental_raw in {"#", "♯"}:
+        accidental = "sharp"
+    elif accidental_raw in {"b", "♭"}:
+        accidental = "flat"
+    elif accidental_raw:
+        accidental = "natural"
+    else:
+        accidental = None
+
+    octave_text = (pitch_el.findtext("Octave") or "").strip()
+    try:
+        octave = int(octave_text)
+    except ValueError:
+        octave = None
+
+    return step, accidental, octave
 
 
 def _parse_bend(bend_prop: ET.Element) -> tuple[float | None, str | None]:
@@ -912,6 +1024,14 @@ def _find_guitar_track(root: ET.Element) -> tuple[int | None, list[int]]:
     return tid, pitches
 
 
+def _track_bar_index(root: ET.Element, track_id: int) -> int | None:
+    """Return the 0-based track position used by MasterBar/Bars references."""
+    for idx, track in enumerate(root.findall("Tracks/Track")):
+        if track.get("id") == str(track_id):
+            return idx
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Event extraction
 # ---------------------------------------------------------------------------
@@ -964,7 +1084,9 @@ def _extract_gpif_beat_chord_markers(
             beat_duration = rhythm_map.get(rid, 1.0)
             chord_el = beat_el.find("Chord")
             if chord_el is not None:
-                ref = chord_el.get("ref", "")
+                # GP7/8 stores the chord diagram ID as text content, not as
+                # a "ref" attribute (older GP formats may use ref="N").
+                ref = (chord_el.get("ref") or (chord_el.text or "")).strip()
                 name = diag_name_map.get(ref, "")
                 if name:
                     markers[f"{beat_onset:.6f}"] = name
@@ -999,6 +1121,7 @@ def _extract_events(
     events: list[NoteEvent] = []
 
     for bar_num, masterbar in enumerate(root.findall("MasterBars/MasterBar")):
+        measure_duration = _measure_beats(masterbar)
         # Advance tempo if a new automation starts at this bar.
         while tempo_idx + 1 < len(tempo_map) and tempo_map[tempo_idx + 1][0] <= bar_num:
             tempo_idx += 1
@@ -1007,16 +1130,17 @@ def _extract_events(
         bar_ids_text = masterbar.findtext("Bars") or ""
         bar_ids = bar_ids_text.split()
         if track_idx >= len(bar_ids):
+            onset += measure_duration
             continue
 
         bar_id = bar_ids[track_idx]
         bar_el = bars_index.get(bar_id)
         if bar_el is None:
+            onset += measure_duration
             continue
 
         voices_text = bar_el.findtext("Voices") or ""
         voice_ids = voices_text.split()
-        measure_duration = _measure_beats(masterbar)
 
         if not voice_ids or all(v == "-1" for v in voice_ids):
             # Empty or rest-only measure: advance by time signature length.
@@ -1080,7 +1204,16 @@ def _extract_events(
                 notes_text = beat_el.findtext("Notes") or ""
                 for note_id in notes_text.split():
                     nd = note_map.get(note_id)
-                    if nd is None or nd.is_tie_dest:
+                    if nd is None:
+                        continue
+                    # Tie-destination notes are emitted as regular events so that
+                    # measures containing only tied-note continuations are not treated
+                    # as empty (which would otherwise trigger spurious whole-measure
+                    # rests).  The renderer detects same-pitch consecutive notes and
+                    # draws tie arcs automatically.  Notes whose data was not fully
+                    # parsed (e.g. drum slots) keep pitch=0 and are already marked;
+                    # skip those zero-pitch placeholders only.
+                    if nd.is_tie_dest and nd.midi_pitch == 0 and nd.fret == 0 and nd.gpif_string == 0:
                         continue
 
                     # Convert GPIF string index (0=low) to our convention (1=high).
@@ -1093,6 +1226,7 @@ def _extract_events(
                             duration=beat_duration,
                             tempo=current_tempo,
                             articulation=nd.articulation,
+                            is_tie_dest=nd.is_tie_dest,
                             dynamic=_beat_dynamic(beat_el),
                             string_hint=string_num,
                             fret_hint=nd.fret,
@@ -1118,6 +1252,10 @@ def _extract_events(
                             pop=nd.pop,
                             rasgueado=nd.rasgueado or beat_rasgueado,
                             golpe=nd.golpe or beat_golpe,
+                            note_step=nd.pitch_step,
+                            note_accidental=nd.pitch_accidental,
+                            note_octave=nd.pitch_octave,
+                            measure_index=bar_num + 1,
                         )
                     )
 

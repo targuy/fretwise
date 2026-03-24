@@ -10,10 +10,53 @@ from fretwise.core.layout.rules import (
 )
 
 
-def test_raw_measure_width_is_clamped() -> None:
+def test_raw_measure_width_empty_returns_minimum() -> None:
     rules = default_layout_rules()
-    assert raw_measure_width(0, rules) == rules.measure_min_width
-    assert raw_measure_width(999, rules) == rules.measure_max_width
+    assert raw_measure_width([], 4, rules) == rules.measure_min_width
+
+
+def test_raw_measure_width_dense_rhythm_respects_max() -> None:
+    rules = default_layout_rules()
+    # 64 very short onsets (extreme case) should not exceed the configured cap.
+    positions = [i / 16.0 for i in range(64)]
+    assert raw_measure_width(positions, 4, rules) <= rules.measure_max_width
+
+
+def test_raw_measure_width_invariant_whole_equals_four_quarters() -> None:
+    """Fundamental invariant: equivalent rhythmic content → identical width."""
+    rules = default_layout_rules()
+    whole = raw_measure_width([0.0], 4, rules)
+    quarters = raw_measure_width([0.0, 1.0, 2.0, 3.0], 4, rules)
+    assert whole == quarters
+
+
+def test_raw_measure_width_invariant_half_plus_two_quarters_equals_four_quarters() -> None:
+    rules = default_layout_rules()
+    mix = raw_measure_width([0.0, 2.0, 3.0], 4, rules)
+    quarters = raw_measure_width([0.0, 1.0, 2.0, 3.0], 4, rules)
+    assert mix == quarters
+
+
+def test_raw_measure_width_invariant_two_halves_equals_four_quarters() -> None:
+    rules = default_layout_rules()
+    halves = raw_measure_width([0.0, 2.0], 4, rules)
+    quarters = raw_measure_width([0.0, 1.0, 2.0, 3.0], 4, rules)
+    assert halves == quarters
+
+
+def test_raw_measure_width_sixteenth_run_wider_than_quarters() -> None:
+    rules = default_layout_rules()
+    sixteenths = raw_measure_width([i * 0.25 for i in range(16)], 4, rules)
+    quarters = raw_measure_width([0.0, 1.0, 2.0, 3.0], 4, rules)
+    assert sixteenths > quarters
+
+
+def test_raw_measure_width_eighth_notes_same_as_quarters() -> None:
+    """8th notes (gap=0.5 beat, ideal=16 > min_note_width=14) still fill evenly."""
+    rules = default_layout_rules()
+    eighths = raw_measure_width([i * 0.5 for i in range(8)], 4, rules)
+    quarters = raw_measure_width([0.0, 1.0, 2.0, 3.0], 4, rules)
+    assert eighths == quarters
 
 
 def test_event_anchor_x_stays_within_measure_padding() -> None:

@@ -120,6 +120,16 @@ def default_notation_policy() -> NotationPolicy:
             allowed_modes=standard_modes,
             anchor=SymbolAnchor.STANDARD,
         ),
+        "barline": SymbolRule(
+            symbol_id="barline",
+            allowed_modes=all_modes,
+            anchor=SymbolAnchor.SYSTEM,
+        ),
+        "ledger_line": SymbolRule(
+            symbol_id="ledger_line",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
         "accidental_sharp": SymbolRule(
             symbol_id="accidental_sharp",
             allowed_modes=standard_modes,
@@ -129,6 +139,31 @@ def default_notation_policy() -> NotationPolicy:
             symbol_id="accidental_flat",
             allowed_modes=standard_modes,
             anchor=SymbolAnchor.STANDARD,
+        ),
+        "accidental_natural": SymbolRule(
+            symbol_id="accidental_natural",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "accent": SymbolRule(
+            symbol_id="accent",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "ornament_turn": SymbolRule(
+            symbol_id="ornament_turn",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+        ),
+        "repeat_barline_left": SymbolRule(
+            symbol_id="repeat_barline_left",
+            allowed_modes=all_modes,
+            anchor=SymbolAnchor.SYSTEM,
+        ),
+        "repeat_barline_right": SymbolRule(
+            symbol_id="repeat_barline_right",
+            allowed_modes=all_modes,
+            anchor=SymbolAnchor.SYSTEM,
         ),
         "stem_line": SymbolRule(
             symbol_id="stem_line",

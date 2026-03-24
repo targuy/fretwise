@@ -4,7 +4,30 @@ from __future__ import annotations
 
 from html import escape
 
+from fretwise.core.graphics.reference_glyph_set import default_reference_glyph_set
 from fretwise.core.scene import RenderScene
+
+
+_REFERENCE_GLYPHS = default_reference_glyph_set()
+_REST_KIND_TO_REFERENCE_GLYPH = {
+    "quarter": "rest_quarter",
+    "eighth": "rest_eighth",
+    "thirty_second": "rest_thirty_second",
+}
+
+_REPEAT_BARLINE_VIEWBOX_W = 1.864
+_REPEAT_BARLINE_VIEWBOX_H = 6.6639997
+_REPEAT_BARLINE_HOOK_UP_PATH = (
+    "m 450,333 c 9,0 16,-8 16,-16 0,-3 -1,-6 -3,-9 C 364,164 248,-56 75,-56 "
+    "l -75,0 0,87 c 0,14 11,25 25,25 l 50,0 c 159,0 271,136 362,270 3,4 8,7 13,7 z"
+)
+_REPEAT_BARLINE_HOOK_DOWN_PATH = (
+    "m 466,-317 c 0,-8 -7,-16 -16,-16 -5,0 -10,3 -13,7 -91,134 -203,270 -362,270 "
+    "l -50,0 C 11,-56 0,-45 0,-31 l 0,87 75,0 c 173,0 289,-220 388,-364 2,-3 3,-6 3,-9 z"
+)
+_REPEAT_BARLINE_DOT_PATH = (
+    "M 0,0 C 0,31 25,56 56,56 87,56 112,31 112,0 112,-31 87,-56 56,-56 25,-56 0,-31 0,0 Z"
+)
 
 
 def render_scene_to_svg(scene: RenderScene) -> str:
@@ -32,6 +55,10 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                         out.extend(_render_lines(recipe.params, stroke="#666"))
                     elif recipe.recipe_id == "staff_lines":
                         out.extend(_render_lines(recipe.params, stroke="#222"))
+                    elif recipe.recipe_id == "barline":
+                        out.append(_render_barline(recipe.params))
+                    elif recipe.recipe_id == "ledger_line":
+                        out.append(_render_ledger_line(recipe.params))
                     elif recipe.recipe_id == "stem_line":
                         out.append(_render_stem_line(recipe.params))
                     elif recipe.recipe_id == "flag_stack":
@@ -61,13 +88,19 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                                 dy=-1.0,
                             )
                         )
+                    elif recipe.recipe_id == "tab_slide_line":
+                        x0 = float(recipe.params.get("x0", 0.0))
+                        y0 = float(recipe.params.get("y0", 0.0))
+                        x1 = float(recipe.params.get("x1", x0))
+                        y1 = float(recipe.params.get("y1", y0))
+                        if x1 > x0:
+                            out.append(
+                                f'<line x1="{x0:.2f}" y1="{y0:.2f}" '
+                                f'x2="{x1:.2f}" y2="{y1:.2f}" '
+                                f'stroke="#111" stroke-width="0.9"/>'
+                            )
                 for text in layer.text_instances:
-                    out.append(
-                        f'<text x="{text.x:.2f}" y="{text.y:.2f}" '
-                        f'font-family="{escape(text.font_family)}" '
-                        f'font-size="{text.font_size:.2f}">'
-                        f"{escape(text.text)}</text>"
-                    )
+                    out.extend(_render_text_instance(text=text))
                 for glyph in layer.glyph_instances:
                     out.append(
                         _render_glyph(
@@ -110,6 +143,28 @@ def _render_stem_line(params: dict[str, object]) -> str:
     )
 
 
+def _render_barline(params: dict[str, object]) -> str:
+    x = float(params.get("x", 0.0))
+    y0 = float(params.get("y0", 0.0))
+    y1 = float(params.get("y1", y0))
+    width = float(params.get("width", 0.8))
+    return (
+        f'<line x1="{x:.2f}" y1="{y0:.2f}" x2="{x:.2f}" y2="{y1:.2f}" '
+        f'stroke="black" stroke-width="{max(0.6, width):.2f}"/>'
+    )
+
+
+def _render_ledger_line(params: dict[str, object]) -> str:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    width = float(params.get("width", 1.0))
+    return (
+        f'<line x1="{x0:.2f}" y1="{y:.2f}" x2="{x1:.2f}" y2="{y:.2f}" '
+        f'stroke="black" stroke-width="{max(0.8, width):.2f}"/>'
+    )
+
+
 def _render_flag_stack(params: dict[str, object]) -> list[str]:
     x = float(params.get("x", 0.0))
     y = float(params.get("y", 0.0))
@@ -119,22 +174,32 @@ def _render_flag_stack(params: dict[str, object]) -> list[str]:
     if count <= 0:
         return []
     paths: list[str] = []
+    x_ctrl1 = 3.8
+    x_ctrl2 = 4.8
+    x_end = 1.4
+    y_ctrl1 = 1.8
+    y_ctrl2 = 5.2
+    y_end = 8.8
     for index in range(count):
         if direction == "down":
-            yi = y + index * spacing
-            path_d = (
-                f"M{x:.2f},{yi:.2f} "
-                f"Q{x - 5.2:.2f},{yi - 2.0:.2f} {x - 3.4:.2f},{yi - 8.0:.2f}"
-            )
-        else:
             yi = y - index * spacing
             path_d = (
                 f"M{x:.2f},{yi:.2f} "
-                f"Q{x + 5.2:.2f},{yi + 2.0:.2f} {x + 3.4:.2f},{yi + 8.0:.2f}"
+                f"C{x + x_ctrl1:.2f},{yi - y_ctrl1:.2f} "
+                f"{x + x_ctrl2:.2f},{yi - y_ctrl2:.2f} "
+                f"{x + x_end:.2f},{yi - y_end:.2f}"
+            )
+        else:
+            yi = y + index * spacing
+            path_d = (
+                f"M{x:.2f},{yi:.2f} "
+                f"C{x + x_ctrl1:.2f},{yi + y_ctrl1:.2f} "
+                f"{x + x_ctrl2:.2f},{yi + y_ctrl2:.2f} "
+                f"{x + x_end:.2f},{yi + y_end:.2f}"
             )
         paths.append(
             f'<path d="{path_d}" '
-            'fill="none" stroke="black" stroke-width="0.8"/>'
+            'fill="none" stroke="black" stroke-width="0.75"/>'
         )
     return paths
 
@@ -142,21 +207,31 @@ def _render_flag_stack(params: dict[str, object]) -> list[str]:
 def _render_beam_group(params: dict[str, object]) -> str:
     x0 = float(params.get("x0", 0.0))
     x1 = float(params.get("x1", x0))
-    y = float(params.get("y", 0.0))
+    base_y = float(params.get("y", 0.0))
+    y0 = float(params.get("y0", base_y))
+    y1 = float(params.get("y1", y0))
     level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
     gap = float(params.get("gap", 3.0))
     direction = str(params.get("direction", "up"))
-    width = max(0.0, x1 - x0)
-    if width <= 0.0:
+    if x1 <= x0:
         return ""
-    if direction == "down":
-        y_rect = y + (max(1, level) - 1) * (thickness + gap)
-    else:
-        y_rect = y - (max(1, level) - 1) * (thickness + gap) - thickness
+    level_index = max(1, level) - 1
+    # Stems-up: secondary beams stack downward (positive y, toward notehead).
+    # Stems-down: secondary beams stack upward (negative y, toward notehead).
+    sign = -1.0 if direction == "down" else 1.0
+    offset = level_index * (thickness + gap) * sign
+    near_y0 = y0 + offset
+    near_y1 = y1 + offset
+    far_y0 = near_y0 + sign * max(1.0, thickness)
+    far_y1 = near_y1 + sign * max(1.0, thickness)
     return (
-        f'<rect x="{x0:.2f}" y="{y_rect:.2f}" '
-        f'width="{width:.2f}" height="{max(1.0, thickness):.2f}" fill="black"/>'
+        '<polygon points="'
+        f"{x0:.2f},{near_y0:.2f} "
+        f"{x1:.2f},{near_y1:.2f} "
+        f"{x1:.2f},{far_y1:.2f} "
+        f"{x0:.2f},{far_y0:.2f}"
+        '" fill="black"/>'
     )
 
 
@@ -199,6 +274,36 @@ def _render_tab_span(
     return [text, line]
 
 
+def _render_text_instance(*, text) -> list[str]:
+    raw_text = str(text.text)
+    metadata = text.metadata or {}
+    attrs = [
+        f'x="{text.x:.2f}"',
+        f'y="{text.y:.2f}"',
+        f'font-family="{escape(text.font_family)}"',
+        f'font-size="{text.font_size:.2f}"',
+    ]
+    text_anchor = str(metadata.get("text_anchor", "")).strip()
+    dominant_baseline = str(metadata.get("dominant_baseline", "")).strip()
+    if text_anchor:
+        attrs.append(f'text-anchor="{escape(text_anchor)}"')
+    if dominant_baseline:
+        attrs.append(f'dominant-baseline="{escape(dominant_baseline)}"')
+    text_svg = f"<text {' '.join(attrs)}>{escape(raw_text)}</text>"
+
+    # Keep tab digits readable by masking the line segment behind each digit.
+    if metadata.get("tab_string") is not None and metadata.get("kind") == "note":
+        glyph_count = max(1, len(raw_text))
+        mask_w = max(7.0, text.font_size * (0.55 + 0.45 * glyph_count))
+        mask_h = max(7.0, text.font_size * 0.95)
+        rect = (
+            f'<rect x="{(text.x - mask_w / 2.0):.2f}" y="{(text.y - mask_h / 2.0):.2f}" '
+            f'width="{mask_w:.2f}" height="{mask_h:.2f}" fill="white" stroke="none"/>'
+        )
+        return [rect, text_svg]
+    return [text_svg]
+
+
 def _render_glyph(
     glyph_id: str,
     *,
@@ -207,40 +312,376 @@ def _render_glyph(
     size: float,
     metadata: dict[str, object],
 ) -> str:
+    if glyph_id == "notehead":
+        return _render_notehead_glyph(x=x, y=y, size=size, metadata=metadata)
+    if glyph_id == "notehead_muted":
+        return _render_notehead_muted_glyph(x=x, y=y, size=size, metadata=metadata)
     if glyph_id == "clef":
         return (
             f'<text x="{x:.2f}" y="{y:.2f}" '
-            f'font-family="Times New Roman" font-size="{max(10.0, size):.2f}">'
+            f'font-family="Bravura,Times New Roman,serif" '
+            f'font-size="{max(18.0, size):.2f}" dominant-baseline="middle">'
             "𝄞</text>"
         )
     if glyph_id == "time_signature":
         numerator = int(metadata.get("numerator", 4))
         denominator = int(metadata.get("denominator", 4))
+        fs = max(9.0, size)
         return (
-            f'<text x="{x:.2f}" y="{y:.2f}" '
-            f'font-family="Helvetica" font-size="{max(9.0, size):.2f}">'
-            f"{numerator}/{denominator}</text>"
+            f'<text x="{x:.2f}" y="{(y - 4.5):.2f}" '
+            f'font-family="Times New Roman" font-size="{fs:.2f}" text-anchor="middle">'
+            f"{numerator}</text>"
+            f'<text x="{x:.2f}" y="{(y + 5.5):.2f}" '
+            f'font-family="Times New Roman" font-size="{fs:.2f}" text-anchor="middle">'
+            f"{denominator}</text>"
         )
     if glyph_id == "rest":
-        return (
-            f'<text x="{x:.2f}" y="{y:.2f}" '
-            f'font-family="Times New Roman" font-size="{max(9.0, size):.2f}">'
-            "𝄽</text>"
-        )
+        return _render_rest_glyph(x=x, y=y, size=size, metadata=metadata)
     if glyph_id == "accidental_sharp":
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id="accidental_sharp",
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=1.0,
+            anchor_x=0.0,
+            anchor_y=0.78,
+        )
+        if rendered is not None:
+            return rendered
         return (
             f'<text x="{x:.2f}" y="{y:.2f}" '
             f'font-family="Helvetica" font-size="{max(8.0, size):.2f}">'
             "♯</text>"
         )
     if glyph_id == "accidental_flat":
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id="accidental_flat",
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=1.0,
+            anchor_x=0.0,
+            anchor_y=0.78,
+        )
+        if rendered is not None:
+            return rendered
         return (
             f'<text x="{x:.2f}" y="{y:.2f}" '
             f'font-family="Helvetica" font-size="{max(8.0, size):.2f}">'
+            "♭</text>"
+        )
+    if glyph_id == "accidental_natural":
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id="accidental_natural",
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=1.0,
+            anchor_x=0.0,
+            anchor_y=0.78,
+        )
+        if rendered is not None:
+            return rendered
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Bravura,Helvetica,serif" font-size="{max(8.0, size):.2f}">'
+            "♮</text>"
+        )
+    if glyph_id == "accent":
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id="accent",
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=0.42,
+            anchor_x=0.5,
+            anchor_y=0.5,
+        )
+        if rendered is not None:
+            return rendered
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Times New Roman" font-size="{max(7.0, size):.2f}">'
+            "&gt;</text>"
+        )
+    if glyph_id == "ornament_turn":
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id="ornament_turn",
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=0.55,
+            anchor_x=0.5,
+            anchor_y=0.5,
+        )
+        if rendered is not None:
+            return rendered
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Times New Roman" font-size="{max(7.0, size):.2f}">'
+            "~</text>"
+        )
+    if glyph_id == "repeat_barline_left":
+        return _render_repeat_barline_glyph(x=x, y=y, size=size, direction="left")
+    if glyph_id == "repeat_barline_right":
+        return _render_repeat_barline_glyph(x=x, y=y, size=size, direction="right")
+    if glyph_id == "key_sig_sharp":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Bravura,Helvetica,serif" font-size="{max(7.0, size):.2f}" '
+            f'dominant-baseline="middle">'
+            "♯</text>"
+        )
+    if glyph_id == "key_sig_flat":
+        return (
+            f'<text x="{x:.2f}" y="{y:.2f}" '
+            f'font-family="Bravura,Helvetica,serif" font-size="{max(7.0, size):.2f}" '
+            f'dominant-baseline="middle">'
             "♭</text>"
         )
     return (
         f'<circle cx="{x:.2f}" cy="{y:.2f}" '
         f'r="{max(1.0, size):.2f}" '
         'fill="none" stroke="black"/>'
+    )
+
+
+def _render_notehead_muted_glyph(
+    *, x: float, y: float, size: float, metadata: dict[str, object]
+) -> str:
+    """Render an X-shaped notehead for muted/dead notes."""
+    rx = max(3.4, float(metadata.get("rx", size * 1.1)))
+    ry = max(2.4, float(metadata.get("ry", size * 0.78)))
+    stroke_width = max(0.8, float(metadata.get("stroke_width", 1.0)))
+    return (
+        f'<line x1="{x - rx:.2f}" y1="{y - ry:.2f}" '
+        f'x2="{x + rx:.2f}" y2="{y + ry:.2f}" '
+        f'stroke="black" stroke-width="{stroke_width:.2f}"/>'
+        f'<line x1="{x + rx:.2f}" y1="{y - ry:.2f}" '
+        f'x2="{x - rx:.2f}" y2="{y + ry:.2f}" '
+        f'stroke="black" stroke-width="{stroke_width:.2f}"/>'
+    )
+
+
+def _render_notehead_glyph(
+    *, x: float, y: float, size: float, metadata: dict[str, object]
+) -> str:
+    filled = bool(metadata.get("filled", False))
+    rx = max(3.4, float(metadata.get("rx", size * 1.1)))
+    ry = max(2.4, float(metadata.get("ry", size * 0.78)))
+    rotation = float(metadata.get("rotation", -20.0))
+    stroke_width = max(0.6, float(metadata.get("stroke_width", 0.9)))
+    fill = "black" if filled else "white"
+    body = (
+        f'<ellipse cx="{x:.2f}" cy="{y:.2f}" rx="{rx:.2f}" ry="{ry:.2f}" '
+        f'fill="{fill}" stroke="black" stroke-width="{stroke_width:.2f}" '
+        f'transform="rotate({rotation:.2f} {x:.2f} {y:.2f})"/>'
+    )
+    dot_count = int(metadata.get("dot_count", 0) or 0)
+    if dot_count <= 0:
+        return body
+
+    spacing = max(2.6, float(metadata.get("staff_spacing", 8.0)) * 0.33)
+    on_line = str(metadata.get("on_staff_line", "false")).lower() == "true"
+    dot_y = y - spacing * 0.45 if on_line else y
+    dot_r = max(1.0, ry * 0.32)
+    dots = []
+    for idx in range(dot_count):
+        dot_x = x + rx + 2.3 + idx * (dot_r * 2.5)
+        dots.append(
+            f'<circle cx="{dot_x:.2f}" cy="{dot_y:.2f}" r="{dot_r:.2f}" fill="black" stroke="none"/>'
+        )
+    return body + "".join(dots)
+
+
+def _render_rest_glyph(
+    *, x: float, y: float, size: float, metadata: dict[str, object]
+) -> str:
+    duration = float(metadata.get("duration", 0.5) or 0.5)
+    rest_kind = str(metadata.get("rest_kind") or _duration_class(duration))
+    if str(metadata.get("is_measure_rest", "")).lower() == "true":
+        rest_kind = "whole"
+    block_w = max(6.0, float(metadata.get("rest_block_width", 8.0)))
+    block_h = max(2.0, float(metadata.get("rest_block_height", 3.0)))
+    half_w = block_w / 2.0
+    augmentation_dot_count = int(metadata.get("dot_count", 0) or 0)
+    rect_attrs = 'stroke="black" stroke-width="1" fill="black"'
+    path_attrs = 'stroke="black" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"'
+
+    def _augmentation_dots(dot_y: float) -> str:
+        if augmentation_dot_count <= 0:
+            return ""
+        dots: list[str] = []
+        for idx in range(augmentation_dot_count):
+            dot_x = x + 5.0 + idx * 2.8
+            dots.append(
+                f'<circle cx="{dot_x:.2f}" cy="{dot_y:.2f}" r="1.15" fill="black" stroke="none"/>'
+            )
+        return "".join(dots)
+
+    vector_rest = _REST_KIND_TO_REFERENCE_GLYPH.get(rest_kind)
+    if vector_rest is not None:
+        rendered = _render_reference_path_glyph(
+            reference_glyph_id=vector_rest,
+            x=x,
+            y=y,
+            size=size,
+            size_multiplier=1.15 if rest_kind == "quarter" else 1.0,
+            anchor_x=0.5,
+            anchor_y=0.5,
+        )
+        if rendered is not None:
+            return rendered + _augmentation_dots(y + 0.5)
+
+    if rest_kind == "whole":
+        return (
+            f'<line x1="{x - 5.5:.2f}" y1="{y:.2f}" x2="{x + 5.5:.2f}" y2="{y:.2f}" '
+            'stroke="black" stroke-width="0.7"/>'
+            f'<rect x="{x - half_w:.2f}" y="{y + 0.2:.2f}" '
+            f'width="{block_w:.2f}" height="{block_h:.2f}" {rect_attrs}/>'
+            + _augmentation_dots(y + 1.2)
+        )
+    if rest_kind == "half":
+        return (
+            f'<line x1="{x - 5.5:.2f}" y1="{y:.2f}" x2="{x + 5.5:.2f}" y2="{y:.2f}" '
+            'stroke="black" stroke-width="0.7"/>'
+            f'<rect x="{x - half_w:.2f}" y="{y - block_h + 0.1:.2f}" '
+            f'width="{block_w:.2f}" height="{block_h:.2f}" {rect_attrs}/>'
+            + _augmentation_dots(y + 0.5)
+        )
+    if rest_kind == "quarter":
+        return (
+            f'<path d="M{x - 2.0:.2f},{y + 4.0:.2f} '
+            f'L{x + 2.5:.2f},{y + 1.5:.2f} '
+            f'C{x + 4.0:.2f},{y + 0.5:.2f} {x - 3.5:.2f},{y - 2.0:.2f} {x + 0.5:.2f},{y - 3.0:.2f} '
+            f'C{x + 2.5:.2f},{y - 4.0:.2f} {x - 1.0:.2f},{y + 5.5:.2f} {x + 0.5:.2f},{y + 7.0:.2f}" '
+            f'{path_attrs}/>'
+            + _augmentation_dots(y + 0.5)
+        )
+
+    intrinsic_dot_count = {
+        "eighth": 1,
+        "sixteenth": 2,
+        "thirty_second": 3,
+        "sixty_fourth": 4,
+    }.get(rest_kind, 1)
+    dots: list[str] = []
+    for idx in range(intrinsic_dot_count):
+        dot_x = x - 1.0 - idx * 0.8
+        dot_y = y - 3.0 + idx * 2.8
+        dots.append(
+            f'<circle cx="{dot_x:.2f}" cy="{dot_y:.2f}" r="1.25" fill="black" stroke="none"/>'
+        )
+    return (
+        f'<line x1="{x - 1.5:.2f}" y1="{y + 4.0:.2f}" '
+        f'x2="{x + 2.0:.2f}" y2="{y - 3.8:.2f}" '
+        'stroke="black" stroke-width="0.8"/>'
+        + "".join(dots)
+        + _augmentation_dots(y + 0.8)
+    )
+
+
+def _duration_class(duration: float) -> str:
+    base = _duration_components(duration)[0]
+    if base >= 4.0:
+        return "whole"
+    if base >= 2.0:
+        return "half"
+    if base >= 1.0:
+        return "quarter"
+    if base >= 0.5:
+        return "eighth"
+    if base >= 0.25:
+        return "sixteenth"
+    if base >= 0.125:
+        return "thirty_second"
+    return "sixty_fourth"
+
+
+def _duration_components(duration: float) -> tuple[float, int]:
+    known_bases = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
+    tol = 0.01
+    for base in known_bases:
+        if abs(duration - base) <= tol:
+            return base, 0
+        if abs(duration - base * 1.5) <= tol:
+            return base, 1
+        if abs(duration - base * 1.75) <= tol:
+            return base, 2
+    return duration, 0
+
+
+def _render_reference_path_glyph(
+    *,
+    reference_glyph_id: str,
+    x: float,
+    y: float,
+    size: float,
+    size_multiplier: float,
+    anchor_x: float,
+    anchor_y: float,
+) -> str | None:
+    reference_glyph = _REFERENCE_GLYPHS.get(reference_glyph_id)
+    if reference_glyph is None:
+        return None
+    if reference_glyph.svg_path_data is None or reference_glyph.svg_view_box is None:
+        return None
+
+    _, _, view_box_w, view_box_h = reference_glyph.svg_view_box
+    if view_box_w <= 0.0 or view_box_h <= 0.0:
+        return None
+
+    draw_h = max(0.5, size * size_multiplier)
+    scale = draw_h / view_box_h
+    draw_w = view_box_w * scale
+    origin_x = x - draw_w * anchor_x
+    origin_y = y - draw_h * anchor_y
+
+    path_transform = ""
+    if reference_glyph.svg_path_transform:
+        path_transform = f' transform="{reference_glyph.svg_path_transform}"'
+
+    return (
+        f'<g transform="translate({origin_x:.4f},{origin_y:.4f}) scale({scale:.6f})">'
+        f'<path d="{reference_glyph.svg_path_data}"{path_transform} fill="currentColor"/>'
+        "</g>"
+    )
+
+
+def _render_repeat_barline_glyph(*, x: float, y: float, size: float, direction: str) -> str:
+    draw_h = max(8.0, size)
+    scale = draw_h / _REPEAT_BARLINE_VIEWBOX_H
+    draw_w = _REPEAT_BARLINE_VIEWBOX_W * scale
+    origin_x = x - draw_w * 0.5
+    origin_y = y - draw_h * 0.5
+
+    left_primitives = (
+        '<rect x="0" y="1.332" width="0.60000002" height="4" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_HOOK_UP_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,0,1.332)" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_HOOK_DOWN_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,0,5.332)" fill="currentColor"/>'
+        '<rect x="0.9" y="1.332" width="0.19" height="4" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_DOT_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,1.39,1.832)" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_DOT_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,1.39,2.832)" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_DOT_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,1.39,3.832)" fill="currentColor"/>'
+        f'<path d="{_REPEAT_BARLINE_DOT_PATH}" '
+        'transform="matrix(0.004,0,0,-0.004,1.39,4.832)" fill="currentColor"/>'
+    )
+
+    if direction == "right":
+        return (
+            f'<g transform="translate({origin_x:.4f},{origin_y:.4f}) scale({scale:.6f}) '
+            f'translate({_REPEAT_BARLINE_VIEWBOX_W:.4f},0) scale(-1,1)">'
+            f"{left_primitives}"
+            "</g>"
+        )
+    return (
+        f'<g transform="translate({origin_x:.4f},{origin_y:.4f}) scale({scale:.6f})">'
+        f"{left_primitives}"
+        "</g>"
     )

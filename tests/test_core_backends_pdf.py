@@ -10,9 +10,22 @@ from fretwise.core.backends import (
     render_scene_to_pdf_file,
     render_scene_to_svg,
 )
+from fretwise.core.canonical import (
+    Measure,
+    RestEvent,
+    Score,
+    Staff,
+    StaffGroup,
+    TimeSignature,
+    Track,
+    Voice,
+)
+from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.registries import build_default_registries
-from fretwise.models import Articulation, Dynamic, NoteEvent
+from fretwise.core.scene import canonical_to_render_scene
+from fretwise.models import Articulation, Dynamic
+from fretwise.models import NoteEvent as LegacyNoteEvent
 
 
 def _note(
@@ -21,8 +34,8 @@ def _note(
     onset: float,
     string_hint: int | None = None,
     fret_hint: int | None = None,
-) -> NoteEvent:
-    return NoteEvent(
+) -> LegacyNoteEvent:
+    return LegacyNoteEvent(
         pitch=pitch,
         onset=onset,
         duration=1.0,
@@ -103,3 +116,53 @@ def test_svg_and_pdf_backends_share_same_scene_input() -> None:
     assert svg.count("<text ") >= 2
     assert pdf.startswith(b"%PDF-")
 
+
+def test_render_scene_backends_draw_rest_as_vector_mark() -> None:
+    score = Score(
+        score_id="s-rest",
+        title="quiet-song",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=4, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r1",
+                                                        onset=0.0,
+                                                        duration=1.0,
+                                                        voice=0,
+                                                    )
+                                                ],
+                                            )
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.TAB_RHYTHM.value)
+    svg = render_scene_to_svg(scene)
+    pdf = render_scene_to_pdf_bytes(scene)
+
+    assert "<path " in svg or "<rect " in svg
+    assert "rest</text>" not in svg
+    assert b"rest" not in pdf

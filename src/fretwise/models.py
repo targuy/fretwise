@@ -119,6 +119,17 @@ class NoteEvent:
     rasgueado: bool = False             # Rasp. — rapid flamenco strum across strings
     golpe: bool = False                 # * — percussive tap on guitar top/body
 
+    # ── Notated pitch spelling (optional, parser-provided) ───────────────────
+    note_step: str | None = None        # A..G
+    note_accidental: str | None = None  # "sharp" | "flat" | "natural" | None
+    note_octave: int | None = None      # scientific octave number
+
+    # ── Tie continuation (set by parser for tied note destinations) ─────────────
+    is_tie_dest: bool = False           # True when this note is a tie continuation
+
+    # ── Source measure anchor (optional) ──────────────────────────────────────
+    measure_index: int | None = None    # 1-based measure number from source parser
+
 
 # Bend type string constants (used in NoteEvent.bend_type)
 class BendType:

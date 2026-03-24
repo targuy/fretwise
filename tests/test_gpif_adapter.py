@@ -110,6 +110,86 @@ _MINIMAL_GPIF = """<?xml version="1.0" encoding="utf-8"?>
 </GPIF>"""
 
 
+_NON_POSITIONAL_TRACK_IDS_GPIF = """<?xml version="1.0" encoding="utf-8"?>
+<GPIF>
+  <MasterTrack>
+    <Automations>
+      <Automation>
+        <Type>Tempo</Type><Bar>0</Bar><Position>0</Position>
+        <Value>120 2</Value>
+      </Automation>
+    </Automations>
+  </MasterTrack>
+  <Tracks>
+    <Track id="10">
+      <Name>Guitar A</Name>
+      <InstrumentSet><Type>electricGuitar</Type></InstrumentSet>
+      <Staves>
+        <Staff>
+          <Properties>
+            <Property name="Tuning">
+              <Pitches>40 45 50 55 59 64</Pitches>
+              <Instrument>Guitar</Instrument>
+            </Property>
+          </Properties>
+        </Staff>
+      </Staves>
+    </Track>
+    <Track id="42">
+      <Name>Guitar B</Name>
+      <InstrumentSet><Type>electricGuitar</Type></InstrumentSet>
+      <Staves>
+        <Staff>
+          <Properties>
+            <Property name="Tuning">
+              <Pitches>40 45 50 55 59 64</Pitches>
+              <Instrument>Guitar</Instrument>
+            </Property>
+          </Properties>
+        </Staff>
+      </Staves>
+    </Track>
+  </Tracks>
+  <MasterBars>
+    <MasterBar>
+      <Time>4/4</Time>
+      <Bars>0 1</Bars>
+    </MasterBar>
+  </MasterBars>
+  <Bars>
+    <Bar id="0"><Clef>G2</Clef><Voices>0 -1 -1 -1</Voices></Bar>
+    <Bar id="1"><Clef>G2</Clef><Voices>1 -1 -1 -1</Voices></Bar>
+  </Bars>
+  <Voices>
+    <Voice id="0"><Beats>0</Beats></Voice>
+    <Voice id="1"><Beats>1</Beats></Voice>
+  </Voices>
+  <Beats>
+    <Beat id="0"><Rhythm ref="0"/><Notes>0</Notes></Beat>
+    <Beat id="1"><Rhythm ref="0"/><Notes>1</Notes></Beat>
+  </Beats>
+  <Notes>
+    <Note id="0">
+      <Properties>
+        <Property name="String"><String>4</String></Property>
+        <Property name="Fret"><Fret>3</Fret></Property>
+        <Property name="Midi"><Number>60</Number></Property>
+      </Properties>
+    </Note>
+    <Note id="1">
+      <Properties>
+        <Property name="String"><String>4</String></Property>
+        <Property name="Fret"><Fret>5</Fret></Property>
+        <Property name="Midi"><Number>62</Number></Property>
+      </Properties>
+    </Note>
+  </Notes>
+  <Rhythms>
+    <Rhythm id="0"><NoteValue>Quarter</NoteValue></Rhythm>
+  </Rhythms>
+</GPIF>"""
+
+
 # ---------------------------------------------------------------------------
 # GpifAdapter.supports()
 # ---------------------------------------------------------------------------
@@ -218,16 +298,27 @@ class TestParseHappyPath:
         events = self.adapter.parse(f)
         assert events == []
 
-    def test_tied_note_skipped(self, tmp_path: Path) -> None:
-        """Notes with <Tie destination="true"> must be skipped."""
+    def test_tied_note_emitted_as_event(self, tmp_path: Path) -> None:
+        """Notes with <Tie destination="true"> must still be emitted as NoteEvents.
+
+        The tie-destination notehead is a real sounding note (its attack is
+        sustained from a previous note); skipping it would leave the measure
+        empty and render a spurious whole-measure rest.  The tie arc itself is
+        added by _append_standard_connections when two consecutive same-pitch
+        notes are contiguous in onset.
+        """
         gpif = _MINIMAL_GPIF.replace(
             '<Note id="1">',
             '<Note id="1"><Tie destination="true"/>',
         )
         f = self._write_gp(tmp_path, gpif)
         events = self.adapter.parse(f)
-        assert len(events) == 1
-        assert events[0].pitch == 64
+        # Both the origin note (pitch 64) and the tie-destination note (pitch 66)
+        # must be present.
+        assert len(events) == 2
+        pitches = {e.pitch for e in events}
+        assert 64 in pitches
+        assert 66 in pitches
 
     def test_fractional_string_note_skipped(self, tmp_path: Path) -> None:
         """Drum notes with fractional String (e.g. "5.5") must be skipped."""
@@ -239,6 +330,39 @@ class TestParseHappyPath:
         events = self.adapter.parse(f)
         # The note with fractional string should be skipped.
         assert all(e.pitch != 64 or e.string_hint is not None for e in events)
+
+    def test_parse_extracts_notated_pitch_spelling(self, tmp_path: Path) -> None:
+        gpif = _MINIMAL_GPIF.replace(
+            "<Property name=\"Midi\"><Number>64</Number></Property>",
+            (
+                "<Property name=\"Midi\"><Number>64</Number></Property>"
+                "<Property name=\"TransposedPitch\">"
+                "<Pitch><Step>F</Step><Accidental>#</Accidental><Octave>5</Octave></Pitch>"
+                "</Property>"
+            ),
+        )
+        f = self._write_gp(tmp_path, gpif)
+        events = self.adapter.parse(f)
+        target = next(event for event in events if event.pitch == 64)
+
+        assert target.note_step == "F"
+        assert target.note_accidental == "sharp"
+        assert target.note_octave == 5
+
+    def test_parse_track_uses_track_position_not_numeric_track_id(self, tmp_path: Path) -> None:
+        f = self._write_gp(tmp_path, _NON_POSITIONAL_TRACK_IDS_GPIF)
+        events = self.adapter.parse_track(f, 42)
+
+        assert len(events) == 1
+        assert events[0].pitch == 62
+        assert self.adapter.track_name == "Guitar B"
+
+    def test_parse_works_with_non_positional_track_ids(self, tmp_path: Path) -> None:
+        f = self._write_gp(tmp_path, _NON_POSITIONAL_TRACK_IDS_GPIF)
+        events = self.adapter.parse(f)
+
+        assert len(events) == 1
+        assert events[0].pitch == 60
 
 
 # ---------------------------------------------------------------------------

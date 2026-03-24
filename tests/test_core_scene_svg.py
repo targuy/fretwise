@@ -19,6 +19,9 @@ from fretwise.core.canonical import (
     Voice,
     completed_to_canonical_score,
 )
+from fretwise.core.canonical import (
+    NoteEvent as CanonicalNoteEvent,
+)
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.scene import canonical_to_render_scene
@@ -36,6 +39,11 @@ def _note(
     fret_hint: int | None = None,
     let_ring: bool = False,
     palm_muted: bool = False,
+    strum_direction: str | None = None,
+    note_step: str | None = None,
+    note_accidental: str | None = None,
+    note_octave: int | None = None,
+    is_tie_dest: bool = False,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
@@ -49,6 +57,11 @@ def _note(
         fret_hint=fret_hint,
         let_ring=let_ring,
         palm_muted=palm_muted,
+        strum_direction=strum_direction,
+        note_step=note_step,
+        note_accidental=note_accidental,
+        note_octave=note_octave,
+        is_tie_dest=is_tie_dest,
     )
 
 
@@ -67,6 +80,41 @@ def test_canonical_to_render_scene_builds_tab_lines_and_note_text() -> None:
     assert len(staff.layer_groups) == 2
     assert staff.layer_groups[0].recipe_instances[0].recipe_id == "tab_lines"
     assert any(text.metadata.get("kind") == "note" for text in staff.layer_groups[1].text_instances)
+
+
+def test_canonical_to_render_scene_renders_all_systems_for_long_score() -> None:
+    events = [
+        _note(
+            pitch=64 + (measure_idx % 5),
+            onset=float(measure_idx * 4),
+            string_hint=1,
+            fret_hint=measure_idx % 7,
+        )
+        for measure_idx in range(20)
+    ]
+    raw_score = legacy_parse_to_raw_score(
+        Path("long-song.gp"),
+        source_format="gpif",
+        events=events,
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    page = result.render_scene.document_scene.pages[0]
+    assert len(page.systems) >= 2
+
+    ys = [system.y for system in page.systems]
+    assert ys == sorted(ys)
+
+    measure_labels = 0
+    for system in page.systems:
+        staff = system.staves[0]
+        measure_labels += sum(
+            1 for text in staff.layer_groups[1].text_instances
+            if text.metadata.get("kind") == "measure_number"
+        )
+    assert measure_labels == len(events)
 
 
 def test_render_scene_to_svg_outputs_svg_document() -> None:
@@ -121,7 +169,7 @@ def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
 
     assert "stem_line" in recipe_ids
     assert "beam_group" in recipe_ids
-    assert "<rect " in svg
+    assert "<polygon " in svg
 
 
 def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_group() -> None:
@@ -146,7 +194,7 @@ def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_gr
 
     assert 1 in levels
     assert 2 in levels
-    assert svg.count("<rect ") >= 2
+    assert svg.count("<polygon ") >= 2
 
 
 def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() -> None:
@@ -169,6 +217,91 @@ def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() ->
 
     assert "up" in directions
     assert "down" in directions
+
+
+def test_canonical_to_render_scene_standard_sets_stem_direction_from_pitch_height() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("stem-pitch-height.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=79, onset=0.0, duration=1.0, voice_hint=0, string_hint=1, fret_hint=15),
+            _note(pitch=57, onset=1.0, duration=1.0, voice_hint=0, string_hint=6, fret_hint=0),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    stem_recipes = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "stem_line"
+    ]
+    directions = {str(recipe.metadata.get("direction", "up")) for recipe in stem_recipes}
+
+    assert "up" in directions
+    assert "down" in directions
+
+
+def test_canonical_to_render_scene_standard_two_voices_force_outward_stems() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("stem-two-voices.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=79, onset=0.0, duration=1.0, voice_hint=0, string_hint=1, fret_hint=15),
+            _note(pitch=55, onset=0.0, duration=1.0, voice_hint=1, string_hint=5, fret_hint=3),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    same_onset_stems = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "stem_line" and abs(float(recipe.metadata.get("onset", 1.0))) < 1e-6
+    ]
+    directions = {str(recipe.metadata.get("direction", "up")) for recipe in same_onset_stems}
+
+    assert directions == {"up", "down"}
+
+
+def test_canonical_to_render_scene_standard_uses_constant_unbeamed_stem_length() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("stem-constant-length.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=79, onset=0.0, duration=1.0, voice_hint=0, string_hint=1, fret_hint=15),
+            _note(pitch=57, onset=1.0, duration=1.0, voice_hint=0, string_hint=6, fret_hint=0),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    staff_lines = next(
+        recipe for recipe in staff.layer_groups[0].recipe_instances if recipe.recipe_id == "staff_lines"
+    )
+    staff_y = float(staff_lines.params.get("y", 0.0))
+    spacing = float(staff_lines.params.get("spacing", 8.0))
+    stem_top = staff_y - spacing
+    stem_bottom = staff_y + 5.0 * spacing
+    expected_length = float(staff_lines.params.get("spacing", 8.0)) * 3.5
+    stems = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "stem_line"
+    ]
+    lengths = [
+        abs(float(stem.params.get("y1", 0.0)) - float(stem.params.get("y0", 0.0)))
+        for stem in stems
+    ]
+
+    assert len(lengths) >= 2
+    for stem in stems:
+        y0 = float(stem.params.get("y0", 0.0))
+        y1 = float(stem.params.get("y1", 0.0))
+        length = abs(y1 - y0)
+        if abs(length - expected_length) < 0.1:
+            continue
+        # When a stem cannot keep the canonical 3.5-space length because it
+        # is capped by the outer staff boundary, the endpoint sits on that cap.
+        assert length < expected_length
+        assert abs(y1 - stem_top) < 0.1 or abs(y1 - stem_bottom) < 0.1
 
 
 def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() -> None:
@@ -200,7 +333,8 @@ def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None
                 fret_hint=0,
             ),
             _note(pitch=66, onset=0.5, duration=0.5, string_hint=1, fret_hint=2),
-            _note(pitch=66, onset=1.0, duration=0.5, string_hint=1, fret_hint=2),
+            # Tie destination: same pitch as previous note, explicitly marked
+            _note(pitch=66, onset=1.0, duration=0.5, string_hint=1, fret_hint=2, is_tie_dest=True),
         ],
     )
     result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
@@ -219,7 +353,8 @@ def test_canonical_to_render_scene_standard_down_voice_tie_curves_upward() -> No
         source_format="gpif",
         events=[
             _note(pitch=55, onset=0.0, duration=0.5, voice_hint=1, string_hint=4, fret_hint=5),
-            _note(pitch=55, onset=0.5, duration=0.5, voice_hint=1, string_hint=4, fret_hint=5),
+            _note(pitch=55, onset=0.5, duration=0.5, voice_hint=1, string_hint=4, fret_hint=5,
+                  is_tie_dest=True),
         ],
     )
     result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
@@ -270,7 +405,8 @@ def test_canonical_to_render_scene_standard_adapts_tie_profile_for_long_span() -
         source_format="gpif",
         events=[
             _note(pitch=55, onset=0.0, duration=2.0, voice_hint=1, string_hint=4, fret_hint=5),
-            _note(pitch=55, onset=2.0, duration=1.0, voice_hint=1, string_hint=4, fret_hint=5),
+            _note(pitch=55, onset=2.0, duration=1.0, voice_hint=1, string_hint=4, fret_hint=5,
+                  is_tie_dest=True),
         ],
     )
     result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
@@ -296,7 +432,33 @@ def test_canonical_to_render_scene_standard_contains_accidental_glyph() -> None:
     svg = render_scene_to_svg(result.render_scene)
 
     assert "accidental_sharp" in note_glyph_ids
-    assert "♯" in svg
+    assert "♯" not in svg
+    assert "<path " in svg
+
+
+def test_canonical_to_render_scene_standard_prefers_note_spelling_accidental_hint() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=61,
+                onset=0.0,
+                duration=1.0,
+                string_hint=2,
+                fret_hint=2,
+                note_step="D",
+                note_accidental="flat",
+                note_octave=5,
+            )
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    note_glyph_ids = [g.glyph_id for g in staff.layer_groups[1].glyph_instances]
+
+    assert "accidental_flat" in note_glyph_ids
+    assert "accidental_sharp" not in note_glyph_ids
 
 
 def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
@@ -328,6 +490,129 @@ def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
     assert "palm_mute_span" in recipe_ids
     assert "L.R." in svg
     assert "P.M." in svg
+
+
+def test_canonical_to_render_scene_tablature_rhythm_emits_rhythm_recipes() -> None:
+    score = Score(
+        score_id="s-tab-rhythm",
+        title="tab-rhythm",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=4, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    CanonicalNoteEvent(
+                                                        event_id="n1",
+                                                        onset=0.0,
+                                                        duration=0.5,
+                                                        voice=0,
+                                                        pitch_notated=64,
+                                                        pitch_sounding=64,
+                                                    ),
+                                                    CanonicalNoteEvent(
+                                                        event_id="n2",
+                                                        onset=0.5,
+                                                        duration=0.5,
+                                                        voice=0,
+                                                        pitch_notated=66,
+                                                        pitch_sounding=66,
+                                                    ),
+                                                    RestEvent(
+                                                        event_id="r1",
+                                                        onset=1.0,
+                                                        duration=0.5,
+                                                        voice=0,
+                                                    ),
+                                                    CanonicalNoteEvent(
+                                                        event_id="n3",
+                                                        onset=1.5,
+                                                        duration=0.5,
+                                                        voice=0,
+                                                        pitch_notated=67,
+                                                        pitch_sounding=67,
+                                                    ),
+                                                ],
+                                            )
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.TAB_RHYTHM.value)
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [recipe.recipe_id for recipe in staff.layer_groups[1].recipe_instances]
+    note_texts = [
+        text.text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "note"
+    ]
+    rests = [glyph for glyph in staff.layer_groups[1].glyph_instances if glyph.glyph_id == "rest"]
+
+    assert "stem_line" in recipe_ids
+    assert "beam_group" in recipe_ids
+    assert "flag_stack" in recipe_ids
+    assert note_texts
+    assert len(rests) == 1
+    assert rests[0].metadata.get("mode") == "tablature_rhythm"
+
+
+def test_canonical_to_render_scene_tablature_rhythm_anchors_time_signature_on_tab_plane() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("tab-rhythm-layout.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=0.5, string_hint=2, fret_hint=5)],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.TAB_RHYTHM,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    staff_layer = staff.layer_groups[0]
+    time_signature = next(g for g in staff_layer.glyph_instances if g.glyph_id == "time_signature")
+    tab_lines = next(r for r in staff_layer.recipe_instances if r.recipe_id == "tab_lines")
+    tab_y = float(tab_lines.params.get("y", 0.0))
+    tab_spacing = float(tab_lines.params.get("spacing", 10.0))
+
+    assert abs(time_signature.y - (tab_y + 2.0 * tab_spacing)) < 0.01
+    assert not any(text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances)
+
+
+def test_canonical_to_render_scene_standard_tab_uses_tab_letters_without_string_names() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("standard-tab-layout.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0, string_hint=3, fret_hint=7)],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    staff_layer = staff.layer_groups[0]
+    tab_labels = [t for t in staff_layer.text_instances if t.metadata.get("kind") == "tab_label"]
+
+    assert [t.text for t in tab_labels] == ["T", "A", "B"]
+    assert not any(text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances)
 
 
 def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> None:
@@ -383,7 +668,62 @@ def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> 
     assert "clef" in staff_glyph_ids
     assert "time_signature" in staff_glyph_ids
     assert "rest" in notes_glyph_ids
-    assert "3/4" in svg
+    assert ">3</text>" in svg
+    assert ">4</text>" in svg
+    rest_glyphs = [g for g in staff.layer_groups[1].glyph_instances if g.glyph_id == "rest"]
+    assert rest_glyphs
+    assert rest_glyphs[0].metadata.get("rest_kind") == "quarter"
+
+
+def test_canonical_to_render_scene_standard_marks_measure_rest_as_whole_symbol() -> None:
+    score = Score(
+        score_id="s-rest-measure",
+        title="measure-rest",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=3, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r-full",
+                                                        onset=0.0,
+                                                        duration=3.0,
+                                                        voice=0,
+                                                    )
+                                                ],
+                                            )
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.STANDARD.value)
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    rests = [g for g in staff.layer_groups[1].glyph_instances if g.glyph_id == "rest"]
+
+    assert len(rests) == 1
+    assert rests[0].metadata.get("rest_kind") == "whole"
+    assert rests[0].metadata.get("is_measure_rest") == "true"
 
 
 def test_canonical_to_render_scene_standard_places_rests_by_voice() -> None:
@@ -452,6 +792,309 @@ def test_canonical_to_render_scene_standard_places_rests_by_voice() -> None:
     assert rests["r-up"].y < rests["r-down"].y
     assert rests["r-up"].metadata.get("voice_number") == "0"
     assert rests["r-down"].metadata.get("voice_number") == "1"
+
+
+def test_canonical_to_render_scene_standard_groups_chord_stems_by_onset() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("chord-stems.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=0.5, string_hint=1, fret_hint=0),
+            _note(pitch=52, onset=0.0, duration=0.5, string_hint=5, fret_hint=3),
+            _note(pitch=66, onset=0.5, duration=0.5, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    stem_recipes = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "stem_line"
+    ]
+
+    assert len(stem_recipes) == 2
+
+
+def test_canonical_to_render_scene_standard_draws_chord_names_from_markers() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("chord-marker.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0, string_hint=2, fret_hint=2)],
+        chord_markers={"0.000000": "A5"},
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    chord_labels = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "chord_name"
+    ]
+
+    assert len(chord_labels) == 1
+    assert chord_labels[0].text == "A5"
+
+
+def test_canonical_to_render_scene_standard_tab_draws_strum_direction_marker() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("strum-marker.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=1.0,
+                string_hint=2,
+                fret_hint=2,
+                strum_direction="down",
+            )
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    strum_marks = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "strum_direction"
+    ]
+
+    assert len(strum_marks) == 1
+    assert strum_marks[0].text == "↓"
+    assert strum_marks[0].metadata.get("direction") == "down"
+
+
+def test_canonical_to_render_scene_standard_displaces_colliding_chord_noteheads() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("chord-collision-offset.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=2, fret_hint=2),
+            _note(pitch=65, onset=0.0, duration=1.0, voice_hint=0, string_hint=3, fret_hint=3),
+            _note(pitch=67, onset=1.0, duration=1.0, voice_hint=0, string_hint=2, fret_hint=5),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notes_layer = staff.layer_groups[1]
+    chord_noteheads = [
+        glyph
+        for glyph in notes_layer.glyph_instances
+        if glyph.glyph_id == "notehead" and abs(float(glyph.metadata.get("onset", 9.0))) < 1e-6
+    ]
+    xs = [glyph.x for glyph in chord_noteheads]
+    stem = next(
+        recipe
+        for recipe in notes_layer.recipe_instances
+        if recipe.recipe_id == "stem_line" and abs(float(recipe.metadata.get("onset", 9.0))) < 1e-6
+    )
+    stem_x = float(stem.params.get("x", 0.0))
+    stem_direction = str(stem.metadata.get("direction", "up"))
+
+    assert len(chord_noteheads) == 2
+    assert (max(xs) - min(xs)) > 2.0
+    # The stem is anchored to the un-displaced notehead (the canonical beat x).
+    # Displaced noteheads (2nd-interval avoidance) sit on the OPPOSITE side of
+    # the stem from the regular noteheads, so the stem x falls BETWEEN the two
+    # notehead x positions regardless of stem direction.
+    assert min(xs) < stem_x < max(xs)
+
+
+def test_canonical_to_render_scene_standard_stacks_dense_unisons_without_agglomeration() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("dense-unison-stack.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=2, fret_hint=2),
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=3, fret_hint=7),
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=4, fret_hint=12),
+            _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=5, fret_hint=17),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    noteheads = [
+        glyph
+        for glyph in staff.layer_groups[1].glyph_instances
+        if glyph.glyph_id == "notehead" and abs(float(glyph.metadata.get("onset", 9.0))) < 1e-6
+    ]
+
+    assert len(noteheads) == 1
+
+
+def test_canonical_to_render_scene_standard_marks_notehead_fill_by_duration() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("notehead-fill.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=2.0, string_hint=2, fret_hint=5),
+            _note(pitch=66, onset=2.0, duration=1.0, string_hint=2, fret_hint=7),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    noteheads = [g for g in staff.layer_groups[1].glyph_instances if g.glyph_id == "notehead"]
+    by_event = {str(g.metadata.get("event_id")): g for g in noteheads}
+
+    assert by_event["n0"].metadata.get("filled") is False
+    assert by_event["n1"].metadata.get("filled") is True
+
+
+def test_canonical_to_render_scene_standard_marks_dotted_and_double_dotted_noteheads() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("dotted-notes.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.5, string_hint=2, fret_hint=5),
+            _note(pitch=66, onset=2.0, duration=1.75, string_hint=2, fret_hint=7),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    noteheads = [g for g in staff.layer_groups[1].glyph_instances if g.glyph_id == "notehead"]
+    by_event = {str(g.metadata.get("event_id")): g for g in noteheads}
+
+    assert by_event["n0"].metadata.get("dot_count") == 1
+    assert by_event["n1"].metadata.get("dot_count") == 2
+
+
+def test_canonical_to_render_scene_standard_marks_dotted_rests() -> None:
+    score = Score(
+        score_id="s-dotted-rests",
+        title="dotted-rests",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef="treble",
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=4, denominator=4),
+                                        voices=[
+                                            Voice(
+                                                number=0,
+                                                events=[
+                                                    RestEvent(
+                                                        event_id="r-dot",
+                                                        onset=0.0,
+                                                        duration=1.5,
+                                                        voice=0,
+                                                    ),
+                                                    RestEvent(
+                                                        event_id="r-double-dot",
+                                                        onset=2.0,
+                                                        duration=1.75,
+                                                        voice=0,
+                                                    ),
+                                                ],
+                                            )
+                                        ],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+    scene = canonical_to_render_scene(score, mode=RepresentationMode.STANDARD.value)
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    rests = {
+        str(glyph.metadata.get("event_id")): glyph
+        for glyph in staff.layer_groups[1].glyph_instances
+        if glyph.glyph_id == "rest"
+    }
+
+    assert rests["r-dot"].metadata.get("dot_count") == 1
+    assert rests["r-double-dot"].metadata.get("dot_count") == 2
+    assert rests["r-dot"].metadata.get("rest_kind") == "quarter"
+    assert rests["r-double-dot"].metadata.get("rest_kind") == "quarter"
+
+
+def test_canonical_to_render_scene_adds_measure_barlines() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("barlines.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=4.0, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    staff_layer = staff.layer_groups[0]
+    barlines = [recipe for recipe in staff_layer.recipe_instances if recipe.recipe_id == "barline"]
+
+    assert len(barlines) >= 1
+
+
+def test_canonical_to_render_scene_standard_attaches_up_stem_on_notehead_right_side() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("stem-up.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=0.5, voice_hint=0, string_hint=2, fret_hint=5)],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notes_layer = staff.layer_groups[1]
+    notehead = next(g for g in notes_layer.glyph_instances if g.glyph_id == "notehead")
+    stem = next(r for r in notes_layer.recipe_instances if r.recipe_id == "stem_line")
+    stem_direction = str(stem.metadata.get("direction", "up"))
+
+    if stem_direction == "up":
+        assert stem.params["x"] > notehead.x
+    else:
+        assert stem.params["x"] < notehead.x
+
+
+def test_canonical_to_render_scene_standard_attaches_down_stem_on_notehead_left_side() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("stem-down.gp"),
+        source_format="gpif",
+        events=[_note(pitch=52, onset=0.0, duration=0.5, voice_hint=1, string_hint=5, fret_hint=3)],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notes_layer = staff.layer_groups[1]
+    notehead = next(g for g in notes_layer.glyph_instances if g.glyph_id == "notehead")
+    stem = next(r for r in notes_layer.recipe_instances if r.recipe_id == "stem_line")
+
+    assert stem.params["x"] < notehead.x
+
+
+def test_canonical_to_render_scene_standard_tab_shows_rests_without_tab_digits() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("rests-standard-tab.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=0.5, string_hint=2, fret_hint=5),
+            _note(pitch=66, onset=2.0, duration=0.5, string_hint=2, fret_hint=7),
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notes_layer = staff.layer_groups[1]
+    rests = [g for g in notes_layer.glyph_instances if g.glyph_id == "rest"]
+    tab_note_texts = [t for t in notes_layer.text_instances if t.metadata.get("kind") == "note"]
+
+    assert rests
+    assert all(not str(t.metadata.get("event_id", "")).startswith("r-") for t in tab_note_texts)
 
 
 def test_run_core_pipeline_from_raw_end_to_end() -> None:

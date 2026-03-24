@@ -73,6 +73,10 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_lines(canvas, page_h, recipe.params, color=(0.4, 0.4, 0.4))
                         elif recipe.recipe_id == "staff_lines":
                             _draw_lines(canvas, page_h, recipe.params, color=(0.1, 0.1, 0.1))
+                        elif recipe.recipe_id == "barline":
+                            _draw_barline(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "ledger_line":
+                            _draw_ledger_line(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "stem_line":
                             _draw_stem_line(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "flag_stack":
@@ -152,6 +156,35 @@ def _draw_stem_line(
     canvas.line(x, _to_pdf_y(page_h, y0), x, _to_pdf_y(page_h, y1))
 
 
+def _draw_barline(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x = float(params.get("x", 0.0))
+    y0 = float(params.get("y0", 0.0))
+    y1 = float(params.get("y1", y0))
+    width = float(params.get("width", 0.8))
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(max(0.6, width))
+    canvas.line(x, _to_pdf_y(page_h, y0), x, _to_pdf_y(page_h, y1))
+
+
+def _draw_ledger_line(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+) -> None:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    width = float(params.get("width", 1.0))
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(max(0.8, width))
+    y_pdf = _to_pdf_y(page_h, y)
+    canvas.line(x0, y_pdf, x1, y_pdf)
+
+
 def _draw_flag_stack(
     canvas: rl_canvas.Canvas,
     page_h: float,
@@ -165,28 +198,34 @@ def _draw_flag_stack(
     if count <= 0:
         return
     canvas.setStrokeColorRGB(0, 0, 0)
-    canvas.setLineWidth(0.8)
+    canvas.setLineWidth(0.75)
+    x_ctrl1 = 3.8
+    x_ctrl2 = 4.8
+    x_end = 1.4
+    y_ctrl1 = 1.8
+    y_ctrl2 = 5.2
+    y_end = 8.8
     for index in range(count):
-        yi = y + index * spacing if direction == "down" else y - index * spacing
+        yi = y - index * spacing if direction == "down" else y + index * spacing
         path = canvas.beginPath()
         path.moveTo(x, _to_pdf_y(page_h, yi))
         if direction == "down":
             path.curveTo(
-                x - 5.2,
-                _to_pdf_y(page_h, yi - 2.0),
-                x - 5.4,
-                _to_pdf_y(page_h, yi - 5.0),
-                x - 3.4,
-                _to_pdf_y(page_h, yi - 8.0),
+                x + x_ctrl1,
+                _to_pdf_y(page_h, yi - y_ctrl1),
+                x + x_ctrl2,
+                _to_pdf_y(page_h, yi - y_ctrl2),
+                x + x_end,
+                _to_pdf_y(page_h, yi - y_end),
             )
         else:
             path.curveTo(
-                x + 5.2,
-                _to_pdf_y(page_h, yi + 2.0),
-                x + 5.4,
-                _to_pdf_y(page_h, yi + 5.0),
-                x + 3.4,
-                _to_pdf_y(page_h, yi + 8.0),
+                x + x_ctrl1,
+                _to_pdf_y(page_h, yi + y_ctrl1),
+                x + x_ctrl2,
+                _to_pdf_y(page_h, yi + y_ctrl2),
+                x + x_end,
+                _to_pdf_y(page_h, yi + y_end),
             )
         canvas.drawPath(path, stroke=1, fill=0)
 
@@ -198,29 +237,34 @@ def _draw_beam_group(
 ) -> None:
     x0 = float(params.get("x0", 0.0))
     x1 = float(params.get("x1", x0))
-    y = float(params.get("y", 0.0))
+    base_y = float(params.get("y", 0.0))
+    y0 = float(params.get("y0", base_y))
+    y1 = float(params.get("y1", y0))
     level = int(params.get("level", 1))
     thickness = float(params.get("thickness", 2.5))
     gap = float(params.get("gap", 3.0))
     direction = str(params.get("direction", "up"))
-    width = x1 - x0
-    if width <= 0.0:
+    if x1 <= x0:
         return
-    if direction == "down":
-        y_rect = y + (max(1, level) - 1) * (thickness + gap)
-    else:
-        y_rect = y - (max(1, level) - 1) * (thickness + gap) - thickness
-    y_rect_pdf = _to_pdf_y(page_h, y_rect)
+    level_index = max(1, level) - 1
+    # Stems-up: secondary beams stack downward (positive y, toward notehead).
+    # Stems-down: secondary beams stack upward (negative y, toward notehead).
+    sign = -1.0 if direction == "down" else 1.0
+    offset = level_index * (thickness + gap) * sign
+    near_y0 = y0 + offset
+    near_y1 = y1 + offset
+    far_y0 = near_y0 + sign * max(1.0, thickness)
+    far_y1 = near_y1 + sign * max(1.0, thickness)
+
     canvas.setFillColorRGB(0, 0, 0)
     canvas.setStrokeColorRGB(0, 0, 0)
-    canvas.rect(
-        x0,
-        y_rect_pdf - max(1.0, thickness),
-        width,
-        max(1.0, thickness),
-        fill=1,
-        stroke=0,
-    )
+    path = canvas.beginPath()
+    path.moveTo(x0, _to_pdf_y(page_h, near_y0))
+    path.lineTo(x1, _to_pdf_y(page_h, near_y1))
+    path.lineTo(x1, _to_pdf_y(page_h, far_y1))
+    path.lineTo(x0, _to_pdf_y(page_h, far_y0))
+    path.close()
+    canvas.drawPath(path, fill=1, stroke=0)
 
 
 def _draw_tab_span(
@@ -299,6 +343,10 @@ def _draw_glyph(
     canvas.setFillColorRGB(0, 0, 0)
     canvas.setStrokeColorRGB(0, 0, 0)
 
+    if glyph_id == "notehead":
+        _draw_notehead_glyph(canvas, page_h, x=x, y=y, size=size, metadata=metadata)
+        return
+
     if glyph_id == "clef":
         canvas.setFont("Times-Roman", max(10.0, size))
         canvas.drawString(x, y_pdf, "G")
@@ -307,13 +355,14 @@ def _draw_glyph(
     if glyph_id == "time_signature":
         numerator = int(metadata.get("numerator", 4))
         denominator = int(metadata.get("denominator", 4))
-        canvas.setFont("Helvetica", max(9.0, size))
-        canvas.drawString(x, y_pdf, f"{numerator}/{denominator}")
+        fs = max(9.0, size)
+        canvas.setFont("Times-Roman", fs)
+        canvas.drawCentredString(x, _to_pdf_y(page_h, y - 4.5), str(numerator))
+        canvas.drawCentredString(x, _to_pdf_y(page_h, y + 5.5), str(denominator))
         return
 
     if glyph_id == "rest":
-        canvas.setFont("Times-Roman", max(9.0, size))
-        canvas.drawString(x, y_pdf, "rest")
+        _draw_rest_glyph(canvas, page_h, x=x, y=y, size=size, metadata=metadata)
         return
     if glyph_id == "accidental_sharp":
         canvas.setFont("Helvetica", max(8.0, size))
@@ -323,6 +372,171 @@ def _draw_glyph(
         canvas.setFont("Helvetica", max(8.0, size))
         canvas.drawString(x, y_pdf, "b")
         return
+    if glyph_id == "accidental_natural":
+        canvas.setFont("Helvetica", max(8.0, size))
+        canvas.drawString(x, y_pdf, "♮")
+        return
 
     radius = max(1.0, size)
     canvas.circle(x, y_pdf, radius, fill=0, stroke=1)
+
+
+def _draw_notehead_glyph(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    *,
+    x: float,
+    y: float,
+    size: float,
+    metadata: dict[str, object],
+) -> None:
+    filled = bool(metadata.get("filled", False))
+    rx = max(3.4, float(metadata.get("rx", size * 1.1)))
+    ry = max(2.4, float(metadata.get("ry", size * 0.78)))
+    rotation = float(metadata.get("rotation", -20.0))
+    stroke_width = max(0.6, float(metadata.get("stroke_width", 0.9)))
+    y_pdf = _to_pdf_y(page_h, y)
+    canvas.saveState()
+    canvas.translate(x, y_pdf)
+    canvas.rotate(rotation)
+    canvas.setLineWidth(stroke_width)
+    canvas.ellipse(-rx, -ry, rx, ry, fill=1 if filled else 0, stroke=1)
+    canvas.restoreState()
+    dot_count = int(metadata.get("dot_count", 0) or 0)
+    if dot_count <= 0:
+        return
+    spacing = max(2.6, float(metadata.get("staff_spacing", 8.0)) * 0.33)
+    on_line = str(metadata.get("on_staff_line", "false")).lower() == "true"
+    dot_y = y - spacing * 0.45 if on_line else y
+    dot_r = max(1.0, ry * 0.32)
+    canvas.setFillColorRGB(0, 0, 0)
+    canvas.setStrokeColorRGB(0, 0, 0)
+    for idx in range(dot_count):
+        dot_x = x + rx + 2.3 + idx * (dot_r * 2.5)
+        canvas.circle(dot_x, _to_pdf_y(page_h, dot_y), dot_r, fill=1, stroke=0)
+
+
+def _draw_rest_glyph(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    *,
+    x: float,
+    y: float,
+    size: float,
+    metadata: dict[str, object],
+) -> None:
+    duration = float(metadata.get("duration", 0.5) or 0.5)
+    rest_kind = str(metadata.get("rest_kind") or _duration_class(duration))
+    if str(metadata.get("is_measure_rest", "")).lower() == "true":
+        rest_kind = "whole"
+    block_w = max(6.0, float(metadata.get("rest_block_width", 8.0)))
+    block_h = max(2.0, float(metadata.get("rest_block_height", 3.0)))
+    half_w = block_w / 2.0
+    augmentation_dot_count = int(metadata.get("dot_count", 0) or 0)
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setFillColorRGB(0, 0, 0)
+
+    def _draw_augmentation_dots(dot_y: float) -> None:
+        if augmentation_dot_count <= 0:
+            return
+        for idx in range(augmentation_dot_count):
+            dot_x = x + 5.0 + idx * 2.8
+            canvas.circle(dot_x, _to_pdf_y(page_h, dot_y), 1.15, fill=1, stroke=0)
+
+    if rest_kind == "whole":
+        canvas.setLineWidth(0.7)
+        canvas.line(x - 5.5, _to_pdf_y(page_h, y), x + 5.5, _to_pdf_y(page_h, y))
+        canvas.rect(
+            x - half_w,
+            _to_pdf_y(page_h, y + block_h),
+            block_w,
+            block_h,
+            fill=1,
+            stroke=0,
+        )
+        _draw_augmentation_dots(y + 1.2)
+        return
+
+    if rest_kind == "half":
+        canvas.setLineWidth(0.7)
+        canvas.line(x - 5.5, _to_pdf_y(page_h, y), x + 5.5, _to_pdf_y(page_h, y))
+        canvas.rect(
+            x - half_w,
+            _to_pdf_y(page_h, y),
+            block_w,
+            block_h,
+            fill=1,
+            stroke=0,
+        )
+        _draw_augmentation_dots(y + 0.5)
+        return
+
+    canvas.setLineWidth(1.0)
+    if rest_kind == "quarter":
+        path = canvas.beginPath()
+        path.moveTo(x - 2.0, _to_pdf_y(page_h, y + 4.0))
+        path.lineTo(x + 2.5, _to_pdf_y(page_h, y + 1.5))
+        path.curveTo(
+            x + 4.0,
+            _to_pdf_y(page_h, y + 0.5),
+            x - 3.5,
+            _to_pdf_y(page_h, y - 2.0),
+            x + 0.5,
+            _to_pdf_y(page_h, y - 3.0),
+        )
+        path.curveTo(
+            x + 2.5,
+            _to_pdf_y(page_h, y - 4.0),
+            x - 1.0,
+            _to_pdf_y(page_h, y + 5.5),
+            x + 0.5,
+            _to_pdf_y(page_h, y + 7.0),
+        )
+        canvas.drawPath(path, stroke=1, fill=0)
+        _draw_augmentation_dots(y + 0.5)
+        return
+
+    intrinsic_dot_count = {
+        "eighth": 1,
+        "sixteenth": 2,
+        "thirty_second": 3,
+        "sixty_fourth": 4,
+    }.get(rest_kind, 1)
+    canvas.setLineWidth(0.8)
+    canvas.line(x - 1.5, _to_pdf_y(page_h, y + 4.0), x + 2.0, _to_pdf_y(page_h, y - 3.8))
+    canvas.setLineWidth(0.0)
+    for idx in range(intrinsic_dot_count):
+        dot_x = x - 1.0 - idx * 0.8
+        dot_y = y - 3.0 + idx * 2.8
+        canvas.circle(dot_x, _to_pdf_y(page_h, dot_y), 1.25, fill=1, stroke=0)
+    _draw_augmentation_dots(y + 0.8)
+
+
+def _duration_class(duration: float) -> str:
+    base = _duration_components(duration)[0]
+    if base >= 4.0:
+        return "whole"
+    if base >= 2.0:
+        return "half"
+    if base >= 1.0:
+        return "quarter"
+    if base >= 0.5:
+        return "eighth"
+    if base >= 0.25:
+        return "sixteenth"
+    if base >= 0.125:
+        return "thirty_second"
+    return "sixty_fourth"
+
+
+def _duration_components(duration: float) -> tuple[float, int]:
+    known_bases = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
+    tol = 0.01
+    for base in known_bases:
+        if abs(duration - base) <= tol:
+            return base, 0
+        if abs(duration - base * 1.5) <= tol:
+            return base, 1
+        if abs(duration - base * 1.75) <= tol:
+            return base, 2
+    return duration, 0

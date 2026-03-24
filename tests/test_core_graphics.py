@@ -49,6 +49,8 @@ def test_default_notation_policy_symbol_rules() -> None:
     assert policy.is_allowed(RepresentationMode.STANDARD, "beam_group")
     assert policy.is_allowed(RepresentationMode.STANDARD, "tie_arc")
     assert policy.is_allowed(RepresentationMode.STANDARD, "slur_arc")
+    assert policy.is_allowed(RepresentationMode.STANDARD, "ledger_line")
+    assert policy.is_allowed(RepresentationMode.TAB, "barline")
     assert policy.is_allowed(RepresentationMode.TAB, "let_ring_span")
     assert policy.is_allowed(RepresentationMode.TAB, "palm_mute_span")
     assert policy.is_allowed(RepresentationMode.TAB_RHYTHM, "tab_digit")
@@ -74,6 +76,8 @@ def test_default_recipe_catalog_has_expected_recipes() -> None:
     assert "tie_arc" in recipes
     assert "beam_group" in recipes
     assert "flag_stack" in recipes
+    assert "barline" in recipes
+    assert "ledger_line" in recipes
     assert "bend_curve" in recipes
 
 
@@ -132,6 +136,23 @@ def test_pipeline_standard_tablature_mode_is_conformant() -> None:
     result = run_core_pipeline_from_raw(
         raw_score,
         representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+
+    assert result.conformance_issues == []
+
+
+def test_pipeline_standard_mode_dotted_values_are_conformant() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("dotted-song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.5, string_hint=1, fret_hint=0),
+            _note(pitch=66, onset=2.0, duration=1.75, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD,
     )
 
     assert result.conformance_issues == []
@@ -351,7 +372,10 @@ def test_scene_conformance_flags_invalid_stem_geometry_in_standard_mode() -> Non
     )
     stem = notes_layer.recipe_instances[stem_idx]
     params = dict(stem.params)
-    params["y1"] = float(params.get("y0", 0.0)) + 5.0
+    y0 = float(params.get("y0", 0.0))
+    direction = str(stem.metadata.get("direction", "up"))
+    # Force an invalid geometry whatever the current stem direction is.
+    params["y1"] = y0 + 5.0 if direction == "up" else y0 - 5.0
     notes_layer.recipe_instances[stem_idx] = replace(stem, params=params)
 
     issues = check_scene_conformance(

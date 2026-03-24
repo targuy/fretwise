@@ -47,6 +47,7 @@ class MeasureLayout:
     width: float
     height: float
     beats_per_measure: int
+    time_denominator: int = 4
     event_layouts: list[EventLayout] = field(default_factory=list)
     collision_issues: list[CollisionIssue] = field(default_factory=list)
     metadata: dict[str, str] = field(default_factory=dict)

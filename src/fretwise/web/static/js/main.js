@@ -30,6 +30,7 @@ const fileGrid      = $('#file-list');
 const trackGrid     = $('#track-list');
 const tabCanvas     = $('#tab-canvas');
 const cursorCanvas  = $('#cursor-canvas');
+const coreSvgView   = $('#core-svg-view');
 const legendContent = $('#legend-content');
 const toolbar       = $('#toolbar');
 
@@ -51,6 +52,7 @@ const trackSwitcher  = $('#track-switcher');
 const selSpeed       = $('#speed-select');
 const bpmInput       = $('#bpm-input');
 const selMode        = $('#mode-select');
+const selRepresentationMode = $('#representation-mode-select');
 const uploadInput    = $('#upload-input');
 const uploadStatus   = $('#upload-status');
 const rngVolume     = $('#rng-volume');
@@ -58,6 +60,7 @@ const songTitle     = $('#song-title');
 const songArtist    = $('#song-artist');
 const trackBadge    = $('#meta-instrument');
 const metaMode      = $('#meta-mode');
+const metaViewMode  = $('#meta-view-mode');
 const metaTempo     = $('#meta-tempo');
 const positionBar   = $('#position-bar');
 
@@ -173,7 +176,8 @@ async function selectTrack(trackId, trackName) {
 
   try {
     const mode = selMode?.value || 'reference';
-    const data = await fetchSolve(currentFile, trackId, mode);
+    const representationMode = getSelectedRepresentationMode();
+    const data = await fetchSolve(currentFile, trackId, mode, representationMode);
     initRenderer(data);
   } catch (err) {
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
@@ -195,6 +199,7 @@ async function exportPDF() {
   try {
     const mode = selMode?.value || 'reference';
     const engine = pdfEngineSelect?.value || 'core';
+    const representationMode = getSelectedRepresentationMode();
     const {
       blob,
       filename,
@@ -206,6 +211,7 @@ async function exportPDF() {
       currentTrackId,
       mode,
       engine,
+      representationMode,
     );
     _downloadBlob(blob, filename);
     if (usedEngine === 'core') {
@@ -262,6 +268,56 @@ function _setPdfExportStatus(message, level = 'neutral') {
     return;
   }
   pdfExportStatus.style.color = 'rgba(255,255,255,0.75)';
+}
+
+function getSelectedRepresentationMode() {
+  return selRepresentationMode?.value || 'standard_tablature';
+}
+
+function _representationModeLabel(mode) {
+  switch (mode) {
+    case 'standard':
+      return 'STANDARD';
+    case 'standard_tablature':
+      return 'STANDARD + TAB';
+    case 'tablature_rhythm':
+      return 'TAB + RHYTHM';
+    case 'tablature':
+    default:
+      return 'TAB';
+  }
+}
+
+function applyRepresentationModeView(data) {
+  const representationMode = data?.representation_mode || getSelectedRepresentationMode();
+  if (selRepresentationMode && selRepresentationMode.value !== representationMode) {
+    selRepresentationMode.value = representationMode;
+  }
+  if (metaViewMode) {
+    metaViewMode.textContent = _representationModeLabel(representationMode);
+  }
+
+  const showCore = representationMode !== 'tablature';
+  if (tabCanvas) tabCanvas.style.visibility = showCore ? 'hidden' : 'visible';
+  if (cursorCanvas) cursorCanvas.style.visibility = showCore ? 'hidden' : 'visible';
+  if (coreSvgView) {
+    coreSvgView.style.display = showCore ? 'block' : 'none';
+    coreSvgView.innerHTML = showCore && data?.core_svg ? data.core_svg : '';
+    if (showCore) _applyResponsiveCoreSvg();
+  }
+}
+
+function _applyResponsiveCoreSvg() {
+  if (!coreSvgView) return;
+  const svg = coreSvgView.querySelector('svg');
+  if (!svg) return;
+  svg.setAttribute('preserveAspectRatio', 'xMinYMin meet');
+  svg.removeAttribute('width');
+  svg.removeAttribute('height');
+  svg.style.display = 'block';
+  svg.style.width = '100%';
+  svg.style.maxWidth = '100%';
+  svg.style.height = 'auto';
 }
 
 function exportPDFLegacyCanvas() {
@@ -359,9 +415,11 @@ function initRenderer(data) {
   if (data.artist) songArtist.textContent = data.artist;
   if (metaTempo) metaTempo.textContent = `♩ = ${Math.round(data.tempo || 120)}`;
   if (bpmInput) bpmInput.value = Math.round(data.tempo || 120);
+  if (metaMode) metaMode.textContent = (selMode?.value || 'reference').toUpperCase();
 
   renderer = new TabRenderer(tabCanvas, data);
   renderer.render();
+  applyRepresentationModeView(data);
 
   // Populate chord strip from chord diagrams
   const strip = $('#chord-strip');
@@ -618,6 +676,14 @@ if (trackSwitcher) {
 
 if (selMode) {
   selMode.addEventListener('change', () => {
+    if (currentFile && currentTrackId != null) {
+      selectTrack(currentTrackId, songArtist.textContent);
+    }
+  });
+}
+
+if (selRepresentationMode) {
+  selRepresentationMode.addEventListener('change', () => {
     if (currentFile && currentTrackId != null) {
       selectTrack(currentTrackId, songArtist.textContent);
     }

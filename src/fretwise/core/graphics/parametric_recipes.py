@@ -29,6 +29,18 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
             required_params=("x", "y", "width", "count", "spacing"),
             tags=("standard", "grid"),
         ),
+        "barline": RecipeDefinition(
+            recipe_id="barline",
+            required_params=("x", "y0", "y1"),
+            optional_params=("width",),
+            tags=("system", "divider"),
+        ),
+        "ledger_line": RecipeDefinition(
+            recipe_id="ledger_line",
+            required_params=("x0", "x1", "y"),
+            optional_params=("width",),
+            tags=("standard", "pitch"),
+        ),
         "stem_line": RecipeDefinition(
             recipe_id="stem_line",
             required_params=("x", "y0", "y1"),
