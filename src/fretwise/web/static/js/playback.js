@@ -27,8 +27,9 @@ export class PlaybackEngine {
     this._masterGain = null;
     this._volume = 0.7;        // master volume 0..1
     this._lastScheduledMeasure = -1;
-    this._synth = null;          // SpessaSynth Synthetizer (null = oscillator fallback)
+    this._synth = null;          // soundfont-player Player (null = oscillator fallback)
     this._synthLoading = false;  // loading guard to avoid double-init
+    this._instrumentName = 'electric_guitar_clean'; // current soundfont instrument
 
     // Callbacks
     this.onMeasureChange = null;
@@ -67,9 +68,45 @@ export class PlaybackEngine {
   disableAudio() {
     this.audioEnabled = false;
     if (this._synth) {
-      try { for (let c = 0; c < 16; c++) this._synth.allNotesOff(c); } catch (_) {}
+      try { this._synth.stop(); } catch (_) {}
     }
     return false;
+  }
+
+  /**
+   * Infer the GM soundfont instrument name from a human-readable track name.
+   * @param {string} trackName — e.g. "E. Guitar", "Bass", "Distortion"
+   * @returns {string} soundfont instrument name (matches gleitz/midi-js-soundfonts key)
+   */
+  static _inferInstrument(trackName) {
+    const n = (trackName || '').toLowerCase();
+    if (/dist|metal|crunch|heavy/i.test(n))       return 'distortion_guitar';
+    if (/overdriv|driven/i.test(n))                return 'overdriven_guitar';
+    if (/bass/i.test(n))                           return 'electric_bass_finger';
+    if (/nylon|classical/i.test(n))                return 'acoustic_guitar_nylon';
+    if (/acoustic|folk|steel/i.test(n))            return 'acoustic_guitar_steel';
+    // Default: clean electric covers Lead, Rhythm, E. Guitar, Jazz Guitar, etc.
+    return 'electric_guitar_clean';
+  }
+
+  /**
+   * Set the current instrument from a track name string and (re)load if needed.
+   * Safe to call before or after enableAudio().
+   * @param {string} trackName — human-readable name from the API
+   */
+  setInstrument(trackName) {
+    const inst = PlaybackEngine._inferInstrument(trackName);
+    if (inst === this._instrumentName && this._synth) return; // no change
+    this._instrumentName = inst;
+    // Discard previous synth so _initSynth() reloads with new instrument
+    if (this._synth) {
+      try { this._synth.stop(); } catch (_) {}
+      this._synth = null;
+    }
+    this._synthLoading = false;
+    if (this.audioEnabled) {
+      this._initSynth().catch(() => {});
+    }
   }
 
   /** Set master volume (0.0 – 1.0). */
@@ -322,28 +359,50 @@ export class PlaybackEngine {
   // ── Note audio synthesis ──────────────────────────────────────────
 
   /**
-   * Async-load SpessaSynth from CDN and the SF2 soundfont from /api/soundfont.
-   * If either fails, _synth stays null and oscillator synthesis is used instead.
+   * Load soundfont-player (UMD) and the MusyngKite soundfont for the current instrument.
+   * On success, this._synth = Soundfont Player instance.
+   * On any failure, this._synth stays null and the oscillator fallback is used.
    */
   async _initSynth() {
     if (this._synth || this._synthLoading) return;
     this._synthLoading = true;
     if (this.onSynthStatusChange) this.onSynthStatusChange('loading');
     try {
-      const resp = await fetch('/api/soundfont');
-      if (!resp.ok) throw new Error(`SF2 ${resp.status}`);
-      const sf2Buffer = await resp.arrayBuffer();
-      const { Synthetizer } = await import('https://cdn.jsdelivr.net/npm/spessasynth_lib@3');
-      const dest = this._masterGain || this._audioCtx.destination;
-      this._synth = new Synthetizer(dest, sf2Buffer);
-      // Wait for AudioWorklet to initialise before sending program-change
-      await new Promise(r => setTimeout(r, 800));
-      // Program 25 = Steel-String Guitar on all voice channels (0–3)
-      for (let ch = 0; ch < 4; ch++) this._synth.programChange(ch, 25);
-      console.log('[FretWise] SpessaSynth ready (SF2 loaded)');
+      // Step 1 — inject soundfont-player UMD script (sets window.Soundfont)
+      if (!window.Soundfont) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = '/static/js/vendor/soundfont-player.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('soundfont-player script failed to load'));
+          document.head.appendChild(s);
+        });
+      }
+      if (!window.Soundfont) throw new Error('window.Soundfont not defined after script load');
+
+      // Step 2 — load the instrument from local pre-rendered MP3 samples
+      const instName = this._instrumentName;
+      console.log(`[FretWise] soundfont-player: loading ${instName}…`);
+      this._synth = await window.Soundfont.instrument(
+        this._audioCtx,
+        instName,
+        {
+          soundfont: 'MusyngKite',
+          format: 'mp3',
+          nameToUrl: (name, sf, format) =>
+            `/static/js/vendor/soundfonts/${sf}/${name}-${format}.js`,
+          destination: this._masterGain || this._audioCtx.destination,
+          gain: 4,
+        }
+      );
+
+      // Audible confirmation note: A4 for 0.5 s
+      this._synth.play(69, this._audioCtx.currentTime, { duration: 0.5, gain: 0.8 });
+
+      console.log(`[FretWise] soundfont-player ready — ${instName}`);
       if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
-      console.warn('[FretWise] SpessaSynth init failed, using oscillator fallback:', err);
+      console.error('[FretWise] soundfont-player FAILED, oscillator fallback:', err);
       this._synth = null;
       if (this.onSynthStatusChange) this.onSynthStatusChange('error');
     } finally {
@@ -367,22 +426,19 @@ export class PlaybackEngine {
     if (!notes || !notes.length) return;
 
     if (this._synth) {
+      // soundfont-player: schedule notes via AudioContext time (precise, no setTimeout drift)
       const bpm = this.bpm;
       const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
       const secPerBeat = (60 / this.tempo) / this.speed;
+      const now = this._audioCtx.currentTime;
       for (const note of notes) {
-        // voice_hint 0-3 → MIDI channel 0-3 (all Steel Guitar, avoids noteOn/noteOff cross-talk)
-        const ch = (note.voice_hint ?? 0) & 0x0F;
-        const delayMs = (offsetSec + (note.onset - measureOnset) * secPerBeat) * 1000;
-        const durMs = Math.max(80, note.duration * secPerBeat * 1000 - 30);
-        const vel = this._dynamicToVelocity(note.dynamic);
-        setTimeout(() => {
-          if (!this.audioEnabled || !this._synth) return;
-          this._synth.noteOn(ch, note.pitch, vel);
-          setTimeout(() => this._synth?.noteOff(ch, note.pitch), durMs);
-        }, delayMs);
+        const when = now + offsetSec + (note.onset - measureOnset) * secPerBeat;
+        const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
+        const gain = this._dynamicToVelocity(note.dynamic) / 127;
+        this._synth.play(note.pitch, when, { duration, gain });
       }
     } else {
+      console.log(`[FretWise] measure ${measureIdx}: oscillator fallback (synth=${this._synth}, loading=${this._synthLoading})`);
       this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
     }
   }

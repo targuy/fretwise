@@ -145,6 +145,9 @@ export class TabRenderer {
     // Dynamic tracking: only show dynamic marking when it changes
     this._lastDynamic = '';
 
+    // Fingering display toggle
+    this.showFingering = true;
+
     // Playback state
     this.cursorBeat = 0;
     this.isPlaying = false;
@@ -467,9 +470,11 @@ export class TabRenderer {
     }
 
     // Second pass: finger annotations drawn on top of all note ovals
-    const fingerMaxX = mX + mW - 8;  // 8px buffer before barline
-    for (const { note, x, y } of notePositions) {
-      this._drawFingerAnnotation(ctx, note, x, y, fingerMaxX);
+    if (this.showFingering) {
+      const fingerMaxX = mX + mW - 8;  // 8px buffer before barline
+      for (const { note, x, y } of notePositions) {
+        this._drawFingerAnnotation(ctx, note, x, y, fingerMaxX);
+      }
     }
 
     // Draw dynamic marking once per measure column (only on change)

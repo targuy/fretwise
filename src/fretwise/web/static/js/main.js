@@ -455,6 +455,8 @@ function initRenderer(data) {
     tempo: data.tempo || 120,
     beatsPerMeasure: data.beats_per_measure || 4,
   });
+  // Select the right soundfont instrument from the track name
+  playback.setInstrument(data.track_name || '');
   playback.onMeasureChange = (_m) => {};
   playback.onStop = () => { updatePlayButton(false); stopCursorLoop(); };
 
@@ -516,15 +518,16 @@ function initRenderer(data) {
   // SF2 loading indicator — update sound button while SpessaSynth is fetching
   playback.onSynthStatusChange = (status) => {
     if (!btnSound) return;
+    const instName = PlaybackEngine._inferInstrument(data.track_name || '');
     if (status === 'loading') {
       btnSound.textContent = '⏳';
-      btnSound.title = 'Chargement de la soundfont SF2 (125 MB)…';
+      btnSound.title = `Chargement de l'instrument (${instName})…`;
     } else if (status === 'ready') {
       btnSound.textContent = soundOn ? '🔊' : '🔇';
-      btnSound.title = soundOn ? 'Son ON (SF2) — cliquer pour couper' : 'Son OFF — cliquer pour activer';
+      btnSound.title = soundOn ? `Son ON (${instName}) — cliquer pour couper` : 'Son OFF — cliquer pour activer';
     } else { // 'error' — oscillator fallback
       btnSound.textContent = soundOn ? '🔊' : '🔇';
-      btnSound.title = soundOn ? 'Son ON (oscillateur) — SF2 indisponible' : 'Son OFF — cliquer pour activer';
+      btnSound.title = soundOn ? 'Son ON (oscillateur) — soundfont indisponible' : 'Son OFF — cliquer pour activer';
     }
   };
 
@@ -628,13 +631,22 @@ if (btnSound) {
     if (soundOn) {
       playback.disableAudio();
       soundOn = false;
+      btnSound.classList.remove('active');
+      btnSound.textContent = '🔇';
+      btnSound.title = 'Sound OFF — click to enable';
     } else {
       playback.enableAudio();
       soundOn = true;
+      btnSound.classList.add('active');
+      // Don't overwrite text here — onSynthStatusChange will set it to ⏳ then 🔊/🔇
+      // Only set it now if synth is already ready (or not loading)
+      if (!playback._synthLoading) {
+        btnSound.textContent = '🔊';
+        btnSound.title = playback._synth
+          ? 'Sound ON (SF2) — click to mute'
+          : 'Sound ON — click to mute';
+      }
     }
-    btnSound.classList.toggle('active', soundOn);
-    btnSound.textContent = soundOn ? '🔊' : '🔇';
-    btnSound.title = soundOn ? 'Sound ON — click to mute' : 'Sound OFF — click to enable';
   });
 }
 
