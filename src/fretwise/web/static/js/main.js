@@ -47,7 +47,6 @@ const btnLoopA      = $('#btn-loop-a');
 const btnLoopB      = $('#btn-loop-b');
 const btnLoopClear  = $('#btn-loop-clear');
 const btnMetronome  = $('#btn-metronome');
-const btnSound      = $('#btn-sound');
 const btnFingering  = $('#btn-fingering');
 const btnExportPdf  = $('#btn-export-pdf');
 const pdfEngineSelect = $('#pdf-engine-select');
@@ -425,13 +424,8 @@ function initRenderer(data) {
 
   renderer = new TabRenderer(tabCanvas, data);
   renderer.render();
-  // Reset sound button state when loading a new track
-  soundOn = false;
-  if (btnSound) {
-    btnSound.classList.remove('active');
-    btnSound.textContent = '\uD83D\uDD07';
-    btnSound.title = 'Sound OFF — click to enable';
-  }
+  // Audio is always enabled; the multi-track bar handles per-track muting
+  soundOn = true;
   if (btnFingering) {
     btnFingering.classList.toggle('active', renderer.showFingering);
   }
@@ -464,6 +458,8 @@ function initRenderer(data) {
   playback.setInstrument(data.track_name || '');
   playback.onMeasureChange = (_m) => {};
   playback.onStop = () => { updatePlayButton(false); stopCursorLoop(); };
+  // Enable audio immediately (muting is handled per-track in the multi-track bar)
+  playback.enableAudio();
 
   // Wire position scrubber
   playback.onPositionChange = (frac) => {
@@ -519,22 +515,6 @@ function initRenderer(data) {
   } else {
     if (coreSvgView) coreSvgView.onclick = null;
   }
-
-  // SF2 loading indicator — update sound button while SpessaSynth is fetching
-  playback.onSynthStatusChange = (status) => {
-    if (!btnSound) return;
-    const instName = PlaybackEngine._inferInstrument(data.track_name || '');
-    if (status === 'loading') {
-      btnSound.textContent = '⏳';
-      btnSound.title = `Chargement de l'instrument (${instName})…`;
-    } else if (status === 'ready') {
-      btnSound.textContent = soundOn ? '🔊' : '🔇';
-      btnSound.title = soundOn ? `Son ON (${instName}) — cliquer pour couper` : 'Son OFF — cliquer pour activer';
-    } else { // 'error' — oscillator fallback
-      btnSound.textContent = soundOn ? '🔊' : '🔇';
-      btnSound.title = soundOn ? 'Son ON (oscillateur) — soundfont indisponible' : 'Son OFF — cliquer pour activer';
-    }
-  };
 
   // Speed
   if (selSpeed) {
@@ -711,31 +691,6 @@ if (btnFingering) {
     renderer.showFingering = !renderer.showFingering;
     btnFingering.classList.toggle('active', renderer.showFingering);
     renderer.render();
-  });
-}
-
-if (btnSound) {
-  btnSound.addEventListener('click', () => {
-    if (!playback) return;
-    if (soundOn) {
-      playback.disableAudio();
-      soundOn = false;
-      btnSound.classList.remove('active');
-      btnSound.textContent = '🔇';
-      btnSound.title = 'Sound OFF — click to enable';
-    } else {
-      playback.enableAudio();
-      soundOn = true;
-      btnSound.classList.add('active');
-      // Don't overwrite text here — onSynthStatusChange will set it to ⏳ then 🔊/🔇
-      // Only set it now if synth is already ready (or not loading)
-      if (!playback._synthLoading) {
-        btnSound.textContent = '🔊';
-        btnSound.title = playback._synth
-          ? 'Sound ON (SF2) — click to mute'
-          : 'Sound ON — click to mute';
-      }
-    }
   });
 }
 
