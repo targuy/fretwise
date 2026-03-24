@@ -8,6 +8,7 @@
 import { fetchExportPdf, fetchFiles, fetchSolve, fetchTracks, uploadFile } from './api.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
+import { SvgCursorDriver } from './svg-playback.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
@@ -17,6 +18,7 @@ let currentTracks = [];   // all tracks for the current file
 let renderer = null;
 let playback = null;
 let loopASet = false;  // has A marker been set
+let soundOn = false;   // tracks mute state across track changes
 
 // ── DOM references ──────────────────────────────────────────────────
 
@@ -43,6 +45,7 @@ const btnLoopB      = $('#btn-loop-b');
 const btnLoopClear  = $('#btn-loop-clear');
 const btnMetronome  = $('#btn-metronome');
 const btnSound      = $('#btn-sound');
+const btnFingering  = $('#btn-fingering');
 const btnExportPdf  = $('#btn-export-pdf');
 const pdfEngineSelect = $('#pdf-engine-select');
 const pdfExportStatus = $('#pdf-export-status');
@@ -280,11 +283,9 @@ function _representationModeLabel(mode) {
       return 'STANDARD';
     case 'standard_tablature':
       return 'STANDARD + TAB';
-    case 'tablature_rhythm':
-      return 'TAB + RHYTHM';
     case 'tablature':
     default:
-      return 'TAB';
+      return 'TAB + RHYTHM';
   }
 }
 
@@ -419,6 +420,16 @@ function initRenderer(data) {
 
   renderer = new TabRenderer(tabCanvas, data);
   renderer.render();
+  // Reset sound button state when loading a new track
+  soundOn = false;
+  if (btnSound) {
+    btnSound.classList.remove('active');
+    btnSound.textContent = '\uD83D\uDD07';
+    btnSound.title = 'Sound OFF — click to enable';
+  }
+  if (btnFingering) {
+    btnFingering.classList.toggle('active', renderer.showFingering);
+  }
   applyRepresentationModeView(data);
 
   // Populate chord strip from chord diagrams
@@ -485,6 +496,37 @@ function initRenderer(data) {
     const y = e.clientY - rect.top;
     tabCanvas.style.cursor = renderer.getChordNameAtPoint(x, y) ? 'pointer' : 'default';
   });
+
+  // SVG cursor driver for standard / standard+tab modes
+  const _svgMode = data.representation_mode || getSelectedRepresentationMode();
+  if (_svgMode !== 'tablature' && data.measure_regions?.length && coreSvgView) {
+    const _svgDriver = new SvgCursorDriver(coreSvgView, data);
+    _svgDriver.init();
+    playback.onMeasureChange = (m) => {
+      _svgDriver.highlight(m, playback.loopStart, playback.loopEnd);
+    };
+    coreSvgView.onclick = (e) => {
+      const m = _svgDriver.measureAtClick(e);
+      if (m >= 0) playback.goToMeasure(m);
+    };
+  } else {
+    if (coreSvgView) coreSvgView.onclick = null;
+  }
+
+  // SF2 loading indicator — update sound button while SpessaSynth is fetching
+  playback.onSynthStatusChange = (status) => {
+    if (!btnSound) return;
+    if (status === 'loading') {
+      btnSound.textContent = '⏳';
+      btnSound.title = 'Chargement de la soundfont SF2 (125 MB)…';
+    } else if (status === 'ready') {
+      btnSound.textContent = soundOn ? '🔊' : '🔇';
+      btnSound.title = soundOn ? 'Son ON (SF2) — cliquer pour couper' : 'Son OFF — cliquer pour activer';
+    } else { // 'error' — oscillator fallback
+      btnSound.textContent = soundOn ? '🔊' : '🔇';
+      btnSound.title = soundOn ? 'Son ON (oscillateur) — SF2 indisponible' : 'Son OFF — cliquer pour activer';
+    }
+  };
 
   // Speed
   if (selSpeed) {
@@ -571,8 +613,16 @@ if (btnLoopClear) {
   });
 }
 
+if (btnFingering) {
+  btnFingering.addEventListener('click', () => {
+    if (!renderer) return;
+    renderer.showFingering = !renderer.showFingering;
+    btnFingering.classList.toggle('active', renderer.showFingering);
+    renderer.render();
+  });
+}
+
 if (btnSound) {
-  let soundOn = false;
   btnSound.addEventListener('click', () => {
     if (!playback) return;
     if (soundOn) {

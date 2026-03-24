@@ -34,6 +34,7 @@ export class PlaybackEngine {
     this.onMeasureChange = null;
     this.onStop = null;
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
+    this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
   }
 
   get totalMeasures() {
@@ -327,6 +328,7 @@ export class PlaybackEngine {
   async _initSynth() {
     if (this._synth || this._synthLoading) return;
     this._synthLoading = true;
+    if (this.onSynthStatusChange) this.onSynthStatusChange('loading');
     try {
       const resp = await fetch('/api/soundfont');
       if (!resp.ok) throw new Error(`SF2 ${resp.status}`);
@@ -335,12 +337,15 @@ export class PlaybackEngine {
       const dest = this._masterGain || this._audioCtx.destination;
       this._synth = new Synthetizer(dest, sf2Buffer);
       // Wait for AudioWorklet to initialise before sending program-change
-      await new Promise(r => setTimeout(r, 600));
-      this._synth.programChange(0, 25);  // program 25 = Steel-String Guitar
-      console.log('[FretWise] SpessaSynth ready');
+      await new Promise(r => setTimeout(r, 800));
+      // Program 25 = Steel-String Guitar on all voice channels (0–3)
+      for (let ch = 0; ch < 4; ch++) this._synth.programChange(ch, 25);
+      console.log('[FretWise] SpessaSynth ready (SF2 loaded)');
+      if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
-      console.warn('[FretWise] Oscillator fallback:', err.message);
+      console.warn('[FretWise] SpessaSynth init failed, using oscillator fallback:', err);
       this._synth = null;
+      if (this.onSynthStatusChange) this.onSynthStatusChange('error');
     } finally {
       this._synthLoading = false;
     }
@@ -366,13 +371,15 @@ export class PlaybackEngine {
       const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
       const secPerBeat = (60 / this.tempo) / this.speed;
       for (const note of notes) {
+        // voice_hint 0-3 → MIDI channel 0-3 (all Steel Guitar, avoids noteOn/noteOff cross-talk)
+        const ch = (note.voice_hint ?? 0) & 0x0F;
         const delayMs = (offsetSec + (note.onset - measureOnset) * secPerBeat) * 1000;
         const durMs = Math.max(80, note.duration * secPerBeat * 1000 - 30);
         const vel = this._dynamicToVelocity(note.dynamic);
         setTimeout(() => {
           if (!this.audioEnabled || !this._synth) return;
-          this._synth.noteOn(0, note.pitch, vel);
-          setTimeout(() => this._synth?.noteOff(0, note.pitch), durMs);
+          this._synth.noteOn(ch, note.pitch, vel);
+          setTimeout(() => this._synth?.noteOff(ch, note.pitch), durMs);
         }, delayMs);
       }
     } else {

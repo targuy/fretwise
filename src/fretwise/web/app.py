@@ -187,6 +187,10 @@ def _register_routes(app: FastAPI) -> None:
             "chord_markers": chord_markers,
             "core_svg": core_result.svg,
             "core_conformance_issues": len(core_result.conformance_issues),
+            "measure_regions": _extract_measure_regions(
+                getattr(core_result, "render_scene", None),
+                getattr(core_result, "canonical_score", None),
+            ),
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
         }
@@ -260,6 +264,19 @@ def _register_routes(app: FastAPI) -> None:
         content = await file.read()
         dest.write_bytes(content)
         return {"name": safe_name, "status": "ok"}
+
+    @app.get("/api/soundfont")
+    async def get_soundfont() -> Response:
+        """Stream the bundled SF2 soundfont file for in-browser synthesis."""
+        # Project root is 4 levels up from this file (src/fretwise/web/app.py)
+        sf2_path = Path(__file__).parent.parent.parent.parent / "data" / "sounds" / "Shan SGM-Pro 11.SF2"
+        if not sf2_path.exists():
+            raise HTTPException(404, "Soundfont file not found")
+        return Response(
+            content=sf2_path.read_bytes(),
+            media_type="application/octet-stream",
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -482,6 +499,53 @@ def _run_core_pipeline_for_events(
     )
 
 
+def _extract_measure_regions(
+    render_scene: Any,
+    canonical_score: Any,
+) -> list[dict[str, Any]]:
+    """Compute per-measure {measure_idx, x, y0, y1, width} regions for SVG cursor."""
+    try:
+        from fretwise.core.layout import canonical_to_page_layout  # lazy import
+
+        page_layout = canonical_to_page_layout(canonical_score)
+
+        # Collect y-bounds per system from barline recipes in the render scene
+        pages = render_scene.document_scene.pages if render_scene else []
+        sys_y_bounds: list[tuple[float, float]] = []
+        for sys_scene in (pages[0].systems if pages else []):
+            y0: float | None = None
+            y1: float | None = None
+            for staff in sys_scene.staves[:1]:
+                for layer in staff.layer_groups:
+                    for recipe in layer.recipe_instances:
+                        if recipe.recipe_id == "barline":
+                            by0 = float(recipe.params.get("y0", 0.0))
+                            by1 = float(recipe.params.get("y1", 0.0))
+                            if y0 is None or by0 < y0:
+                                y0 = by0
+                            if y1 is None or by1 > y1:
+                                y1 = by1
+            sys_y_bounds.append((y0 or 0.0, y1 or 100.0))
+
+        regions: list[dict[str, Any]] = []
+        measure_idx = 0
+        for si, sys_layout in enumerate(page_layout.systems):
+            y0_sys, y1_sys = sys_y_bounds[si] if si < len(sys_y_bounds) else (0.0, 100.0)
+            for stf_layout in sys_layout.staves[:1]:
+                for ml in stf_layout.measure_layouts:
+                    regions.append({
+                        "measure_idx": measure_idx,
+                        "x": ml.x,
+                        "y0": y0_sys,
+                        "y1": y1_sys,
+                        "width": ml.width,
+                    })
+                    measure_idx += 1
+        return regions
+    except Exception:
+        return []
+
+
 def _serialize_result(r: FingeringResult) -> dict[str, Any]:
     """Serialize a FingeringResult to a JSON-friendly dict."""
     ne = r.note_event
@@ -494,6 +558,7 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "tempo": ne.tempo,
         "articulation": str(ne.articulation),
         "dynamic": str(ne.dynamic),
+        "voice_hint": ne.voice_hint,
         "string": st.string_num,
         "fret": st.fret,
         "finger": str(st.finger),
