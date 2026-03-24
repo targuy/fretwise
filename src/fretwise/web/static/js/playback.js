@@ -174,6 +174,11 @@ export class PlaybackEngine {
         }
       );
       console.log(`[FretWise] secondary "${ch.trackName}" ready (${instName})`);
+      // If playback is already running, immediately play the current measure
+      // so the channel doesn't stay silent until the next measure change.
+      if (this.isPlaying && this._lastScheduledMeasure >= 0) {
+        this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
+      }
     } catch (err) {
       console.warn(`[FretWise] secondary "${ch.trackName}" load failed:`, err);
       ch.synth = null;
@@ -554,18 +559,28 @@ export class PlaybackEngine {
     // Schedule secondary audio channels (same AudioContext time base = perfect sync)
     for (const ch of this._secondaryChannels) {
       if (!ch.enabled || !ch.synth) continue;
-      const chNotes = ch.measures[measureIdx];
-      if (!chNotes || !chNotes.length) continue;
-      const chBpm = this.bpm;
-      const chMeasureOnset = Math.floor(chNotes[0].onset / chBpm) * chBpm;
-      const chSpb = (60 / this.tempo) / this.speed;
-      const chNow = this._audioCtx.currentTime;
-      for (const note of chNotes) {
-        const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
-        const duration = Math.max(0.08, note.duration * chSpb - 0.025);
-        const gain = (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain;
-        ch.synth.play(note.pitch, when, { duration, gain });
-      }
+      this._scheduleChannelNotes(ch, measureIdx, offsetSec);
+    }
+  }
+
+  /** Schedule notes for a single secondary channel at a given measure.
+   * @param {Object} ch - secondary channel object
+   * @param {number} measureIdx
+   * @param {number} [offsetSec=0]
+   */
+  _scheduleChannelNotes(ch, measureIdx, offsetSec = 0) {
+    if (!ch.synth || !ch.enabled || !this._audioCtx || !this.audioEnabled) return;
+    const chNotes = ch.measures[measureIdx];
+    if (!chNotes || !chNotes.length) return;
+    const chBpm = this.bpm;
+    const chMeasureOnset = Math.floor(chNotes[0].onset / chBpm) * chBpm;
+    const chSpb = (60 / this.tempo) / this.speed;
+    const chNow = this._audioCtx.currentTime;
+    for (const note of chNotes) {
+      const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
+      const duration = Math.max(0.08, note.duration * chSpb - 0.025);
+      const gain = (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain;
+      ch.synth.play(note.pitch, when, { duration, gain });
     }
   }
 
