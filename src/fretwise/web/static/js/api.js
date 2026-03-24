@@ -23,6 +23,17 @@ export async function uploadFile(file) {
   return res.json();
 }
 
+export async function fetchNotes(filename, trackId, mode) {
+  let url = `/api/notes/${encodeURIComponent(filename)}?mode=${encodeURIComponent(mode || 'reference')}`;
+  if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(err.detail || 'Notes fetch failed');
+  }
+  return res.json();
+}
+
 export async function fetchSolve(filename, trackId, mode, representationMode) {
   let url =
     `/api/solve/${encodeURIComponent(filename)}?mode=${encodeURIComponent(mode)}` +

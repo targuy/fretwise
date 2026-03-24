@@ -130,6 +130,38 @@ def _register_routes(app: FastAPI) -> None:
 
         return tracks
 
+    @app.get("/api/notes/{filename}")
+    async def get_notes(
+        filename: str,
+        track_id: int | None = Query(None),
+        mode: str = Query("reference"),
+    ) -> dict[str, Any]:
+        """Return Viterbi-fingered notes for a track (audio-only, no rendering).
+
+        Lighter than /api/solve: skips the core rendering pipeline entirely.
+        Used by the multi-track audio mixer to load secondary track note data.
+        """
+        filepath = _resolve_file(app, filename)
+        modes = _solve_modes()
+        if mode not in modes:
+            raise HTTPException(400, f"Unknown mode: {mode}")
+
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        results, _ = _run_legacy_pipeline(events, mode=mode)
+        track_name: str = getattr(adapter, "track_name", "") or ""
+        tempo = events[0].tempo if events else 120.0
+        beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
+
+        return {
+            "track_name": track_name,
+            "tempo": tempo,
+            "beats_per_measure": beats_per_measure,
+            "results": [_serialize_result(r) for r in results],
+        }
+
     @app.get("/api/solve/{filename}")
     async def solve_file(
         filename: str,

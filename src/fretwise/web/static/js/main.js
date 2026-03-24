@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { fetchExportPdf, fetchFiles, fetchSolve, fetchTracks, uploadFile } from './api.js';
+import { fetchExportPdf, fetchFiles, fetchNotes, fetchSolve, fetchTracks, uploadFile } from './api.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
@@ -19,6 +19,7 @@ let renderer = null;
 let playback = null;
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
+const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
 
 // ── DOM references ──────────────────────────────────────────────────
 
@@ -113,6 +114,7 @@ async function loadFiles() {
 
 async function selectFile(filename) {
   currentFile = filename;
+  _notesCache.clear(); // bust cache on new file
   showPage('tracks');
   trackGrid.innerHTML = '<p style="color:#aaa;">Loading tracks…</p>';
 
@@ -551,7 +553,77 @@ function initRenderer(data) {
     bpmInput.onkeydown = (e) => { if (e.key === 'Enter') bpmInput.onchange(); };
   }
 
+  _rebuildMultiTrackBar(currentTrackId);
   updatePlayButton(false);
+}
+
+// ── Multi-track audio mixer ─────────────────────────────────────────
+
+const _multiTrackBar = $('#multi-track-bar');
+const _tabContainer  = $('#tab-container');
+
+function _rebuildMultiTrackBar(primaryTrackId) {
+  if (!_multiTrackBar) return;
+  if (!currentTracks || currentTracks.length <= 1) {
+    _multiTrackBar.style.display = 'none';
+    document.body.classList.remove('has-multitrack-bar');
+    return;
+  }
+  _multiTrackBar.style.display = '';
+  document.body.classList.add('has-multitrack-bar');
+  _multiTrackBar.innerHTML = '<span class="mt-label">🏛 Pistes audio :</span>';
+  for (const t of currentTracks) {
+    const isPrimary = t.id === primaryTrackId;
+    const isActive  = !isPrimary && playback &&
+      playback._secondaryChannels.some(c => c.trackId === t.id);
+    const btn = document.createElement('button');
+    btn.className = 'mt-track-btn' +
+      (isPrimary ? ' mt-primary' : '') +
+      (isActive  ? ' mt-active'  : '');
+    btn.textContent = (isPrimary ? '▶ ' : isActive ? '🔈 ' : '🔇 ') +
+      sanitize(t.name || `Piste ${t.id}`);
+    btn.dataset.trackId = t.id;
+    if (!isPrimary) {
+      btn.addEventListener('click', () => _toggleSecondaryTrack(t.id, t.name || '', btn));
+    }
+    _multiTrackBar.appendChild(btn);
+  }
+}
+
+async function _toggleSecondaryTrack(trackId, trackName, btn) {
+  if (!playback) return;
+  // Already active → remove
+  const existing = playback._secondaryChannels.findIndex(c => c.trackId === trackId);
+  if (existing >= 0) {
+    playback.removeSecondaryChannel(trackId);
+    btn.className = 'mt-track-btn';
+    btn.textContent = '🔇 ' + sanitize(trackName);
+    return;
+  }
+  // Not active → fetch notes (cached) and add
+  btn.textContent = '⏳ ' + sanitize(trackName);
+  btn.disabled = true;
+  try {
+    const cacheKey = `${currentFile}#${trackId}`;
+    let notesData = _notesCache.get(cacheKey);
+    if (!notesData) {
+      notesData = await fetchNotes(currentFile, trackId, selMode?.value || 'reference');
+      _notesCache.set(cacheKey, notesData);
+    }
+    playback.addSecondaryChannel(
+      trackId, trackName, notesData.results, notesData.beats_per_measure
+    );
+    btn.className = 'mt-track-btn mt-active';
+    btn.textContent = '🔈 ' + sanitize(trackName);
+  } catch (err) {
+    console.error('[FretWise] secondary track load failed:', err);
+    btn.textContent = '❌ ' + sanitize(trackName);
+    setTimeout(() => {
+      btn.textContent = '🔇 ' + sanitize(trackName);
+    }, 2000);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ── Toolbar wiring ──────────────────────────────────────────────────

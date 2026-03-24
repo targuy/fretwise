@@ -30,6 +30,8 @@ export class PlaybackEngine {
     this._synth = null;          // soundfont-player Player (null = oscillator fallback)
     this._synthLoading = false;  // loading guard to avoid double-init
     this._instrumentName = 'electric_guitar_clean'; // current soundfont instrument
+    // Secondary audio channels: [{trackId, trackName, measures, synth, gain, enabled, _loading}]
+    this._secondaryChannels = [];
 
     // Callbacks
     this.onMeasureChange = null;
@@ -62,6 +64,10 @@ export class PlaybackEngine {
     }
     this.audioEnabled = true;
     this._initSynth().catch(() => { /* oscillator fallback ok */ });
+    // Reload any secondary channels whose synth was stopped
+    for (const ch of this._secondaryChannels) {
+      if (!ch.synth) this._loadChannelInstrument(ch).catch(() => {});
+    }
     return true;
   }
 
@@ -70,7 +76,110 @@ export class PlaybackEngine {
     if (this._synth) {
       try { this._synth.stop(); } catch (_) {}
     }
+    for (const ch of this._secondaryChannels) {
+      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} ch.synth = null; }
+    }
     return false;
+  }
+
+  // ── Secondary channel management ─────────────────────────────────
+
+  /**
+   * Build a measures array from a flat results array (same logic as _groupMeasures).
+   * @param {Array} results — note objects with onset field
+   * @param {number} bpm — beats per measure
+   * @returns {Array<Array>}
+   */
+  static _buildMeasures(results, bpm) {
+    if (!results || !results.length) return [];
+    const measures = [];
+    let bucket = [];
+    let start = 0;
+    for (const n of results) {
+      while (n.onset >= start + bpm - 0.001) {
+        measures.push(bucket);
+        bucket = [];
+        start += bpm;
+      }
+      bucket.push(n);
+    }
+    if (bucket.length) measures.push(bucket);
+    return measures;
+  }
+
+  /**
+   * Add a secondary audio channel for a track (plays alongside the primary).
+   * @param {number} trackId
+   * @param {string} trackName
+   * @param {Array}  results — note objects from /api/notes
+   * @param {number} beatsPerMeasure
+   */
+  addSecondaryChannel(trackId, trackName, results, beatsPerMeasure) {
+    this.removeSecondaryChannel(trackId); // remove if already present
+    const bpm = beatsPerMeasure || this.bpm;
+    const measures = PlaybackEngine._buildMeasures(results, bpm);
+    const ch = { trackId, trackName, measures, synth: null, gain: 0.8, enabled: true, _loading: false };
+    this._secondaryChannels.push(ch);
+    if (this.audioEnabled && this._audioCtx) {
+      this._loadChannelInstrument(ch).catch(err =>
+        console.warn(`[FretWise] secondary channel "${trackName}" load failed:`, err)
+      );
+    }
+  }
+
+  /**
+   * Remove and stop a secondary audio channel.
+   * @param {number} trackId
+   */
+  removeSecondaryChannel(trackId) {
+    const idx = this._secondaryChannels.findIndex(c => c.trackId === trackId);
+    if (idx >= 0) {
+      const ch = this._secondaryChannels[idx];
+      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} }
+      this._secondaryChannels.splice(idx, 1);
+    }
+  }
+
+  /**
+   * Load soundfont-player instrument for a secondary channel.
+   * @param {Object} ch — secondary channel object
+   */
+  async _loadChannelInstrument(ch) {
+    if (ch._loading || ch.synth) return;
+    ch._loading = true;
+    try {
+      if (!window.Soundfont) {
+        await new Promise((resolve, reject) => {
+          // Script already injected by _initSynth? Check before adding again
+          if (document.querySelector('script[src*="soundfont-player"]')) { resolve(); return; }
+          const s = document.createElement('script');
+          s.src = '/static/js/vendor/soundfont-player.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('soundfont-player load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      if (!window.Soundfont) throw new Error('Soundfont not available');
+      const instName = PlaybackEngine._inferInstrument(ch.trackName);
+      ch.synth = await window.Soundfont.instrument(
+        this._audioCtx,
+        instName,
+        {
+          soundfont: 'MusyngKite',
+          format: 'mp3',
+          nameToUrl: (name, sf, format) =>
+            `/static/js/vendor/soundfonts/${sf}/${name}-${format}.js`,
+          destination: this._masterGain || this._audioCtx.destination,
+          gain: 4,
+        }
+      );
+      console.log(`[FretWise] secondary "${ch.trackName}" ready (${instName})`);
+    } catch (err) {
+      console.warn(`[FretWise] secondary "${ch.trackName}" load failed:`, err);
+      ch.synth = null;
+    } finally {
+      ch._loading = false;
+    }
   }
 
   /**
@@ -440,6 +549,23 @@ export class PlaybackEngine {
     } else {
       console.log(`[FretWise] measure ${measureIdx}: oscillator fallback (synth=${this._synth}, loading=${this._synthLoading})`);
       this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
+    }
+
+    // Schedule secondary audio channels (same AudioContext time base = perfect sync)
+    for (const ch of this._secondaryChannels) {
+      if (!ch.enabled || !ch.synth) continue;
+      const chNotes = ch.measures[measureIdx];
+      if (!chNotes || !chNotes.length) continue;
+      const chBpm = this.bpm;
+      const chMeasureOnset = Math.floor(chNotes[0].onset / chBpm) * chBpm;
+      const chSpb = (60 / this.tempo) / this.speed;
+      const chNow = this._audioCtx.currentTime;
+      for (const note of chNotes) {
+        const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
+        const duration = Math.max(0.08, note.duration * chSpb - 0.025);
+        const gain = (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain;
+        ch.synth.play(note.pitch, when, { duration, gain });
+      }
     }
   }
 

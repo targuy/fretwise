@@ -273,6 +273,55 @@ html, body { height: 100%; font-family: 'Segoe UI', Arial, sans-serif; color: va
 }
 .btn-legend:hover { background: var(--green-dark); }
 
+/* ── Multi-track audio mixer strip ─────────────────────── */
+#multi-track-bar {
+  position: fixed;
+  bottom: 68px; /* above #position-bar (52+16) */
+  left: 0; right: 0;
+  height: 28px;
+  background: var(--bg-header);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 0 12px;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.mt-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.mt-track-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.7);
+  padding: 1px 9px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mt-track-btn:hover:not(.mt-primary) { background: rgba(255,255,255,0.1); }
+.mt-track-btn.mt-primary {
+  background: var(--green); border-color: var(--green); color: #fff; cursor: default;
+}
+.mt-track-btn.mt-active {
+  background: rgba(255,160,40,0.2);
+  border-color: rgba(255,160,40,0.55);
+  color: rgb(255,185,70);
+}
+/* Shift fixed elements up when multi-track bar is visible */
+body.has-multitrack-bar #position-bar  { bottom: 96px; /* 52+16+28 */ }
+body.has-multitrack-bar .btn-legend    { bottom: 114px; /* 86+28 */ }
+body.has-multitrack-bar #tab-container { padding-bottom: 100px; /* 72+28 */ }
+
 /* ── Position scrubber bar ──────────────────────────────── */
 #position-bar {
   position: fixed;
