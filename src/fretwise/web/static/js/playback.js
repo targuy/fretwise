@@ -27,6 +27,8 @@ export class PlaybackEngine {
     this._masterGain = null;
     this._volume = 0.7;        // master volume 0..1
     this._lastScheduledMeasure = -1;
+    this._synth = null;          // SpessaSynth Synthetizer (null = oscillator fallback)
+    this._synthLoading = false;  // loading guard to avoid double-init
 
     // Callbacks
     this.onMeasureChange = null;
@@ -57,11 +59,15 @@ export class PlaybackEngine {
       this._audioCtx.resume();
     }
     this.audioEnabled = true;
+    this._initSynth().catch(() => { /* oscillator fallback ok */ });
     return true;
   }
 
   disableAudio() {
     this.audioEnabled = false;
+    if (this._synth) {
+      try { for (let c = 0; c < 16; c++) this._synth.allNotesOff(c); } catch (_) {}
+    }
     return false;
   }
 
@@ -314,12 +320,68 @@ export class PlaybackEngine {
 
   // ── Note audio synthesis ──────────────────────────────────────────
 
+  /**
+   * Async-load SpessaSynth from CDN and the SF2 soundfont from /api/soundfont.
+   * If either fails, _synth stays null and oscillator synthesis is used instead.
+   */
+  async _initSynth() {
+    if (this._synth || this._synthLoading) return;
+    this._synthLoading = true;
+    try {
+      const resp = await fetch('/api/soundfont');
+      if (!resp.ok) throw new Error(`SF2 ${resp.status}`);
+      const sf2Buffer = await resp.arrayBuffer();
+      const { Synthetizer } = await import('https://cdn.jsdelivr.net/npm/spessasynth_lib@3');
+      const dest = this._masterGain || this._audioCtx.destination;
+      this._synth = new Synthetizer(dest, sf2Buffer);
+      // Wait for AudioWorklet to initialise before sending program-change
+      await new Promise(r => setTimeout(r, 600));
+      this._synth.programChange(0, 25);  // program 25 = Steel-String Guitar
+      console.log('[FretWise] SpessaSynth ready');
+    } catch (err) {
+      console.warn('[FretWise] Oscillator fallback:', err.message);
+      this._synth = null;
+    } finally {
+      this._synthLoading = false;
+    }
+  }
+
+  /** Map dynamic marking to MIDI velocity (0-127). */
+  _dynamicToVelocity(dynamic) {
+    return { pp: 32, p: 48, mp: 64, mf: 80, f: 96, ff: 112 }[dynamic] ?? 80;
+  }
+
   /** Schedule all notes in a measure to play at correct times.
+   *  Dispatches to SpessaSynth (SF2) when loaded, oscillator otherwise.
    *  @param {number} measureIdx
-   *  @param {number} [offsetSec=0] — extra delay (seconds) added to all notes,
-   *    used for lookahead scheduling of the NEXT measure before its cursor fires.
+   *  @param {number} [offsetSec=0] — extra delay (seconds) before first note
    */
   _scheduleMeasureNotes(measureIdx, offsetSec = 0) {
+    if (!this._audioCtx || !this.audioEnabled) return;
+    const notes = this.renderer.measures[measureIdx];
+    if (!notes || !notes.length) return;
+
+    if (this._synth) {
+      const bpm = this.bpm;
+      const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
+      const secPerBeat = (60 / this.tempo) / this.speed;
+      for (const note of notes) {
+        const delayMs = (offsetSec + (note.onset - measureOnset) * secPerBeat) * 1000;
+        const durMs = Math.max(80, note.duration * secPerBeat * 1000 - 30);
+        const vel = this._dynamicToVelocity(note.dynamic);
+        setTimeout(() => {
+          if (!this.audioEnabled || !this._synth) return;
+          this._synth.noteOn(0, note.pitch, vel);
+          setTimeout(() => this._synth?.noteOff(0, note.pitch), durMs);
+        }, delayMs);
+      }
+    } else {
+      this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
+    }
+  }
+
+  /** Original oscillator-based note scheduler (fallback). */
+  _scheduleMeasureNotesOscillator(measureIdx, offsetSec = 0) {
     if (!this._audioCtx || !this.audioEnabled) return;
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
