@@ -269,6 +269,13 @@ export class PlaybackEngine {
       cancelAnimationFrame(this._raf);
       this._raf = null;
     }
+    // Cut all already-scheduled audio immediately so notes don't ring
+    // past the pause point and don't double when play resumes.
+    // soundfont-player's .stop() halts active notes but keeps the instrument loaded.
+    if (this._synth) { try { this._synth.stop(); } catch (_) {} }
+    for (const ch of this._secondaryChannels) {
+      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} }
+    }
   }
 
   /** Toggle play/pause */

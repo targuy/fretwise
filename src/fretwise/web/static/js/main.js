@@ -20,8 +20,8 @@ let playback = null;
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
-// key: primaryTrackId → Set<secondaryTrackId> — persists across primary-track switches
-const _activeSecondaryTracks = new Map();
+// key: primaryTrackId → Set<secondaryTrackId> — tracks explicitly muted by the user
+const _mutedSecondaryTracks = new Map();
 
 // ── DOM references ──────────────────────────────────────────────────
 
@@ -117,7 +117,7 @@ async function loadFiles() {
 async function selectFile(filename) {
   currentFile = filename;
   _notesCache.clear(); // bust cache on new file
-  _activeSecondaryTracks.clear(); // reset preferences on new file
+  _mutedSecondaryTracks.clear(); // reset mute preferences on new file
   showPage('tracks');
   trackGrid.innerHTML = '<p style="color:#aaa;">Loading tracks…</p>';
 
@@ -576,15 +576,15 @@ function _rebuildMultiTrackBar(primaryTrackId) {
   _multiTrackBar.style.display = '';
   document.body.classList.add('has-multitrack-bar');
   _multiTrackBar.innerHTML = '<span class="mt-label">🏛 Pistes audio :</span>';
+  const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
   for (const t of currentTracks) {
     const isPrimary = t.id === primaryTrackId;
-    const isActive  = !isPrimary && playback &&
-      playback._secondaryChannels.some(c => c.trackId === t.id);
+    const isMuted   = !isPrimary && muted.has(t.id);
     const btn = document.createElement('button');
     btn.className = 'mt-track-btn' +
       (isPrimary ? ' mt-primary' : '') +
-      (isActive  ? ' mt-active'  : '');
-    btn.textContent = (isPrimary ? '▶ ' : isActive ? '🔈 ' : '🔇 ') +
+      (!isPrimary && !isMuted ? ' mt-active' : '');
+    btn.textContent = (isPrimary ? '▶ ' : isMuted ? '🔇 ' : '🔈 ') +
       sanitize(t.name || `Piste ${t.id}`);
     btn.dataset.trackId = t.id;
     if (!isPrimary) {
@@ -596,17 +596,17 @@ function _rebuildMultiTrackBar(primaryTrackId) {
 
 async function _toggleSecondaryTrack(trackId, trackName, btn) {
   if (!playback) return;
-  // Already active → remove
-  const existing = playback._secondaryChannels.findIndex(c => c.trackId === trackId);
-  if (existing >= 0) {
+  const isMuted = !playback._secondaryChannels.some(c => c.trackId === trackId);
+  if (!isMuted) {
+    // Currently playing → mute it
     playback.removeSecondaryChannel(trackId);
-    // Forget preference
-    _activeSecondaryTracks.get(currentTrackId)?.delete(trackId);
+    if (!_mutedSecondaryTracks.has(currentTrackId)) _mutedSecondaryTracks.set(currentTrackId, new Set());
+    _mutedSecondaryTracks.get(currentTrackId).add(trackId);
     btn.className = 'mt-track-btn';
     btn.textContent = '🔇 ' + sanitize(trackName);
     return;
   }
-  // Not active → fetch notes (cached) and add
+  // Currently muted → unmute
   btn.textContent = '⏳ ' + sanitize(trackName);
   btn.disabled = true;
   try {
@@ -619,31 +619,27 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
     playback.addSecondaryChannel(
       trackId, trackName, notesData.results, notesData.beats_per_measure
     );
-    // Save preference
-    if (!_activeSecondaryTracks.has(currentTrackId)) _activeSecondaryTracks.set(currentTrackId, new Set());
-    _activeSecondaryTracks.get(currentTrackId).add(trackId);
+    // Remove from muted set
+    _mutedSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn mt-active';
     btn.textContent = '🔈 ' + sanitize(trackName);
   } catch (err) {
     console.error('[FretWise] secondary track load failed:', err);
     btn.textContent = '❌ ' + sanitize(trackName);
-    setTimeout(() => {
-      btn.textContent = '🔇 ' + sanitize(trackName);
-    }, 2000);
+    setTimeout(() => { btn.textContent = '🔇 ' + sanitize(trackName); }, 2000);
   } finally {
     btn.disabled = false;
   }
 }
 
-/** Re-activate secondary tracks that were remembered for this primary track. */
+/** Activate all secondary tracks that are not explicitly muted for this primary track. */
 async function _restoreSecondaryTracks(primaryTrackId) {
-  const active = _activeSecondaryTracks.get(primaryTrackId);
-  if (!active || active.size === 0) return;
-  for (const trackId of active) {
-    const t = currentTracks.find(x => x.id === trackId);
-    if (!t) continue;
-    const btn = _multiTrackBar?.querySelector(`[data-track-id="${trackId}"]`);
-    if (btn) await _toggleSecondaryTrack(trackId, t.name || '', btn);
+  const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
+  for (const t of currentTracks) {
+    if (t.id === primaryTrackId) continue; // skip primary
+    if (muted.has(t.id)) continue;         // skip explicitly muted
+    const btn = _multiTrackBar?.querySelector(`[data-track-id="${t.id}"]`);
+    if (btn) await _toggleSecondaryTrack(t.id, t.name || '', btn);
   }
 }
 
