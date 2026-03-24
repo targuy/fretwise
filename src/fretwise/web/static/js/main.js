@@ -20,6 +20,8 @@ let playback = null;
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
+// key: primaryTrackId → Set<secondaryTrackId> — persists across primary-track switches
+const _activeSecondaryTracks = new Map();
 
 // ── DOM references ──────────────────────────────────────────────────
 
@@ -115,6 +117,7 @@ async function loadFiles() {
 async function selectFile(filename) {
   currentFile = filename;
   _notesCache.clear(); // bust cache on new file
+  _activeSecondaryTracks.clear(); // reset preferences on new file
   showPage('tracks');
   trackGrid.innerHTML = '<p style="color:#aaa;">Loading tracks…</p>';
 
@@ -554,6 +557,7 @@ function initRenderer(data) {
   }
 
   _rebuildMultiTrackBar(currentTrackId);
+  _restoreSecondaryTracks(currentTrackId); // re-enable previously active secondary tracks
   updatePlayButton(false);
 }
 
@@ -596,6 +600,8 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
   const existing = playback._secondaryChannels.findIndex(c => c.trackId === trackId);
   if (existing >= 0) {
     playback.removeSecondaryChannel(trackId);
+    // Forget preference
+    _activeSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn';
     btn.textContent = '🔇 ' + sanitize(trackName);
     return;
@@ -613,6 +619,9 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
     playback.addSecondaryChannel(
       trackId, trackName, notesData.results, notesData.beats_per_measure
     );
+    // Save preference
+    if (!_activeSecondaryTracks.has(currentTrackId)) _activeSecondaryTracks.set(currentTrackId, new Set());
+    _activeSecondaryTracks.get(currentTrackId).add(trackId);
     btn.className = 'mt-track-btn mt-active';
     btn.textContent = '🔈 ' + sanitize(trackName);
   } catch (err) {
@@ -623,6 +632,18 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
     }, 2000);
   } finally {
     btn.disabled = false;
+  }
+}
+
+/** Re-activate secondary tracks that were remembered for this primary track. */
+async function _restoreSecondaryTracks(primaryTrackId) {
+  const active = _activeSecondaryTracks.get(primaryTrackId);
+  if (!active || active.size === 0) return;
+  for (const trackId of active) {
+    const t = currentTracks.find(x => x.id === trackId);
+    if (!t) continue;
+    const btn = _multiTrackBar?.querySelector(`[data-track-id="${trackId}"]`);
+    if (btn) await _toggleSecondaryTrack(trackId, t.name || '', btn);
   }
 }
 
