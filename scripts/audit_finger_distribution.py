@@ -26,7 +26,7 @@ CORPUS_NOTES = 0
 
 
 def audit_file(path: Path) -> None:
-    global CORPUS_NOTES
+    global CORPUS_NOTES, CORPUS_TOTAL
     try:
         adapter = get_adapter(path)
         events = adapter.parse(path)
@@ -46,7 +46,7 @@ def audit_file(path: Path) -> None:
     counter: Counter[str] = Counter()
     for r in results:
         # Extract finger name from Finger enum
-        finger_name = r.state.finger.value.upper()
+        finger_name = r.state.finger.name
         counter[finger_name] += 1
 
     total = sum(counter.values())
