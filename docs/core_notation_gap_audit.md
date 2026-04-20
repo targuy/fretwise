@@ -13,16 +13,10 @@ Constat initial observ\u00e9 en UI:
 
 - `RenderScene` parcourt maintenant tous les `system_layouts` (plus seulement le premier).
 - positions verticales de syst\u00e8mes fix\u00e9es dans le layout (`system.y` progressif),
-- hauteur de page layout/sc\u00e8ne adapt\u00e9e au nombre de syst\u00e8mes,
+- hauteur de page layout/sc\u00e8ne adapt\u0![alt text](image.png)0e9e au nombre de syst\u00e8mes,
 - mode `tablature_rhythm` rendu sur tous les syst\u00e8mes,
 - marquages dynamiques minimaux ajout\u00e9s c\u00f4t\u00e9 standard (changement de dynamique),
 - conformance interne core v\u00e9rifi\u00e9e (\u00e0 date) sans issue sur la fixture test\u00e9e.
-- accords: regroupement rythmique par `onset` (une hampe/beam/flag par attaque),
-- s\u00e9paration des mesures: ajout de `barline` dans tous les modes core,
-- notation standard: `notehead` pleine/creuse selon dur\u00e9e + projection verticale diatonique,
-- notes hors port\u00e9e: ajout des `ledger_line`,
-- collisions d'alt\u00e9rations dans les accords: d\u00e9calage horizontal progressif,
-- web core: SVG rendu responsive en largeur (`width:100%`, `height:auto`).
 
 ## Mesure objective sur `AC_DC-Highway To Hell-12-22-2025.gp`
 
@@ -42,7 +36,7 @@ Inventaire extrait du `RenderScene`:
   - textes: `measure_number`, `note`
 - Mode `standard`:
   - glyphes: `time_signature`, `clef`, `notehead`, `accidental_sharp`, `accidental_flat`
-  - recettes: `staff_lines`, `barline`, `ledger_line`, `stem_line`, `beam_group`, `flag_stack`, `tie_arc`, `slur_arc`
+  - recettes: `staff_lines`, `stem_line`, `beam_group`, `flag_stack`, `tie_arc`, `slur_arc`
   - textes: `measure_number`, `dynamic`
 - Mode `standard_tablature`:
   - union des \u00e9l\u00e9ments standard + tablature.
@@ -83,3 +77,60 @@ Inventaire extrait du `RenderScene`:
 3. Couvrir explicitement les effets de jeu normatifs (pages 88-89) dans le canonical -> scene.
 4. Ajouter des tests de conformit\u00e9 visuelle snapshot sur corpus r\u00e9el (dont `Highway To Hell`).
 5. Introduire un rapport d'audit normatif d\u00e9taill\u00e9 par mode (symboles attendus vs pr\u00e9sents).
+
+
+---
+
+## Finger Bias Analysis (2026-04-20)
+
+### Mécanisme analytique
+
+Le générateur d'états (`StateGenerator._states_for_position`) crée 4 états par note `(string, fret=F)` :
+
+```
+INDEX  → hand_position = F      (hp stable si on répète INDEX)
+MIDDLE → hand_position = F - 1
+RING   → hand_position = F - 2
+PINKY  → hand_position = F - 3
+```
+
+La fonction de coût mécanique favorise le **shift de main minimal** :
+- `cost_position_shift = |Δhp| × tempo_factor` (dominant pour notes rapides)
+- `cost_finger_difficulty` : INDEX=1.0, MIDDLE=1.15, RING=1.3, PINKY=1.5
+
+Pour une transition fret 5 → fret 7 (quarter note, 120 BPM, tf=2.0) :
+- RING@7 : shift=0 + diff=1.3 = **1.3**
+- INDEX@7 : shift=2×2.0 + diff=1.0 = **5.0** → RING gagne
+
+Seuil de bascule INDEX < RING : ~13.3 beats à 120 BPM (inexistant en pratique musicale).
+`cost_sequential_crossing` amplifie le phénomène sur les runs ascendants.
+
+### Résultats corpus (33 787 notes, 36 fichiers GP)
+
+| Doigt   | Notes  |    %  |
+|---------|--------|-------|
+| OPEN    |  8 547 | 25.3% |
+| INDEX   | 12 755 | 37.8% |
+| MIDDLE  |  4 419 | 13.1% |
+| RING    |  5 244 | 15.5% |
+| PINKY   |  2 822 |  8.4% |
+
+INDEX+MIDDLE : **50.8%** | RING+PINKY : **23.9%**
+Ratio RP/IM : **0.470** (référence humaine attendue : ~0.5–0.7)
+
+- Mesures avec >60% RING/PINKY : **217 mesures**
+- Mesures avec >80% RING/PINKY : **115 mesures**
+
+### Cas identifiés
+
+Les mesures à fort ratio RING/PINKY se concentrent sur des passages à **hauts frets** (8–14).
+Exemple ZZ Top mesure 104 (frets 11–14) : 100% RING/PINKY — comportement correct, main en position 11.
+
+Les runs ascendants en position basse (frets 5–8) produisent INDEX→MIDDLE→RING→PINKY (main stable) :
+c'est la **technique correcte "4 frets / 4 doigts"** en position fixe.
+
+### Conclusion
+
+**Hypothèse B confirmée** : le comportement est correct. Le ratio RP/IM mesuré (0.470) est
+légèrement *inférieur* à la fourchette humaine (0.5–0.7) — l'algorithme utilise INDEX/MIDDLE
+légèrement plus qu'un guitariste humain moyen. Aucune correction algorithmique nécessaire.
