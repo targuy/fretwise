@@ -37,7 +37,8 @@ def audit_file(path: Path, threshold: float) -> list[dict]:
     if not events:
         return []
 
-    beats_pm = float(getattr(adapter, "beats_per_measure", 4.0))
+    beats_pm_raw = getattr(adapter, "beats_per_measure", 4.0)
+    beats_pm = float(beats_pm_raw if beats_pm_raw is not None else 4.0)
     generator = StateGenerator()
     cost_fn   = CostFunction(weights=CostWeights.performance())
     optimizer = ViterbiOptimizer(cost_fn)
