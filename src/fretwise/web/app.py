@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -15,7 +14,6 @@ from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
-from fretwise.export import render_pdf_tab
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
@@ -26,12 +24,9 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
-from fretwise.pdf_conformance import (
-    core_pdf_conformance_report,
-    legacy_shadow_pdf_conformance_report,
-)
+from fretwise.pdf_conformance import core_pdf_conformance_report
 from fretwise.pipeline import run_pipeline
-from fretwise.scoring import CostFunction, CostWeights
+from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -134,7 +129,8 @@ def _register_routes(app: FastAPI) -> None:
     async def get_notes(
         filename: str,
         track_id: int | None = Query(None),
-        mode: str = Query("reference"),
+        same_finger_motion_penalty: bool = Query(True),
+        infer_implicit_legato: bool = Query(True),
     ) -> dict[str, Any]:
         """Return Viterbi-fingered notes for a track (audio-only, no rendering).
 
@@ -142,15 +138,19 @@ def _register_routes(app: FastAPI) -> None:
         Used by the multi-track audio mixer to load secondary track note data.
         """
         filepath = _resolve_file(app, filename)
-        modes = _solve_modes()
-        if mode not in modes:
-            raise HTTPException(400, f"Unknown mode: {mode}")
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        results, _ = _run_legacy_pipeline(events, mode=mode)
+        rule_preferences = RulePreferences(
+            same_finger_motion_penalty=same_finger_motion_penalty,
+            infer_implicit_legato=infer_implicit_legato,
+        )
+        results, _ = _run_legacy_pipeline(
+            events,
+            rule_preferences=rule_preferences,
+        )
         track_name: str = getattr(adapter, "track_name", "") or ""
         tempo = events[0].tempo if events else 120.0
         beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
@@ -166,14 +166,12 @@ def _register_routes(app: FastAPI) -> None:
     async def solve_file(
         filename: str,
         track_id: int | None = Query(None),
-        mode: str = Query("reference"),
         representation_mode: str = Query("standard_tablature"),
+        same_finger_motion_penalty: bool = Query(True),
+        infer_implicit_legato: bool = Query(True),
     ) -> dict[str, Any]:
         """Run the full pipeline and return results as JSON."""
         filepath = _resolve_file(app, filename)
-        modes = _solve_modes()
-        if mode not in modes:
-            raise HTTPException(400, f"Unknown mode: {mode}")
         view_mode = _parse_representation_mode(representation_mode)
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
@@ -181,7 +179,14 @@ def _register_routes(app: FastAPI) -> None:
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        results, stats = _run_legacy_pipeline(events, mode=mode)
+        rule_preferences = RulePreferences(
+            same_finger_motion_penalty=same_finger_motion_penalty,
+            infer_implicit_legato=infer_implicit_legato,
+        )
+        results, stats = _run_legacy_pipeline(
+            events,
+            rule_preferences=rule_preferences,
+        )
         core_result = _run_core_pipeline_for_events(
             filepath,
             adapter,
@@ -210,7 +215,7 @@ def _register_routes(app: FastAPI) -> None:
             "title": auto_title,
             "artist": auto_artist,
             "track_name": track_name,
-            "mode": mode,
+            "mode": "performance",
             "representation_mode": view_mode.value,
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
@@ -231,43 +236,23 @@ def _register_routes(app: FastAPI) -> None:
     async def export_pdf(
         filename: str,
         track_id: int | None = Query(None),
-        mode: str = Query("reference"),
-        engine: str = Query("legacy"),
         representation_mode: str = Query("standard_tablature"),
     ) -> Response:
-        """Render and download a PDF using legacy or notation-core engine."""
+        """Render and download a PDF using the notation-core engine."""
         filepath = _resolve_file(app, filename)
-        modes = _solve_modes()
-        if mode not in modes:
-            raise HTTPException(400, f"Unknown mode: {mode}")
-        if engine not in {"legacy", "core"}:
-            raise HTTPException(400, f"Unknown engine: {engine}")
         view_mode = _parse_representation_mode(representation_mode)
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        if engine == "core":
-            pdf_bytes, conformance_issues = _render_core_pdf_payload(
-                filepath,
-                adapter,
-                events,
-                representation_mode=view_mode,
-            )
-            conformance_report = core_pdf_conformance_report(conformance_issues)
-        else:
-            pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
-                filepath,
-                adapter,
-                events,
-                mode=mode,
-                representation_mode=view_mode,
-            )
-            conformance_report = legacy_shadow_pdf_conformance_report(
-                conformance_issues,
-                shadow_failed=shadow_failed,
-            )
+        pdf_bytes, conformance_issues = _render_core_pdf_payload(
+            filepath,
+            adapter,
+            events,
+            representation_mode=view_mode,
+        )
+        conformance_report = core_pdf_conformance_report(conformance_issues)
 
         auto_title, auto_artist = _infer_title_artist(filepath)
         filename_base = auto_title if not auto_artist else f"{auto_artist} - {auto_title}"
@@ -277,7 +262,7 @@ def _register_routes(app: FastAPI) -> None:
             media_type="application/pdf",
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}"',
-                "X-Fretwise-Pdf-Engine": engine,
+                "X-Fretwise-Pdf-Engine": "core",
                 "X-Fretwise-Conformance-Issues": str(conformance_report.issue_count),
                 "X-Fretwise-Conformance-Report": conformance_report.to_header_value(),
             },
@@ -331,15 +316,6 @@ def _resolve_file(app: FastAPI, filename: str) -> Path:
     return filepath
 
 
-def _solve_modes() -> dict[str, Any]:
-    return {
-        "reference": CostWeights.reference,
-        "performance": CostWeights.performance,
-        "musical": CostWeights.musical,
-        "learning": CostWeights.learning,
-    }
-
-
 def _load_adapter_and_events(
     filepath: Path,
     *,
@@ -388,11 +364,11 @@ def _parse_representation_mode(value: str | None) -> RepresentationMode:
 
 
 def _run_legacy_pipeline(
-    events: list[NoteEvent], *, mode: str
+    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
 ) -> tuple[list[FingeringResult], dict[str, int]]:
-    weights = _solve_modes()[mode]()
+    weights = CostWeights.performance()
     generator = StateGenerator()
-    cost_fn = CostFunction(weights=weights)
+    cost_fn = CostFunction(weights=weights, rule_preferences=rule_preferences)
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
     return run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
@@ -431,46 +407,6 @@ def _render_core_pdf_payload(
     return render_scene_to_pdf_bytes(core_result.render_scene), len(core_result.conformance_issues)
 
 
-def _render_legacy_pdf_payload(
-    filepath: Path,
-    adapter: Any,
-    events: list[NoteEvent],
-    *,
-    mode: str,
-    representation_mode: RepresentationMode,
-) -> tuple[bytes, int, bool]:
-    results, _stats = _run_legacy_pipeline(events, mode=mode)
-    track_name: str = getattr(adapter, "track_name", "") or ""
-    section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
-    chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
-    beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
-    title, artist = _infer_title_artist(filepath)
-
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        temp_path = Path(tmp.name)
-    try:
-        render_pdf_tab(
-            results,
-            temp_path,
-            title=title,
-            artist=artist,
-            beats_per_measure=beats_per_measure,
-            instrument=track_name,
-            mode_label=f"{mode} mode",
-            section_markers=section_markers or None,
-            chord_diagrams=chord_diagrams or None,
-        )
-        conformance_issues, shadow_failed = _shadow_core_conformance_outcome(
-            filepath,
-            adapter,
-            events,
-            representation_mode=representation_mode,
-        )
-        return temp_path.read_bytes(), conformance_issues, shadow_failed
-    finally:
-        temp_path.unlink(missing_ok=True)
-
-
 def _safe_pdf_filename(label: str) -> str:
     safe = re.sub(r"[^a-zA-Z0-9._ -]+", "_", label).strip()
     if not safe:
@@ -478,27 +414,6 @@ def _safe_pdf_filename(label: str) -> str:
     if not safe.lower().endswith(".pdf"):
         safe += ".pdf"
     return safe
-
-
-def _shadow_core_conformance_outcome(
-    filepath: Path,
-    adapter: Any,
-    events: list[NoteEvent],
-    *,
-    representation_mode: RepresentationMode,
-) -> tuple[int, bool]:
-    """Run core pipeline in shadow mode for legacy export diagnostics."""
-    try:
-        core_result = _run_core_pipeline_for_events(
-            filepath,
-            adapter,
-            events,
-            representation_mode=representation_mode,
-        )
-    except Exception:
-        # Legacy PDF export must remain non-blocking while core integration hardens.
-        return 0, True
-    return len(core_result.conformance_issues), False
 
 
 def _run_core_pipeline_for_events(
@@ -596,6 +511,12 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "finger": str(st.finger),
         "hand_position": st.hand_position,
         "cost": r.cost,
+        "measure_index": ne.measure_index,
+        # Sedentary fingers annotation (see docs/finger_placement_strategy.md).
+        # getattr for backward compat with legacy mocks that predate the field.
+        "planted_fingers": {
+            k: list(v) for k, v in getattr(r, "planted_fingers", {}).items()
+        },
         # Notation fields
         "let_ring": ne.let_ring,
         "bend_value": ne.bend_value,
@@ -622,3 +543,7 @@ def _serialize_chord_diagram(cd: ChordDiagram) -> dict[str, Any]:
         "base_fret": cd.base_fret,
         "fingers": cd.fingers,
     }
+
+
+# Module-level instance for uvicorn / ASGI servers.
+app = create_app()

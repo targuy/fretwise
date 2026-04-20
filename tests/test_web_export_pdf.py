@@ -18,7 +18,6 @@ from fretwise.web.app import (
     _load_adapter_and_events,
     _parse_representation_mode,
     _render_core_pdf_payload,
-    _render_legacy_pdf_payload,
     _safe_pdf_filename,
     create_app,
 )
@@ -61,8 +60,8 @@ class _DummyAdapter:
         return self.parse(path)
 
 
-def _legacy_result() -> Any:
-    note_event = NoteEvent(
+def _legacy_result(events: list[NoteEvent] | None = None) -> Any:
+    note_event = (events[0] if events else None) or NoteEvent(
         pitch=64,
         onset=0.0,
         duration=1.0,
@@ -73,18 +72,8 @@ def _legacy_result() -> Any:
         string_hint=1,
         fret_hint=0,
     )
-    state = SimpleNamespace(
-        string_num=1,
-        fret=0,
-        finger="1",
-        hand_position=0,
-    )
-    return SimpleNamespace(
-        note_id=1,
-        note_event=note_event,
-        state=state,
-        cost=1.23,
-    )
+    state = SimpleNamespace(string_num=1, fret=0, finger="1", hand_position=0)
+    return SimpleNamespace(note_id=1, note_event=note_event, state=state, cost=1.23)
 
 
 def _route_endpoint(app: Any, path: str) -> Any:
@@ -140,91 +129,6 @@ def test_render_core_pdf_payload_returns_pdf_and_conformance_count(tmp_path: Pat
     assert captured["representation_mode"] == RepresentationMode.STANDARD_TAB
 
 
-def test_render_legacy_pdf_payload_returns_pdf_and_zero_conformance_count(
-    tmp_path: Path,
-) -> None:
-    adapter = _DummyAdapter()
-    file_path = tmp_path / "song.gp"
-    file_path.touch()
-
-    captured: dict[str, Any] = {}
-
-    def _fake_render_pdf_tab(*_args: Any, **kwargs: Any) -> None:
-        output = _args[1]
-        assert isinstance(output, Path)
-        output.write_bytes(b"%PDF-legacy")
-
-    def _fake_shadow(*_args: Any, **kwargs: Any) -> tuple[int, bool]:
-        captured["representation_mode"] = kwargs["representation_mode"]
-        return 0, False
-
-    from fretwise.web import app as web_app
-
-    monkeypatch = pytest.MonkeyPatch()
-    monkeypatch.setattr(web_app, "render_pdf_tab", _fake_render_pdf_tab)
-    monkeypatch.setattr(web_app, "_shadow_core_conformance_outcome", _fake_shadow)
-    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
-        file_path,
-        adapter,
-        adapter.parse(file_path),
-        mode="reference",
-        representation_mode=RepresentationMode.TAB_RHYTHM,
-    )
-    monkeypatch.undo()
-    assert pdf_bytes.startswith(b"%PDF-legacy")
-    assert conformance_issues == 0
-    assert shadow_failed is False
-    assert captured["representation_mode"] == RepresentationMode.TAB_RHYTHM
-
-
-def test_render_legacy_pdf_payload_reports_shadow_core_conformance_count(
-    monkeypatch: Any, tmp_path: Path
-) -> None:
-    adapter = _DummyAdapter()
-    file_path = tmp_path / "song.gp"
-    file_path.touch()
-
-    def _fake_run_core(*_args: Any, **_kwargs: Any) -> Any:
-        return SimpleNamespace(conformance_issues=[object(), object()])
-
-    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_run_core)
-
-    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
-        file_path,
-        adapter,
-        adapter.parse(file_path),
-        mode="reference",
-        representation_mode=RepresentationMode.TAB,
-    )
-    assert pdf_bytes.startswith(b"%PDF-")
-    assert conformance_issues == 2
-    assert shadow_failed is False
-
-
-def test_render_legacy_pdf_payload_ignores_shadow_core_failures(
-    monkeypatch: Any, tmp_path: Path
-) -> None:
-    adapter = _DummyAdapter()
-    file_path = tmp_path / "song.gp"
-    file_path.touch()
-
-    def _raise(*_args: Any, **_kwargs: Any) -> Any:
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _raise)
-
-    pdf_bytes, conformance_issues, shadow_failed = _render_legacy_pdf_payload(
-        file_path,
-        adapter,
-        adapter.parse(file_path),
-        mode="reference",
-        representation_mode=RepresentationMode.TAB,
-    )
-    assert pdf_bytes.startswith(b"%PDF-")
-    assert conformance_issues == 0
-    assert shadow_failed is True
-
-
 def test_load_adapter_and_events_uses_parse_track_when_requested(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
@@ -278,9 +182,9 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
         return adapter, adapter.parse(file_path)
 
     def _fake_legacy(
-        events: list[NoteEvent], *, mode: str
+        events: list[NoteEvent], *, rule_preferences: Any = None
     ) -> tuple[list[Any], dict[str, int]]:
-        del mode
+        del rule_preferences
         return [_legacy_result() for _ in events], {"parsed": len(events)}
 
     def _fake_core(*_args: Any, **kwargs: Any) -> Any:
@@ -296,7 +200,6 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
         endpoint(
             filename="song.gp",
             track_id=None,
-            mode="reference",
             representation_mode="standard+tablature",
         )
     )
@@ -342,8 +245,6 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
         endpoint(
             filename="song.gp",
             track_id=None,
-            mode="reference",
-            engine="core",
             representation_mode="tab+rhythm",
         )
     )

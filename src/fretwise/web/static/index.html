@@ -82,22 +82,33 @@
 <footer id="toolbar" style="display:none">
   <div class="toolbar-left">
     <span class="tb-sep"></span>
-    <span class="tb-label">Mode</span>
-    <select id="mode-select" class="toolbar-select" title="Fingering optimisation mode: affects cost weights (mechanical / musical / player profile). Changing re-computes the fingerings.">
-      <option value="reference">Reference</option>
-      <option value="performance">Performance</option>
-      <option value="musical">Musical</option>
-      <option value="learning">Learning</option>
-    </select>
-    <span class="tb-sep"></span>
     <span class="tb-label">View</span>
     <select id="representation-mode-select" class="toolbar-select" title="Notation representation mode: standard staff, tablature, or hybrid views. Changing re-runs the solver and updates the rendering.">
       <option value="standard_tablature" selected>Standard + Tab</option>
       <option value="standard">Standard</option>
-      <option value="tablature">Tab + Rhythm</option>
+      <option value="tablature_rhythm">Tab + Rhythm</option>
+      <option value="tablature">Tab</option>
     </select>
     <span class="tb-sep"></span>
     <button id="btn-fingering" class="tb-btn" title="Toggle left-hand fingering">✋ Fingers</button>
+    <button id="btn-hand-viz" class="tb-btn" title="Toggle hand visualization panel">🖐 Viz</button>
+    <details id="prefs-panel" class="tb-prefs">
+      <summary>Preferences</summary>
+      <div class="tb-prefs-body">
+        <label class="tb-pref-item" title="Penalize unrealistic one-finger runs across multiple frets.">
+          <input type="checkbox" id="pref-same-finger-penalty" checked>
+          <span>Same-finger run penalty</span>
+        </label>
+        <label class="tb-pref-item" title="Relax same-finger penalty when movement resembles short implicit legato.">
+          <input type="checkbox" id="pref-infer-legato" checked>
+          <span>Infer implicit legato</span>
+        </label>
+        <label class="tb-pref-item" title="Show hand position and hand-shift notifications in a dedicated lane below TAB.">
+          <input type="checkbox" id="pref-hand-overlay" checked>
+          <span>Show hand movement lane</span>
+        </label>
+      </div>
+    </details>
   </div>
   <div class="toolbar-center">
     <button class="tb-btn" id="btn-prev" title="Previous measure">&#9664;&#9664;</button>
@@ -125,16 +136,23 @@
     <input type="range" id="rng-volume" min="0" max="100" value="70" class="rng-volume" title="Volume">
   </div>
   <div class="toolbar-right">
-    <span class="tb-label">Engine</span>
-    <select id="pdf-engine-select" class="toolbar-select" title="PDF export engine">
-      <option value="core" selected>Core</option>
-      <option value="legacy">Legacy</option>
-    </select>
     <button class="tb-btn" id="btn-export-pdf" title="Export PDF">📄 PDF</button>
     <span id="pdf-export-status" class="tb-status" aria-live="polite"></span>
     <button class="tb-btn" id="btn-back-viewer">&larr; Back</button>
   </div>
 </footer>
+
+<!-- ═══════════════ HAND VISUALIZATION FLOATING PANEL ═══════════════ -->
+<div id="hand-viz-panel" class="floating-panel" style="display:none">
+  <div class="floating-panel-header" id="hand-viz-drag">
+    <span class="floating-panel-title">Main fretteuse — visualisation</span>
+    <div class="floating-panel-actions">
+      <button class="floating-panel-btn" id="hand-viz-resync" title="Resync with current track">↻</button>
+      <button class="floating-panel-btn" id="hand-viz-close" title="Close">×</button>
+    </div>
+  </div>
+  <iframe id="hand-viz-frame" src="/static/hand_viz.html" title="Hand visualization"></iframe>
+</div>
 
 <!-- ═══════════════ LEGEND OVERLAY ═══════════════ -->
 <div id="legend-overlay" class="overlay" style="display:none">

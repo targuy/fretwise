@@ -23,8 +23,12 @@ export async function uploadFile(file) {
   return res.json();
 }
 
-export async function fetchNotes(filename, trackId, mode) {
-  let url = `/api/notes/${encodeURIComponent(filename)}?mode=${encodeURIComponent(mode || 'reference')}`;
+export async function fetchNotes(filename, trackId, preferences = {}) {
+  const sameFingerPenalty = preferences.sameFingerPenalty !== false;
+  const inferImplicitLegato = preferences.inferImplicitLegato !== false;
+  let url = `/api/notes/${encodeURIComponent(filename)}?`;
+  url += `same_finger_motion_penalty=${sameFingerPenalty ? 'true' : 'false'}`;
+  url += `&infer_implicit_legato=${inferImplicitLegato ? 'true' : 'false'}`;
   if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -34,10 +38,14 @@ export async function fetchNotes(filename, trackId, mode) {
   return res.json();
 }
 
-export async function fetchSolve(filename, trackId, mode, representationMode) {
+export async function fetchSolve(filename, trackId, representationMode, preferences = {}) {
+  const sameFingerPenalty = preferences.sameFingerPenalty !== false;
+  const inferImplicitLegato = preferences.inferImplicitLegato !== false;
   let url =
-    `/api/solve/${encodeURIComponent(filename)}?mode=${encodeURIComponent(mode)}` +
-    `&representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}`;
+    `/api/solve/${encodeURIComponent(filename)}?` +
+    `representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}` +
+    `&same_finger_motion_penalty=${sameFingerPenalty ? 'true' : 'false'}` +
+    `&infer_implicit_legato=${inferImplicitLegato ? 'true' : 'false'}`;
   if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
   const res = await fetch(url);
   if (!res.ok) {
@@ -47,12 +55,10 @@ export async function fetchSolve(filename, trackId, mode, representationMode) {
   return res.json();
 }
 
-export async function fetchExportPdf(filename, trackId, mode, engine, representationMode) {
+export async function fetchExportPdf(filename, trackId, representationMode) {
   let url =
     `/api/export/pdf/${encodeURIComponent(filename)}` +
-    `?mode=${encodeURIComponent(mode)}` +
-    `&engine=${encodeURIComponent(engine)}` +
-    `&representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}`;
+    `?representation_mode=${encodeURIComponent(representationMode || 'standard_tablature')}`;
   if (trackId !== null && trackId !== undefined) {
     url += `&track_id=${trackId}`;
   }
@@ -65,7 +71,6 @@ export async function fetchExportPdf(filename, trackId, mode, engine, representa
 
   const blob = await res.blob();
   const contentDisposition = res.headers.get('content-disposition') || '';
-  const usedEngine = res.headers.get('x-fretwise-pdf-engine') || engine || 'legacy';
   const conformanceIssuesRaw = res.headers.get('x-fretwise-conformance-issues') || '0';
   const conformanceIssues = Number.parseInt(conformanceIssuesRaw, 10) || 0;
   const conformanceReportRaw = res.headers.get('x-fretwise-conformance-report') || '';
@@ -78,14 +83,8 @@ export async function fetchExportPdf(filename, trackId, mode, engine, representa
     }
   }
   let filenameOut = 'fretwise-export.pdf';
-  const m = /filename=\"?([^\";]+)\"?/i.exec(contentDisposition);
+  const m = /filename="?([^";]+)"?/i.exec(contentDisposition);
   if (m && m[1]) filenameOut = m[1];
 
-  return {
-    blob,
-    filename: filenameOut,
-    engine: usedEngine,
-    conformanceIssues,
-    conformanceReport,
-  };
+  return { blob, filename: filenameOut, engine: 'core', conformanceIssues, conformanceReport };
 }

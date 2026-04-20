@@ -17,6 +17,7 @@ let currentTrackId = null;
 let currentTracks = [];   // all tracks for the current file
 let renderer = null;
 let playback = null;
+let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
@@ -49,14 +50,12 @@ const btnLoopClear  = $('#btn-loop-clear');
 const btnMetronome  = $('#btn-metronome');
 const btnFingering  = $('#btn-fingering');
 const btnExportPdf  = $('#btn-export-pdf');
-const pdfEngineSelect = $('#pdf-engine-select');
 const pdfExportStatus = $('#pdf-export-status');
 const btnBackFiles  = $('#btn-back-files');
 const btnBackViewer  = $('#btn-back-viewer');
 const trackSwitcher  = $('#track-switcher');
 const selSpeed       = $('#speed-select');
 const bpmInput       = $('#bpm-input');
-const selMode        = $('#mode-select');
 const selRepresentationMode = $('#representation-mode-select');
 const uploadInput    = $('#upload-input');
 const uploadStatus   = $('#upload-status');
@@ -73,6 +72,15 @@ const positionBar   = $('#position-bar');
 const btnLegend     = $('#btn-legend');
 const legendOverlay = $('#legend-overlay');
 const legendClose   = $('#legend-close');
+const prefSameFingerPenalty = $('#pref-same-finger-penalty');
+const prefInferLegato = $('#pref-infer-legato');
+const prefHandOverlay = $('#pref-hand-overlay');
+const btnHandViz    = $('#btn-hand-viz');
+const handVizPanel  = $('#hand-viz-panel');
+const handVizFrame  = $('#hand-viz-frame');
+const handVizClose  = $('#hand-viz-close');
+const handVizResync = $('#hand-viz-resync');
+const handVizDrag   = $('#hand-viz-drag');
 
 // ── Page routing ────────────────────────────────────────────────────
 
@@ -158,7 +166,7 @@ async function selectTrack(trackId, trackName) {
   songTitle.textContent = currentFile.replace(/\.[^.]+$/, '');
   songArtist.textContent = trackName || `Track ${trackId}`;
   if (trackBadge) trackBadge.textContent = trackName || `Track ${trackId}`;
-  if (metaMode) metaMode.textContent = (selMode?.value || 'reference').toUpperCase();
+  if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
   tabCanvas.width = 100;
   tabCanvas.height = 100;
@@ -169,9 +177,13 @@ async function selectTrack(trackId, trackName) {
   ctx.fillText('Computing fingerings…', 50, 50);
 
   try {
-    const mode = selMode?.value || 'reference';
     const representationMode = getSelectedRepresentationMode();
-    const data = await fetchSolve(currentFile, trackId, mode, representationMode);
+    const data = await fetchSolve(
+      currentFile,
+      trackId,
+      representationMode,
+      getRulePreferences(),
+    );
     initRenderer(data);
   } catch (err) {
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
@@ -191,37 +203,17 @@ async function exportPDF() {
   _setPdfExportStatus('Exporting…', 'neutral');
 
   try {
-    const mode = selMode?.value || 'reference';
-    const engine = pdfEngineSelect?.value || 'core';
     const representationMode = getSelectedRepresentationMode();
-    const {
-      blob,
-      filename,
-      engine: usedEngine,
-      conformanceIssues,
-      conformanceReport,
-    } = await fetchExportPdf(
+    const { blob, filename, conformanceIssues } = await fetchExportPdf(
       currentFile,
       currentTrackId,
-      mode,
-      engine,
       representationMode,
     );
     _downloadBlob(blob, filename);
-    if (usedEngine === 'core') {
-      if (conformanceIssues > 0) {
-        _setPdfExportStatus(`Core: ${conformanceIssues} issue(s)`, 'warn');
-      } else {
-        _setPdfExportStatus('Core: conformance OK', 'ok');
-      }
+    if (conformanceIssues > 0) {
+      _setPdfExportStatus(`${conformanceIssues} conformance issue(s)`, 'warn');
     } else {
-      if (conformanceReport?.shadow_failed) {
-        _setPdfExportStatus('Legacy: shadow core unavailable', 'warn');
-      } else if (conformanceIssues > 0) {
-        _setPdfExportStatus(`Legacy: shadow core ${conformanceIssues} issue(s)`, 'warn');
-      } else {
-        _setPdfExportStatus('Legacy export complete', 'ok');
-      }
+      _setPdfExportStatus('Export OK', 'ok');
     }
   } catch (err) {
     console.warn('API PDF export failed, falling back to local canvas export:', err);
@@ -268,13 +260,24 @@ function getSelectedRepresentationMode() {
   return selRepresentationMode?.value || 'standard_tablature';
 }
 
+function getRulePreferences() {
+  return {
+    sameFingerPenalty: prefSameFingerPenalty?.checked !== false,
+    inferImplicitLegato: prefInferLegato?.checked !== false,
+    showHandOverlay: prefHandOverlay?.checked !== false,
+  };
+}
+
 function _representationModeLabel(mode) {
   switch (mode) {
     case 'standard':
       return 'STANDARD';
     case 'standard_tablature':
       return 'STANDARD + TAB';
+    case 'tablature_rhythm':
+      return 'TAB + RHYTHM';
     case 'tablature':
+      return 'TAB';
     default:
       return 'TAB + RHYTHM';
   }
@@ -295,7 +298,216 @@ function applyRepresentationModeView(data) {
   if (coreSvgView) {
     coreSvgView.style.display = showCore ? 'block' : 'none';
     coreSvgView.innerHTML = showCore && data?.core_svg ? data.core_svg : '';
-    if (showCore) _applyResponsiveCoreSvg();
+    if (showCore) {
+      _applyResponsiveCoreSvg();
+      _syncCoreSvgFingering();
+      _syncCoreSvgHandOverlay();
+    }
+  }
+}
+
+function _fingerGlyph(finger) {
+  return {
+    index: 'i',
+    middle: 'm',
+    ring: 'r',
+    pinky: 'p',
+  }[String(finger || '').toLowerCase()] || '';
+}
+
+function _buildResultByOnsetString(results) {
+  const map = new Map();
+  for (const note of (results || [])) {
+    const onset = Number.parseFloat(note?.onset);
+    const tabString = Number.parseInt(note?.string, 10);
+    if (!Number.isFinite(onset) || !Number.isInteger(tabString)) continue;
+    const key = `${onset.toFixed(6)}:${tabString}`;
+    if (!map.has(key)) map.set(key, note);
+  }
+  return map;
+}
+
+function _syncCoreSvgFingering() {
+  if (!coreSvgView || !renderer) return;
+  const svg = coreSvgView.querySelector('svg');
+  if (!svg) return;
+
+  svg.querySelectorAll('.fw-finger-annotation').forEach((el) => el.remove());
+  if (!renderer.showFingering) return;
+
+  const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
+  const tabNotes = svg.querySelectorAll('text.fw-tab-note');
+  for (const noteText of tabNotes) {
+    const onsetRaw = noteText.getAttribute('data-onset') || '';
+    const tabStringRaw = noteText.getAttribute('data-tab-string') || '';
+    const onset = Number.parseFloat(onsetRaw);
+    const tabString = Number.parseInt(tabStringRaw, 10);
+    if (!Number.isFinite(onset) || !Number.isInteger(tabString)) continue;
+
+    const resultNote = byOnsetString.get(`${onset.toFixed(6)}:${tabString}`);
+    if (!resultNote) continue;
+    if (Number.parseInt(resultNote.fret, 10) <= 0) continue;
+
+    const fingerChar = _fingerGlyph(resultNote.finger);
+    if (!fingerChar) continue;
+
+    const x = Number.parseFloat(noteText.getAttribute('x') || '0');
+    const y = Number.parseFloat(noteText.getAttribute('y') || '0');
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+
+    const fingerEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    fingerEl.setAttribute('class', 'fw-finger-annotation');
+    fingerEl.setAttribute('x', (x + 6.0).toFixed(2));
+    fingerEl.setAttribute('y', (y + 6.4).toFixed(2));
+    fingerEl.setAttribute('font-family', 'Arial,sans-serif');
+    fingerEl.setAttribute('font-size', '7');
+    fingerEl.setAttribute('font-weight', '700');
+    fingerEl.setAttribute('fill', '#b71c1c');
+    fingerEl.setAttribute('text-anchor', 'start');
+    fingerEl.setAttribute('dominant-baseline', 'central');
+    fingerEl.textContent = fingerChar;
+    svg.appendChild(fingerEl);
+  }
+}
+
+function _clusterSorted(values, epsilon = 1.0) {
+  const sorted = Array.from(values).sort((a, b) => a - b);
+  const out = [];
+  for (const v of sorted) {
+    const prev = out[out.length - 1];
+    if (!prev || Math.abs(v - prev) > epsilon) out.push(v);
+  }
+  return out;
+}
+
+function _syncCoreSvgHandOverlay() {
+  if (!coreSvgView || !renderer) return;
+  const svg = coreSvgView.querySelector('svg');
+  if (!svg) return;
+
+  svg.querySelectorAll('.fw-hand-annotation').forEach((el) => el.remove());
+  const prefs = getRulePreferences();
+  if (!prefs.showHandOverlay) return;
+
+  const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
+  const tabNotes = Array.from(svg.querySelectorAll('text.fw-tab-note'));
+  if (!tabNotes.length) return;
+
+  const laneSeeds = _clusterSorted(
+    tabNotes
+      .filter((el) => parseInt(el.getAttribute('data-tab-string') || '', 10) === 6)
+      .map((el) => Number.parseFloat(el.getAttribute('y') || '0'))
+      .filter((v) => Number.isFinite(v)),
+    1.4,
+  );
+  if (!laneSeeds.length) {
+    const yMax = Math.max(...tabNotes.map((el) => Number.parseFloat(el.getAttribute('y') || '0')));
+    if (Number.isFinite(yMax)) laneSeeds.push(yMax);
+  }
+  if (!laneSeeds.length) return;
+
+  const onsetEntries = new Map();
+  
+  for (const noteText of tabNotes) {
+    const onset = Number.parseFloat(noteText.getAttribute('data-onset') || '');
+    const tabString = Number.parseInt(noteText.getAttribute('data-tab-string') || '', 10);
+    const x = Number.parseFloat(noteText.getAttribute('x') || '0');
+    const y = Number.parseFloat(noteText.getAttribute('y') || '0');
+    if (!Number.isFinite(onset) || !Number.isFinite(x) || !Number.isFinite(y) || !Number.isInteger(tabString)) {
+      continue;
+    }
+    const resultNote = byOnsetString.get(`${onset.toFixed(6)}:${tabString}`);
+    if (!resultNote || !Number.isFinite(Number(resultNote.hand_position))) continue;
+
+    let laneIdx = 0;
+    let laneDist = Infinity;
+    for (let i = 0; i < laneSeeds.length; i += 1) {
+      const d = Math.abs(y - laneSeeds[i]);
+      if (d < laneDist) {
+        laneDist = d;
+        laneIdx = i;
+      }
+    }
+
+    const onsetKey = onset.toFixed(6);
+    const existing = onsetEntries.get(onsetKey);
+    if (!existing || x < existing.x) {
+      onsetEntries.set(onsetKey, {
+        onset,
+        x,
+        laneIdx,
+        handPosition: Number(resultNote.hand_position),
+        measureIndex: resultNote.measure_index,
+      });
+    }
+  }
+
+  const onsets = Array.from(onsetEntries.values()).sort((a, b) => a.onset - b.onset || a.x - b.x);
+
+  const MIN_SPACING = 38.0;
+  let globalPrevHand = null;
+  const lastAnnotXByLane = new Map();
+  const lastMeasureByLane = new Map();
+  const seenLanes = new Set();
+
+  for (const entry of onsets) {
+    const laneIdx = entry.laneIdx;
+    const laneBaseY = laneSeeds[Math.min(laneIdx, laneSeeds.length - 1)] + 12.0;
+    const isNewLane = !seenLanes.has(laneIdx);
+    const handChanged = globalPrevHand !== null && globalPrevHand !== entry.handPosition;
+
+    let displayLabel = null;
+    let isChange = false;
+
+    if (isNewLane) {
+      // First note on this visual row — always show, with arrow if position changed
+      if (handChanged) {
+        const arrow = globalPrevHand < entry.handPosition ? '→' : '←';
+        displayLabel = arrow + 'P' + entry.handPosition;
+        isChange = true;
+      } else {
+        displayLabel = 'P' + entry.handPosition;
+      }
+    } else if (handChanged) {
+      // Position changed mid-lane
+      const arrow = globalPrevHand < entry.handPosition ? '→' : '←';
+      displayLabel = arrow + 'P' + entry.handPosition;
+      isChange = true;
+    } else if (Number.isFinite(entry.measureIndex)) {
+      // Measure-boundary reminder when position is unchanged
+      const prevMeasure = lastMeasureByLane.get(laneIdx);
+      const isFirstOfMeasure = prevMeasure == null || entry.measureIndex !== prevMeasure;
+      if (isFirstOfMeasure) {
+        const lastAnnotX = lastAnnotXByLane.get(laneIdx);
+        if (lastAnnotX == null || entry.x - lastAnnotX >= MIN_SPACING) {
+          displayLabel = 'P' + entry.handPosition;
+        }
+      }
+    }
+
+    // Always update tracking state, even when not rendering
+    seenLanes.add(laneIdx);
+    globalPrevHand = entry.handPosition;
+    if (Number.isFinite(entry.measureIndex)) {
+      lastMeasureByLane.set(laneIdx, entry.measureIndex);
+    }
+
+    if (displayLabel === null) continue;
+
+    const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textEl.setAttribute('class', 'fw-hand-annotation');
+    textEl.setAttribute('x', entry.x.toFixed(2));
+    textEl.setAttribute('y', laneBaseY.toFixed(2));
+    textEl.setAttribute('font-family', 'Arial,sans-serif');
+    textEl.setAttribute('font-size', isChange ? '6.2' : '5.8');
+    textEl.setAttribute('font-weight', isChange ? '700' : '600');
+    textEl.setAttribute('fill', isChange ? '#c0392b' : '#546e7a');
+    textEl.setAttribute('text-anchor', 'middle');
+    textEl.setAttribute('dominant-baseline', 'hanging');
+    textEl.textContent = displayLabel;
+    svg.appendChild(textEl);
+
+    lastAnnotXByLane.set(laneIdx, entry.x);
   }
 }
 
@@ -407,10 +619,12 @@ function initRenderer(data) {
   if (data.artist) songArtist.textContent = data.artist;
   if (metaTempo) metaTempo.textContent = `♩ = ${Math.round(data.tempo || 120)}`;
   if (bpmInput) bpmInput.value = Math.round(data.tempo || 120);
-  if (metaMode) metaMode.textContent = (selMode?.value || 'reference').toUpperCase();
+  if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
   renderer = new TabRenderer(tabCanvas, data);
   renderer.render();
+  // Notify the floating hand-viz panel that fresh fingering data is ready.
+  window.dispatchEvent(new CustomEvent('fretwise:renderer-ready'));
   // Audio is always enabled; the multi-track bar handles per-track muting
   soundOn = true;
   if (btnFingering) {
@@ -444,7 +658,16 @@ function initRenderer(data) {
   // Select the right soundfont instrument from the track name
   playback.setInstrument(data.track_name || '');
   playback.onMeasureChange = (_m) => {};
-  playback.onStop = () => { updatePlayButton(false); stopCursorLoop(); };
+  playback.onStop = () => {
+    updatePlayButton(false);
+    stopCursorLoop();
+    _postHandVizTime();
+  };
+  // Feed the floating hand-viz panel with the current playhead time on every
+  // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
+  playback.onTimeChange = (_sec) => {
+    if (handVizPanel && handVizPanel.style.display !== 'none') _postHandVizTime();
+  };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
   playback.enableAudio();
 
@@ -488,14 +711,31 @@ function initRenderer(data) {
   });
 
   // SVG cursor driver for standard / standard+tab modes
+  _svgDriver = null;
   const _svgMode = data.representation_mode || getSelectedRepresentationMode();
   if (_svgMode !== 'tablature' && data.measure_regions?.length && coreSvgView) {
-    const _svgDriver = new SvgCursorDriver(coreSvgView, data);
+    _svgDriver = new SvgCursorDriver(coreSvgView, data);
     _svgDriver.init();
     playback.onMeasureChange = (m) => {
       _svgDriver.highlight(m, playback.loopStart, playback.loopEnd);
     };
     coreSvgView.onclick = (e) => {
+      // Chord name click → scroll to chord diagram
+      const chordEl = e.target.closest('[data-chord]');
+      if (chordEl) {
+        const chordName = chordEl.getAttribute('data-chord');
+        const strip = $('#chord-strip');
+        if (strip && chordName) {
+          const el = strip.querySelector(`[data-chord="${CSS.escape(chordName)}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('chord-highlight');
+            setTimeout(() => el.classList.remove('chord-highlight'), 1500);
+          }
+        }
+        return;
+      }
+      // Measure jump
       const m = _svgDriver.measureAtClick(e);
       if (m >= 0) playback.goToMeasure(m);
     };
@@ -609,7 +849,11 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
     const cacheKey = `${currentFile}#${trackId}`;
     let notesData = _notesCache.get(cacheKey);
     if (!notesData) {
-      notesData = await fetchNotes(currentFile, trackId, selMode?.value || 'reference');
+      notesData = await fetchNotes(
+        currentFile,
+        trackId,
+        getRulePreferences(),
+      );
       _notesCache.set(cacheKey, notesData);
     }
     playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure);
@@ -703,7 +947,13 @@ if (btnFingering) {
     if (!renderer) return;
     renderer.showFingering = !renderer.showFingering;
     btnFingering.classList.toggle('active', renderer.showFingering);
-    renderer.render();
+    const representationMode = getSelectedRepresentationMode();
+    if (representationMode === 'tablature') {
+      renderer.render();
+      return;
+    }
+    _syncCoreSvgFingering();
+    _syncCoreSvgHandOverlay();
   });
 }
 
@@ -779,15 +1029,7 @@ document.addEventListener('input', (e) => {
   }
 });
 
-// ── Mode change re-solve ────────────────────────────────────────────
-
-if (selMode) {
-  selMode.addEventListener('change', () => {
-    if (currentFile && currentTrackId != null) {
-      selectTrack(currentTrackId, songArtist.textContent);
-    }
-  });
-}
+// ── Representation mode change re-solve ────────────────────────────
 
 if (selRepresentationMode) {
   selRepresentationMode.addEventListener('change', () => {
@@ -796,6 +1038,167 @@ if (selRepresentationMode) {
     }
   });
 }
+
+if (prefSameFingerPenalty) {
+  prefSameFingerPenalty.addEventListener('change', () => {
+    if (currentFile && currentTrackId != null) {
+      _notesCache.clear();
+      selectTrack(currentTrackId, songArtist.textContent);
+    }
+  });
+}
+
+if (prefInferLegato) {
+  prefInferLegato.addEventListener('change', () => {
+    if (currentFile && currentTrackId != null) {
+      _notesCache.clear();
+      selectTrack(currentTrackId, songArtist.textContent);
+    }
+  });
+}
+
+if (prefHandOverlay) {
+  prefHandOverlay.addEventListener('change', () => {
+    if (!renderer) return;
+    if (getSelectedRepresentationMode() === 'tablature') {
+      renderer.render();
+      return;
+    }
+    _syncCoreSvgHandOverlay();
+  });
+}
+
+// ── Floating hand-visualization panel ──────────────────────────────────
+// Available in ALL representation modes. The panel hosts an iframe that
+// renders the animated left hand with active / sedentary / idle states.
+//
+// Two-way integration with parent:
+//   - Data push  (track selection → post full fingering payload to iframe)
+//   - Playhead sync (every tick → post current time in seconds so the
+//     iframe animates in lock-step with parent's playback cursor).
+//
+// See docs/finger_placement_strategy.md for the sedentary-finger logic.
+function _buildHandVizPayload() {
+  if (!renderer || !renderer.data || !Array.isArray(renderer.data.results)) {
+    return null;
+  }
+  const results = renderer.data.results;
+  if (results.length === 0) return null;
+  const tempo = renderer.data.tempo || 120;
+  const frames = [];
+  // Time base = parent's playback clock (t=0 at measure 0 beat 0), so
+  // onset_sec is onset_beats * 60 / tempo — no "first-note" offset.
+  for (const r of results) {
+    const onsetSec = (r.onset || 0) * 60 / tempo;
+    const durSec = Math.max(0.08, (r.duration || 0.25) * 60 / tempo);
+    // `r.finger` comes from Python as "Finger.INDEX" — normalise to bare word.
+    let finger = String(r.finger || 'open');
+    if (finger.startsWith('Finger.')) finger = finger.slice(7).toLowerCase();
+    frames.push({
+      note_id: r.note_id,
+      onset_sec: onsetSec,
+      duration_sec: durSec,
+      string: r.string,
+      fret: r.fret,
+      finger,
+      hand_position: r.hand_position,
+      pitch: r.pitch,
+      voice: r.voice_hint || 0,
+      planted: r.planted_fingers || {},
+    });
+  }
+  return {
+    meta: {
+      title: (renderer.data.title || 'FretWise'),
+      artist: renderer.data.artist || '',
+      track: renderer.data.track_name || '',
+      tempo,
+      synced: true,                     // iframe MUST use external clock
+      max_seconds: frames.length
+        ? frames[frames.length - 1].onset_sec + 4
+        : 10,
+    },
+    fretboard: {
+      num_frets: 15,
+      scale_length_mm: 648,
+      tuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+    },
+    frames,
+  };
+}
+
+function _postHandVizData() {
+  if (!handVizFrame || !handVizFrame.contentWindow) return;
+  const payload = _buildHandVizPayload();
+  if (!payload) return;
+  handVizFrame.contentWindow.postMessage(
+    { type: 'fretwise-hand-data', payload },
+    '*',
+  );
+  // After reinstalling data, also push current time so the iframe starts
+  // at the right place instead of t=0.
+  _postHandVizTime();
+}
+
+function _postHandVizTime() {
+  if (!handVizFrame || !handVizFrame.contentWindow) return;
+  if (!handVizPanel || handVizPanel.style.display === 'none') return;
+  if (!playback || typeof playback.getCurrentTimeSec !== 'function') return;
+  handVizFrame.contentWindow.postMessage(
+    { type: 'fretwise-hand-seek', t: playback.getCurrentTimeSec(),
+      playing: !!playback.isPlaying },
+    '*',
+  );
+}
+
+function _toggleHandViz() {
+  if (!handVizPanel) return;
+  const visible = handVizPanel.style.display !== 'none';
+  handVizPanel.style.display = visible ? 'none' : 'flex';
+  if (btnHandViz) btnHandViz.classList.toggle('tb-btn-active', !visible);
+  if (!visible) setTimeout(_postHandVizData, 100);
+}
+
+if (btnHandViz) btnHandViz.addEventListener('click', _toggleHandViz);
+
+if (handVizClose) {
+  handVizClose.addEventListener('click', () => {
+    if (handVizPanel) handVizPanel.style.display = 'none';
+    if (btnHandViz) btnHandViz.classList.remove('tb-btn-active');
+  });
+}
+if (handVizResync) handVizResync.addEventListener('click', _postHandVizData);
+
+// Make the panel draggable by its header.
+if (handVizDrag && handVizPanel) {
+  let drag = null;
+  handVizDrag.addEventListener('mousedown', (e) => {
+    // Skip clicks on the header buttons themselves.
+    if (e.target.closest('.floating-panel-btn')) return;
+    const rect = handVizPanel.getBoundingClientRect();
+    drag = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!drag) return;
+    const x = Math.max(4, Math.min(window.innerWidth  - 60,  e.clientX - drag.dx));
+    const y = Math.max(4, Math.min(window.innerHeight - 60,  e.clientY - drag.dy));
+    handVizPanel.style.left   = x + 'px';
+    handVizPanel.style.top    = y + 'px';
+    handVizPanel.style.right  = 'auto';
+    handVizPanel.style.bottom = 'auto';
+  });
+  window.addEventListener('mouseup', () => { drag = null; });
+}
+
+// Repush whenever the iframe signals it is ready.
+window.addEventListener('message', (ev) => {
+  if (ev && ev.data && ev.data.type === 'fretwise-hand-ready') _postHandVizData();
+});
+
+// Repush whenever the track changes or the pipeline re-runs. We hook into
+// the renderer initialization point below.
+window.addEventListener('fretwise:renderer-ready', _postHandVizData);
 
 // ── File upload ─────────────────────────────────────────────────────
 
@@ -1004,6 +1407,7 @@ function startCursorLoop() {
   if (_cursorRaf) cancelAnimationFrame(_cursorRaf);
   function loop() {
     _drawCursorOverlay();
+    _tickSvgCursor();
     if (playback?.isPlaying) {
       _cursorRaf = requestAnimationFrame(loop);
     } else {
@@ -1019,6 +1423,15 @@ function stopCursorLoop() {
   if (cursorCanvas) {
     cursorCanvas.getContext('2d').clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
   }
+  _svgDriver?.hideLine();
+}
+
+function _tickSvgCursor() {
+  if (!_svgDriver || !playback?.isPlaying) return;
+  const elapsed = (performance.now() - playback._startTime) / 1000;
+  const elapsedBeats = elapsed * playback.tempo / 60 * playback.speed;
+  const onset = playback._startMeasure * playback.bpm + elapsedBeats;
+  _svgDriver.tick(onset, playback.bpm);
 }
 
 function _drawCursorOverlay() {
