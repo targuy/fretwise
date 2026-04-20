@@ -8,6 +8,11 @@ from __future__ import annotations
 
 from fretwise.models import Articulation, Dynamic, Finger, FingeringState, NoteEvent
 from fretwise.scoring import RulePreferences, compute_mechanical_cost
+from fretwise.generator import StateGenerator
+from fretwise.optimizer import ViterbiOptimizer
+from fretwise.patterns import PatternMatcher
+from fretwise.pipeline import run_pipeline
+from fretwise.scoring import CostFunction, CostWeights
 
 _NO_SAME_FINGER = RulePreferences(same_finger_motion_penalty=False)
 
@@ -115,3 +120,69 @@ def test_ascending_favors_ring_descending_favors_index() -> None:
     c_ring_down  = compute_mechanical_cost(s1_high, _state(5, Finger.RING),  note, rule_preferences=_NO_SAME_FINGER)
     c_index_down = compute_mechanical_cost(s1_high, _state(5, Finger.INDEX), note, rule_preferences=_NO_SAME_FINGER)
     assert c_index_down < c_ring_down, f"Descending: INDEX ({c_index_down:.3f}) should beat RING ({c_ring_down:.3f})"
+
+
+def _make_run(start_fret: int, length: int, duration: float = 0.5, tempo: float = 120.0) -> list[NoteEvent]:
+    """Creates ascending notes on string 1 (E4=MIDI64), semitones, with fret hints."""
+    notes = []
+    for i in range(length):
+        notes.append(NoteEvent(
+            pitch=64 + start_fret + i,
+            onset=i * duration,
+            duration=duration,
+            tempo=tempo,
+            articulation=Articulation.NORMAL,
+            dynamic=Dynamic.MF,
+            string_hint=1,
+            fret_hint=start_fret + i,
+        ))
+    return notes
+
+
+def test_ascending_run_frets_5_to_8_finger_sequence() -> None:
+    """Run ascendant frets 5-6-7-8: documents what the algorithm produces.
+
+    A human guitarist would typically play:
+      Option A (fixed position): INDEX@5, MIDDLE@6, RING@7, PINKY@8  <- correct
+    The algorithm should produce Option A (stable hand, no shift).
+    This test documents the current behavior without strict assertion on fingering.
+    """
+    notes = _make_run(start_fret=5, length=4, duration=0.5, tempo=120.0)
+    generator = StateGenerator()
+    cost_fn   = CostFunction(weights=CostWeights.performance())
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher   = PatternMatcher()
+    results, _ = run_pipeline(notes, generator, optimizer, pattern_matcher=matcher)
+
+    fingers = [r.state.finger.name for r in results]
+    hand_positions = [r.state.hand_position for r in results]
+
+    print(f"\nRun 5->8: fingers={fingers}, hand_positions={hand_positions}")
+    assert len(results) == 4
+
+
+def test_ascending_run_frets_5_to_10_finger_sequence() -> None:
+    """Run ascendant 6 notes frets 5-10: exceeds 4-fret span, requires a shift.
+
+    A human guitarist would shift hand position somewhere during the ascent.
+    Pathological behavior: stay at hp=5 and play fret 10 with PINKY (hp=7, a shift anyway).
+    This test documents how many hand-position shifts the algorithm makes.
+    """
+    notes = _make_run(start_fret=5, length=6, duration=0.5, tempo=120.0)
+    generator = StateGenerator()
+    cost_fn   = CostFunction(weights=CostWeights.performance())
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher   = PatternMatcher()
+    results, _ = run_pipeline(notes, generator, optimizer, pattern_matcher=matcher)
+
+    fingers = [r.state.finger.name for r in results]
+    hand_positions = [r.state.hand_position for r in results]
+    frets = [r.state.fret for r in results]
+
+    print(f"\nRun 5->10 (6 notes):")
+    for r in results:
+        print(f"  fret={r.state.fret}  finger={r.state.finger.name}  hp={r.state.hand_position}")
+
+    hp_shifts = sum(1 for i in range(1, len(hand_positions)) if hand_positions[i] != hand_positions[i-1])
+    print(f"  Hand position shifts: {hp_shifts}")
+    assert len(results) == 6
