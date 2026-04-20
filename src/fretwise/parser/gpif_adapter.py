@@ -96,6 +96,8 @@ class GpifAdapter(BaseParser):
 
     #: Name of the last selected guitar track; set after each call to parse().
     track_name: str = ""
+    #: MIDI program number (0-127) of the selected track; -1 if unknown.
+    midi_program: int = -1
     #: Section/rehearsal markers: {1-based measure number → section title}.
     #: Set after each call to parse().
     section_markers: dict[int, str] = {}
@@ -223,9 +225,12 @@ class GpifAdapter(BaseParser):
         # Find the tuning (open_pitches) for this specific track.
         open_pitches: list[int] = []
         self.track_name = ""
+        self.midi_program = -1
         for track in root.findall("Tracks/Track"):
             if track.get("id") == str(track_id):
                 self.track_name = track.findtext("Name", "").strip()
+                prog_text = track.findtext(".//MIDI/Program") or ""
+                self.midi_program = int(prog_text) if prog_text.isdigit() else -1
                 staff = track.find("Staves/Staff")
                 if staff is not None:
                     props = {p.get("name", ""): p for p in staff.findall("Properties/Property")}
@@ -489,6 +494,21 @@ def _build_rhythm_map(root: ET.Element) -> dict[str, float]:
                 beats = beats * den / num
 
         result[rid] = beats
+    return result
+
+
+def _build_rhythm_tuplet_map(root: ET.Element) -> dict[str, tuple[int, int] | None]:
+    """Return {rhythm_id: (actual, normal)} for tuplet rhythms, or None otherwise."""
+    result: dict[str, tuple[int, int] | None] = {}
+    for r in root.findall("Rhythms/Rhythm"):
+        rid = r.get("id", "")
+        tuplet = r.find("PrimaryTuplet")
+        if tuplet is not None:
+            num = int(tuplet.get("num", "1"))
+            den = int(tuplet.get("den", "1"))
+            result[rid] = (num, den) if num != den else None
+        else:
+            result[rid] = None
     return result
 
 
@@ -1110,6 +1130,7 @@ def _extract_events(
     All GP voices present in each bar are processed; each NoteEvent carries its
     voice index in ``voice_hint`` so the pipeline can run Viterbi per voice.
     """
+    rhythm_tuplet_map = _build_rhythm_tuplet_map(root)
     num_strings = len(open_pitches)
     bars_index = {b.get("id"): b for b in root.findall("Bars/Bar")}
     voices_index = {v.get("id"): v for v in root.findall("Voices/Voice")}
@@ -1170,6 +1191,9 @@ def _extract_events(
 
                 # Beat-level dots (some GPIF versions put dots on Beat, not Rhythm).
                 beat_duration = rhythm_map.get(rid, 1.0)
+                _rt = rhythm_tuplet_map.get(rid)
+                beat_tuplet_actual: int | None = _rt[0] if _rt else None
+                beat_tuplet_normal: int | None = _rt[1] if _rt else None
                 dot_el = beat_el.find("AugmentationDot")
                 if dot_el is not None:
                     count = int(dot_el.get("count", "1"))
@@ -1256,6 +1280,8 @@ def _extract_events(
                             note_accidental=nd.pitch_accidental,
                             note_octave=nd.pitch_octave,
                             measure_index=bar_num + 1,
+                            tuplet_actual=beat_tuplet_actual,
+                            tuplet_normal=beat_tuplet_normal,
                         )
                     )
 

@@ -27,10 +27,13 @@ export class PlaybackEngine {
     this._masterGain = null;
     this._volume = 0.7;        // master volume 0..1
     this._lastScheduledMeasure = -1;
-    this._synth = null;          // soundfont-player Player (null = oscillator fallback)
-    this._synthLoading = false;  // loading guard to avoid double-init
-    this._instrumentName = 'electric_guitar_clean'; // current soundfont instrument
-    // Secondary audio channels: [{trackId, trackName, measures, synth, gain, enabled, _loading}]
+    this._spessa = null;          // SpessaSynth Synthetizer (shared, all MIDI channels)
+    this._synth = null;           // 'spessa' sentinel | soundfont-player Player | null (osc)
+    this._synthLoading = false;   // loading guard to avoid double-init
+    this._midiProgram = 25;       // GM program for primary track (25 = acoustic steel guitar)
+    this._instrumentName = 'electric_guitar_clean'; // soundfont-player fallback instrument
+    // Secondary audio channels: [{trackId, trackName, measures, synth, gain, enabled,
+    //                             _loading, midiChannel, midiProgram}]
     this._secondaryChannels = [];
 
     // Callbacks
@@ -38,6 +41,22 @@ export class PlaybackEngine {
     this.onStop = null;
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
     this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
+    this.onTimeChange = null;     // (seconds) → void, called on every tick
+  }
+
+  /**
+   * Current playhead position in seconds from the start of the song (measure 0
+   * beat 0 = t=0).  Exposed for external consumers that animate off the same
+   * clock (e.g. the floating hand-visualization panel).
+   */
+  getCurrentTimeSec() {
+    const spm = this.secondsPerMeasure;
+    if (this.isPlaying && this._startTime != null) {
+      const elapsed = (performance.now() - this._startTime) / 1000;
+      return this._startMeasure * spm + elapsed;
+    }
+    const cursor = this.renderer ? (this.renderer.cursorMeasure || 0) : 0;
+    return cursor * spm;
   }
 
   get totalMeasures() {
@@ -73,11 +92,14 @@ export class PlaybackEngine {
 
   disableAudio() {
     this.audioEnabled = false;
-    if (this._synth) {
+    if (this._spessa) {
+      try { this._spessa.stopAll?.(); } catch (_) {}
+    } else if (this._synth && this._synth !== 'spessa') {
       try { this._synth.stop(); } catch (_) {}
     }
     for (const ch of this._secondaryChannels) {
-      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} ch.synth = null; }
+      if (ch.synth && ch.synth !== 'spessa') { try { ch.synth.stop(); } catch (_) {} }
+      ch.synth = null;
     }
     return false;
   }
@@ -113,12 +135,21 @@ export class PlaybackEngine {
    * @param {string} trackName
    * @param {Array}  results — note objects from /api/notes
    * @param {number} beatsPerMeasure
+   * @param {number} [midiProgram] — GM program number (0-127); inferred from name if absent
    */
-  addSecondaryChannel(trackId, trackName, results, beatsPerMeasure) {
+  addSecondaryChannel(trackId, trackName, results, beatsPerMeasure, midiProgram) {
     this.removeSecondaryChannel(trackId); // remove if already present
     const bpm = beatsPerMeasure || this.bpm;
     const measures = PlaybackEngine._buildMeasures(results, bpm);
-    const ch = { trackId, trackName, measures, synth: null, gain: 0.8, enabled: true, _loading: false };
+    // MIDI channels 1-15 for secondary tracks (0 is reserved for primary)
+    const midiChannel = Math.min(15, this._secondaryChannels.length + 1);
+    const resolvedProgram = (Number.isInteger(midiProgram) && midiProgram >= 0)
+      ? midiProgram
+      : PlaybackEngine._instrumentToMidiProgram(PlaybackEngine._inferInstrument(trackName));
+    const ch = {
+      trackId, trackName, measures, synth: null, gain: 0.8, enabled: true, _loading: false,
+      midiChannel, midiProgram: resolvedProgram,
+    };
     this._secondaryChannels.push(ch);
     if (this.audioEnabled && this._audioCtx) {
       this._loadChannelInstrument(ch).catch(err =>
@@ -135,22 +166,34 @@ export class PlaybackEngine {
     const idx = this._secondaryChannels.findIndex(c => c.trackId === trackId);
     if (idx >= 0) {
       const ch = this._secondaryChannels[idx];
-      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} }
+      if (ch.synth && ch.synth !== 'spessa') { try { ch.synth.stop(); } catch (_) {} }
       this._secondaryChannels.splice(idx, 1);
     }
   }
 
   /**
-   * Load soundfont-player instrument for a secondary channel.
+   * Load instrument for a secondary channel.
+   * With SpessaSynth: instant programChange on the shared synth.
+   * Without: fall back to soundfont-player (async MP3 load).
    * @param {Object} ch — secondary channel object
    */
   async _loadChannelInstrument(ch) {
     if (ch._loading || ch.synth) return;
+
+    if (this._spessa) {
+      this._spessa.programChange(ch.midiChannel, ch.midiProgram);
+      ch.synth = 'spessa';
+      console.log(`[FretWise] secondary "${ch.trackName}" → GM ${ch.midiProgram} (ch ${ch.midiChannel})`);
+      if (this.isPlaying && this._lastScheduledMeasure >= 0) {
+        this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
+      }
+      return;
+    }
+
     ch._loading = true;
     try {
       if (!window.Soundfont) {
         await new Promise((resolve, reject) => {
-          // Script already injected by _initSynth? Check before adding again
           if (document.querySelector('script[src*="soundfont-player"]')) { resolve(); return; }
           const s = document.createElement('script');
           s.src = '/static/js/vendor/soundfont-player.min.js';
@@ -162,9 +205,7 @@ export class PlaybackEngine {
       if (!window.Soundfont) throw new Error('Soundfont not available');
       const instName = PlaybackEngine._inferInstrument(ch.trackName);
       ch.synth = await window.Soundfont.instrument(
-        this._audioCtx,
-        instName,
-        {
+        this._audioCtx, instName, {
           soundfont: 'MusyngKite',
           format: 'mp3',
           nameToUrl: (name, sf, format) =>
@@ -174,8 +215,6 @@ export class PlaybackEngine {
         }
       );
       console.log(`[FretWise] secondary "${ch.trackName}" ready (${instName})`);
-      // If playback is already running, immediately play the current measure
-      // so the channel doesn't stay silent until the next measure change.
       if (this.isPlaying && this._lastScheduledMeasure >= 0) {
         this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
       }
@@ -188,9 +227,10 @@ export class PlaybackEngine {
   }
 
   /**
-   * Infer the GM soundfont instrument name from a human-readable track name.
-   * @param {string} trackName — e.g. "E. Guitar", "Bass", "Distortion"
-   * @returns {string} soundfont instrument name (matches gleitz/midi-js-soundfonts key)
+   * Infer the MusyngKite soundfont instrument name from a human-readable track name.
+   * Used only for the soundfont-player fallback path.
+   * @param {string} trackName
+   * @returns {string} MusyngKite instrument key
    */
   static _inferInstrument(trackName) {
     const n = (trackName || '').toLowerCase();
@@ -199,21 +239,64 @@ export class PlaybackEngine {
     if (/bass/i.test(n))                           return 'electric_bass_finger';
     if (/nylon|classical/i.test(n))                return 'acoustic_guitar_nylon';
     if (/acoustic|folk|steel/i.test(n))            return 'acoustic_guitar_steel';
-    // Default: clean electric covers Lead, Rhythm, E. Guitar, Jazz Guitar, etc.
     return 'electric_guitar_clean';
   }
 
   /**
-   * Set the current instrument from a track name string and (re)load if needed.
-   * Safe to call before or after enableAudio().
+   * Map a MusyngKite instrument name back to a GM program number.
+   * Used when no explicit MIDI program is provided.
+   * @param {string} instName
+   * @returns {number} GM program (0-127)
+   */
+  static _instrumentToMidiProgram(instName) {
+    return {
+      acoustic_guitar_nylon:  24,
+      acoustic_guitar_steel:  25,
+      electric_guitar_clean:  27,
+      overdriven_guitar:      29,
+      distortion_guitar:      30,
+      electric_bass_finger:   33,
+    }[instName] ?? 27;
+  }
+
+  /**
+   * Set the GM MIDI program for the primary track.
+   * With SpessaSynth: applies instantly via programChange.
+   * Without: infers the closest MusyngKite instrument and reloads if needed.
+   * @param {number} program — GM program 0-127; -1 = unknown (keeps previous)
+   */
+  setMidiProgram(program) {
+    if (!Number.isInteger(program) || program < 0 || program > 127) return;
+    this._midiProgram = program;
+    if (this._spessa) {
+      this._spessa.programChange(0, program);
+      return;
+    }
+    // Soundfont fallback: map GM program to nearest MusyngKite instrument
+    const inst = program >= 32 && program <= 36 ? 'electric_bass_finger'
+               : program === 24 ? 'acoustic_guitar_nylon'
+               : program === 25 ? 'acoustic_guitar_steel'
+               : program === 29 ? 'overdriven_guitar'
+               : program === 30 ? 'distortion_guitar'
+               : 'electric_guitar_clean';
+    this.setInstrument(inst);
+  }
+
+  /**
+   * Set instrument from track name (soundfont fallback path).
+   * With SpessaSynth active, setMidiProgram() is preferred.
    * @param {string} trackName — human-readable name from the API
    */
   setInstrument(trackName) {
     const inst = PlaybackEngine._inferInstrument(trackName);
-    if (inst === this._instrumentName && this._synth) return; // no change
+    if (this._spessa) {
+      // SpessaSynth is active: instrument is set via setMidiProgram; nothing to reload
+      this._instrumentName = inst;
+      return;
+    }
+    if (inst === this._instrumentName && this._synth) return;
     this._instrumentName = inst;
-    // Discard previous synth so _initSynth() reloads with new instrument
-    if (this._synth) {
+    if (this._synth && this._synth !== 'spessa') {
       try { this._synth.stop(); } catch (_) {}
       this._synth = null;
     }
@@ -264,18 +347,29 @@ export class PlaybackEngine {
 
   /** Pause playback */
   pause() {
+    // Snapshot the current time BEFORE flipping isPlaying so the getter
+    // still returns the running elapsed-time, then freeze it.
+    const frozen = this.getCurrentTimeSec();
     this.isPlaying = false;
     if (this._raf) {
       cancelAnimationFrame(this._raf);
       this._raf = null;
     }
+    // Snap the cursor to the matching measure so getCurrentTimeSec()
+    // returns `frozen` while paused (spm-granular is enough here).
+    const m = Math.floor(frozen / this.secondsPerMeasure);
+    if (this.renderer) this.renderer.cursorMeasure = Math.max(0, Math.min(m, this.totalMeasures - 1));
     // Cut all already-scheduled audio immediately so notes don't ring
     // past the pause point and don't double when play resumes.
-    // soundfont-player's .stop() halts active notes but keeps the instrument loaded.
-    if (this._synth) { try { this._synth.stop(); } catch (_) {} }
-    for (const ch of this._secondaryChannels) {
-      if (ch.synth) { try { ch.synth.stop(); } catch (_) {} }
+    if (this._spessa) {
+      try { this._spessa.stopAll?.(); } catch (_) {}
+    } else {
+      if (this._synth && this._synth !== 'spessa') { try { this._synth.stop(); } catch (_) {} }
+      for (const ch of this._secondaryChannels) {
+        if (ch.synth && ch.synth !== 'spessa') { try { ch.synth.stop(); } catch (_) {} }
+      }
     }
+    if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
   }
 
   /** Toggle play/pause */
@@ -300,6 +394,7 @@ export class PlaybackEngine {
     this.renderer.render();
     if (this.onMeasureChange) this.onMeasureChange(this.renderer.cursorMeasure);
     if (this.onPositionChange) this.onPositionChange(this.renderer.cursorMeasure / Math.max(1, this.totalMeasures - 1));
+    if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
     if (wasPlaying) this.play();
   }
 
@@ -423,6 +518,10 @@ export class PlaybackEngine {
       }
     }
 
+    // Fire per-tick time callback (sub-measure resolution) for external
+    // consumers like the floating hand-visualization panel.
+    if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
+
     this._raf = requestAnimationFrame(() => this._tick());
   }
 
@@ -480,16 +579,55 @@ export class PlaybackEngine {
   // ── Note audio synthesis ──────────────────────────────────────────
 
   /**
-   * Load soundfont-player (UMD) and the MusyngKite soundfont for the current instrument.
-   * On success, this._synth = Soundfont Player instance.
-   * On any failure, this._synth stays null and the oscillator fallback is used.
+   * Initialise the audio synthesizer.
+   * Primary path: SpessaSynth + Shan SGM-Pro SF2 (full GM, realistic samples).
+   * Fallback: soundfont-player + MusyngKite MP3 samples (6 guitar presets).
+   * If both fail: oscillator synthesis (this._synth stays null).
    */
   async _initSynth() {
-    if (this._synth || this._synthLoading) return;
+    if (this._spessa || this._synth || this._synthLoading) return;
     this._synthLoading = true;
     if (this.onSynthStatusChange) this.onSynthStatusChange('loading');
     try {
-      // Step 1 — inject soundfont-player UMD script (sets window.Soundfont)
+      // ── Primary path: SpessaSynth + SF2 ───────────────────────────────────
+      const { Synthetizer } = await import('/static/js/vendor/spessasynth.esm.js');
+      await this._audioCtx.audioWorklet.addModule(
+        '/static/js/vendor/synthetizer/worklet_processor.min.js'
+      );
+
+      console.log('[FretWise] SpessaSynth: fetching SF2 soundfont…');
+      const resp = await fetch('/api/soundfont');
+      if (!resp.ok) throw new Error(`SF2 fetch: HTTP ${resp.status}`);
+      const sf2Buffer = await resp.arrayBuffer();
+
+      const dest = this._masterGain || this._audioCtx.destination;
+      const spessa = new Synthetizer(dest, sf2Buffer);
+
+      // Set GM program for primary and any already-registered secondary channels
+      spessa.programChange(0, this._midiProgram);
+      for (const ch of this._secondaryChannels) {
+        spessa.programChange(ch.midiChannel, ch.midiProgram);
+        ch.synth = 'spessa';
+      }
+
+      this._spessa = spessa;
+      this._synth = 'spessa';
+      console.log(`[FretWise] SpessaSynth ready — GM program ${this._midiProgram}`);
+      if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
+    } catch (err) {
+      console.warn('[FretWise] SpessaSynth unavailable, falling back to MusyngKite:', err.message);
+      await this._initSynthFallback();
+    } finally {
+      this._synthLoading = false;
+    }
+  }
+
+  /**
+   * Fallback synthesizer: soundfont-player + MusyngKite pre-rendered MP3 samples.
+   * Only 6 guitar/bass presets available.  Used when SpessaSynth fails to load.
+   */
+  async _initSynthFallback() {
+    try {
       if (!window.Soundfont) {
         await new Promise((resolve, reject) => {
           const s = document.createElement('script');
@@ -499,15 +637,12 @@ export class PlaybackEngine {
           document.head.appendChild(s);
         });
       }
-      if (!window.Soundfont) throw new Error('window.Soundfont not defined after script load');
+      if (!window.Soundfont) throw new Error('window.Soundfont not defined');
 
-      // Step 2 — load the instrument from local pre-rendered MP3 samples
       const instName = this._instrumentName;
       console.log(`[FretWise] soundfont-player: loading ${instName}…`);
       this._synth = await window.Soundfont.instrument(
-        this._audioCtx,
-        instName,
-        {
+        this._audioCtx, instName, {
           soundfont: 'MusyngKite',
           format: 'mp3',
           nameToUrl: (name, sf, format) =>
@@ -516,18 +651,13 @@ export class PlaybackEngine {
           gain: 4,
         }
       );
-
-      // Audible confirmation note: A4 for 0.5 s
       this._synth.play(69, this._audioCtx.currentTime, { duration: 0.5, gain: 0.8 });
-
       console.log(`[FretWise] soundfont-player ready — ${instName}`);
       if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
       console.error('[FretWise] soundfont-player FAILED, oscillator fallback:', err);
       this._synth = null;
       if (this.onSynthStatusChange) this.onSynthStatusChange('error');
-    } finally {
-      this._synthLoading = false;
     }
   }
 
@@ -546,8 +676,21 @@ export class PlaybackEngine {
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
 
-    if (this._synth) {
-      // soundfont-player: schedule notes via AudioContext time (precise, no setTimeout drift)
+    if (this._spessa) {
+      // SpessaSynth: precise AudioContext-time scheduling via noteOn/noteOff
+      const bpm = this.bpm;
+      const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
+      const secPerBeat = (60 / this.tempo) / this.speed;
+      const now = this._audioCtx.currentTime;
+      for (const note of notes) {
+        const when = now + offsetSec + (note.onset - measureOnset) * secPerBeat;
+        const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
+        const velocity = this._dynamicToVelocity(note.dynamic);
+        this._spessa.noteOn(0, note.pitch, velocity, false, when);
+        this._spessa.noteOff(0, note.pitch, when + duration);
+      }
+    } else if (this._synth) {
+      // soundfont-player fallback
       const bpm = this.bpm;
       const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
       const secPerBeat = (60 / this.tempo) / this.speed;
@@ -579,10 +722,21 @@ export class PlaybackEngine {
     if (!ch.synth || !ch.enabled || !this._audioCtx || !this.audioEnabled) return;
     const chNotes = ch.measures[measureIdx];
     if (!chNotes || !chNotes.length) return;
-    const chBpm = this.bpm;
-    const chMeasureOnset = Math.floor(chNotes[0].onset / chBpm) * chBpm;
+    const chMeasureOnset = Math.floor(chNotes[0].onset / this.bpm) * this.bpm;
     const chSpb = (60 / this.tempo) / this.speed;
     const chNow = this._audioCtx.currentTime;
+
+    if (this._spessa) {
+      for (const note of chNotes) {
+        const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
+        const duration = Math.max(0.08, note.duration * chSpb - 0.025);
+        const velocity = Math.min(127, Math.round(this._dynamicToVelocity(note.dynamic) * ch.gain));
+        this._spessa.noteOn(ch.midiChannel, note.pitch, velocity, false, when);
+        this._spessa.noteOff(ch.midiChannel, note.pitch, when + duration);
+      }
+      return;
+    }
+
     for (const note of chNotes) {
       const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
       const duration = Math.max(0.08, note.duration * chSpb - 0.025);

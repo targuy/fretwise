@@ -58,6 +58,8 @@ class GuitarProAdapter(BaseParser):
 
     #: Name of the last selected guitar track; set after each call to parse().
     track_name: str = ""
+    #: MIDI program number (0-127) of the selected track; -1 if unknown.
+    midi_program: int = -1
     #: Section/rehearsal markers: {1-based measure number → section title}.
     #: Set after each call to parse().
     section_markers: dict[int, str] = {}
@@ -110,6 +112,7 @@ class GuitarProAdapter(BaseParser):
             return []
 
         self.track_name = getattr(track, "name", "") or ""
+        self.midi_program = getattr(getattr(track, "channel", None), "instrument", -1)
         self.section_markers = _extract_section_markers(track)
         self.chord_markers = _extract_beat_chord_markers(song, track)
         return _extract_note_events(song, track)
@@ -168,7 +171,7 @@ def _extract_note_events(
     onset = 0.0
     events: list[NoteEvent] = []
 
-    for measure in track.measures:
+    for measure_number, measure in enumerate(track.measures, start=1):
         current_tempo = _measure_tempo(measure, current_tempo)
         measure_onset = onset
         measure_duration = _measure_nominal_duration_in_beats(measure)
@@ -178,6 +181,13 @@ def _extract_note_events(
 
             for beat in voice.beats:
                 beat_duration = _duration_in_beats(beat.duration)
+                _gp_tup = beat.duration.tuplet
+                _beat_tuplet_actual: int | None = (
+                    _gp_tup.enters if _gp_tup.enters != _gp_tup.times else None
+                )
+                _beat_tuplet_normal: int | None = (
+                    _gp_tup.times if _gp_tup.enters != _gp_tup.times else None
+                )
                 strum_direction = _beat_strum_direction(beat)
 
                 for note in beat.notes:
@@ -202,6 +212,9 @@ def _extract_note_events(
                             voice_hint=voice_idx,
                             let_ring=bool(getattr(getattr(note, "effect", None), "letRing", False)),
                             strum_direction=strum_direction,
+                            tuplet_actual=_beat_tuplet_actual,
+                            tuplet_normal=_beat_tuplet_normal,
+                            measure_index=measure_number,
                         )
                     )
 

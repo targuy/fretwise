@@ -152,11 +152,13 @@ def _register_routes(app: FastAPI) -> None:
             rule_preferences=rule_preferences,
         )
         track_name: str = getattr(adapter, "track_name", "") or ""
+        midi_program: int = getattr(adapter, "midi_program", -1)
         tempo = events[0].tempo if events else 120.0
         beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
 
         return {
             "track_name": track_name,
+            "midi_program": midi_program,
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
             "results": [_serialize_result(r) for r in results],
@@ -196,6 +198,7 @@ def _register_routes(app: FastAPI) -> None:
 
         # Extract metadata from adapter
         track_name: str = getattr(adapter, "track_name", "") or ""
+        midi_program: int = getattr(adapter, "midi_program", -1)
         section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
         chord_diagrams: list[ChordDiagram] = list(
             getattr(adapter, "chord_diagrams", []) or []
@@ -215,6 +218,7 @@ def _register_routes(app: FastAPI) -> None:
             "title": auto_title,
             "artist": auto_artist,
             "track_name": track_name,
+            "midi_program": midi_program,
             "mode": "performance",
             "representation_mode": view_mode.value,
             "tempo": tempo,

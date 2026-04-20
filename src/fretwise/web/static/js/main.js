@@ -655,7 +655,8 @@ function initRenderer(data) {
     tempo: data.tempo || 120,
     beatsPerMeasure: data.beats_per_measure || 4,
   });
-  // Select the right soundfont instrument from the track name
+  // Set GM MIDI program (SpessaSynth) and infer MusyngKite instrument (fallback)
+  playback.setMidiProgram(data.midi_program ?? -1);
   playback.setInstrument(data.track_name || '');
   playback.onMeasureChange = (_m) => {};
   playback.onStop = () => {
@@ -856,7 +857,7 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
       );
       _notesCache.set(cacheKey, notesData);
     }
-    playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure);
+    playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure, notesData.midi_program);
     _mutedSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn mt-active';
     if (iconSpan) { iconSpan.textContent = '🔈'; iconSpan.title = `Muter ${sanitize(trackName)}`; }
