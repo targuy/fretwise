@@ -162,6 +162,8 @@ def _map_note(
         techniques.append(Technique(name="bend", value=str(note.bend_value)))
     if note.strum_direction in {"up", "down"}:
         techniques.append(Technique(name=f"strum_{note.strum_direction}"))
+    if note.harmonic_type is not None:
+        techniques.append(Technique(name="harmonic"))
     layout_hints: list[LayoutHint] = []
     if chord_name:
         layout_hints.append(LayoutHint(key="chord_name", value=chord_name))
@@ -176,6 +178,10 @@ def _map_note(
 
     if note.is_tie_dest:
         layout_hints.append(LayoutHint(key="is_tie_dest", value="true"))
+
+    if note.tuplet_actual is not None and note.tuplet_normal is not None:
+        layout_hints.append(LayoutHint(key="tuplet_actual", value=str(note.tuplet_actual)))
+        layout_hints.append(LayoutHint(key="tuplet_normal", value=str(note.tuplet_normal)))
 
     tab_info: TabInfo | None = None
     if note.string_hint is not None or note.fret_hint is not None:

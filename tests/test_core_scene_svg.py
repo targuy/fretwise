@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import fretwise.core.scene.builders as scene_builders
+
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_svg
 from fretwise.core.canonical import (
@@ -24,7 +26,15 @@ from fretwise.core.canonical import (
 )
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
-from fretwise.core.scene import canonical_to_render_scene
+from fretwise.core.scene import (
+    DocumentScene,
+    LayerGroup,
+    PageScene,
+    RenderScene,
+    StaffScene,
+    SystemScene,
+    canonical_to_render_scene,
+)
 from fretwise.models import Articulation, Dynamic, NoteEvent
 
 
@@ -151,6 +161,23 @@ def test_canonical_to_render_scene_standard_tablature_has_both_planes() -> None:
     staff_glyph_ids = {g.glyph_id for g in staff.layer_groups[0].glyph_instances}
     assert "clef" in staff_glyph_ids
     assert "time_signature" in staff_glyph_ids
+
+
+def test_svg_tab_note_text_exposes_core_overlay_metadata() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=0.5, string_hint=2, fret_hint=5)],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+    svg = render_scene_to_svg(result.render_scene)
+
+    assert 'class="fw-tab-note"' in svg
+    assert 'data-tab-string="2"' in svg
+    assert 'data-onset="0.000000"' in svg
 
 
 def test_canonical_to_render_scene_standard_contains_stems_and_beams() -> None:
@@ -595,6 +622,172 @@ def test_canonical_to_render_scene_tablature_rhythm_anchors_time_signature_on_ta
 
     assert abs(time_signature.y - (tab_y + 2.0 * tab_spacing)) < 0.01
     assert not any(text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances)
+
+
+def test_tuplet_brackets_are_mode_specific_between_standard_and_tab_rhythm_builders() -> None:
+    standard_layer = LayerGroup(layer_id="standard")
+    tab_rhythm_layer = LayerGroup(layer_id="tab-rhythm")
+    tuplet_by_onset = {
+        0.0: (3, 2),
+        round(1.0 / 3.0, 6): (3, 2),
+        round(2.0 / 3.0, 6): (3, 2),
+    }
+
+    scene_builders._append_standard_rhythm(
+        standard_layer,
+        measure_number=1,
+        beats_per_measure=4,
+        time_denominator=4,
+        events=[
+            (100.0, 0.0, 1.0 / 3.0, 60.0, "up"),
+            (120.0, 1.0 / 3.0, 1.0 / 3.0, 58.0, "up"),
+            (140.0, 2.0 / 3.0, 1.0 / 3.0, 56.0, "up"),
+        ],
+        stem_top_y=20.0,
+        stem_bottom_y=100.0,
+        staff_spacing=8.0,
+        stem_offset=3.3,
+        tuplet_by_onset=tuplet_by_onset,
+    )
+    scene_builders._append_tablature_rhythm(
+        tab_rhythm_layer,
+        measure_number=1,
+        beats_per_measure=4,
+        time_denominator=4,
+        events=[
+            (100.0, 0.0, 1.0 / 3.0, 96.0),
+            (120.0, 1.0 / 3.0, 1.0 / 3.0, 96.0),
+            (140.0, 2.0 / 3.0, 1.0 / 3.0, 96.0),
+        ],
+        tab_rhythm_beam_y=70.0,
+        tuplet_by_onset=tuplet_by_onset,
+    )
+
+    standard_tuplets = [r for r in standard_layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
+    tab_rhythm_tuplets = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
+    tab_rhythm_beams = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "beam_group"]
+    tab_rhythm_stems = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "stem_line"]
+
+    assert len(standard_tuplets) == 1
+    assert len(tab_rhythm_tuplets) == 1
+    assert standard_tuplets[0].metadata.get("style") == "standard"
+    assert tab_rhythm_tuplets[0].metadata.get("style") == "tablature_rhythm"
+    assert tab_rhythm_tuplets[0].params.get("direction") == "down"
+    # Bracket Y is below the beam (beam_y + 8), not above it
+    assert float(tab_rhythm_tuplets[0].params.get("y", 999.0)) > 70.0
+    assert tab_rhythm_beams
+    assert float(tab_rhythm_beams[0].params.get("thickness", 0.0)) > 2.5
+    assert tab_rhythm_stems
+    assert float(tab_rhythm_stems[0].params.get("width", 0.0)) > 0.8
+
+
+def test_svg_tuplet_brackets_use_distinct_styles_for_standard_tab_and_tab_rhythm() -> None:
+    standard_layer = LayerGroup(
+        layer_id="standard",
+        recipe_instances=[
+            scene_builders.RecipeInstance(
+                recipe_id="tuplet_bracket",
+                params={
+                    "x0": 20.0,
+                    "x1": 60.0,
+                    "y": 30.0,
+                    "number": 3,
+                    "direction": "up",
+                    "style": "standard",
+                },
+                metadata={"style": "standard"},
+            )
+        ],
+    )
+    tab_rhythm_layer = LayerGroup(
+        layer_id="tab-rhythm",
+        recipe_instances=[
+            scene_builders.RecipeInstance(
+                recipe_id="tuplet_bracket",
+                params={
+                    "x0": 20.0,
+                    "x1": 60.0,
+                    "y": 30.0,
+                    "number": 3,
+                    "direction": "up",
+                    "style": "tablature_rhythm",
+                },
+                metadata={"style": "tablature_rhythm"},
+            )
+        ],
+    )
+
+    standard_svg = render_scene_to_svg(
+        RenderScene(
+            document_scene=DocumentScene(
+                title="standard",
+                pages=[
+                    PageScene(
+                        page_number=1,
+                        width=120.0,
+                        height=80.0,
+                        systems=[
+                            SystemScene(
+                                system_id="sys1",
+                                x=0.0,
+                                y=0.0,
+                                width=120.0,
+                                height=80.0,
+                                staves=[
+                                    StaffScene(
+                                        staff_id="st1",
+                                        x=0.0,
+                                        y=0.0,
+                                        width=120.0,
+                                        height=80.0,
+                                        layer_groups=[standard_layer],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        )
+    )
+    tab_rhythm_svg = render_scene_to_svg(
+        RenderScene(
+            document_scene=DocumentScene(
+                title="tab-rhythm",
+                pages=[
+                    PageScene(
+                        page_number=1,
+                        width=120.0,
+                        height=80.0,
+                        systems=[
+                            SystemScene(
+                                system_id="sys1",
+                                x=0.0,
+                                y=0.0,
+                                width=120.0,
+                                height=80.0,
+                                staves=[
+                                    StaffScene(
+                                        staff_id="st1",
+                                        x=0.0,
+                                        y=0.0,
+                                        width=120.0,
+                                        height=80.0,
+                                        layer_groups=[tab_rhythm_layer],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        )
+    )
+
+    assert 'font-size="8"' in standard_svg
+    assert 'font-weight="bold"' not in standard_svg
+    assert 'font-size="10"' in tab_rhythm_svg
+    assert 'font-weight="bold"' in tab_rhythm_svg
 
 
 def test_canonical_to_render_scene_standard_tab_uses_tab_letters_without_string_names() -> None:
@@ -1095,6 +1288,168 @@ def test_canonical_to_render_scene_standard_tab_shows_rests_without_tab_digits()
 
     assert rests
     assert all(not str(t.metadata.get("event_id", "")).startswith("r-") for t in tab_note_texts)
+
+
+def test_canonical_to_render_scene_tablature_rhythm_emits_tuplet_bracket() -> None:
+    """Three triplet-8th notes in one beat must produce exactly one tuplet_bracket."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            NoteEvent(
+                pitch=60, onset=0.0, duration=1 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=0,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+            NoteEvent(
+                pitch=62, onset=1 / 3, duration=1 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=2,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+            NoteEvent(
+                pitch=64, onset=2 / 3, duration=1 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=4,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+        ],
+        beats_per_measure=4.0,
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode("tablature_rhythm"),
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipe_ids = [r.recipe_id for lg in staff.layer_groups for r in lg.recipe_instances]
+    tuplet_recipes = [
+        r
+        for lg in staff.layer_groups
+        for r in lg.recipe_instances
+        if r.recipe_id == "tuplet_bracket"
+    ]
+
+    assert "tuplet_bracket" in recipe_ids, "Expected at least one tuplet_bracket recipe"
+    assert len(tuplet_recipes) == 1, f"Expected 1 bracket for 3 triplet notes, got {len(tuplet_recipes)}"
+    bracket = tuplet_recipes[0]
+    assert bracket.params["number"] == 3
+
+
+def test_canonical_to_render_scene_tab_slide_connects_across_measures() -> None:
+    """A slide at the end of measure 1 must connect to the first note of measure 2."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            NoteEvent(
+                pitch=57, onset=0.0, duration=1.0,
+                tempo=120.0, articulation=Articulation.SLIDE, dynamic=Dynamic.MF,
+                string_hint=4, fret_hint=7,
+                slide_type="shift",
+            ),
+            NoteEvent(
+                pitch=60, onset=4.0, duration=1.0,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=4, fret_hint=10,
+            ),
+        ],
+        beats_per_measure=4.0,
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode("tablature_rhythm"),
+    )
+    slide_recipes = [
+        r
+        for p in result.render_scene.document_scene.pages
+        for s in p.systems
+        for st in s.staves
+        for lg in st.layer_groups
+        for r in lg.recipe_instances
+        if r.recipe_id == "tab_slide_line"
+    ]
+    assert len(slide_recipes) == 1, (
+        f"Expected 1 cross-measure slide line, got {len(slide_recipes)}"
+    )
+
+
+def test_canonical_to_render_scene_standard_uses_diamond_notehead_for_harmonics() -> None:
+    """A note with harmonic_type='natural' must render a diamond (notehead_harmonic) glyph."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            NoteEvent(
+                pitch=76, onset=0.0, duration=1.0,
+                tempo=120.0, articulation=Articulation.HARMONIC, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=12,
+                harmonic_type="natural",
+            ),
+        ],
+        beats_per_measure=4.0,
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode("standard_tablature"),
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    glyph_ids = [g.glyph_id for lg in staff.layer_groups for g in lg.glyph_instances]
+
+    assert "notehead_harmonic" in glyph_ids, (
+        f"Expected 'notehead_harmonic' glyph for harmonic note, found: {set(glyph_ids)}"
+    )
+
+    svg = render_scene_to_svg(result.render_scene)
+    assert 'class="fw-notehead-harmonic"' in svg
+
+
+def test_canonical_to_render_scene_tablature_rhythm_emits_bracket_for_triplet_quarters() -> None:
+    """Three triplet quarter notes (dur=2/3) must produce exactly one tuplet_bracket.
+
+    These notes don't enter short_stems (base_dur==1.0 not < 1.0) so they never
+    form a beam group.  The standalone bracket emitter must catch them.
+    """
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            NoteEvent(
+                pitch=60, onset=0.0, duration=2 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=0,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+            NoteEvent(
+                pitch=62, onset=2 / 3, duration=2 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=2,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+            NoteEvent(
+                pitch=64, onset=4 / 3, duration=2 / 3,
+                tempo=120.0, articulation=Articulation.NORMAL, dynamic=Dynamic.MF,
+                string_hint=1, fret_hint=4,
+                tuplet_actual=3, tuplet_normal=2,
+            ),
+        ],
+        beats_per_measure=4.0,
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode("tablature_rhythm"),
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    tuplet_recipes = [
+        r
+        for lg in staff.layer_groups
+        for r in lg.recipe_instances
+        if r.recipe_id == "tuplet_bracket"
+    ]
+    assert len(tuplet_recipes) == 1, (
+        f"Expected 1 tuplet_bracket for 3 triplet quarter notes, got {len(tuplet_recipes)}"
+    )
+    assert tuplet_recipes[0].params["number"] == 3
 
 
 def test_run_core_pipeline_from_raw_end_to_end() -> None:

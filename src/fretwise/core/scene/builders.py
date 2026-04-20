@@ -38,6 +38,10 @@ _REST_GAP_BREAK = 0.115
 _TAB_SPAN_PAD = 6.0
 _BEAM_GAP = 3.0
 _FLAG_STACK_SPACING = 3.5
+_TAB_RHYTHM_BEAM_THICKNESS = 3.1
+_TAB_RHYTHM_BEAM_GAP = 3.4
+_TAB_RHYTHM_FLAG_SPACING = 4.1
+_TAB_RHYTHM_STEM_WIDTH = 0.95
 _SECONDARY_BEAM_HOOK_LEN = 8.0
 _MIN_STEM_LENGTH = 18.0
 _MAX_BEAM_SLOPE = 0.35
@@ -298,10 +302,15 @@ def layout_to_render_scene(
             # the end of measure N and the continuation at the start of N+1 are
             # detected by _append_standard_connections via contiguous onset check).
             standard_connection_events: list[dict[str, object]] = []
+            # Slide events accumulated cross-measure, like standard_connection_events for ties.
+            # All tab events (slide and non-slide) are stored here so that the slide target
+            # can be located by finding the next note on the same string across measures.
+            all_tab_span_events: list[dict[str, object]] = []
             for measure_index, measure_layout in enumerate(staff_layout.measure_layouts):
                 standard_rhythm_events: list[tuple[float, float, float, float, str]] = []
                 tab_rhythm_events: list[tuple[float, float, float, float]] = []
                 tab_span_events: list[dict[str, object]] = []
+                tuplet_by_onset: dict[float, tuple[int, int]] = {}
                 accidental_columns_by_onset: dict[float, list[float]] = {}
                 shown_accidentals_by_step: dict[int, str | None] = {}
                 shown_chord_labels_by_onset: set[float] = set()
@@ -376,6 +385,11 @@ def layout_to_render_scene(
                         )
                 for event_layout in measure_layout.event_layouts:
                     event_type = event_layout.metadata.get("event_type")
+                    if event_type != "RestEvent":
+                        _ta = _safe_int(event_layout.metadata.get("tuplet_actual"))
+                        _tn = _safe_int(event_layout.metadata.get("tuplet_normal"))
+                        if _ta and _tn and _ta != _tn:
+                            tuplet_by_onset[round(event_layout.onset, 6)] = (_ta, _tn)
                     if has_tab and event_type != "RestEvent":
                         techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                         if "muted" in techniques:
@@ -433,18 +447,18 @@ def layout_to_render_scene(
                                     )
                                 )
                                 shown_strum_marks_by_onset.add(onset_key)
-                        tab_span_events.append(
-                            {
-                                "event_id": event_layout.event_id,
-                                "x": event_layout.x,
-                                "y": tab_note_y,
-                                "onset": event_layout.onset,
-                                "tab_string": _safe_int(event_layout.metadata.get("tab_string"))
-                                or 3,
-                                "techniques": techniques,
-                                "fret_num": _safe_int(event_layout.metadata.get("tab_fret")) or 0,
-                            }
-                        )
+                        _tab_event_dict = {
+                            "event_id": event_layout.event_id,
+                            "x": event_layout.x,
+                            "y": tab_note_y,
+                            "onset": event_layout.onset,
+                            "tab_string": _safe_int(event_layout.metadata.get("tab_string"))
+                            or 3,
+                            "techniques": techniques,
+                            "fret_num": _safe_int(event_layout.metadata.get("tab_fret")) or 0,
+                        }
+                        tab_span_events.append(_tab_event_dict)
+                        all_tab_span_events.append(_tab_event_dict)
 
                     if has_standard:
                         voice_number = _safe_int(event_layout.metadata.get("voice_number")) or 0
@@ -551,9 +565,12 @@ def layout_to_render_scene(
                                     )
                                 )
                                 shown_accidentals_by_step[diatonic_step] = accidental
-                            notehead_glyph = (
-                                "notehead_muted" if "muted" in techniques else "notehead"
-                            )
+                            if "muted" in techniques:
+                                notehead_glyph = "notehead_muted"
+                            elif "harmonic" in techniques:
+                                notehead_glyph = "notehead_harmonic"
+                            else:
+                                notehead_glyph = "notehead"
                             notes_layer.glyph_instances.append(
                                 GlyphInstance(
                                     glyph_id=notehead_glyph,
@@ -649,11 +666,18 @@ def layout_to_render_scene(
                                 tab_spacing=tab_spacing,
                             )
                         else:
+                            # Use the same chord-level display duration as standard notation
+                            # (min per onset+voice), not the raw note duration.
+                            _tab_onset_key = round(event_layout.onset, 6)
+                            _tab_display_dur = rhythm_duration_by_onset_voice.get(
+                                (_tab_onset_key, voice_number),
+                                event_layout.duration,
+                            )
                             tab_rhythm_events.append(
                                 (
                                     event_layout.x,
                                     event_layout.onset,
-                                    event_layout.duration,
+                                    _tab_display_dur,
                                     _tab_note_y_from_metadata(
                                         event_layout.metadata,
                                         tab_y=tab_y,
@@ -673,6 +697,7 @@ def layout_to_render_scene(
                         stem_bottom_y=stem_bottom_y,
                         staff_spacing=staff_spacing,
                         stem_offset=stem_notehead_dx,
+                        tuplet_by_onset=tuplet_by_onset,
                     )
                 if has_tab_rhythm and tab_rhythm_events:
                     _append_tablature_rhythm(
@@ -682,6 +707,7 @@ def layout_to_render_scene(
                         time_denominator=measure_layout.time_denominator,
                         events=tab_rhythm_events,
                         tab_rhythm_beam_y=tab_rhythm_beam_y,
+                        tuplet_by_onset=tuplet_by_onset,
                     )
                 if has_tab and tab_span_events:
                     _append_tab_technique_spans(
@@ -696,6 +722,11 @@ def layout_to_render_scene(
             # connected correctly.
             if has_standard and standard_connection_events:
                 _append_standard_connections(notes_layer, standard_connection_events)
+            # Draw slide diagonal lines after all measures using the full cross-measure
+            # event list, so that slides at the end of a measure connect to the next
+            # note even if it is in a different measure.
+            if has_tab and all_tab_span_events:
+                _append_tab_slide_connections(notes_layer, all_tab_span_events)
 
             staff_scenes.append(
                 StaffScene(
@@ -969,7 +1000,7 @@ def _append_tab_rhythm_rest_glyph(
             glyph_id="rest",
             x=x,
             y=_tab_rhythm_rest_y(voice_number, tab_y=tab_y, tab_spacing=tab_spacing),
-            size=11.0,
+            size=12.0,
             metadata={
                 "event_id": event_id,
                 "voice_number": str(voice_number),
@@ -1132,6 +1163,59 @@ def _duration_components(duration: float) -> tuple[float, int]:
         if abs(duration - base * 1.75) <= tol:
             return base, 2
     return duration, 0
+
+
+def _notated_duration(
+    actual: float,
+    tuplet_actual: int | None,
+    tuplet_normal: int | None,
+) -> float:
+    """Return the notated/display duration for flag-count and beam-level computation.
+
+    For a triplet 8th (actual≈0.333, tuplet_actual=3, tuplet_normal=2):
+    returns 0.333 × (3/2) = 0.5 (the display 8th-note base).
+    """
+    if tuplet_actual and tuplet_normal and tuplet_normal > 0:
+        return actual * tuplet_actual / tuplet_normal
+    return actual
+
+
+def _tuplet_bracket_runs(
+    group: list[tuple[float, float, float]],
+    tuplet_by_onset: dict[float, tuple[int, int]],
+) -> list[tuple[float, float, int]]:
+    """Find contiguous runs of same-tuplet notes within a beam group.
+
+    Returns a list of (x0, x1, tuplet_number) for each run of ≥2 consecutive
+    notes sharing the same non-trivial tuplet ratio.  This handles the common
+    case where a beam group mixes tuplet notes and regular notes (e.g. 3 triplet
+    16ths followed by a regular 8th in the same beat).
+    """
+    results: list[tuple[float, float, int]] = []
+    run_start: int | None = None
+    run_tup: tuple[int, int] | None = None
+
+    def _flush(end_idx: int) -> None:
+        nonlocal run_start, run_tup
+        if run_start is not None and end_idx - run_start >= 2:
+            results.append((group[run_start][0], group[end_idx - 1][0], run_tup[0]))  # type: ignore[index]
+        run_start = None
+        run_tup = None
+
+    for idx, (x, onset, _dur) in enumerate(group):
+        tup = tuplet_by_onset.get(round(onset, 6))
+        if tup is not None:
+            if tup == run_tup:
+                pass  # extend current run
+            else:
+                _flush(idx)
+                run_start = idx
+                run_tup = tup
+        else:
+            _flush(idx)
+
+    _flush(len(group))
+    return results
 
 
 def _dot_count(duration: float) -> int:
@@ -1344,6 +1428,7 @@ def _append_standard_rhythm(
     stem_bottom_y: float,
     staff_spacing: float,
     stem_offset: float,
+    tuplet_by_onset: dict[float, tuple[int, int]] | None = None,
 ) -> None:
     stem_entries: list[dict[str, float | int | str]] = []
     stem_length = max(_MIN_STEM_LENGTH, _STANDARD_STEM_LENGTH_SPACES * staff_spacing)
@@ -1450,7 +1535,11 @@ def _append_standard_rhythm(
     for x, onset, duration, note_y, stem_direction in sorted(
         collapsed_events, key=lambda item: (item[1], item[0])
     ):
-        base_dur = _base_duration(duration)
+        _tup = (tuplet_by_onset or {}).get(round(onset, 6))
+        _ndur = _notated_duration(
+            duration, _tup[0] if _tup else None, _tup[1] if _tup else None
+        )
+        base_dur = _base_duration(_ndur)
         if base_dur >= 4.0:
             continue
         stem_x = _stem_x_for_notehead(
@@ -1530,7 +1619,7 @@ def _append_standard_rhythm(
                 "note_y": note_y,
                 "y0": stem_y0,
                 "y1": stem_y1,
-                "flag_count": _flag_count(duration) if base_dur < 1.0 else 0,
+                "flag_count": _flag_count(_ndur) if base_dur < 1.0 else 0,
             }
         )
 
@@ -1589,6 +1678,27 @@ def _append_standard_rhythm(
                     flag_by_onset=flag_by_onset,
                     beamed_keys=beamed_keys,
                 )
+                if tuplet_by_onset:
+                    _bracket_y = (
+                        anchor_up - 6.0 if direction == "up" else anchor_down + 8.0
+                    )
+                    for _bx0, _bx1, _bta in _tuplet_bracket_runs(
+                        resolved_group_stems, tuplet_by_onset
+                    ):
+                        layer.recipe_instances.append(
+                            RecipeInstance(
+                                recipe_id="tuplet_bracket",
+                                params={
+                                    "x0": _bx0,
+                                    "x1": _bx1,
+                                    "y": _bracket_y,
+                                    "number": _bta,
+                                    "direction": direction,
+                                    "style": "standard",
+                                },
+                                metadata={"direction": direction, "style": "standard"},
+                            )
+                        )
 
     for entry in stem_entries:
         onset = float(entry["onset"])
@@ -1626,6 +1736,7 @@ def _append_standard_rhythm(
                     "count": flag_count,
                     "spacing": _FLAG_STACK_SPACING,
                     "direction": stem_direction,
+                    "width": 0.75,
                 },
                 metadata={"onset": float(entry["onset"]), "direction": stem_direction},
             )
@@ -1640,11 +1751,16 @@ def _append_tablature_rhythm(
     time_denominator: int = 4,
     events: list[tuple[float, float, float, float]],
     tab_rhythm_beam_y: float,
+    tuplet_by_onset: dict[float, tuple[int, int]] | None = None,
 ) -> None:
     short_stems: list[tuple[float, float, float, int]] = []
     collapsed_events = _collapse_tablature_rhythm_events(events)
     for x, onset, duration, note_y in sorted(collapsed_events, key=lambda item: (item[1], item[0])):
-        base_dur = _base_duration(duration)
+        _tup = (tuplet_by_onset or {}).get(round(onset, 6))
+        _ndur = _notated_duration(
+            duration, _tup[0] if _tup else None, _tup[1] if _tup else None
+        )
+        base_dur = _base_duration(_ndur)
         if base_dur >= 4.0:
             continue
         layer.recipe_instances.append(
@@ -1652,9 +1768,9 @@ def _append_tablature_rhythm(
                 recipe_id="stem_line",
                 params={
                     "x": x,
-                    "y0": note_y + 3.0,
+                    "y0": tab_rhythm_beam_y - 11.0,
                     "y1": tab_rhythm_beam_y,
-                    "width": 0.8,
+                    "width": _TAB_RHYTHM_STEM_WIDTH,
                     "direction": "down",
                 },
                 metadata={
@@ -1666,7 +1782,25 @@ def _append_tablature_rhythm(
             )
         )
         if base_dur < 1.0:
-            short_stems.append((x, onset, duration, _flag_count(duration)))
+            short_stems.append((x, onset, duration, _flag_count(_ndur)))
+        # Augmentation dot: emit a small filled circle to the right of the stem
+        # for dotted durations (e.g. dotted 8th = 0.75 beats).
+        _dots = _dot_count(_ndur)
+        if _dots > 0:
+            _dot_r = 1.1
+            for _di in range(_dots):
+                _dot_cx = x + 3.5 + _di * 3.0
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="filled_circle",
+                        params={
+                            "cx": _dot_cx,
+                            "cy": tab_rhythm_beam_y + 4.5,
+                            "r": _dot_r,
+                        },
+                        metadata={"plane": "tablature_rhythm", "kind": "augmentation_dot"},
+                    )
+                )
 
     beamed_onsets: set[float] = set()
     beam_groups = _beam_groups(
@@ -1689,9 +1823,9 @@ def _append_tablature_rhythm(
                     "x1": group[-1][0],
                     "y": tab_rhythm_beam_y,
                     "level": 1,
-                    "thickness": 2.5,
-                    "gap": _BEAM_GAP,
-                    "direction": "down",
+                    "thickness": _TAB_RHYTHM_BEAM_THICKNESS,
+                    "gap": _TAB_RHYTHM_BEAM_GAP,
+                    "direction": "up",
                 },
                 metadata={"plane": "tablature_rhythm"},
             )
@@ -1705,13 +1839,40 @@ def _append_tablature_rhythm(
                         "x1": x1,
                         "y": tab_rhythm_beam_y,
                         "level": level,
-                        "thickness": 2.5,
-                        "gap": _BEAM_GAP,
-                        "direction": "down",
+                        "thickness": _TAB_RHYTHM_BEAM_THICKNESS,
+                        "gap": _TAB_RHYTHM_BEAM_GAP,
+                        "direction": "up",
                     },
                     metadata={"plane": "tablature_rhythm"},
                 )
             )
+        if tuplet_by_onset:
+            for _tbx0, _tbx1, _tbta in _tuplet_bracket_runs(group, tuplet_by_onset):
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="tuplet_bracket",
+                        params={
+                            "x0": _tbx0,
+                            "x1": _tbx1,
+                            "y": tab_rhythm_beam_y + 8.0,
+                            "number": _tbta,
+                            "direction": "down",
+                            "style": "tablature_rhythm",
+                        },
+                        metadata={"plane": "tablature_rhythm", "style": "tablature_rhythm"},
+                    )
+                )
+
+    # Emit brackets for tuplet notes not covered by beam groups (e.g. triplet quarter
+    # notes: notated dur == 1.0, so they don't enter short_stems and never get beamed).
+    if tuplet_by_onset:
+        unbeamed_tuplet = [
+            (x, onset, dur)
+            for x, onset, dur, _note_y in sorted(collapsed_events, key=lambda e: e[1])
+            if (tuplet_by_onset or {}).get(round(onset, 6)) is not None
+            and onset not in beamed_onsets
+        ]
+        _emit_standalone_tuplet_brackets(layer, unbeamed_tuplet, tuplet_by_onset, tab_rhythm_beam_y)
 
     for x, onset, _duration, flag_count in short_stems:
         if onset in beamed_onsets or flag_count <= 0:
@@ -1723,10 +1884,11 @@ def _append_tablature_rhythm(
                     "x": x,
                     "y": tab_rhythm_beam_y,
                     "count": flag_count,
-                    "spacing": _FLAG_STACK_SPACING,
-                    "direction": "down",
+                    "spacing": _TAB_RHYTHM_FLAG_SPACING,
+                    "direction": "up",
+                    "width": 0.95,
                 },
-                metadata={"onset": onset, "direction": "down", "plane": "tablature_rhythm"},
+                metadata={"onset": onset, "direction": "up", "plane": "tablature_rhythm"},
             )
         )
 
@@ -1770,7 +1932,10 @@ def _collapse_tablature_rhythm_events(
         group = by_onset[onset_key]
         x = sum(item[0] for item in group) / len(group)
         onset = group[0][1]
-        duration = min(item[2] for item in group)
+        # Prefer the longest duration at this onset: this matches the primary voice's
+        # rhythm (voice 0 typically plays the main chord/melody) rather than picking
+        # up a short secondary-voice note as the representative rhythm.
+        duration = max(item[2] for item in group)
         note_y = min(item[3] for item in group)
         collapsed.append((x, onset, duration, note_y))
     return collapsed
@@ -2372,6 +2537,116 @@ def _secondary_beam_segments(
     return segments
 
 
+def _emit_standalone_tuplet_brackets(
+    layer: LayerGroup,
+    stems: list[tuple[float, float, float]],
+    tuplet_by_onset: dict[float, tuple[int, int]],
+    beam_y: float,
+) -> None:
+    """Emit tuplet_bracket recipes for notes not covered by a beam group.
+
+    Groups consecutive notes sharing the same (tuplet_actual, tuplet_normal) ratio
+    into visual brackets.  Requires ≥ 2 consecutive same-ratio notes for a bracket.
+    Used for triplet quarter notes and other tuplet values whose notated duration is
+    a quarter note or longer (base_dur ≥ 1.0), which never enter the short_stems path.
+    """
+    if not stems or not tuplet_by_onset:
+        return
+
+    sorted_stems = sorted(stems, key=lambda s: s[1])  # sort by onset
+    run_start: int | None = None
+    run_tup: tuple[int, int] | None = None
+    results: list[tuple[float, float, int]] = []
+
+    def _flush(end_idx: int) -> None:
+        nonlocal run_start, run_tup
+        if run_start is not None and end_idx - run_start >= 2:
+            results.append((
+                sorted_stems[run_start][0],
+                sorted_stems[end_idx - 1][0],
+                run_tup[0],  # type: ignore[index]
+            ))
+        run_start = None
+        run_tup = None
+
+    for idx, (x, onset, _dur) in enumerate(sorted_stems):
+        tup = tuplet_by_onset.get(round(onset, 6))
+        if tup is not None:
+            if tup == run_tup:
+                pass  # extend current run
+            else:
+                _flush(idx)
+                run_start = idx
+                run_tup = tup
+        else:
+            _flush(idx)
+    _flush(len(sorted_stems))
+
+    for x0, x1, number in results:
+        layer.recipe_instances.append(
+            RecipeInstance(
+                recipe_id="tuplet_bracket",
+                params={
+                    "x0": x0,
+                    "x1": x1,
+                    "y": beam_y + 8.0,
+                    "number": number,
+                    "direction": "down",
+                    "style": "tablature_rhythm",
+                },
+                metadata={"plane": "tablature_rhythm", "style": "tablature_rhythm"},
+            )
+        )
+
+
+def _append_tab_slide_connections(
+    layer: LayerGroup,
+    events: list[dict[str, object]],
+) -> None:
+    """Draw diagonal slide lines connecting slide sources to the next note on the same string.
+
+    Receives ALL tab events (slide and non-slide) for the entire staff so that slides at
+    the end of a measure connect to the next note even across measure boundaries.
+    Groups events by string, then for each slide source draws a diagonal to the next note.
+    """
+    by_string: dict[int, list[dict[str, object]]] = {}
+    for event in events:
+        string_num = int(event.get("tab_string", 3))
+        by_string.setdefault(string_num, []).append(event)
+
+    for string_num, string_events in by_string.items():
+        sorted_events = sorted(string_events, key=lambda e: float(e.get("onset", 0.0)))
+        for idx, event in enumerate(sorted_events):
+            techs = set(event.get("techniques", set()))
+            if "slide" not in techs:
+                continue
+            if idx + 1 >= len(sorted_events):
+                continue
+            next_event = sorted_events[idx + 1]
+            sl_x0 = float(event.get("x", 0.0)) + 5.0
+            sl_x1 = float(next_event.get("x", 0.0)) - 5.0
+            sl_y_mid = float(event.get("y", 0.0))
+            fret0 = int(event.get("fret_num", 0))
+            fret1 = int(next_event.get("fret_num", 0))
+            if fret1 > fret0:
+                sl_y0, sl_y1 = sl_y_mid + 2.5, sl_y_mid - 2.5
+            elif fret1 < fret0:
+                sl_y0, sl_y1 = sl_y_mid - 2.5, sl_y_mid + 2.5
+            else:
+                sl_y0 = sl_y1 = sl_y_mid
+            if sl_x1 > sl_x0 + 2.0:
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="tab_slide_line",
+                        params={"x0": sl_x0, "y0": sl_y0, "x1": sl_x1, "y1": sl_y1},
+                        metadata={
+                            "string": str(string_num),
+                            "event_id": str(event.get("event_id")),
+                        },
+                    )
+                )
+
+
 def _append_tab_technique_spans(
     layer: LayerGroup,
     *,
@@ -2424,29 +2699,7 @@ def _append_tab_technique_spans(
                             )
                         )
 
-            # Slide diagonal lines
-            if "slide" in techs and idx + 1 < len(notes_sorted):
-                next_event = notes_sorted[idx + 1]
-                sl_x0 = float(event.get("x", 0.0)) + 5.0
-                sl_x1 = float(next_event.get("x", 0.0)) - 5.0
-                sl_y_mid = float(event.get("y", 0.0))
-                fret0 = int(event.get("fret_num", 0))
-                fret1 = int(next_event.get("fret_num", 0))
-                if fret1 > fret0:
-                    sl_y0, sl_y1 = sl_y_mid + 2.5, sl_y_mid - 2.5
-                elif fret1 < fret0:
-                    sl_y0, sl_y1 = sl_y_mid - 2.5, sl_y_mid + 2.5
-                else:
-                    sl_y0 = sl_y1 = sl_y_mid
-                if sl_x1 > sl_x0 + 2.0:
-                    layer.recipe_instances.append(
-                        RecipeInstance(
-                            recipe_id="tab_slide_line",
-                            params={"x0": sl_x0, "y0": sl_y0, "x1": sl_x1, "y1": sl_y1},
-                            metadata={"string": str(string_num),
-                                      "event_id": str(event.get("event_id"))},
-                        )
-                    )
+            # Slide diagonal lines are handled cross-measure by _append_tab_slide_connections.
 
             if not techs.intersection({"let_ring", "palm_mute"}):
                 continue

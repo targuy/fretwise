@@ -50,7 +50,7 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
         "flag_stack": RecipeDefinition(
             recipe_id="flag_stack",
             required_params=("x", "y", "count"),
-            optional_params=("spacing",),
+            optional_params=("spacing", "width"),
             tags=("rhythm", "standard"),
         ),
         "tie_arc": RecipeDefinition(
@@ -88,5 +88,24 @@ def default_recipe_catalog() -> dict[str, RecipeDefinition]:
             required_params=("x0", "x1", "y"),
             optional_params=("label", "dash"),
             tags=("tab", "technique", "span"),
+        ),
+        "tuplet_bracket": RecipeDefinition(
+            recipe_id="tuplet_bracket",
+            required_params=("x0", "x1", "y", "number"),
+            optional_params=("direction", "style"),
+            tags=("rhythm", "tuplet"),
+        ),
+        "filled_circle": RecipeDefinition(
+            recipe_id="filled_circle",
+            required_params=("cx", "cy", "r"),
+            optional_params=(),
+            tags=("rhythm", "dot"),
+        ),
+        "tab_slide_line": RecipeDefinition(
+            recipe_id="tab_slide_line",
+            required_params=("x0", "y0", "x1", "y1"),
+            optional_params=(),
+            notes="Diagonal line from slide source to target fret. y0>y1 = descending, y0<y1 = ascending.",
+            tags=("tab", "technique", "slide"),
         ),
     }

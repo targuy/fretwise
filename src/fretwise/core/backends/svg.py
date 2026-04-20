@@ -12,6 +12,7 @@ _REFERENCE_GLYPHS = default_reference_glyph_set()
 _REST_KIND_TO_REFERENCE_GLYPH = {
     "quarter": "rest_quarter",
     "eighth": "rest_eighth",
+    "sixteenth": "rest_sixteenth",
     "thirty_second": "rest_thirty_second",
 }
 
@@ -99,6 +100,16 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                                 f'x2="{x1:.2f}" y2="{y1:.2f}" '
                                 f'stroke="#111" stroke-width="0.9"/>'
                             )
+                    elif recipe.recipe_id == "tuplet_bracket":
+                        out.extend(_render_tuplet_bracket(recipe.params, recipe.metadata))
+                    elif recipe.recipe_id == "filled_circle":
+                        cx = float(recipe.params.get("cx", 0.0))
+                        cy = float(recipe.params.get("cy", 0.0))
+                        r = float(recipe.params.get("r", 1.0))
+                        out.append(
+                            f'<circle cx="{cx:.2f}" cy="{cy:.2f}" r="{r:.2f}" '
+                            f'fill="black" stroke="none"/>'
+                        )
                 for text in layer.text_instances:
                     out.extend(_render_text_instance(text=text))
                 for glyph in layer.glyph_instances:
@@ -170,6 +181,7 @@ def _render_flag_stack(params: dict[str, object]) -> list[str]:
     y = float(params.get("y", 0.0))
     count = int(params.get("count", 0))
     spacing = float(params.get("spacing", 4.0))
+    width = float(params.get("width", 0.75))
     direction = str(params.get("direction", "up"))
     if count <= 0:
         return []
@@ -199,7 +211,7 @@ def _render_flag_stack(params: dict[str, object]) -> list[str]:
             )
         paths.append(
             f'<path d="{path_d}" '
-            'fill="none" stroke="black" stroke-width="0.75"/>'
+            f'fill="none" stroke="black" stroke-width="{max(0.6, width):.2f}"/>'
         )
     return paths
 
@@ -274,6 +286,110 @@ def _render_tab_span(
     return [text, line]
 
 
+def _render_tuplet_bracket(
+    params: dict[str, object], metadata: dict[str, object] | None = None
+) -> list[str]:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    number = int(params.get("number", 3))
+    direction = str(params.get("direction", "up"))
+    tuplet_style = str((metadata or {}).get("style") or params.get("style") or "standard")
+
+    if tuplet_style == "tablature_rhythm":
+        return _render_tablature_rhythm_tuplet_bracket(
+            x0=x0,
+            x1=x1,
+            y=y,
+            number=number,
+            direction=direction,
+        )
+    return _render_standard_tuplet_bracket(
+        x0=x0,
+        x1=x1,
+        y=y,
+        number=number,
+        direction=direction,
+    )
+
+
+def _render_tablature_rhythm_tuplet_bracket(
+    *, x0: float, x1: float, y: float, number: int, direction: str
+) -> list[str]:
+    """Render the heavier Guitar Pro-like bracket used only in TAB+Rhythm."""
+
+    margin = 3.5
+    bx0 = x0 - margin
+    bx1 = x1 + margin
+    xmid = (bx0 + bx1) / 2.0
+
+    font_size = 10
+    text_half_w = 5.8
+
+    hook_h = 4.2
+    # Hooks point away from the beam: when the bracket is below the beam
+    # (direction=="up"), hooks open downward (+y); above (direction=="down"),
+    # hooks open upward (-y).
+    tick_y1 = y + hook_h if direction == "down" else y - hook_h
+
+    stroke = 'stroke="black" stroke-width="1.1" fill="none" stroke-linecap="round"'
+    out: list[str] = []
+
+    # Left vertical tick
+    out.append(f'<line x1="{bx0:.2f}" y1="{y:.2f}" x2="{bx0:.2f}" y2="{tick_y1:.2f}" {stroke}/>')
+    # Left horizontal arm (bx0 to xmid - text_half_w)
+    left_arm_end = xmid - text_half_w
+    if left_arm_end > bx0 + 0.5:
+        out.append(f'<line x1="{bx0:.2f}" y1="{y:.2f}" x2="{left_arm_end:.2f}" y2="{y:.2f}" {stroke}/>')
+    # Right horizontal arm (xmid + text_half_w to bx1)
+    right_arm_start = xmid + text_half_w
+    if right_arm_start < bx1 - 0.5:
+        out.append(f'<line x1="{right_arm_start:.2f}" y1="{y:.2f}" x2="{bx1:.2f}" y2="{y:.2f}" {stroke}/>')
+    # Right vertical tick
+    out.append(f'<line x1="{bx1:.2f}" y1="{y:.2f}" x2="{bx1:.2f}" y2="{tick_y1:.2f}" {stroke}/>')
+    # Centered italic bold number, vertically centered on the arm line.
+    out.append(
+        f'<text x="{xmid:.2f}" y="{y:.2f}" '
+        f'font-family="serif" font-size="{font_size}" '
+        f'font-style="italic" font-weight="bold" '
+        f'text-anchor="middle" dominant-baseline="middle">{number}</text>'
+    )
+    return out
+
+
+def _render_standard_tuplet_bracket(
+    *, x0: float, x1: float, y: float, number: int, direction: str
+) -> list[str]:
+    """Render the lighter bracket used by standard notation views."""
+
+    margin = 2.5
+    bx0 = x0 - margin
+    bx1 = x1 + margin
+    xmid = (bx0 + bx1) / 2.0
+
+    text_half_w = 4.2
+    hook_h = 3.0
+    hook_y1 = y + hook_h if direction == "up" else y - hook_h
+    stroke = 'stroke="black" stroke-width="0.8" fill="none" stroke-linecap="round"'
+    out: list[str] = []
+
+    out.append(f'<line x1="{bx0:.2f}" y1="{y:.2f}" x2="{bx0:.2f}" y2="{hook_y1:.2f}" {stroke}/>')
+    left_arm_end = xmid - text_half_w
+    if left_arm_end > bx0 + 0.5:
+        out.append(f'<line x1="{bx0:.2f}" y1="{y:.2f}" x2="{left_arm_end:.2f}" y2="{y:.2f}" {stroke}/>')
+    right_arm_start = xmid + text_half_w
+    if right_arm_start < bx1 - 0.5:
+        out.append(f'<line x1="{right_arm_start:.2f}" y1="{y:.2f}" x2="{bx1:.2f}" y2="{y:.2f}" {stroke}/>')
+    out.append(f'<line x1="{bx1:.2f}" y1="{y:.2f}" x2="{bx1:.2f}" y2="{hook_y1:.2f}" {stroke}/>')
+    out.append(
+        f'<text x="{xmid:.2f}" y="{y:.2f}" '
+        'font-family="Times New Roman,serif" font-size="8" '
+        'font-style="italic" text-anchor="middle" dominant-baseline="middle">'
+        f'{number}</text>'
+    )
+    return out
+
+
 def _render_text_instance(*, text) -> list[str]:
     raw_text = str(text.text)
     metadata = text.metadata or {}
@@ -289,6 +405,20 @@ def _render_text_instance(*, text) -> list[str]:
         attrs.append(f'text-anchor="{escape(text_anchor)}"')
     if dominant_baseline:
         attrs.append(f'dominant-baseline="{escape(dominant_baseline)}"')
+    if metadata.get("kind") == "chord_name":
+        attrs.append('class="fw-chord-name"')
+        attrs.append(f'data-chord="{escape(raw_text)}"')
+    if metadata.get("kind") == "note" and metadata.get("tab_string") is not None:
+        attrs.append('class="fw-tab-note"')
+        attrs.append(f'data-event-id="{escape(str(metadata.get("event_id", "")))}"')
+        attrs.append(f'data-tab-string="{escape(str(metadata.get("tab_string", "")))}"')
+        onset = metadata.get("onset")
+        if onset is not None:
+            try:
+                onset_str = f"{float(onset):.6f}"
+            except (TypeError, ValueError):
+                onset_str = str(onset)
+            attrs.append(f'data-onset="{escape(onset_str)}"')
     text_svg = f"<text {' '.join(attrs)}>{escape(raw_text)}</text>"
 
     # Keep tab digits readable by masking the line segment behind each digit.
@@ -298,7 +428,8 @@ def _render_text_instance(*, text) -> list[str]:
         mask_h = max(7.0, text.font_size * 0.95)
         rect = (
             f'<rect x="{(text.x - mask_w / 2.0):.2f}" y="{(text.y - mask_h / 2.0):.2f}" '
-            f'width="{mask_w:.2f}" height="{mask_h:.2f}" fill="white" stroke="none"/>'
+            f'width="{mask_w:.2f}" height="{mask_h:.2f}" fill="white" stroke="none" '
+            'class="fw-tab-note-mask"/>'
         )
         return [rect, text_svg]
     return [text_svg]
@@ -316,6 +447,19 @@ def _render_glyph(
         return _render_notehead_glyph(x=x, y=y, size=size, metadata=metadata)
     if glyph_id == "notehead_muted":
         return _render_notehead_muted_glyph(x=x, y=y, size=size, metadata=metadata)
+    if glyph_id == "notehead_harmonic":
+        # Diamond shape (◇) for harmonic notes: rotated square centered at (x, y).
+        pts = (
+            f"{x:.2f},{(y - 3.5):.2f} "
+            f"{(x + 4.5):.2f},{y:.2f} "
+            f"{x:.2f},{(y + 3.5):.2f} "
+            f"{(x - 4.5):.2f},{y:.2f}"
+        )
+        event_id = (metadata or {}).get("event_id", "")
+        return (
+            f'<polygon points="{pts}" fill="none" stroke="black" stroke-width="0.8" '
+            f'class="fw-notehead-harmonic" data-event-id="{event_id}"/>'
+        )
     if glyph_id == "clef":
         return (
             f'<text x="{x:.2f}" y="{y:.2f}" '
@@ -506,6 +650,7 @@ def _render_rest_glyph(
     block_h = max(2.0, float(metadata.get("rest_block_height", 3.0)))
     half_w = block_w / 2.0
     augmentation_dot_count = int(metadata.get("dot_count", 0) or 0)
+    is_tab_rhythm = str(metadata.get("mode", "")).strip() == "tablature_rhythm"
     rect_attrs = 'stroke="black" stroke-width="1" fill="black"'
     path_attrs = 'stroke="black" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"'
 
@@ -527,7 +672,7 @@ def _render_rest_glyph(
             x=x,
             y=y,
             size=size,
-            size_multiplier=1.15 if rest_kind == "quarter" else 1.0,
+            size_multiplier=1.2 if is_tab_rhythm else (1.15 if rest_kind == "quarter" else 1.0),
             anchor_x=0.5,
             anchor_y=0.5,
         )

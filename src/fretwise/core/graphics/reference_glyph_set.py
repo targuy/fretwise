@@ -80,6 +80,16 @@ def default_reference_glyph_set() -> dict[str, ReferenceGlyph]:
             unicode_char="\U0001D13F",
             bbox=(0.0, -8.0, 5.0, 8.0),
             anchors={"center": (2.0, 0.0)},
+            svg_path_data=(
+                "m 54,-500 86,327 c -35,-13 -71,-23 -108,-23 -46,0 -87,33 -87,79 "
+                "0,40 32,72 72,72 25,0 49,-15 57,-39 10,-28 5,-59 34,-59 "
+                "17,0 54,54 59,71 L 206,77 C 172,65 136,54 100,54 54,54 13,87 13,133 "
+                "c 0,40 33,72 73,72 25,0 48,-15 56,-39 10,-28 5,-59 34,-59 "
+                "16,0 52,51 56,68 6,12 23,12 28,0 L 109,-500 "
+                "c -8,-7 -18,-10 -28,-10 -10,0 -19,3 -27,10 z"
+            ),
+            svg_path_transform="matrix(0.004,0,0,-0.004,0.12,1.32)",
+            svg_view_box=(0.0, 0.0, 1.22, 2.86),
         ),
         "rest_thirty_second": ReferenceGlyph(
             glyph_id="rest_thirty_second",
@@ -122,6 +132,14 @@ def default_reference_glyph_set() -> dict[str, ReferenceGlyph]:
             unicode_char="\u00D7",
             bbox=(-3.5, -3.5, 3.5, 3.5),
             anchors={"center": (0.0, 0.0), "stem_up": (3.5, 0.0), "stem_down": (-3.5, 0.0)},
+        ),
+        "notehead_harmonic": ReferenceGlyph(
+            glyph_id="notehead_harmonic",
+            unicode_char="\u25C7",  # ◇ WHITE DIAMOND
+            bbox=(-4.5, -3.5, 4.5, 3.5),
+            anchors={"center": (0.0, 0.0), "stem_up": (4.5, 0.0), "stem_down": (-4.5, 0.0)},
+            svg_path_data="M 0,-3.5 L 4.5,0 L 0,3.5 L -4.5,0 Z",
+            svg_view_box=(-4.5, -3.5, 9.0, 7.0),
         ),
         "accidental_sharp": ReferenceGlyph(
             glyph_id="accidental_sharp",
