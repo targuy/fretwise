@@ -6,13 +6,17 @@ sur les transitions INDEX→INDEX et masquerait le phénomène étudié).
 """
 from __future__ import annotations
 
-from fretwise.models import Articulation, Dynamic, Finger, FingeringState, NoteEvent
-from fretwise.scoring import RulePreferences, compute_mechanical_cost
 from fretwise.generator import StateGenerator
+from fretwise.models import Articulation, Dynamic, Finger, FingeringState, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
 from fretwise.pipeline import run_pipeline
-from fretwise.scoring import CostFunction, CostWeights
+from fretwise.scoring import (
+    CostFunction,
+    CostWeights,
+    RulePreferences,
+    compute_mechanical_cost,
+)
 
 _NO_SAME_FINGER = RulePreferences(same_finger_motion_penalty=False)
 
@@ -85,18 +89,28 @@ def test_bias_breakeven_duration() -> None:
 
     # À 10 beats : seconds=5.0, tf=0.2 → INDEX=2×0.2+1.0=1.4 > RING=1.3 → RING gagne encore
     note_10b = _note(duration=10.0, tempo=120.0)
-    cost_ring_10  = compute_mechanical_cost(s1, s2_ring,  note_10b, rule_preferences=_NO_SAME_FINGER)
-    cost_index_10 = compute_mechanical_cost(s1, s2_index, note_10b, rule_preferences=_NO_SAME_FINGER)
+    cost_ring_10 = compute_mechanical_cost(
+        s1, s2_ring, note_10b, rule_preferences=_NO_SAME_FINGER
+    )
+    cost_index_10 = compute_mechanical_cost(
+        s1, s2_index, note_10b, rule_preferences=_NO_SAME_FINGER
+    )
     assert cost_ring_10 < cost_index_10 or abs(cost_ring_10 - cost_index_10) < 0.5, (
-        f"At 10 beats, RING ({cost_ring_10:.3f}) should be cheaper or very close to INDEX ({cost_index_10:.3f})"
+        "At 10 beats, RING should be cheaper or very close to INDEX. "
+        f"Got RING={cost_ring_10:.3f}, INDEX={cost_index_10:.3f}"
     )
 
     # À 14 beats : seconds=7.0, tf≈0.143 → INDEX=2×0.143+1.0≈1.286 < RING=1.3 → INDEX gagne
     note_14b = _note(duration=14.0, tempo=120.0)
-    cost_ring_14  = compute_mechanical_cost(s1, s2_ring,  note_14b, rule_preferences=_NO_SAME_FINGER)
-    cost_index_14 = compute_mechanical_cost(s1, s2_index, note_14b, rule_preferences=_NO_SAME_FINGER)
+    cost_ring_14 = compute_mechanical_cost(
+        s1, s2_ring, note_14b, rule_preferences=_NO_SAME_FINGER
+    )
+    cost_index_14 = compute_mechanical_cost(
+        s1, s2_index, note_14b, rule_preferences=_NO_SAME_FINGER
+    )
     assert cost_index_14 < cost_ring_14, (
-        f"At 14 beats, INDEX ({cost_index_14:.3f}) should beat RING ({cost_ring_14:.3f})"
+        f"At 14 beats, INDEX ({cost_index_14:.3f}) should beat "
+        f"RING ({cost_ring_14:.3f})"
     )
 
 
@@ -111,18 +125,36 @@ def test_ascending_favors_ring_descending_favors_index() -> None:
 
     # MONTÉE
     s1_low = _state(5, Finger.INDEX)
-    c_ring_up  = compute_mechanical_cost(s1_low, _state(7, Finger.RING),  note, rule_preferences=_NO_SAME_FINGER)
-    c_index_up = compute_mechanical_cost(s1_low, _state(7, Finger.INDEX), note, rule_preferences=_NO_SAME_FINGER)
-    assert c_ring_up < c_index_up, f"Ascending: RING ({c_ring_up:.3f}) should beat INDEX ({c_index_up:.3f})"
+    c_ring_up = compute_mechanical_cost(
+        s1_low, _state(7, Finger.RING), note, rule_preferences=_NO_SAME_FINGER
+    )
+    c_index_up = compute_mechanical_cost(
+        s1_low, _state(7, Finger.INDEX), note, rule_preferences=_NO_SAME_FINGER
+    )
+    assert c_ring_up < c_index_up, (
+        f"Ascending: RING ({c_ring_up:.3f}) should beat INDEX ({c_index_up:.3f})"
+    )
 
     # DESCENTE
     s1_high = _state(7, Finger.INDEX)
-    c_ring_down  = compute_mechanical_cost(s1_high, _state(5, Finger.RING),  note, rule_preferences=_NO_SAME_FINGER)
-    c_index_down = compute_mechanical_cost(s1_high, _state(5, Finger.INDEX), note, rule_preferences=_NO_SAME_FINGER)
-    assert c_index_down < c_ring_down, f"Descending: INDEX ({c_index_down:.3f}) should beat RING ({c_ring_down:.3f})"
+    c_ring_down = compute_mechanical_cost(
+        s1_high, _state(5, Finger.RING), note, rule_preferences=_NO_SAME_FINGER
+    )
+    c_index_down = compute_mechanical_cost(
+        s1_high, _state(5, Finger.INDEX), note, rule_preferences=_NO_SAME_FINGER
+    )
+    assert c_index_down < c_ring_down, (
+        f"Descending: INDEX ({c_index_down:.3f}) should beat "
+        f"RING ({c_ring_down:.3f})"
+    )
 
 
-def _make_run(start_fret: int, length: int, duration: float = 0.5, tempo: float = 120.0) -> list[NoteEvent]:
+def _make_run(
+    start_fret: int,
+    length: int,
+    duration: float = 0.5,
+    tempo: float = 120.0,
+) -> list[NoteEvent]:
     """Creates ascending notes on string 1 (E4=MIDI64), semitones, with fret hints."""
     notes = []
     for i in range(length):
@@ -175,14 +207,19 @@ def test_ascending_run_frets_5_to_10_finger_sequence() -> None:
     matcher   = PatternMatcher()
     results, _ = run_pipeline(notes, generator, optimizer, pattern_matcher=matcher)
 
-    fingers = [r.state.finger.name for r in results]
     hand_positions = [r.state.hand_position for r in results]
-    frets = [r.state.fret for r in results]
 
-    print(f"\nRun 5->10 (6 notes):")
+    print("\nRun 5->10 (6 notes):")
     for r in results:
-        print(f"  fret={r.state.fret}  finger={r.state.finger.name}  hp={r.state.hand_position}")
+        print(
+            f"  fret={r.state.fret}  finger={r.state.finger.name}  "
+            f"hp={r.state.hand_position}"
+        )
 
-    hp_shifts = sum(1 for i in range(1, len(hand_positions)) if hand_positions[i] != hand_positions[i-1])
+    hp_shifts = sum(
+        1
+        for i in range(1, len(hand_positions))
+        if hand_positions[i] != hand_positions[i - 1]
+    )
     print(f"  Hand position shifts: {hp_shifts}")
     assert len(results) == 6
