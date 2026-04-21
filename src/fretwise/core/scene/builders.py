@@ -282,7 +282,7 @@ def layout_to_render_scene(
                     staff_x=staff_layout.x,
                     tab_y=tab_y,
                     tab_spacing=tab_spacing,
-                    include_string_labels=mode == "tablature",
+                    open_pitches=_extract_open_pitches(score) if has_tab_rhythm else None,
                 )
             _append_measure_barlines(
                 staff_layer,
@@ -697,6 +697,7 @@ def layout_to_render_scene(
                         stem_bottom_y=stem_bottom_y,
                         staff_spacing=staff_spacing,
                         stem_offset=stem_notehead_dx,
+                        tab_y=tab_y if has_tab else None,
                         tuplet_by_onset=tuplet_by_onset,
                     )
                 if has_tab_rhythm and tab_rhythm_events:
@@ -1068,13 +1069,56 @@ def _score_time_signature_for_measure(
     return default
 
 
+_PITCH_CLASS_NAMES = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+_STANDARD_OPEN_PITCHES: tuple[int, ...] = (64, 59, 55, 50, 45, 40)
+
+
+def _open_pitch_to_string_label(midi: int, string_num: int) -> str:
+    name = _PITCH_CLASS_NAMES[midi % 12]
+    # High E (string 1) shown lowercase by convention to distinguish from low E
+    if name == "E" and string_num == 1:
+        return "e"
+    return name
+
+
+def _extract_open_pitches(score: Score) -> tuple[int, ...]:
+    """Infer open-string MIDI pitches from TabInfo on score notes (pitch - fret)."""
+    pitches: dict[int, int] = {}
+    for track in score.tracks:
+        for sg in track.staff_groups:
+            for staff in sg.staves:
+                for measure in staff.measures:
+                    for voice in measure.voices:
+                        for event in voice.events:
+                            candidates = []
+                            notes = getattr(event, "notes", None)
+                            if notes is not None:
+                                candidates.extend(notes)
+                            else:
+                                candidates.append(event)
+                            for note in candidates:
+                                ti = getattr(note, "tab_info", None)
+                                if ti is None:
+                                    continue
+                                s = getattr(ti, "string", None)
+                                f = getattr(ti, "fret", None)
+                                p = getattr(note, "pitch_sounding", None)
+                                if s and f is not None and p is not None and s not in pitches:
+                                    pitches[s] = p - f
+                        if len(pitches) == 6:
+                            break
+    if len(pitches) < 6:
+        return _STANDARD_OPEN_PITCHES
+    return tuple(pitches[s] for s in range(1, 7))
+
+
 def _append_tab_left_labels(
     layer: LayerGroup,
     *,
     staff_x: float,
     tab_y: float,
     tab_spacing: float,
-    include_string_labels: bool = True,
+    open_pitches: tuple[int, ...] | None = None,
 ) -> None:
     tab_letters = ("T", "A", "B")
     for idx, letter in enumerate(tab_letters):
@@ -1084,24 +1128,23 @@ def _append_tab_left_labels(
                 x=staff_x - 34.0,
                 y=tab_y + 10.0 + idx * 14.0,
                 font_size=10.0,
+
                 metadata={"kind": "tab_label"},
             )
         )
 
-    if not include_string_labels:
-        return
-
-    string_labels = ("e", "B", "G", "D", "A", "E")
-    for idx, string_label in enumerate(string_labels):
-        layer.text_instances.append(
-            TextInstance(
-                text=string_label,
-                x=staff_x - 14.0,
-                y=tab_y + idx * tab_spacing + 4.0,
-                font_size=8.0,
-                metadata={"kind": "string_label", "string_number": str(idx + 1)},
+    if open_pitches and len(open_pitches) == 6:
+        for idx in range(6):
+            string_label = _open_pitch_to_string_label(open_pitches[idx], idx + 1)
+            layer.text_instances.append(
+                TextInstance(
+                    text=string_label,
+                    x=staff_x - 14.0,
+                    y=tab_y + idx * tab_spacing + 4.0,
+                    font_size=8.0,
+                    metadata={"kind": "string_label", "string_number": str(idx + 1)},
+                )
             )
-        )
 
 
 def _append_measure_barlines(
@@ -1286,7 +1329,10 @@ def _stem_direction_by_onset_voice(
     staff_spacing: float,
 ) -> dict[tuple[float, int], str]:
     grouped_note_ys: dict[tuple[float, int], list[float]] = {}
-    voices_present: set[int] = set()
+    # Track which voices are active at each specific onset, not globally.
+    # A measure with sparse Voice-1 notes (e.g. Stairway accompaniment) should
+    # still use pitch-based direction at onsets where only Voice 0 is present.
+    voices_at_onset: dict[float, set[int]] = {}
     middle_line_y = staff_std_y + 2.0 * staff_spacing
 
     for event in events:
@@ -1295,7 +1341,7 @@ def _stem_direction_by_onset_voice(
             continue
         onset = round(float(getattr(event, "onset", 0.0)), 6)
         voice_number = _safe_int(getattr(event, "metadata", {}).get("voice_number")) or 0
-        voices_present.add(voice_number)
+        voices_at_onset.setdefault(onset, set()).add(voice_number)
         note_y = _standard_note_y(
             getattr(event, "metadata", {}),
             staff_std_y=staff_std_y,
@@ -1304,10 +1350,10 @@ def _stem_direction_by_onset_voice(
         grouped_note_ys.setdefault((onset, voice_number), []).append(note_y)
 
     direction_by_key: dict[tuple[float, int], str] = {}
-    polyphonic_staff = len(voices_present) > 1
     for key, note_ys in grouped_note_ys.items():
-        _onset, voice_number = key
-        if polyphonic_staff:
+        onset, voice_number = key
+        onset_is_polyphonic = len(voices_at_onset.get(onset, set())) > 1
+        if onset_is_polyphonic:
             direction_by_key[key] = "down" if voice_number >= 1 else "up"
         else:
             direction_by_key[key] = _stem_direction_for_cluster(
@@ -1428,6 +1474,7 @@ def _append_standard_rhythm(
     stem_bottom_y: float,
     staff_spacing: float,
     stem_offset: float,
+    tab_y: float | None = None,
     tuplet_by_onset: dict[float, tuple[int, int]] | None = None,
 ) -> None:
     stem_entries: list[dict[str, float | int | str]] = []
@@ -1576,6 +1623,10 @@ def _append_standard_rhythm(
                 stem_y1 = stem_y0 + current_len
             else:
                 stem_y1 = min(stem_bottom_y, stem_y0 + current_len)
+            # Hard cap: stems must never enter the TAB area (when displayed).
+            if tab_y is not None:
+                tab_clearance = 4.0
+                stem_y1 = min(stem_y1, tab_y - tab_clearance)
         else:
             stem_y0 = note_y - 3.0
             # For chords the stem MUST reach past the outermost (highest) notehead.
@@ -1825,7 +1876,10 @@ def _append_tablature_rhythm(
                     "level": 1,
                     "thickness": _TAB_RHYTHM_BEAM_THICKNESS,
                     "gap": _TAB_RHYTHM_BEAM_GAP,
-                    "direction": "up",
+                    # TAB+Rhythm: stems go down from the staff to the beam line.
+                    # Secondary beams must stack *toward* the staff (upward = smaller y).
+                    # "down" → sign=-1 → offset negative → beams above primary beam.
+                    "direction": "down",
                 },
                 metadata={"plane": "tablature_rhythm"},
             )
@@ -1841,7 +1895,7 @@ def _append_tablature_rhythm(
                         "level": level,
                         "thickness": _TAB_RHYTHM_BEAM_THICKNESS,
                         "gap": _TAB_RHYTHM_BEAM_GAP,
-                        "direction": "up",
+                        "direction": "down",
                     },
                     metadata={"plane": "tablature_rhythm"},
                 )
@@ -2661,6 +2715,13 @@ def _append_tab_technique_spans(
 
     for string_num, notes in by_string.items():
         notes_sorted = sorted(notes, key=lambda item: float(item.get("onset", 0.0)))
+
+        # Accumulators for merged span runs: (x0, x1, y)
+        pm_runs: list[tuple[float, float, float]] = []
+        lr_runs: list[tuple[float, float, float]] = []
+        pm_run: tuple[float, float, float] | None = None
+        lr_run: tuple[float, float, float] | None = None
+
         for idx, event in enumerate(notes_sorted):
             techs = set(event.get("techniques", set()))
 
@@ -2701,41 +2762,59 @@ def _append_tab_technique_spans(
 
             # Slide diagonal lines are handled cross-measure by _append_tab_slide_connections.
 
-            if not techs.intersection({"let_ring", "palm_mute"}):
-                continue
-
             x = float(event.get("x", 0.0))
             y = float(event.get("y", 0.0))
-            x0 = x + _TAB_SPAN_PAD
             next_x = (
                 float(notes_sorted[idx + 1].get("x", x))
                 if idx + 1 < len(notes_sorted)
                 else measure_x + measure_width - 4.0
             )
-            x1 = min(measure_x + measure_width - 4.0, next_x - _TAB_SPAN_PAD)
-            if x1 <= x0 + 1.0:
-                continue
+            x1_note = min(measure_x + measure_width - 4.0, next_x - _TAB_SPAN_PAD)
 
-            if "let_ring" in techs:
-                layer.recipe_instances.append(
-                    RecipeInstance(
-                        recipe_id="let_ring_span",
-                        params={"x0": x0, "x1": x1, "y": y - 8.0, "dash": "2,2"},
-                        metadata={
-                            "string": str(string_num),
-                            "event_id": str(event.get("event_id")),
-                        },
-                    )
-                )
+            # Accumulate palm_mute runs (merge consecutive into one span)
             if "palm_mute" in techs:
+                if pm_run is None:
+                    pm_run = (x + _TAB_SPAN_PAD, x1_note, y)
+                else:
+                    pm_run = (pm_run[0], x1_note, pm_run[2])
+            else:
+                if pm_run is not None:
+                    pm_runs.append(pm_run)
+                    pm_run = None
+
+            # Accumulate let_ring runs
+            if "let_ring" in techs:
+                if lr_run is None:
+                    lr_run = (x + _TAB_SPAN_PAD, x1_note, y)
+                else:
+                    lr_run = (lr_run[0], x1_note, lr_run[2])
+            else:
+                if lr_run is not None:
+                    lr_runs.append(lr_run)
+                    lr_run = None
+
+        if pm_run is not None:
+            pm_runs.append(pm_run)
+        if lr_run is not None:
+            lr_runs.append(lr_run)
+
+        for (x0, x1, y) in pm_runs:
+            if x1 > x0 + 1.0:
                 layer.recipe_instances.append(
                     RecipeInstance(
                         recipe_id="palm_mute_span",
                         params={"x0": x0, "x1": x1, "y": y - 14.0, "label": "P.M.", "dash": "3,2"},
-                        metadata={
-                            "string": str(string_num),
-                            "event_id": str(event.get("event_id")),
-                        },
+                        metadata={"string": str(string_num)},
+                    )
+                )
+
+        for (x0, x1, y) in lr_runs:
+            if x1 > x0 + 1.0:
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="let_ring_span",
+                        params={"x0": x0, "x1": x1, "y": y - 8.0, "dash": "2,2"},
+                        metadata={"string": str(string_num)},
                     )
                 )
 

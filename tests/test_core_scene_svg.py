@@ -225,12 +225,14 @@ def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_gr
 
 
 def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() -> None:
+    # Both voices at the SAME onset: polyphonic rule forces Voice 0 up / Voice 1 down
+    # regardless of pitch height.  Notes at different onsets use pitch-based direction.
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
         source_format="gpif",
         events=[
             _note(pitch=64, onset=0.0, duration=1.0, voice_hint=0, string_hint=2, fret_hint=5),
-            _note(pitch=52, onset=1.0, duration=1.0, voice_hint=1, string_hint=5, fret_hint=3),
+            _note(pitch=52, onset=0.0, duration=1.0, voice_hint=1, string_hint=5, fret_hint=3),
         ],
     )
     result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
