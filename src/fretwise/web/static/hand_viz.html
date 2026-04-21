@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>FretWise — Visualisation des doigtés</title>
+  <style>
+    :root {
+      --bg-outer: #141518;
+      --text: #d6d8db;
+      --muted: #8d929a;
+      --accent: #f4a03a;
+    }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 50% 35%, #23262b 0%, var(--bg-outer) 100%);
+      color: var(--text);
+    }
+    #app { max-width: 1440px; margin: 0 auto; padding: 18px 22px 28px; }
+    #hud {
+      display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+      padding: 6px 4px 14px;
+    }
+    #hud .title { font-size: 22px; font-weight: 600; letter-spacing: 0.2px; }
+    #hud .artist { color: var(--muted); font-size: 16px; }
+    #hud .meta { color: var(--muted); font-size: 13px; }
+    #hud .spacer { flex: 1; }
+    button.ctrl {
+      background: #2c2f34; color: var(--text);
+      border: 1px solid #3b3e44; border-radius: 6px;
+      font-size: 14px; padding: 6px 14px; cursor: pointer;
+    }
+    button.ctrl:hover { background: #363a41; }
+    button.ctrl.primary { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
+    #scene-wrap {
+      background: linear-gradient(180deg, #1a1c20 0%, #0f1013 100%);
+      border-radius: 10px; padding: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.45), inset 0 0 0 1px #2a2c31;
+    }
+    svg#scene { width: 100%; height: auto; display: block; }
+    #timeline {
+      margin-top: 14px; height: 10px; background: #1f2126;
+      border-radius: 5px; overflow: hidden; position: relative;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+    #timeline .fill {
+      height: 100%; background: linear-gradient(90deg, var(--accent), #f5c46b);
+      width: 0%; transition: width 60ms linear;
+    }
+    #notelog {
+      margin-top: 12px; font-family: "SF Mono", Consolas, monospace;
+      font-size: 12px; color: var(--muted); height: 20px;
+    }
+    #legend {
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+      margin-top: 10px; font-size: 12px; color: var(--muted);
+    }
+    #legend .swatch { display: inline-block; width: 14px; height: 14px;
+      border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    #legend .active  { background: #ff8c1c; box-shadow: 0 0 8px rgba(255,140,28,0.6); }
+    #legend .planted { background: #1fb8d9; box-shadow: 0 0 6px rgba(31,184,217,0.55); }
+    #legend .idle    { background: #3b3e44; border: 1px dashed #999; }
+    #legend .open    { background: rgba(255,204,60,0.22); border: 1.8px solid #ffcc3c; }
+    #legend .note    { margin-left: auto; font-size: 11px; opacity: 0.85; }
+    #notelog { color: #c6cad1; }
+    #legend { color: #c6cad1; }
+    #hud .title  { color: #eef0f3; }
+    #hud .artist { color: #b4bac2; }
+    #hud .meta   { color: #b4bac2; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      background: #2a2d33; color: var(--text); font-size: 12px;
+      margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="hud">
+    <div class="title" id="hud-title">FretWise - Main fretteuse</div>
+    <div class="artist" id="hud-artist"></div>
+    <span class="badge" id="hud-track"></span>
+    <div class="spacer"></div>
+    <div class="meta" id="hud-meta"></div>
+    <button class="ctrl" id="btn-rewind">Rewind</button>
+    <button class="ctrl primary" id="btn-play">Lecture</button>
+  </div>
+
+  <div id="scene-wrap">
+    <svg id="scene" viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="fretWire" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#e8e8ea"/>
+          <stop offset="45%"  stop-color="#b5b7bb"/>
+          <stop offset="55%"  stop-color="#6a6c70"/>
+          <stop offset="100%" stop-color="#d0d2d4"/>
+        </linearGradient>
+        <linearGradient id="nutGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#f4eed8"/>
+          <stop offset="100%" stop-color="#b9b093"/>
+        </linearGradient>
+        <linearGradient id="boardGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#141415"/>
+          <stop offset="50%"  stop-color="#0a0a0b"/>
+          <stop offset="100%" stop-color="#131314"/>
+        </linearGradient>
+        <linearGradient id="stringWound" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#d9c07a"/>
+          <stop offset="45%"  stop-color="#a38645"/>
+          <stop offset="55%"  stop-color="#5e4a1e"/>
+          <stop offset="100%" stop-color="#c4a965"/>
+        </linearGradient>
+        <linearGradient id="stringPlain" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#f0f1f3"/>
+          <stop offset="50%"  stop-color="#9fa2a6"/>
+          <stop offset="100%" stop-color="#d4d6d9"/>
+        </linearGradient>
+        <radialGradient id="skinGrad" cx="0.5" cy="0.55" r="0.8">
+          <stop offset="0%"   stop-color="rgba(246,214,186,0.88)"/>
+          <stop offset="70%"  stop-color="rgba(226,182,148,0.82)"/>
+          <stop offset="100%" stop-color="rgba(180,130,100,0.72)"/>
+        </radialGradient>
+        <radialGradient id="skinDark" cx="0.5" cy="0.5" r="0.7">
+          <stop offset="0%"   stop-color="rgba(210,165,135,0.90)"/>
+          <stop offset="100%" stop-color="rgba(150,105,85,0.75)"/>
+        </radialGradient>
+      </defs>
+
+      <g id="layer-fretboard"></g>
+      <g id="layer-shadow"></g>
+      <g id="layer-hand"></g>
+      <g id="layer-overlay"></g>
+    </svg>
+  </div>
+
+  <div id="timeline"><div class="fill" id="timeline-fill"></div></div>
+  <div id="legend">
+    <span><span class="swatch active"></span>Actif — joue la note</span>
+    <span><span class="swatch planted"></span>Sédentaire — doigt posé mais ne sonne pas</span>
+    <span><span class="swatch idle"></span>Au repos — replié au-dessus du manche</span>
+    <span><span class="swatch open"></span>Corde à vide en cours de sonner</span>
+    <span class="note">Cordes : <b style="color:#c4a965">bronze</b> = filées (E2 A2 D3) / <b style="color:#d4d6d9">argent</b> = unies (G3 B3 E4)</span>
+  </div>
+  <div id="notelog">-</div>
+</div>
+
+<script>
+/* ============================================================================
+   FretWise - Hand visualization (top-down, hand-above-neck layout)
+
+   Scene convention (corrected):
+     - Nut on the LEFT, high frets to the right.
+     - String 1 (high E)   at TOP   of the fretboard.
+     - String 6 (low E)    at BOTTOM of the fretboard.
+     - Guitarist sits BELOW the fretboard (off-screen at the bottom).
+     - Forearm rises up from bottom, wrist passes UNDER the neck (partially
+       hidden — rendered as a faint ghost stripe), and the hand emerges
+       ABOVE the fretboard.
+     - Fingers extend from the palm DOWN across the neck onto the strings.
+     - Index is the LEFTMOST finger in the view, pinky the RIGHTMOST.
+   Plane decomposition:
+     - Horizontal plane (visible in projection):   abduction + hand slide
+     - Vertical plane (perpendicular, = depth):    flexion -> FORESHORTENING
+   Therefore fingers are drawn as STRAIGHT projected segments; their length
+   shortens as flexion increases.
+   ========================================================================== */
+
+/* ---------- Fretboard geometry (px) --------------------------------------- */
+const SCENE_W = 1440, SCENE_H = 560;
+
+const NUT_X    = 110;
+const SCALE_PX = 1120;
+const NUM_FRETS = 15;
+
+/* String order (FLIPPED): top = string 1 (high E), bottom = string 6 (low E). */
+const STRING_Y_TOP     = 230;   // string 1 (high E)
+const STRING_Y_BOTTOM  = 350;   // string 6 (low E)
+const STRING_SPACING   = (STRING_Y_BOTTOM - STRING_Y_TOP) / 5;
+const BOARD_TOP_MARGIN = 24;
+const BOARD_TOP_Y      = STRING_Y_TOP - BOARD_TOP_MARGIN;     // 206
+const BOARD_BOT_Y      = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;  // 374
+const FOREARM_TOP_Y    = BOARD_BOT_Y + 8;                     // 382 — forearm emerges below here
+
+/* ---------- Hand geometry (palm ABOVE, forearm BELOW) --------------------- */
+const PALM_TOP_Y  = 30;          // top of palm
+const PALM_Y      = 95;          // palm centre
+const MCP_Y       = 160;         // MCP line = bottom of palm, just above the board (206)
+const PALM_HALF_WIDTH = 72;
+
+/* Index leftmost, pinky rightmost. */
+const MCP_OFFSETS = { index: -52, middle: -18, ring: +15, pinky: +49 };
+const HOME_FRET_OFFSET = { index: 0, middle: 1, ring: 2, pinky: 3 };
+
+/* Maximum reach (px). Respects real 75/82/77/62 mm ratios.  Worst-case
+   reach = ~216 px for extreme-fret abduction with MCP at y=160 to string 6
+   at y=350 (dy=190) plus ~100 px abduction. */
+const FINGER_TOTAL = { index: 238, middle: 260, ring: 246, pinky: 218 };
+const PHAL_RATIOS  = { proximal: 0.44, middle: 0.28, distal: 0.28 };
+const FINGER_WIDTH = { index: 25, middle: 27, ring: 25, pinky: 21 };
+const NAIL_RADIUS  = { index: 13, middle: 14, ring: 13, pinky: 12 };
+
+/* Folded rest: tip short distance below MCP, staying ABOVE the board
+   (BOARD_TOP_Y = 206). Tip at y = MCP_Y + REST_TIP_Y_OFFSET = 188 < 206 ✓. */
+const REST_TIP_Y_OFFSET = 28;
+
+const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
+const FINGER_LABEL = { index: "i", middle: "m", ring: "r", pinky: "p" };
+
+/* Rotation coefficients: how many fret-widths each finger's MCP shifts per
+   unit of hand rotation. Positive = toward higher frets (nut side = index goes
+   left). Sum = 0 (rotation is pure tilt, no translation). Sum of squares = 5. */
+const ROT_COEFF    = { index: 1.5, middle: 0.5, ring: -0.5, pinky: -1.5 };
+const ROT_SQ_SUM   = 5.0;
+const MAX_HAND_ROT = 3.0;   // frets — beyond this the wrist would be strained
+
+/* ---------- Fretboard maths ---------------------------------------------- */
+function fretX(f) {
+  if (f <= 0) return NUT_X;
+  return NUT_X + SCALE_PX * (1 - Math.pow(2, -f / 12));
+}
+function pressX(f) {
+  if (f === 0) return NUT_X - 14;
+  return (fretX(f - 1) + fretX(f)) / 2;
+}
+function stringY(s) {
+  // s = 1 (high E) at top, s = 6 (low E) at bottom
+  return STRING_Y_TOP + (s - 1) * STRING_SPACING;
+}
+
+/* ---------- Finger kinematics (straight in projection) -------------------
+   Plane of view  = horizontal plane of the hand.
+   Flexion axis   = vertical, perpendicular to the view -> foreshortening.
+   So the projected finger is a single straight segment MCP -> tip whose
+   length shortens as flexion increases. Joint markers (PIP, DIP) are
+   interpolated along the segment at the anatomical proportions. */
+function solveFinger(mcpX, mcpY, tipX, tipY, name) {
+  const L = FINGER_TOTAL[name];
+  let dx = tipX - mcpX, dy = tipY - mcpY;
+  let d  = Math.hypot(dx, dy);
+  // Clamp to max reach (cannot exceed fully extended length)
+  if (d > L - 0.5) {
+    const k = (L - 0.5) / d;
+    tipX = mcpX + dx * k;
+    tipY = mcpY + dy * k;
+    dx *= k; dy *= k; d = L - 0.5;
+  }
+  const pipT = PHAL_RATIOS.proximal;
+  const dipT = PHAL_RATIOS.proximal + PHAL_RATIOS.middle;
+  return {
+    mcp: { x: mcpX,            y: mcpY            },
+    pip: { x: mcpX + dx * pipT, y: mcpY + dy * pipT },
+    dip: { x: mcpX + dx * dipT, y: mcpY + dy * dipT },
+    tip: { x: tipX,             y: tipY            },
+    flexion: 1 - d / L,          // 0 = fully extended, 1 = fully curled
+    projLen: d,
+  };
+}
+
+/* ---------- Frame sampling ------------------------------------------------
+   At time t, return:
+     handPos      — current hand_position (snapshot of latest started frame)
+     active       — finger -> {string, fret, strings[], ...} (pressing = sounding)
+     planted      — finger -> {string, fret, strings[]} (sedentary, still pressed)
+     recent       — finger -> last onset_sec (for pulse halo)
+     openStrings  — set of string numbers currently played open (fret = 0)
+     openRecent   — string -> most recent open onset (for pulse)
+   A "barre" is ONLY detected when multiple notes with the same finger are
+   *simultaneously* active at time t AND on *adjacent* strings.  Sequential
+   re-use of the same finger at the same fret on non-adjacent strings (eg
+   index alternating between s6 bass and s1 melody) is NOT a barre. */
+function sampleState(t, frames) {
+  let handPos = 1;
+  let lastFrame = null;
+  const active  = {};              // finger -> { string, fret, ... }
+  const planted = {};              // finger -> { string, fret }
+  const recent  = {};
+  const activeByFretByFinger = {}; // fname -> fret -> Set<string>
+  const openStrings = new Set();
+  const openRecent  = {};
+
+  for (const f of frames) {
+    if (f.onset_sec > t + 0.001) break;
+    // Only fretted notes anchor the palm position.  Open strings carry a
+    // Viterbi-assigned hp that reflects the upcoming fretted note (look-ahead
+    // cost minimisation), not where the hand currently sits.  Letting open
+    // strings drive handPos causes the palm to jump ahead while the fretted
+    // fingers (correctly at hp=1) appear over-extended to the left.
+    if (typeof f.hand_position === "number" && f.finger !== "open" && f.fret > 0) {
+      handPos = f.hand_position;
+    }
+    lastFrame = f;
+    if (t < f.onset_sec + f.duration_sec) {
+      if (f.fret === 0 || f.finger === "open") {
+        openStrings.add(f.string);
+        openRecent[f.string] = f.onset_sec;
+      } else if (f.finger !== "open" && f.fret > 0) {
+        active[f.finger] = {
+          string: f.string, fret: f.fret,
+          onset_sec: f.onset_sec, duration_sec: f.duration_sec,
+        };
+        recent[f.finger] = f.onset_sec;
+        if (!activeByFretByFinger[f.finger]) activeByFretByFinger[f.finger] = {};
+        if (!activeByFretByFinger[f.finger][f.fret]) {
+          activeByFretByFinger[f.finger][f.fret] = new Set();
+        }
+        activeByFretByFinger[f.finger][f.fret].add(f.string);
+      }
+    }
+  }
+  if (lastFrame && lastFrame.planted) {
+    for (const fname in lastFrame.planted) {
+      if (active[fname]) continue;
+      const p = lastFrame.planted[fname];
+      planted[fname] = { string: p[0], fret: p[1] };
+    }
+  }
+
+  /* Strict barre detection: contiguous adjacent strings only, and only
+     counting notes that are ACTIVE at the current instant (no lookahead).
+     This correctly distinguishes real barres from "index-covers-bass-then-
+     treble" cases that only look like a barre because of the time window. */
+  function extendContiguous(startString, allStrings) {
+    const result = [startString];
+    for (let s = startString + 1; allStrings.has(s); s++) result.push(s);
+    for (let s = startString - 1; allStrings.has(s); s--) result.unshift(s);
+    return result;
+  }
+  for (const fname in active) {
+    const fretSet = activeByFretByFinger[fname] &&
+                    activeByFretByFinger[fname][active[fname].fret];
+    if (fretSet && fretSet.size > 1) {
+      active[fname].strings = extendContiguous(active[fname].string, fretSet);
+    } else {
+      active[fname].strings = [active[fname].string];
+    }
+  }
+  for (const fname in planted) {
+    // Planted is always a single string in v1 (model limitation), but check
+    // if an active note of a DIFFERENT finger is pressing the same fret on
+    // adjacent string — we still keep planted as single-string here.
+    planted[fname].strings = [planted[fname].string];
+  }
+  return { handPos, active, planted, recent, openStrings, openRecent };
+}
+
+/* Compute the wrist rotation (in fret units) that minimises total deviation
+   of each finger's MCP from its target fret.  Least-squares solution:
+     r = Σ(ROT_COEFF[f] × delta[f]) / ROT_SQ_SUM
+   where delta[f] = target_fret − natural_mcp_fret. */
+function computeTargetRotation(s, smoothHandPos) {
+  let num = 0, count = 0;
+  for (const f of FINGER_ORDER) {
+    const act = s.active[f] || s.planted[f];
+    if (!act || act.fret === 0) continue;
+    const delta = act.fret - smoothHandPos - HOME_FRET_OFFSET[f];
+    num += ROT_COEFF[f] * delta;
+    count++;
+  }
+  if (count === 0) return 0;
+  return Math.max(-MAX_HAND_ROT, Math.min(MAX_HAND_ROT, num / ROT_SQ_SUM));
+}
+
+/* ---------- Hand simulator ------------------------------------------------ */
+class HandSimulator {
+  constructor() {
+    this.palmX = pressX(3);
+    this.smoothHandPos = 3;
+    this.handRotation  = 0;   // fret units; positive = index-side shifts right
+    this.fingers = {};
+    for (const f of FINGER_ORDER) {
+      this.fingers[f] = {
+        tipX: this.palmX + MCP_OFFSETS[f],
+        tipY: MCP_Y + REST_TIP_Y_OFFSET,
+        role: "idle",       // "active" | "planted" | "idle"
+        fret: 0,
+        strings: [],        // string range under the finger if barring
+        lastOnset: -999,
+      };
+    }
+  }
+  update(t, dt, frames) {
+    const s = sampleState(t, frames);
+    const targetPalm = (pressX(s.handPos) + pressX(s.handPos + 3)) / 2;
+    // Snap instantly for small shifts (≤2 frets) so fingers never appear
+    // left of the palm due to animation lag.  Smooth large jumps (>2 frets).
+    const hpDelta = Math.abs(s.handPos - this.smoothHandPos);
+    const smoothK = hpDelta <= 2 ? 1.0 : Math.min(1, dt / 0.06);
+    this.palmX += (targetPalm - this.palmX) * smoothK;
+    this.smoothHandPos += (s.handPos - this.smoothHandPos) * smoothK;
+    const targetRot = computeTargetRotation(s, this.smoothHandPos);
+    this.handRotation += (targetRot - this.handRotation) * Math.min(1, dt / 0.12);
+
+    for (const f of FINGER_ORDER) {
+      const fg   = this.fingers[f];
+      const mcpX = pressX(this.smoothHandPos + HOME_FRET_OFFSET[f] + this.handRotation * ROT_COEFF[f]);
+      const act  = s.active[f];
+      const pl   = s.planted[f];
+      let targetX, targetY, role, fret = 0, strings = [];
+      if (act) {
+        fret    = act.fret;
+        strings = act.strings || [act.string];
+        targetX = pressX(fret);
+        // If barring multiple strings, target the geometric centre so the
+        // finger stays put across the barre instead of sliding between strings.
+        const ymin = stringY(strings[0]);
+        const ymax = stringY(strings[strings.length - 1]);
+        targetY = (ymin + ymax) / 2;
+        role = "active";
+      } else if (pl) {
+        fret    = pl.fret;
+        strings = pl.strings || [pl.string];
+        targetX = pressX(fret);
+        const ymin = stringY(strings[0]);
+        const ymax = stringY(strings[strings.length - 1]);
+        targetY = (ymin + ymax) / 2;
+        role = "planted";
+      } else {
+        targetX = mcpX;
+        targetY = MCP_Y + REST_TIP_Y_OFFSET;
+        role = "idle";
+      }
+      // Faster approach when actively striking; slower for idle. Barring
+      // transitions between adjacent strings at the same fret are smoothed
+      // by the centre-targeting (palm/MCP stays put, tip is already in the
+      // middle of the bar so there is no visible slide).
+      // Idle fingers snap with the palm on small shifts (≤2 frets) to prevent
+      // them from lagging behind and appearing over-extended.
+      const tau = role === "active" ? 0.05
+                : role === "planted" ? 0.06
+                : hpDelta <= 2 ? 0.01 : 0.09;
+      fg.tipX += (targetX - fg.tipX) * Math.min(1, dt / tau);
+      fg.tipY += (targetY - fg.tipY) * Math.min(1, dt / tau);
+      fg.role    = role;
+      fg.fret    = fret;
+      fg.strings = strings;
+      if (s.recent[f] !== undefined) fg.lastOnset = s.recent[f];
+    }
+
+    // Enforce anatomical constraint: fingers cannot cross.
+    // After smoothing, clamp so index ≤ middle ≤ ring ≤ pinky in X.
+    let maxTipX = -Infinity;
+    for (const f of FINGER_ORDER) {
+      if (this.fingers[f].tipX < maxTipX) this.fingers[f].tipX = maxTipX;
+      else maxTipX = this.fingers[f].tipX;
+    }
+  }
+}
+
+/* ---------- SVG helpers --------------------------------------------------- */
+function el(tag, attrs, text) {
+  const e = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = String(text);
+  return e;
+}
+function clearLayer(layer) { while (layer.firstChild) layer.removeChild(layer.firstChild); }
+
+/* ---------- Fretboard rendering ------------------------------------------ */
+function buildFretboard(layer, data) {
+  clearLayer(layer);
+  const x0 = NUT_X - 18, x1 = fretX(NUM_FRETS) + 10;
+  const boardTop = BOARD_TOP_Y;
+  const boardBot = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;
+
+  layer.appendChild(el("rect", {
+    x: x0 - 6, y: boardTop - 6, width: (x1 - x0) + 12, height: (boardBot - boardTop) + 12,
+    rx: 10, ry: 10, fill: "#0c0c0d", stroke: "#2b2d32", "stroke-width": 1,
+  }));
+  layer.appendChild(el("rect", {
+    x: x0, y: boardTop, width: x1 - x0, height: boardBot - boardTop,
+    rx: 6, ry: 6, fill: "url(#boardGrad)",
+  }));
+  const singleDots = [3, 5, 7, 9, 15].filter(f => f <= NUM_FRETS);
+  for (const f of singleDots) {
+    const cx = (fretX(f - 1) + fretX(f)) / 2;
+    layer.appendChild(el("circle", {
+      cx, cy: (boardTop + boardBot) / 2, r: 9,
+      fill: "#ffffff", "fill-opacity": 0.85,
+    }));
+  }
+  if (NUM_FRETS >= 12) {
+    const cx  = (fretX(11) + fretX(12)) / 2;
+    const mid = (boardTop + boardBot) / 2;
+    layer.appendChild(el("circle", { cx, cy: mid - 20, r: 9, fill: "#fff", "fill-opacity": 0.85 }));
+    layer.appendChild(el("circle", { cx, cy: mid + 20, r: 9, fill: "#fff", "fill-opacity": 0.85 }));
+  }
+  layer.appendChild(el("rect", {
+    x: NUT_X - 8, y: boardTop, width: 10, height: boardBot - boardTop,
+    fill: "url(#nutGrad)", stroke: "#5a5234", "stroke-width": 0.5,
+  }));
+  for (let f = 1; f <= NUM_FRETS; f++) {
+    layer.appendChild(el("rect", {
+      x: fretX(f) - 1.8, y: boardTop - 2, width: 3.6, height: (boardBot - boardTop) + 4,
+      fill: "url(#fretWire)", rx: 1.2,
+    }));
+  }
+  for (let f = 1; f <= NUM_FRETS; f++) {
+    const cx = (fretX(f - 1) + fretX(f)) / 2;
+    layer.appendChild(el("text", {
+      x: cx, y: boardBot + 22, "text-anchor": "middle",
+      "font-family": "Helvetica, Arial, sans-serif", "font-size": 11, fill: "#6d7178",
+    }, f));
+  }
+  const thick = [3.2, 2.6, 2.1, 1.8, 1.5, 1.3];
+  const grad  = ["stringWound","stringWound","stringWound","stringPlain","stringPlain","stringPlain"];
+  for (let s = 6; s >= 1; s--) {
+    const y = stringY(s);
+    const i = 6 - s;
+    layer.appendChild(el("rect", {
+      x: NUT_X - 6, y: y - thick[i] / 2,
+      width: x1 - NUT_X + 6, height: thick[i],
+      fill: "url(#" + grad[i] + ")", rx: 0.8,
+    }));
+  }
+  // tuning is low→high (E2..E4); in the new layout s=1 is at top (high E)
+  // and s=6 at bottom (low E), so label for string s is tuning[6-s].
+  const tuning = (data && data.fretboard && data.fretboard.tuning)
+    || ["E2","A2","D3","G3","B3","E4"];
+  for (let s = 1; s <= 6; s++) {
+    layer.appendChild(el("text", {
+      x: NUT_X - 26, y: stringY(s) + 4, "text-anchor": "middle",
+      "font-family": "Helvetica, Arial, sans-serif", "font-size": 12,
+      "font-weight": 600, fill: "#c6cad1",
+    }, tuning[6 - s]));
+  }
+}
+
+/* ---------- Capsule (rounded tapered link) -------------------------------- */
+function capsule(a, b, wA, wB, fillRef, strokeCol) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len = Math.hypot(dx, dy) || 0.001;
+  const nx = -dy / len, ny = dx / len;
+  const Ax = a.x + nx * wA / 2, Ay = a.y + ny * wA / 2;
+  const Bx = b.x + nx * wB / 2, By = b.y + ny * wB / 2;
+  const Cx = b.x - nx * wB / 2, Cy = b.y - ny * wB / 2;
+  const Dx = a.x - nx * wA / 2, Dy = a.y - ny * wA / 2;
+  const r1 = wA / 2, r2 = wB / 2;
+  const path = `M${Ax},${Ay} L${Bx},${By}
+                A${r2},${r2} 0 0 1 ${Cx},${Cy}
+                L${Dx},${Dy}
+                A${r1},${r1} 0 0 1 ${Ax},${Ay} Z`;
+  return el("path", {
+    d: path, fill: fillRef || "url(#skinGrad)",
+    stroke: strokeCol || "rgba(170,120,95,0.55)", "stroke-width": 1.2,
+  });
+}
+
+/* ---------- Hand rendering (palm above, forearm below the board) ---------- */
+function drawHand(layer, shadowLayer, sim, t) {
+  clearLayer(layer);
+  clearLayer(shadowLayer);
+  const palmX = sim.palmX;
+  const palmHalfW = (pressX(sim.smoothHandPos + 3) - pressX(sim.smoothHandPos)) / 2 + 18;
+  // Rotation-aware MCP corners: index-side and pinky-side shift in opposite directions.
+  const idxMcpX  = pressX(sim.smoothHandPos + HOME_FRET_OFFSET.index + sim.handRotation * ROT_COEFF.index);
+  const pnkMcpX  = pressX(sim.smoothHandPos + HOME_FRET_OFFSET.pinky + sim.handRotation * ROT_COEFF.pinky);
+  const palmMcpL = idxMcpX - 10;
+  const palmMcpR = pnkMcpX + 10;
+
+  /* Forearm: comes UP from the player (bottom of scene) toward the neck.
+     Stops just below the board; the wrist is conceptually hidden behind it. */
+  layer.appendChild(el("path", {
+    d: `M${palmX - 76},${SCENE_H + 40}
+        Q${palmX - 68},${SCENE_H - 60} ${palmX - 60},${FOREARM_TOP_Y + 2}
+        L${palmX + 60},${FOREARM_TOP_Y + 2}
+        Q${palmX + 68},${SCENE_H - 60} ${palmX + 76},${SCENE_H + 40}
+        Z`,
+    fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
+  }));
+
+  /* Ghost stripe through the neck — suggests the wrist is hidden behind
+     the fretboard and re-emerges at the top as the palm. Very faint so it
+     does not mask the strings or frets. */
+  const ghostW = 48;
+  layer.appendChild(el("rect", {
+    x: palmX - ghostW / 2,
+    y: BOARD_TOP_Y - 2,
+    width: ghostW,
+    height: (BOARD_BOT_Y - BOARD_TOP_Y) + 4,
+    fill: "rgba(230,188,160,0.09)",
+    stroke: "rgba(170,120,95,0.22)",
+    "stroke-width": 0.8,
+    "stroke-dasharray": "4 3",
+    rx: 6,
+  }));
+
+  /* Palm (ABOVE the neck): top near wrist, bottom at MCP line. */
+  layer.appendChild(el("path", {
+    d: `M${palmMcpL},${MCP_Y - 4}
+        Q${palmX - palmHalfW - 6},${PALM_Y} ${palmX - palmHalfW + 6},${PALM_TOP_Y + 18}
+        Q${palmX},${PALM_TOP_Y} ${palmX + palmHalfW - 6},${PALM_TOP_Y + 18}
+        Q${palmX + palmHalfW + 6},${PALM_Y} ${palmMcpR},${MCP_Y - 4}
+        Z`,
+    fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
+  }));
+
+  /* Subtle knuckle crease at the MCP line */
+  layer.appendChild(el("path", {
+    d: `M${idxMcpX},${MCP_Y - 10}
+        Q${palmX},${MCP_Y - 4} ${pnkMcpX},${MCP_Y - 10}`,
+    fill: "none", stroke: "rgba(130,85,65,0.35)", "stroke-width": 1,
+  }));
+
+  /* High-contrast per-role palette. Planted is now solid cyan so it reads
+     unambiguously as "blue" to the viewer. */
+  const ROLE = {
+    active:  { ring: "#ff8c1c", ringFill: "rgba(255,140,28,0.28)",
+               barFill: "rgba(255,140,28,0.32)", barStroke: "#ff8c1c",
+               nailFill: "#ffffff", nailStroke: "#1a1a1a", textColor: "#181818" },
+    planted: { ring: "#1fb8d9", ringFill: "rgba(31,184,217,0.35)",
+               barFill: "rgba(31,184,217,0.34)", barStroke: "#1fb8d9",
+               nailFill: "#29c5e8", nailStroke: "#0d4d5c", textColor: "#ffffff" },
+    idle:    { ring: "#666",    ringFill: "rgba(0,0,0,0)",
+               barFill: "none",  barStroke: "none",
+               nailFill: "#f5f5f7", nailStroke: "#555", textColor: "#2a2a2a" },
+  };
+
+  /* Draw each finger */
+  for (const fname of FINGER_ORDER) {
+    const mcpX = pressX(sim.smoothHandPos + HOME_FRET_OFFSET[fname] + sim.handRotation * ROT_COEFF[fname]);
+    const mcpY = MCP_Y;
+    const fg   = sim.fingers[fname];
+    const ik   = solveFinger(mcpX, mcpY, fg.tipX, fg.tipY, fname);
+    const w    = FINGER_WIDTH[fname];
+    const role = fg.role;
+    const pal  = ROLE[role];
+
+    const fillRef   = role === "planted" ? "url(#skinDark)" : "url(#skinGrad)";
+    const strokeCol = role === "planted"
+      ? "rgba(120,100,110,0.55)"
+      : "rgba(170,120,95,0.55)";
+    const fingerOpacity = role === "planted" ? 0.78 : 1.0;
+
+    /* Barre rendering: when the finger covers >=2 adjacent strings at the
+       same fret, draw a vertical bar pad at that fret.  Drawn BEFORE the
+       finger body so the tip sits on top. */
+    if ((role === "active" || role === "planted") && fg.strings.length > 1) {
+      const fx = pressX(fg.fret);
+      const ymin = stringY(fg.strings[0]) - 5;
+      const ymax = stringY(fg.strings[fg.strings.length - 1]) + 5;
+      layer.appendChild(el("rect", {
+        x: fx - 9, y: ymin, width: 18, height: ymax - ymin,
+        rx: 9, ry: 9,
+        fill: pal.barFill, stroke: pal.barStroke,
+        "stroke-width": 1.6,
+        "stroke-dasharray": role === "planted" ? "4 3" : "",
+      }));
+    }
+
+    /* Shadow under the fingertip when it is on the board. */
+    if (ik.tip.y > BOARD_TOP_Y) {
+      shadowLayer.appendChild(el("ellipse", {
+        cx: ik.tip.x + 3, cy: ik.tip.y + 4,
+        rx: w * 0.55, ry: 4,
+        fill: role === "active" ? "rgba(0,0,0,0.40)" : "rgba(0,0,0,0.22)",
+      }));
+    }
+
+    const gFinger = el("g", { opacity: fingerOpacity });
+    gFinger.appendChild(capsule(ik.mcp, ik.pip, w,        w * 0.95, fillRef, strokeCol));
+    gFinger.appendChild(capsule(ik.pip, ik.dip, w * 0.92, w * 0.82, fillRef, strokeCol));
+    gFinger.appendChild(capsule(ik.dip, ik.tip, w * 0.80, w * 0.62, fillRef, strokeCol));
+
+    gFinger.appendChild(el("circle", {
+      cx: ik.pip.x, cy: ik.pip.y, r: w * 0.42,
+      fill: "rgba(210,160,130,0.36)",
+      stroke: "rgba(150,100,80,0.45)", "stroke-width": 0.7,
+    }));
+    gFinger.appendChild(el("circle", {
+      cx: ik.dip.x, cy: ik.dip.y, r: w * 0.34,
+      fill: "rgba(210,160,130,0.36)",
+      stroke: "rgba(150,100,80,0.45)", "stroke-width": 0.7,
+    }));
+
+    if (role === "idle" && ik.flexion > 0.55) {
+      const arcR = w * 0.55 + 4;
+      const ax = ik.mcp.x - arcR * 0.1, ay = ik.mcp.y + 4;
+      const bx = ik.tip.x + arcR * 0.1, by = ik.tip.y + 4;
+      gFinger.appendChild(el("path", {
+        d: `M${ax},${ay} Q${(ax + bx) / 2},${Math.max(ay, by) + arcR} ${bx},${by}`,
+        fill: "none", stroke: "rgba(150,100,80,0.5)",
+        "stroke-width": 1, "stroke-dasharray": "3 2",
+      }));
+    }
+
+    gFinger.appendChild(el("circle", {
+      cx: ik.mcp.x, cy: ik.mcp.y, r: w * 0.5,
+      fill: "rgba(200,150,120,0.5)",
+      stroke: "rgba(150,100,80,0.6)", "stroke-width": 0.8,
+    }));
+    layer.appendChild(gFinger);
+
+    /* Note-on pulse (only for active, only right after onset). */
+    if (role === "active") {
+      const sincePress = t - fg.lastOnset;
+      if (sincePress >= 0 && sincePress < 0.25) {
+        const k = 1 - sincePress / 0.25;
+        layer.appendChild(el("circle", {
+          cx: ik.tip.x, cy: ik.tip.y,
+          r: 14 + 18 * (1 - k),
+          fill: "none", stroke: `rgba(255,140,28,${0.7 * k})`, "stroke-width": 2.6,
+        }));
+      }
+      /* Sustained orange press ring at the sounding string. */
+      layer.appendChild(el("circle", {
+        cx: ik.tip.x, cy: ik.tip.y, r: 9,
+        fill: pal.ringFill, stroke: pal.ring, "stroke-width": 1.5,
+      }));
+    } else if (role === "planted") {
+      layer.appendChild(el("circle", {
+        cx: ik.tip.x, cy: ik.tip.y, r: 8,
+        fill: pal.ringFill, stroke: pal.ring, "stroke-width": 1.3,
+        "stroke-dasharray": "3 2",
+      }));
+    }
+
+    /* Nail disc + letter (i / m / r / p) — high contrast. */
+    layer.appendChild(el("circle", {
+      cx: ik.tip.x, cy: ik.tip.y, r: NAIL_RADIUS[fname],
+      fill: pal.nailFill,
+      stroke: pal.nailStroke, "stroke-width": 1.6,
+    }));
+    layer.appendChild(el("text", {
+      x: ik.tip.x, y: ik.tip.y + 5, "text-anchor": "middle",
+      "font-family": "Helvetica, Arial, sans-serif",
+      "font-size": 14, "font-weight": 800,
+      fill: pal.textColor,
+    }, FINGER_LABEL[fname]));
+  }
+}
+
+/* ---------- Embedded fallback: ~10 s A-minor pentatonic lick -------------- */
+const EMBEDDED_DATA = {
+  meta: {
+    title: "Exemple - pentatonique La mineur", artist: "Dataset integre",
+    track: "lead", tempo: 120, max_seconds: 10,
+  },
+  fretboard: { num_frets: 15, scale_length_mm: 648, tuning: ["E2","A2","D3","G3","B3","E4"] },
+  frames: [
+    { note_id: 0, onset_sec: 0.00, duration_sec: 0.25, string: 6, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id: 1, onset_sec: 0.25, duration_sec: 0.25, string: 6, fret: 8,  finger: "pinky",  hand_position: 5 },
+    { note_id: 2, onset_sec: 0.50, duration_sec: 0.25, string: 5, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id: 3, onset_sec: 0.75, duration_sec: 0.25, string: 5, fret: 7,  finger: "ring",   hand_position: 5 },
+    { note_id: 4, onset_sec: 1.00, duration_sec: 0.25, string: 4, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id: 5, onset_sec: 1.25, duration_sec: 0.25, string: 4, fret: 7,  finger: "ring",   hand_position: 5 },
+    { note_id: 6, onset_sec: 1.50, duration_sec: 0.25, string: 3, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id: 7, onset_sec: 1.75, duration_sec: 0.25, string: 3, fret: 7,  finger: "ring",   hand_position: 5 },
+    { note_id: 8, onset_sec: 2.00, duration_sec: 0.25, string: 2, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id: 9, onset_sec: 2.25, duration_sec: 0.25, string: 2, fret: 8,  finger: "pinky",  hand_position: 5 },
+    { note_id:10, onset_sec: 2.50, duration_sec: 0.25, string: 1, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id:11, onset_sec: 2.75, duration_sec: 0.25, string: 1, fret: 8,  finger: "pinky",  hand_position: 5 },
+    { note_id:12, onset_sec: 3.00, duration_sec: 0.50, string: 1, fret: 10, finger: "middle", hand_position: 8 },
+    { note_id:13, onset_sec: 3.50, duration_sec: 0.50, string: 1, fret: 12, finger: "pinky",  hand_position: 8 },
+    { note_id:14, onset_sec: 4.00, duration_sec: 0.25, string: 2, fret: 10, finger: "middle", hand_position: 8 },
+    { note_id:15, onset_sec: 4.25, duration_sec: 0.25, string: 2, fret: 8,  finger: "index",  hand_position: 8 },
+    { note_id:16, onset_sec: 4.50, duration_sec: 0.25, string: 3, fret: 9,  finger: "middle", hand_position: 7 },
+    { note_id:17, onset_sec: 4.75, duration_sec: 0.25, string: 3, fret: 7,  finger: "index",  hand_position: 7 },
+    { note_id:18, onset_sec: 5.00, duration_sec: 0.25, string: 4, fret: 9,  finger: "ring",   hand_position: 7 },
+    { note_id:19, onset_sec: 5.25, duration_sec: 0.25, string: 4, fret: 7,  finger: "index",  hand_position: 7 },
+    { note_id:20, onset_sec: 5.50, duration_sec: 0.50, string: 5, fret: 7,  finger: "ring",   hand_position: 5 },
+    { note_id:21, onset_sec: 6.00, duration_sec: 0.50, string: 5, fret: 5,  finger: "index",  hand_position: 5 },
+    { note_id:22, onset_sec: 6.50, duration_sec: 0.50, string: 6, fret: 7,  finger: "ring",   hand_position: 5 },
+    { note_id:23, onset_sec: 7.00, duration_sec: 3.00, string: 6, fret: 5,  finger: "index",  hand_position: 5 },
+  ],
+};
+
+/* ---------- Boot ---------------------------------------------------------- */
+async function loadData() {
+  try {
+    const r = await fetch("hand_viz_data.json", { cache: "no-store" });
+    if (r.ok) {
+      const j = await r.json();
+      if (j.frames && j.frames.length) return j;
+    }
+  } catch (e) { /* fallback */ }
+  return EMBEDDED_DATA;
+}
+
+function formatHUD(data) {
+  const m = data.meta || {};
+  document.getElementById("hud-title").textContent  = m.title  || "FretWise";
+  document.getElementById("hud-artist").textContent = m.artist || "";
+  document.getElementById("hud-track").textContent  = m.track ? ("> " + m.track) : "";
+  document.getElementById("hud-meta").textContent   =
+    Math.round(m.tempo || 120) + " BPM - " + data.frames.length + " notes - " +
+    (m.max_seconds || 10) + "s";
+}
+
+/* ---------- Runtime state (mutable, reassignable via postMessage) -------- */
+let CURRENT_DATA  = null;     // current dataset
+let CURRENT_SIM   = null;     // hand simulator bound to that data
+let CURRENT_TOTAL = 10;       // current max_seconds
+let playT         = 0;        // internal clock (standalone mode)
+let playing       = true;
+let EXT_SYNCED    = false;    // true = parent drives the clock via `seek`
+let extT          = 0;        // last time received from parent
+
+function installData(data) {
+  CURRENT_DATA  = data;
+  CURRENT_SIM   = new HandSimulator();
+  CURRENT_TOTAL = (data && data.meta && data.meta.max_seconds) || 10;
+  playT         = 0;
+  EXT_SYNCED    = !!(data && data.meta && data.meta.synced);
+  formatHUD(data);
+  buildFretboard(document.getElementById("layer-fretboard"), data);
+}
+
+/* postMessage support — the parent FretWise UI pushes fingering data
+   ("fretwise-hand-data") and time updates ("fretwise-hand-seek") here. */
+window.addEventListener("message", (ev) => {
+  const msg = ev.data;
+  if (!msg) return;
+  if (msg.type === "fretwise-hand-data"
+      && msg.payload && Array.isArray(msg.payload.frames)) {
+    installData(msg.payload);
+  } else if (msg.type === "fretwise-hand-seek") {
+    extT    = typeof msg.t === "number" ? msg.t : 0;
+    playing = !!msg.playing;
+    EXT_SYNCED = true;
+  }
+});
+
+(async () => {
+  installData(await loadData());
+
+  /* Tell the parent window we are ready to receive data via postMessage. */
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "fretwise-hand-ready" }, "*");
+    }
+  } catch (e) { /* isolated window */ }
+
+  const layerShadow  = document.getElementById("layer-shadow");
+  const layerHand    = document.getElementById("layer-hand");
+  const layerOverlay = document.getElementById("layer-overlay");
+  const tlFill       = document.getElementById("timeline-fill");
+  const logEl        = document.getElementById("notelog");
+  const btnPlay      = document.getElementById("btn-play");
+  const btnRew       = document.getElementById("btn-rewind");
+
+  /* Overlay: highlight tuning labels for strings currently played open. */
+  function drawOpenStringRings(state, tNow) {
+    clearLayer(layerOverlay);
+    for (const s of state.openStrings) {
+      const cy = stringY(s);
+      const cx = NUT_X - 26;
+      const onset = state.openRecent[s] || 0;
+      const since = tNow - onset;
+      // Pulse during the first 200 ms
+      if (since >= 0 && since < 0.22) {
+        const k = 1 - since / 0.22;
+        layerOverlay.appendChild(el("circle", {
+          cx, cy, r: 13 + 10 * (1 - k),
+          fill: "none",
+          stroke: `rgba(255,204,60,${0.75 * k})`,
+          "stroke-width": 2.2,
+        }));
+      }
+      // Sustained ring while the open-string note is still active
+      layerOverlay.appendChild(el("circle", {
+        cx, cy, r: 11,
+        fill: "rgba(255,204,60,0.22)",
+        stroke: "#ffcc3c",
+        "stroke-width": 1.8,
+      }));
+    }
+  }
+
+  function setPlay(p) {
+    playing = p;
+    btnPlay.textContent = p ? "Pause" : "Lecture";
+  }
+  setPlay(true);
+  btnPlay.addEventListener("click", () => setPlay(!playing));
+  btnRew .addEventListener("click", () => { playT = 0; });
+
+  let lastMs = performance.now();
+  function frame(now) {
+    const dtMs = now - lastMs; lastMs = now;
+    const dt   = Math.min(0.1, dtMs / 1000);
+
+    /* Clock selection:
+       - External (synced) mode: parent drives the clock via seek messages.
+         We just read `extT` every frame; no internal accumulation, no loop.
+       - Standalone mode: internal loop (pre-existing behaviour).  */
+    let tNow;
+    if (EXT_SYNCED) {
+      tNow = extT;
+    } else {
+      if (playing && CURRENT_DATA) {
+        playT += dt;
+        if (playT > CURRENT_TOTAL + 0.8) playT = 0;
+      }
+      tNow = playT;
+    }
+
+    if (CURRENT_SIM && CURRENT_DATA) {
+      const st = sampleState(tNow, CURRENT_DATA.frames);
+      CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames);
+      drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+      drawOpenStringRings(st, tNow);
+
+      tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
+      const actParts = [], pltParts = [];
+      for (const f of FINGER_ORDER) {
+        const a = st.active[f];
+        if (a) actParts.push(FINGER_LABEL[f] + ": S" + a.string + " F" + a.fret);
+        const p = st.planted[f];
+        if (p) pltParts.push(FINGER_LABEL[f] + ": S" + p.string + " F" + p.fret);
+      }
+      const openList = [...st.openStrings].sort((a,b) => a - b)
+        .map(s => "S" + s).join(" ");
+      logEl.textContent = "t=" + tNow.toFixed(2) + "s - pos=" + st.handPos +
+                          "   actifs: " + (actParts.join("  ") || "-") +
+                          "   sedentaires: " + (pltParts.join("  ") || "-") +
+                          "   cordes a vide: " + (openList || "-");
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

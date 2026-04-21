@@ -15,10 +15,15 @@ from fretwise.scoring import (
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
     resolve_chord_finger_span,
+    resolve_chord_partial_barre,
     resolve_chord_stretch,
     resolve_chord_string_diagonal,
+    resolve_arpeggio_chord_fingering,
+    resolve_chord_unified_hand_position,
     resolve_finger_continuity,
+    resolve_pinky_run_to_index,
     resolve_section_consistency,
+    resolve_sedentary_fingers,
 )
 
 
@@ -85,6 +90,7 @@ def run_pipeline(
                 list(valid_events), valid_states_list,
             )
         results = optimizer.solve(list(valid_events), valid_states_list)
+        results = resolve_arpeggio_chord_fingering(results)
         results = resolve_finger_continuity(results)
         results = resolve_chord_conflicts(results)
         results = resolve_chord_stretch(results)
@@ -97,6 +103,20 @@ def run_pipeline(
     # Sort by onset then voice for stable, predictable ordering.
     all_results.sort(key=lambda r: (r.note_event.onset, r.note_event.voice_hint or 0))
 
+    # Deduplicate cross-voice unison notes: when two voices play the exact same
+    # (string, fret) at the same onset, keep only the first occurrence.  GP
+    # files frequently double-notate the same pitch across voices; rendering
+    # both produces two fingers on one spot, which is physically impossible.
+    seen: set[tuple[float, int, int]] = set()
+    deduped: list[FingeringResult] = []
+    for r in all_results:
+        key = (round(r.note_event.onset, 6), r.state.string_num, r.state.fret)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(r)
+    all_results = deduped
+
     # Second pass on the merged result: catch inter-voice chord conflicts and
     # crossings that are only visible when all voices are combined.
     if len(voices) > 1:
@@ -107,6 +127,28 @@ def run_pipeline(
 
     for i, r in enumerate(all_results):
         r.note_id = i
+
+    # Partial-barre detection — collapse adjacent-string same-fret chord
+    # subsets into an INDEX barre.  Must run AFTER chord-conflicts so the
+    # duplicated INDEX created by the barre is not undone.
+    all_results = resolve_chord_partial_barre(all_results)
+
+    # Unified hand-position — snap every note of a chord to the same
+    # hand_position (= lowest fret of the chord).  Cleans up the generator's
+    # per-finger natural-hp assignment once the barre is applied.
+    all_results = resolve_chord_unified_hand_position(all_results)
+
+    # Pinky-run correction — overrides Viterbi's (locally cheap but
+    # musically poor) choice of keeping the pinky planted for repeated
+    # same-fret strikes.  Must run BEFORE sedentary annotation so the
+    # latter sees the corrected finger assignments.
+    all_results = resolve_pinky_run_to_index(all_results)
+
+    # Sedentary/planted fingers — read-only w.r.t. FingeringState.  Runs on the
+    # merged, fully-resolved list so every active finger decision is final and
+    # all voices share one consistent hand model.  See
+    # docs/finger_placement_strategy.md.
+    all_results = resolve_sedentary_fingers(all_results)
 
     stats = {
         "parsed": len(events),
