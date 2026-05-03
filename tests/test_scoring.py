@@ -13,6 +13,7 @@ from fretwise.scoring import (
     compute_musical_cost,
     cost_finger_difficulty,
     cost_position_shift,
+    cost_same_finger_motion,
     cost_sequential_crossing,
     cost_stretch,
     cost_string_change,
@@ -21,8 +22,12 @@ from fretwise.scoring import (
     resolve_chord_finger_span,
     resolve_chord_stretch,
     resolve_chord_string_diagonal,
+    resolve_chord_partial_barre,
+    resolve_chord_unified_hand_position,
     resolve_finger_continuity,
+    resolve_pinky_run_to_index,
     resolve_section_consistency,
+    resolve_sedentary_fingers,
 )
 
 
@@ -79,6 +84,33 @@ class TestCostPositionShift:
             cost_position_shift(s2, s1, note)
         )
 
+    def test_open_string_source_shift_cost_is_reduced_but_not_free(self) -> None:
+        open_state = _state(fret=0, finger=Finger.OPEN, hand_position=1)
+        fretted_state = _state(fret=10, finger=Finger.PINKY, hand_position=7)
+        cost = cost_position_shift(open_state, fretted_state, _note())
+        assert cost > 0.0
+        assert cost < cost_position_shift(
+            _state(fret=10, finger=Finger.PINKY, hand_position=1),
+            _state(fret=12, finger=Finger.PINKY, hand_position=7),
+            _note(),
+        )
+
+    def test_open_string_target_shift_cost_is_reduced_but_not_free(self) -> None:
+        fretted_state = _state(fret=10, finger=Finger.PINKY, hand_position=7)
+        open_state = _state(fret=0, finger=Finger.OPEN, hand_position=1)
+        cost = cost_position_shift(fretted_state, open_state, _note())
+        assert cost > 0.0
+        assert cost < cost_position_shift(
+            _state(fret=12, finger=Finger.PINKY, hand_position=7),
+            _state(fret=10, finger=Finger.PINKY, hand_position=1),
+            _note(),
+        )
+
+    def test_open_transition_same_hand_position_remains_zero(self) -> None:
+        open_state = _state(fret=0, finger=Finger.OPEN, hand_position=5)
+        fretted_state = _state(fret=7, finger=Finger.RING, hand_position=5)
+        assert cost_position_shift(open_state, fretted_state, _note()) == pytest.approx(0.0)
+
 
 # ---------------------------------------------------------------------------
 # cost_stretch
@@ -92,21 +124,28 @@ class TestCostStretch:
         assert cost_stretch(s1, s2) == pytest.approx(0.0)
 
     def test_index_on_fret_equals_hand_position_no_stretch(self) -> None:
-        # Index plays fret 5, hand_position = 5 → stretch = 0
+        # Index natural offset is 0: fret - hand_position == 0
         s1 = _state()
         s2 = _state(fret=5, finger=Finger.INDEX, hand_position=5)
         assert cost_stretch(s1, s2) == pytest.approx(0.0)
 
-    def test_pinky_extends_stretch(self) -> None:
-        # Pinky plays fret 8, hand_position = 5 → stretch = 3
+    def test_natural_ring_and_pinky_offsets_have_no_stretch(self) -> None:
         s1 = _state()
-        s2 = _state(fret=8, finger=Finger.PINKY, hand_position=5)
+        s_ring = _state(fret=3, finger=Finger.RING, hand_position=1)
+        s_pinky = _state(fret=8, finger=Finger.PINKY, hand_position=5)
+        assert cost_stretch(s1, s_ring) == pytest.approx(0.0)
+        assert cost_stretch(s1, s_pinky) == pytest.approx(0.0)
+
+    def test_non_natural_pinky_position_has_stretch(self) -> None:
+        # Pinky natural offset is 3. Here offset=2 so we expect non-zero stretch.
+        s1 = _state()
+        s2 = _state(fret=8, finger=Finger.PINKY, hand_position=6)
         assert cost_stretch(s1, s2) > 0.0
 
     def test_higher_position_reduces_stretch_cost(self) -> None:
-        # Same finger offset but higher on the neck → lower cost
-        s_low = _state(fret=4, finger=Finger.PINKY, hand_position=1)
-        s_high = _state(fret=16, finger=Finger.PINKY, hand_position=13)
+        # Same deviation from natural pinky offset, higher on the neck → lower cost.
+        s_low = _state(fret=4, finger=Finger.PINKY, hand_position=2)
+        s_high = _state(fret=16, finger=Finger.PINKY, hand_position=14)
         assert cost_stretch(None, s_low) > cost_stretch(None, s_high)  # type: ignore[arg-type]
 
 
@@ -183,6 +222,47 @@ class TestComputeMechanicalCost:
         s2 = _state(string_num=6, fret=20, finger=Finger.PINKY, hand_position=17)
         cost = compute_mechanical_cost(s1, s2, _note(tempo=200.0, duration=0.25))
         assert cost > 5.0  # should be clearly expensive
+
+    def test_same_finger_run_costs_more_than_natural_reassignment(self) -> None:
+        note = _note(tempo=93.0, duration=0.125)
+        previous = _state(string_num=6, fret=8, finger=Finger.PINKY, hand_position=5)
+        same_finger = _state(string_num=6, fret=10, finger=Finger.PINKY, hand_position=7)
+        reassigned = _state(string_num=6, fret=10, finger=Finger.RING, hand_position=8)
+        assert compute_mechanical_cost(previous, same_finger, note) > compute_mechanical_cost(
+            previous, reassigned, note
+        )
+
+
+# ---------------------------------------------------------------------------
+# cost_same_finger_motion
+# ---------------------------------------------------------------------------
+
+
+class TestCostSameFingerMotion:
+    def test_same_fret_string_change_is_exempt_for_barre_like_motion(self) -> None:
+        s1 = _state(string_num=2, fret=5, finger=Finger.INDEX, hand_position=5)
+        s2 = _state(string_num=4, fret=5, finger=Finger.INDEX, hand_position=5)
+        assert cost_same_finger_motion(s1, s2, _note(tempo=120.0, duration=0.25)) == pytest.approx(
+            0.0
+        )
+
+    def test_same_finger_fret_change_is_penalized(self) -> None:
+        s1 = _state(string_num=6, fret=8, finger=Finger.PINKY, hand_position=5)
+        s2 = _state(string_num=6, fret=10, finger=Finger.PINKY, hand_position=7)
+        assert cost_same_finger_motion(s1, s2, _note(tempo=93.0, duration=0.125)) > 0.0
+
+    def test_slide_destination_is_exempt(self) -> None:
+        s1 = _state(string_num=3, fret=5, finger=Finger.RING, hand_position=3)
+        s2 = _state(string_num=3, fret=7, finger=Finger.RING, hand_position=5)
+        note = NoteEvent(
+            pitch=60,
+            onset=0.0,
+            duration=0.25,
+            tempo=120.0,
+            articulation=Articulation.SLIDE,
+            slide_type="shift",
+        )
+        assert cost_same_finger_motion(s1, s2, note) == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -292,9 +372,9 @@ class TestCostSequentialCrossing:
         # Verify the penalty propagates through compute_mechanical_cost.
         note = _note()
         # Crossing in same position: should cost more than natural order.
-        s1 = _st(5, Finger.INDEX, hand_pos=5)
-        s_cross = _st(4, Finger.RING, hand_pos=5)   # fret down, rank up → cross
-        s_natural = _st(4, Finger.INDEX, hand_pos=4)   # fret down, same rank → OK
+        s1 = _st(7, Finger.RING, hand_pos=5)
+        s_cross = _st(8, Finger.MIDDLE, hand_pos=5)   # fret up, rank down → cross
+        s_natural = _st(8, Finger.PINKY, hand_pos=5)   # fret up, rank up → OK
         cost_cross = compute_mechanical_cost(s1, s_cross, note)
         cost_natural = compute_mechanical_cost(s1, s_natural, note)
         assert cost_cross > cost_natural
@@ -693,6 +773,385 @@ class TestResolveFingerContinuity:
         # String 3 at onset 1.0 would want INDEX but INDEX is already used by string 4.
         # Conflict prevention: should NOT propagate.
         assert len(out) == 3  # no crash
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_partial_barre
+# ---------------------------------------------------------------------------
+
+
+def _chord_fr(
+    note_id: int,
+    onset: float,
+    string_num: int,
+    fret: int,
+    finger: Finger,
+    hand_position: int,
+) -> FingeringResult:
+    """FingeringResult helper for chord tests — all notes share an onset."""
+    return _fr_hp(note_id, onset, string_num, fret, finger, hand_position)
+
+
+class TestResolveChordPartialBarre:
+    """Verify the partial-barre resolver — a chord with 2+ notes on adjacent
+    strings at the same lowest fret should use INDEX as a barre."""
+
+    def test_bm_voicing_collapses_to_index_barre_plus_ring(self) -> None:
+        # The exact BB King "Thrill Is Gone" m2 chord:
+        # s1 f7 (index), s2 f7 (middle), s3 f7 (ring), s4 f9 (pinky)
+        results = [
+            _chord_fr(0, 0.0, 1, 7, Finger.INDEX,  7),
+            _chord_fr(1, 0.0, 2, 7, Finger.MIDDLE, 6),
+            _chord_fr(2, 0.0, 3, 7, Finger.RING,   5),
+            _chord_fr(3, 0.0, 4, 9, Finger.PINKY,  6),
+        ]
+        out = resolve_chord_partial_barre(results)
+        fingers = [r.state.finger for r in out]
+        # The 3 notes at f7 (s1, s2, s3 adjacent) should all use INDEX.
+        assert out[0].state.finger is Finger.INDEX
+        assert out[1].state.finger is Finger.INDEX
+        assert out[2].state.finger is Finger.INDEX
+        # The f9 note should use a non-pinky finger (RING is natural at hp=7).
+        assert out[3].state.finger is Finger.RING
+        # All hp values should be 7 (the barre fret).
+        for r in out:
+            assert r.state.hand_position == 7
+
+    def test_no_adjacent_same_fret_no_rewrite(self) -> None:
+        # s1 f7 and s3 f7 — NOT adjacent (s2 missing).
+        # Two separate fingers on non-contiguous strings should not be barred.
+        results = [
+            _chord_fr(0, 0.0, 1, 7, Finger.INDEX,  7),
+            _chord_fr(1, 0.0, 3, 7, Finger.MIDDLE, 6),
+            _chord_fr(2, 0.0, 4, 9, Finger.RING,   7),
+        ]
+        out = resolve_chord_partial_barre(results)
+        # No contiguous barre → preserved
+        assert out[1].state.finger is Finger.MIDDLE
+
+    def test_two_adjacent_notes_form_barre(self) -> None:
+        # s2 f5 + s1 f5, contiguous at same fret.
+        results = [
+            _chord_fr(0, 0.0, 1, 5, Finger.INDEX,  5),
+            _chord_fr(1, 0.0, 2, 5, Finger.MIDDLE, 4),
+        ]
+        out = resolve_chord_partial_barre(results)
+        assert out[0].state.finger is Finger.INDEX
+        assert out[1].state.finger is Finger.INDEX  # barred
+
+    def test_single_note_chord_unchanged(self) -> None:
+        results = [_chord_fr(0, 0.0, 3, 5, Finger.INDEX, 5)]
+        out = resolve_chord_partial_barre(results)
+        assert out[0].state.finger is Finger.INDEX
+
+    def test_full_barre_all_strings_same_fret(self) -> None:
+        # F barre — 6 strings at fret 1.  All INDEX, hp=1.
+        # (No higher-fret note in this simplified case.)
+        results = [
+            _chord_fr(0, 0.0, 1, 1, Finger.INDEX,  1),
+            _chord_fr(1, 0.0, 2, 1, Finger.MIDDLE, 1),
+            _chord_fr(2, 0.0, 3, 1, Finger.RING,   1),
+            _chord_fr(3, 0.0, 4, 1, Finger.PINKY,  1),
+        ]
+        out = resolve_chord_partial_barre(results)
+        assert all(r.state.finger is Finger.INDEX for r in out)
+        assert all(r.state.hand_position == 1 for r in out)
+
+
+# ---------------------------------------------------------------------------
+# resolve_chord_unified_hand_position
+# ---------------------------------------------------------------------------
+
+
+class TestResolveChordUnifiedHandPosition:
+    """Verify that all fretted notes in a chord share one hand_position."""
+
+    def test_divergent_hps_are_unified(self) -> None:
+        # Three notes with hp values {5, 6, 7} — INDEX is present, so hp = INDEX.fret = 7.
+        results = [
+            _chord_fr(0, 0.0, 1, 7, Finger.INDEX,  7),
+            _chord_fr(1, 0.0, 2, 7, Finger.MIDDLE, 6),
+            _chord_fr(2, 0.0, 3, 7, Finger.RING,   5),
+        ]
+        out = resolve_chord_unified_hand_position(results)
+        assert {r.state.hand_position for r in out} == {7}
+
+    def test_already_unified_unchanged(self) -> None:
+        results = [
+            _chord_fr(0, 0.0, 1, 5, Finger.INDEX, 5),
+            _chord_fr(1, 0.0, 2, 5, Finger.INDEX, 5),
+        ]
+        out = resolve_chord_unified_hand_position(results)
+        assert {r.state.hand_position for r in out} == {5}
+
+    def test_open_strings_not_affected(self) -> None:
+        results = [
+            _chord_fr(0, 0.0, 1, 0, Finger.OPEN,  1),
+            _chord_fr(1, 0.0, 2, 5, Finger.INDEX, 5),
+            _chord_fr(2, 0.0, 3, 7, Finger.RING,  5),
+        ]
+        out = resolve_chord_unified_hand_position(results)
+        # Open's hp stays at 1; fretted notes unify to INDEX's fret (5).
+        assert out[0].state.hand_position == 1
+        assert out[1].state.hand_position == 5
+        assert out[2].state.hand_position == 5
+
+
+# ---------------------------------------------------------------------------
+# resolve_pinky_run_to_index
+# ---------------------------------------------------------------------------
+
+
+class TestResolvePinkyRunToIndex:
+    """Tests for the pinky-run → index rewrite (fixes the Viterbi quirk that
+    keeps pinky planted for repeated same-fret notes at a low hand position).
+    """
+
+    def test_empty_unchanged(self) -> None:
+        assert resolve_pinky_run_to_index([]) == []
+
+    def test_short_run_below_threshold_unchanged(self) -> None:
+        # 2 consecutive pinky notes — below min_run=3, not rewritten.
+        results = [
+            _fr_hp(0, 0.0, 4, 5, Finger.PINKY, 2),
+            _fr_hp(1, 0.5, 4, 5, Finger.PINKY, 2),
+        ]
+        out = resolve_pinky_run_to_index(results)
+        assert all(r.state.finger is Finger.PINKY for r in out)
+
+    def test_long_run_rewritten_to_index(self) -> None:
+        # 4 pinky notes on the same (s, f, hp), nothing else sharing hp=2.
+        results = [
+            _fr_hp(0, 0.0, 4, 5, Finger.PINKY, 2),
+            _fr_hp(1, 0.5, 4, 5, Finger.PINKY, 2),
+            _fr_hp(2, 1.0, 4, 5, Finger.PINKY, 2),
+            _fr_hp(3, 1.5, 4, 5, Finger.PINKY, 2),
+        ]
+        out = resolve_pinky_run_to_index(results)
+        for r in out:
+            assert r.state.finger is Finger.INDEX
+            assert r.state.hand_position == 5   # moved to hp = fret
+            assert r.state.fret == 5
+
+    def test_hp_shared_by_other_finger_keeps_pinky(self) -> None:
+        # Pinky run of 3 at hp=4, but an INDEX note at hp=4 appears just
+        # after the run.  Hp=4 is legitimate — the run is a real stretch, not
+        # a shortcut.  Must not rewrite.
+        results = [
+            _fr_hp(0, 0.0, 3, 7, Finger.PINKY, 4),
+            _fr_hp(1, 0.5, 3, 7, Finger.PINKY, 4),
+            _fr_hp(2, 1.0, 3, 7, Finger.PINKY, 4),
+            _fr_hp(3, 1.5, 3, 4, Finger.INDEX, 4),   # same hp, non-pinky
+        ]
+        out = resolve_pinky_run_to_index(results)
+        for r in out[:3]:
+            assert r.state.finger is Finger.PINKY
+
+    def test_run_broken_by_different_string_not_rewritten(self) -> None:
+        # Pinky on s4 f5 for 2 notes, then s3 f5, breaks the run.  Each
+        # sub-run is 2 long, below the threshold.
+        results = [
+            _fr_hp(0, 0.0, 4, 5, Finger.PINKY, 2),
+            _fr_hp(1, 0.5, 4, 5, Finger.PINKY, 2),
+            _fr_hp(2, 1.0, 3, 5, Finger.PINKY, 2),   # different string
+            _fr_hp(3, 1.5, 3, 5, Finger.PINKY, 2),
+        ]
+        out = resolve_pinky_run_to_index(results)
+        assert all(r.state.finger is Finger.PINKY for r in out)
+
+    def test_run_rewrite_preserves_note_id_and_event(self) -> None:
+        results = [
+            _fr_hp(10, 0.0, 4, 5, Finger.PINKY, 2),
+            _fr_hp(11, 0.5, 4, 5, Finger.PINKY, 2),
+            _fr_hp(12, 1.0, 4, 5, Finger.PINKY, 2),
+        ]
+        out = resolve_pinky_run_to_index(results)
+        assert [r.note_id for r in out] == [10, 11, 12]
+        assert all(r.note_event is results[i].note_event for i, r in enumerate(out))
+
+
+# ---------------------------------------------------------------------------
+# resolve_sedentary_fingers
+# ---------------------------------------------------------------------------
+
+
+def _fr_hp(
+    note_id: int,
+    onset: float,
+    string_num: int,
+    fret: int,
+    finger: Finger,
+    hand_position: int,
+    duration: float = 0.5,
+) -> FingeringResult:
+    """FingeringResult with explicit hand_position (for sedentary tests)."""
+    state = FingeringState(
+        string_num=string_num, fret=fret, finger=finger, hand_position=hand_position,
+    )
+    note = NoteEvent(pitch=60, onset=onset, duration=duration, tempo=120.0)
+    return FingeringResult(note_id=note_id, note_event=note, state=state, cost=0.0)
+
+
+class TestResolveSedentaryFingers:
+    """Test the sedentary-finger post-processing pass.
+
+    See ``docs/finger_placement_strategy.md`` for the specification of rules
+    R1 (non-interference), R2 (reachability) and R3 (utility).
+    """
+
+    def test_empty_returns_empty(self) -> None:
+        assert resolve_sedentary_fingers([]) == []
+
+    def test_single_note_has_no_planted(self) -> None:
+        out = resolve_sedentary_fingers([_fr_hp(0, 0.0, 5, 3, Finger.RING, 1)])
+        assert out[0].planted_fingers == {}
+
+    def test_one_shot_arpeggio_no_future_reuse_not_planted(self) -> None:
+        # One-shot C arpeggio: ring(5,3), middle(4,2), open, index(2,1), open.
+        # No reuses anywhere — under the default (R3a-only) strict rule no
+        # finger is marked planted because none is reused within the lookahead.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,   1),
+            _fr_hp(1, 0.5, 4, 2, Finger.MIDDLE, 1),
+            _fr_hp(2, 1.0, 3, 0, Finger.OPEN,   1),
+            _fr_hp(3, 1.5, 2, 1, Finger.INDEX,  1),
+            _fr_hp(4, 2.0, 1, 0, Finger.OPEN,   1),
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert all(r.planted_fingers == {} for r in out)
+
+    def test_arpeggio_with_chord_context_flag_plants(self) -> None:
+        # Opt-in R3b: classical "plant ahead" style — a one-shot arpeggio
+        # in a stable hand position marks prior fingers as planted even
+        # without future reuse.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,   1),
+            _fr_hp(1, 0.5, 4, 2, Finger.MIDDLE, 1),
+            _fr_hp(2, 1.0, 3, 0, Finger.OPEN,   1),
+            _fr_hp(3, 1.5, 2, 1, Finger.INDEX,  1),
+            _fr_hp(4, 2.0, 1, 0, Finger.OPEN,   1),
+        ]
+        out = resolve_sedentary_fingers(results, allow_chord_context=True)
+        assert out[0].planted_fingers == {}
+        assert out[1].planted_fingers == {"ring": (5, 3)}
+        assert out[4].planted_fingers == {"ring": (5, 3), "middle": (4, 2), "index": (2, 1)}
+
+    def test_arpeggio_with_reuse_plants_via_r3a(self) -> None:
+        # When the arpeggio repeats (reuse of the same finger at the same
+        # position later), R3a correctly marks the finger as planted even
+        # without R3b.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,   1),
+            _fr_hp(1, 0.5, 4, 2, Finger.MIDDLE, 1),  # ring not yet known reused
+            _fr_hp(2, 1.0, 5, 3, Finger.RING,   1),  # reuse — triggers R3a
+        ]
+        out = resolve_sedentary_fingers(results)
+        # At note 1, ring will be reused at note 2 → planted via R3a
+        assert out[1].planted_fingers == {"ring": (5, 3)}
+
+    def test_position_shift_releases_fingers_out_of_reach(self) -> None:
+        # Shift from hp=1 to hp=5 → fret 2 and fret 3 fall outside [4, 9] reach.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,   1),
+            _fr_hp(1, 0.5, 4, 2, Finger.MIDDLE, 1),
+            _fr_hp(2, 1.0, 5, 7, Finger.RING,   5),  # position shift
+        ]
+        out = resolve_sedentary_fingers(results)
+        # At note 2: middle's (4, 2) is out of reach (2 < max(1, 5-1)=4).
+        assert out[2].planted_fingers == {}
+
+    def test_same_string_higher_fret_covers_lower_planted(self) -> None:
+        # Ring plants (3, 5). Next note plays (3, 7) with pinky.
+        # R1b — active fret 7 > planted fret 5, planted is covered, OK.
+        # R3a — check reuse: need a future reuse of ring at (3, 5).
+        results = [
+            _fr_hp(0, 0.0, 3, 5, Finger.RING,  3),
+            _fr_hp(1, 0.5, 3, 7, Finger.PINKY, 3),
+            _fr_hp(2, 1.0, 3, 5, Finger.RING,  3),  # reuse of ring at (3, 5)
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert out[1].planted_fingers == {"ring": (3, 5)}
+        # Note 2 is the active reuse, so ring is no longer planted (it's now active).
+        assert "ring" not in out[2].planted_fingers
+
+    def test_same_string_lower_fret_releases_planted(self) -> None:
+        # Ring at (3, 7). Then index at (3, 5) — would be MUTED by ring's higher fret.
+        # Planted ring must be released (R1b fails: 7 > 5, planted dominates → bad).
+        results = [
+            _fr_hp(0, 0.0, 3, 7, Finger.RING,  5),
+            _fr_hp(1, 0.5, 3, 5, Finger.INDEX, 5),
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert out[1].planted_fingers == {}
+
+    def test_future_reuse_triggers_plant(self) -> None:
+        # Ring at (5, 3), then note on another string, then ring back at (5, 3).
+        # R3a reuse rule keeps ring planted on the intermediate note.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,  1),
+            _fr_hp(1, 3.0, 3, 1, Finger.INDEX, 1),  # 3 beats later → still within lookback
+            _fr_hp(2, 6.0, 5, 3, Finger.RING,  1),
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert out[1].planted_fingers == {"ring": (5, 3)}
+
+    def test_next_use_is_a_move_not_planted(self) -> None:
+        # Ring at (5, 3), then index, then ring at a DIFFERENT position (5, 5),
+        # then ring back at (5, 3).  Even though ring returns to (5, 3) later,
+        # its IMMEDIATE next action is to move — it is NOT sedentary on the
+        # intermediate index note.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,  1),
+            _fr_hp(1, 1.0, 3, 1, Finger.INDEX, 1),
+            _fr_hp(2, 2.0, 5, 5, Finger.RING,  3),   # move!
+            _fr_hp(3, 3.0, 5, 3, Finger.RING,  1),   # eventual return
+        ]
+        out = resolve_sedentary_fingers(results)
+        # At note 1, ring's NEXT use is (5, 5) — different from its placed
+        # (5, 3). So it is a move, not a stay. Must NOT be planted.
+        assert "ring" not in out[1].planted_fingers
+
+    def test_no_reuse_no_chord_context_no_plant(self) -> None:
+        # Ring placed then not reused and not in chord context (gap > 2 beats,
+        # not part of the same hand position cluster).  Should NOT plant.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,  1),
+            _fr_hp(1, 5.0, 3, 1, Finger.INDEX, 1),  # 5 beats later, no future reuse
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert out[1].planted_fingers == {}
+
+    def test_active_finger_is_never_planted(self) -> None:
+        # When a finger IS the active finger for the current note, it must not
+        # appear in planted_fingers.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,   1),
+            _fr_hp(1, 0.5, 5, 3, Finger.RING,   1),  # same finger re-strike
+        ]
+        out = resolve_sedentary_fingers(results)
+        assert "ring" not in out[1].planted_fingers
+
+    def test_inactive_timeout_releases_finger(self) -> None:
+        # With a 1-beat max_inactive override, a finger placed at onset 0
+        # should be released by onset 5.
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,  1),
+            _fr_hp(1, 5.0, 4, 2, Finger.INDEX, 1),
+        ]
+        out = resolve_sedentary_fingers(results, max_inactive_beats=1.0)
+        assert out[1].planted_fingers == {}
+
+    def test_collision_clears_previous_finger(self) -> None:
+        # If index lands on (5, 3) where ring used to be planted, the old ring
+        # entry is cleared (two fingers cannot share one position).
+        results = [
+            _fr_hp(0, 0.0, 5, 3, Finger.RING,  1),
+            _fr_hp(1, 0.5, 5, 3, Finger.INDEX, 1),
+            _fr_hp(2, 1.0, 4, 2, Finger.MIDDLE, 1),
+        ]
+        out = resolve_sedentary_fingers(results)
+        # At note 2, ring should NOT be planted at (5, 3) — that position is now index's.
+        assert "ring" not in out[2].planted_fingers
 
 
 # ---------------------------------------------------------------------------

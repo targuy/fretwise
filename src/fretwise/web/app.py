@@ -40,7 +40,7 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
 
     Args:
         fixtures_dir: Directory containing GP/MusicXML/MIDI files.
-                      Defaults to tests/fixtures/.
+                      Defaults to partitions/ (gitignored personal library).
     """
     app = FastAPI(title="FretWise", version="0.1.0")
 
@@ -56,8 +56,8 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
         return response
 
     if fixtures_dir is None:
-        # Default to project's test fixtures
-        fixtures_dir = Path(__file__).parents[3] / "tests" / "fixtures"
+        # Default to the partitions library (personal scores, gitignored)
+        fixtures_dir = Path(__file__).parents[3] / "partitions"
 
     # Mount static files
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")

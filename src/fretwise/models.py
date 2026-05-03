@@ -130,6 +130,10 @@ class NoteEvent:
     # ── Source measure anchor (optional) ──────────────────────────────────────
     measure_index: int | None = None    # 1-based measure number from source parser
 
+    # ── Tuplet ─────────────────────────────────────────────────────────────────
+    tuplet_actual: int | None = None    # actual note count (e.g. 3 for a triplet)
+    tuplet_normal: int | None = None    # normal note count (e.g. 2 for a triplet)
+
 
 # Bend type string constants (used in NoteEvent.bend_type)
 class BendType:
@@ -195,6 +199,12 @@ class FingeringResult:
         cost: Total transition cost assigned by the optimizer.
         alternatives: Other candidate states with their costs, sorted
             ascending.  Empty list if only one state was possible.
+        planted_fingers: Fingers held down (sedentary) at this note but
+            not responsible for its sounding pitch.  Key = Finger value
+            (str), value = (string_num, fret).  Populated by the
+            ``resolve_sedentary_fingers`` post-processing pass; empty by
+            default.  See ``docs/finger_placement_strategy.md`` for the
+            rules that govern sedentary fingers.
     """
 
     note_id: int
@@ -202,6 +212,7 @@ class FingeringResult:
     state: FingeringState
     cost: float
     alternatives: list[tuple[FingeringState, float]] = field(default_factory=list)
+    planted_fingers: dict[str, tuple[int, int]] = field(default_factory=dict)
 
 
 @dataclass

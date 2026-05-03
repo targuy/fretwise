@@ -24,16 +24,17 @@ class TestStateGeneratorStandardTuning:
         """E4 (MIDI 64) = string 1 open."""
         states = self.gen.states_for(_note(64))
         open_states = [s for s in states if s.string_num == 1 and s.fret == 0]
-        assert len(open_states) == 1
-        assert open_states[0].finger == Finger.OPEN
+        assert len(open_states) == 12
+        assert all(s.finger == Finger.OPEN for s in open_states)
         assert open_states[0].hand_position == 1
+        assert open_states[-1].hand_position == 12
 
     def test_open_low_e_string(self) -> None:
         """E2 (MIDI 40) = string 6 open."""
         states = self.gen.states_for(_note(40))
         open_states = [s for s in states if s.string_num == 6 and s.fret == 0]
-        assert len(open_states) == 1
-        assert open_states[0].finger == Finger.OPEN
+        assert len(open_states) == 12
+        assert all(s.finger == Finger.OPEN for s in open_states)
 
     def test_middle_c_string_coverage(self) -> None:
         """MIDI 60 (C4) is playable on strings 2–6."""
@@ -184,7 +185,7 @@ class TestStateGeneratorHintFallback:
         )
         states = gen.states_for(note)
         str1_open = [s for s in states if s.string_num == 1 and s.fret == 0]
-        assert len(str1_open) == 1  # exactly one, not duplicated
+        assert len(str1_open) == 12  # full open-state set, not duplicated beyond config
 
 
 class TestStateGeneratorCustomTuning:

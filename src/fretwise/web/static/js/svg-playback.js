@@ -17,6 +17,8 @@ export class SvgCursorDriver {
     this.regions = (data.measure_regions || []).sort((a, b) => a.measure_idx - b.measure_idx);
     /** @type {SVGRectElement[]} */
     this._rects = [];
+    /** @type {SVGLineElement|null} */
+    this._line = null;
   }
 
   /**
@@ -38,6 +40,14 @@ export class SvgCursorDriver {
       svg.appendChild(rect);   // appended last → rendered on top
       this._rects.push(rect);
     }
+
+    // Red cursor line — drawn on top of everything, hidden until playback starts
+    this._line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    this._line.setAttribute('class', 'fw-cursor-line');
+    this._line.setAttribute('x1', '0'); this._line.setAttribute('x2', '0');
+    this._line.setAttribute('y1', '0'); this._line.setAttribute('y2', '0');
+    this._line.setAttribute('visibility', 'hidden');
+    svg.appendChild(this._line);
   }
 
   /**
@@ -60,6 +70,29 @@ export class SvgCursorDriver {
     if (activeRect) {
       activeRect.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+  }
+
+  /**
+   * Move the red cursor line to the given beat onset position.
+   * @param {number} onset         - current playback position in beats (from song start)
+   * @param {number} beatsPerMeasure
+   */
+  tick(onset, beatsPerMeasure) {
+    if (!this._line) return;
+    const measureIdx = Math.floor(onset / beatsPerMeasure);
+    const region = this.regions.find(r => r.measure_idx === measureIdx);
+    if (!region) { this._line.setAttribute('visibility', 'hidden'); return; }
+    const fraction = Math.min(1, (onset - measureIdx * beatsPerMeasure) / beatsPerMeasure);
+    const x = (region.x + fraction * region.width).toFixed(2);
+    this._line.setAttribute('x1', x); this._line.setAttribute('x2', x);
+    this._line.setAttribute('y1', region.y0.toFixed(2));
+    this._line.setAttribute('y2', region.y1.toFixed(2));
+    this._line.setAttribute('visibility', 'visible');
+  }
+
+  /** Hide the red cursor line (on pause / stop). */
+  hideLine() {
+    if (this._line) this._line.setAttribute('visibility', 'hidden');
   }
 
   /**

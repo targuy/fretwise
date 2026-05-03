@@ -369,7 +369,10 @@ def _render_standard_tuplet_bracket(
 
     text_half_w = 4.2
     hook_h = 3.0
-    hook_y1 = y + hook_h if direction == "up" else y - hook_h
+    # In SVG Y increases downward. "up" means bracket is above the notes (stems-up):
+    # hooks point upward = smaller y.  "down" means bracket is below the notes: hooks
+    # point downward = larger y.
+    hook_y1 = y - hook_h if direction == "up" else y + hook_h
     stroke = 'stroke="black" stroke-width="0.8" fill="none" stroke-linecap="round"'
     out: list[str] = []
 

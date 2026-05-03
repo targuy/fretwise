@@ -416,6 +416,47 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; /* 72+28 */ }
   color: rgba(255,255,255,0.75);
   text-align: left;
 }
+.tb-prefs {
+  position: relative;
+}
+.tb-prefs > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  padding: 4px 8px;
+  user-select: none;
+}
+.tb-prefs > summary::-webkit-details-marker { display: none; }
+.tb-prefs[open] > summary {
+  background: rgba(255,255,255,0.12);
+}
+.tb-prefs-body {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  min-width: 250px;
+  background: #1d2030;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  padding: 8px 10px;
+  z-index: 180;
+}
+.tb-pref-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f0f0f0;
+  font-size: 12px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.tb-pref-item input {
+  accent-color: var(--green);
+}
 /* Volume slider */
 .rng-volume {
   width: 72px;
@@ -437,6 +478,46 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; /* 72+28 */ }
 }
 .fw-cursor.loop {
   fill: rgba(64, 148, 255, 0.12);
+}
+/* Red beat-accurate cursor line in SVG mode */
+.fw-cursor-line {
+  stroke: #e53935;
+  stroke-width: 1.5;
+  opacity: 0.85;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px #e53935);
+}
+/* Chord name labels in SVG — clickable */
+.fw-chord-name {
+  cursor: pointer;
+  fill: #1d4ed8;
+}
+.fw-chord-name:hover {
+  fill: #1e40af;
+  text-decoration: underline;
+}
+.fw-finger-annotation {
+  pointer-events: none;
+  user-select: none;
+}
+.fw-hand-annotation {
+  pointer-events: none;
+  user-select: none;
+}
+.fw-hand-arrow {
+  fill: #0097a7;
+  font-weight: 500;
+  font-size: 5.6px;
+}
+.fw-hand-position {
+  fill: #455a64;
+  font-weight: 600;
+  font-size: 5.8px;
+}
+.fw-hand-position[data-is-change="true"] {
+  fill: #c41c3b;
+  font-weight: 700;
+  font-size: 6.2px;
 }
 
 /* ── Legend Overlay ─────────────────────────────────────── */
@@ -471,6 +552,61 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; /* 72+28 */ }
 }
 .overlay-close:hover { color: var(--text); }
 .overlay-content h2 { margin-bottom: 16px; }
+
+/* ── Floating hand-viz panel ──────────────────────────── */
+.floating-panel {
+  position: fixed;
+  bottom: 86px;
+  right: 24px;
+  width: 760px;
+  height: 420px;
+  min-width: 420px;
+  min-height: 260px;
+  background: #14161a;
+  color: #d6d8db;
+  border: 1px solid #3b3e44;
+  border-radius: 8px;
+  box-shadow: 0 14px 44px rgba(0,0,0,0.55), inset 0 0 0 1px #272a2f;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: both;
+}
+.floating-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px 6px 14px;
+  background: linear-gradient(180deg, #242730, #1c1f25);
+  border-bottom: 1px solid #2d3036;
+  user-select: none;
+  cursor: move;
+}
+.floating-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: #d6d8db;
+}
+.floating-panel-actions { display: flex; gap: 4px; }
+.floating-panel-btn {
+  background: transparent;
+  border: none;
+  color: #aab0b8;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.floating-panel-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.floating-panel iframe {
+  flex: 1;
+  border: none;
+  background: #0f1013;
+  width: 100%;
+}
 
 /* ── Legend HTML card layout ──────────────────────────── */
 .legend-overlay-content { max-width: 960px; }

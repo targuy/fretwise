@@ -52,10 +52,12 @@ class GeneratorConfig:
     Attributes:
         open_string_pitches: MIDI pitches for open strings 1–6 (index 0 = string 1).
         max_fret: Highest fret considered during state generation.
+        max_open_hand_position: Highest hand position tracked for open-string states.
     """
 
     open_string_pitches: list[int] = None  # type: ignore[assignment]
     max_fret: int = MAX_FRET
+    max_open_hand_position: int = 12
 
     def __post_init__(self) -> None:
         if self.open_string_pitches is None:
@@ -137,17 +139,20 @@ class StateGenerator:
     def _states_for_position(self, string_num: int, fret: int) -> list[FingeringState]:
         """Return FingeringStates for a fixed (string, fret) position.
 
-        Generates one OPEN state for fret 0, or one state per finger for
-        fretted positions (the hand_position derives from the finger offset).
+        Generates OPEN states for fret 0 across a bounded hand-position range
+        (to preserve continuity through open notes), or one state per finger
+        for fretted positions (hand_position derives from finger offset).
         """
         if fret == 0:
+            max_open_hp = max(1, min(self._config.max_open_hand_position, self._config.max_fret))
             return [
                 FingeringState(
                     string_num=string_num,
                     fret=0,
                     finger=Finger.OPEN,
-                    hand_position=1,
+                    hand_position=hp,
                 )
+                for hp in range(1, max_open_hp + 1)
             ]
 
         states: list[FingeringState] = []

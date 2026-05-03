@@ -18,7 +18,7 @@ from pathlib import Path
 from reportlab.lib.units import mm  # type: ignore[import-untyped]
 from reportlab.pdfgen import canvas as rl_canvas  # type: ignore[import-untyped]
 
-from fretwise.models import FingeringResult
+from fretwise.models import Finger, FingeringResult
 
 # ---------------------------------------------------------------------------
 # Layout constants (pt — 1 pt = 1/72 inch)
@@ -38,24 +38,36 @@ _CLEF_W = 34.0
 _NOTES_X0 = _MARGIN + _CLEF_W  # 62.5 pt — matches tab _STRINGS_X0
 
 # Stem
-_NOTE_STEM_H = 26.0          # stem length (pt)
+# Minimum stem length measured from the notehead *closest* to the stem tip:
+# 3.5 staff spaces = 3.5 × _STAFF_SPACING = 28 pt.
+# For a single note this is the full stem length from its own center.
+# For chords, the stem is extended so the farthest note from the tip still
+# has at least this clearance.
+_MIN_STEM_CLEARANCE = 3.5 * _STAFF_SPACING   # 28.0 pt
 _STEM_UP_THRESHOLD = 71       # MIDI B4 — stems up below, stems down above
 
 # Notehead
 _NH_RX = 4.5                  # notehead ellipse horizontal radius
 _NH_RY = 3.2                  # notehead ellipse vertical radius
 
-# System extents
-_ABOVE_STAFF = 32.0           # room for ledger lines / stems above top line
-_BELOW_STAFF = 24.0           # room for ledger below + dynamics
-_SYSTEM_H = _ABOVE_STAFF + _STAFF_HEIGHT + _BELOW_STAFF  # ~88 pt
+# System extents — base values; will be overridden per-system by
+# _compute_system_extents() to handle notes with many ledger lines.
+_ABOVE_STAFF_BASE = 32.0      # room for ledger lines / stems above top line
+_BELOW_STAFF_BASE = 24.0      # room for ledger below + dynamics
+# Export the old names as aliases so combined_renderer keeps working.
+_ABOVE_STAFF = _ABOVE_STAFF_BASE
+_BELOW_STAFF = _BELOW_STAFF_BASE
+_SYSTEM_H = _ABOVE_STAFF_BASE + _STAFF_HEIGHT + _BELOW_STAFF_BASE  # ~88 pt
 _INTER_SYSTEM_GAP = 10.0
 _SYSTEM_PITCH = _SYSTEM_H + _INTER_SYSTEM_GAP
 
+# Extra padding added on top of the actual ledger-line extent (pt)
+_LEDGER_PAD = 14.0
+
 # Accidental glyphs (Unicode)
-_SHARP = "\u266F"
-_FLAT = "\u266D"
-_NATURAL = "\u266E"
+_SHARP = "♯"
+_FLAT = "♭"
+_NATURAL = "♮"
 
 # Beam
 _BEAM_H = 3.0
@@ -93,6 +105,14 @@ _PC_TO_DIATONIC: dict[int, tuple[int, int]] = {
 
 # How many diatonic steps per octave
 _DIATONIC_PER_OCTAVE = 7
+
+# Finger → annotation letter (left of notehead)
+_FINGER_LETTER: dict[str, str] = {
+    Finger.INDEX: "I",
+    Finger.MIDDLE: "M",
+    Finger.RING: "R",
+    Finger.PINKY: "P",
+}
 
 
 def _midi_to_staff_pos(midi: int) -> tuple[int, int]:
@@ -149,6 +169,111 @@ def _has_stem(duration: float) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Per-system extent computation (Issue B)
+# ---------------------------------------------------------------------------
+
+
+def _position_ledger_extent_above(position: int) -> int:
+    """Return the highest (largest) diatonic position due to ledger lines above staff.
+
+    Ledger positions above the staff start at 12, 14, 16, …
+    The topmost ledger line drawn for *position* is at least *position* itself
+    (rounded up to the nearest even ledger-line position ≥ 12).
+    """
+    if position < 12:
+        return 11  # top staff line is position 10 (F5); stems can push to 11
+    return position
+
+
+def _position_ledger_extent_below(position: int) -> int:
+    """Return the lowest (smallest) diatonic position due to ledger lines below staff.
+
+    Ledger positions below the staff are 0, -2, -4, …
+    The bottommost ledger line drawn for *position* is at most *position* itself
+    (rounded down to the nearest even ledger position ≤ 0).
+    """
+    if position > 0:
+        return 1  # bottom staff line is position 2 (E4)
+    return position
+
+
+def _compute_system_extents(
+    sys_measures: list[list[FingeringResult]],
+    staff_y: float,
+) -> tuple[float, float]:
+    """Compute the maximum extent above and below the staff for a system.
+
+    Considers both noteheads (including ledger lines) and stems.
+
+    Returns:
+        (above_staff, below_staff) — padding in pts required above/below the
+        five staff lines to contain all noteheads and stems without clipping.
+        Values are at least (_ABOVE_STAFF_BASE, _BELOW_STAFF_BASE).
+    """
+    max_above = _ABOVE_STAFF_BASE
+    max_below = _BELOW_STAFF_BASE
+
+    for measure in sys_measures:
+        # Group by onset to handle chord stem lengths
+        onset_groups: dict[float, list[FingeringResult]] = {}
+        for r in measure:
+            k = round(r.note_event.onset, 6)
+            onset_groups.setdefault(k, []).append(r)
+
+        for group in onset_groups.values():
+            if not group:
+                continue
+            pitches = [r.note_event.pitch for r in group]
+            stem_up = min(pitches) < _STEM_UP_THRESHOLD
+
+            for r in group:
+                ne = r.note_event
+                pos, _ = _midi_to_staff_pos(ne.pitch)
+                note_y = _staff_pos_to_y(staff_y, pos)
+
+                # Ledger-line extent
+                if pos < 2:
+                    # Notes below the staff — need space below
+                    eff_pos = _position_ledger_extent_below(pos)
+                    eff_y = _staff_pos_to_y(staff_y, eff_pos)
+                    dist_below = staff_y - eff_y + _NH_RY + _LEDGER_PAD
+                    max_below = max(max_below, dist_below)
+                if pos > 10:
+                    # Notes above the staff — need space above
+                    eff_pos = _position_ledger_extent_above(pos)
+                    eff_y = _staff_pos_to_y(staff_y, eff_pos)
+                    dist_above = eff_y - (staff_y + _STAFF_HEIGHT) + _NH_RY + _LEDGER_PAD
+                    max_above = max(max_above, dist_above)
+
+            # Stem extent for this onset group
+            if _has_stem(group[0].note_event.duration):
+                positions = [_midi_to_staff_pos(r.note_event.pitch)[0] for r in group]
+                ys = [_staff_pos_to_y(staff_y, p) for p in positions]
+                if stem_up:
+                    # Stem goes up from the highest note.
+                    # Farthest note from stem tip = lowest note in chord.
+                    stem_base_y = max(ys)   # highest pitch = largest y-value for stem start
+                    lowest_y = min(ys)
+                    # stem tip must be at least _MIN_STEM_CLEARANCE above lowest_y
+                    stem_tip_y = lowest_y + _MIN_STEM_CLEARANCE
+                    stem_tip_y = max(stem_tip_y, stem_base_y + _MIN_STEM_CLEARANCE)
+                    if stem_tip_y > staff_y + _STAFF_HEIGHT:
+                        dist_above = stem_tip_y - (staff_y + _STAFF_HEIGHT) + _LEDGER_PAD
+                        max_above = max(max_above, dist_above)
+                else:
+                    # Stem goes down from the lowest note.
+                    stem_base_y = min(ys)
+                    highest_y = max(ys)
+                    stem_tip_y = highest_y - _MIN_STEM_CLEARANCE
+                    stem_tip_y = min(stem_tip_y, stem_base_y - _MIN_STEM_CLEARANCE)
+                    if stem_tip_y < staff_y:
+                        dist_below = staff_y - stem_tip_y + _LEDGER_PAD
+                        max_below = max(max_below, dist_below)
+
+    return max_above, max_below
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -195,21 +320,27 @@ def render_staff_pdf(
         current_top = _draw_title_block(c, title, artist, instrument, mode_label, current_top)
 
     song_m_idx = 0
-    first_page = True
 
     for sys_measures, sys_mwidths in systems:
-        needed = _SYSTEM_PITCH
+        # Compute per-system extents using a representative staff_y.
+        # We use a temporary staff_y=0 to get relative extents.
+        above, below = _compute_system_extents(sys_measures, 0.0)
+        # Clamp to at least base values
+        above = max(above, _ABOVE_STAFF_BASE)
+        below = max(below, _BELOW_STAFF_BASE)
+        system_h = above + _STAFF_HEIGHT + below
+        needed = system_h + _INTER_SYSTEM_GAP
+
         if current_top - needed < _MARGIN + 30:
             c.showPage()
             current_top = _PAGE_H - _MARGIN
-            first_page = False
 
-        staff_bottom_y = current_top - _ABOVE_STAFF - _STAFF_HEIGHT
+        staff_bottom_y = current_top - above - _STAFF_HEIGHT
         _draw_system(
             c, sys_measures, staff_bottom_y, song_m_idx,
             beats_per_measure, sys_mwidths, section_markers,
         )
-        current_top -= _SYSTEM_PITCH
+        current_top -= needed
         song_m_idx += len(sys_measures)
 
     c.save()
@@ -334,6 +465,40 @@ def _draw_time_signature(
     c.drawCentredString(x, mid_y - 12, str(denominator))
 
 
+def _compute_chord_stem_tip(
+    note_ys: list[float],
+    stem_up: bool,
+) -> float:
+    """Compute the stem tip y-coordinate for a chord.
+
+    The stem tip must be at least _MIN_STEM_CLEARANCE away from the notehead
+    farthest from the tip.  For stem-up chords the farthest note is the
+    lowest (smallest y); for stem-down chords it is the highest (largest y).
+
+    Args:
+        note_ys: Y positions of all noteheads in the chord.
+        stem_up: True if the stem points upward.
+
+    Returns:
+        Y coordinate of the stem tip.
+    """
+    if stem_up:
+        # Stem base at highest notehead; tip above lowest notehead.
+        stem_base = max(note_ys)
+        farthest = min(note_ys)
+        min_tip = farthest + _MIN_STEM_CLEARANCE
+        # Also enforce minimum length from stem base
+        min_tip_from_base = stem_base + _MIN_STEM_CLEARANCE
+        return max(min_tip, min_tip_from_base)
+    else:
+        # Stem base at lowest notehead; tip below highest notehead.
+        stem_base = min(note_ys)
+        farthest = max(note_ys)
+        max_tip = farthest - _MIN_STEM_CLEARANCE
+        min_tip_from_base = stem_base - _MIN_STEM_CLEARANCE
+        return min(max_tip, min_tip_from_base)
+
+
 def _draw_measure_notes(
     c: rl_canvas.Canvas,
     results: list[FingeringResult],
@@ -356,44 +521,72 @@ def _draw_measure_notes(
     pad = 8.0  # left/right padding within measure
     usable_w = measure_w - 2 * pad
 
-    # Collect onsets for beam grouping
-    stem_info: list[tuple[float, float, float, int, bool]] = []
-    # (x, y, duration, midi, stem_up)
-
+    # Group notes by onset (chords share the same x and a single stem)
+    onset_groups: dict[float, list[FingeringResult]] = {}
     for r in results:
-        ne = r.note_event
-        beat_in_measure = ne.onset - measure_onset
+        k = round(r.note_event.onset, 6)
+        onset_groups.setdefault(k, []).append(r)
+
+    for _onset_key, group in sorted(onset_groups.items()):
+        ne0 = group[0].note_event
+        beat_in_measure = ne0.onset - measure_onset
         frac = beat_in_measure / beats_per_measure if beats_per_measure > 0 else 0
         note_x = x0 + pad + frac * usable_w
 
-        pos, accidental = _midi_to_staff_pos(ne.pitch)
-        note_y = _staff_pos_to_y(staff_y, pos)
-        filled = _is_filled(ne.duration)
-        has_stem_flag = _has_stem(ne.duration)
-        stem_up = ne.pitch < _STEM_UP_THRESHOLD
+        # Determine stem direction from the lowest pitch in the group (majority rule)
+        pitches = [r.note_event.pitch for r in group]
+        stem_up = min(pitches) < _STEM_UP_THRESHOLD
 
-        # Ledger lines
-        _draw_ledger_lines(c, note_x, staff_y, pos)
+        # Collect y positions for all notes in this chord
+        note_ys: list[float] = []
+        for r in group:
+            pos, _ = _midi_to_staff_pos(r.note_event.pitch)
+            note_ys.append(_staff_pos_to_y(staff_y, pos))
 
-        # Accidental
-        if accidental:
-            c.setFont("Helvetica", 9)
-            c.drawString(note_x - _NH_RX - 7, note_y - 3, _SHARP)
+        # Draw each notehead (and its ledger lines, accidentals, finger annotation)
+        for r in group:
+            ne = r.note_event
+            pos, accidental = _midi_to_staff_pos(ne.pitch)
+            note_y = _staff_pos_to_y(staff_y, pos)
 
-        # Notehead
-        _draw_notehead(c, note_x, note_y, filled)
+            # Ledger lines
+            _draw_ledger_lines(c, note_x, staff_y, pos)
 
-        # Stem
-        if has_stem_flag:
-            _draw_stem(c, note_x, note_y, stem_up)
+            # Accidental
+            if accidental:
+                c.setFont("Helvetica", 9)
+                c.setFillColorRGB(0, 0, 0)
+                c.drawString(note_x - _NH_RX - 7, note_y - 3, _SHARP)
 
-        # Flags (only for unbeamed notes)
-        n_flags = _num_flags(ne.duration)
-        if n_flags > 0:
-            flag_x = note_x + _NH_RX if stem_up else note_x - _NH_RX
-            flag_y = note_y + _NOTE_STEM_H if stem_up else note_y - _NOTE_STEM_H
-            for i in range(n_flags):
-                _draw_flag_symbol(c, flag_x, flag_y, stem_up, i)
+            # Notehead
+            filled = _is_filled(ne.duration)
+            _draw_notehead(c, note_x, note_y, filled)
+
+            # Issue C — finger annotation: small red letter to the left of notehead
+            finger_letter = _FINGER_LETTER.get(r.state.finger, "")
+            if finger_letter:
+                c.saveState()
+                c.setFont("Helvetica", 6)
+                c.setFillColorRGB(0.8, 0.0, 0.0)
+                c.drawString(note_x - _NH_RX - 6, note_y - 2, finger_letter)
+                c.restoreState()
+
+        # Draw a single shared stem for the chord (Issue A)
+        if _has_stem(ne0.duration):
+            stem_tip_y = _compute_chord_stem_tip(note_ys, stem_up)
+            _draw_chord_stem(c, note_x, note_ys, stem_up, stem_tip_y)
+
+            # Flags (only for unbeamed notes; only drawn once at the stem tip)
+            n_flags = _num_flags(ne0.duration)
+            if n_flags > 0:
+                if stem_up:
+                    flag_x = note_x + _NH_RX
+                    flag_y = stem_tip_y
+                else:
+                    flag_x = note_x - _NH_RX
+                    flag_y = stem_tip_y
+                for i in range(n_flags):
+                    _draw_flag_symbol(c, flag_x, flag_y, stem_up, i)
 
 
 def _draw_notehead(c: rl_canvas.Canvas, x: float, y: float, filled: bool) -> None:
@@ -412,16 +605,49 @@ def _draw_notehead(c: rl_canvas.Canvas, x: float, y: float, filled: bool) -> Non
     c.restoreState()
 
 
+def _draw_chord_stem(
+    c: rl_canvas.Canvas,
+    note_x: float,
+    note_ys: list[float],
+    stem_up: bool,
+    stem_tip_y: float,
+) -> None:
+    """Draw a single stem shared by all noteheads in a chord.
+
+    For a stem-up chord, the stem runs from the highest notehead y upward
+    to stem_tip_y.  For stem-down, from the lowest notehead y downward.
+
+    Args:
+        note_x: X position of the noteheads.
+        note_ys: Y positions of all noteheads in the chord.
+        stem_up: True if stem points up.
+        stem_tip_y: Pre-computed y coordinate of the stem tip.
+    """
+    c.setStrokeColorRGB(0, 0, 0)
+    c.setLineWidth(0.8)
+    if stem_up:
+        stem_x = note_x + _NH_RX
+        stem_base_y = max(note_ys)  # highest note (stem attaches at top of notehead)
+        c.line(stem_x, stem_base_y, stem_x, stem_tip_y)
+    else:
+        stem_x = note_x - _NH_RX
+        stem_base_y = min(note_ys)  # lowest note (stem attaches at bottom of notehead)
+        c.line(stem_x, stem_base_y, stem_x, stem_tip_y)
+
+
 def _draw_stem(c: rl_canvas.Canvas, x: float, y: float, stem_up: bool) -> None:
-    """Draw a vertical stem from the notehead."""
+    """Draw a vertical stem from a single notehead (legacy helper).
+
+    For single notes the stem length is at least _MIN_STEM_CLEARANCE.
+    """
     c.setStrokeColorRGB(0, 0, 0)
     c.setLineWidth(0.8)
     if stem_up:
         stem_x = x + _NH_RX
-        c.line(stem_x, y, stem_x, y + _NOTE_STEM_H)
+        c.line(stem_x, y, stem_x, y + _MIN_STEM_CLEARANCE)
     else:
         stem_x = x - _NH_RX
-        c.line(stem_x, y, stem_x, y - _NOTE_STEM_H)
+        c.line(stem_x, y, stem_x, y - _MIN_STEM_CLEARANCE)
 
 
 def _draw_ledger_lines(

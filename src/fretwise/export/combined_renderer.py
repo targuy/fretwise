@@ -41,7 +41,10 @@ from fretwise.export.staff_renderer import (
     _STAFF_SPACING,
     _ABOVE_STAFF,
     _BELOW_STAFF,
+    _ABOVE_STAFF_BASE,
+    _BELOW_STAFF_BASE,
     _NOTES_X0,
+    _compute_system_extents,
     _draw_system as _staff_draw_system,
 )
 from fretwise.models import ChordDiagram, FingeringResult
@@ -51,18 +54,28 @@ from fretwise.models import ChordDiagram, FingeringResult
 
 _STAFF_TAB_GAP = 8.0               # gap between bottom staff ledger line and tab top
 
-# The combined system height:
-#   staff above-pad + staff-lines + staff below-pad
-#   + gap
-#   + tab above-strings + tab strings + tab below-strings
-# We compute it to know how many systems fit per page.
-
+# The *base* combined system height (used for initial page-break estimates).
+# Actual heights vary per system — see _combined_system_h().
 _COMBINED_SYSTEM_H = (
-    _ABOVE_STAFF + _STAFF_HEIGHT + _BELOW_STAFF
+    _ABOVE_STAFF_BASE + _STAFF_HEIGHT + _BELOW_STAFF_BASE
     + _STAFF_TAB_GAP
     + _TAB_SYSTEM_H
 )
 _COMBINED_PITCH = _COMBINED_SYSTEM_H + _INTER_SYSTEM_GAP
+
+
+def _combined_system_h(
+    sys_measures: list[list[FingeringResult]],
+) -> tuple[float, float, float]:
+    """Return (above, below, total_combined_h) for one system.
+
+    *above* / *below* are the dynamic staff padding values; *total_combined_h*
+    is the full height of the staff+tab block (excluding the inter-system gap).
+    """
+    above, below = _compute_system_extents(sys_measures, 0.0)
+    above = max(above, _ABOVE_STAFF_BASE)
+    below = max(below, _BELOW_STAFF_BASE)
+    return above, below, above + _STAFF_HEIGHT + below + _STAFF_TAB_GAP + _TAB_SYSTEM_H
 
 
 # ---------------------------------------------------------------------------
@@ -130,16 +143,19 @@ def render_combined_pdf(
         song_m_start = first_song_measure + m_idx
         m_idx += len(sys_measures)
 
+        # Compute dynamic staff extents for this system
+        above, below, combined_h = _combined_system_h(sys_measures)
+
         # Check space for combined system
-        system_bottom = current_top - _COMBINED_SYSTEM_H
+        system_bottom = current_top - combined_h
         if system_bottom < _MARGIN:
             c.showPage()
             current_top = _PAGE_H - _MARGIN
             first_system_on_page = True
-            system_bottom = current_top - _COMBINED_SYSTEM_H
+            system_bottom = current_top - combined_h
 
         # ── Staff portion ──
-        staff_bottom_y = current_top - _ABOVE_STAFF - _STAFF_HEIGHT
+        staff_bottom_y = current_top - above - _STAFF_HEIGHT
         _staff_draw_system(
             c, sys_measures, staff_bottom_y, (song_m_start - 1),
             beats_per_measure, measure_widths, section_markers,
@@ -147,7 +163,7 @@ def render_combined_pdf(
 
         # ── Tab portion (below staff + gap) ──
         # sys_y for pdf_tab is the y of string 1 (topmost string)
-        tab_top = staff_bottom_y - _BELOW_STAFF - _STAFF_TAB_GAP
+        tab_top = staff_bottom_y - below - _STAFF_TAB_GAP
         # pdf_tab._draw_system expects sys_y = y of string-1
         from fretwise.export.pdf_tab import _ABOVE_STRINGS
 

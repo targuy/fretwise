@@ -83,6 +83,8 @@ def _draw_scene_pages(canvas: rl_canvas.Canvas, scene: RenderScene) -> None:
                             _draw_flag_stack(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "beam_group":
                             _draw_beam_group(canvas, page_h, recipe.params)
+                        elif recipe.recipe_id == "tuplet_bracket":
+                            _draw_tuplet_bracket(canvas, page_h, recipe.params, recipe.metadata)
                         elif recipe.recipe_id == "tie_arc":
                             _draw_arc(canvas, page_h, recipe.params)
                         elif recipe.recipe_id == "slur_arc":
@@ -194,11 +196,12 @@ def _draw_flag_stack(
     y = float(params.get("y", 0.0))
     count = int(params.get("count", 0))
     spacing = float(params.get("spacing", 4.0))
+    width = float(params.get("width", 0.75))
     direction = str(params.get("direction", "up"))
     if count <= 0:
         return
     canvas.setStrokeColorRGB(0, 0, 0)
-    canvas.setLineWidth(0.75)
+    canvas.setLineWidth(max(0.6, width))
     x_ctrl1 = 3.8
     x_ctrl2 = 4.8
     x_end = 1.4
@@ -325,6 +328,56 @@ def _draw_arc(
     canvas.drawPath(path, stroke=1, fill=0)
 
 
+def _draw_tuplet_bracket(
+    canvas: rl_canvas.Canvas,
+    page_h: float,
+    params: dict[str, object],
+    metadata: dict[str, object] | None,
+) -> None:
+    x0 = float(params.get("x0", 0.0))
+    x1 = float(params.get("x1", x0))
+    y = float(params.get("y", 0.0))
+    number = int(params.get("number", 3))
+    direction = str(params.get("direction", "up"))
+    tuplet_style = str((metadata or {}).get("style") or params.get("style") or "standard")
+
+    if tuplet_style == "tablature_rhythm":
+        margin = 3.5
+        font_name = "Times-BoldItalic"
+        font_size = 10.0
+        text_half_w = 5.8
+        # In scene coords Y increases downward (same as SVG).  "down" means the bracket
+        # is placed below the beam line (hooks open downward, away from the staff).
+        hook_y1 = y + 4.2 if direction == "down" else y - 4.2
+        line_width = 1.1
+    else:
+        margin = 2.5
+        font_name = "Times-Italic"
+        font_size = 8.0
+        text_half_w = 4.2
+        hook_y1 = y + 3.0 if direction == "down" else y - 3.0
+        line_width = 0.8
+
+    bx0 = x0 - margin
+    bx1 = x1 + margin
+    xmid = (bx0 + bx1) / 2.0
+    left_arm_end = xmid - text_half_w
+    right_arm_start = xmid + text_half_w
+
+    canvas.setStrokeColorRGB(0, 0, 0)
+    canvas.setLineWidth(line_width)
+    canvas.line(bx0, _to_pdf_y(page_h, y), bx0, _to_pdf_y(page_h, hook_y1))
+    if left_arm_end > bx0 + 0.5:
+        canvas.line(bx0, _to_pdf_y(page_h, y), left_arm_end, _to_pdf_y(page_h, y))
+    if right_arm_start < bx1 - 0.5:
+        canvas.line(right_arm_start, _to_pdf_y(page_h, y), bx1, _to_pdf_y(page_h, y))
+    canvas.line(bx1, _to_pdf_y(page_h, y), bx1, _to_pdf_y(page_h, hook_y1))
+
+    canvas.setFillColorRGB(0, 0, 0)
+    canvas.setFont(font_name, font_size)
+    canvas.drawCentredString(xmid, _to_pdf_y(page_h, y + font_size * 0.16), str(number))
+
+
 def _to_pdf_y(page_h: float, scene_y: float) -> float:
     return page_h - scene_y
 
@@ -433,6 +486,7 @@ def _draw_rest_glyph(
     block_h = max(2.0, float(metadata.get("rest_block_height", 3.0)))
     half_w = block_w / 2.0
     augmentation_dot_count = int(metadata.get("dot_count", 0) or 0)
+    is_tab_rhythm = str(metadata.get("mode", "")).strip() == "tablature_rhythm"
     canvas.setStrokeColorRGB(0, 0, 0)
     canvas.setFillColorRGB(0, 0, 0)
 
@@ -471,7 +525,7 @@ def _draw_rest_glyph(
         _draw_augmentation_dots(y + 0.5)
         return
 
-    canvas.setLineWidth(1.0)
+    canvas.setLineWidth(1.1 if is_tab_rhythm else 1.0)
     if rest_kind == "quarter":
         path = canvas.beginPath()
         path.moveTo(x - 2.0, _to_pdf_y(page_h, y + 4.0))
@@ -502,7 +556,7 @@ def _draw_rest_glyph(
         "thirty_second": 3,
         "sixty_fourth": 4,
     }.get(rest_kind, 1)
-    canvas.setLineWidth(0.8)
+    canvas.setLineWidth(0.95 if is_tab_rhythm else 0.8)
     canvas.line(x - 1.5, _to_pdf_y(page_h, y + 4.0), x + 2.0, _to_pdf_y(page_h, y - 3.8))
     canvas.setLineWidth(0.0)
     for idx in range(intrinsic_dot_count):

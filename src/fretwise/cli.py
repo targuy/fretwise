@@ -605,9 +605,9 @@ def formats() -> None:
     help="Port to serve the web interface on.",
 )
 @click.option(
-    "--dir", "-d", "fixtures_dir", default=".",
-    type=click.Path(exists=True, file_okay=False),
-    help="Directory containing score files to browse.",
+    "--dir", "-d", "fixtures_dir", default="partitions",
+    type=click.Path(file_okay=False),
+    help="Directory containing score files to browse (default: ./partitions).",
 )
 @click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
 def web(port: int, fixtures_dir: str, host: str) -> None:
@@ -619,7 +619,7 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
 
     \b
     Example:
-      fretwise web --dir ./tests/fixtures --port 8080
+      fretwise web --dir ./partitions --port 8080
     """
     try:
         import uvicorn  # type: ignore[import-untyped]
