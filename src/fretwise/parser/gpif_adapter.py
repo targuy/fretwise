@@ -352,7 +352,7 @@ class GpifAdapter(BaseParser):
         from fretwise.patterns.chord_library import is_corrupt_diagram_set, repair_diagrams
 
         if is_corrupt_diagram_set(diagrams):
-            logger.warning(
+            logger.debug(
                 "Chord diagram data appears corrupted (all %d diagrams have identical "
                 "frets). Replacing with library voicings.",
                 len(diagrams),

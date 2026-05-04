@@ -269,30 +269,6 @@ def _measure_event_layouts(
                 )
             )
 
-    # Center notes within the measure: shift all events right by half the
-    # trailing space so that left and right margins are approximately equal.
-    if layouts:
-        beats = max(1, beats_per_measure)
-        max_onset_frac = max(
-            (ev.onset % beats) / beats for ev in layouts
-        )
-        tail_frac = 1.0 - max_onset_frac
-        usable_w = max(20.0, width - rules.measure_lr_pad * 2)
-        centering_dx = tail_frac * usable_w / 2.0
-        max_x_allowed = width - rules.measure_lr_pad
-        if centering_dx > 0.5:
-            layouts = [
-                EventLayout(
-                    event_id=ev.event_id,
-                    onset=ev.onset,
-                    duration=ev.duration,
-                    x=min(ev.x + centering_dx, max_x_allowed),
-                    y=ev.y,
-                    metadata=dict(ev.metadata),
-                )
-                for ev in layouts
-            ]
-
     adjusted, collision_issues = enforce_min_event_spacing(
         layouts,
         min_spacing=rules.min_event_spacing,
