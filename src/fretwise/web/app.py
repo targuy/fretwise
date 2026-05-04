@@ -14,6 +14,7 @@ from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
+from fretwise.core.notation_mode import is_valid_mode as _is_valid_notation_mode
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
@@ -362,10 +363,9 @@ def _parse_representation_mode(value: str | None) -> RepresentationMode:
     }
     if normalized in alias_map:
         return alias_map[normalized]
-    try:
+    if _is_valid_notation_mode(normalized):
         return RepresentationMode(normalized)
-    except ValueError as exc:
-        raise HTTPException(400, f"Unknown representation_mode: {value}") from exc
+    raise HTTPException(400, f"Unknown representation_mode: {value!r}")
 
 
 def _run_legacy_pipeline(

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
+from fretwise.core.notation_mode import system_height_for_mode
+
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout.collisions import enforce_min_event_spacing
@@ -41,12 +43,8 @@ def canonical_to_page_layout(
     """Build the first-page layout contract from a canonical score."""
     layout_rules = rules or default_layout_rules()
     # Adjust system height based on rendering mode so vertical spacing is appropriate.
-    # standard_tablature uses the default 168 (standard staff + gap + tab + rhythm zone).
-    # standard-only needs only ~80 px (staff + ledger lines + dynamics room).
-    if mode == "standard":
-        layout_rules = replace(layout_rules, system_height=80.0)
-    elif mode in ("tablature", "tablature_rhythm"):
-        layout_rules = replace(layout_rules, system_height=130.0)
+    # Delegate to notation_mode.system_height_for_mode — single source of truth.
+    layout_rules = replace(layout_rules, system_height=system_height_for_mode(mode))
     systems: list[SystemLayout] = []
     packs = _measure_packs(score, rules=layout_rules, mode=mode)
     if not packs:
