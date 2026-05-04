@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
-from fretwise.core.notation_mode import system_height_for_mode
+from fretwise.core.notation_mode import has_standard, system_height_for_mode
 
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
@@ -45,6 +45,16 @@ def canonical_to_page_layout(
     # Adjust system height based on rendering mode so vertical spacing is appropriate.
     # Delegate to notation_mode.system_height_for_mode — single source of truth.
     layout_rules = replace(layout_rules, system_height=system_height_for_mode(mode))
+    # Standard notation (stems, accidentals, ties) requires wider measure slots than
+    # pure TAB.  Replace the three spacing knobs atomically so all downstream helpers
+    # (raw_measure_width, event_anchor_x, collision enforcer) see consistent values.
+    if has_standard(mode):
+        layout_rules = replace(
+            layout_rules,
+            space_per_beat=layout_rules.standard_space_per_beat,
+            min_note_width=layout_rules.standard_min_note_width,
+            measure_min_width=layout_rules.standard_measure_min_width,
+        )
     systems: list[SystemLayout] = []
     packs = _measure_packs(score, rules=layout_rules, mode=mode)
     if not packs:
@@ -269,13 +279,14 @@ def _measure_event_layouts(
         tail_frac = 1.0 - max_onset_frac
         usable_w = max(20.0, width - rules.measure_lr_pad * 2)
         centering_dx = tail_frac * usable_w / 2.0
+        max_x_allowed = width - rules.measure_lr_pad
         if centering_dx > 0.5:
             layouts = [
                 EventLayout(
                     event_id=ev.event_id,
                     onset=ev.onset,
                     duration=ev.duration,
-                    x=ev.x + centering_dx,
+                    x=min(ev.x + centering_dx, max_x_allowed),
                     y=ev.y,
                     metadata=dict(ev.metadata),
                 )
