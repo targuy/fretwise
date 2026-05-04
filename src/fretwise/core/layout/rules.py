@@ -30,6 +30,13 @@ class LayoutRules:
     space_per_beat: float = 32.0
     min_note_width: float = 14.0
     min_event_spacing: float = 14.0
+    # Standard-notation-specific spacing overrides.  Modes that include a
+    # standard staff (stems, accidentals, ties) require more horizontal room
+    # than pure TAB.  canonical_to_page_layout() replaces space_per_beat /
+    # min_note_width / measure_min_width with these values when has_standard().
+    standard_space_per_beat: float = 48.0
+    standard_min_note_width: float = 20.0
+    standard_measure_min_width: float = 180.0
     system_leading_inset: float = 52.0
     standard_staff_spacing: float = 8.0
     tab_staff_spacing: float = 10.0
