@@ -18,6 +18,7 @@ from fretwise.web.app import (
     _load_adapter_and_events,
     _parse_representation_mode,
     _render_core_pdf_payload,
+    _run_core_pipeline_for_events,
     _safe_pdf_filename,
     create_app,
 )
@@ -29,6 +30,10 @@ class _DummyAdapter:
     chord_diagrams: list[Any] = []
     chord_markers: dict[str, str] = {}
     beats_per_measure: float = 4.0
+    measure_time_signatures: dict[int, tuple[int, int]] = {}
+    key_signature_fifths: int = 0
+    time_denominator: int = 4
+    has_anacrusis: bool = False
 
     def parse(self, _path: Path) -> list[NoteEvent]:
         return [
@@ -251,3 +256,92 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
     assert response.status_code == 200
     assert response.headers["x-fretwise-pdf-engine"] == "core"
     assert captured["representation_mode"] == RepresentationMode.TAB_RHYTHM
+
+
+def test_run_core_pipeline_for_events_propagates_measure_time_signatures(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """_run_core_pipeline_for_events must pass measure_time_signatures to legacy_parse_to_raw_score.
+
+    Regression test for the Aigle Noir bug: the web handler was calling
+    legacy_parse_to_raw_score without measure_time_signatures, causing the
+    mapper to use a uniform global meter for all measures even when the
+    score contained meter changes (e.g. 4/4 → 3/4 at measure 77).
+    """
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+
+    class _VariableMeterAdapter(_DummyAdapter):
+        beats_per_measure: float = 4.0
+        measure_time_signatures: dict[int, tuple[int, int]] = {
+            1: (4, 4),
+            77: (3, 4),
+        }
+        key_signature_fifths: int = -2  # Bb major (2 flats)
+
+    adapter = _VariableMeterAdapter()
+    events = [
+        NoteEvent(
+            pitch=60,
+            onset=0.0,
+            duration=1.0,
+            tempo=120.0,
+            articulation=Articulation.NORMAL,
+            dynamic=Dynamic.MF,
+            voice_hint=0,
+            string_hint=1,
+            fret_hint=0,
+            measure_index=1,
+        )
+    ]
+
+    captured: dict[str, Any] = {}
+
+    import fretwise.core.ingest.adapters as ingest_adapters
+
+    original_fn = ingest_adapters.legacy_parse_to_raw_score
+
+    def _capturing_legacy_parse(path: Any, **kwargs: Any) -> Any:
+        captured.update(kwargs)
+        return original_fn(path, **kwargs)
+
+    monkeypatch.setattr(
+        "fretwise.web.app.legacy_parse_to_raw_score",
+        _capturing_legacy_parse,
+    )
+
+    # Run with a fake downstream pipeline that just returns a minimal result
+    from fretwise.core.ingest import RawScore
+
+    def _fake_run_core(raw: RawScore, **kwargs: Any) -> Any:
+        return SimpleNamespace(
+            normalized_score=None,
+            completed_score=None,
+            validation_report=None,
+            decision_outcome=None,
+            canonical_score=None,
+            render_scene=SimpleNamespace(document_scene=SimpleNamespace(pages=[])),
+            conformance_issues=[],
+            svg="<svg/>",
+        )
+
+    monkeypatch.setattr("fretwise.web.app.run_core_pipeline_from_raw", _fake_run_core)
+
+    _run_core_pipeline_for_events(
+        file_path,
+        adapter,
+        events,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+
+    assert "measure_time_signatures" in captured, (
+        "measure_time_signatures was not passed to legacy_parse_to_raw_score"
+    )
+    assert captured["measure_time_signatures"] == {1: (4, 4), 77: (3, 4)}, (
+        f"Expected measure_time_signatures {{1:(4,4), 77:(3,4)}}, "
+        f"got {captured.get('measure_time_signatures')}"
+    )
+    assert "key_signature_fifths" in captured, (
+        "key_signature_fifths was not passed to legacy_parse_to_raw_score"
+    )
+    assert captured["key_signature_fifths"] == -2

@@ -742,6 +742,7 @@ def _run_core_pipeline_for_events(
         track_name=getattr(adapter, "track_name", "") or "",
         beats_per_measure=source_beats_per_measure,
         time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
+        key_signature_fifths=int(getattr(adapter, "key_signature_fifths", 0) or 0),
         has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=dict(getattr(adapter, "section_markers", {}) or {}),
         chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
