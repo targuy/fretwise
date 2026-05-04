@@ -99,3 +99,43 @@ def string_row_y(*, string_num: int, rules: LayoutRules) -> float:
     """Return y anchor for one tablature string row."""
     s = max(1, min(6, string_num))
     return rules.row_top + (s - 1) * rules.row_spacing + 4.0
+
+
+# Maps chromatic pitch class (0–11, C=0) to diatonic step within the octave (C=0…B=6).
+# Sharps/flats collapse onto the lower diatonic step (e.g. C#→C=0, D#→D=1).
+_CHROMATIC_TO_DIATONIC: tuple[int, ...] = (0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6)
+
+
+def pitch_to_staff_y(
+    pitch_midi: int,
+    *,
+    staff_y_origin: float,
+    staff_spacing: float,
+    clef: str = "treble",
+) -> float:
+    """Return SVG y-coordinate for a MIDI pitch on a standard staff.
+
+    Treble clef reference: E4 (MIDI 64) = bottom line (line index 0).
+    Each diatonic step = staff_spacing / 2 vertically.
+    Y decreases as pitch rises (SVG origin at top).
+
+    Args:
+        pitch_midi: MIDI pitch number (0–127).
+        staff_y_origin: SVG y of the top (5th) staff line.
+        staff_spacing: Distance in SVG units between adjacent staff lines.
+        clef: Only ``"treble"`` is supported; other values fall back to treble.
+
+    Returns:
+        SVG y-coordinate for the notehead centre.  Ledger-line notes are
+        placed correctly above/below the staff; the function never raises.
+    """
+    del clef  # Only treble implemented; bass clef reserved for future work.
+    # MIDI octave: C4=60 → octave = pitch_midi // 12 - 1.
+    octave = pitch_midi // 12 - 1
+    diatonic_in_octave = _CHROMATIC_TO_DIATONIC[pitch_midi % 12]
+    # Diatonic steps above E4 (bottom line, step 0 in the treble clef staff).
+    # E4 sits at diatonic position 2 in its octave (C=0, D=1, E=2…).
+    staff_steps = (octave - 4) * 7 + (diatonic_in_octave - 2)
+    # Bottom line = staff_y_origin + 4 * staff_spacing.  Each step upward
+    # subtracts half a staff_spacing (SVG y increases downward).
+    return staff_y_origin + 4.0 * staff_spacing - staff_steps * (staff_spacing / 2.0)
