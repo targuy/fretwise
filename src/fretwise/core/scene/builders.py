@@ -521,10 +521,19 @@ def layout_to_render_scene(
                                 (onset_key, voice_number),
                                 event_layout.duration,
                             )
-                            note_x = event_layout.x + notehead_offset_by_event_id.get(
-                                event_layout.event_id,
-                                0.0,
+                            # Voice 1+ noteheads are offset left by one notehead diameter
+                            # so that simultaneous notes in different voices don't overlap.
+                            voice_x_offset = -(2.0 * notehead_rx) if voice_number >= 1 else 0.0
+                            chord_offset = notehead_offset_by_event_id.get(
+                                event_layout.event_id, 0.0
                             )
+                            note_x = event_layout.x + voice_x_offset + chord_offset
+                            # Clamp notehead to the right boundary of the measure so it doesn't
+                            # bleed into the next measure visually.
+                            right_bound = (
+                                measure_layout.x + measure_layout.width - notehead_rx - 2.0
+                            )
+                            note_x = min(note_x, right_bound)
                             stem_direction = stem_direction_by_onset_voice.get(
                                 (onset_key, voice_number),
                                 _stem_direction_for_note(
@@ -618,9 +627,9 @@ def layout_to_render_scene(
                                         "rotation": notehead_rotation,
                                         "stroke_width": notehead_stroke_width,
                                         "head_displaced": "true"
-                                        if abs(note_x - event_layout.x) > 0.1
+                                        if abs(chord_offset) > 0.1
                                         else "false",
-                                        "head_dx": note_x - event_layout.x,
+                                        "head_dx": chord_offset,
                                     },
                                 )
                             )
