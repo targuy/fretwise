@@ -427,10 +427,14 @@ def layout_to_render_scene(
                             tab_y=tab_y,
                             tab_spacing=tab_spacing,
                         )
+                        tab_note_x = min(
+                            event_layout.x,
+                            measure_layout.x + measure_layout.width - 4.0,
+                        )
                         notes_layer.text_instances.append(
                             TextInstance(
                                 text=str(text),
-                                x=event_layout.x,
+                                x=tab_note_x,
                                 y=tab_note_y,
                                 font_family="Times-Roman",
                                 font_size=8.5,
@@ -521,19 +525,10 @@ def layout_to_render_scene(
                                 (onset_key, voice_number),
                                 event_layout.duration,
                             )
-                            # Voice 1+ noteheads are offset left by one notehead diameter
-                            # so that simultaneous notes in different voices don't overlap.
-                            voice_x_offset = -(2.0 * notehead_rx) if voice_number >= 1 else 0.0
                             chord_offset = notehead_offset_by_event_id.get(
                                 event_layout.event_id, 0.0
                             )
-                            note_x = event_layout.x + voice_x_offset + chord_offset
-                            # Clamp notehead to the right boundary of the measure so it doesn't
-                            # bleed into the next measure visually.
-                            right_bound = (
-                                measure_layout.x + measure_layout.width - notehead_rx - 2.0
-                            )
-                            note_x = min(note_x, right_bound)
+                            note_x = event_layout.x + chord_offset
                             stem_direction = stem_direction_by_onset_voice.get(
                                 (onset_key, voice_number),
                                 _stem_direction_for_note(
