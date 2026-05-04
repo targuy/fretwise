@@ -771,7 +771,7 @@ def resolve_chord_finger_ordering(results: list[FingeringResult]) -> list[Finger
         valid_fingers = _natural_finger_assignment(frets_sorted)
         if valid_fingers is None:
             onset_val = resolved[fretted[0][0]].note_event.onset
-            logger.warning(
+            logger.debug(
                 "No valid finger assignment for chord at onset %.3f "
                 "(frets %s) — leaving current assignment.",
                 onset_val, frets_sorted,
@@ -968,7 +968,7 @@ def resolve_chord_finger_span(results: list[FingeringResult]) -> list[FingeringR
         valid_fingers = _natural_finger_assignment(frets_sorted)
         if valid_fingers is None:
             onset_val = resolved[fretted[0][0]].note_event.onset
-            logger.warning(
+            logger.debug(
                 "No valid finger assignment for chord at onset %.3f "
                 "(frets %s) — leaving current assignment.",
                 onset_val, frets_sorted,
