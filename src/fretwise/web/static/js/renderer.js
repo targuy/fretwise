@@ -22,7 +22,7 @@ const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E'];
 
 // System vertical layout
 const ABOVE_STRINGS = 80;     // space above string 1 (tempo, chord, section, stems)
-const BELOW_STRINGS = 55;     // space below string 6 (rhythm, lyrics)
+const BELOW_STRINGS = 70;     // space below string 6 (annotations, rhythm)
 const SYSTEM_H = ABOVE_STRINGS + STRINGS_H + BELOW_STRINGS;
 const INTER_SYSTEM = 16;
 
@@ -30,54 +30,57 @@ const INTER_SYSTEM = 16;
 const NOTE_RX = 8;            // oval x radius
 const NOTE_RY = 5.5;          // oval y radius
 const COL_STEP = 30;          // fixed px between consecutive note columns
-const LEFT_PAD = 14;          // left pad in measure
-const RIGHT_PAD = 8;          // right pad in measure
+const LEFT_PAD = 28;          // left margin in measure (room for measure number)
+const RIGHT_PAD = 18;         // right margin in measure
 
 // Stem / rhythm (below tab)
-const STEM_GAP = 4;
-const STEM_H = 18;
+const STEM_GAP = 20;      // room for PM/let ring annotation band below strings
+const STEM_H = 16;
 const BEAM_H = 3;
 const BEAM_GAP_Y = 4;
 
 // Colors (Songsterr palette)
-const COL_STRING     = '#999999';
-const COL_STRING_LW  = 0.8;
-const COL_TEXT        = '#222222';
-const COL_FRET        = '#222222';
-const COL_GREY        = '#888888';
+const COL_STRING     = '#c4bfb5';  // soft warm grey on cream bg
+const COL_STRING_LW  = 0.9;
+const COL_TEXT        = '#1a1a1a';
+const COL_FRET        = '#1a1a1a';
+const COL_GREY        = '#888880';
 const COL_GREEN       = '#4caf50';
-const COL_CHORD       = '#222222';
-const COL_SECTION     = '#222222';
-const COL_BEND        = '#cc1111';
+const COL_CHORD       = '#1a1a1a';
+const COL_SECTION     = '#2c2c2c';
+const COL_BEND        = '#c0392b';
 const COL_VIBRATO     = '#2a8a2a';
-const COL_LET_RING    = '#5577cc';
-const COL_PM          = '#555555';
-const COL_HP_ARC      = '#555555';
-const COL_TAPPING     = '#2255cc';
-const COL_FINGER      = '#cc1111';
-const COL_HARMONIC    = '#996600';
-const COL_SLIDE       = '#444444';
-const COL_ACCENT      = '#cc1111';
-const COL_MUTED       = '#222222';
-const COL_MEASURE_NUM = '#aaaaaa';
-const COL_CURSOR      = 'rgba(76, 175, 80, 0.12)';
+const COL_LET_RING    = '#4466bb';
+const COL_PM          = '#666655';
+const COL_HP_ARC      = '#666655';
+const COL_TAPPING     = '#1a45aa';
+const COL_FINGER      = '#c0392b';
+const COL_HARMONIC    = '#8a6200';
+const COL_SLIDE       = '#555548';
+const COL_ACCENT      = '#c0392b';
+const COL_MUTED       = '#1a1a1a';
+const COL_MEASURE_NUM = '#bbb8b0';  // subtle on cream
+const COL_CURSOR      = 'rgba(76, 175, 80, 0.10)';
 const COL_CURSOR_LINE = '#4caf50';
 
 // Fonts
-const FONT_FRET       = 'bold 11px Arial';
-const FONT_FRET_SM    = 'bold 10px Arial';
-const FONT_STRING     = '11px Arial';
-const FONT_TAB        = 'bold 13px Arial';
-const FONT_CHORD      = 'bold 12px Arial';
-const FONT_SECTION    = 'italic bold 11px Arial';
-const FONT_TEMPO      = '10px Arial';
-const FONT_MNUM       = '9px Arial';
-const FONT_FINGER     = 'bold 8px Arial';
-const FONT_SYMBOL     = '10px Arial';
-const FONT_SYMBOL_SM  = '9px Arial';
-const FONT_DYNAMIC    = 'italic bold 11px Arial';
-const FONT_LEGEND_H   = 'bold 14px Arial';
-const FONT_LEGEND     = '12px Arial';
+const MONO            = '"JetBrains Mono", monospace';
+const SANS            = 'Inter, system-ui, sans-serif';
+const SERIF           = '"Fraunces", Georgia, serif';
+const FONT_FRET       = `bold 11px ${MONO}`;
+const FONT_FRET_SM    = `bold 10px ${MONO}`;
+const FONT_STRING     = `500 10px ${SANS}`;
+const FONT_TAB        = `bold 13px ${MONO}`;
+const FONT_CHORD      = `600 12px ${SANS}`;
+const FONT_SECTION    = `italic 600 11px ${SERIF}`;
+const FONT_TEMPO      = `500 10px ${MONO}`;
+const FONT_MNUM       = `400 9px ${SANS}`;
+const FONT_FINGER     = `bold 8px ${MONO}`;
+const FONT_SYMBOL     = `500 10px ${SANS}`;
+const FONT_SYMBOL_SM  = `400 9px ${SANS}`;
+const FONT_DYNAMIC    = `italic bold 11px ${SERIF}`;
+const FONT_LEGEND_H   = `600 14px ${SANS}`;
+const FONT_LEGEND     = `400 12px ${SANS}`;
 
 /**
  * @typedef {Object} Note  – from API /api/solve
@@ -126,6 +129,17 @@ export class TabRenderer {
     this.chordDiagrams = data.chord_diagrams || [];
     this.chordMarkers = data.chord_markers || {};  // onset_str → chord name from file
     this.dpr = window.devicePixelRatio || 1;
+
+    // Finger colors — read from CSS custom properties so themes apply
+    const _cs = getComputedStyle(document.documentElement);
+    const _cv = (v, fallback) => { const t = _cs.getPropertyValue(v).trim(); return t || fallback; };
+    this._fingerColors = {
+      index:  _cv('--f1', '#e07060'),
+      middle: _cv('--f2', '#60c060'),
+      ring:   _cv('--f3', '#6090e0'),
+      pinky:  _cv('--f4', '#c060c0'),
+    };
+    this._bgScore = _cv('--bg-score', '#faf8f2');
 
     // Derived from result grouping
     this.measures = [];
@@ -240,20 +254,23 @@ export class TabRenderer {
 
   _groupMeasures() {
     if (!this.results.length) return;
-    const bpm = this.bpm;
-    const measures = [];
-    let curBucket = [];
-    let curStart = 0;
+    // Group by measure_index (1-based, correctly assigned by the parser even for variable meter)
+    const byMeasure = new Map();
     for (const n of this.results) {
-      while (n.onset >= curStart + bpm - 0.001) {
-        measures.push(curBucket);
-        curBucket = [];
-        curStart += bpm;
-      }
-      curBucket.push(n);
+      const mi = n.measure_index ?? 1;
+      if (!byMeasure.has(mi)) byMeasure.set(mi, []);
+      byMeasure.get(mi).push(n);
     }
-    if (curBucket.length) measures.push(curBucket);
+    const keys = [...byMeasure.keys()].sort((a, b) => a - b);
+    const minM = keys[0], maxM = keys[keys.length - 1];
+    const measures = [];
+    const measureNumbers = []; // parallel array: actual 1-based measure number for each slot
+    for (let m = minM; m <= maxM; m++) {
+      measures.push(byMeasure.get(m) ?? []);
+      measureNumbers.push(m);
+    }
     this.measures = measures;
+    this.measureNumbers = measureNumbers;
   }
 
   _buildSystems() {
@@ -261,11 +278,10 @@ export class TabRenderer {
     if (!measures.length) return;
     const availW = this.systemWidth - MARGIN_L - MARGIN_R;
 
-    // Measure width = LEFT_PAD + nCols * COL_STEP + RIGHT_PAD (fixed step)
+    // Measure width: margins + (nCols-1) inter-note gaps, so last note sits at mW-RIGHT_PAD
     const measureWidth = (notes) => {
-      if (!notes.length) return LEFT_PAD + COL_STEP + RIGHT_PAD; // empty = 1 column
-      const nCols = new Set(notes.map(n => n.onset.toFixed(6))).size;
-      return LEFT_PAD + nCols * COL_STEP + RIGHT_PAD;
+      const nCols = notes.length ? new Set(notes.map(n => n.onset.toFixed(6))).size : 1;
+      return LEFT_PAD + Math.max(nCols - 1, 1) * COL_STEP + RIGHT_PAD;
     };
 
     const systems = [];
@@ -286,7 +302,8 @@ export class TabRenderer {
     this.systems = systems.map(s => ({
       measures: s.map(c => measures[c.idx]),
       widths: s.map(c => c.w),
-      startMeasure: s[0].idx,
+      startMeasure: s[0].idx,                          // 0-based index for cursor tracking
+      firstMeasureNum: this.measureNumbers[s[0].idx],  // actual 1-based number for display
     }));
   }
 
@@ -299,7 +316,7 @@ export class TabRenderer {
 
     // ── TAB label + string names
     ctx.font = FONT_TAB;
-    ctx.fillStyle = COL_TEXT;
+    ctx.fillStyle = COL_GREY;   // subtle, not full black
     ctx.textAlign = 'center';
     const tabX = 20;
     ctx.fillText('T', tabX, strY(1) + 1);
@@ -338,8 +355,8 @@ export class TabRenderer {
     for (let mi = 0; mi < sys.measures.length; mi++) {
       const mNotes = sys.measures[mi];
       const mW = sys.widths[mi];
-      const absMeasure = sys.startMeasure + mi;
-      const measureNum = absMeasure + 1; // 1-based
+      const absMeasure = sys.startMeasure + mi;          // 0-based index for cursor
+      const measureNum = sys.firstMeasureNum + mi;        // actual 1-based measure number
 
       // Section marker
       const sectionLabel = this.sectionMarkers[String(measureNum)];
@@ -426,8 +443,8 @@ export class TabRenderer {
 
   _drawMeasureNotes(ctx, notes, mX, mW, sysY) {
     if (!notes.length) {
-      // Draw whole rest
-      this._drawRest(ctx, mX + LEFT_PAD + COL_STEP / 2, sysY, 4.0);
+      // Draw whole rest centered in measure
+      this._drawRest(ctx, mX + mW / 2, sysY, 4.0);
       return;
     }
 
@@ -439,12 +456,17 @@ export class TabRenderer {
       onsetMap.get(key).push(n);
     }
 
-    // Sort onsets → assign fixed x per column index
+    // Sort onsets → compute x per column
     const sortedKeys = [...onsetMap.keys()].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const nCols = sortedKeys.length;
+    // Single column → center in measure; multiple → LEFT_PAD…mW-RIGHT_PAD evenly
+    const colXs = sortedKeys.map((_, i) =>
+      nCols === 1 ? mX + mW / 2 : mX + LEFT_PAD + i * COL_STEP
+    );
 
     const notePositions = [];
     sortedKeys.forEach((key, colIdx) => {
-      const nx = mX + LEFT_PAD + colIdx * COL_STEP;
+      const nx = colXs[colIdx];
       // Store column x for cursor overlay
       this.noteColumns.push({
         onset: parseFloat(key),
@@ -469,30 +491,100 @@ export class TabRenderer {
       this._drawNote(ctx, note, x, y, sysY);
     }
 
-    // Second pass: finger annotations drawn on top of all note ovals
-    if (this.showFingering) {
-      const fingerMaxX = mX + mW - 8;  // 8px buffer before barline
-      for (const { note, x, y } of notePositions) {
-        this._drawFingerAnnotation(ctx, note, x, y, fingerMaxX);
-      }
-    }
+    // (finger color is now baked into the oval fill in _drawNote — no second pass needed)
 
     // Draw dynamic marking once per measure column (only on change)
-    for (const key of sortedKeys) {
+    for (let i = 0; i < sortedKeys.length; i++) {
+      const key = sortedKeys[i];
       const col = onsetMap.get(key)[0];
       if (col.dynamic && col.dynamic !== this._lastDynamic) {
         this._lastDynamic = col.dynamic;
-        const colIdx = sortedKeys.indexOf(key);
-        const dx = mX + LEFT_PAD + colIdx * COL_STEP;
         ctx.font = FONT_DYNAMIC;
         ctx.fillStyle = COL_GREY;
         ctx.textAlign = 'center';
-        ctx.fillText(col.dynamic, dx, sysY + ABOVE_STRINGS + STRINGS_H + 47);
+        ctx.fillText(col.dynamic, colXs[i], sysY + ABOVE_STRINGS + STRINGS_H + 60);
       }
     }
 
+    // Draw PM / let-ring spans between staff and rhythm zone
+    this._drawSpanAnnotations(ctx, notePositions, sysY, mX, mW);
+
     // Draw rhythm below
     this._drawRhythm(ctx, notePositions, sysY, mX, mW);
+  }
+
+  // ── Span annotations: PM and let-ring bands below the TAB staff ───
+
+  _drawSpanAnnotations(ctx, notePositions, sysY, mX, mW) {
+    const staffBottom = sysY + ABOVE_STRINGS + STRINGS_H;
+    const sorted = notePositions
+      .slice()
+      .sort((a, b) => a.note.onset - b.note.onset);
+
+    this._drawAnnotationBand(ctx, sorted, 'palm_muted',  staffBottom + 5,  'P.M.', COL_PM);
+    this._drawAnnotationBand(ctx, sorted, 'let_ring',    staffBottom + 14, 'let ring', COL_LET_RING);
+  }
+
+  _drawAnnotationBand(ctx, sortedPositions, field, y, label, color) {
+    // Build unique x-positions per onset (chords share one x)
+    const seen = new Set();
+    const pts = [];
+    for (const np of sortedPositions) {
+      const key = np.note.onset.toFixed(6);
+      if (np.note[field] && !seen.has(key)) {
+        seen.add(key);
+        pts.push(np.x);
+      }
+    }
+    if (!pts.length) return;
+
+    // Group consecutive x-positions into spans (gap > 1.5× COL_STEP breaks a span)
+    const spans = [];
+    let start = pts[0], end = pts[0];
+    for (let i = 1; i < pts.length; i++) {
+      if (pts[i] - pts[i - 1] <= COL_STEP * 1.6) {
+        end = pts[i];
+      } else {
+        spans.push({ start, end });
+        start = pts[i]; end = pts[i];
+      }
+    }
+    spans.push({ start, end });
+
+    ctx.save();
+    ctx.font = `500 7.5px ${SANS}`;
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+
+    for (const span of spans) {
+      const lw = ctx.measureText(label).width;
+      const lx = span.start - NOTE_RX;
+      const ex = span.end + NOTE_RX + 6;
+
+      // Label
+      ctx.textAlign = 'left';
+      ctx.fillText(label, lx, y);
+
+      // Dashed line from after label to span end
+      const lineX0 = lx + lw + 3;
+      if (ex > lineX0 + 4) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 0.75;
+        ctx.setLineDash([3, 2]);
+        ctx.beginPath();
+        ctx.moveTo(lineX0, y);
+        ctx.lineTo(ex, y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Closing tick (small downward bar)
+        ctx.lineWidth = 0.75;
+        ctx.beginPath();
+        ctx.moveTo(ex, y - 3);
+        ctx.lineTo(ex, y + 4);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
   }
 
   // ── Single note rendering ─────────────────────────────────────────
@@ -506,11 +598,15 @@ export class TabRenderer {
     const label = note.ghost ? `(${fret})` : String(fret);
     const ovalRX = label.length > 1 ? NOTE_RX + 3 : NOTE_RX;
 
+    // Oval fill: finger color when assigned, white otherwise
+    const fingerFill = (!isMuted && !isHarmonic && note.finger && note.finger !== 'open' && fret > 0)
+      ? (this._fingerColors[note.finger] || '#ffffff')
+      : '#ffffff';
+
     if (isHarmonic) {
       this._drawDiamond(ctx, x, y, ovalRX, NOTE_RY);
     } else {
-      // White background oval
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = fingerFill;
       ctx.beginPath();
       ctx.ellipse(x, y, ovalRX + 1, NOTE_RY + 1, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -529,6 +625,7 @@ export class TabRenderer {
       ctx.fillText(label, x, y + 0.5);
     } else {
       ctx.font = label.length > 1 ? FONT_FRET_SM : FONT_FRET;
+      // Dark text on colored ovals; keep existing dark color — all finger colors are light enough
       ctx.fillStyle = COL_FRET;
       ctx.fillText(label, x, y + 0.5);
     }
@@ -588,37 +685,9 @@ export class TabRenderer {
       ctx.fillText('>', x, y - NOTE_RY - 8);
     }
 
-    // Palm mute "P.M."
-    if (note.palm_muted) {
-      ctx.font = FONT_SYMBOL_SM;
-      ctx.fillStyle = COL_PM;
-      ctx.textAlign = 'center';
-      ctx.fillText('P.M.', x, sysY + ABOVE_STRINGS + STRINGS_H + 14);
-    }
-
-    // Let ring dashes
-    if (note.let_ring) {
-      // Scale dashes to the note's duration
-      const dashLen = Math.max(12, Math.min(50, note.duration * 20));
-      ctx.strokeStyle = COL_LET_RING;
-      ctx.lineWidth = 0.8;
-      ctx.setLineDash([3, 2]);
-      ctx.beginPath();
-      ctx.moveTo(x + ovalRX + 2, y);
-      ctx.lineTo(x + ovalRX + dashLen, y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // "let ring" label
-      ctx.font = '7px Arial';
-      ctx.fillStyle = COL_LET_RING;
-      ctx.textAlign = 'left';
-      ctx.fillText('let ring', x + ovalRX + 2, y - 6);
-    }
-
     // Bend arrow
     if (note.bend_value) {
-      this._drawBend(ctx, x, y, note.bend_value, note.bend_type);
+      this._drawBend(ctx, x, y, note.bend_value, note.bend_type, note.duration);
     }
 
     // Vibrato wavy line
@@ -670,30 +739,12 @@ export class TabRenderer {
       ctx.fillText('Rasp.', x - ovalRX - 12, ry + 1);
     }
 
-    // Finger annotation (SW of oval, dark red) — rendered in a second pass
-    // by _drawFingerAnnotation() to avoid being overwritten by lower-string ovals.
+    // Finger color is applied to the oval background above (fingerFill).
 
     // Dynamic marking: rendered by _drawMeasureNotes, not per-note.
     // (removed from here to avoid showing on every note)
   }
 
-  /** Draw finger annotation (second pass so it's always visible on top). */
-  _drawFingerAnnotation(ctx, note, x, y, maxX = Infinity) {
-    const fret = note.fret;
-    if (!note.finger || note.finger === 'open' || fret <= 0) return;
-    const fingerChar = { index: 'i', middle: 'm', ring: 'r', pinky: 'p' }[note.finger] || '';
-    if (!fingerChar) return;
-    const ovalRX = String(fret).length > 1 ? NOTE_RX + 3 : NOTE_RX;
-    const annoX = x + ovalRX + 2;
-    if (annoX > maxX) return;  // would collide with/overflow past barline
-    ctx.font = FONT_FINGER;
-    ctx.fillStyle = COL_FINGER;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    // Place to the lower-right of the oval — avoids overwriting by adjacent strings
-    ctx.fillText(fingerChar, annoX, y + NOTE_RY + 7);
-    ctx.textBaseline = 'middle';
-  }
 
   // ── Harmonic diamond ──────────────────────────────────────────────
 
@@ -720,10 +771,11 @@ export class TabRenderer {
 
   // ── Bend arrow ────────────────────────────────────────────────────
 
-  _drawBend(ctx, x, y, bendValue, bendType) {
+  _drawBend(ctx, x, y, bendValue, bendType, duration = 1) {
     const arrowH = 22;
     const tipY = y - NOTE_RY - arrowH;
     const isPre = bendType === 'pre_bend' || bendType === 'pre_bend_release';
+    const isRelease = bendType === 'bend_release' || bendType === 'pre_bend_release';
 
     ctx.strokeStyle = COL_BEND;
     ctx.fillStyle = COL_BEND;
@@ -742,18 +794,49 @@ export class TabRenderer {
     ctx.lineTo(x + 3, tipY + 5);
     ctx.stroke();
 
-    // Label
+    // Label ("full" for 1-step bends, Guitar Pro convention)
     let label;
     if (bendValue <= 0.5) label = '½';
-    else if (bendValue <= 1.0) label = '1';
+    else if (bendValue <= 1.0) label = 'full';
     else if (bendValue <= 1.5) label = '1½';
     else label = '2';
 
     if (isPre) label = '(' + label + ')';
 
-    ctx.font = 'bold 9px Arial';
+    ctx.font = 'bold 8px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, x + 3, tipY - 3);
+
+    // Hold-plateau dashed line extending right from bend tip
+    const plateauW = Math.max(10, Math.min(duration * COL_STEP * 0.75, 48));
+    const plateauX0 = x + 3 + ctx.measureText(label).width + 2;
+    const plateauX1 = x + plateauW;
+    if (plateauX1 > plateauX0 + 4) {
+      ctx.lineWidth = 0.9;
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath();
+      ctx.moveTo(plateauX0, tipY - 3 - 4); // align with label cap-height
+      ctx.lineTo(plateauX1, tipY - 3 - 4);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // Release arrow: small downward curve at plateau end
+    if (isRelease) {
+      ctx.lineWidth = 1.2;
+      const rx = plateauX1;
+      ctx.beginPath();
+      ctx.moveTo(rx, tipY - 3 - 4);
+      ctx.quadraticCurveTo(rx + 4, tipY + arrowH * 0.3, rx, y - NOTE_RY - 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx - 3, y - NOTE_RY - 7);
+      ctx.lineTo(rx, y - NOTE_RY - 2);
+      ctx.lineTo(rx + 3, y - NOTE_RY - 7);
+      ctx.stroke();
+    }
+
     ctx.textAlign = 'center';
-    ctx.fillText(label, x, tipY - 3);
   }
 
   // ── Vibrato wave ──────────────────────────────────────────────────
@@ -803,10 +886,14 @@ export class TabRenderer {
       const { note, x, y } = notePositions[i];
       const nextOnSameString = this._findNext(notePositions, i, note.string);
 
-      // Hammer-on / Pull-off arcs
+      // Hammer-on / Pull-off arcs — note is the ORIGIN; arc goes to next note on same string.
+      // HopoOrigin/HopoDestination from GP7 are both mapped to HAMMER_ON/PULL_OFF at parse time.
+      // Determine H vs P by comparing frets: ascending = H, descending = P.
       if ((note.articulation === 'hammer_on' || note.articulation === 'pull_off') && nextOnSameString) {
-        const { x: nx, y: ny } = nextOnSameString;
-        const label = note.articulation === 'hammer_on' ? 'H' : 'P';
+        const { x: nx, y: ny, note: nextNote } = nextOnSameString;
+        const label = (nextNote.fret > note.fret) ? 'H'
+                    : (nextNote.fret < note.fret) ? 'P'
+                    : (note.articulation === 'pull_off' ? 'P' : 'H');
         this._drawSlurArc(ctx, x, y, nx, ny, label);
       }
 
@@ -929,6 +1016,10 @@ export class TabRenderer {
       onsetMap.get(key).push(n);
     }
     const sortedKeys = [...onsetMap.keys()].sort((a, b) => parseFloat(a) - parseFloat(b));
+    const nColsChord = sortedKeys.length;
+    const chordColXs = sortedKeys.map((_, i) =>
+      nColsChord === 1 ? mX + mW / 2 : mX + LEFT_PAD + i * COL_STEP
+    );
 
     let drawn = 0;
     const drawnNames = new Set();
@@ -942,7 +1033,7 @@ export class TabRenderer {
       }
       if (name && !drawnNames.has(name) && drawn < 3) {
         drawnNames.add(name);
-        const nx = mX + LEFT_PAD + colIdx * COL_STEP;
+        const nx = chordColXs[colIdx];
         const ly = sysY + 38;
         ctx.font = FONT_CHORD;
         const textW = ctx.measureText(name).width;
@@ -1004,33 +1095,38 @@ export class TabRenderer {
     for (const [key, group] of onsetGroups) {
       const x = group[0].x;
       const dur = Math.min(...group.map(g => g.note.duration));
-      cols.push({ x, duration: dur, onset: parseFloat(key) });
+      const ta = group[0].note.tuplet_actual ?? null;
+      const tn = group[0].note.tuplet_normal ?? null;
+      cols.push({ x, duration: dur, onset: parseFloat(key), tuplet_actual: ta, tuplet_normal: tn });
     }
     cols.sort((a, b) => a.onset - b.onset);
 
-    // Determine beat boundaries for this set of notes
+    // Determine beat boundaries: floor the first note's onset to the nearest integer beat.
+    // This is robust to variable time signatures (avoids the fixed bpm*floor formula).
     const bpm = this.bpm;
     let measureOnset = 0;
     if (cols.length > 0) {
-      measureOnset = Math.floor(cols[0].onset / bpm) * bpm;
+      measureOnset = Math.floor(cols[0].onset + 1e-6);
     }
 
     // Draw stems
     for (const col of cols) {
-      if (col.duration >= 4.0) continue; // whole note: no stem
+      if (col.duration >= 4.0) continue; // whole note: nothing in rhythm zone
+
+      const stemLen = col.duration >= 2.0 ? STEM_H / 2 : STEM_H;
 
       ctx.strokeStyle = COL_TEXT;
       ctx.lineWidth = 0.9;
       ctx.beginPath();
       ctx.moveTo(col.x, baseY);
-      ctx.lineTo(col.x, baseY + STEM_H);
+      ctx.lineTo(col.x, baseY + stemLen);
       ctx.stroke();
 
-      // Dotted note: augmentation dot next to stem base
+      // Dotted note: augmentation dot beside stem bottom
       if (this._isDotted(col.duration)) {
         ctx.fillStyle = COL_TEXT;
         ctx.beginPath();
-        ctx.arc(col.x + 4, baseY + STEM_H - 2, 1.3, 0, Math.PI * 2);
+        ctx.arc(col.x + 4, baseY + stemLen - 2, 1.3, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -1064,66 +1160,191 @@ export class TabRenderer {
         // Leading rest: place before first note
         restX = cols.length > 0 ? cols[0].x - COL_STEP * 0.6 : mX + LEFT_PAD;
       } else if (i === cols.length) {
-        // Trailing rest: place after last note
-        restX = cols[cols.length - 1].x + COL_STEP;
+        // Trailing rest: midpoint between last note and measure barline
+        const lastX = cols[cols.length - 1].x;
+        const barlineX = mX + mW - RIGHT_PAD;
+        restX = (lastX + barlineX) / 2;
       } else {
         // Mid-measure rest: midpoint between surrounding note columns
         restX = (cols[i - 1].x + cols[i].x) / 2;
       }
       // Clamp to measure boundaries
       if (restX < mX + LEFT_PAD || restX > rightBound) continue;
-      this._drawRhythmRest(ctx, restX, baseY, gapDur);
+      this._drawRestOnStaff(ctx, restX, sysY, gapDur);
+      this._drawRestStem(ctx, restX, baseY, gapDur);
     }
+
+    // ── Tuplet brackets ─────────────────────────────────────────────
+    this._drawTupletBrackets(ctx, cols, baseY);
   }
 
-  // ── Rest symbol in the rhythm zone (below tab, at stem level) ─────
+  _drawTupletBrackets(ctx, cols, baseY) {
+    // Scan for runs of notes that share the same tuplet_actual value and group
+    // them into bracket spans. A run of N notes with tuplet_actual===N is one group.
+    let run = [];
+    let curTA = null;
 
-  _drawRhythmRest(ctx, x, baseY, duration) {
-    // Place rest at mid-stem height so it aligns visually with stems
-    const y = baseY + STEM_H * 0.45;
+    const flush = () => {
+      if (run.length < 2 || curTA === null) { run = []; curTA = null; return; }
+      const x1 = run[0].x;
+      const x2 = run[run.length - 1].x;
+      this._drawTupletBracket(ctx, x1, x2, baseY, curTA);
+      run = [];
+      curTA = null;
+    };
+
+    for (const col of cols) {
+      const ta = col.tuplet_actual;
+      if (ta === null || ta === undefined) {
+        flush();
+        continue;
+      }
+      if (ta !== curTA) {
+        flush();
+        curTA = ta;
+      }
+      run.push(col);
+      if (run.length === ta) flush(); // completed group of N
+    }
+    flush();
+  }
+
+  _drawTupletBracket(ctx, x1, x2, baseY, number) {
+    // Bracket below the rhythm stems: vertical ticks at each end, horizontal
+    // line with a gap for the number, number centered in the gap.
+    const by = baseY + STEM_H + 5;  // horizontal bar Y
+    const tickH = 4;                 // downward tick height
+    const numStr = String(number);
+    ctx.font = 'bold 8px Arial';
+    const numW = ctx.measureText(numStr).width / 2 + 2; // half-width + padding
+    const mid = (x1 + x2) / 2;
+
+    ctx.strokeStyle = COL_TEXT;
+    ctx.lineWidth = 0.9;
+
+    // Left vertical tick
+    ctx.beginPath();
+    ctx.moveTo(x1, by);
+    ctx.lineTo(x1, by + tickH);
+    ctx.stroke();
+
+    // Right vertical tick
+    ctx.beginPath();
+    ctx.moveTo(x2, by);
+    ctx.lineTo(x2, by + tickH);
+    ctx.stroke();
+
+    // Horizontal line left segment (tick base to number gap)
+    ctx.beginPath();
+    ctx.moveTo(x1, by + tickH);
+    ctx.lineTo(mid - numW, by + tickH);
+    ctx.stroke();
+
+    // Horizontal line right segment (number gap to right tick)
+    ctx.beginPath();
+    ctx.moveTo(mid + numW, by + tickH);
+    ctx.lineTo(x2, by + tickH);
+    ctx.stroke();
+
+    // Number centered in gap
+    ctx.fillStyle = COL_TEXT;
+    ctx.textAlign = 'center';
+    ctx.fillText(numStr, mid, by + tickH + 7);
+  }
+
+  // ── Rest symbol on the TAB staff (vertically centered between strings) ───
+
+  _drawRestOnStaff(ctx, x, sysY, duration) {
+    // Draw rest symbol centered vertically in the TAB staff (between the strings)
+    const midY = sysY + ABOVE_STRINGS + STRINGS_H / 2;
+
+    // Clear oval behind the symbol so it reads cleanly over string lines
+    ctx.fillStyle = this._bgScore;
+    ctx.beginPath();
+    ctx.ellipse(x, midY, 9, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.fillStyle = COL_TEXT;
     ctx.strokeStyle = COL_TEXT;
 
     if (duration >= 1.0) {
-      // Quarter rest: small zigzag
-      ctx.lineWidth = 1.4;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
+      // Quarter rest: zigzag
+      const top = midY - 8;
+      ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       ctx.beginPath();
-      ctx.moveTo(x + 2, y - 5);
-      ctx.lineTo(x - 1, y - 2);
-      ctx.lineTo(x + 1, y + 1);
-      ctx.lineTo(x - 2, y + 4);
-      ctx.lineTo(x + 1, y + 7);
+      ctx.moveTo(x + 3,  top);
+      ctx.lineTo(x - 2,  top + 4);
+      ctx.lineTo(x + 2,  top + 8);
+      ctx.lineTo(x - 3,  top + 12);
+      ctx.lineTo(x + 1,  top + 16);
       ctx.stroke();
       ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
     } else if (duration >= 0.5) {
-      // Eighth rest: diagonal stroke + dot
-      ctx.lineWidth = 1.2;
-      ctx.lineCap = 'round';
+      // Eighth rest: filled dot + curved hook
       ctx.beginPath();
-      ctx.moveTo(x + 2, y - 4);
-      ctx.lineTo(x - 2, y + 5);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(x + 2, y - 4, 1.8, 0, Math.PI * 2);
+      ctx.arc(x + 2, midY - 5, 2.2, 0, Math.PI * 2);
       ctx.fill();
+      ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + 2, midY - 3);
+      ctx.bezierCurveTo(x + 4, midY - 1, x + 1, midY + 1, x - 1, midY + 3);
+      ctx.bezierCurveTo(x - 3, midY + 5, x - 2, midY + 7, x, midY + 8);
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+    } else if (duration >= 0.25) {
+      // Sixteenth rest: two dots + two stacked hooks
+      ctx.beginPath(); ctx.arc(x + 2, midY - 7, 2.0, 0, Math.PI * 2); ctx.fill();
+      ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x + 2, midY - 5);
+      ctx.bezierCurveTo(x + 4, midY - 3, x + 1, midY - 1, x - 1, midY + 1);
+      ctx.bezierCurveTo(x - 3, midY + 3, x - 2, midY + 4, x, midY + 5);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + 2, midY - 1, 2.0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x + 2, midY + 1);
+      ctx.bezierCurveTo(x + 4, midY + 3, x + 1, midY + 5, x - 1, midY + 7);
+      ctx.bezierCurveTo(x - 3, midY + 9, x - 2, midY + 10, x, midY + 11);
+      ctx.stroke();
       ctx.lineCap = 'butt';
     } else {
-      // Sixteenth rest: diagonal stroke + two dots
-      ctx.lineWidth = 1.2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + 2, y - 5);
-      ctx.lineTo(x - 2, y + 6);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(x + 2, y - 5, 1.7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(x, y, 1.7, 0, Math.PI * 2);
-      ctx.fill();
+      // 32nd rest: three dots + three hooks
+      for (const [dy, doFill] of [[-9, true], [-3, true], [3, true]]) {
+        ctx.beginPath(); ctx.arc(x + 2, midY + dy, 1.8, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+      for (const dy of [-7, -1, 5]) {
+        ctx.beginPath();
+        ctx.moveTo(x + 2, midY + dy + 2);
+        ctx.bezierCurveTo(x + 4, midY + dy + 4, x - 1, midY + dy + 5, x - 1, midY + dy + 7);
+        ctx.stroke();
+      }
       ctx.lineCap = 'butt';
+    }
+  }
+
+  _drawRestStem(ctx, x, baseY, duration) {
+    if (duration >= 4.0) return; // whole rest: nothing in rhythm zone
+
+    const stemLen = duration >= 2.0 ? STEM_H / 2 : STEM_H;
+
+    ctx.strokeStyle = COL_TEXT;
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY);
+    ctx.lineTo(x, baseY + stemLen);
+    ctx.stroke();
+
+    if (this._isDotted(duration)) {
+      ctx.fillStyle = COL_TEXT;
+      ctx.beginPath();
+      ctx.arc(x + 4, baseY + stemLen - 2, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const nFlags = this._numFlags(duration);
+    for (let fi = 0; fi < nFlags; fi++) {
+      this._drawFlag(ctx, x, baseY + stemLen, fi);
     }
   }
 
@@ -1135,56 +1356,72 @@ export class TabRenderer {
   }
 
   _drawFlag(ctx, x, stemEnd, flagIdx) {
+    // Straight horizontal tick — one per sub-beat division (8th=1, 16th=2, 32nd=3)
     ctx.strokeStyle = COL_TEXT;
-    ctx.lineWidth = 1.0;
-    const fy = stemEnd - flagIdx * 4;
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    const fy = stemEnd - flagIdx * BEAM_GAP_Y;
     ctx.beginPath();
     ctx.moveTo(x, fy);
-    ctx.quadraticCurveTo(x + 8, fy + 4, x + 3, fy + 10);
+    ctx.lineTo(x + 8, fy);
     ctx.stroke();
+    ctx.lineCap = 'butt';
   }
 
   _drawBeams(ctx, cols, baseY, measureOnset) {
     if (cols.length < 2) return;
     const groups = this._computeBeamGroups(cols, measureOnset);
+    const BEAMLET_W = 6; // partial-beam stub width (px)
 
-    // Draw primary beam for each group
     for (const group of groups) {
       const y = baseY + STEM_H;
       ctx.strokeStyle = COL_TEXT;
       ctx.lineWidth = BEAM_H;
+
+      // Primary beam: spans the full group
       ctx.beginPath();
       ctx.moveTo(group[0].x, y);
       ctx.lineTo(group[group.length - 1].x, y);
       ctx.stroke();
 
-      // Secondary beam: partial, only over runs of 16th notes
+      // Secondary beams + beamlets for 16th-or-shorter notes
       let runStart = null;
       let runEnd = null;
-      for (const col of group) {
+      let runStartIdx = -1;
+
+      const flushRun = () => {
+        if (runStart === null) return;
+        ctx.lineWidth = BEAM_H;
+        if (runEnd > runStart) {
+          // Full secondary beam over a run of 2+ sub-8th notes
+          ctx.beginPath();
+          ctx.moveTo(runStart, y + BEAM_GAP_Y);
+          ctx.lineTo(runEnd, y + BEAM_GAP_Y);
+          ctx.stroke();
+        } else {
+          // Single isolated sub-8th note → partial beam (beamlet)
+          // Direction: RIGHT when at the start of the group, LEFT otherwise
+          const dir = (runStartIdx === 0) ? 1 : -1;
+          ctx.beginPath();
+          ctx.moveTo(runStart, y + BEAM_GAP_Y);
+          ctx.lineTo(runStart + dir * BEAMLET_W, y + BEAM_GAP_Y);
+          ctx.stroke();
+        }
+        runStart = null;
+        runEnd = null;
+        runStartIdx = -1;
+      };
+
+      for (let i = 0; i < group.length; i++) {
+        const col = group[i];
         if (col.duration < 0.5) {
-          if (runStart === null) runStart = col.x;
+          if (runStart === null) { runStart = col.x; runStartIdx = i; }
           runEnd = col.x;
         } else {
-          if (runStart !== null && runEnd !== null && runEnd > runStart) {
-            ctx.lineWidth = BEAM_H;
-            ctx.beginPath();
-            ctx.moveTo(runStart, y + BEAM_GAP_Y);
-            ctx.lineTo(runEnd, y + BEAM_GAP_Y);
-            ctx.stroke();
-          }
-          runStart = null;
-          runEnd = null;
+          flushRun();
         }
       }
-      // Flush trailing run
-      if (runStart !== null && runEnd !== null && runEnd > runStart) {
-        ctx.lineWidth = BEAM_H;
-        ctx.beginPath();
-        ctx.moveTo(runStart, y + BEAM_GAP_Y);
-        ctx.lineTo(runEnd, y + BEAM_GAP_Y);
-        ctx.stroke();
-      }
+      flushRun();
     }
   }
 
@@ -1257,7 +1494,7 @@ export class TabRenderer {
       // ── Whole rest: filled rectangle hanging below string 2
       const ry = sysY + ABOVE_STRINGS + STRING_SPACING;
       // White disc to clear string lines
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = this._bgScore;
       ctx.beginPath();
       ctx.arc(x, ry + 2.5, 8, 0, Math.PI * 2);
       ctx.fill();
@@ -1267,7 +1504,7 @@ export class TabRenderer {
     } else if (duration >= 2.0) {
       // ── Half rest: filled rectangle sitting on string 3
       const ry = sysY + ABOVE_STRINGS + 2 * STRING_SPACING;
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = this._bgScore;
       ctx.beginPath();
       ctx.arc(x, ry - 2.5, 8, 0, Math.PI * 2);
       ctx.fill();
@@ -1275,7 +1512,7 @@ export class TabRenderer {
       ctx.fillRect(x - 6, ry - 5, 12, 5);
     } else if (duration >= 1.0) {
       // ── Quarter rest: drawn as zigzag path (standard notation)
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = this._bgScore;
       ctx.beginPath();
       ctx.arc(x, midY, 8, 0, Math.PI * 2);
       ctx.fill();
@@ -1295,7 +1532,7 @@ export class TabRenderer {
       ctx.lineJoin = 'miter';
     } else if (duration >= 0.5) {
       // ── Eighth rest: angled line with one dot/flag
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = this._bgScore;
       ctx.beginPath();
       ctx.arc(x, midY, 8, 0, Math.PI * 2);
       ctx.fill();
@@ -1314,7 +1551,7 @@ export class TabRenderer {
       ctx.lineCap = 'butt';
     } else {
       // ── Sixteenth rest: angled line with two dots/flags
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = this._bgScore;
       ctx.beginPath();
       ctx.arc(x, midY, 8, 0, Math.PI * 2);
       ctx.fill();
@@ -2187,6 +2424,76 @@ const _LG_SECTIONS = [
           ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5;
           ctx.beginPath(); ctx.moveTo(25, my - 12); ctx.lineTo(130, my); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(25, my + 12); ctx.lineTo(130, my); ctx.stroke();
+        },
+      },
+    ],
+  },
+  {
+    id: 'doigtes', title: 'Doigtés main gauche',
+    items: [
+      {
+        title: 'Index (1)',
+        desc: 'Disque jaune ambré. Le chiffre indique la case à jouer.',
+        draw(ctx, w, h) {
+          const cs = getComputedStyle(document.documentElement);
+          const col = cs.getPropertyValue('--f1').trim() || '#c8a820';
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#333';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('5', w / 2, h / 2 + 0.5);
+        },
+      },
+      {
+        title: 'Majeur (2)',
+        desc: 'Disque vert. Deuxième doigt de la main gauche.',
+        draw(ctx, w, h) {
+          const cs = getComputedStyle(document.documentElement);
+          const col = cs.getPropertyValue('--f2').trim() || '#60c060';
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#333';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('7', w / 2, h / 2 + 0.5);
+        },
+      },
+      {
+        title: 'Annulaire (3)',
+        desc: 'Disque bleu. Troisième doigt de la main gauche.',
+        draw(ctx, w, h) {
+          const cs = getComputedStyle(document.documentElement);
+          const col = cs.getPropertyValue('--f3').trim() || '#6090e0';
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#333';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('9', w / 2, h / 2 + 0.5);
+        },
+      },
+      {
+        title: 'Auriculaire (4)',
+        desc: 'Disque magenta. Quatrième doigt (petit doigt) de la main gauche.',
+        draw(ctx, w, h) {
+          const cs = getComputedStyle(document.documentElement);
+          const col = cs.getPropertyValue('--f4').trim() || '#c060c0';
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#333';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('10', w / 2, h / 2 + 0.5);
+        },
+      },
+      {
+        title: 'Corde à vide (0)',
+        desc: 'Disque blanc — pas de doigt appuyé, corde jouée à vide.',
+        draw(ctx, w, h) {
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.ellipse(w / 2, h / 2, 13, 9, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.font = 'bold 11px Arial'; ctx.fillStyle = '#333';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText('0', w / 2, h / 2 + 0.5);
         },
       },
     ],

@@ -630,9 +630,53 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
     from fretwise.web.app import create_app
 
     app = create_app(Path(fixtures_dir).resolve())
-    click.echo(f"FretWise web → http://{host}:{port}")
+    click.echo(f"FretWise web -> http://{host}:{port}")
     click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
     click.echo("Press Ctrl+C to stop.\n")
+    uvicorn.run(app, host=host, port=port, log_level="warning")
+
+
+@main.command()
+@click.option(
+    "--port", "-p", default=8080, show_default=True,
+    help="Port to serve the web interface on.",
+)
+@click.option(
+    "--dir", "-d", "fixtures_dir", default="partitions",
+    type=click.Path(file_okay=False),
+    help="Directory containing score files to browse (default: ./partitions).",
+)
+@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+def gui(port: int, fixtures_dir: str, host: str) -> None:
+    """Launch the web GUI and open it in the default browser.
+
+    \b
+    Starts the FretWise web server and immediately opens the interface
+    in your default browser.  Equivalent to 'fretwise web' + browser open.
+
+    \b
+    Example:
+      fretwise gui
+      fretwise gui --port 9090 --dir ./partitions
+    """
+    try:
+        import uvicorn  # type: ignore[import-untyped]
+    except ImportError:
+        click.echo("Error: uvicorn is required.  pip install uvicorn[standard]", err=True)
+        raise SystemExit(1)
+
+    import threading
+    import webbrowser
+
+    from fretwise.web.app import create_app
+
+    url = f"http://{host}:{port}"
+    app = create_app(Path(fixtures_dir).resolve())
+    click.echo(f"FretWise GUI -> {url}")
+    click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
+    click.echo("Press Ctrl+C to stop.\n")
+
+    threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     uvicorn.run(app, host=host, port=port, log_level="warning")
 
 

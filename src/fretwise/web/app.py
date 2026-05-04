@@ -231,6 +231,7 @@ def _register_routes(app: FastAPI) -> None:
             "measure_regions": _extract_measure_regions(
                 getattr(core_result, "render_scene", None),
                 getattr(core_result, "canonical_score", None),
+                mode=view_mode.value,
             ),
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
@@ -453,12 +454,13 @@ def _run_core_pipeline_for_events(
 def _extract_measure_regions(
     render_scene: Any,
     canonical_score: Any,
+    mode: str = "standard_tablature",
 ) -> list[dict[str, Any]]:
     """Compute per-measure {measure_idx, x, y0, y1, width} regions for SVG cursor."""
     try:
         from fretwise.core.layout import canonical_to_page_layout  # lazy import
 
-        page_layout = canonical_to_page_layout(canonical_score)
+        page_layout = canonical_to_page_layout(canonical_score, mode=mode)
 
         # Collect y-bounds per system from barline recipes in the render scene
         pages = render_scene.document_scene.pages if render_scene else []
@@ -535,6 +537,8 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "accent": ne.accent,
         "accent_strong": ne.accent_strong,
         "tremolo_picking": ne.tremolo_picking,
+        "tuplet_actual": ne.tuplet_actual,
+        "tuplet_normal": ne.tuplet_normal,
     }
 
 

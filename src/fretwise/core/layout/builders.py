@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
@@ -35,10 +35,17 @@ class _MeasurePack:
 
 
 def canonical_to_page_layout(
-    score: Score, *, rules: LayoutRules | None = None
+    score: Score, *, rules: LayoutRules | None = None, mode: str = "standard_tablature"
 ) -> PageLayout:
     """Build the first-page layout contract from a canonical score."""
     layout_rules = rules or default_layout_rules()
+    # Adjust system height based on rendering mode so vertical spacing is appropriate.
+    # standard_tablature uses the default 168 (standard staff + gap + tab + rhythm zone).
+    # standard-only needs only ~80 px (staff + ledger lines + dynamics room).
+    if mode == "standard":
+        layout_rules = replace(layout_rules, system_height=80.0)
+    elif mode in ("tablature", "tablature_rhythm"):
+        layout_rules = replace(layout_rules, system_height=130.0)
     systems: list[SystemLayout] = []
     packs = _measure_packs(score, rules=layout_rules)
     if not packs:

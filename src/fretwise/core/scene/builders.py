@@ -115,7 +115,7 @@ def _layout_float(page_layout: PageLayout, key: str, default: float) -> float:
 
 def canonical_to_render_scene(score: Score, *, mode: str = "tablature") -> RenderScene:
     """Build a scene representation from canonical score through layout."""
-    page_layout = canonical_to_page_layout(score)
+    page_layout = canonical_to_page_layout(score, mode=mode)
     return layout_to_render_scene(page_layout=page_layout, score=score, mode=mode)
 
 
@@ -164,7 +164,12 @@ def layout_to_render_scene(
             stem_top_y = staff_std_y - 2 * staff_spacing
             stem_bottom_y = staff_std_y + 6 * staff_spacing
             tab_rhythm_beam_y = tab_y + 5.0 * tab_spacing + 14.0
-            dynamic_y = tab_y + 5.0 * tab_spacing + 18.0
+            # In standard-only mode there is no tab staff; place dynamics just below
+            # the bottom of the standard staff (6 staff-spaces below first line).
+            if has_tab:
+                dynamic_y = tab_y + 5.0 * tab_spacing + 18.0
+            else:
+                dynamic_y = staff_std_y + 6.0 * staff_spacing + 12.0
             # Compute key-signature layout before time_signature_x so that the
             # time signature can be pushed right when accidentals are present.
             key_fifths = score.key_signature.fifths
