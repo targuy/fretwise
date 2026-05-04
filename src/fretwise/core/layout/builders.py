@@ -19,6 +19,7 @@ from fretwise.core.layout.rules import (
     LayoutRules,
     default_layout_rules,
     event_anchor_x,
+    pitch_to_staff_y,
     raw_measure_width,
     string_row_y,
 )
@@ -47,7 +48,7 @@ def canonical_to_page_layout(
     elif mode in ("tablature", "tablature_rhythm"):
         layout_rules = replace(layout_rules, system_height=130.0)
     systems: list[SystemLayout] = []
-    packs = _measure_packs(score, rules=layout_rules)
+    packs = _measure_packs(score, rules=layout_rules, mode=mode)
     if not packs:
         return PageLayout(
             page_number=1,
@@ -140,7 +141,9 @@ def canonical_to_page_layout(
     )
 
 
-def _measure_packs(score: Score, *, rules: LayoutRules) -> list[_MeasurePack]:
+def _measure_packs(
+    score: Score, *, rules: LayoutRules, mode: str = "standard_tablature"
+) -> list[_MeasurePack]:
     if not score.tracks:
         return []
     track = score.tracks[0]
@@ -164,6 +167,7 @@ def _measure_packs(score: Score, *, rules: LayoutRules) -> list[_MeasurePack]:
             measure.voices,
             rules=rules,
             measure_width=raw_width,
+            mode=mode,
         )
         packs.append(
             _MeasurePack(
@@ -196,6 +200,7 @@ def _measure_event_layouts(
     *,
     rules: LayoutRules,
     measure_width: float | None = None,
+    mode: str = "standard_tablature",
 ) -> tuple[list[EventLayout], list[CollisionIssue]]:
     del measure_number
     # Use the caller-provided width so that proportional x values are consistent
@@ -226,7 +231,14 @@ def _measure_event_layouts(
                 string_num = 3
                 if event.tab_info is not None and event.tab_info.string is not None:
                     string_num = max(1, min(6, event.tab_info.string))
-                y = string_row_y(string_num=string_num, rules=rules)
+                if mode in ("standard", "standard_tablature"):
+                    y = pitch_to_staff_y(
+                        event.pitch_notated,
+                        staff_y_origin=rules.row_top,
+                        staff_spacing=rules.standard_staff_spacing,
+                    )
+                else:
+                    y = string_row_y(string_num=string_num, rules=rules)
                 metadata["pitch_notated"] = str(event.pitch_notated)
                 if event.tab_info is not None and event.tab_info.fret is not None:
                     metadata["tab_fret"] = str(event.tab_info.fret)
