@@ -440,10 +440,12 @@ def _run_core_pipeline_for_events(
         track_name=track_name,
         beats_per_measure=source_beats_per_measure,
         time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
+        key_signature_fifths=int(getattr(adapter, "key_signature_fifths", 0) or 0),
         has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=section_markers,
         chord_markers=chord_markers,
         chord_diagrams=chord_diagrams,
+        measure_time_signatures=dict(getattr(adapter, "measure_time_signatures", {}) or {}),
     )
     return run_core_pipeline_from_raw(
         raw_score,
