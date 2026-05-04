@@ -37,9 +37,10 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
     beats_per_measure = _safe_beats_per_measure(completed_score.beats_per_measure)
     time_denominator = getattr(completed_score, "time_denominator", 4)
     time_numerator = int(round(completed_score.beats_per_measure * time_denominator / 4.0))
-    time_signature = TimeSignature(numerator=time_numerator, denominator=time_denominator)
+    default_time_signature = TimeSignature(numerator=time_numerator, denominator=time_denominator)
     chord_markers_by_onset = _normalize_chord_markers(completed_score.chord_markers)
     measure_number_offset = -1 if completed_score.has_anacrusis else 0
+    mts = completed_score.measure_time_signatures  # {1-based → (num, den)}
 
     measures: dict[int, list[tuple[int, CanonicalNoteEvent]]] = {}
     for note_index, note in enumerate(completed_score.notes):
@@ -49,8 +50,25 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
             (note_index, _map_note(note_index, note, chord_name=chord_name))
         )
 
-    canonical_measures: list[Measure] = []
     max_measure_idx = max(measures.keys(), default=-1)
+
+    # Pre-compute the absolute onset (measure_start) for each measure by accumulating
+    # per-measure durations.  This is necessary when the time signature varies across
+    # measures (e.g. 4/4 → 3/4 from measure 77 in "Aigle Noir").
+    measure_starts: dict[int, float] = {}
+    cursor = 0.0
+    for m_idx in range(max_measure_idx + 1):
+        measure_starts[m_idx] = cursor
+        measure_num = m_idx + 1  # 1-based MasterBar position
+        if mts and measure_num in mts:
+            num, den = mts[measure_num]
+            # Convert to quarter-note beats: e.g. 3/4 → 3.0, 6/8 → 3.0
+            bpm_m = max(1, num) * 4.0 / max(1, den)
+        else:
+            bpm_m = float(beats_per_measure)
+        cursor += bpm_m
+
+    canonical_measures: list[Measure] = []
     for measure_idx in range(0, max_measure_idx + 1):
         per_voice: dict[int, list[CanonicalNoteEvent]] = {}
         for _note_index, event in measures.get(measure_idx, []):
@@ -59,8 +77,17 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
             per_voice[0] = []
 
         measure_number = measure_idx + 1 + measure_number_offset
-        measure_start = measure_idx * beats_per_measure
-        measure_end = measure_start + beats_per_measure
+        measure_start = measure_starts[measure_idx]
+        measure_num = measure_idx + 1  # 1-based MasterBar position
+        if mts and measure_num in mts:
+            num, den = mts[measure_num]
+            bpm_this = max(1, num) * 4.0 / max(1, den)
+            measure_time_signature = TimeSignature(numerator=num, denominator=den)
+        else:
+            bpm_this = float(beats_per_measure)
+            measure_time_signature = default_time_signature
+        measure_end = measure_start + bpm_this
+
         voices = [
             Voice(
                 number=voice_number,
@@ -77,7 +104,7 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
         canonical_measures.append(
             Measure(
                 number=measure_number,
-                time_signature=time_signature,
+                time_signature=measure_time_signature,
                 voices=voices,
                 section_name=completed_score.section_markers.get(measure_number, ""),
             )

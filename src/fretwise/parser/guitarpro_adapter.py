@@ -66,6 +66,9 @@ class GuitarProAdapter(BaseParser):
     #: Beat-level chord name annotations: {onset_str → chord_name}.
     #: Set after each call to parse().
     chord_markers: dict[str, str] = {}
+    #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
+    #: Set after each call to parse().
+    measure_time_signatures: dict[int, tuple[int, int]] = {}
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp3, .gp4, and .gp5 files."""
@@ -115,6 +118,7 @@ class GuitarProAdapter(BaseParser):
         self.midi_program = getattr(getattr(track, "channel", None), "instrument", -1)
         self.section_markers = _extract_section_markers(track)
         self.chord_markers = _extract_beat_chord_markers(song, track)
+        self.measure_time_signatures = _extract_measure_time_signatures(track)
         return _extract_note_events(song, track)
 
 
@@ -370,6 +374,27 @@ def _extract_section_markers(
         if title and title.lower() != "section":
             markers[m_idx + 1] = title
     return markers
+
+
+def _extract_measure_time_signatures(
+    track: guitarpro.Track,  # type: ignore[name-defined]
+) -> dict[int, tuple[int, int]]:
+    """Return {1-based measure number → (numerator, denominator)} for every measure.
+
+    Reads ``measure.header.timeSignature`` from each measure in the track.
+    """
+    result: dict[int, tuple[int, int]] = {}
+    for m_idx, measure in enumerate(track.measures):
+        try:
+            ts = measure.header.timeSignature
+            numerator = int(getattr(ts, "numerator", 4) or 4)
+            denominator_obj = getattr(ts, "denominator", 4)
+            denominator = int(getattr(denominator_obj, "value", denominator_obj) or 4)
+            if numerator > 0 and denominator > 0:
+                result[m_idx + 1] = (numerator, denominator)
+        except Exception:
+            continue
+    return result
 
 
 def _get_articulation(note: guitarpro.Note) -> Articulation:  # type: ignore[name-defined]

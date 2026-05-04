@@ -119,6 +119,9 @@ class GpifAdapter(BaseParser):
     #: True if the first MasterBar is a pickup bar (anacrusis/upbeat).
     #: Set after each call to parse() or parse_track().
     has_anacrusis: bool = False
+    #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
+    #: Set after each call to parse() or parse_track().
+    measure_time_signatures: dict[int, tuple[int, int]] = {}
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp files (Guitar Pro 7/8)."""
@@ -176,6 +179,7 @@ class GpifAdapter(BaseParser):
         self.time_denominator = _get_time_denominator(root)
         self.key_signature_fifths = _get_key_signature_fifths(root)
         self.has_anacrusis = root.find("MasterTrack/Anacrusis") is not None
+        self.measure_time_signatures = _get_measure_time_signatures(root)
         diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
         self.chord_markers = _extract_gpif_beat_chord_markers(
             root, track_index, rhythm_map, diag_name_map
@@ -252,6 +256,7 @@ class GpifAdapter(BaseParser):
         self.time_denominator = _get_time_denominator(root)
         self.key_signature_fifths = _get_key_signature_fifths(root)
         self.has_anacrusis = root.find("MasterTrack/Anacrusis") is not None
+        self.measure_time_signatures = _get_measure_time_signatures(root)
 
         # Extract chord diagrams for this track.
         for track in root.findall("Tracks/Track"):
@@ -431,6 +436,30 @@ def _get_key_signature_fifths(root: ET.Element) -> int:
         return int(acc_text)
     except (ValueError, AttributeError):
         return 0
+
+
+def _get_measure_time_signatures(root: ET.Element) -> dict[int, tuple[int, int]]:
+    """Return {1-based measure number → (numerator, denominator)} for every MasterBar.
+
+    Reads ``<Time>num/den</Time>`` from each ``<MasterBar>``.  Only entries
+    where the time signature differs from the previous measure (or the very
+    first measure) are strictly needed, but we return every bar for simplicity
+    so the mapper can always look up the exact time signature by measure index.
+    """
+    result: dict[int, tuple[int, int]] = {}
+    for bar_num, masterbar in enumerate(root.findall("MasterBars/MasterBar")):
+        time_str = masterbar.findtext("Time", "").strip()
+        if not time_str:
+            continue
+        try:
+            numerator_str, denominator_str = time_str.split("/")
+            numerator = int(numerator_str)
+            denominator = int(denominator_str)
+            if numerator > 0 and denominator > 0:
+                result[bar_num + 1] = (numerator, denominator)
+        except (ValueError, AttributeError):
+            continue
+    return result
 
 
 def _build_section_markers(root: ET.Element) -> dict[int, str]:

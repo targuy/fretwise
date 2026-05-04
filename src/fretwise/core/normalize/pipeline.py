@@ -67,4 +67,5 @@ def normalize_raw_score(raw_score: RawScore) -> NormalizedScore:
         chord_diagrams=list(raw_score.chord_diagrams),
         source_trace_map=normalized_trace_map,
         normalization_log=log,
+        measure_time_signatures=dict(raw_score.measure_time_signatures),
     )
