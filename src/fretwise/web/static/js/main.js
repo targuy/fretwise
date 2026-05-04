@@ -68,6 +68,22 @@ const metaViewMode  = $('#meta-view-mode');
 const metaTempo     = $('#meta-tempo');
 const positionBar   = $('#position-bar');
 
+// Timecode
+const tcCurrent = $('#tc-current');
+
+function _fmtTime(sec) {
+  const s = Math.floor(sec);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+// Header extras
+const headerMeta       = $('#header-meta');
+const headerMetaTitle  = $('#header-meta-title');
+const headerMetaTrack  = $('#header-meta-track');
+const headerMetaTempo  = $('#header-meta-tempo');
+const btnHeaderBack    = $('#btn-header-back');
+const btnHeaderPdf     = $('#btn-header-pdf');
+
 // Header
 const btnLegend     = $('#btn-legend');
 const legendOverlay = $('#legend-overlay');
@@ -85,10 +101,17 @@ const handVizDrag   = $('#hand-viz-drag');
 // ── Page routing ────────────────────────────────────────────────────
 
 function showPage(page) {
+  const isViewer = page === 'viewer';
   fileSelector.style.display  = page === 'files'  ? '' : 'none';
   trackSelector.style.display = page === 'tracks' ? '' : 'none';
-  tabViewer.style.display     = page === 'viewer' ? '' : 'none';
-  toolbar.style.display       = page === 'viewer' ? '' : 'none';
+  tabViewer.style.display     = isViewer ? '' : 'none';
+  toolbar.style.display       = isViewer ? '' : 'none';
+  if (headerMeta)       headerMeta.style.display       = isViewer ? '' : 'none';
+  if (btnHeaderBack)    btnHeaderBack.style.display    = isViewer ? '' : 'none';
+  const tabsBar = $('#track-tabs-bar');
+  if (tabsBar) tabsBar.style.display = isViewer ? '' : 'none';
+  // Ensure the old bottom bar class doesn't shift bottom elements
+  document.body.classList.remove('has-multitrack-bar');
 }
 
 // ── File selector ───────────────────────────────────────────────────
@@ -123,32 +146,21 @@ async function loadFiles() {
 
 async function selectFile(filename) {
   currentFile = filename;
-  _notesCache.clear(); // bust cache on new file
-  _mutedSecondaryTracks.clear(); // reset mute preferences on new file
-  showPage('tracks');
-  trackGrid.innerHTML = '<p style="color:#aaa;">Loading tracks…</p>';
+  _notesCache.clear();
+  _mutedSecondaryTracks.clear();
 
   try {
     const tracks = await fetchTracks(filename);
     currentTracks = tracks;
     if (!tracks.length) {
-      trackGrid.innerHTML = '<p style="color:#aaa;">No guitar tracks found.</p>';
+      // Stay on file selector and surface the error
+      fileGrid.innerHTML = `<p style="color:#ff5555;">No guitar tracks found in "${sanitize(filename)}".</p>`;
       return;
     }
-    trackGrid.innerHTML = '';
-    for (const t of tracks) {
-      const card = document.createElement('div');
-      card.className = 'track-card';
-      card.innerHTML = `
-        <div class="track-icon">🎵</div>
-        <div class="track-name">${sanitize(t.name)}</div>
-        <div class="track-id">Track ${t.id}</div>
-      `;
-      card.addEventListener('click', () => selectTrack(t.id, t.name));
-      trackGrid.appendChild(card);
-    }
+    // Auto-select first track — skip the intermediate track-selector page
+    await selectTrack(tracks[0].id, tracks[0].name);
   } catch (err) {
-    trackGrid.innerHTML = `<p style="color:#ff5555;">Error: ${sanitize(err.message)}</p>`;
+    fileGrid.innerHTML = `<p style="color:#ff5555;">Error loading "${sanitize(filename)}": ${sanitize(err.message)}</p>`;
   }
 }
 
@@ -163,10 +175,13 @@ async function selectTrack(trackId, trackName) {
   showPage('viewer');
   populateTrackSwitcher(trackId);
 
-  songTitle.textContent = currentFile.replace(/\.[^.]+$/, '');
+  const cleanTitle = currentFile.replace(/\.[^.]+$/, '');
+  songTitle.textContent = cleanTitle;
   songArtist.textContent = trackName || `Track ${trackId}`;
   if (trackBadge) trackBadge.textContent = trackName || `Track ${trackId}`;
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
+  if (headerMetaTitle) headerMetaTitle.textContent = cleanTitle;
+  if (headerMetaTrack) headerMetaTrack.textContent = trackName || `Track ${trackId}`;
 
   tabCanvas.width = 100;
   tabCanvas.height = 100;
@@ -301,6 +316,7 @@ function applyRepresentationModeView(data) {
     if (showCore) {
       _applyResponsiveCoreSvg();
       _syncCoreSvgFingering();
+      _syncCoreSvgAnnotations();
       _syncCoreSvgHandOverlay();
     }
   }
@@ -332,41 +348,39 @@ function _syncCoreSvgFingering() {
   const svg = coreSvgView.querySelector('svg');
   if (!svg) return;
 
-  svg.querySelectorAll('.fw-finger-annotation').forEach((el) => el.remove());
+  // Clear previous finger classes from all masks
+  const FINGER_CLASSES = ['fw-finger-1', 'fw-finger-2', 'fw-finger-3', 'fw-finger-4'];
+  svg.querySelectorAll('.fw-tab-note-mask').forEach((rect) => {
+    rect.classList.remove(...FINGER_CLASSES);
+  });
+
   if (!renderer.showFingering) return;
+
+  const fingerClassMap = {
+    index:  'fw-finger-1',
+    middle: 'fw-finger-2',
+    ring:   'fw-finger-3',
+    pinky:  'fw-finger-4',
+  };
 
   const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
   const tabNotes = svg.querySelectorAll('text.fw-tab-note');
   for (const noteText of tabNotes) {
-    const onsetRaw = noteText.getAttribute('data-onset') || '';
-    const tabStringRaw = noteText.getAttribute('data-tab-string') || '';
-    const onset = Number.parseFloat(onsetRaw);
-    const tabString = Number.parseInt(tabStringRaw, 10);
+    const onset = Number.parseFloat(noteText.getAttribute('data-onset') || '');
+    const tabString = Number.parseInt(noteText.getAttribute('data-tab-string') || '', 10);
     if (!Number.isFinite(onset) || !Number.isInteger(tabString)) continue;
 
     const resultNote = byOnsetString.get(`${onset.toFixed(6)}:${tabString}`);
-    if (!resultNote) continue;
-    if (Number.parseInt(resultNote.fret, 10) <= 0) continue;
+    if (!resultNote || Number.parseInt(resultNote.fret, 10) <= 0) continue;
 
-    const fingerChar = _fingerGlyph(resultNote.finger);
-    if (!fingerChar) continue;
+    const fc = fingerClassMap[resultNote.finger];
+    if (!fc) continue;
 
-    const x = Number.parseFloat(noteText.getAttribute('x') || '0');
-    const y = Number.parseFloat(noteText.getAttribute('y') || '0');
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-
-    const fingerEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    fingerEl.setAttribute('class', 'fw-finger-annotation');
-    fingerEl.setAttribute('x', (x + 6.0).toFixed(2));
-    fingerEl.setAttribute('y', (y + 6.4).toFixed(2));
-    fingerEl.setAttribute('font-family', 'Arial,sans-serif');
-    fingerEl.setAttribute('font-size', '7');
-    fingerEl.setAttribute('font-weight', '700');
-    fingerEl.setAttribute('fill', '#b71c1c');
-    fingerEl.setAttribute('text-anchor', 'start');
-    fingerEl.setAttribute('dominant-baseline', 'central');
-    fingerEl.textContent = fingerChar;
-    svg.appendChild(fingerEl);
+    // The mask rect is the element immediately before the note text in the SVG
+    const maskRect = noteText.previousElementSibling;
+    if (maskRect && maskRect.classList.contains('fw-tab-note-mask')) {
+      maskRect.classList.add(fc);
+    }
   }
 }
 
@@ -378,6 +392,166 @@ function _clusterSorted(values, epsilon = 1.0) {
     if (!prev || Math.abs(v - prev) > epsilon) out.push(v);
   }
   return out;
+}
+
+/** Inject technique & expression annotations into the SVG TAB view. */
+function _syncCoreSvgAnnotations() {
+  if (!coreSvgView || !renderer) return;
+  const svg = coreSvgView.querySelector('svg');
+  if (!svg) return;
+
+  svg.querySelectorAll('.fw-svg-annotation').forEach((el) => el.remove());
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag) => document.createElementNS(NS, tag);
+  const push = (el) => { el.classList.add('fw-svg-annotation'); svg.appendChild(el); return el; };
+
+  const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
+  const tabNotes = Array.from(svg.querySelectorAll('text.fw-tab-note'));
+  if (!tabNotes.length) return;
+
+  // Build onset→y map for string 6 (lowest) — used to place dynamics below the staff
+  const str6YByOnset = new Map();
+  for (const el of tabNotes) {
+    if (parseInt(el.getAttribute('data-tab-string') || '', 10) !== 6) continue;
+    const onset = Number.parseFloat(el.getAttribute('data-onset') || '');
+    const y     = Number.parseFloat(el.getAttribute('y') || '');
+    if (Number.isFinite(onset) && Number.isFinite(y))
+      str6YByOnset.set(onset.toFixed(6), y);
+  }
+
+  // Process in onset order so dynamic tracking works correctly
+  const sorted = tabNotes.slice().sort((a, b) =>
+    Number.parseFloat(a.getAttribute('data-onset') || '0') -
+    Number.parseFloat(b.getAttribute('data-onset') || '0')
+  );
+
+  let lastDynamic = '';
+  const dynShown = new Set(); // one dynamic per onset column
+
+  for (const noteText of sorted) {
+    const onset     = Number.parseFloat(noteText.getAttribute('data-onset') || '');
+    const tabString = Number.parseInt(noteText.getAttribute('data-tab-string') || '', 10);
+    if (!Number.isFinite(onset) || !Number.isInteger(tabString)) continue;
+
+    const r = byOnsetString.get(`${onset.toFixed(6)}:${tabString}`);
+    if (!r) continue;
+
+    const x  = Number.parseFloat(noteText.getAttribute('x') || '0');
+    const y  = Number.parseFloat(noteText.getAttribute('y') || '0');
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+
+    const ok = Number.parseInt(r.fret, 10);
+
+    // ── Dynamic (once per onset, on string-6 column, only on change)
+    const dynKey = onset.toFixed(6);
+    if (r.dynamic && !dynShown.has(dynKey) && r.dynamic !== lastDynamic) {
+      const baseY = str6YByOnset.get(dynKey);
+      if (Number.isFinite(baseY)) {
+        lastDynamic = r.dynamic;
+        dynShown.add(dynKey);
+        const t = mk('text');
+        t.setAttribute('x', x.toFixed(2));
+        t.setAttribute('y', (baseY + 14).toFixed(2));
+        t.setAttribute('font-family', '"Fraunces", Georgia, serif');
+        t.setAttribute('font-size', '8');
+        t.setAttribute('font-style', 'italic');
+        t.setAttribute('font-weight', '700');
+        t.setAttribute('fill', '#666655');
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = r.dynamic;
+        push(t);
+      }
+    }
+
+    if (ok <= 0) continue; // open strings skip technique labels
+
+    // ── Hammer-on / Pull-off label
+    if (r.articulation === 'hammer_on' || r.articulation === 'pull_off') {
+      const t = mk('text');
+      t.setAttribute('x', x.toFixed(2));
+      t.setAttribute('y', (y - 7).toFixed(2));
+      t.setAttribute('font-family', 'Inter, sans-serif');
+      t.setAttribute('font-size', '6');
+      t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#666655');
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = r.articulation === 'hammer_on' ? 'H' : 'P';
+      push(t);
+    }
+
+    // ── Bend arrow + amount
+    if (r.bend_value) {
+      const semis = Number(r.bend_value);
+      const label = semis === 0.5 ? '½' : semis === 1.5 ? '1½' : semis === 2.5 ? '2½' : String(semis);
+      const arr = mk('text');
+      arr.setAttribute('x', (x + 2).toFixed(2));
+      arr.setAttribute('y', (y - 5).toFixed(2));
+      arr.setAttribute('font-size', '8');
+      arr.setAttribute('fill', '#c0392b');
+      arr.setAttribute('text-anchor', 'middle');
+      arr.textContent = '↑';
+      push(arr);
+      if (label) {
+        const t = mk('text');
+        t.setAttribute('x', (x + 6).toFixed(2));
+        t.setAttribute('y', (y - 11).toFixed(2));
+        t.setAttribute('font-family', 'Inter, sans-serif');
+        t.setAttribute('font-size', '5.5');
+        t.setAttribute('font-weight', '700');
+        t.setAttribute('fill', '#c0392b');
+        t.setAttribute('text-anchor', 'middle');
+        t.textContent = label;
+        push(t);
+      }
+    }
+
+    // ── Vibrato ~
+    if (r.articulation === 'vibrato' || r.articulation === 'wide_vibrato' || r.vibrato_wide) {
+      const t = mk('text');
+      t.setAttribute('x', (x + 7).toFixed(2));
+      t.setAttribute('y', (y - 5).toFixed(2));
+      t.setAttribute('font-size', '9');
+      t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#2a8a2a');
+      t.setAttribute('text-anchor', 'start');
+      t.textContent = r.articulation === 'wide_vibrato' || r.vibrato_wide ? '≈' : '~';
+      push(t);
+    }
+
+    // ── Tapping T
+    if (r.tapping) {
+      const t = mk('text');
+      t.setAttribute('x', x.toFixed(2));
+      t.setAttribute('y', (y - 8).toFixed(2));
+      t.setAttribute('font-family', 'Inter, sans-serif');
+      t.setAttribute('font-size', '6.5');
+      t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#1a45aa');
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = 'T';
+      push(t);
+    }
+
+    // ── Accent > / ∧
+    if (r.accent_strong) {
+      const t = mk('text');
+      t.setAttribute('x', x.toFixed(2));
+      t.setAttribute('y', (y - 8).toFixed(2));
+      t.setAttribute('font-size', '8'); t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#c0392b'); t.setAttribute('text-anchor', 'middle');
+      t.textContent = '∧';
+      push(t);
+    } else if (r.accent) {
+      const t = mk('text');
+      t.setAttribute('x', x.toFixed(2));
+      t.setAttribute('y', (y - 8).toFixed(2));
+      t.setAttribute('font-size', '8'); t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#c0392b'); t.setAttribute('text-anchor', 'middle');
+      t.textContent = '>';
+      push(t);
+    }
+  }
 }
 
 function _syncCoreSvgHandOverlay() {
@@ -611,13 +785,16 @@ function exportPDFLegacyCanvas() {
 function initRenderer(data) {
   // Reset loop state
   loopASet = false;
-  if (btnLoopA)    btnLoopA.classList.remove('active');
-  if (btnLoopB)    btnLoopB.classList.remove('active');
+  if (btnLoopA)     btnLoopA.classList.remove('active');
+  if (btnLoopB)     btnLoopB.classList.remove('active');
+  if (btnLoopClear) btnLoopClear.classList.remove('loop-active');
 
   // Update title/artist from API response
-  if (data.title) songTitle.textContent = data.title;
-  if (data.artist) songArtist.textContent = data.artist;
-  if (metaTempo) metaTempo.textContent = `♩ = ${Math.round(data.tempo || 120)}`;
+  if (data.title) { songTitle.textContent = data.title; if (headerMetaTitle) headerMetaTitle.textContent = data.title; }
+  if (data.artist) { songArtist.textContent = data.artist; if (headerMetaTrack) headerMetaTrack.textContent = data.artist; }
+  const tempoStr = `♩ = ${Math.round(data.tempo || 120)}`;
+  if (metaTempo) metaTempo.textContent = tempoStr;
+  if (headerMetaTempo) headerMetaTempo.textContent = tempoStr;
   if (bpmInput) bpmInput.value = Math.round(data.tempo || 120);
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
@@ -633,20 +810,27 @@ function initRenderer(data) {
   applyRepresentationModeView(data);
 
   // Populate chord strip from chord diagrams
+  _chordDataMap = {};
+  const bar   = $('#chord-bar');
   const strip = $('#chord-strip');
-  if (strip) {
+  if (bar && strip) {
     if (data.chord_diagrams?.length) {
       strip.innerHTML = '';
       for (const cd of data.chord_diagrams) {
+        _chordDataMap[cd.name] = cd;
         const el = document.createElement('div');
         el.className = 'chord-diagram-item';
         el.setAttribute('data-chord', cd.name);
         el.innerHTML = chordDiagramSVG(cd);
+        el.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          showChordPopup(cd.name, ev.clientX, ev.clientY);
+        });
         strip.appendChild(el);
       }
-      strip.style.display = '';
+      bar.style.display = '';
     } else {
-      strip.style.display = 'none';
+      bar.style.display = 'none';
     }
   }
 
@@ -666,7 +850,8 @@ function initRenderer(data) {
   };
   // Feed the floating hand-viz panel with the current playhead time on every
   // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
-  playback.onTimeChange = (_sec) => {
+  playback.onTimeChange = (sec) => {
+    if (tcCurrent) tcCurrent.textContent = _fmtTime(sec);
     if (handVizPanel && handVizPanel.style.display !== 'none') _postHandVizTime();
   };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
@@ -678,26 +863,18 @@ function initRenderer(data) {
     if (pb) pb.value = Math.round(frac * 1000);
   };
 
-  // Canvas click: chord label → scroll+highlight, else measure jump
+  // Canvas click: chord label → inline popup, else measure jump
   tabCanvas.onclick = (e) => {
     const rect = tabCanvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    // Check chord name click first
     const chordName = renderer.getChordNameAtPoint(x, y);
     if (chordName) {
-      const strip = $('#chord-strip');
-      if (strip) {
-        const el = strip.querySelector(`[data-chord="${CSS.escape(chordName)}"]`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          el.classList.add('chord-highlight');
-          setTimeout(() => el.classList.remove('chord-highlight'), 1500);
-        }
-      }
+      e.stopPropagation();
+      showChordPopup(chordName, e.clientX, e.clientY);
       return;
     }
-    // Measure jump
+    hideChordPopup();
     const m = renderer.getMeasureAtPoint(x, y);
     if (m >= 0 && playback) playback.goToMeasure(m);
   };
@@ -721,22 +898,16 @@ function initRenderer(data) {
       _svgDriver.highlight(m, playback.loopStart, playback.loopEnd);
     };
     coreSvgView.onclick = (e) => {
-      // Chord name click → scroll to chord diagram
       const chordEl = e.target.closest('[data-chord]');
       if (chordEl) {
         const chordName = chordEl.getAttribute('data-chord');
-        const strip = $('#chord-strip');
-        if (strip && chordName) {
-          const el = strip.querySelector(`[data-chord="${CSS.escape(chordName)}"]`);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.classList.add('chord-highlight');
-            setTimeout(() => el.classList.remove('chord-highlight'), 1500);
-          }
+        if (chordName) {
+          e.stopPropagation();
+          showChordPopup(chordName, e.clientX, e.clientY);
+          return;
         }
-        return;
       }
-      // Measure jump
+      hideChordPopup();
       const m = _svgDriver.measureAtClick(e);
       if (m >= 0) playback.goToMeasure(m);
     };
@@ -765,8 +936,83 @@ function initRenderer(data) {
   }
 
   _rebuildMultiTrackBar(currentTrackId);
+  _rebuildTrackTabs(currentTrackId);
   _restoreSecondaryTracks(currentTrackId); // re-enable previously active secondary tracks
   updatePlayButton(false);
+}
+
+// ── Track tabs bar ──────────────────────────────────────────────────
+
+const _TRACK_COLORS = [
+  'oklch(0.74 0.14 30)',   // coral
+  'oklch(0.76 0.14 245)',  // blue
+  'oklch(0.78 0.14 130)',  // green
+  'oklch(0.78 0.14 320)',  // magenta
+  'oklch(0.82 0.15 75)',   // amber
+  'oklch(0.74 0.14 190)',  // teal
+];
+
+/** Convert MIDI note array to tuning string (e.g. [40,45,50,55,59,64] → "EADGBE"). */
+function _tuningLabel(tuning) {
+  if (!tuning || !tuning.length) return '';
+  const NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return tuning.map(n => NAMES[n % 12]).join('');
+}
+
+function _rebuildTrackTabs(primaryTrackId) {
+  const bar = $('#track-tabs-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+  if (!currentTracks || !currentTracks.length) return;
+
+  for (let i = 0; i < currentTracks.length; i++) {
+    const t = currentTracks[i];
+    const isPrimary = t.id === primaryTrackId;
+    const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
+    const isMuted = !isPrimary && muted.has(t.id);
+    const color = _TRACK_COLORS[i % _TRACK_COLORS.length];
+    const label = sanitize(t.name || `Track ${t.id}`);
+    const tuning = _tuningLabel(t.tuning);
+    const metaText = tuning ? `${tuning} · ${t.id}` : `Track ${t.id}`;
+
+    const tab = document.createElement('div');
+    tab.className = 'track-tab';
+    tab.dataset.active = isPrimary ? '1' : '0';
+    tab.dataset.trackId = t.id;
+
+    const colorBar = document.createElement('div');
+    colorBar.className = 'track-tab-color';
+    colorBar.style.background = color;
+
+    const body = document.createElement('div');
+    body.className = 'track-tab-body';
+    body.innerHTML = `<div class="track-tab-name">${label}</div><div class="track-tab-meta">${metaText}</div>`;
+
+    tab.appendChild(colorBar);
+    tab.appendChild(body);
+
+    // Mute button (secondary tracks only)
+    if (!isPrimary) {
+      const muteBtn = document.createElement('button');
+      muteBtn.className = 'track-mute-btn';
+      muteBtn.textContent = 'M';
+      muteBtn.dataset.muted = isMuted ? '1' : '0';
+      muteBtn.title = isMuted ? `Unmute ${label}` : `Mute ${label}`;
+      muteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const oldBtn = _multiTrackBar ? _multiTrackBar.querySelector(`[data-track-id="${t.id}"]`) : null;
+        _toggleSecondaryTrack(t.id, t.name || '', oldBtn || muteBtn).then(() => {
+          _rebuildTrackTabs(primaryTrackId);
+        });
+      });
+      tab.appendChild(muteBtn);
+
+      // Click tab name to switch primary
+      tab.addEventListener('click', () => selectTrack(t.id, t.name || ''));
+    }
+
+    bar.appendChild(tab);
+  }
 }
 
 // ── Multi-track audio mixer ─────────────────────────────────────────
@@ -930,6 +1176,8 @@ if (btnLoopB) {
     playback.setLoopEnd(m);
     btnLoopB.classList.add('active');
     btnLoopB.title = `Loop end: measure ${m + 1}`;
+    // Highlight the loop button when A→B is fully set
+    if (loopASet && btnLoopClear) btnLoopClear.classList.add('loop-active');
   });
 }
 
@@ -940,6 +1188,7 @@ if (btnLoopClear) {
     loopASet = false;
     if (btnLoopA) { btnLoopA.classList.remove('active'); btnLoopA.title = 'Set loop start (A)'; }
     if (btnLoopB) { btnLoopB.classList.remove('active'); btnLoopB.title = 'Set loop end (B)'; }
+    btnLoopClear.classList.remove('loop-active');
   });
 }
 
@@ -954,6 +1203,7 @@ if (btnFingering) {
       return;
     }
     _syncCoreSvgFingering();
+    _syncCoreSvgAnnotations();
     _syncCoreSvgHandOverlay();
   });
 }
@@ -986,6 +1236,19 @@ if (btnBackViewer) {
   });
 }
 
+if (btnHeaderBack) {
+  btnHeaderBack.addEventListener('click', () => {
+    if (playback) playback.stop();
+    renderer = null;
+    playback = null;
+    loadFiles();
+  });
+}
+
+if (btnHeaderPdf) {
+  btnHeaderPdf.addEventListener('click', exportPDF);
+}
+
 if (btnBackFiles) {
   btnBackFiles.addEventListener('click', () => {
     loadFiles();
@@ -993,15 +1256,11 @@ if (btnBackFiles) {
 }
 
 // ── Legend overlay ───────────────────────────────────────────────────
-let _legendBuilt = false;
-
 if (btnLegend) {
   btnLegend.addEventListener('click', () => {
     legendOverlay.style.display = '';
-    if (legendContent && !_legendBuilt) {
-      buildLegendHTML(legendContent);
-      _legendBuilt = true;
-    }
+    // Always rebuild so finger colors reflect the current theme
+    if (legendContent) buildLegendHTML(legendContent);
   });
 }
 
@@ -1034,11 +1293,30 @@ document.addEventListener('input', (e) => {
 
 if (selRepresentationMode) {
   selRepresentationMode.addEventListener('change', () => {
+    _syncViewSegPills();
     if (currentFile && currentTrackId != null) {
       selectTrack(currentTrackId, songArtist.textContent);
     }
   });
 }
+
+// ── View segmented control (pills) ─────────────────────────────────
+function _syncViewSegPills() {
+  const active = selRepresentationMode?.value || 'standard_tablature';
+  document.querySelectorAll('.view-seg-btn').forEach(btn => {
+    btn.classList.toggle('view-seg-active', btn.dataset.mode === active);
+  });
+}
+
+document.querySelectorAll('.view-seg-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!selRepresentationMode) return;
+    selRepresentationMode.value = btn.dataset.mode;
+    selRepresentationMode.dispatchEvent(new Event('change'));
+  });
+});
+
+_syncViewSegPills();
 
 if (prefSameFingerPenalty) {
   prefSameFingerPenalty.addEventListener('change', () => {
@@ -1287,117 +1565,161 @@ function _toRoman(n) {
 
 /**
  * Returns an inline SVG string for a chord diagram.
- * Layout: chord name → x/o markers → nut/grid → fret dots with finger numbers.
+ * @param {object} cd  Chord diagram data (name, frets, fingers, base_fret, string_count)
+ * @param {number} sc  Scale factor (1 = strip size, ~1.9 = popup size)
  */
-function chordDiagramSVG(cd) {
-  const nStr   = cd.string_count || 6;
-  const nFret  = 5;       // fret rows shown
-  const S      = 13;      // px between adjacent strings
-  const F      = 13;      // px between adjacent frets
-  const ML     = 8;       // left margin
-  const dotR   = 5;       // finger dot radius
-  const boxW   = (nStr - 1) * S;
-  const boxH   = nFret * F;
-  const gridY  = 30;      // y where the string/fret grid starts
+function chordDiagramSVG(cd, sc = 1) {
+  const nStr  = cd.string_count || 6;
+  const nFret = 5;
+  const S     = Math.round(13 * sc);
+  const F     = Math.round(13 * sc);
+  const ML    = Math.round(8  * sc);
+  const dotR  = Math.round(5  * sc);
+  const boxW  = (nStr - 1) * S;
+  const boxH  = nFret * F;
+  const gridY = Math.round(30 * sc);
   const hasPos = cd.base_fret > 1;
-  const svgW   = ML + boxW + ML + (hasPos ? 22 : 0);
-  const svgH   = gridY + boxH + 8;
+  const svgW  = ML + boxW + ML + (hasPos ? Math.round(22 * sc) : 0);
+  const svgH  = gridY + boxH + Math.round(8 * sc);
+  const fSz   = Math.max(6, Math.round(7  * sc));   // finger-number font
+  const nameSz= Math.max(9, Math.round(13 * sc));   // chord-name font
 
-  // x of string i: i=0 → high e (right), i=nStr-1 → low E (left)
   const strX = i => ML + (nStr - 1 - i) * S;
 
-  let p = `<svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg"
-    style="display:block">`;
+  // Finger color mapped to program CSS variables (--f1…--f4)
+  const dotFill  = (f) => (f >= 1 && f <= 4) ? `var(--f${f})` : '#444';
+  const dotText  = '#111'; // all finger colors are light → dark text readable
 
-  // ── Chord name ──
-  p += `<text x="${ML + boxW / 2}" y="13"
-    font-family="Arial,sans-serif" font-weight="bold" font-size="13"
+  let p = `<svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="display:block">`;
+
+  // Chord name
+  p += `<text x="${ML + boxW / 2}" y="${Math.round(14 * sc)}"
+    font-family="Arial,sans-serif" font-weight="bold" font-size="${nameSz}"
     text-anchor="middle" fill="#222">${sanitize(cd.name)}</text>`;
 
-  // ── Nut bar (open position) or fret label (position chord) ──
+  // Nut bar or fret label
   if (!hasPos) {
-    p += `<rect x="${ML}" y="${gridY - 3}" width="${boxW}" height="3.5"
-      fill="#222" rx="0.5"/>`;
+    p += `<rect x="${ML}" y="${gridY - Math.round(3 * sc)}" width="${boxW}" height="${Math.round(3.5 * sc)}"
+      fill="#333" rx="0.5"/>`;
   } else {
-    p += `<text x="${ML + boxW + 5}" y="${gridY + F / 2 + 4}"
-      font-family="Arial,sans-serif" font-size="9" fill="#555">${_toRoman(cd.base_fret)}fr</text>`;
+    const posSz = Math.max(7, Math.round(9 * sc));
+    p += `<text x="${ML + boxW + 5}" y="${gridY + F / 2 + Math.round(4 * sc)}"
+      font-family="Arial,sans-serif" font-size="${posSz}" fill="#555">${_toRoman(cd.base_fret)}fr</text>`;
   }
 
-  // ── Grid: vertical string lines ──
+  // Grid: string lines
   for (let i = 0; i < nStr; i++) {
     const x = strX(i);
-    p += `<line x1="${x}" y1="${gridY}" x2="${x}" y2="${gridY + boxH}"
-      stroke="#bbb" stroke-width="0.8"/>`;
+    p += `<line x1="${x}" y1="${gridY}" x2="${x}" y2="${gridY + boxH}" stroke="#bbb" stroke-width="0.8"/>`;
   }
 
-  // ── Grid: horizontal fret lines ──
+  // Grid: fret lines
   for (let f = 0; f <= nFret; f++) {
     const y = gridY + f * F;
-    p += `<line x1="${ML}" y1="${y}" x2="${ML + boxW}" y2="${y}"
-      stroke="#bbb" stroke-width="0.8"/>`;
+    p += `<line x1="${ML}" y1="${y}" x2="${ML + boxW}" y2="${y}" stroke="#bbb" stroke-width="0.8"/>`;
   }
 
-  // ── Muted (x) and open (o) markers above grid ──
+  // Muted (×) and open (○) markers above grid
+  const markY = Math.round(26 * sc);
+  const openCY = Math.round(21 * sc);
+  const openR  = Math.round(3.5 * sc);
+  const markSz = Math.max(7, Math.round(9 * sc));
   for (let i = 0; i < nStr; i++) {
     const x = strX(i);
     const fv = cd.frets[i];
     if (fv === -1) {
-      // × muted
-      p += `<text x="${x}" y="26" font-family="Arial,sans-serif"
-        font-size="9" font-weight="bold" text-anchor="middle" fill="#444">x</text>`;
+      p += `<text x="${x}" y="${markY}" font-family="Arial,sans-serif"
+        font-size="${markSz}" font-weight="bold" text-anchor="middle" fill="#555">x</text>`;
     } else if (fv === 0) {
-      // ○ open string
-      p += `<circle cx="${x}" cy="21" r="3.5"
-        fill="none" stroke="#444" stroke-width="1.2"/>`;
+      p += `<circle cx="${x}" cy="${openCY}" r="${openR}" fill="none" stroke="#555" stroke-width="1.2"/>`;
     }
   }
 
-  // ── Barre detection: ≥2 strings at the minimum fretted fret ──
-  const frettedNotes = cd.frets
-    .map((fv, i) => ({ i, fv }))
-    .filter(n => n.fv > 0);
+  // Barre detection: ≥2 strings at the lowest fretted fret
+  const frettedNotes = cd.frets.map((fv, i) => ({ i, fv })).filter(n => n.fv > 0);
   const barreSet = new Set();
   if (frettedNotes.length >= 2) {
-    const minFret  = Math.min(...frettedNotes.map(n => n.fv));
-    const barreSt  = frettedNotes.filter(n => n.fv === minFret);
+    const minFret = Math.min(...frettedNotes.map(n => n.fv));
+    const barreSt = frettedNotes.filter(n => n.fv === minFret);
     if (barreSt.length >= 2) {
       const row = minFret - Math.max(cd.base_fret, 1);
       if (row >= 0 && row < nFret) {
         const cy  = gridY + row * F + F / 2;
         const xs  = barreSt.map(n => strX(n.i));
         const bx0 = Math.min(...xs), bx1 = Math.max(...xs);
+        const bf  = cd.fingers?.[barreSt[0].i] || 0;
         p += `<rect x="${bx0 - dotR}" y="${cy - dotR}"
           width="${bx1 - bx0 + 2 * dotR}" height="${2 * dotR}"
-          rx="${dotR}" fill="#222"/>`;
-        const bf = cd.fingers?.[barreSt[0].i] || 0;
+          rx="${dotR}" fill="${dotFill(bf)}"/>`;
         if (bf) p += `<text x="${(bx0 + bx1) / 2}" y="${cy + dotR * 0.42}"
-          font-family="Arial,sans-serif" font-size="7" font-weight="bold"
-          text-anchor="middle" fill="white">${bf}</text>`;
+          font-family="Arial,sans-serif" font-size="${fSz}" font-weight="bold"
+          text-anchor="middle" fill="${dotText}">${bf}</text>`;
         for (const n of barreSt) barreSet.add(n.i);
       }
     }
   }
 
-  // ── Individual finger dots ──
+  // Individual finger dots
   for (let i = 0; i < nStr; i++) {
     const fv = cd.frets[i];
     if (fv <= 0 || barreSet.has(i)) continue;
     const row = fv - Math.max(cd.base_fret, 1);
     if (row < 0 || row >= nFret) continue;
-    const cx = strX(i);
-    const cy = gridY + row * F + F / 2;
-    p += `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="#222"/>`;
+    const cx     = strX(i);
+    const cy     = gridY + row * F + F / 2;
     const finger = cd.fingers?.[i] || 0;
+    p += `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="${dotFill(finger)}"/>`;
     if (finger) {
       p += `<text x="${cx}" y="${cy + dotR * 0.42}"
-        font-family="Arial,sans-serif" font-size="7" font-weight="bold"
-        text-anchor="middle" fill="white">${finger}</text>`;
+        font-family="Arial,sans-serif" font-size="${fSz}" font-weight="bold"
+        text-anchor="middle" fill="${dotText}">${finger}</text>`;
     }
   }
 
   p += '</svg>';
   return p;
 }
+
+// ── Chord popup: show inline, close on outside click ──────────────
+
+let _chordDataMap = {};
+
+function showChordPopup(chordName, clientX, clientY) {
+  const cd = _chordDataMap[chordName];
+  const popup = $('#chord-popup');
+  if (!cd || !popup) return;
+
+  popup.innerHTML = chordDiagramSVG(cd, 1.85);
+  popup.classList.add('visible');
+  popup.style.display = 'block';
+
+  // Position near click, clamped to viewport
+  const VW = window.innerWidth, VH = window.innerHeight;
+  popup.style.left = '0'; popup.style.top = '0'; // reset for measurement
+  const pw = popup.offsetWidth, ph = popup.offsetHeight;
+  const px = Math.max(8, Math.min((clientX ?? VW / 2) - pw / 2, VW - pw - 8));
+  const py = Math.max(8, Math.min((clientY ?? VH / 2) + 12,     VH - ph - 8));
+  popup.style.left = `${px}px`;
+  popup.style.top  = `${py}px`;
+}
+
+function hideChordPopup() {
+  const popup = $('#chord-popup');
+  if (popup) { popup.style.display = 'none'; popup.classList.remove('visible'); }
+}
+
+// Dismiss popup on any outside click
+document.addEventListener('click', (e) => {
+  const popup = $('#chord-popup');
+  if (popup?.style.display !== 'none' && !popup.contains(e.target)) hideChordPopup();
+});
+
+// Chord bar collapse/expand toggle
+document.addEventListener('DOMContentLoaded', () => {
+  $('#chord-bar-toggle')?.addEventListener('click', () => {
+    $('#chord-bar')?.classList.toggle('collapsed');
+  });
+});
 
 // ── Red cursor overlay ──────────────────────────────────────────────
 

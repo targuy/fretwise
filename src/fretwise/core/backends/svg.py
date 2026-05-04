@@ -43,8 +43,8 @@ def render_scene_to_svg(scene: RenderScene) -> str:
     out: list[str] = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{page.width}" '
         f'height="{page.height}" viewBox="0 0 {page.width} {page.height}">',
-        '<rect x="0" y="0" width="100%" height="100%" fill="white"/>',
-        f'<text x="30" y="24" font-family="Helvetica" font-size="14">'
+        f'<text x="30" y="24" font-family="Inter, system-ui, sans-serif" '
+        f'font-size="14" font-weight="600" fill="#1a1a1a">'
         f"{escape(scene.document_scene.title)}</text>",
     ]
 
@@ -53,9 +53,9 @@ def render_scene_to_svg(scene: RenderScene) -> str:
             for layer in staff.layer_groups:
                 for recipe in layer.recipe_instances:
                     if recipe.recipe_id == "tab_lines":
-                        out.extend(_render_lines(recipe.params, stroke="#666"))
+                        out.extend(_render_lines(recipe.params, stroke="#c4bfb5"))
                     elif recipe.recipe_id == "staff_lines":
-                        out.extend(_render_lines(recipe.params, stroke="#222"))
+                        out.extend(_render_lines(recipe.params, stroke="#1a1a1a"))
                     elif recipe.recipe_id == "barline":
                         out.append(_render_barline(recipe.params))
                     elif recipe.recipe_id == "ledger_line":

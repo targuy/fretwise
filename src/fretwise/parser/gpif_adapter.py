@@ -685,8 +685,10 @@ def _parse_note_properties(props: dict[str, ET.Element]) -> dict:  # type: ignor
         result["muted"] = True
         result["articulation"] = Articulation.MUTED
 
-    # Hammer-on / Pull-off
-    elif "HammerOn" in props:
+    # Hammer-on / Pull-off — GP5 uses "HammerOn"/"PullOff"; GP7 uses "HopoOrigin"/"HopoDestination".
+    # Only the ORIGIN note is marked: the renderer draws the arc forward to the next note on the
+    # same string.  HopoDestination alone is left as NORMAL so it doesn't trigger a spurious arc.
+    elif "HammerOn" in props or "HopoOrigin" in props:
         result["articulation"] = Articulation.HAMMER_ON
     elif "PullOff" in props:
         result["articulation"] = Articulation.PULL_OFF
