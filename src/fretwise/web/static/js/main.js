@@ -9,6 +9,7 @@ import { fetchExportPdf, fetchFiles, fetchNotes, fetchSolve, fetchTracks, upload
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
+import { MODES, MODE_LABELS, DEFAULT_MODE } from './modeConfig.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
@@ -272,7 +273,7 @@ function _setPdfExportStatus(message, level = 'neutral') {
 }
 
 function getSelectedRepresentationMode() {
-  return selRepresentationMode?.value || 'standard_tablature';
+  return selRepresentationMode?.value || DEFAULT_MODE;
 }
 
 function getRulePreferences() {
@@ -284,18 +285,7 @@ function getRulePreferences() {
 }
 
 function _representationModeLabel(mode) {
-  switch (mode) {
-    case 'standard':
-      return 'STANDARD';
-    case 'standard_tablature':
-      return 'STANDARD + TAB';
-    case 'tablature_rhythm':
-      return 'TAB + RHYTHM';
-    case 'tablature':
-      return 'TAB';
-    default:
-      return 'TAB + RHYTHM';
-  }
+  return (MODE_LABELS[mode] || MODE_LABELS[DEFAULT_MODE]).toUpperCase();
 }
 
 function applyRepresentationModeView(data) {
@@ -307,7 +297,7 @@ function applyRepresentationModeView(data) {
     metaViewMode.textContent = _representationModeLabel(representationMode);
   }
 
-  const showCore = representationMode !== 'tablature';
+  const showCore = representationMode !== MODES.TABLATURE;
   if (tabCanvas) tabCanvas.style.visibility = showCore ? 'hidden' : 'visible';
   if (cursorCanvas) cursorCanvas.style.visibility = showCore ? 'hidden' : 'visible';
   if (coreSvgView) {
@@ -891,7 +881,7 @@ function initRenderer(data) {
   // SVG cursor driver for standard / standard+tab modes
   _svgDriver = null;
   const _svgMode = data.representation_mode || getSelectedRepresentationMode();
-  if (_svgMode !== 'tablature' && data.measure_regions?.length && coreSvgView) {
+  if (_svgMode !== MODES.TABLATURE && data.measure_regions?.length && coreSvgView) {
     _svgDriver = new SvgCursorDriver(coreSvgView, data);
     _svgDriver.init();
     playback.onMeasureChange = (m) => {
@@ -1198,7 +1188,7 @@ if (btnFingering) {
     renderer.showFingering = !renderer.showFingering;
     btnFingering.classList.toggle('active', renderer.showFingering);
     const representationMode = getSelectedRepresentationMode();
-    if (representationMode === 'tablature') {
+    if (representationMode === MODES.TABLATURE) {
       renderer.render();
       return;
     }
@@ -1302,7 +1292,7 @@ if (selRepresentationMode) {
 
 // ── View segmented control (pills) ─────────────────────────────────
 function _syncViewSegPills() {
-  const active = selRepresentationMode?.value || 'standard_tablature';
+  const active = selRepresentationMode?.value || DEFAULT_MODE;
   document.querySelectorAll('.view-seg-btn').forEach(btn => {
     btn.classList.toggle('view-seg-active', btn.dataset.mode === active);
   });
@@ -1339,7 +1329,7 @@ if (prefInferLegato) {
 if (prefHandOverlay) {
   prefHandOverlay.addEventListener('change', () => {
     if (!renderer) return;
-    if (getSelectedRepresentationMode() === 'tablature') {
+    if (getSelectedRepresentationMode() === MODES.TABLATURE) {
       renderer.render();
       return;
     }
