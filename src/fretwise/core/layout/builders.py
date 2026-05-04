@@ -191,12 +191,19 @@ def _measure_packs(
 
 
 def _onset_beat_positions(voices: list[object], *, beats_per_measure: int) -> list[float]:
-    """Collect sorted unique onset positions within a measure, in beats."""
+    """Collect sorted unique onset positions within a measure, in beats.
+
+    Uses measure-relative onset (event.onset - measure_start) rather than
+    global-onset modulo, so that measures starting at non-multiple-of-q_beats
+    positions (e.g. after 3/4 or 2/4 bars in an otherwise 4/4 song) are
+    handled correctly.
+    """
+    all_events = [e for v in voices for e in getattr(v, "events", [])]
+    measure_start = min((getattr(e, "onset", 0.0) for e in all_events), default=0.0)
     positions: set[float] = set()
-    beats = max(1, beats_per_measure)
     for voice in voices:
         for event in getattr(voice, "events", []):
-            rel_onset = round(getattr(event, "onset", 0.0) % beats, 9)
+            rel_onset = round(getattr(event, "onset", 0.0) - measure_start, 9)
             positions.add(rel_onset)
     return sorted(positions)
 
@@ -216,10 +223,17 @@ def _measure_event_layouts(
     width = measure_width if measure_width is not None else rules.measure_min_width
     layouts: list[EventLayout] = []
 
+    # Measure-relative onset: subtract the earliest onset in this measure so
+    # that positions are always in [0, q_beats), even when the canonical measure
+    # starts at a global onset that is not a multiple of q_beats (e.g. after a
+    # 2/4 or 3/4 bar in an otherwise 4/4 song).
+    all_voice_events = [e for v in voices for e in getattr(v, "events", [])]
+    measure_start_onset = min((e.onset for e in all_voice_events), default=0.0)
+
     for voice in voices:
         events = getattr(voice, "events", [])
         for event in events:
-            rel_onset = event.onset % beats_per_measure
+            rel_onset = event.onset - measure_start_onset
             x = event_anchor_x(
                 onset_in_measure=rel_onset,
                 beats_per_measure=beats_per_measure,
