@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from fretwise.core.notation_utils import standard_note_y as _notation_standard_note_y
+
 
 @dataclass(frozen=True)
 class LayoutRules:
@@ -101,11 +103,6 @@ def string_row_y(*, string_num: int, rules: LayoutRules) -> float:
     return rules.row_top + (s - 1) * rules.row_spacing + 4.0
 
 
-# Maps chromatic pitch class (0–11, C=0) to diatonic step within the octave (C=0…B=6).
-# Sharps/flats collapse onto the lower diatonic step (e.g. C#→C=0, D#→D=1).
-_CHROMATIC_TO_DIATONIC: tuple[int, ...] = (0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6)
-
-
 def pitch_to_staff_y(
     pitch_midi: int,
     *,
@@ -130,12 +127,8 @@ def pitch_to_staff_y(
         placed correctly above/below the staff; the function never raises.
     """
     del clef  # Only treble implemented; bass clef reserved for future work.
-    # MIDI octave: C4=60 → octave = pitch_midi // 12 - 1.
-    octave = pitch_midi // 12 - 1
-    diatonic_in_octave = _CHROMATIC_TO_DIATONIC[pitch_midi % 12]
-    # Diatonic steps above E4 (bottom line, step 0 in the treble clef staff).
-    # E4 sits at diatonic position 2 in its octave (C=0, D=1, E=2…).
-    staff_steps = (octave - 4) * 7 + (diatonic_in_octave - 2)
-    # Bottom line = staff_y_origin + 4 * staff_spacing.  Each step upward
-    # subtracts half a staff_spacing (SVG y increases downward).
-    return staff_y_origin + 4.0 * staff_spacing - staff_steps * (staff_spacing / 2.0)
+    return _notation_standard_note_y(
+        pitch_midi,
+        staff_y_origin=staff_y_origin,
+        staff_spacing=staff_spacing,
+    )

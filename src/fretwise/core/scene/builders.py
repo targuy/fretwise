@@ -5,6 +5,27 @@ from __future__ import annotations
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
+from fretwise.core.notation_mode import has_standard as _has_standard_mode
+from fretwise.core.notation_mode import has_tab as _has_tab_mode
+from fretwise.core.notation_utils import (
+    diatonic_step_from_metadata as _diatonic_step_from_metadata,
+    standard_note_y as _notation_standard_note_y,
+)
+from .render_helpers import (
+    base_duration as _base_duration,
+    boolish as _boolish,
+    dot_count as _dot_count,
+    duration_class as _duration_class,
+    duration_components as _duration_components,
+    flag_count as _flag_count,
+    is_filled_notehead as _is_filled_notehead,
+    is_measure_rest_event as _is_measure_rest_event,
+    notated_duration as _notated_duration,
+    rest_kind as _rest_kind,
+    safe_int as _safe_int,
+    stem_direction as _stem_direction,
+    stem_x_for_notehead as _stem_x_for_notehead,
+)
 from fretwise.core.scene.models import (
     DocumentScene,
     GlyphInstance,
@@ -60,8 +81,6 @@ _REST_BLOCK_WIDTH = 8.0
 _REST_BLOCK_HEIGHT = 3.0
 _ARC_ONSET_TOLERANCE = 0.06
 _SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
-_MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
-_MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 
 # Key signature glyph layout constants (treble clef).
 # Y offsets expressed as *multiples of staff_spacing* from staff_std_y.
@@ -123,8 +142,8 @@ def layout_to_render_scene(
     *, page_layout: PageLayout, score: Score, mode: str = "tablature"
 ) -> RenderScene:
     """Build render scene from explicit page layout contract."""
-    has_tab = mode in _MODES_WITH_TAB
-    has_standard = mode in _MODES_WITH_STANDARD
+    has_tab = _has_tab_mode(mode)
+    has_standard = _has_standard_mode(mode)
     has_tab_rhythm = mode == "tablature_rhythm"
     staff_spacing = _layout_float(page_layout, "standard_staff_spacing", _STAFF_STD_SPACING)
     tab_spacing = _layout_float(page_layout, "tab_staff_spacing", _TAB_SPACING)
@@ -493,7 +512,7 @@ def layout_to_render_scene(
                             )
                             techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                             pitch = _safe_int(event_layout.metadata.get("pitch_notated")) or 64
-                            diatonic_step = _diatonic_step_index_for_metadata(
+                            diatonic_step = _diatonic_step_from_metadata(
                                 event_layout.metadata,
                                 fallback_pitch=pitch,
                             )
@@ -812,59 +831,21 @@ def _standard_note_y(
     except ValueError:
         pitch = 64
 
-    # Treble staff reference:
-    # bottom line = E4 (MIDI 64), each staff step = half line spacing.
-    diatonic_delta = _diatonic_step_index_for_metadata(
-        metadata,
-        fallback_pitch=pitch,
-    ) - _diatonic_step_index_for_step_octave("E", 4)
-    return staff_std_y + 4 * staff_spacing - diatonic_delta * (staff_spacing / 2.0)
-
-
-def _diatonic_step_index_for_metadata(metadata: dict[str, str], *, fallback_pitch: int) -> int:
-    step_raw = str(metadata.get("pitch_step", "")).strip().upper()
+    step_raw = str(metadata.get("pitch_step", "")).strip().upper() or None
     octave_raw = str(metadata.get("pitch_octave", "")).strip()
-    if step_raw in {"A", "B", "C", "D", "E", "F", "G"}:
-        try:
-            octave = int(octave_raw)
-            return _diatonic_step_index_for_step_octave(step_raw, octave)
-        except ValueError:
-            pass
-    return _diatonic_step_index_for_pitch(fallback_pitch)
+    octave: int | None
+    try:
+        octave = int(octave_raw) if octave_raw else None
+    except ValueError:
+        octave = None
 
-
-def _diatonic_step_index_for_step_octave(step: str, octave: int) -> int:
-    letter_step = {
-        "C": 0,
-        "D": 1,
-        "E": 2,
-        "F": 3,
-        "G": 4,
-        "A": 5,
-        "B": 6,
-    }[step]
-    return octave * 7 + letter_step
-
-
-def _diatonic_step_index_for_pitch(pitch: int) -> int:
-    pitch_class = pitch % 12
-    octave = pitch // 12 - 1
-    # C D E F G A B
-    letter_step = {
-        0: 0,   # C
-        1: 0,   # C#
-        2: 1,   # D
-        3: 1,   # Eb
-        4: 2,   # E
-        5: 3,   # F
-        6: 3,   # F#
-        7: 4,   # G
-        8: 4,   # Ab
-        9: 5,   # A
-        10: 5,  # Bb
-        11: 6,  # B
-    }[pitch_class]
-    return octave * 7 + letter_step
+    return _notation_standard_note_y(
+        pitch,
+        staff_y_origin=staff_std_y,
+        staff_spacing=staff_spacing,
+        step=step_raw,
+        octave=octave,
+    )
 
 
 def _append_ledger_lines(
@@ -1194,40 +1175,6 @@ def _append_measure_barlines(
         )
 
 
-def _is_filled_notehead(duration: float) -> bool:
-    return _base_duration(duration) <= 1.0
-
-
-_KNOWN_BASE_DURATIONS = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
-
-
-def _duration_components(duration: float) -> tuple[float, int]:
-    tol = 0.01
-    for base in _KNOWN_BASE_DURATIONS:
-        if abs(duration - base) <= tol:
-            return base, 0
-        if abs(duration - base * 1.5) <= tol:
-            return base, 1
-        if abs(duration - base * 1.75) <= tol:
-            return base, 2
-    return duration, 0
-
-
-def _notated_duration(
-    actual: float,
-    tuplet_actual: int | None,
-    tuplet_normal: int | None,
-) -> float:
-    """Return the notated/display duration for flag-count and beam-level computation.
-
-    For a triplet 8th (actual≈0.333, tuplet_actual=3, tuplet_normal=2):
-    returns 0.333 × (3/2) = 0.5 (the display 8th-note base).
-    """
-    if tuplet_actual and tuplet_normal and tuplet_normal > 0:
-        return actual * tuplet_actual / tuplet_normal
-    return actual
-
-
 def _tuplet_bracket_runs(
     group: list[tuple[float, float, float]],
     tuplet_by_onset: dict[float, tuple[int, int]],
@@ -1264,50 +1211,6 @@ def _tuplet_bracket_runs(
 
     _flush(len(group))
     return results
-
-
-def _dot_count(duration: float) -> int:
-    return _duration_components(duration)[1]
-
-
-def _duration_class(duration: float) -> str:
-    base = _duration_components(duration)[0]
-    if base >= 4.0:
-        return "whole"
-    if base >= 2.0:
-        return "half"
-    if base >= 1.0:
-        return "quarter"
-    if base >= 0.5:
-        return "eighth"
-    if base >= 0.25:
-        return "sixteenth"
-    if base >= 0.125:
-        return "thirty_second"
-    return "sixty_fourth"
-
-
-def _rest_kind(duration: float, *, is_measure_rest: bool = False) -> str:
-    if is_measure_rest:
-        return "whole"
-    return _duration_class(duration)
-
-
-def _is_measure_rest_event(
-    onset: float,
-    duration: float,
-    *,
-    measure_number: int,
-    beats_per_measure: int,
-) -> bool:
-    tolerance = 1e-6
-    measure_start = (measure_number - 1) * beats_per_measure
-    onset_in_measure = onset - measure_start
-    return abs(onset_in_measure) <= tolerance and abs(duration - beats_per_measure) <= 0.01
-
-
-def _boolish(value: object) -> bool:
-    return str(value).strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _rhythm_duration_by_onset_voice(events: list[object]) -> dict[tuple[float, int], float]:
@@ -2254,16 +2157,6 @@ def _beam_y_at_x(
     return y0 + (y1 - y0) * t
 
 
-def _stem_x_for_notehead(x: float, *, direction: str, stem_offset: float) -> float:
-    if direction == "down":
-        return x - stem_offset
-    return x + stem_offset
-
-
-def _stem_direction(voice_number: int) -> str:
-    return "down" if voice_number >= 1 else "up"
-
-
 def _stem_direction_for_note(
     *,
     note_y: float,
@@ -2524,20 +2417,6 @@ def _beam_groups(
         groups.append(current)
     return groups
 
-
-def _base_duration(duration: float) -> float:
-    return _duration_components(duration)[0]
-
-
-def _flag_count(duration: float) -> int:
-    base = _base_duration(duration)
-    if base >= 1.0:
-        return 0
-    if base >= 0.5:
-        return 1
-    if base >= 0.25:
-        return 2
-    return 3
 
 
 def _secondary_beam_segments(
@@ -2828,13 +2707,6 @@ def _parse_techniques(value: str | None) -> set[str]:
     if not value:
         return set()
     return {item.strip() for item in value.split(",") if item.strip()}
-
-
-def _safe_int(value: str | None) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except ValueError:
-        return None
 
 
 def _accidental_column_for_note_y(
