@@ -57,9 +57,9 @@
     }
     #legend .swatch { display: inline-block; width: 14px; height: 14px;
       border-radius: 50%; margin-right: 6px; vertical-align: middle; }
-    #legend .active  { background: #43c7ff; box-shadow: 0 0 8px rgba(67,199,255,0.6); }
-    #legend .planted { background: rgba(31,184,217,0.55); box-shadow: 0 0 6px rgba(31,184,217,0.45); }
-    #legend .hover   { background: rgba(255,95,87,0.45); border: 1px dashed #ff5f57; }
+    #legend .active  { background: #e2b694; box-shadow: 0 0 6px rgba(226,182,148,0.55); }
+    #legend .planted { background: rgba(145,224,255,0.58); box-shadow: 0 0 6px rgba(114,220,255,0.45); }
+    #legend .hover   { background: rgba(255,158,150,0.62); border: 1px dashed #ff918b; }
     #legend .idle    { background: rgba(226,182,148,0.25); border: 1px dashed rgba(255,95,87,0.45); }
     #legend .open    { background: rgba(255,204,60,0.22); border: 1.8px solid #ffcc3c; }
     #legend .note    { margin-left: auto; font-size: 11px; opacity: 0.85; }
@@ -136,9 +136,9 @@
 
   <div id="timeline"><div class="fill" id="timeline-fill"></div></div>
   <div id="legend">
-    <span><span class="swatch active"></span>Actif — appuie (bleu)</span>
-    <span><span class="swatch planted"></span>Sédentaire — reste appuyé (bleu transparent)</span>
-    <span><span class="swatch hover"></span>Préparé — survole sans appuyer (rouge transparent)</span>
+    <span><span class="swatch active"></span>Actif — appuie (peau opaque)</span>
+    <span><span class="swatch planted"></span>Touche sans sonner — bleu transparent</span>
+    <span><span class="swatch hover"></span>Survole — rouge transparent</span>
     <span><span class="swatch idle"></span>Inutile — replié</span>
     <span><span class="swatch open"></span>Corde à vide en cours de sonner</span>
     <span class="note">Cordes : <b style="color:#c4a965">bronze</b> = filées (E2 A2 D3) / <b style="color:#d4d6d9">argent</b> = unies (G3 B3 E4)</span>
@@ -185,10 +185,14 @@ const BOARD_BOT_Y      = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;  // 374
 const FOREARM_TOP_Y    = BOARD_BOT_Y + 8;                     // 382 — forearm emerges below here
 
 /* ---------- Hand geometry (palm ABOVE, forearm BELOW) --------------------- */
-const PALM_TOP_Y  = 50;          // top of palm
-const PALM_Y      = 118;         // palm centre
-const MCP_Y       = 180;         // MCP line = bottom of palm, just above the board (206)
+const PALM_TOP_Y  = 50;          // rest top of palm
+const PALM_Y      = 118;         // rest palm centre
+const MCP_Y       = 180;         // rest MCP line; dynamic in the simulator
 const PALM_HALF_WIDTH = 72;
+const PALM_CENTER_FROM_MCP = 62;
+const PALM_TOP_FROM_MCP = 130;
+const MCP_MIN_Y = 164;
+const MCP_MAX_Y = 232;
 
 /* Index leftmost, pinky rightmost. */
 const MCP_OFFSETS = { index: -52, middle: -18, ring: +15, pinky: +49 };
@@ -198,19 +202,20 @@ const HOME_FRET_OFFSET = { index: 0, middle: 1, ring: 2, pinky: 3 };
    middle longest, pinky shortest.  Mobility mirrors common left-hand guitar
    mechanics: index/middle are independent; ring/pinky have less abduction and
    tend to follow the wrist/forearm more. */
-const FINGER_TOTAL = { index: 216, middle: 236, ring: 224, pinky: 202 };
+const FINGER_TOTAL = { index: 176, middle: 194, ring: 184, pinky: 158 };
 const FINGER_SEG   = {
   index:  { proximal: 0.44, middle: 0.28, distal: 0.28 },
   middle: { proximal: 0.43, middle: 0.29, distal: 0.28 },
   ring:   { proximal: 0.44, middle: 0.28, distal: 0.28 },
   pinky:  { proximal: 0.46, middle: 0.27, distal: 0.27 },
 };
-const FINGER_WIDTH = { index: 19, middle: 21, ring: 19, pinky: 16 };
-const NAIL_RADIUS  = { index: 10, middle: 11, ring: 10, pinky: 9 };
-const MAX_ABDUCTION_PX = { index: 88, middle: 80, ring: 66, pinky: 56 };
-const FOLD_X_OFFSET = { index: -16, middle: -5, ring: 8, pinky: 20 };
-const FOLD_Y_OFFSET = { index: 30, middle: 27, ring: 26, pinky: 23 };
-const HOVER_Y_OFFSET = -18;       // hover above string plane, visibly not pressing
+const FINGER_WIDTH = { index: 22, middle: 24, ring: 22, pinky: 19 };
+const NAIL_RADIUS  = { index: 12, middle: 13, ring: 12, pinky: 10 };
+const MAX_ABDUCTION_PX = { index: 70, middle: 64, ring: 52, pinky: 43 };
+const DESIRED_REACH_Y = { index: 58, middle: 65, ring: 62, pinky: 50 };
+const FOLD_X_OFFSET = { index: -14, middle: -4, ring: 8, pinky: 18 };
+const FOLD_Y_OFFSET = { index: 24, middle: 22, ring: 21, pinky: 19 };
+const HOVER_Y_OFFSET = -12;       // hover above string plane, visibly not pressing
 const UPCOMING_WINDOW_SEC = 1.8;  // red hover if a finger is needed soon
 
 /* Folded rest: tip short distance below MCP, staying ABOVE the board
@@ -219,7 +224,7 @@ const REST_TIP_Y_OFFSET = 28;
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 const FINGER_LABEL = { index: "i", middle: "m", ring: "r", pinky: "p" };
-const HAND_MODEL_LABEL = "modele biomecanique v3 compact";
+const HAND_MODEL_LABEL = "modele biomecanique v4 IK";
 
 /* Rotation coefficients: how many fret-widths each finger's MCP shifts per
    unit of hand rotation. Positive = toward higher frets (nut side = index goes
@@ -337,6 +342,10 @@ function interpPoint(a, b, t) {
   return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
 }
 
+function angleDeg(a, b) {
+  return Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+}
+
 /* ---------- Finger kinematics (curved projected phalanges) ----------------
    This is intentionally not a full 3D anatomical solver.  It is a constrained
    2.5D model tuned to guitar photographs:
@@ -355,7 +364,7 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   }
 
   let d  = Math.hypot(dx, dy);
-  const roleReach = role === "idle" ? 0.55 : role === "hover" ? 0.82 : 0.92;
+  const roleReach = role === "idle" ? 0.58 : role === "hover" ? 0.82 : 0.96;
   const maxReach = L * roleReach;
   if (d > maxReach) {
     const k = maxReach / d;
@@ -376,8 +385,8 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   const roleBoost = role === "idle" ? 0.38 : role === "hover" ? 0.18 : 0.04;
   const flexion = clamp(baseFlex + roleBoost, 0, 0.95);
   const sideBias = { index: -0.18, middle: -0.05, ring: 0.12, pinky: 0.24 }[name];
-  const curl = (20 + 48 * flexion) * (role === "active" || role === "planted" ? 0.7 : 1.0);
-  const tuck = (role === "idle" ? 18 : role === "hover" ? 7 : 0)
+  const curl = (12 + 34 * flexion) * (role === "active" || role === "planted" ? 0.55 : 0.9);
+  const tuck = (role === "idle" ? 14 : role === "hover" ? 5 : 0)
     * { index: 0.65, middle: 0.8, ring: 1.08, pinky: 1.24 }[name];
 
   const mcp = { x: mcpX, y: mcpY };
@@ -522,11 +531,69 @@ function computeTargetRotation(s, smoothHandPos) {
   return Math.max(-MAX_HAND_ROT, Math.min(MAX_HAND_ROT, num / ROT_SQ_SUM));
 }
 
+function collectHandTargets(s) {
+  const targets = [];
+  for (const f of FINGER_ORDER) {
+    const active = s.active[f];
+    const planted = s.planted[f];
+    const hover = s.upcoming[f];
+    const src = active || planted || hover;
+    if (!src || src.fret === 0) continue;
+    const strings = src.strings || [src.string];
+    const ymin = stringY(strings[0]);
+    const ymax = stringY(strings[strings.length - 1]);
+    targets.push({
+      finger: f,
+      fret: src.fret,
+      x: pressX(src.fret),
+      y: (ymin + ymax) / 2 + (hover && !active && !planted ? HOVER_Y_OFFSET : 0),
+      weight: active ? 1.0 : planted ? 0.72 : 0.28,
+    });
+  }
+  return targets;
+}
+
+function solveTargetHandPose(s, fallbackHandPos) {
+  const targets = collectHandTargets(s);
+  if (!targets.length) {
+    return {
+      handPos: s.handPos,
+      mcpY: MCP_Y,
+      rotation: 0,
+      forearmBias: 0,
+    };
+  }
+
+  let wSum = 0, hpSum = 0, mcpYSum = 0, rotNum = 0;
+  for (const t of targets) {
+    const home = HOME_FRET_OFFSET[t.finger];
+    const reachY = DESIRED_REACH_Y[t.finger];
+    wSum += t.weight;
+    hpSum += (t.fret - home) * t.weight;
+    mcpYSum += (t.y - reachY) * t.weight;
+  }
+
+  const handPos = clamp(hpSum / wSum, Math.max(1, fallbackHandPos - 2.5), fallbackHandPos + 2.5);
+  for (const t of targets) {
+    const delta = t.fret - handPos - HOME_FRET_OFFSET[t.finger];
+    rotNum += ROT_COEFF[t.finger] * delta * t.weight;
+  }
+
+  const lowStringPull = targets.reduce((acc, t) => acc + (t.y - STRING_Y_TOP) * t.weight, 0) / wSum;
+  return {
+    handPos,
+    mcpY: clamp(mcpYSum / wSum, MCP_MIN_Y, MCP_MAX_Y),
+    rotation: clamp(rotNum / Math.max(0.001, ROT_SQ_SUM * (wSum / targets.length)), -MAX_HAND_ROT, MAX_HAND_ROT),
+    forearmBias: clamp((lowStringPull - 55) * 0.28, -18, 26),
+  };
+}
+
 /* ---------- Hand simulator ------------------------------------------------ */
 class HandSimulator {
   constructor() {
     this.palmX = pressX(3);
     this.smoothHandPos = 3;
+    this.mcpY = MCP_Y;
     this.handRotation  = 0;   // fret units; positive = index-side shifts right
     this.wristDeviation = 0;  // px lateral bend; visible compensation at wrist
     this.forearmDrift   = 0;  // px; forearm moves with the wrist on stretches
@@ -535,7 +602,7 @@ class HandSimulator {
     for (const f of FINGER_ORDER) {
       this.fingers[f] = {
         tipX: this.palmX + MCP_OFFSETS[f],
-        tipY: MCP_Y + REST_TIP_Y_OFFSET,
+        tipY: this.mcpY + REST_TIP_Y_OFFSET,
         role: "idle",       // "active" | "planted" | "hover" | "idle"
         fret: 0,
         strings: [],        // string range under the finger if barring
@@ -545,18 +612,18 @@ class HandSimulator {
   }
   update(t, dt, frames, chordGroups) {
     const s = sampleState(t, frames);
-    const targetPalm = (pressX(s.handPos) + pressX(s.handPos + 3)) / 2;
-    // Snap instantly for small shifts (≤2 frets) so fingers never appear
-    // left of the palm due to animation lag.  Smooth large jumps (>2 frets).
-    const hpDelta = Math.abs(s.handPos - this.smoothHandPos);
-    const smoothK = hpDelta <= 2 ? 1.0 : Math.min(1, dt / 0.06);
+    const pose = solveTargetHandPose(s, this.smoothHandPos);
+    const targetPalm = (pressX(pose.handPos) + pressX(pose.handPos + 3)) / 2;
+    const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
+    const smoothK = hpDelta <= 2 ? Math.min(1, dt / 0.055) : Math.min(1, dt / 0.11);
     this.palmX += (targetPalm - this.palmX) * smoothK;
-    this.smoothHandPos += (s.handPos - this.smoothHandPos) * smoothK;
-    const targetRot = computeTargetRotation(s, this.smoothHandPos);
+    this.smoothHandPos += (pose.handPos - this.smoothHandPos) * smoothK;
+    this.mcpY += (pose.mcpY - this.mcpY) * Math.min(1, dt / 0.10);
+    const targetRot = pose.rotation;
     this.handRotation += (targetRot - this.handRotation) * Math.min(1, dt / 0.12);
     const targetWristDeviation = clamp(this.handRotation * WRIST_DEV_GAIN, -26, 26);
     this.wristDeviation += (targetWristDeviation - this.wristDeviation) * Math.min(1, dt / 0.14);
-    const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + this.wristDeviation * 0.9, -34, 34);
+    const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + this.wristDeviation * 0.9 + pose.forearmBias, -34, 42);
     this.forearmDrift += (targetForearmDrift - this.forearmDrift) * Math.min(1, dt / 0.18);
 
     // ---- Chord-snap logic ----
@@ -574,6 +641,7 @@ class HandSimulator {
     for (const f of FINGER_ORDER) {
       const fg   = this.fingers[f];
       const mcpX = pressX(this.smoothHandPos + HOME_FRET_OFFSET[f] + this.handRotation * ROT_COEFF[f]);
+      const mcpY = this.mcpY;
       const act  = s.active[f];
       const pl   = s.planted[f];
       const up   = s.upcoming[f];
@@ -624,7 +692,7 @@ class HandSimulator {
         role = "hover";
       } else {
         targetX = mcpX + FOLD_X_OFFSET[f];
-        targetY = MCP_Y + FOLD_Y_OFFSET[f];
+        targetY = mcpY + FOLD_Y_OFFSET[f];
         role = "idle";
       }
       // Faster approach when actively striking; slower for idle. Barring
@@ -760,6 +828,9 @@ function drawHand(layer, shadowLayer, sim, t) {
   clearLayer(layer);
   clearLayer(shadowLayer);
   const palmX = sim.palmX;
+  const mcpY = sim.mcpY;
+  const palmY = mcpY - PALM_CENTER_FROM_MCP;
+  const palmTopY = mcpY - PALM_TOP_FROM_MCP;
   const wristX = palmX + sim.wristDeviation;
   const forearmX = wristX + sim.forearmDrift;
   const palmHalfW = (pressX(sim.smoothHandPos + 3) - pressX(sim.smoothHandPos)) / 2 + 18;
@@ -800,53 +871,53 @@ function drawHand(layer, shadowLayer, sim, t) {
 
   /* Palm (ABOVE the neck): top near wrist, bottom at MCP line. */
   layer.appendChild(el("path", {
-    d: `M${palmMcpL},${MCP_Y - 4}
-        Q${palmX - palmHalfW - 8},${PALM_Y} ${wristX - palmHalfW + 8},${PALM_TOP_Y + 18}
-        Q${wristX},${PALM_TOP_Y - Math.abs(sim.wristDeviation) * 0.12} ${wristX + palmHalfW - 8},${PALM_TOP_Y + 18}
-        Q${palmX + palmHalfW + 6},${PALM_Y} ${palmMcpR},${MCP_Y - 4}
+    d: `M${palmMcpL},${mcpY - 4}
+        Q${palmX - palmHalfW - 10},${palmY} ${wristX - palmHalfW + 8},${palmTopY + 18}
+        Q${wristX},${palmTopY - Math.abs(sim.wristDeviation) * 0.12} ${wristX + palmHalfW - 8},${palmTopY + 18}
+        Q${palmX + palmHalfW + 10},${palmY} ${palmMcpR},${mcpY - 4}
         Z`,
     fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
   }));
 
   /* Subtle knuckle crease at the MCP line */
   layer.appendChild(el("path", {
-    d: `M${idxMcpX},${MCP_Y - 10}
-        Q${palmX},${MCP_Y - 4} ${pnkMcpX},${MCP_Y - 10}`,
+    d: `M${idxMcpX},${mcpY - 10}
+        Q${palmX},${mcpY - 4} ${pnkMcpX},${mcpY - 10}`,
     fill: "none", stroke: "rgba(130,85,65,0.35)", "stroke-width": 1,
   }));
 
   /* Painting rules:
-     - active/planted fingers that press the fret are blue;
-     - hovering fingers that are prepared but not pressing are translucent red;
+     - active fingers are opaque skin, because they are really pressing;
+     - planted-but-silent fingers are translucent light blue;
+     - hovering fingers are translucent light red;
      - unused fingers fold and fade away. */
   const ROLE = {
-    active:  { ring: "#43c7ff", ringFill: "rgba(67,199,255,0.34)",
-               bodyFill: "rgba(120,195,255,0.58)", bodyStroke: "rgba(42,162,220,0.95)",
-               barFill: "rgba(67,199,255,0.32)", barStroke: "#43c7ff",
-               nailFill: "#e9fbff", nailStroke: "#0d4d5c", textColor: "#10313a",
+    active:  { ring: "#ffb347", ringFill: "rgba(255,179,71,0.28)",
+               bodyFill: "url(#skinGrad)", bodyStroke: "rgba(170,120,95,0.72)",
+               barFill: "rgba(255,179,71,0.22)", barStroke: "#ffb347",
+               nailFill: "#fff7ef", nailStroke: "rgba(95,60,45,0.78)", textColor: "#3a241c",
                opacity: 1.0 },
-    planted: { ring: "#1fb8d9", ringFill: "rgba(31,184,217,0.28)",
-               bodyFill: "rgba(88,185,225,0.38)", bodyStroke: "rgba(31,184,217,0.72)",
-               barFill: "rgba(31,184,217,0.24)", barStroke: "#1fb8d9",
-               nailFill: "#9ceeff", nailStroke: "#0d4d5c", textColor: "#0c3038",
-               opacity: 0.68 },
-    hover:   { ring: "#ff5f57", ringFill: "rgba(255,95,87,0.14)",
-               bodyFill: "rgba(255,90,80,0.24)", bodyStroke: "rgba(255,95,87,0.62)",
+    planted: { ring: "#72dcff", ringFill: "rgba(114,220,255,0.24)",
+               bodyFill: "rgba(145,224,255,0.42)", bodyStroke: "rgba(114,220,255,0.85)",
+               barFill: "rgba(145,224,255,0.26)", barStroke: "#72dcff",
+               nailFill: "rgba(230,250,255,0.70)", nailStroke: "rgba(40,120,150,0.78)", textColor: "#113844",
+               opacity: 0.74 },
+    hover:   { ring: "#ff918b", ringFill: "rgba(255,145,139,0.18)",
+               bodyFill: "rgba(255,158,150,0.44)", bodyStroke: "rgba(255,145,139,0.88)",
                barFill: "none", barStroke: "none",
-               nailFill: "rgba(255,210,205,0.78)", nailStroke: "#9d2d28", textColor: "#571512",
-               opacity: 0.48 },
+               nailFill: "rgba(255,235,232,0.72)", nailStroke: "rgba(160,55,50,0.78)", textColor: "#5c1e1b",
+               opacity: 0.62 },
     idle:    { ring: "#9b4a45", ringFill: "rgba(255,95,87,0.08)",
-               bodyFill: "rgba(226,182,148,0.26)", bodyStroke: "rgba(255,95,87,0.26)",
+               bodyFill: "rgba(226,182,148,0.42)", bodyStroke: "rgba(140,95,75,0.36)",
                barFill: "none",  barStroke: "none",
-               nailFill: "rgba(245,245,247,0.46)", nailStroke: "rgba(120,70,70,0.45)",
-               textColor: "rgba(60,35,35,0.65)", opacity: 0.36 },
+               nailFill: "rgba(245,236,226,0.58)", nailStroke: "rgba(120,70,70,0.45)",
+               textColor: "rgba(60,35,35,0.65)", opacity: 0.50 },
   };
 
   /* Draw each finger */
   for (const fname of FINGER_ORDER) {
     const mcpX = pressX(sim.smoothHandPos + HOME_FRET_OFFSET[fname] + sim.handRotation * ROT_COEFF[fname])
                + sim.wristDeviation * 0.12;
-    const mcpY = MCP_Y;
     const fg   = sim.fingers[fname];
     const ik   = solveFinger(mcpX, mcpY, fg.tipX, fg.tipY, fname, fg.role);
     const w    = FINGER_WIDTH[fname];
@@ -946,11 +1017,23 @@ function drawHand(layer, shadowLayer, sim, t) {
       }));
     }
 
-    /* Nail disc + letter (i / m / r / p) — high contrast. */
-    layer.appendChild(el("circle", {
-      cx: ik.tip.x, cy: ik.tip.y, r: NAIL_RADIUS[fname],
+    /* Fingernail: wider oval, rotated with the distal phalanx. */
+    const nailAngle = angleDeg(ik.dip, ik.tip);
+    layer.appendChild(el("ellipse", {
+      cx: ik.tip.x, cy: ik.tip.y,
+      rx: NAIL_RADIUS[fname] * 1.12,
+      ry: NAIL_RADIUS[fname] * 0.78,
+      transform: `rotate(${nailAngle.toFixed(2)} ${ik.tip.x.toFixed(2)} ${ik.tip.y.toFixed(2)})`,
       fill: pal.nailFill,
       stroke: pal.nailStroke, "stroke-width": 1.6,
+    }));
+    layer.appendChild(el("ellipse", {
+      cx: ik.tip.x - 2, cy: ik.tip.y - 2,
+      rx: NAIL_RADIUS[fname] * 0.36,
+      ry: NAIL_RADIUS[fname] * 0.18,
+      transform: `rotate(${nailAngle.toFixed(2)} ${ik.tip.x.toFixed(2)} ${ik.tip.y.toFixed(2)})`,
+      fill: "rgba(255,255,255,0.35)",
+      stroke: "none",
     }));
     layer.appendChild(el("text", {
       x: ik.tip.x, y: ik.tip.y + 5, "text-anchor": "middle",
