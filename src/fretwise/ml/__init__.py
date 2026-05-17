@@ -209,10 +209,20 @@ def extract_chord_features(
 ) -> list[list[float]]:
     """Build the 24-feature vector for each fretted chord note.
 
-    Aligns with the feature spec shipped by GuitarDataSet (Phase 2 classifier).
-    "below" / "above" refer to the **string-ascending** ordering of fretted
-    notes (string 1 = high e first → string 6 = low E last). Open strings are
-    counted via ``n_open`` but not present as ChordNote.
+    Aligns with the feature spec shipped by GuitarDataSet (Phase 2 classifier)
+    and verified against ``GuitarDataset-feature-calibration.json``.
+
+    Convention:
+      - Fretted notes are sorted by ``string_idx`` ascending = ``string_num``
+        descending = **low E (string 6) first, high e (string 1) last**.
+      - ``position_in_chord``: 0.0 at the first (bassiest) fretted note,
+        1.0 at the last (treble).
+      - ``gap_below`` / ``gap_above``: signed fret delta to the preceding /
+        following note in the sort order. -1 also marks "no neighbour".
+      - ``string_gap_below`` / ``string_gap_above``: **absolute** string_num
+        delta to the preceding / following note in the sort order.
+      - ``ctx_fret_N``: relative_fret of the Nth fretted note in sort order
+        (0-indexed), padded with -1 when fewer than 6 fretted notes.
 
     Args:
         chord_notes: Fretted notes of the chord (fret > 0).
@@ -225,7 +235,9 @@ def extract_chord_features(
     if not chord_notes:
         return []
 
-    sorted_by_string = sorted(enumerate(chord_notes), key=lambda p: p[1].string)
+    sorted_by_string = sorted(
+        enumerate(chord_notes), key=lambda p: p[1].string, reverse=True,
+    )
     sorted_chord = [n for _, n in sorted_by_string]
 
     frets = [n.fret for n in sorted_chord]
@@ -234,19 +246,16 @@ def extract_chord_features(
     fret_span = max_fret - min_fret
     n_fretted = len(sorted_chord)
     n_played = n_fretted + n_open
-    # is_barre: true at the chord level if any two notes share min_fret AND
-    # at least one ChordNote has is_barre_candidate True.
     barre_active = (
         sum(1 for n in sorted_chord if n.fret == min_fret) >= 2
         and any(n.is_barre_candidate for n in sorted_chord if n.fret == min_fret)
     )
     is_barre = 1.0 if barre_active else 0.0
 
-    # ctx_fret_0..5: relative_fret per string slot 1..6, padded with -1.
+    # ctx_fret_N: relative_fret of the Nth fretted note in sort order.
     ctx_relative = [-1.0] * 6
-    for n in sorted_chord:
-        if 1 <= n.string <= 6:
-            ctx_relative[n.string - 1] = float(n.fret - min_fret)
+    for i, n in enumerate(sorted_chord[:6]):
+        ctx_relative[i] = float(n.fret - min_fret)
 
     feature_vectors: list[list[float]] = [[0.0] * 24 for _ in chord_notes]
 
@@ -257,11 +266,12 @@ def extract_chord_features(
 
         gap_below = float(note.fret - prev_note.fret) if prev_note is not None else -1.0
         gap_above = float(next_note.fret - note.fret) if next_note is not None else -1.0
+        # string_gap is absolute (sort order across-strings step magnitude).
         string_gap_below = (
-            float(note.string - prev_note.string) if prev_note is not None else -1.0
+            float(abs(note.string - prev_note.string)) if prev_note is not None else 0.0
         )
         string_gap_above = (
-            float(next_note.string - note.string) if next_note is not None else -1.0
+            float(abs(next_note.string - note.string)) if next_note is not None else 0.0
         )
         fret_below_val = float(prev_note.fret) if prev_note is not None else 0.0
 
