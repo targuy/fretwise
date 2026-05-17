@@ -9,7 +9,7 @@
 
 ## DOING
 
-- `[data]` R-C6 string-diagonal investigation préliminaire — pattern miroir D-shape barre identifié (DEC-007). Findings dans decisions log.
+- `[pm]` **B integration** — rewire `cost_position_shift` segment-aware, behind config flag, validation par audit + golden set (DEC-008 PO go)
 
 ## TODO — Priority 1 (next 24h)
 
