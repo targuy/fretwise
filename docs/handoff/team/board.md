@@ -9,7 +9,7 @@
 
 ## DOING
 
-- `[pm]` Idle — waiting for GDS Phase 2 progress or PO redirect
+- `[pm]` Idle — Phase 2 ML intégrée. Attente demande #13 (features calibration) côté GDS pour validation finale
 
 ## TODO — Priority 1 (next 24h)
 
@@ -43,6 +43,7 @@
 
 ### Session 2026-05-17
 
+- `[pm]` **Phase 2 ML INTÉGRÉE** (`7261f0f`) — LearnedChordFingerClassifier + extract_chord_features + resolve_chord_learned_fingers. ONNX 97.7% accuracy. Opt-in via `run_pipeline(chord_finger_classifier=...)`. 950/951 tests verts. Fretwise-007 envoyé.
 - `[data]` **Quality.py tuning-awareness fix** (`003f19e`) — DEC-010 — infère tuning per-string depuis events. Corpus bad 22.6 % → **6.7 %** (re-classified 235 false positives drop-D/half-step). Métrique fiable maintenant.
 - `[pm]` Fretwise-006-handoff.md à GDS — B integration livrée + mesures + roadmap implications
 - `[data]` **Mesure B integration** : MIDDLE +1.81 pp, ratio RP/IM 0.5696 → 0.555, golden set +1 net (2 fix Bb King, 1 régression Cream)
