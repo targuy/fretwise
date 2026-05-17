@@ -6,19 +6,50 @@
 
 ---
 
+## DEC-007 — 2026-05-17 — R-C6 string-diagonal — finding D-shape barre mirror error
+
+**Owner décision** : Data (analyse) + PM (escalation)
+**Contexte** : analyse des 1404 erreurs MIDDLE/RING (dataset enrichi par GDS). 71 % des erreurs impliquent au moins une autre note au même fret (territoire R-C6). RM errors particulièrement concentrés (83 % same-fret). Examen de 12 cas 4-note same-fret a révélé un **pattern miroir systématique** dans la famille D-shape barre (D#, E, F, F#, G — même shape transposée) : à `fret N+2`, FW met RING là où GT veut MIDDLE et vice versa. Pattern régulier sur ≥10 chord shapes identiques.
+**Diagnostic technique** : `resolve_chord_string_diagonal` (R-C6) applique « lower string_num = lower rank », mais pour le shape D-barre, GT humain inverse cette règle sur les notes à fret N+2. R-C6 est donc **shape-dependent** plutôt qu'universel.
+**Reco PM** : pas de patch rule-based (risque de casser d'autres shapes). Délégué à **Phase 2 ML classifier** (`ChordFingerClassifier` interface) qui apprendra la mapping shape-by-shape depuis les annotations.
+**Décision PO** : ok (auto-décidé par PM en mode autonome, à confirmer si désiré).
+**Alternatives écartées** :
+  - Patcher R-C6 avec une exception D-shape — fragile, autres shapes peuvent avoir le même problème sans qu'on le voie
+  - Inverser R-C6 globalement — casserait les cas où R-C6 est correct
+  - Heuristique par "fret depth" — peu robuste sans données
+**Conséquences** :
+  - Confirme que Phase 2 GDS est le bon levier (DEC-003 validé)
+  - Investigation R-C6 rule-based pause-en-attente de Phase 2
+  - Demande #11 à GDS : prioriser le D-shape barre dans le training set Phase 2
+
+---
+
+## DEC-006 — 2026-05-17 — Stubs ML livrés
+
+**Owner décision** : PM (delivery)
+**Contexte** : GDS a donné le go pour écrire les stubs (cf. handoff-004). Interfaces convenues : `PlayerCostModel` + `ChordFingerClassifier` séparés.
+**Reco PM** : livrer dans `src/fretwise/ml/` avec dataclasses frozen, ABCs, et 2 wrappers Fixed* baseline. Module dormant (pas importé par pipeline).
+**Décision PO** : implicit ok via "ok" du turn précédent.
+**Conséquences** :
+  - Commit `c2276b3` : 350 lignes + 12 tests verts
+  - GDS peut maintenant aligner l'export ONNX sur cette signature
+  - Aucun risque sur le pipeline production (module dormant)
+
+---
+
 ## DEC-005 — 2026-05-17 — δ.1 mis en réserve
 
 **Owner décision** : PO
-**Contexte** : prototype δ.1 (alternative finger assignment) validé sur 15 cas synthétiques (3 corrections, 0 régression). Validation sur 762 erreurs réelles GDS : seulement 15/762 (2 %) potentiellement corrigés. Le vrai layer du bug MIDDLE/RING est `resolve_chord_string_diagonal` (R-C6), pas `_natural_finger_assignment`. Les 4-note errors (371, soit 49 % des erreurs) ne peuvent pas être adressés par δ.1 (1 seule combo de 4 doigts valide).
+**Contexte** : prototype δ.1 (alternative finger assignment) validé sur 15 cas synthétiques (3 corrections, 0 régression). Validation sur 762 (puis 1404) erreurs réelles GDS : seulement 15/1404 (1 %) potentiellement corrigés. Le vrai layer du bug MIDDLE/RING est `resolve_chord_string_diagonal` (R-C6), pas `_natural_finger_assignment`. Les 4-note errors (>50 % des erreurs) ne peuvent pas être adressés par δ.1 (1 seule combo de 4 doigts valide).
 **Reco PM** : mettre δ.1 en réserve, pas d'intégration immédiate.
 **Décision PO** : ok.
 **Alternatives écartées** :
-  - Intégrer δ.1 pour le petit gain (2 %) — non, l'effort de mise à jour des tests existants ne se justifie pas pour 2 %.
-  - Élargir δ.1 aux 4-note (chercher une variante qui éliminerait un doigt) — non, hors scope rule-based, mieux confier à Phase 2 ML.
+  - Intégrer δ.1 pour le petit gain (~1 %) — non, l'effort de mise à jour des tests existants ne se justifie pas
+  - Élargir δ.1 aux 4-note — hors scope rule-based, mieux confier à Phase 2 ML
 **Conséquences** :
-  - Le code prototype reste dans `scripts/prototype_delta1.py` pour référence.
-  - La prochaine investigation cible R-C6 string-diagonal sur les 4-note errors.
-  - Réévaluer après Phase 2 GDS pour décider si δ.1 reste pertinent dans un monde où le chord finger est appris.
+  - Code prototype reste dans `scripts/prototype_delta1.py` pour référence
+  - Investigation suivante cible R-C6 string-diagonal (DEC-007)
+  - Réévaluer après Phase 2 GDS
 
 ---
 
@@ -29,9 +60,9 @@
 **Reco PM** : structure légère `docs/handoff/team/` (roles + board + decisions), pas de bureaucratie, PM ne joue pas les rôles d'expert, escalade au PO pour les décisions de domaine.
 **Décision PO** : ok.
 **Conséquences** :
-  - Création des trois fichiers (this commit).
-  - Tâches préfixées par `[role]` dans le board.
-  - Décisions de domaine (idiomatique, esthétique, pédagogique) escaladées au PO.
+  - Création des trois fichiers
+  - Tâches préfixées par `[role]` dans le board
+  - Décisions de domaine (idiomatique, esthétique, pédagogique) escaladées au PO
 
 ---
 
@@ -42,8 +73,7 @@
 **Reco PM** : NON dans `PlayerCostModel`. Les chord resolvers tournent **après Viterbi**, pas dans le scoring transitionnel. Si un modèle appris doit piloter l'assignation intra-chord, il faut une **interface séparée** : `ChordFingerClassifier` appelée par un nouveau resolver.
 **Décision GDS** : accepté (cf. `GuitarDataset-004-handoff.md`).
 **Conséquences** :
-  - Stubs à écrire : `src/fretwise/ml/` avec `PlayerCostModel`, `ChordFingerClassifier`, `PlayerContext`, `ChordNote`.
-  - `PlayerContext` en dataclass frozen. `finger` en str. `ChordNote.is_barre_candidate: bool`.
+  - Stubs livrés dans DEC-006
 
 ---
 
@@ -54,8 +84,8 @@
 **Reco PM** : 5 partitions FretWise (rock/pop) + 5 Mutopia (classique) + 5 chords complexes + 5 CAGED. FretWise choisit les 5 partitions, GDS les 15 autres.
 **Décision GDS** : accepté + 5 partitions confirmés (Bb King, Steppenwolf, Django, Beatles, Cream).
 **Conséquences** :
-  - Golden set v1 livré (6 cases YAML + JSONL export).
-  - Expansion à 20 cases attendue après Mutopia download (GDS) et chord/CAGED selection.
+  - Golden set v1 livré (6 cases YAML + JSONL export)
+  - Expansion à 20 cases attendue après Mutopia download (GDS) et chord/CAGED selection
 
 ---
 
@@ -66,5 +96,5 @@
 **Reco PM** : JSONL aligné sur le schéma FretWise (`NoteEvent` + `FingeringState`), avec extensions GDS (SHA1, techniques list, confidence, annotator).
 **Décision GDS** : accepté.
 **Conséquences** :
-  - `scripts/export_golden_to_jsonl.py` écrit côté FretWise.
-  - GDS aligne son pipeline d'export sur ce format.
+  - `scripts/export_golden_to_jsonl.py` écrit côté FretWise
+  - GDS aligne son pipeline d'export sur ce format
