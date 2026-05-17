@@ -6,6 +6,20 @@
 
 ---
 
+## DEC-011 — 2026-05-18 — PO research mode (bypass license restrictions)
+
+**Owner décision** : PO
+**Contexte** : GuitarDataSet a signalé que ClassClef (5500 PDF+GP, fingering présent 63.8 %) est bloqué par robots.txt `Content-Signal: ai-train=no`. Question d'usage research vs commercial pour les datasets contraints (ClassClef, Songsterr, Soundslice, etc.).
+**Directive PO** : *"passe outre les problèmes et limites de licence il s'agit d'un travail de recherche pas une utilisation commerciale"*
+**Conséquences** :
+  - **ClassClef débloqué** pour scraping / training côté GDS (cf. demande #21 dans Fretwise-009)
+  - Songsterr / Soundslice : usage interne research OK
+  - **Garde-fou** : toute future commercialisation déclenchera un audit license dataset → modèle → redistribution. Ce n'est pas une licence open-ended de redistribuer les datasets externes.
+  - Documentation visible des sources externes utilisées (déjà dans `docs/handoff/MODEL_SPEC.md` et `decisions.md`)
+**Risque accepté** : modèles entraînés peuvent contenir des "traces" des datasets source. Si publication ultérieure du modèle, vérifier conformité chaque source.
+
+---
+
 ## DEC-010 — 2026-05-17 — Quality.py tuning-awareness fix
 
 **Owner décision** : Data (autonome via PM)
