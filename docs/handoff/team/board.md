@@ -9,16 +9,16 @@
 
 ## DOING
 
-- `[pm]` Setup team docs (roles, board, decisions)
+- `[data]` R-C6 string-diagonal investigation préliminaire — pattern miroir D-shape barre identifié (DEC-007). Findings dans decisions log.
 
 ## TODO — Priority 1 (next 24h)
 
-- `[pm]` Écrire stubs ML `src/fretwise/ml/` (PlayerCostModel, ChordFingerClassifier, PlayerContext, ChordNote) — go reçu de GDS dans handoff-004
-- `[data]` Investiguer R-C6 string-diagonal sur les 371 erreurs 4-note — c'est le vrai layer du bug MIDDLE/RING (δ.1 a confirmé que ce n'est pas `_natural_finger_assignment`)
 - `[music]` Valider GT (ground truth) idiomatique pour les 4 XFAIL du golden set :
   - Bb King - The Thrill Is Gone, m8 et m94 (PINKY-spam — quels doigts un humain joue ?)
   - Steppenwolf - Born To Be Wild, m23 (PINKY run)
   - Django Reinhardt - Nuages whole-piece (42% PINKY — vraiment trop ou idiomatique jazz manouche ?)
+- `[data]` Demande #11 à GDS : per-string mapping complet pour D-shape barre family (≥10 chord shapes affectés) — input pour Phase 2 ML
+- `[pm]` Attendre réponse GDS aux demandes #8 / #9 / #10 (per-string mapping, analyse R-C6 friendly, sous-corpus curé)
 
 ## TODO — Priority 2 (cette semaine)
 
@@ -43,6 +43,11 @@
 
 ### Session 2026-05-17
 
+- `[pm]` Stubs ML `src/fretwise/ml/` (`c2276b3`) — PlayerCostModel + ChordFingerClassifier + 12 tests verts. Module dormant.
+- `[pm]` Team docs setup (`4390daf`) — roles + board + decisions
+- `[data]` Validation δ.1 sur 1404 erreurs réelles (échantillon enrichi par GDS) — confirme 1 % fix, le bug est au layer R-C6 → δ.1 en réserve
+- `[data]` Analyse R-C6 : 71 % des erreurs same-fret, D-shape barre miroir systématique identifié → escalade Phase 2 ML
+- `[pm]` Round-trips 1-4 GDS avec watcher actif (`br8tt1kxp`)
 - `[pm]` A' tolérance hp shift (`2480d8e`) — gain -1.98 % RP/IM corpus 2M notes
 - `[pm]` B v0 segmentation module (`95e4d63`) — module pur, 15 tests, dormant
 - `[pm]` Fix bug `resolve_chord_partial_barre` IndexError (`1f42771`) — débloque 27 morceaux
