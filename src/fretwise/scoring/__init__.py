@@ -1343,7 +1343,9 @@ def resolve_chord_partial_barre(
                     break
             if chosen is None:
                 # Fallback: lower rank (stretch backward) — rare.
-                for off in range(max(0, offset) - 1, 0, -1):
+                # Clamp the start at 3 (last valid _FRETTED_FINGERS index) for
+                # the case where the note sits more than 4 frets above the barre.
+                for off in range(min(max(0, offset) - 1, 3), 0, -1):
                     fng = _FRETTED_FINGERS[off]
                     if fng in available:
                         chosen = fng
