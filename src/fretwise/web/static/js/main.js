@@ -1676,6 +1676,11 @@ function _postHandVizData() {
   _postHandVizTime();
 }
 
+function _reloadHandVizFrame() {
+  if (!handVizFrame) return;
+  handVizFrame.src = `/static/hand_viz.html?v=${Date.now()}`;
+}
+
 function _postHandVizTime() {
   if (!handVizFrame || !handVizFrame.contentWindow) return;
   if (!handVizPanel || handVizPanel.style.display === 'none') return;
@@ -1692,7 +1697,10 @@ function _toggleHandViz() {
   const visible = handVizPanel.style.display !== 'none';
   handVizPanel.style.display = visible ? 'none' : 'flex';
   if (btnHandViz) btnHandViz.classList.toggle('tb-btn-active', !visible);
-  if (!visible) setTimeout(_postHandVizData, 100);
+  if (!visible) {
+    _reloadHandVizFrame();
+    setTimeout(_postHandVizData, 250);
+  }
 }
 
 if (btnHandViz) btnHandViz.addEventListener('click', _toggleHandViz);
@@ -1703,7 +1711,10 @@ if (handVizClose) {
     if (btnHandViz) btnHandViz.classList.remove('tb-btn-active');
   });
 }
-if (handVizResync) handVizResync.addEventListener('click', _postHandVizData);
+if (handVizResync) handVizResync.addEventListener('click', () => {
+  _reloadHandVizFrame();
+  setTimeout(_postHandVizData, 250);
+});
 
 // Make the panel draggable by its header.
 if (handVizDrag && handVizPanel) {
