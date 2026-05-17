@@ -9,8 +9,7 @@
 
 ## DOING
 
-- `[data]` Mesure delta B integration sur corpus complet (audit background `b6apm34g3`)
-- `[pm]` Fretwise-006-handoff.md à GDS quand mesure dispo
+- `[pm]` Idle — waiting for GDS Phase 2 progress or PO redirect
 
 ## TODO — Priority 1 (next 24h)
 
@@ -44,6 +43,10 @@
 
 ### Session 2026-05-17
 
+- `[data]` **Quality.py tuning-awareness fix** (`003f19e`) — DEC-010 — infère tuning per-string depuis events. Corpus bad 22.6 % → **6.7 %** (re-classified 235 false positives drop-D/half-step). Métrique fiable maintenant.
+- `[pm]` Fretwise-006-handoff.md à GDS — B integration livrée + mesures + roadmap implications
+- `[data]` **Mesure B integration** : MIDDLE +1.81 pp, ratio RP/IM 0.5696 → 0.555, golden set +1 net (2 fix Bb King, 1 régression Cream)
+- `[pm]` 12 tests B integration (`e068b08`)
 - `[pm]` **B integration livrée** (`0564d4b`) — segment-aware `cost_position_shift`. ViterbiOptimizer passe `index` à `transition_cost`. Pipeline calcule segments per voice, active sur cost_fn via `set_segment_anchors`. 936/937 tests verts (SVG pré-existant).
 - `[pm]` Roadmap décisions DEC-008 (`dc23363`) — Phase 3 reportée, B GO
 - `[data]` Quality scan corpus (`dc23363`) — 77.2 % clean, 22.6 % bad (mais dominé par bug tuning-awareness de quality.py → P2 fix)
