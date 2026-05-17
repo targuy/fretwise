@@ -95,6 +95,10 @@
         <path d="M19 12H5M11 6l-6 6 6 6"/>
       </svg>
     </button>
+    <!-- Settings -->
+    <button class="ic-btn" id="btn-settings" title="Settings" aria-label="Settings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
   </div>
 
 </header>
@@ -103,14 +107,43 @@
 <div id="track-tabs-bar" style="display:none"></div>
 
 <!-- ═══════════════ FILE SELECTOR (shown initially) ═══════════════ -->
-<div id="file-selector" class="panel">
-  <h2>Select a score</h2>
-  <div id="file-list" class="file-grid"></div>
-  <div id="file-loading" class="loading" style="display:none">Loading files…</div>
+<div id="file-selector" class="page" style="display:none">
+  <div class="lib-header">
+    <div class="lib-search-bar">
+      <input id="lib-search" type="search" placeholder="Search by title, artist, genre…" autocomplete="off" />
+      <select id="lib-genre-filter">
+        <option value="">All genres</option>
+      </select>
+      <select id="lib-format-filter">
+        <option value="">All formats</option>
+      </select>
+    </div>
+  </div>
+  <div class="lib-table-wrap">
+    <table class="lib-table" id="lib-table">
+      <thead>
+        <tr>
+          <th data-col="title" class="sortable">Title <span class="sort-arrow"></span></th>
+          <th data-col="artist" class="sortable">Artist <span class="sort-arrow"></span></th>
+          <th data-col="genre" class="sortable">Genre <span class="sort-arrow"></span></th>
+          <th data-col="year" class="sortable">Year <span class="sort-arrow"></span></th>
+          <th data-col="format" class="sortable">Format <span class="sort-arrow"></span></th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="lib-table-body"></tbody>
+    </table>
+    <div class="lib-empty" id="lib-empty" style="display:none">No files found. Check your partition directory in Settings.</div>
+  </div>
   <div id="upload-area">
     <label id="upload-label" for="upload-input">&#8679; Upload a file (.gp3 .gp4 .gp5 .gp .xml .mid)</label>
     <input type="file" id="upload-input" accept=".gp3,.gp4,.gp5,.gp,.xml,.mxl,.musicxml,.mid,.midi" style="display:none">
     <span id="upload-status"></span>
+  </div>
+  <!-- Song info panel (side drawer) -->
+  <div class="song-info-panel" id="song-info-panel">
+    <button class="song-info-close" id="song-info-close" title="Close">&times;</button>
+    <div id="song-info-content"></div>
   </div>
 </div>
 
@@ -237,6 +270,9 @@
     <button class="tx-btn" id="btn-metronome" title="Metronome">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3h8l3 18H5z"/><path d="M12 8l5 11"/></svg>
     </button>
+    <button class="tx-btn" id="btn-follow" title="Following playhead (click to explore freely)" aria-pressed="true">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
+    </button>
   </div>
 
   <!-- Right: volume · view segmented control -->
@@ -259,6 +295,9 @@
     </select>
     <!-- Hidden PDF + back (functionality via header buttons) -->
     <button class="tb-btn" id="btn-export-pdf" style="display:none" title="Export PDF">PDF</button>
+    <button class="ic-btn" id="btn-download-gp" title="Download original Guitar Pro file" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </button>
     <button class="tb-btn" id="btn-back-viewer" style="display:none">&larr; Back</button>
   </div>
 
@@ -274,6 +313,46 @@
     </div>
   </div>
   <iframe id="hand-viz-frame" src="/static/hand_viz.html" title="Hand visualization"></iframe>
+</div>
+
+<!-- ═══════════════ SETTINGS PAGE ═══════════════ -->
+<div id="settings-page" class="page" style="display:none">
+  <div class="settings-wrap">
+    <h2 class="settings-title">Settings</h2>
+    <section class="settings-section">
+      <h3>Partition Library</h3>
+      <div class="settings-field">
+        <label for="set-partitions-dir">Partition directory</label>
+        <div class="settings-path-row">
+          <input id="set-partitions-dir" type="text" placeholder="Path to partition folder…" />
+          <button id="set-partitions-apply" class="tx-btn">Apply</button>
+        </div>
+        <p class="settings-hint">Directory containing your .gp5, .gp, .mid etc. files.</p>
+      </div>
+      <div class="settings-field">
+        <label for="set-index-path">Songs index file (TSV)</label>
+        <div class="settings-path-row">
+          <input id="set-index-path" type="text" placeholder="Path to songs_index.tsv…" />
+          <button id="set-index-apply" class="tx-btn">Apply</button>
+        </div>
+        <p class="settings-hint">TSV file with columns: filename, title, artist, genre, year, guitar, rig, …</p>
+      </div>
+    </section>
+    <section class="settings-section">
+      <h3>Soundfonts</h3>
+      <div id="sf-list" class="sf-list">
+        <div class="sf-loading">Loading…</div>
+      </div>
+      <div class="sf-upload-area">
+        <label class="sf-upload-label" for="sf-upload-input">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Soundfont (.sf2)
+        </label>
+        <input type="file" id="sf-upload-input" accept=".sf2,.sf3,.dls" style="display:none" />
+        <div id="sf-upload-status" class="sf-upload-status"></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <!-- ═══════════════ LEGEND OVERLAY ═══════════════ -->

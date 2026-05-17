@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { fetchExportPdf, fetchFiles, fetchNotes, fetchSolve, fetchTracks, uploadFile } from './api.js';
+import { activateSoundfont, deleteSoundfont, downloadFile, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
@@ -25,6 +25,8 @@ const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes respo
 // key: primaryTrackId → Set<secondaryTrackId> — tracks explicitly muted by the user
 const _mutedSecondaryTracks = new Map();
 
+let _followPlayhead = true;  // when false, user is exploring — no auto-scroll
+
 // ── DOM references ──────────────────────────────────────────────────
 
 const $  = (sel) => document.querySelector(sel);
@@ -33,7 +35,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
 const fileSelector  = $('#file-selector');
 const trackSelector = $('#track-selector');
 const tabViewer     = $('#tab-viewer');
-const fileGrid      = $('#file-list');
+const settingsPage  = $('#settings-page');
 const trackGrid     = $('#track-list');
 const tabCanvas     = $('#tab-canvas');
 const cursorCanvas  = $('#cursor-canvas');
@@ -49,8 +51,10 @@ const btnLoopA      = $('#btn-loop-a');
 const btnLoopB      = $('#btn-loop-b');
 const btnLoopClear  = $('#btn-loop-clear');
 const btnMetronome  = $('#btn-metronome');
+const btnFollow     = $('#btn-follow');
 const btnFingering  = $('#btn-fingering');
 const btnExportPdf  = $('#btn-export-pdf');
+const btnDownloadGp = $('#btn-download-gp');
 const pdfExportStatus = $('#pdf-export-status');
 const btnBackFiles  = $('#btn-back-files');
 const btnBackViewer  = $('#btn-back-viewer');
@@ -103,44 +107,210 @@ const handVizDrag   = $('#hand-viz-drag');
 
 function showPage(page) {
   const isViewer = page === 'viewer';
-  fileSelector.style.display  = page === 'files'  ? '' : 'none';
-  trackSelector.style.display = page === 'tracks' ? '' : 'none';
+  fileSelector.style.display  = page === 'files'    ? '' : 'none';
+  trackSelector.style.display = page === 'tracks'   ? '' : 'none';
   tabViewer.style.display     = isViewer ? '' : 'none';
   toolbar.style.display       = isViewer ? '' : 'none';
+  if (settingsPage)     settingsPage.style.display     = page === 'settings' ? '' : 'none';
   if (headerMeta)       headerMeta.style.display       = isViewer ? '' : 'none';
   if (btnHeaderBack)    btnHeaderBack.style.display    = isViewer ? '' : 'none';
+  if (btnDownloadGp)    btnDownloadGp.style.display    = isViewer ? '' : 'none';
   const tabsBar = $('#track-tabs-bar');
   if (tabsBar) tabsBar.style.display = isViewer ? '' : 'none';
   // Ensure the old bottom bar class doesn't shift bottom elements
   document.body.classList.remove('has-multitrack-bar');
 }
 
-// ── File selector ───────────────────────────────────────────────────
+// ── File selector (library table) ──────────────────────────────────
+
+let _allFiles = [];
+let _libSort = { col: 'title', dir: 1 };
+let _libSearch = '';
+let _libGenreFilter = '';
+let _libFormatFilter = '';
 
 async function loadFiles() {
   showPage('files');
-  fileGrid.innerHTML = '<p style="color:#aaa;">Loading files…</p>';
   try {
-    const files = await fetchFiles();
-    if (!files.length) {
-      fileGrid.innerHTML = '<p style="color:#aaa;">No score files found.</p>';
-      return;
-    }
-    fileGrid.innerHTML = '';
-    for (const f of files) {
-      const card = document.createElement('div');
-      card.className = 'file-card';
-      card.innerHTML = `
-        <div class="file-icon">🎸</div>
-        <div class="file-name">${sanitize(f.stem)}</div>
-        <div class="file-ext">${sanitize(f.format)}</div>
-      `;
-      card.addEventListener('click', () => selectFile(f.name));
-      fileGrid.appendChild(card);
-    }
+    _allFiles = await fetchFiles();
+    _populateLibFilters();
+    _renderLibTable();
   } catch (err) {
-    fileGrid.innerHTML = `<p style="color:#ff5555;">Error: ${sanitize(err.message)}</p>`;
+    console.error('loadFiles error:', err);
+    const empty = $('#lib-empty');
+    if (empty) {
+      empty.style.display = '';
+      empty.textContent = 'Error loading files: ' + (err.message || err);
+    }
   }
+}
+
+function _populateLibFilters() {
+  const genres = new Set();
+  const formats = new Set();
+  for (const f of _allFiles) {
+    if (f.meta?.genre) genres.add(f.meta.genre);
+    if (f.format) formats.add(f.format);
+  }
+  const genreSel = $('#lib-genre-filter');
+  if (genreSel) {
+    genreSel.innerHTML = '<option value="">All genres</option>';
+    [...genres].sort().forEach(g => {
+      const o = document.createElement('option');
+      o.value = g; o.textContent = g;
+      genreSel.appendChild(o);
+    });
+  }
+  const fmtSel = $('#lib-format-filter');
+  if (fmtSel) {
+    fmtSel.innerHTML = '<option value="">All formats</option>';
+    [...formats].sort().forEach(f => {
+      const o = document.createElement('option');
+      o.value = f; o.textContent = f;
+      fmtSel.appendChild(o);
+    });
+  }
+}
+
+function _renderLibTable() {
+  const tbody = $('#lib-table-body');
+  const empty = $('#lib-empty');
+  if (!tbody) return;
+
+  let rows = _allFiles.filter(f => {
+    const title = (f.meta?.title || f.stem || '').toLowerCase();
+    const artist = (f.meta?.artist || '').toLowerCase();
+    const genre = (f.meta?.genre || '').toLowerCase();
+    const q = _libSearch.toLowerCase();
+    if (q && !title.includes(q) && !artist.includes(q) && !genre.includes(q) && !(f.name || '').toLowerCase().includes(q)) return false;
+    if (_libGenreFilter && (f.meta?.genre || '') !== _libGenreFilter) return false;
+    if (_libFormatFilter && (f.format || '') !== _libFormatFilter) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    let av, bv;
+    switch (_libSort.col) {
+      case 'title':  av = a.meta?.title || a.stem || ''; bv = b.meta?.title || b.stem || ''; break;
+      case 'artist': av = a.meta?.artist || ''; bv = b.meta?.artist || ''; break;
+      case 'genre':  av = a.meta?.genre || ''; bv = b.meta?.genre || ''; break;
+      case 'year':   av = parseInt(a.meta?.year) || 0; bv = parseInt(b.meta?.year) || 0; break;
+      case 'format': av = a.format || ''; bv = b.format || ''; break;
+      default:       av = ''; bv = '';
+    }
+    if (av < bv) return -_libSort.dir;
+    if (av > bv) return _libSort.dir;
+    return 0;
+  });
+
+  if (rows.length === 0) {
+    if (empty) empty.style.display = '';
+    tbody.innerHTML = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  tbody.innerHTML = '';
+  for (const f of rows) {
+    const tr = document.createElement('tr');
+    tr.className = 'lib-row';
+    tr.dataset.file = f.name;
+
+    const title = f.meta?.title || f.stem || f.name;
+    const artist = f.meta?.artist || '—';
+    const genre = f.meta?.genre || '—';
+    const year = f.meta?.year || '—';
+    const format = f.format || '?';
+
+    tr.innerHTML = `
+      <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span></td>
+      <td class="lib-cell-artist">${_esc(artist)}</td>
+      <td class="lib-cell-genre"><span class="lib-badge lib-badge-genre">${_esc(genre)}</span></td>
+      <td class="lib-cell-year">${_esc(String(year))}</td>
+      <td class="lib-cell-format"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
+      <td class="lib-cell-actions">
+        <button class="lib-btn-info" title="Song info" data-file="${_esc(f.name)}">ℹ</button>
+        <button class="lib-btn-dl" title="Download ${_esc(f.name)}" data-file="${_esc(f.name)}">⬇</button>
+      </td>
+    `;
+
+    tr.querySelector('.lib-cell-title').addEventListener('click', () => selectFile(f.name));
+
+    tr.querySelector('.lib-btn-info').addEventListener('click', (e) => {
+      e.stopPropagation();
+      _showSongInfo(f);
+    });
+
+    tr.querySelector('.lib-btn-dl').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        const { blob, filename } = await downloadFile(f.name);
+        _downloadBlob(blob, filename);
+      } catch (err) {
+        console.error('Download error:', err);
+      }
+    });
+
+    tbody.appendChild(tr);
+  }
+
+  document.querySelectorAll('#lib-table th.sortable').forEach(th => {
+    const col = th.dataset.col;
+    const arrow = th.querySelector('.sort-arrow');
+    if (!arrow) return;
+    if (col === _libSort.col) {
+      arrow.textContent = _libSort.dir === 1 ? ' ▲' : ' ▼';
+    } else {
+      arrow.textContent = '';
+    }
+  });
+}
+
+function _esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function _showSongInfo(f) {
+  const panel = $('#song-info-panel');
+  const content = $('#song-info-content');
+  if (!panel || !content) return;
+
+  content.innerHTML = '<div class="song-info-loading">Loading…</div>';
+  panel.classList.add('open');
+
+  let meta = f.meta || {};
+  try {
+    const fetched = await fetchSongInfo(f.name);
+    if (fetched) meta = fetched;
+  } catch (_) {}
+
+  const title = meta.title || f.stem || f.name;
+  const rows = Object.entries(meta)
+    .filter(([k]) => k !== 'filename' && k !== 'file' && k !== 'name')
+    .map(([k, v]) => `<tr><th>${_esc(k)}</th><td>${_esc(String(v || '—'))}</td></tr>`)
+    .join('');
+
+  content.innerHTML = `
+    <div class="song-info-title">${_esc(title)}</div>
+    <table class="song-info-table">
+      <tbody>${rows || '<tr><td colspan="2">No metadata available</td></tr>'}</tbody>
+    </table>
+    <div class="song-info-actions">
+      <button class="tx-btn song-info-open-btn" data-file="${_esc(f.name)}">Open →</button>
+      <button class="tx-btn song-info-dl-btn" data-file="${_esc(f.name)}">Download</button>
+    </div>
+  `;
+
+  content.querySelector('.song-info-open-btn')?.addEventListener('click', () => {
+    panel.classList.remove('open');
+    selectFile(f.name);
+  });
+  content.querySelector('.song-info-dl-btn')?.addEventListener('click', async () => {
+    try {
+      const { blob, filename } = await downloadFile(f.name);
+      _downloadBlob(blob, filename);
+    } catch (err) { console.error(err); }
+  });
 }
 
 // ── Track selector ──────────────────────────────────────────────────
@@ -155,13 +325,15 @@ async function selectFile(filename) {
     currentTracks = tracks;
     if (!tracks.length) {
       // Stay on file selector and surface the error
-      fileGrid.innerHTML = `<p style="color:#ff5555;">No guitar tracks found in "${sanitize(filename)}".</p>`;
+      const libEmpty = $('#lib-empty');
+      if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `No guitar tracks found in "${sanitize(filename)}".`; }
       return;
     }
     // Auto-select first track — skip the intermediate track-selector page
     await selectTrack(tracks[0].id, tracks[0].name);
   } catch (err) {
-    fileGrid.innerHTML = `<p style="color:#ff5555;">Error loading "${sanitize(filename)}": ${sanitize(err.message)}</p>`;
+    const libEmpty = $('#lib-empty');
+    if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `Error loading "${sanitize(filename)}": ${sanitize(err.message)}`; }
   }
 }
 
@@ -173,6 +345,12 @@ function populateTrackSwitcher(_trackId) {
 
 async function selectTrack(trackId, trackName) {
   currentTrackId = trackId;
+  // Stop playback when switching tracks
+  if (playback && playback.isPlaying) {
+    playback.pause();
+    updatePlayButton(false);
+    stopCursorLoop();
+  }
   showPage('viewer');
   populateTrackSwitcher(trackId);
 
@@ -825,6 +1003,14 @@ function initRenderer(data) {
   }
 
   // Playback engine
+  // Stop and release any existing playback engine
+  if (playback) {
+    try { playback.pause(); } catch (_) {}
+    try { playback.disableAudio(); } catch (_) {}
+    playback = null;
+  }
+  updatePlayButton(false);
+  stopCursorLoop();
   playback = new PlaybackEngine(renderer, {
     tempo: data.tempo || 120,
     beatsPerMeasure: data.beats_per_measure || 4,
@@ -866,7 +1052,14 @@ function initRenderer(data) {
     }
     hideChordPopup();
     const m = renderer.getMeasureAtPoint(x, y);
-    if (m >= 0 && playback) playback.goToMeasure(m);
+    if (m >= 0 && playback) {
+      // If playing and user clicks elsewhere: stop following, jump there
+      if (playback.isPlaying) {
+        _followPlayhead = false;
+        _updateFollowButton();
+      }
+      playback.goToMeasure(m);
+    }
   };
 
   // Canvas mousemove: show pointer cursor over chord label zones
@@ -899,7 +1092,13 @@ function initRenderer(data) {
       }
       hideChordPopup();
       const m = _svgDriver.measureAtClick(e);
-      if (m >= 0) playback.goToMeasure(m);
+      if (m >= 0) {
+        if (playback?.isPlaying) {
+          _followPlayhead = false;
+          _updateFollowButton();
+        }
+        playback.goToMeasure(m);
+      }
     };
   } else {
     if (coreSvgView) coreSvgView.onclick = null;
@@ -929,6 +1128,8 @@ function initRenderer(data) {
   _rebuildTrackTabs(currentTrackId);
   _restoreSecondaryTracks(currentTrackId); // re-enable previously active secondary tracks
   updatePlayButton(false);
+  _followPlayhead = true;
+  _updateFollowButton();
 }
 
 // ── Track tabs bar ──────────────────────────────────────────────────
@@ -978,8 +1179,26 @@ function _rebuildTrackTabs(primaryTrackId) {
     body.className = 'track-tab-body';
     body.innerHTML = `<div class="track-tab-name">${label}</div><div class="track-tab-meta">${metaText}</div>`;
 
+    // Instrument picker button
+    const instrBtn = document.createElement('button');
+    instrBtn.className = 'instr-picker-btn';
+    instrBtn.textContent = '🎵';
+    const storedProgram = _getStoredInstrument(currentFile || '', t.id);
+    instrBtn.title = storedProgram !== null
+      ? `Instrument: GM ${storedProgram} (click to change)`
+      : 'Select instrument (click to change)';
+    instrBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Channel 0 = primary, secondary channels start at 1
+      const chIdx = isPrimary ? 0 : Math.min(15,
+        currentTracks.filter(x => x.id !== primaryTrackId).findIndex(x => x.id === t.id) + 1
+      );
+      _openInstrumentPicker(instrBtn, currentFile || '', t.id, chIdx);
+    });
+
     tab.appendChild(colorBar);
     tab.appendChild(body);
+    tab.appendChild(instrBtn);
 
     // Mute button (secondary tracks only)
     if (!isPrimary) {
@@ -1126,9 +1345,57 @@ function updatePlayButton(playing) {
   }
 }
 
+function _updateFollowButton() {
+  if (!btnFollow) return;
+  btnFollow.classList.toggle('active', _followPlayhead);
+  btnFollow.title = _followPlayhead
+    ? 'Following playhead (click to explore freely)'
+    : 'Click to follow playhead again';
+}
+
+if (btnFollow) {
+  btnFollow.addEventListener('click', () => {
+    _followPlayhead = true;
+    _updateFollowButton();
+    // Immediately scroll to current playhead position
+    if (playback && renderer) {
+      const m = renderer.cursorMeasure || 0;
+      const sys = renderer.systems?.find(
+        s => m >= s.startMeasure && m < s.startMeasure + s.measures.length
+      );
+      if (sys) {
+        const container = tabCanvas.parentElement;
+        if (container) {
+          const sysIdx = renderer.systems.indexOf(sys);
+          const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
+          const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
+          container.scrollTo({ top: Math.max(0, sysY - container.offsetHeight / 2 + SYSTEM_H / 2), behavior: 'smooth' });
+        }
+        _autoScrollTarget = null;
+      }
+    }
+  });
+}
+
+if (btnDownloadGp) {
+  btnDownloadGp.addEventListener('click', async () => {
+    if (!currentFile) return;
+    try {
+      const { blob, filename } = await downloadFile(currentFile);
+      _downloadBlob(blob, filename);
+    } catch (err) {
+      console.error('Download failed:', err);
+    }
+  });
+}
+
 if (btnPlay) {
   btnPlay.addEventListener('click', () => {
     if (!playback) return;
+    if (!playback.isPlaying) {
+      _followPlayhead = true;  // resume following when starting play
+      _updateFollowButton();
+    }
     playback.toggle();
     updatePlayButton(playback.isPlaying);
     if (playback.isPlaying) startCursorLoop();
@@ -1774,24 +2041,26 @@ function _drawCursorOverlay() {
 
   // ── Auto-scroll: keep cursor in comfortable reading zone ──────────
   // Fixed UI: header=50px top, toolbar=52px+scrubber=16px bottom
-  const TOP_GUTTER  = 70;   // header (50) + small buffer
-  const BOT_GUTTER  = 88;   // toolbar (52) + scrubber (16) + buffer
-  const canvasRect = tabCanvas.getBoundingClientRect();
-  const cursorViewportY = canvasRect.top + col.yTop;
-  const vh = window.innerHeight;
-  const usable = vh - TOP_GUTTER - BOT_GUTTER;
-  const triggerLow  = vh - BOT_GUTTER - 20;   // near bottom fixed UI
-  const triggerHigh = TOP_GUTTER + 10;         // near top header
-  const targetY     = TOP_GUTTER + usable * 0.30; // land at 30% of usable area
-  if (cursorViewportY > triggerLow || cursorViewportY < triggerHigh) {
-    _autoScrollTarget = window.scrollY + cursorViewportY - targetY;
-  }
-  if (_autoScrollTarget !== null) {
-    const delta = _autoScrollTarget - window.scrollY;
-    if (Math.abs(delta) < 0.5) {
-      _autoScrollTarget = null;
-    } else {
-      window.scrollTo(0, window.scrollY + delta * 0.12);
+  if (_followPlayhead) {
+    const TOP_GUTTER  = 70;   // header (50) + small buffer
+    const BOT_GUTTER  = 88;   // toolbar (52) + scrubber (16) + buffer
+    const canvasRect = tabCanvas.getBoundingClientRect();
+    const cursorViewportY = canvasRect.top + col.yTop;
+    const vh = window.innerHeight;
+    const usable = vh - TOP_GUTTER - BOT_GUTTER;
+    const triggerLow  = vh - BOT_GUTTER - 80;   // wider trigger zone near bottom
+    const triggerHigh = TOP_GUTTER + 40;          // wider trigger zone near top
+    const targetY     = TOP_GUTTER + usable * 0.45; // land at 45% of usable area (near center)
+    if (cursorViewportY > triggerLow || cursorViewportY < triggerHigh) {
+      _autoScrollTarget = window.scrollY + cursorViewportY - targetY;
+    }
+    if (_autoScrollTarget !== null) {
+      const delta = _autoScrollTarget - window.scrollY;
+      if (Math.abs(delta) < 0.5) {
+        _autoScrollTarget = null;
+      } else {
+        window.scrollTo(0, window.scrollY + delta * 0.12);
+      }
     }
   }
   // ─────────────────────────────────────────────────────────────────
@@ -1808,6 +2077,243 @@ function _drawCursorOverlay() {
   ctx.lineTo(col.x, col.yBottom);
   ctx.stroke();
   ctx.restore();
+}
+
+// ── Library table: sort and filter events ──────────────────────────
+
+document.querySelectorAll('#lib-table th.sortable').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (_libSort.col === col) _libSort.dir *= -1;
+    else { _libSort.col = col; _libSort.dir = 1; }
+    _renderLibTable();
+  });
+});
+
+const libSearch = $('#lib-search');
+if (libSearch) libSearch.addEventListener('input', () => { _libSearch = libSearch.value; _renderLibTable(); });
+
+const libGenreFilter = $('#lib-genre-filter');
+if (libGenreFilter) libGenreFilter.addEventListener('change', () => { _libGenreFilter = libGenreFilter.value; _renderLibTable(); });
+
+const libFormatFilter = $('#lib-format-filter');
+if (libFormatFilter) libFormatFilter.addEventListener('change', () => { _libFormatFilter = libFormatFilter.value; _renderLibTable(); });
+
+const songInfoClose = $('#song-info-close');
+if (songInfoClose) songInfoClose.addEventListener('click', () => $('#song-info-panel')?.classList.remove('open'));
+
+// ─── Settings page ────────────────────────────────────────────────
+
+// ── Instrument Picker ────────────────────────────────────────────────
+
+let _gmInstruments = null;
+let _instrDropdown = null;
+
+async function _ensureGmInstruments() {
+  if (_gmInstruments) return _gmInstruments;
+  try {
+    _gmInstruments = await fetchGmInstruments();
+  } catch (_) {
+    _gmInstruments = [];
+  }
+  return _gmInstruments;
+}
+
+function _getStoredInstrument(file, trackId) {
+  try {
+    const val = localStorage.getItem(`fretwise:instrument:${file}:${trackId}`);
+    return val !== null ? parseInt(val, 10) : null;
+  } catch (_) { return null; }
+}
+
+function _storeInstrument(file, trackId, program) {
+  try {
+    localStorage.setItem(`fretwise:instrument:${file}:${trackId}`, String(program));
+  } catch (_) {}
+}
+
+function _closeInstrDropdown() {
+  if (_instrDropdown) { _instrDropdown.remove(); _instrDropdown = null; }
+}
+
+async function _openInstrumentPicker(anchorBtn, file, trackId, channelIdx) {
+  _closeInstrDropdown();
+
+  const instruments = await _ensureGmInstruments();
+  const currentProgram = _getStoredInstrument(file, trackId);
+
+  const dd = document.createElement('div');
+  dd.className = 'instr-dropdown';
+
+  const categories = {};
+  for (const instr of instruments) {
+    if (!categories[instr.category]) categories[instr.category] = [];
+    categories[instr.category].push(instr);
+  }
+
+  for (const [cat, instrs] of Object.entries(categories)) {
+    const catEl = document.createElement('div');
+    catEl.className = 'instr-category';
+    catEl.textContent = cat;
+    dd.appendChild(catEl);
+
+    for (const instr of instrs) {
+      const btn = document.createElement('button');
+      btn.className = 'instr-item' + (instr.id === currentProgram ? ' active' : '');
+      btn.textContent = `${instr.id}. ${instr.name}`;
+      btn.addEventListener('click', () => {
+        _storeInstrument(file, trackId, instr.id);
+        if (playback && channelIdx !== undefined) {
+          playback.setChannelInstrument(channelIdx, instr.id);
+        }
+        _closeInstrDropdown();
+        anchorBtn.title = `Instrument: ${instr.name} (click to change)`;
+      });
+      dd.appendChild(btn);
+    }
+  }
+
+  document.body.appendChild(dd);
+  _instrDropdown = dd;
+
+  const rect = anchorBtn.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom + 4;
+  if (left + 260 > window.innerWidth) left = window.innerWidth - 268;
+  if (top + 380 > window.innerHeight) top = rect.top - 384;
+  dd.style.left = `${left}px`;
+  dd.style.top = `${top}px`;
+
+  setTimeout(() => {
+    document.addEventListener('click', _closeInstrDropdown, { once: true });
+  }, 0);
+}
+
+const btnSettings = $('#btn-settings');
+if (btnSettings) {
+  btnSettings.addEventListener('click', () => {
+    showPage('settings');
+    initSettingsPage();
+  });
+}
+
+async function initSettingsPage() {
+  try {
+    const cfg = await fetchSettings();
+    const pdInput = $('#set-partitions-dir');
+    const ipInput = $('#set-index-path');
+    if (pdInput) pdInput.value = cfg.partitions_dir || '';
+    if (ipInput) ipInput.value = cfg.index_path || '';
+  } catch (err) {
+    console.error('Failed to load settings:', err);
+  }
+
+  await _loadSoundfontsPanel();
+
+  const sfUploadInput = $('#sf-upload-input');
+  const sfUploadStatus = $('#sf-upload-status');
+  if (sfUploadInput) {
+    // Avoid double-wiring on re-entry
+    if (!sfUploadInput.dataset.wired) {
+      sfUploadInput.dataset.wired = '1';
+      sfUploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (sfUploadStatus) sfUploadStatus.textContent = 'Uploading…';
+        try {
+          await uploadSoundfont(file);
+          if (sfUploadStatus) sfUploadStatus.textContent = '✓ Uploaded!';
+          setTimeout(() => { if (sfUploadStatus) sfUploadStatus.textContent = ''; }, 3000);
+          await _loadSoundfontsPanel();
+        } catch (err) {
+          if (sfUploadStatus) sfUploadStatus.textContent = '✗ ' + err.message;
+        }
+        e.target.value = '';
+      });
+    }
+  }
+}
+
+async function _loadSoundfontsPanel() {
+  const sfList = $('#sf-list');
+  if (!sfList) return;
+  try {
+    const sfs = await fetchSoundfonts();
+    if (sfs.length === 0) {
+      sfList.innerHTML = '<div class="sf-empty">No soundfonts found in your soundfonts directory.</div>';
+      return;
+    }
+    sfList.innerHTML = '';
+    for (const sf of sfs) {
+      const row = document.createElement('div');
+      row.className = 'sf-row' + (sf.active ? ' active' : '');
+      row.innerHTML = `
+        <div class="sf-info">
+          <span class="sf-name">${_esc(sf.name)}</span>
+          <span class="sf-size">${sf.size_mb} MB</span>
+          ${sf.active ? '<span class="sf-active-badge">Active</span>' : ''}
+        </div>
+        <div class="sf-actions">
+          ${!sf.active ? `<button class="tx-btn sf-btn-activate" data-sf="${_esc(sf.name)}">Set Active</button>` : ''}
+          <button class="tx-btn sf-btn-delete" data-sf="${_esc(sf.name)}">Delete</button>
+        </div>
+      `;
+      row.querySelector('.sf-btn-activate')?.addEventListener('click', async (e) => {
+        const name = e.currentTarget.dataset.sf;
+        try {
+          await activateSoundfont(name);
+          await _loadSoundfontsPanel();
+        } catch (err) { console.error(err); }
+      });
+      row.querySelector('.sf-btn-delete')?.addEventListener('click', async (e) => {
+        const name = e.currentTarget.dataset.sf;
+        if (!confirm(`Delete soundfont "${name}"? This cannot be undone.`)) return;
+        try {
+          await deleteSoundfont(name);
+          await _loadSoundfontsPanel();
+        } catch (err) { console.error(err); alert('Delete failed: ' + err.message); }
+      });
+      sfList.appendChild(row);
+    }
+  } catch (err) {
+    sfList.innerHTML = `<div class="sf-empty">Failed to load soundfonts: ${_esc(err.message)}</div>`;
+  }
+}
+
+const setPartitionsApply = $('#set-partitions-apply');
+if (setPartitionsApply) {
+  setPartitionsApply.addEventListener('click', async () => {
+    const val = $('#set-partitions-dir')?.value?.trim();
+    if (!val) return;
+    try {
+      await saveSettings({ partitions_dir: val });
+      setPartitionsApply.textContent = '✓ Saved';
+      setTimeout(() => { setPartitionsApply.textContent = 'Apply'; }, 2000);
+      await loadFiles();
+    } catch (err) {
+      setPartitionsApply.textContent = '✗ Error';
+      console.error(err);
+      setTimeout(() => { setPartitionsApply.textContent = 'Apply'; }, 3000);
+    }
+  });
+}
+
+const setIndexApply = $('#set-index-apply');
+if (setIndexApply) {
+  setIndexApply.addEventListener('click', async () => {
+    const val = $('#set-index-path')?.value?.trim();
+    if (!val) return;
+    try {
+      await saveSettings({ index_path: val });
+      setIndexApply.textContent = '✓ Saved';
+      setTimeout(() => { setIndexApply.textContent = 'Apply'; }, 2000);
+      await loadFiles();
+    } catch (err) {
+      setIndexApply.textContent = '✗ Error';
+      console.error(err);
+      setTimeout(() => { setIndexApply.textContent = 'Apply'; }, 3000);
+    }
+  });
 }
 
 // ── Boot ────────────────────────────────────────────────────────────

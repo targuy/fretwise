@@ -7,8 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+
+from . import settings as _settings
+from .songs_index import enrich_file_info, load_index
 
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
@@ -41,9 +44,9 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
 
     Args:
         fixtures_dir: Directory containing GP/MusicXML/MIDI files.
-                      Defaults to partitions/ (gitignored personal library).
+                      Defaults to the configured partitions_dir from settings.
     """
-    app = FastAPI(title="FretWise", version="0.1.0")
+    app = FastAPI(title="FretWise", version="0.4.0")
 
     # Prevent browser from caching JS/CSS during development
     @app.middleware("http")
@@ -57,8 +60,8 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
         return response
 
     if fixtures_dir is None:
-        # Default to the partitions library (personal scores, gitignored)
-        fixtures_dir = Path(__file__).parents[3] / "partitions"
+        cfg = _settings.load()
+        fixtures_dir = Path(cfg.get("partitions_dir", str(Path(__file__).parents[3] / "partitions")))
 
     # Mount static files
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
@@ -80,11 +83,15 @@ def _register_routes(app: FastAPI) -> None:
         return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 
     @app.get("/api/files")
-    async def list_files() -> list[dict[str, str]]:
-        """List available score files."""
+    async def list_files() -> JSONResponse:
+        """List available score files, enriched with songs_index metadata."""
+        cfg = _settings.load()
+        # Re-read fixtures_dir from settings in case it was updated at runtime
         fixtures: Path = app.state.fixtures_dir
         if not fixtures.exists():
-            return []
+            return JSONResponse([])
+
+        songs = load_index(cfg.get("index_path", ""))
 
         supported = {
             ".gp3", ".gp4", ".gp5", ".gp",
@@ -94,12 +101,14 @@ def _register_routes(app: FastAPI) -> None:
         files = []
         for f in sorted(fixtures.iterdir()):
             if f.suffix.lower() in supported and f.is_file():
-                files.append({
+                info: dict[str, Any] = {
                     "name": f.name,
                     "stem": f.stem,
                     "format": f.suffix.lstrip(".").upper(),
-                })
-        return files
+                }
+                info = enrich_file_info(info, songs)
+                files.append(info)
+        return JSONResponse(files)
 
     @app.get("/api/tracks/{filename}")
     async def list_tracks(filename: str) -> list[dict[str, Any]]:
@@ -288,6 +297,34 @@ def _register_routes(app: FastAPI) -> None:
         dest.write_bytes(content)
         return {"name": safe_name, "status": "ok"}
 
+    @app.get("/api/download/{filename}")
+    async def download_file(filename: str) -> Response:
+        """Download the original score file."""
+        filepath = _resolve_file(app, filename)
+        try:
+            content = filepath.read_bytes()
+        except OSError as exc:
+            raise HTTPException(500, f"Could not read file: {exc}")
+        safe_name = Path(filename).name
+        suffix = filepath.suffix.lower()
+        media_types = {
+            ".gp3": "application/octet-stream",
+            ".gp4": "application/octet-stream",
+            ".gp5": "application/octet-stream",
+            ".gp": "application/octet-stream",
+            ".xml": "application/xml",
+            ".mxl": "application/zip",
+            ".musicxml": "application/xml",
+            ".mid": "audio/midi",
+            ".midi": "audio/midi",
+        }
+        media_type = media_types.get(suffix, "application/octet-stream")
+        return Response(
+            content=content,
+            media_type=media_type,
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}"'},
+        )
+
     @app.get("/api/soundfont")
     async def get_soundfont() -> Response:
         """Stream the bundled SF2 soundfont file for in-browser synthesis."""
@@ -300,6 +337,276 @@ def _register_routes(app: FastAPI) -> None:
             media_type="application/octet-stream",
             headers={"Cache-Control": "public, max-age=86400"},
         )
+
+    @app.get("/api/soundfont/instruments")
+    async def list_gm_instruments() -> JSONResponse:
+        """Return the 128 General MIDI instrument names organized by category."""
+        GM_INSTRUMENTS = [
+            # Piano (0-7)
+            {"id": 0, "name": "Acoustic Grand Piano", "category": "Piano"},
+            {"id": 1, "name": "Bright Acoustic Piano", "category": "Piano"},
+            {"id": 2, "name": "Electric Grand Piano", "category": "Piano"},
+            {"id": 3, "name": "Honky-tonk Piano", "category": "Piano"},
+            {"id": 4, "name": "Electric Piano 1", "category": "Piano"},
+            {"id": 5, "name": "Electric Piano 2", "category": "Piano"},
+            {"id": 6, "name": "Harpsichord", "category": "Piano"},
+            {"id": 7, "name": "Clavi", "category": "Piano"},
+            # Chromatic Perc (8-15)
+            {"id": 8, "name": "Celesta", "category": "Chromatic Perc"},
+            {"id": 9, "name": "Glockenspiel", "category": "Chromatic Perc"},
+            {"id": 10, "name": "Music Box", "category": "Chromatic Perc"},
+            {"id": 11, "name": "Vibraphone", "category": "Chromatic Perc"},
+            {"id": 12, "name": "Marimba", "category": "Chromatic Perc"},
+            {"id": 13, "name": "Xylophone", "category": "Chromatic Perc"},
+            {"id": 14, "name": "Tubular Bells", "category": "Chromatic Perc"},
+            {"id": 15, "name": "Dulcimer", "category": "Chromatic Perc"},
+            # Organ (16-23)
+            {"id": 16, "name": "Drawbar Organ", "category": "Organ"},
+            {"id": 17, "name": "Percussive Organ", "category": "Organ"},
+            {"id": 18, "name": "Rock Organ", "category": "Organ"},
+            {"id": 19, "name": "Church Organ", "category": "Organ"},
+            {"id": 20, "name": "Reed Organ", "category": "Organ"},
+            {"id": 21, "name": "Accordion", "category": "Organ"},
+            {"id": 22, "name": "Harmonica", "category": "Organ"},
+            {"id": 23, "name": "Tango Accordion", "category": "Organ"},
+            # Guitar (24-31)
+            {"id": 24, "name": "Acoustic Guitar (nylon)", "category": "Guitar"},
+            {"id": 25, "name": "Acoustic Guitar (steel)", "category": "Guitar"},
+            {"id": 26, "name": "Electric Guitar (jazz)", "category": "Guitar"},
+            {"id": 27, "name": "Electric Guitar (clean)", "category": "Guitar"},
+            {"id": 28, "name": "Electric Guitar (muted)", "category": "Guitar"},
+            {"id": 29, "name": "Overdriven Guitar", "category": "Guitar"},
+            {"id": 30, "name": "Distortion Guitar", "category": "Guitar"},
+            {"id": 31, "name": "Guitar harmonics", "category": "Guitar"},
+            # Bass (32-39)
+            {"id": 32, "name": "Acoustic Bass", "category": "Bass"},
+            {"id": 33, "name": "Electric Bass (finger)", "category": "Bass"},
+            {"id": 34, "name": "Electric Bass (pick)", "category": "Bass"},
+            {"id": 35, "name": "Fretless Bass", "category": "Bass"},
+            {"id": 36, "name": "Slap Bass 1", "category": "Bass"},
+            {"id": 37, "name": "Slap Bass 2", "category": "Bass"},
+            {"id": 38, "name": "Synth Bass 1", "category": "Bass"},
+            {"id": 39, "name": "Synth Bass 2", "category": "Bass"},
+            # Strings (40-47)
+            {"id": 40, "name": "Violin", "category": "Strings"},
+            {"id": 41, "name": "Viola", "category": "Strings"},
+            {"id": 42, "name": "Cello", "category": "Strings"},
+            {"id": 43, "name": "Contrabass", "category": "Strings"},
+            {"id": 44, "name": "Tremolo Strings", "category": "Strings"},
+            {"id": 45, "name": "Pizzicato Strings", "category": "Strings"},
+            {"id": 46, "name": "Orchestral Harp", "category": "Strings"},
+            {"id": 47, "name": "Timpani", "category": "Strings"},
+            # Ensemble (48-55)
+            {"id": 48, "name": "String Ensemble 1", "category": "Ensemble"},
+            {"id": 49, "name": "String Ensemble 2", "category": "Ensemble"},
+            {"id": 50, "name": "Synth Strings 1", "category": "Ensemble"},
+            {"id": 51, "name": "Synth Strings 2", "category": "Ensemble"},
+            {"id": 52, "name": "Choir Aahs", "category": "Ensemble"},
+            {"id": 53, "name": "Voice Oohs", "category": "Ensemble"},
+            {"id": 54, "name": "Synth Voice", "category": "Ensemble"},
+            {"id": 55, "name": "Orchestra Hit", "category": "Ensemble"},
+            # Brass (56-63)
+            {"id": 56, "name": "Trumpet", "category": "Brass"},
+            {"id": 57, "name": "Trombone", "category": "Brass"},
+            {"id": 58, "name": "Tuba", "category": "Brass"},
+            {"id": 59, "name": "Muted Trumpet", "category": "Brass"},
+            {"id": 60, "name": "French Horn", "category": "Brass"},
+            {"id": 61, "name": "Brass Section", "category": "Brass"},
+            {"id": 62, "name": "Synth Brass 1", "category": "Brass"},
+            {"id": 63, "name": "Synth Brass 2", "category": "Brass"},
+            # Reed (64-71)
+            {"id": 64, "name": "Soprano Sax", "category": "Reed"},
+            {"id": 65, "name": "Alto Sax", "category": "Reed"},
+            {"id": 66, "name": "Tenor Sax", "category": "Reed"},
+            {"id": 67, "name": "Baritone Sax", "category": "Reed"},
+            {"id": 68, "name": "Oboe", "category": "Reed"},
+            {"id": 69, "name": "English Horn", "category": "Reed"},
+            {"id": 70, "name": "Bassoon", "category": "Reed"},
+            {"id": 71, "name": "Clarinet", "category": "Reed"},
+            # Pipe (72-79)
+            {"id": 72, "name": "Piccolo", "category": "Pipe"},
+            {"id": 73, "name": "Flute", "category": "Pipe"},
+            {"id": 74, "name": "Recorder", "category": "Pipe"},
+            {"id": 75, "name": "Pan Flute", "category": "Pipe"},
+            {"id": 76, "name": "Blown Bottle", "category": "Pipe"},
+            {"id": 77, "name": "Shakuhachi", "category": "Pipe"},
+            {"id": 78, "name": "Whistle", "category": "Pipe"},
+            {"id": 79, "name": "Ocarina", "category": "Pipe"},
+            # Synth Lead (80-87)
+            {"id": 80, "name": "Lead 1 (square)", "category": "Synth Lead"},
+            {"id": 81, "name": "Lead 2 (sawtooth)", "category": "Synth Lead"},
+            {"id": 82, "name": "Lead 3 (calliope)", "category": "Synth Lead"},
+            {"id": 83, "name": "Lead 4 (chiff)", "category": "Synth Lead"},
+            {"id": 84, "name": "Lead 5 (charang)", "category": "Synth Lead"},
+            {"id": 85, "name": "Lead 6 (voice)", "category": "Synth Lead"},
+            {"id": 86, "name": "Lead 7 (fifths)", "category": "Synth Lead"},
+            {"id": 87, "name": "Lead 8 (bass + lead)", "category": "Synth Lead"},
+            # Synth Pad (88-95)
+            {"id": 88, "name": "Pad 1 (new age)", "category": "Synth Pad"},
+            {"id": 89, "name": "Pad 2 (warm)", "category": "Synth Pad"},
+            {"id": 90, "name": "Pad 3 (polysynth)", "category": "Synth Pad"},
+            {"id": 91, "name": "Pad 4 (choir)", "category": "Synth Pad"},
+            {"id": 92, "name": "Pad 5 (bowed)", "category": "Synth Pad"},
+            {"id": 93, "name": "Pad 6 (metallic)", "category": "Synth Pad"},
+            {"id": 94, "name": "Pad 7 (halo)", "category": "Synth Pad"},
+            {"id": 95, "name": "Pad 8 (sweep)", "category": "Synth Pad"},
+            # Synth Effects (96-103)
+            {"id": 96, "name": "FX 1 (rain)", "category": "Synth FX"},
+            {"id": 97, "name": "FX 2 (soundtrack)", "category": "Synth FX"},
+            {"id": 98, "name": "FX 3 (crystal)", "category": "Synth FX"},
+            {"id": 99, "name": "FX 4 (atmosphere)", "category": "Synth FX"},
+            {"id": 100, "name": "FX 5 (brightness)", "category": "Synth FX"},
+            {"id": 101, "name": "FX 6 (goblins)", "category": "Synth FX"},
+            {"id": 102, "name": "FX 7 (echoes)", "category": "Synth FX"},
+            {"id": 103, "name": "FX 8 (sci-fi)", "category": "Synth FX"},
+            # Ethnic (104-111)
+            {"id": 104, "name": "Sitar", "category": "Ethnic"},
+            {"id": 105, "name": "Banjo", "category": "Ethnic"},
+            {"id": 106, "name": "Shamisen", "category": "Ethnic"},
+            {"id": 107, "name": "Koto", "category": "Ethnic"},
+            {"id": 108, "name": "Kalimba", "category": "Ethnic"},
+            {"id": 109, "name": "Bag pipe", "category": "Ethnic"},
+            {"id": 110, "name": "Fiddle", "category": "Ethnic"},
+            {"id": 111, "name": "Shanai", "category": "Ethnic"},
+            # Percussive (112-119)
+            {"id": 112, "name": "Tinkle Bell", "category": "Percussive"},
+            {"id": 113, "name": "Agogo", "category": "Percussive"},
+            {"id": 114, "name": "Steel Drums", "category": "Percussive"},
+            {"id": 115, "name": "Woodblock", "category": "Percussive"},
+            {"id": 116, "name": "Taiko Drum", "category": "Percussive"},
+            {"id": 117, "name": "Melodic Tom", "category": "Percussive"},
+            {"id": 118, "name": "Synth Drum", "category": "Percussive"},
+            {"id": 119, "name": "Reverse Cymbal", "category": "Percussive"},
+            # Sound Effects (120-127)
+            {"id": 120, "name": "Guitar Fret Noise", "category": "Sound FX"},
+            {"id": 121, "name": "Breath Noise", "category": "Sound FX"},
+            {"id": 122, "name": "Seashore", "category": "Sound FX"},
+            {"id": 123, "name": "Bird Tweet", "category": "Sound FX"},
+            {"id": 124, "name": "Telephone Ring", "category": "Sound FX"},
+            {"id": 125, "name": "Helicopter", "category": "Sound FX"},
+            {"id": 126, "name": "Applause", "category": "Sound FX"},
+            {"id": 127, "name": "Gunshot", "category": "Sound FX"},
+        ]
+        return JSONResponse(GM_INSTRUMENTS)
+
+    @app.get("/api/soundfonts")
+    async def list_soundfonts() -> JSONResponse:
+        """List all available soundfonts."""
+        cfg = _settings.load()
+        sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
+        if not sf_dir.is_absolute():
+            sf_dir = Path(__file__).parents[3] / sf_dir
+
+        result = []
+        if sf_dir.exists():
+            for p in sorted(sf_dir.iterdir()):
+                if p.suffix.lower() in {".sf2", ".sf3", ".dls"}:
+                    result.append({
+                        "name": p.name,
+                        "size_mb": round(p.stat().st_size / 1_048_576, 1),
+                        "active": p.name == Path(cfg.get("active_soundfont", "")).name,
+                        "path": str(p),
+                    })
+        return JSONResponse(result)
+
+    @app.delete("/api/soundfonts/{sf_name}")
+    async def delete_soundfont(sf_name: str) -> JSONResponse:
+        """Delete a soundfont file."""
+        cfg = _settings.load()
+        sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
+        if not sf_dir.is_absolute():
+            sf_dir = Path(__file__).parents[3] / sf_dir
+
+        filepath = sf_dir / sf_name
+        try:
+            filepath.resolve().relative_to(sf_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Path traversal not allowed")
+
+        if not filepath.exists():
+            raise HTTPException(404, f"Soundfont not found: {sf_name}")
+
+        try:
+            filepath.unlink()
+        except OSError as exc:
+            raise HTTPException(500, f"Could not delete file: {exc}")
+
+        return JSONResponse({"status": "deleted", "name": sf_name})
+
+    @app.post("/api/soundfonts/upload")
+    async def upload_soundfont(file: UploadFile) -> JSONResponse:
+        """Upload a new soundfont file."""
+        cfg = _settings.load()
+        sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
+        if not sf_dir.is_absolute():
+            sf_dir = Path(__file__).parents[3] / sf_dir
+
+        sf_dir.mkdir(parents=True, exist_ok=True)
+
+        fname = Path(file.filename or "upload.sf2").name
+        if not fname.lower().endswith((".sf2", ".sf3", ".dls")):
+            raise HTTPException(400, "Only .sf2, .sf3, and .dls files are accepted")
+
+        dest = sf_dir / fname
+        try:
+            content = await file.read()
+            dest.write_bytes(content)
+        except OSError as exc:
+            raise HTTPException(500, f"Failed to save file: {exc}")
+
+        return JSONResponse({
+            "status": "uploaded",
+            "name": fname,
+            "size_mb": round(len(content) / 1_048_576, 1),
+        })
+
+    @app.post("/api/soundfonts/{sf_name}/activate")
+    async def activate_soundfont(sf_name: str) -> JSONResponse:
+        """Set a soundfont as the active one for new songs."""
+        cfg = _settings.load()
+        sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
+        if not sf_dir.is_absolute():
+            sf_dir = Path(__file__).parents[3] / sf_dir
+
+        filepath = sf_dir / sf_name
+        if not filepath.exists():
+            raise HTTPException(404, f"Soundfont not found: {sf_name}")
+
+        _settings.save({"active_soundfont": str(filepath)})
+        return JSONResponse({"status": "activated", "name": sf_name})
+
+    @app.get("/api/settings")
+    async def get_settings() -> JSONResponse:
+        """Get current user settings."""
+        return JSONResponse(_settings.load())
+
+    @app.post("/api/settings")
+    async def update_settings(request: Request) -> JSONResponse:
+        """Update user settings. Partial update supported."""
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+
+        if "partitions_dir" in body:
+            p = Path(body["partitions_dir"])
+            if not p.exists():
+                raise HTTPException(400, f"Directory not found: {body['partitions_dir']}")
+            app.state.fixtures_dir = p
+
+        updated = _settings.save(body)
+        return JSONResponse(updated)
+
+    @app.get("/api/song-info/{filename}")
+    async def get_song_info(filename: str) -> JSONResponse:
+        """Get full metadata for a specific song from the index."""
+        cfg = _settings.load()
+        songs = load_index(cfg.get("index_path", ""))
+        stem = Path(filename).stem
+        info = songs.get(filename) or songs.get(stem) or {}
+        if not info:
+            raise HTTPException(404, f"No metadata found for '{filename}'")
+        return JSONResponse(info)
 
 
 # ---------------------------------------------------------------------------

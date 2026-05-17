@@ -1,0 +1,51 @@
+"""Persistent user settings for FretWise, stored in ~/.fretwise/config.json."""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+_CONFIG_DIR = Path(os.environ.get("FRETWISE_CONFIG_DIR", str(Path.home() / ".fretwise")))
+_CONFIG_FILE = _CONFIG_DIR / "config.json"
+
+DEFAULT_PARTITIONS_DIR = r"C:\Users\benoi\iCloudDrive\partitions\partitions"
+DEFAULT_INDEX_PATH = r"C:\Users\benoi\iCloudDrive\partitions\data\songs_index.tsv"
+DEFAULT_SOUNDFONTS_DIR = "data/sounds"
+
+_DEFAULTS: dict[str, Any] = {
+    "partitions_dir": DEFAULT_PARTITIONS_DIR,
+    "index_path": DEFAULT_INDEX_PATH,
+    "soundfonts_dir": DEFAULT_SOUNDFONTS_DIR,
+    "active_soundfont": "",
+    "soundfont_assignments": {},  # filename -> sf2 name
+}
+
+
+def load() -> dict[str, Any]:
+    """Load settings from disk, merging with defaults."""
+    settings = dict(_DEFAULTS)
+    if _CONFIG_FILE.exists():
+        try:
+            data = json.loads(_CONFIG_FILE.read_text(encoding="utf-8"))
+            settings.update({k: v for k, v in data.items() if k in _DEFAULTS})
+        except (json.JSONDecodeError, OSError):
+            pass
+    return settings
+
+
+def save(updates: dict[str, Any]) -> dict[str, Any]:
+    """Save settings to disk. Returns merged settings."""
+    current = load()
+    valid_keys = set(_DEFAULTS)
+    for k, v in updates.items():
+        if k in valid_keys:
+            current[k] = v
+    _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    _CONFIG_FILE.write_text(json.dumps(current, indent=2, ensure_ascii=False), encoding="utf-8")
+    return current
+
+
+def get(key: str, default: Any = None) -> Any:
+    """Get a single setting value."""
+    return load().get(key, default)

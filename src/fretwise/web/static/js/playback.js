@@ -36,6 +36,8 @@ export class PlaybackEngine {
     //                             _loading, midiChannel, midiProgram}]
     this._secondaryChannels = [];
 
+    this._followPlayhead = true;  // scroll follows the playhead
+
     // Callbacks
     this.onMeasureChange = null;
     this.onStop = null;
@@ -306,6 +308,38 @@ export class PlaybackEngine {
     }
   }
 
+  /**
+   * Override the instrument for a given MIDI channel index.
+   * @param {number} channel - MIDI channel index (0-15); 0 = primary track
+   * @param {number} program  - GM program number (0-127)
+   */
+  setChannelInstrument(channel, program) {
+    if (!Number.isInteger(channel) || channel < 0 || channel > 15) return;
+    if (!Number.isInteger(program) || program < 0 || program > 127) return;
+
+    if (!this._instrumentOverrides) this._instrumentOverrides = {};
+    this._instrumentOverrides[channel] = program;
+
+    if (channel === 0) {
+      // Primary track: delegate to setMidiProgram
+      this.setMidiProgram(program);
+      return;
+    }
+
+    // Secondary channels
+    if (this._spessa) {
+      try { this._spessa.programChange(channel, program); } catch (_) {}
+    }
+    // Update the stored midiProgram for the matching secondary channel
+    const ch = this._secondaryChannels.find(c => c.midiChannel === channel);
+    if (ch) {
+      ch.midiProgram = program;
+      if (this._synth && this._synth !== 'spessa' && ch.synth && ch.synth !== 'spessa') {
+        try { ch.synth.setInstrument?.(channel, program); } catch (_) {}
+      }
+    }
+  }
+
   /** Set master volume (0.0 – 1.0). */
   setVolume(v) {
     this._volume = Math.max(0, Math.min(1, v));
@@ -526,6 +560,7 @@ export class PlaybackEngine {
   }
 
   _scrollCursorIntoView() {
+    if (!this._followPlayhead) return;
     const canvas = this.renderer.canvas;
     const container = canvas.parentElement;
     if (!container) return;
@@ -539,10 +574,16 @@ export class PlaybackEngine {
     const sysIdx = this.renderer.systems.indexOf(sys);
     const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
     const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
+    const sysMid = sysY + SYSTEM_H / 2;
 
     const rect = container.getBoundingClientRect();
-    if (sysY < container.scrollTop || sysY + SYSTEM_H > container.scrollTop + rect.height) {
-      container.scrollTo({ top: Math.max(0, sysY - 40), behavior: 'smooth' });
+    const visibleTop = container.scrollTop;
+    const visibleBot = container.scrollTop + rect.height;
+    const centerTarget = sysMid - rect.height / 2;
+
+    // Only scroll when system center would be too close to top/bottom edges
+    if (sysMid > visibleBot - SYSTEM_H * 0.6 || sysMid < visibleTop + SYSTEM_H * 0.6) {
+      container.scrollTo({ top: Math.max(0, centerTarget), behavior: 'smooth' });
     }
   }
 
