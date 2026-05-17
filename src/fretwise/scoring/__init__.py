@@ -295,7 +295,11 @@ def cost_position_shift(s1: FingeringState, s2: FingeringState, note: NoteEvent)
         or s2.fret == 0
     )
 
-    shift = abs(s2.hand_position - s1.hand_position)
+    # hand_position = fret - finger_offset, so changing finger alone can change hp by up
+    # to 3 even if the hand stays physically anchored. Absorb a 1-fret tolerance so that
+    # adjacent finger swaps (e.g. INDEX@3 → MIDDLE@5: hp 3→4) don't read as a real shift.
+    raw_shift = abs(s2.hand_position - s1.hand_position)
+    shift = max(0, raw_shift - 1)
     if shift == 0:
         return 0.0
     # beats_per_minute / 60 = beats per second; duration in beats → seconds
