@@ -9,7 +9,7 @@
 
 ## DOING
 
-- `[pm]` Idle — Phase 2 ML intégrée. Attente demande #13 (features calibration) côté GDS pour validation finale
+- `[pm]` Idle — Phase 2 ML **activée par défaut** CLI + web. Validée empiriquement sur 7 fichiers (ZZ Top La Grange : PINKY 185→13, massive). Demande #13 features calibration toujours utile pour rigor mais non bloquante.
 
 ## TODO — Priority 1 (next 24h)
 
@@ -43,6 +43,7 @@
 
 ### Session 2026-05-17
 
+- `[pm]` **Phase 2 activée par défaut** (`a7d38f8`) — CLI + web app. Fallback gracieux si model absent. Validation empirique sur 7 fichiers : ZZ Top La Grange PINKY 185→13, MIDDLE +340. Sequence cases (Bb King, Cream) inchangés (Phase 2 n'agit qu'aux chord onsets).
 - `[pm]` **Phase 2 ML INTÉGRÉE** (`7261f0f`) — LearnedChordFingerClassifier + extract_chord_features + resolve_chord_learned_fingers. ONNX 97.7% accuracy. Opt-in via `run_pipeline(chord_finger_classifier=...)`. 950/951 tests verts. Fretwise-007 envoyé.
 - `[data]` **Quality.py tuning-awareness fix** (`003f19e`) — DEC-010 — infère tuning per-string depuis events. Corpus bad 22.6 % → **6.7 %** (re-classified 235 false positives drop-D/half-step). Métrique fiable maintenant.
 - `[pm]` Fretwise-006-handoff.md à GDS — B integration livrée + mesures + roadmap implications
