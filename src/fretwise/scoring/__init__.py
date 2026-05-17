@@ -1089,6 +1089,113 @@ _FINGER_OFFSET: dict[Finger, int] = {
 }
 
 
+def resolve_chord_learned_fingers(
+    results: list[FingeringResult],
+    classifier: object | None,
+) -> list[FingeringResult]:
+    """Override chord finger assignment using a learned ChordFingerClassifier.
+
+    Designed for the GuitarDataSet Phase 2 model: 97.7 % chord-finger accuracy
+    on unseen chord names (vs 80.9 % rule-based baseline). This resolver runs
+    AFTER the rule-based chord resolvers and OVERRIDES their finger field for
+    fretted notes within each chord onset group. Open strings are untouched.
+
+    When ``classifier`` is None (default), no-op — preserves the rule-based
+    output. When provided, the classifier MUST satisfy the
+    ``fretwise.ml.ChordFingerClassifier`` protocol.
+
+    Args:
+        results: Sequence of FingeringResult from the rule-based pipeline.
+        classifier: Pluggable chord finger classifier, or None to skip.
+
+    Returns:
+        New list with chord-finger assignments potentially overridden.
+    """
+    if classifier is None or not results:
+        return results
+
+    from fretwise.ml import ChordNote, PlayerContext
+
+    onset_groups: dict[float, list[int]] = defaultdict(list)
+    for idx, r in enumerate(results):
+        onset_groups[round(r.note_event.onset, 6)].append(idx)
+
+    resolved = list(results)
+
+    for indices in onset_groups.values():
+        if len(indices) < 2:
+            continue
+        fretted_pairs: list[tuple[int, FingeringResult]] = [
+            (i, resolved[i]) for i in indices
+            if resolved[i].state.fret > 0 and resolved[i].state.finger is not Finger.OPEN
+        ]
+        if len(fretted_pairs) < 1:
+            continue
+        n_open = sum(
+            1 for i in indices
+            if resolved[i].state.fret == 0 or resolved[i].state.finger is Finger.OPEN
+        )
+        frets_in_chord = [r.state.fret for _, r in fretted_pairs]
+        min_fret = min(frets_in_chord)
+        chord_notes = [
+            ChordNote(
+                string=r.state.string_num,
+                fret=r.state.fret,
+                pitch=r.note_event.pitch,
+                is_barre_candidate=(r.state.fret == min_fret and frets_in_chord.count(min_fret) >= 2),
+            )
+            for _, r in fretted_pairs
+        ]
+
+        any_event = fretted_pairs[0][1].note_event
+        ctx = PlayerContext(
+            onset=float(any_event.onset),
+            duration=float(any_event.duration),
+            tempo=float(any_event.tempo),
+            articulation=any_event.articulation.value if any_event.articulation else "normal",
+            is_chord_member=True,
+            chord_size=len(fretted_pairs) + n_open,
+        )
+
+        try:
+            predicted = classifier.predict_fingers(
+                chord_notes, hand_position=min_fret, context=ctx,
+            )
+        except Exception as exc:
+            logger.warning("ChordFingerClassifier failed on onset %s: %s",
+                           any_event.onset, exc)
+            continue
+
+        if len(predicted) != len(fretted_pairs):
+            logger.warning(
+                "Classifier returned %d fingers for %d notes; skipping.",
+                len(predicted), len(fretted_pairs),
+            )
+            continue
+
+        for (orig_idx, r), finger_name in zip(fretted_pairs, predicted):
+            try:
+                new_finger = Finger(finger_name.lower())
+            except ValueError:
+                continue
+            new_hp = max(1, r.state.fret - _FINGER_OFFSET.get(new_finger, 0))
+            resolved[orig_idx] = FingeringResult(
+                note_id=r.note_id,
+                note_event=r.note_event,
+                state=FingeringState(
+                    string_num=r.state.string_num,
+                    fret=r.state.fret,
+                    finger=new_finger,
+                    hand_position=new_hp,
+                ),
+                cost=r.cost,
+                alternatives=r.alternatives,
+                planted_fingers=r.planted_fingers,
+            )
+
+    return resolved
+
+
 def resolve_finger_continuity(
     results: list[FingeringResult],
     lookback_beats: float = 8.0,

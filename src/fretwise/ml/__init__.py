@@ -37,6 +37,8 @@ __all__ = [
     "ChordFingerClassifier",
     "FixedPlayerCost",
     "FixedChordFingerClassifier",
+    "LearnedChordFingerClassifier",
+    "extract_chord_features",
 ]
 
 
@@ -181,6 +183,186 @@ class FixedPlayerCost(PlayerCostModel):
 
     def emission_cost(self, *args: Any, **kwargs: Any) -> float:
         return 0.0
+
+
+# ---------------------------------------------------------------------------
+# Feature extraction for the learned chord finger classifier
+# ---------------------------------------------------------------------------
+
+# Feature ordering — must match GuitarDataSet's training pipeline exactly.
+# See finger_classifier_spec.json (24 features).
+_FEATURE_NAMES: tuple[str, ...] = (
+    "string_num", "fret", "relative_fret", "position_in_chord",
+    "gap_below", "gap_above", "notes_below", "num_played",
+    "num_fretted", "num_open", "fret_span", "min_fret",
+    "max_fret", "is_barre", "notes_above",
+    "string_gap_below", "string_gap_above", "fret_below_val",
+    "ctx_fret_0", "ctx_fret_1", "ctx_fret_2",
+    "ctx_fret_3", "ctx_fret_4", "ctx_fret_5",
+)
+_FINGER_FROM_INDEX: tuple[str, ...] = ("index", "middle", "ring", "pinky")
+
+
+def extract_chord_features(
+    chord_notes: Sequence[ChordNote],
+    n_open: int = 0,
+) -> list[list[float]]:
+    """Build the 24-feature vector for each fretted chord note.
+
+    Aligns with the feature spec shipped by GuitarDataSet (Phase 2 classifier).
+    "below" / "above" refer to the **string-ascending** ordering of fretted
+    notes (string 1 = high e first → string 6 = low E last). Open strings are
+    counted via ``n_open`` but not present as ChordNote.
+
+    Args:
+        chord_notes: Fretted notes of the chord (fret > 0).
+        n_open: Number of open strings sounding in the same chord.
+
+    Returns:
+        list of 24-element feature vectors, one per input note, in the same
+        order as ``chord_notes``.
+    """
+    if not chord_notes:
+        return []
+
+    sorted_by_string = sorted(enumerate(chord_notes), key=lambda p: p[1].string)
+    sorted_chord = [n for _, n in sorted_by_string]
+
+    frets = [n.fret for n in sorted_chord]
+    min_fret = min(frets)
+    max_fret = max(frets)
+    fret_span = max_fret - min_fret
+    n_fretted = len(sorted_chord)
+    n_played = n_fretted + n_open
+    # is_barre: true at the chord level if any two notes share min_fret AND
+    # at least one ChordNote has is_barre_candidate True.
+    barre_active = (
+        sum(1 for n in sorted_chord if n.fret == min_fret) >= 2
+        and any(n.is_barre_candidate for n in sorted_chord if n.fret == min_fret)
+    )
+    is_barre = 1.0 if barre_active else 0.0
+
+    # ctx_fret_0..5: relative_fret per string slot 1..6, padded with -1.
+    ctx_relative = [-1.0] * 6
+    for n in sorted_chord:
+        if 1 <= n.string <= 6:
+            ctx_relative[n.string - 1] = float(n.fret - min_fret)
+
+    feature_vectors: list[list[float]] = [[0.0] * 24 for _ in chord_notes]
+
+    for sorted_idx, note in enumerate(sorted_chord):
+        orig_idx = sorted_by_string[sorted_idx][0]
+        prev_note = sorted_chord[sorted_idx - 1] if sorted_idx > 0 else None
+        next_note = sorted_chord[sorted_idx + 1] if sorted_idx < n_fretted - 1 else None
+
+        gap_below = float(note.fret - prev_note.fret) if prev_note is not None else -1.0
+        gap_above = float(next_note.fret - note.fret) if next_note is not None else -1.0
+        string_gap_below = (
+            float(note.string - prev_note.string) if prev_note is not None else -1.0
+        )
+        string_gap_above = (
+            float(next_note.string - note.string) if next_note is not None else -1.0
+        )
+        fret_below_val = float(prev_note.fret) if prev_note is not None else 0.0
+
+        position_in_chord = (
+            sorted_idx / (n_fretted - 1) if n_fretted > 1 else 0.0
+        )
+
+        feature_vectors[orig_idx] = [
+            float(note.string),
+            float(note.fret),
+            float(note.fret - min_fret),
+            float(position_in_chord),
+            gap_below,
+            gap_above,
+            float(sorted_idx),
+            float(n_played),
+            float(n_fretted),
+            float(n_open),
+            float(fret_span),
+            float(min_fret),
+            float(max_fret),
+            is_barre,
+            float(n_fretted - 1 - sorted_idx),
+            string_gap_below,
+            string_gap_above,
+            fret_below_val,
+            *ctx_relative,
+        ]
+
+    return feature_vectors
+
+
+class LearnedChordFingerClassifier(ChordFingerClassifier):
+    """ONNX-backed chord finger classifier (GuitarDataSet Phase 2).
+
+    Loads the ONNX model and the feature spec at construction. ``onnxruntime``
+    is imported lazily so callers that don't activate the learned classifier
+    don't pay the dependency cost.
+
+    Args:
+        model_path: Path to the .onnx file.
+        spec_path: Path to the spec JSON (verified at load time).
+
+    Raises:
+        ImportError: If ``onnxruntime`` is not installed.
+        FileNotFoundError: If model_path does not exist.
+    """
+
+    def __init__(self, model_path: str, spec_path: str | None = None) -> None:
+        try:
+            import onnxruntime as ort  # noqa: F401
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError(
+                "onnxruntime is required for LearnedChordFingerClassifier. "
+                "Install it via 'pip install onnxruntime'."
+            ) from exc
+
+        import json
+        from pathlib import Path as _P
+
+        model_p = _P(model_path)
+        if not model_p.exists():
+            raise FileNotFoundError(f"ONNX model not found: {model_path}")
+
+        if spec_path:
+            spec = json.loads(_P(spec_path).read_text(encoding="utf-8"))
+            assert tuple(spec["feature_names"]) == _FEATURE_NAMES, (
+                "Feature spec drift between FretWise and the trained model. "
+                "Compare src/fretwise/ml/__init__.py _FEATURE_NAMES with "
+                f"{spec_path}::feature_names."
+            )
+
+        import onnxruntime as ort
+        self._session = ort.InferenceSession(str(model_p))
+        self._input_name = self._session.get_inputs()[0].name
+
+    def predict_fingers(
+        self,
+        chord_notes: Sequence[ChordNote],
+        hand_position: int,
+        context: PlayerContext,
+    ) -> list[str]:
+        if not chord_notes:
+            return []
+        try:
+            import numpy as np
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError("numpy required for ONNX inference") from exc
+
+        features = extract_chord_features(chord_notes)
+        x = np.asarray(features, dtype=np.float32)
+        outputs = self._session.run(None, {self._input_name: x})
+        # XGBoost ONNX exports usually return (labels, probabilities). Take labels.
+        labels_raw = outputs[0]
+        labels = labels_raw.tolist() if hasattr(labels_raw, "tolist") else list(labels_raw)
+        # Handle (N,) or (N, 1) shapes
+        result: list[str] = []
+        for raw in labels:
+            idx = int(raw[0]) if isinstance(raw, (list, tuple)) else int(raw)
+            result.append(_FINGER_FROM_INDEX[idx])
+        return result
 
 
 class FixedChordFingerClassifier(ChordFingerClassifier):
