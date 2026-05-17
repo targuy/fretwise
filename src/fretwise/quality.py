@@ -27,13 +27,40 @@ A file is "suspect" if **two or more** Suspect thresholds are exceeded.
 """
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 
 from fretwise.models import NoteEvent
 
 # MIDI pitches of open strings in standard EADGBE (string 1 = high e).
 _STANDARD_TUNING: list[int] = [64, 59, 55, 50, 45, 40]
+
+
+def _infer_tuning(events: list[NoteEvent]) -> list[int]:
+    """Infer per-string open-string MIDI pitches from event hints.
+
+    For each string number, looks at every event with string_hint + fret_hint
+    + pitch and computes ``pitch - fret_hint`` (the implied open-string pitch).
+    Takes the most common value per string as the inferred tuning.
+
+    Strings without any reliable evidence keep the EADGBE default. This makes
+    quality assessment robust to non-standard tunings (drop-D, half-step
+    down, etc.) without depending on parser metadata.
+    """
+    candidates: dict[int, Counter[int]] = defaultdict(Counter)
+    for e in events:
+        if (
+            e.string_hint is not None
+            and e.fret_hint is not None
+            and 1 <= e.string_hint <= len(_STANDARD_TUNING)
+        ):
+            candidates[e.string_hint][e.pitch - e.fret_hint] += 1
+
+    tuning = list(_STANDARD_TUNING)
+    for s, counter in candidates.items():
+        if counter:
+            tuning[s - 1] = counter.most_common(1)[0][0]
+    return tuning
 
 # Thresholds — refine on corpus evidence.
 _VERY_HIGH_FRET = 24       # GP allows up to 27 but real guitars stop at 22–24.
@@ -99,13 +126,15 @@ def assess_source_quality(events: list[NoteEvent]) -> QualityReport:
     duration = max(onsets) - min(onsets)
     density = n / max(duration, 1.0)
 
+    tuning = _infer_tuning(events)
+
     pitch_hint_conflicts = 0
     very_high_fret_count = 0
     for e in events:
         if e.string_hint and e.fret_hint is not None:
             sh = e.string_hint
-            if 1 <= sh <= len(_STANDARD_TUNING):
-                expected = _STANDARD_TUNING[sh - 1] + e.fret_hint
+            if 1 <= sh <= len(tuning):
+                expected = tuning[sh - 1] + e.fret_hint
                 if expected != e.pitch:
                     pitch_hint_conflicts += 1
         if e.fret_hint is not None and e.fret_hint > _VERY_HIGH_FRET:

@@ -72,6 +72,36 @@ def test_very_high_fret_count_four_is_bad() -> None:
     assert ">" in report.rationale
 
 
+def test_drop_d_tuning_not_flagged_as_conflicts() -> None:
+    """A drop-D tuning (string 6 = D2 = pitch 38) must not be misread as
+    100% pitch-hint conflicts. The inferred tuning should absorb the
+    non-standard string 6 pitch.
+    """
+    events = []
+    # 50 notes on string 6, drop-D tuning (pitch = 38 at fret 0)
+    for i in range(50):
+        events.append(_note(i, pitch=38 + (i % 5), string_hint=6, fret_hint=i % 5))
+    # 50 notes on string 1, standard (pitch = 64 at fret 0)
+    for i in range(50):
+        events.append(_note(50 + i, pitch=64 + (i % 5), string_hint=1, fret_hint=i % 5))
+    report = assess_source_quality(events)
+    assert report.pitch_hint_conflicts == 0
+    assert report.is_clean
+
+
+def test_half_step_down_tuning_clean() -> None:
+    """Half-step down tuning (every string shifted -1 semitone) — clean."""
+    half_step = [63, 58, 54, 49, 44, 39]  # EADGBE - 1
+    events = []
+    for i in range(60):
+        s = (i % 6) + 1
+        fret = i % 7
+        events.append(_note(i, pitch=half_step[s - 1] + fret, string_hint=s, fret_hint=fret))
+    report = assess_source_quality(events)
+    assert report.pitch_hint_conflicts == 0
+    assert report.is_clean
+
+
 def test_excessive_chord_span_flagged() -> None:
     events = []
     # Build 6 chords with span > 5 at distinct onsets
