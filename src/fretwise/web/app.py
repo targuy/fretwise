@@ -53,7 +53,7 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
     async def _no_cache_static(request: Request, call_next: Any) -> Any:
         response = await call_next(request)
         path = request.url.path
-        if path.startswith("/static/") and (path.endswith(".js") or path.endswith(".css")):
+        if path.startswith("/static/") and path.endswith((".js", ".css", ".html")):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
