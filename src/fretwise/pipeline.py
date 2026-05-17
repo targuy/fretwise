@@ -12,6 +12,7 @@ from fretwise.models import FingeringResult, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
 from fretwise.scoring import (
+    CostFunction,
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
     resolve_chord_finger_span,
@@ -25,6 +26,24 @@ from fretwise.scoring import (
     resolve_section_consistency,
     resolve_sedentary_fingers,
 )
+from fretwise.segmentation import Position, segment_into_positions
+
+
+def _anchors_from_segments(
+    segments: list[Position], n_notes: int,
+) -> list[int | None]:
+    """Build a per-note-index anchor lookup from a list of Positions.
+
+    Notes not covered by any segment (shouldn't happen if segmentation covers
+    the full sequence, but guarded for safety) are assigned None — the
+    scoring layer falls back to A' tolerance for those transitions.
+    """
+    anchors: list[int | None] = [None] * n_notes
+    for seg in segments:
+        for i in range(seg.start_idx, seg.end_idx + 1):
+            if 0 <= i < n_notes:
+                anchors[i] = seg.anchor
+    return anchors
 
 
 def split_by_voice(events: list[NoteEvent]) -> dict[int, list[NoteEvent]]:
@@ -89,7 +108,24 @@ def run_pipeline(
             valid_states_list = pattern_matcher.apply(
                 list(valid_events), valid_states_list,
             )
-        results = optimizer.solve(list(valid_events), valid_states_list)
+
+        # B integration: compute per-voice segment anchors and activate
+        # segment-aware shift cost if the cost function supports it.
+        valid_events_list = list(valid_events)
+        cost_fn = getattr(optimizer, "_cost_fn", None)
+        segment_activated = False
+        if isinstance(cost_fn, CostFunction):
+            segments = segment_into_positions(valid_events_list)
+            if segments:
+                anchors = _anchors_from_segments(segments, len(valid_events_list))
+                cost_fn.set_segment_anchors(anchors)
+                segment_activated = True
+
+        try:
+            results = optimizer.solve(valid_events_list, valid_states_list)
+        finally:
+            if segment_activated and isinstance(cost_fn, CostFunction):
+                cost_fn.clear_segment_anchors()
         results = resolve_arpeggio_chord_fingering(results)
         results = resolve_finger_continuity(results)
         results = resolve_chord_conflicts(results)
