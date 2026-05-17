@@ -21,6 +21,14 @@
 version: 0.1
 schema_doc: docs/handoff/MODEL_SPEC.md
 
+# data_quality_protocol: at every anomaly, the source file's quality is
+# assessed via src/fretwise/quality.py before the pathology is attributed to
+# the algorithm. Fields below per case:
+#   data_quality.verdict: "clean" | "suspect" | "bad" (from QualityReport)
+#   data_quality.notes:   optional human note about why this verdict applies
+# Cases with verdict=bad should be treated as "out of scope" — re-evaluate
+# only after the source is fixed or replaced.
+
 cases:
 
   - id: bb_king_thrill_m8_pinky_spam
@@ -37,6 +45,9 @@ cases:
       finger: PINKY
       max_share: 0.6
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
 
   - id: bb_king_thrill_m94_pinky_heavy
     source: "Bb King-The Thrill Is Gone-12-26-2025.gp"
@@ -50,6 +61,9 @@ cases:
       finger: PINKY
       max_share: 0.6
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
 
   - id: steppenwolf_born_wild_m23_pinky_run
     source: "Steppenwolf-Born To Be Wild-10-15-2025.gp"
@@ -63,6 +77,9 @@ cases:
       finger: PINKY
       max_share: 0.6
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
 
   - id: cream_sunshine_pinky_heavy
     source: "Cream-Sunshine Of Your Love-12-26-2025.gp"
@@ -77,6 +94,9 @@ cases:
       max_share: 0.25
       scope: whole_piece
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
 
   - id: zz_top_la_grange_m50_alternation
     source: "ZZ Top-La Grange-02-25-2026.gp"
@@ -92,6 +112,9 @@ cases:
       finger: PINKY
       max_share: 0.4
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
 
   - id: django_nuages_jazz_pinky
     source: "Django Reinhardt-Nuages-05-30-2025.gp"
@@ -107,6 +130,9 @@ cases:
       max_share: 0.30
       scope: whole_piece
     annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
     notes: |
       Caveat: Django Reinhardt famously played with only two functional
       left-hand fingers (index + middle) after his fire injury, so the
