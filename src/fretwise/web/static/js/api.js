@@ -55,6 +55,21 @@ export async function fetchSolve(filename, trackId, representationMode, preferen
   return res.json();
 }
 
+export async function downloadFile(filename) {
+  const url = `/api/download/${encodeURIComponent(filename)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Download failed' }));
+    throw new Error(err.detail || 'Download failed');
+  }
+  const blob = await res.blob();
+  const contentDisposition = res.headers.get('content-disposition') || '';
+  let filenameOut = filename;
+  const m = /filename="?([^";]+)"?/i.exec(contentDisposition);
+  if (m && m[1]) filenameOut = m[1];
+  return { blob, filename: filenameOut };
+}
+
 export async function fetchExportPdf(filename, trackId, representationMode) {
   let url =
     `/api/export/pdf/${encodeURIComponent(filename)}` +
@@ -87,4 +102,67 @@ export async function fetchExportPdf(filename, trackId, representationMode) {
   if (m && m[1]) filenameOut = m[1];
 
   return { blob, filename: filenameOut, engine: 'core', conformanceIssues, conformanceReport };
+}
+
+export async function fetchSettings() {
+  const res = await fetch('/api/settings');
+  if (!res.ok) throw new Error('Failed to fetch settings');
+  return res.json();
+}
+
+export async function saveSettings(updates) {
+  const res = await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to save settings' }));
+    throw new Error(err.detail || 'Failed to save settings');
+  }
+  return res.json();
+}
+
+export async function fetchSongInfo(filename) {
+  const res = await fetch(`/api/song-info/${encodeURIComponent(filename)}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function fetchGmInstruments() {
+  const res = await fetch('/api/soundfont/instruments');
+  if (!res.ok) throw new Error('Failed to fetch GM instruments');
+  return res.json();
+}
+
+export async function fetchSoundfonts() {
+  const res = await fetch('/api/soundfonts');
+  if (!res.ok) throw new Error('Failed to fetch soundfonts');
+  return res.json();
+}
+
+export async function deleteSoundfont(name) {
+  const res = await fetch(`/api/soundfonts/${encodeURIComponent(name)}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Delete failed' }));
+    throw new Error(err.detail || 'Delete failed');
+  }
+  return res.json();
+}
+
+export async function uploadSoundfont(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('/api/soundfonts/upload', { method: 'POST', body: fd });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+    throw new Error(err.detail || 'Upload failed');
+  }
+  return res.json();
+}
+
+export async function activateSoundfont(name) {
+  const res = await fetch(`/api/soundfonts/${encodeURIComponent(name)}/activate`, { method: 'POST' });
+  if (!res.ok) throw new Error('Activate failed');
+  return res.json();
 }

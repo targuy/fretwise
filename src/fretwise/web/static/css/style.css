@@ -861,6 +861,11 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   pointer-events: none;
   filter: drop-shadow(0 0 2px #e53935);
 }
+/* Tempo marks — bold, slightly darker for prominence */
+.fw-tempo-mark {
+  fill: #111;
+  font-family: "Bravura", "Segoe UI Symbol", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
 /* Chord name labels in SVG — clickable */
 .fw-chord-name {
   cursor: pointer;
@@ -1026,3 +1031,591 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   }
   #tab-canvas { max-width: 100%; page-break-inside: avoid; }
 }
+
+/* ═══════════════ Page base (file selector + settings) ═══════════════ */
+.page { margin-top: 44px; }
+
+/* ═══════════════ Library Table ═══════════════ */
+.lib-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px 8px;
+  background: var(--bg-1);
+  position: sticky;
+  top: 44px;
+  z-index: 10;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.lib-search-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lib-search-bar input[type="search"],
+.lib-search-bar select {
+  padding: 7px 12px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--ui);
+}
+
+.lib-search-bar input[type="search"] { flex: 1 1 200px; }
+
+.lib-search-bar input:focus,
+.lib-search-bar select:focus {
+  border-color: var(--signal);
+}
+
+.lib-search-bar select option { background: var(--bg-1); color: var(--fg-0); }
+
+.lib-table-wrap {
+  padding: 0 20px 20px;
+  overflow-x: auto;
+}
+
+.lib-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.lib-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--line-2);
+  color: var(--fg-2);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.lib-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.lib-table th.sortable:hover { color: var(--signal); }
+
+.sort-arrow { opacity: 0.7; }
+
+.lib-row {
+  border-bottom: 1px solid var(--line-2);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.lib-row:hover { background: var(--bg-2); }
+
+.lib-row td {
+  padding: 10px 10px;
+  color: var(--fg-0);
+  vertical-align: middle;
+}
+
+.lib-cell-title { cursor: pointer; }
+.lib-title-text {
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.lib-row:hover .lib-title-text { color: var(--signal); }
+
+.lib-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.lib-badge-genre {
+  background: oklch(0.82 0.15 75 / 0.15);
+  color: var(--signal);
+}
+
+.lib-badge-fmt {
+  background: var(--bg-2);
+  color: var(--fg-2);
+  border: 1px solid var(--line-2);
+}
+
+.lib-cell-actions {
+  display: flex;
+  gap: 4px;
+  min-width: 72px;
+}
+
+.lib-btn-info,
+.lib-btn-dl {
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  color: var(--fg-2);
+  transition: all 0.15s;
+}
+
+.lib-btn-info:hover,
+.lib-btn-dl:hover {
+  background: var(--bg-2);
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+.lib-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+/* Song info panel (side drawer) */
+.song-info-panel {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  background: var(--bg-1);
+  border-left: 1px solid var(--line-2);
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.song-info-panel.open { transform: translateX(0); }
+
+.song-info-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--fg-2);
+  padding: 4px 8px;
+  border-radius: var(--r-1);
+  transition: color 0.15s, background 0.15s;
+}
+
+.song-info-close:hover { color: var(--fg-0); background: var(--bg-2); }
+
+.song-info-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-right: 30px;
+  color: var(--fg-0);
+}
+
+.song-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.song-info-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--fg-2);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 40%;
+}
+
+.song-info-table td { padding: 6px 8px; color: var(--fg-0); }
+
+.song-info-table tr { border-bottom: 1px solid var(--line-2); }
+
+.song-info-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.song-info-loading {
+  text-align: center;
+  color: var(--fg-2);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* ═══════════════ Settings Page ═══════════════ */
+.settings-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--fg-0);
+}
+
+.settings-section {
+  margin-bottom: 32px;
+  background: var(--bg-2);
+  border-radius: var(--r-4);
+  padding: 20px;
+  border: 1px solid var(--line-2);
+}
+
+.settings-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-2);
+  margin-bottom: 16px;
+}
+
+.settings-field { margin-bottom: 16px; }
+
+.settings-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--fg-0);
+}
+
+.settings-path-row { display: flex; gap: 8px; }
+
+.settings-path-row input[type="text"] {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  color: var(--fg-0);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--mono);
+}
+
+.settings-path-row input:focus { border-color: var(--signal); }
+
+.settings-hint {
+  font-size: 12px;
+  color: var(--fg-2);
+  margin-top: 4px;
+}
+
+/* ═══════════════ Instrument Picker ═══════════════ */
+.instr-picker-btn {
+  font-size: 11px;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.6;
+  color: inherit;
+  transition: opacity 0.15s;
+  vertical-align: middle;
+}
+.instr-picker-btn:hover { opacity: 1; }
+
+.instr-dropdown {
+  position: fixed;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 999;
+  width: 260px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px 0;
+  animation: fadeIn 0.12s ease;
+}
+
+.instr-category {
+  padding: 4px 12px 2px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-2);
+  background: none;
+}
+
+.instr-item {
+  display: block;
+  width: 100%;
+  padding: 6px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--fg-0);
+  transition: background 0.1s;
+}
+
+.instr-item:hover {
+  background: var(--signal);
+  color: #000;
+}
+
+.instr-item.active {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════ Soundfont Panel ═══════════════ */
+.sf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-height: 40px;
+}
+
+.sf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: border-color 0.2s;
+}
+
+.sf-row.active {
+  border-color: var(--signal);
+}
+
+.sf-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sf-size {
+  font-size: 11px;
+  color: var(--fg-2);
+  flex-shrink: 0;
+}
+
+.sf-active-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--signal);
+  color: #000;
+  flex-shrink: 0;
+}
+
+.sf-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sf-empty, .sf-loading {
+  color: var(--fg-2);
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}
+
+.sf-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sf-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--line-2);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--fg-0);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.sf-upload-label:hover {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+}
+
+.sf-upload-status {
+  font-size: 12px;
+  color: var(--fg-2);
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE / ADAPTIVE DESIGN
+   Breakpoints: mobile <640px, tablet 640-1024px
+   ═══════════════════════════════════════════════ */
+
+/* Touch-friendly tap targets */
+@media (hover: none) {
+  button, a, .lib-row, .track-card {
+    min-height: 44px;
+  }
+  .lib-btn-info, .lib-btn-dl {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* ── Tablet (640-1024px) ── */
+@media (max-width: 1024px) {
+  .song-info-panel { width: 300px; }
+
+  .lib-cell-artist,
+  .lib-cell-year { display: none; }
+
+  .settings-wrap { padding: 16px; }
+}
+
+/* ── Mobile (<640px) ── */
+@media (max-width: 640px) {
+  /* Header */
+  .app-header { padding: 0 8px; }
+  .header-meta { display: none; }
+
+  /* Track tabs */
+  #track-tabs-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #track-tabs-bar::-webkit-scrollbar { display: none; }
+
+  /* Library table — card layout on mobile */
+  .lib-table thead { display: none; }
+  .lib-table, .lib-table tbody, .lib-table tr { display: block; width: 100%; }
+  .lib-row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 4px;
+    position: relative;
+  }
+  .lib-cell-title {
+    flex: 1 1 100%;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .lib-cell-artist {
+    flex: 1 1 auto;
+    font-size: 12px;
+    color: var(--fg-2);
+  }
+  .lib-cell-genre { flex: 0 0 auto; }
+  .lib-cell-year { flex: 0 0 auto; font-size: 12px; color: var(--fg-2); }
+  .lib-cell-format { flex: 0 0 auto; }
+  .lib-cell-actions {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Song info panel: full width on mobile */
+  .song-info-panel {
+    width: 100%;
+    top: 44px;
+    border-left: none;
+    border-top: 1px solid var(--line-2);
+  }
+
+  /* Toolbar: compact */
+  #toolbar {
+    padding: 4px 6px;
+  }
+  .toolbar-right .ic-btn > span,
+  .toolbar-right .ic-btn > .btn-label { display: none; }
+
+  /* Search bar: stacked */
+  .lib-search-bar {
+    flex-direction: column;
+  }
+  .lib-search-bar input[type="search"],
+  .lib-search-bar select { width: 100%; }
+
+  /* Settings */
+  .settings-wrap { padding: 12px 8px; }
+  .settings-path-row { flex-direction: column; }
+  .settings-path-row .tx-btn { align-self: flex-end; }
+
+  /* Soundfont rows */
+  .sf-row { flex-direction: column; align-items: flex-start; }
+
+  /* Track grid */
+  .track-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Tab container: full width */
+  #tab-container { margin: 0; }
+
+  /* Hand viz panel: smaller on mobile */
+  #hand-viz-panel {
+    width: min(280px, 90vw) !important;
+  }
+}
+
+/* ── Landscape phone ── */
+@media (max-width: 640px) and (orientation: landscape) {
+  .app-header { height: 36px; }
+  #track-tabs-bar { top: 36px; }
+}
+
+/* ── Touch swipe support ── */
+@media (pointer: coarse) {
+  #tab-container { touch-action: pan-y; }
+  .lib-table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
