@@ -43,6 +43,28 @@ from fretwise.pdf_conformance import (
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights
 
+
+def _load_chord_finger_classifier() -> object | None:
+    """Load the optional ChordFingerClassifier (Phase 2 ONNX model) if present.
+
+    Returns None silently when the model file or onnxruntime are not available,
+    so the CLI keeps working with the rule-based pipeline.
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_path = model_dir / "finger_classifier.onnx"
+    spec_path = model_dir / "finger_classifier_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedChordFingerClassifier
+        return LearnedChordFingerClassifier(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        return None
+
 _MODES = {
     "reference": CostWeights.reference,
     "performance": CostWeights.performance,
@@ -327,7 +349,11 @@ def solve(
         click.echo("No notes found.")
         return
 
-    results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+    classifier = _load_chord_finger_classifier()
+    results, stats = run_pipeline(
+        events, generator, optimizer, pattern_matcher=matcher,
+        chord_finger_classifier=classifier,
+    )
     if not results:
         click.echo("No valid fingering states could be generated.", err=True)
         sys.exit(1)
