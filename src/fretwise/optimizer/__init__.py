@@ -26,7 +26,11 @@ logger = logging.getLogger(__name__)
 class CostFunctionProtocol(Protocol):
     """Structural type for cost functions injected into ViterbiOptimizer.
 
-    Any object with these two methods satisfies the contract.
+    Any object with these two methods satisfies the contract. The ``index``
+    parameter on ``transition_cost`` is optional (defaults to None) so
+    implementations that don't need positional context stay compatible.
+    Segment-aware implementations (B integration) use ``index`` to consult
+    a per-note-index anchor lookup populated by the pipeline.
     """
 
     def transition_cost(
@@ -34,8 +38,18 @@ class CostFunctionProtocol(Protocol):
         s1: FingeringState,
         s2: FingeringState,
         note: NoteEvent,
+        index: int | None = None,
     ) -> float:
-        """Cost of transitioning from s1 to s2 when playing note."""
+        """Cost of transitioning from s1 to s2 when playing note.
+
+        Args:
+            s1: Source state.
+            s2: Target state.
+            note: NoteEvent for s2 (current step).
+            index: Index of the current step in the sequence (0-based).
+                Always non-None when passed by ``ViterbiOptimizer.solve``;
+                callers passing None opt out of positional context.
+        """
         ...
 
     def emission_cost(self, state: FingeringState) -> float:
@@ -118,7 +132,9 @@ class ViterbiOptimizer:
 
             for j, s2 in enumerate(curr_states):
                 for k, s1 in enumerate(prev_states):
-                    cost = viterbi[i - 1][k] + self._cost_fn.transition_cost(s1, s2, note)
+                    cost = viterbi[i - 1][k] + self._cost_fn.transition_cost(
+                        s1, s2, note, index=i,
+                    )
                     if cost < viterbi[i][j]:
                         viterbi[i][j] = cost
                         backtrack[i][j] = k

@@ -225,12 +225,33 @@ class CostFunction:
         self._weights = weights or CostWeights.reference()
         self._profile = profile or default_profile()
         self._rule_preferences = rule_preferences or RulePreferences()
+        # B integration: per-note-index segment anchor lookup. Populated by
+        # the pipeline before each voice's Viterbi run via set_segment_anchors.
+        # None disables segment-aware shift (fallback to A' tolerance).
+        self._segment_anchors: list[int | None] | None = None
+
+    def set_segment_anchors(self, anchors: list[int | None]) -> None:
+        """Activate segment-aware shift cost for the next Viterbi run.
+
+        Args:
+            anchors: One entry per note in the sequence. ``anchors[i]`` is the
+                fret anchor of the segment containing note ``i``, or ``None``
+                if the note is not anchored (open strings, unhinted notes).
+                A None on either side of a transition falls back to the
+                A' per-state shift cost for that transition.
+        """
+        self._segment_anchors = list(anchors)
+
+    def clear_segment_anchors(self) -> None:
+        """Disable segment-aware shift cost (fallback to A' behaviour)."""
+        self._segment_anchors = None
 
     def transition_cost(
         self,
         s1: FingeringState,
         s2: FingeringState,
         note: NoteEvent,
+        index: int | None = None,
     ) -> float:
         """Compute the composite transition cost between two fingering states.
 
@@ -238,16 +259,31 @@ class CostFunction:
             s1: The previous (source) fingering state.
             s2: The next (target) fingering state.
             note: The NoteEvent associated with s2 (provides tempo context).
+            index: Index of s2 in the sequence (0-based). Used to consult
+                segment anchors when ``set_segment_anchors`` has been called.
+                Defaults to None for backward compatibility with callers that
+                don't track positional context.
 
         Returns:
-            Non-negative composite cost.  Lower = more desirable transition.
+            Non-negative composite cost. Lower = more desirable transition.
         """
         w = self._weights
+        anchor_prev: int | None = None
+        anchor_curr: int | None = None
+        if (
+            self._segment_anchors is not None
+            and index is not None
+            and 0 < index < len(self._segment_anchors)
+        ):
+            anchor_prev = self._segment_anchors[index - 1]
+            anchor_curr = self._segment_anchors[index]
         c_meca = compute_mechanical_cost(
             s1,
             s2,
             note,
             rule_preferences=self._rule_preferences,
+            segment_anchor_prev=anchor_prev,
+            segment_anchor_curr=anchor_curr,
         )
         c_music = compute_musical_cost(s1, s2, note)
         c_joueur = 0.0  # stub — Phase 3
@@ -310,6 +346,51 @@ def cost_position_shift(s1: FingeringState, s2: FingeringState, note: NoteEvent)
         # Open strings allow hand motion while sounding, but the reset is not free.
         return 0.35 * shift * tempo_factor
 
+    return shift * tempo_factor
+
+
+def cost_position_shift_segment_aware(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    anchor_prev: int,
+    anchor_curr: int,
+) -> float:
+    """Segment-aware variant of ``cost_position_shift`` (B integration).
+
+    When both notes belong to the same segment (same anchor), the cost is 0:
+    the hand is physically anchored, no real wrist motion is required. When
+    they belong to different segments, the cost is proportional to the
+    anchor delta — which is the actual physical hand-position change.
+
+    This eliminates the F2/F3/F4 pathologies caused by the per-state
+    ``hand_position = fret - finger_offset`` confounding finger changes with
+    real wrist shifts.
+
+    Args:
+        s1: Source state.
+        s2: Target state.
+        note: NoteEvent for s2 (provides tempo / duration).
+        anchor_prev: Hand anchor (lowest fret) of the segment containing s1.
+        anchor_curr: Hand anchor of the segment containing s2.
+
+    Returns:
+        Non-negative cost. 0.0 when same segment.
+    """
+    if anchor_prev == anchor_curr:
+        return 0.0
+
+    open_transition = (
+        s1.finger == Finger.OPEN
+        or s2.finger == Finger.OPEN
+        or s1.fret == 0
+        or s2.fret == 0
+    )
+    shift = abs(anchor_curr - anchor_prev)
+    seconds = note.duration * 60.0 / max(note.tempo, 1.0)
+    tempo_factor = 1.0 / max(seconds, 0.1)
+    if open_transition:
+        return 0.35 * shift * tempo_factor
     return shift * tempo_factor
 
 
@@ -2159,14 +2240,20 @@ def compute_mechanical_cost(
     note: NoteEvent,
     *,
     rule_preferences: RulePreferences | None = None,
+    segment_anchor_prev: int | None = None,
+    segment_anchor_curr: int | None = None,
 ) -> float:
     """Aggregate mechanical cost C_méca(s1, s2).
 
-    Combines four components:
-    1. Position shift (wrist movement, tempo-weighted)
-    2. Stretch (fret span from hand position)
-    3. String change (number of strings crossed)
-    4. Finger difficulty (intrinsic per-finger cost)
+    Combines components:
+    1. Position shift (wrist movement, tempo-weighted) — segment-aware when
+       both ``segment_anchor_prev`` and ``segment_anchor_curr`` are provided,
+       per-state hp delta otherwise (A' tolerance fallback).
+    2. Stretch (fret span from hand position).
+    3. String change (number of strings crossed).
+    4. Finger difficulty (intrinsic per-finger cost).
+    5. Same-finger-motion penalty.
+    6. Sequential crossing penalty (R-S1).
 
     Special case — same string and same fret:
     - Same finger: cost 0 (finger already placed, no movement).
@@ -2176,6 +2263,10 @@ def compute_mechanical_cost(
         s1: Previous fingering state.
         s2: Next fingering state.
         note: NoteEvent for s2 (tempo and duration context).
+        rule_preferences: Optional rule toggles.
+        segment_anchor_prev: Optional anchor of the segment containing s1.
+            When both anchors are provided, segment-aware shift cost is used.
+        segment_anchor_curr: Optional anchor of the segment containing s2.
 
     Returns:
         Non-negative mechanical cost.
@@ -2189,8 +2280,15 @@ def compute_mechanical_cost(
             # Switching finger on the same fret: wasteful, add stiff penalty
             return cost_finger_difficulty(s2) + 4.0
 
+    if segment_anchor_prev is not None and segment_anchor_curr is not None:
+        shift_cost = cost_position_shift_segment_aware(
+            s1, s2, note, segment_anchor_prev, segment_anchor_curr,
+        )
+    else:
+        shift_cost = cost_position_shift(s1, s2, note)
+
     return (
-        cost_position_shift(s1, s2, note)
+        shift_cost
         + cost_stretch(s1, s2)
         + cost_string_change(s1, s2)
         + cost_finger_difficulty(s2)
