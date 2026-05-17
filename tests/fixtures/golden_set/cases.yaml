@@ -1,0 +1,112 @@
+# FretWise — Golden test set (regression on known pathologies)
+#
+# Each case describes a passage where the current algorithm produces a
+# fingering a guitarist would never choose. Rules are intentionally
+# aggregate (per-measure shares) rather than per-note annotations so a
+# domain expert (guitarist) can review them quickly.
+#
+# Format conventions:
+#   - source: path relative to partitions/ (private corpus, gitignored)
+#   - measure: 1-based measure index from the parser
+#   - rule.type: one of {max_finger_share, min_finger_share, no_consecutive_pinky}
+#   - annotation_status: "seeded" (auto-generated proposal), "verified"
+#       (a guitarist confirmed the rule), "rejected" (turned out to be
+#       idiomatic, not a bug — keep as documentation)
+#
+# Seeded cases below come from the pathological-measures audit run on
+# the original 39-fixture corpus. Numbers may shift slightly after the
+# resolve_chord_partial_barre fix (commit pending). Re-validate on
+# re-audit.
+
+version: 0.1
+schema_doc: docs/handoff/MODEL_SPEC.md
+
+cases:
+
+  - id: bb_king_thrill_m22_pinky_spam
+    source: "Bb King-The Thrill Is Gone-12-26-2025.gp"
+    measure: 22
+    description: |
+      Pattern [9, 9, 10, 9, 9, 10, 9, 9] on string 3.
+      Current FretWise output: 100% PINKY.
+      Idiomatic: INDEX@9 + MIDDLE@10 (or INDEX@9 + RING@10),
+      with the hand anchored at position 9.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.5
+    annotation_status: seeded
+
+  - id: bb_king_thrill_m39_pinky_spam
+    source: "Bb King-The Thrill Is Gone-12-26-2025.gp"
+    measure: 39
+    description: |
+      Same pattern as m22 — 100% PINKY repeated. Documenting the second
+      occurrence so the fix is verified to cover both, not just one.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.5
+    annotation_status: seeded
+
+  - id: steppenwolf_born_wild_m23_pinky_run
+    source: "Steppenwolf-Born To Be Wild-10-15-2025.gp"
+    measure: 23
+    description: |
+      Pattern [0, 7, 7, 7, 9, 7, 9, 7]. Current output: 7× PINKY + 1 OPEN.
+      Idiomatic in position 7: INDEX@7 + RING@9. The OPEN string at the
+      start of the measure shouldn't force the hand low.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.6
+    annotation_status: seeded
+
+  - id: cream_sunshine_pinky_heavy
+    source: "Cream-Sunshine Of Your Love-12-26-2025.gp"
+    measure: null  # whole-piece check
+    description: |
+      Iconic Sunshine riff on the D string area. Current output: 35.6%
+      PINKY + 27% RING = 62.6% RP on the whole piece. Idiomatic riff
+      uses RING for the highest note in the box but not throughout.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.25
+      scope: whole_piece
+    annotation_status: seeded
+
+  - id: zz_top_la_grange_m50_alternation
+    source: "ZZ Top-La Grange-02-25-2026.gp"
+    measure: 50
+    description: |
+      Boogie pattern [5, 5, 3, 5, 5, 3, ...]. Current output:
+      [RING, PINKY, INDEX, RING, PINKY, INDEX, ...] — alternates the
+      doubled fret-5 between RING and PINKY for no clear reason.
+      Idiomatic: INDEX@3 + PINKY@5 (Billy Gibbons style) OR
+      INDEX@3 + RING@5 — pick one and stick with it.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.4
+    annotation_status: seeded
+
+  - id: django_nuages_jazz_pinky
+    source: "Django Reinhardt-Nuages-05-30-2025.gp"
+    measure: null
+    description: |
+      Django's manouche-jazz piece. Current output 42.5% PINKY is high
+      even for jazz manouche where the pinky is more active. Documented
+      here to track whether B integration brings it into the 25–35%
+      range typical of jazz fingerstyle.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.30
+      scope: whole_piece
+    annotation_status: seeded
+    notes: |
+      Caveat: Django Reinhardt famously played with only two functional
+      left-hand fingers (index + middle) after his fire injury, so the
+      "idiomatic" doigté for his pieces is unusual. This rule reflects
+      what a modern fingerstyle player would do, not Django himself.
