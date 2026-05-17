@@ -224,15 +224,18 @@ const REST_TIP_Y_OFFSET = 28;
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 const FINGER_LABEL = { index: "i", middle: "m", ring: "r", pinky: "p" };
-const HAND_MODEL_LABEL = "modele biomecanique v4 IK";
+const HAND_MODEL_LABEL = "modele biomecanique v5 poignet-pivot";
 
-/* Rotation coefficients: how many fret-widths each finger's MCP shifts per
-   unit of hand rotation. Positive = toward higher frets (nut side = index goes
-   left). Sum = 0 (rotation is pure tilt, no translation). Sum of squares = 5. */
-const ROT_COEFF    = { index: 1.5, middle: 0.5, ring: -0.5, pinky: -1.5 };
-const ROT_SQ_SUM   = 5.0;
-const MAX_HAND_ROT = 3.0;   // frets — beyond this the wrist would be strained
-const WRIST_DEV_GAIN = 9.0; // visible px shift per fret-unit hand rotation
+/* Wrist pivot rotation model: the hand rotates clockwise (viewed from the
+   front, strings facing) around an axis at the index-finger MCP.  This is
+   the dominant DOF that lets ring/pinky reach the bass strings without the
+   arm needing to slide far.  θ > 0 → pinky swings toward string 6 (low E).
+   Anatomical limit ≈ 35° (0.61 rad); beyond that injury risk rises sharply.
+   With rotation θ:
+     mcpX[f] = pivotX + HOME_FRET_OFFSET[f] × fretW × cos(θ)
+     mcpY[f] = pivotY + HOME_FRET_OFFSET[f] × fretW × sin(θ)   */
+const MAX_WRIST_ROT    = 0.61;   // radians ≈ 35°
+const WRIST_ROT_SMOOTH = 0.14;  // damping time-constant (s) for wrist rotation
 
 /* ---------- Chord detection ------------------------------------------------
    Standard tuning MIDI base per string (s=1..6, s=1 = high E at top). */
@@ -344,6 +347,15 @@ function interpPoint(a, b, t) {
 
 function angleDeg(a, b) {
   return Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+}
+
+/* Finger width scaled to fret spacing so fingers look proportionally correct
+   at any position along the neck (wider at nut, narrower at high frets). */
+function fingerPxWidth(name, fret) {
+  if (fret <= 0 || fret > NUM_FRETS) return FINGER_WIDTH[name];
+  const fw = fretX(fret) - fretX(fret - 1);
+  const k = { index: 0.50, middle: 0.54, ring: 0.48, pinky: 0.42 }[name];
+  return Math.max(14, Math.min(36, fw * k));
 }
 
 /* ---------- Finger kinematics (curved projected phalanges) ----------------
@@ -514,21 +526,69 @@ function sampleState(t, frames) {
   return { handPos, active, planted, upcoming, recent, openStrings, openRecent };
 }
 
-/* Compute the wrist rotation (in fret units) that minimises total deviation
-   of each finger's MCP from its target fret.  Least-squares solution:
-     r = Σ(ROT_COEFF[f] × delta[f]) / ROT_SQ_SUM
-   where delta[f] = target_fret − natural_mcp_fret. */
-function computeTargetRotation(s, smoothHandPos) {
-  let num = 0, count = 0;
-  for (const f of FINGER_ORDER) {
-    const act = s.active[f] || s.planted[f];
-    if (!act || act.fret === 0) continue;
-    const delta = act.fret - smoothHandPos - HOME_FRET_OFFSET[f];
-    num += ROT_COEFF[f] * delta;
-    count++;
+function solveTargetHandPose(s, fallbackHandPos) {
+  const targets = collectHandTargets(s);
+  if (!targets.length) {
+    return {
+      handPos:     s.handPos,
+      pivotX:      pressX(s.handPos),
+      pivotY:      MCP_Y,
+      wristRot:    0,
+      forearmBias: 0,
+    };
   }
-  if (count === 0) return 0;
-  return Math.max(-MAX_HAND_ROT, Math.min(MAX_HAND_ROT, num / ROT_SQ_SUM));
+
+  /* Step 1 — hand position (index-finger fret).  Weighted average of each
+     target finger converted to an index-equivalent fret.  Clamped to stay
+     within ±2.5 frets of the current smooth position. */
+  let wSum = 0, hpSum = 0;
+  for (const t of targets) {
+    wSum  += t.weight;
+    hpSum += (t.fret - HOME_FRET_OFFSET[t.finger]) * t.weight;
+  }
+  const handPos = clamp(hpSum / wSum, Math.max(1, fallbackHandPos - 2.5), fallbackHandPos + 2.5);
+  const pivotX  = pressX(handPos);   // X of index MCP = wrist rotation pivot
+
+  /* Step 2 — pivot Y (index MCP depth).  Driven by index target if present;
+     otherwise estimated from the other fingers (subtract each finger's
+     expected vertical reach from its actual string Y). */
+  const indexTgt = targets.find(t => t.finger === 'index');
+  let pivotY;
+  if (indexTgt) {
+    pivotY = clamp(indexTgt.y - DESIRED_REACH_Y.index, MCP_MIN_Y, MCP_MAX_Y);
+  } else {
+    let mcpYNum = 0;
+    for (const t of targets) mcpYNum += (t.y - DESIRED_REACH_Y[t.finger]) * t.weight;
+    pivotY = clamp(mcpYNum / wSum, MCP_MIN_Y, MCP_MAX_Y);
+  }
+
+  /* Step 3 — wrist rotation θ (pivot = index MCP, CW positive).
+     With rotation, each non-index finger's MCP Y satisfies:
+         mcpY[f] = pivotY + HOME_FRET_OFFSET[f] × fretW × sin(θ)
+     Inverting for sin(θ) and taking a weighted mean gives θ.
+     fretW = pixel width of one fret at the current hand position. */
+  const fretW = fretX(Math.round(handPos) + 1) - fretX(Math.round(handPos));
+  let sinNum = 0, sinDen = 0;
+  for (const t of targets) {
+    const ho = HOME_FRET_OFFSET[t.finger];
+    if (ho === 0) continue;                   // index is the pivot — skip
+    const naturalDx = ho * fretW;             // expected px span to this finger
+    const idealMcpY = t.y - DESIRED_REACH_Y[t.finger];
+    sinNum += ((idealMcpY - pivotY) / naturalDx) * t.weight;
+    sinDen += t.weight;
+  }
+  const sinTheta = sinDen > 0 ? sinNum / sinDen : 0;
+  const wristRot = Math.asin(clamp(sinTheta, -Math.sin(MAX_WRIST_ROT), Math.sin(MAX_WRIST_ROT)));
+
+  /* Step 4 — forearm bias (extra lateral pull for bass-string clusters). */
+  const lowStringPull = targets.reduce((acc, t) => acc + (t.y - STRING_Y_TOP) * t.weight, 0) / wSum;
+  return {
+    handPos,
+    pivotX,
+    pivotY,
+    wristRot,
+    forearmBias: clamp((lowStringPull - 55) * 0.28, -18, 26),
+  };
 }
 
 function collectHandTargets(s) {
@@ -553,56 +613,20 @@ function collectHandTargets(s) {
   return targets;
 }
 
-function solveTargetHandPose(s, fallbackHandPos) {
-  const targets = collectHandTargets(s);
-  if (!targets.length) {
-    return {
-      handPos: s.handPos,
-      mcpY: MCP_Y,
-      rotation: 0,
-      forearmBias: 0,
-    };
-  }
-
-  let wSum = 0, hpSum = 0, mcpYSum = 0, rotNum = 0;
-  for (const t of targets) {
-    const home = HOME_FRET_OFFSET[t.finger];
-    const reachY = DESIRED_REACH_Y[t.finger];
-    wSum += t.weight;
-    hpSum += (t.fret - home) * t.weight;
-    mcpYSum += (t.y - reachY) * t.weight;
-  }
-
-  const handPos = clamp(hpSum / wSum, Math.max(1, fallbackHandPos - 2.5), fallbackHandPos + 2.5);
-  for (const t of targets) {
-    const delta = t.fret - handPos - HOME_FRET_OFFSET[t.finger];
-    rotNum += ROT_COEFF[t.finger] * delta * t.weight;
-  }
-
-  const lowStringPull = targets.reduce((acc, t) => acc + (t.y - STRING_Y_TOP) * t.weight, 0) / wSum;
-  return {
-    handPos,
-    mcpY: clamp(mcpYSum / wSum, MCP_MIN_Y, MCP_MAX_Y),
-    rotation: clamp(rotNum / Math.max(0.001, ROT_SQ_SUM * (wSum / targets.length)), -MAX_HAND_ROT, MAX_HAND_ROT),
-    forearmBias: clamp((lowStringPull - 55) * 0.28, -18, 26),
-  };
-}
-
 /* ---------- Hand simulator ------------------------------------------------ */
 class HandSimulator {
   constructor() {
     this.palmX = pressX(3);
     this.smoothHandPos = 3;
-    this.mcpY = MCP_Y;
-    this.handRotation  = 0;   // fret units; positive = index-side shifts right
-    this.wristDeviation = 0;  // px lateral bend; visible compensation at wrist
-    this.forearmDrift   = 0;  // px; forearm moves with the wrist on stretches
-    this.chordGroupId  = -1;  // id of current chord group (-1 = none)
+    this.pivotY    = MCP_Y;    // Y-position of the index MCP (wrist pivot)
+    this.wristRot  = 0;        // radians, CW = pinky toward bass strings
+    this.forearmDrift = 0;     // px; forearm lateral sway
+    this.chordGroupId = -1;
     this.fingers = {};
     for (const f of FINGER_ORDER) {
       this.fingers[f] = {
         tipX: this.palmX + MCP_OFFSETS[f],
-        tipY: this.mcpY + REST_TIP_Y_OFFSET,
+        tipY: this.pivotY + REST_TIP_Y_OFFSET,
         role: "idle",       // "active" | "planted" | "hover" | "idle"
         fret: 0,
         strings: [],        // string range under the finger if barring
@@ -610,21 +634,29 @@ class HandSimulator {
       };
     }
   }
+
+  /* Returns the current MCP position of a finger based on pivot + wristRot. */
+  getMcpPos(finger) {
+    const fretW = fretX(Math.round(this.smoothHandPos) + 1) - fretX(Math.round(this.smoothHandPos));
+    const dx = HOME_FRET_OFFSET[finger] * fretW;
+    return {
+      x: this.palmX + dx * Math.cos(this.wristRot),
+      y: this.pivotY  + dx * Math.sin(this.wristRot),
+    };
+  }
+
   update(t, dt, frames, chordGroups) {
     const s = sampleState(t, frames);
     const pose = solveTargetHandPose(s, this.smoothHandPos);
-    const targetPalm = (pressX(pose.handPos) + pressX(pose.handPos + 3)) / 2;
+    const targetPalm = pose.pivotX;
     const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
     const smoothK = hpDelta <= 2 ? Math.min(1, dt / 0.055) : Math.min(1, dt / 0.11);
-    this.palmX += (targetPalm - this.palmX) * smoothK;
-    this.smoothHandPos += (pose.handPos - this.smoothHandPos) * smoothK;
-    this.mcpY += (pose.mcpY - this.mcpY) * Math.min(1, dt / 0.10);
-    const targetRot = pose.rotation;
-    this.handRotation += (targetRot - this.handRotation) * Math.min(1, dt / 0.12);
-    const targetWristDeviation = clamp(this.handRotation * WRIST_DEV_GAIN, -26, 26);
-    this.wristDeviation += (targetWristDeviation - this.wristDeviation) * Math.min(1, dt / 0.14);
-    const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + this.wristDeviation * 0.9 + pose.forearmBias, -34, 42);
-    this.forearmDrift += (targetForearmDrift - this.forearmDrift) * Math.min(1, dt / 0.18);
+    this.palmX         += (targetPalm          - this.palmX)     * smoothK;
+    this.smoothHandPos += (pose.handPos         - this.smoothHandPos) * smoothK;
+    this.pivotY        += (pose.pivotY          - this.pivotY)    * Math.min(1, dt / 0.10);
+    this.wristRot      += (pose.wristRot        - this.wristRot)  * Math.min(1, dt / WRIST_ROT_SMOOTH);
+    const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + pose.forearmBias, -34, 42);
+    this.forearmDrift  += (targetForearmDrift   - this.forearmDrift) * Math.min(1, dt / 0.18);
 
     // ---- Chord-snap logic ----
     // Find the chord group that has most recently started (startSec ≤ t).
@@ -640,8 +672,7 @@ class HandSimulator {
 
     for (const f of FINGER_ORDER) {
       const fg   = this.fingers[f];
-      const mcpX = pressX(this.smoothHandPos + HOME_FRET_OFFSET[f] + this.handRotation * ROT_COEFF[f]);
-      const mcpY = this.mcpY;
+      const fmcp = this.getMcpPos(f);
       const act  = s.active[f];
       const pl   = s.planted[f];
       const up   = s.upcoming[f];
@@ -691,8 +722,8 @@ class HandSimulator {
         targetY = stringY(up.string) + HOVER_Y_OFFSET;
         role = "hover";
       } else {
-        targetX = mcpX + FOLD_X_OFFSET[f];
-        targetY = mcpY + FOLD_Y_OFFSET[f];
+        targetX = fmcp.x + FOLD_X_OFFSET[f];
+        targetY = fmcp.y + FOLD_Y_OFFSET[f];
         role = "idle";
       }
       // Faster approach when actively striking; slower for idle. Barring
@@ -827,20 +858,31 @@ function capsule(a, b, wA, wB, fillRef, strokeCol) {
 function drawHand(layer, shadowLayer, sim, t) {
   clearLayer(layer);
   clearLayer(shadowLayer);
-  const palmX = sim.palmX;
-  const mcpY = sim.mcpY;
-  const palmY = mcpY - PALM_CENTER_FROM_MCP;
-  const palmTopY = mcpY - PALM_TOP_FROM_MCP;
-  const wristX = palmX + sim.wristDeviation;
-  const forearmX = wristX + sim.forearmDrift;
-  const palmHalfW = (pressX(sim.smoothHandPos + 3) - pressX(sim.smoothHandPos)) / 2 + 18;
-  // Rotation-aware MCP corners: index-side and pinky-side shift in opposite directions.
-  const idxMcpX  = pressX(sim.smoothHandPos + HOME_FRET_OFFSET.index + sim.handRotation * ROT_COEFF.index)
-                 + sim.wristDeviation * 0.12;
-  const pnkMcpX  = pressX(sim.smoothHandPos + HOME_FRET_OFFSET.pinky + sim.handRotation * ROT_COEFF.pinky)
-                 + sim.wristDeviation * 0.12;
-  const palmMcpL = idxMcpX - 10;
-  const palmMcpR = pnkMcpX + 10;
+
+  /* MCP positions derived from wrist pivot rotation. */
+  const idxMcp = sim.getMcpPos('index');
+  const pnkMcp = sim.getMcpPos('pinky');
+  const pivotX = sim.palmX;
+  const pivotY = sim.pivotY;
+  const θ       = sim.wristRot;
+
+  /* Palm perpendicular (CW rotation in SVG: sin,−cos direction → toward top of screen). */
+  const nPalmX = Math.sin(θ);
+  const nPalmY = -Math.cos(θ);
+
+  /* Palm centre and top computed along the perpendicular from the pivot. */
+  const palmCX  = pivotX + nPalmX * PALM_CENTER_FROM_MCP;
+  const palmCY  = pivotY + nPalmY * PALM_CENTER_FROM_MCP;
+  const palmTopX = pivotX + nPalmX * PALM_TOP_FROM_MCP;
+  const palmTopY = pivotY + nPalmY * PALM_TOP_FROM_MCP;
+
+  /* Wrist and forearm centres derive from the pivot / palm directions. */
+  const wristX = palmTopX + sim.forearmDrift * 0.3;
+  const forearmX = palmTopX + sim.forearmDrift;
+
+  const palmHalfW = (idxMcp.x > pnkMcp.x ? idxMcp.x - pnkMcp.x : pnkMcp.x - idxMcp.x) / 2 + 12;
+  const palmMcpL  = idxMcp.x - 10;
+  const palmMcpR  = pnkMcp.x + 10;
 
   /* Forearm: comes UP from the player (bottom of scene) toward the neck.
      Stops just below the board; the wrist is conceptually hidden behind it. */
@@ -853,9 +895,7 @@ function drawHand(layer, shadowLayer, sim, t) {
     fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
   }));
 
-  /* Ghost stripe through the neck — suggests the wrist is hidden behind
-     the fretboard and re-emerges at the top as the palm. Very faint so it
-     does not mask the strings or frets. */
+  /* Ghost stripe through the neck */
   const ghostW = 48;
   layer.appendChild(el("rect", {
     x: wristX - ghostW / 2,
@@ -869,20 +909,20 @@ function drawHand(layer, shadowLayer, sim, t) {
     rx: 6,
   }));
 
-  /* Palm (ABOVE the neck): top near wrist, bottom at MCP line. */
+  /* Palm (ABOVE the neck): tilted quadrilateral following the wrist pivot. */
   layer.appendChild(el("path", {
-    d: `M${palmMcpL},${mcpY - 4}
-        Q${palmX - palmHalfW - 10},${palmY} ${wristX - palmHalfW + 8},${palmTopY + 18}
-        Q${wristX},${palmTopY - Math.abs(sim.wristDeviation) * 0.12} ${wristX + palmHalfW - 8},${palmTopY + 18}
-        Q${palmX + palmHalfW + 10},${palmY} ${palmMcpR},${mcpY - 4}
+    d: `M${palmMcpL},${pivotY - 4}
+        Q${palmCX - palmHalfW - 10},${palmCY} ${palmTopX - palmHalfW + 8},${palmTopY + 18}
+        Q${palmTopX},${palmTopY} ${palmTopX + palmHalfW - 8},${palmTopY + 18}
+        Q${palmCX + palmHalfW + 10},${palmCY} ${palmMcpR},${pivotY - 4}
         Z`,
     fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
   }));
 
-  /* Subtle knuckle crease at the MCP line */
+  /* Subtle knuckle crease at the tilted MCP line */
   layer.appendChild(el("path", {
-    d: `M${idxMcpX},${mcpY - 10}
-        Q${palmX},${mcpY - 4} ${pnkMcpX},${mcpY - 10}`,
+    d: `M${idxMcp.x},${idxMcp.y - 10}
+        Q${pivotX},${pivotY - 4} ${pnkMcp.x},${pnkMcp.y - 10}`,
     fill: "none", stroke: "rgba(130,85,65,0.35)", "stroke-width": 1,
   }));
 
@@ -897,16 +937,16 @@ function drawHand(layer, shadowLayer, sim, t) {
                barFill: "rgba(255,179,71,0.22)", barStroke: "#ffb347",
                nailFill: "#fff7ef", nailStroke: "rgba(95,60,45,0.78)", textColor: "#3a241c",
                opacity: 1.0 },
-    planted: { ring: "#72dcff", ringFill: "rgba(114,220,255,0.24)",
-               bodyFill: "rgba(145,224,255,0.42)", bodyStroke: "rgba(114,220,255,0.85)",
-               barFill: "rgba(145,224,255,0.26)", barStroke: "#72dcff",
-               nailFill: "rgba(230,250,255,0.70)", nailStroke: "rgba(40,120,150,0.78)", textColor: "#113844",
-               opacity: 0.74 },
-    hover:   { ring: "#ff918b", ringFill: "rgba(255,145,139,0.18)",
-               bodyFill: "rgba(255,158,150,0.44)", bodyStroke: "rgba(255,145,139,0.88)",
+    planted: { ring: "#72dcff", ringFill: "rgba(114,220,255,0.32)",
+               bodyFill: "rgba(175,238,255,0.78)", bodyStroke: "rgba(100,210,255,0.95)",
+               barFill: "rgba(175,238,255,0.50)", barStroke: "#72dcff",
+               nailFill: "rgba(230,250,255,0.82)", nailStroke: "rgba(40,120,150,0.88)", textColor: "#113844",
+               opacity: 0.88 },
+    hover:   { ring: "#ff8880", ringFill: "rgba(255,136,128,0.28)",
+               bodyFill: "rgba(255,178,172,0.82)", bodyStroke: "rgba(255,120,110,0.95)",
                barFill: "none", barStroke: "none",
-               nailFill: "rgba(255,235,232,0.72)", nailStroke: "rgba(160,55,50,0.78)", textColor: "#5c1e1b",
-               opacity: 0.62 },
+               nailFill: "rgba(255,235,232,0.85)", nailStroke: "rgba(160,55,50,0.88)", textColor: "#5c1e1b",
+               opacity: 0.82 },
     idle:    { ring: "#9b4a45", ringFill: "rgba(255,95,87,0.08)",
                bodyFill: "rgba(226,182,148,0.42)", bodyStroke: "rgba(140,95,75,0.36)",
                barFill: "none",  barStroke: "none",
@@ -916,11 +956,10 @@ function drawHand(layer, shadowLayer, sim, t) {
 
   /* Draw each finger */
   for (const fname of FINGER_ORDER) {
-    const mcpX = pressX(sim.smoothHandPos + HOME_FRET_OFFSET[fname] + sim.handRotation * ROT_COEFF[fname])
-               + sim.wristDeviation * 0.12;
+    const fmcp = sim.getMcpPos(fname);
     const fg   = sim.fingers[fname];
-    const ik   = solveFinger(mcpX, mcpY, fg.tipX, fg.tipY, fname, fg.role);
-    const w    = FINGER_WIDTH[fname];
+    const ik   = solveFinger(fmcp.x, fmcp.y, fg.tipX, fg.tipY, fname, fg.role);
+    const w    = fingerPxWidth(fname, fg.fret);
     const role = fg.role;
     const pal  = ROLE[role];
 
@@ -958,17 +997,6 @@ function drawHand(layer, shadowLayer, sim, t) {
     gFinger.appendChild(capsule(ik.pip, ik.dip, w * 0.92, w * 0.82, fillRef, strokeCol));
     gFinger.appendChild(capsule(ik.dip, ik.tip, w * 0.80, w * 0.62, fillRef, strokeCol));
 
-    gFinger.appendChild(el("circle", {
-      cx: ik.pip.x, cy: ik.pip.y, r: w * 0.42,
-      fill: "rgba(210,160,130,0.36)",
-      stroke: "rgba(150,100,80,0.45)", "stroke-width": 0.7,
-    }));
-    gFinger.appendChild(el("circle", {
-      cx: ik.dip.x, cy: ik.dip.y, r: w * 0.34,
-      fill: "rgba(210,160,130,0.36)",
-      stroke: "rgba(150,100,80,0.45)", "stroke-width": 0.7,
-    }));
-
     if ((role === "idle" || role === "hover") && ik.flexion > 0.55) {
       const arcR = w * 0.55 + 4;
       const ax = ik.mcp.x - arcR * 0.1, ay = ik.mcp.y + 4;
@@ -980,11 +1008,6 @@ function drawHand(layer, shadowLayer, sim, t) {
       }));
     }
 
-    gFinger.appendChild(el("circle", {
-      cx: ik.mcp.x, cy: ik.mcp.y, r: w * 0.5,
-      fill: "rgba(200,150,120,0.5)",
-      stroke: "rgba(150,100,80,0.6)", "stroke-width": 0.8,
-    }));
     layer.appendChild(gFinger);
 
     /* Note-on pulse (only for active, only right after onset). */
