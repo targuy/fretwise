@@ -9,7 +9,8 @@
 
 ## DOING
 
-- `[pm]` **B integration** — rewire `cost_position_shift` segment-aware, behind config flag, validation par audit + golden set (DEC-008 PO go)
+- `[data]` Mesure delta B integration sur corpus complet (audit background `b6apm34g3`)
+- `[pm]` Fretwise-006-handoff.md à GDS quand mesure dispo
 
 ## TODO — Priority 1 (next 24h)
 
@@ -43,6 +44,9 @@
 
 ### Session 2026-05-17
 
+- `[pm]` **B integration livrée** (`0564d4b`) — segment-aware `cost_position_shift`. ViterbiOptimizer passe `index` à `transition_cost`. Pipeline calcule segments per voice, active sur cost_fn via `set_segment_anchors`. 936/937 tests verts (SVG pré-existant).
+- `[pm]` Roadmap décisions DEC-008 (`dc23363`) — Phase 3 reportée, B GO
+- `[data]` Quality scan corpus (`dc23363`) — 77.2 % clean, 22.6 % bad (mais dominé par bug tuning-awareness de quality.py → P2 fix)
 - `[pm]` Stubs ML `src/fretwise/ml/` (`c2276b3`) — PlayerCostModel + ChordFingerClassifier + 12 tests verts. Module dormant.
 - `[pm]` Team docs setup (`4390daf`) — roles + board + decisions
 - `[data]` Validation δ.1 sur 1404 erreurs réelles (échantillon enrichi par GDS) — confirme 1 % fix, le bug est au layer R-C6 → δ.1 en réserve
