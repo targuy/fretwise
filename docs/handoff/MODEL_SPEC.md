@@ -231,7 +231,56 @@ def solve(gp_path: Path) -> list:
 
 ---
 
-## 6. Versionning et compatibilité
+## 6. Data quality protocol — exclude before blame
+
+Guitar Pro is a permissive format authored by amateurs. Many "pathologies"
+observed in FretWise output are downstream artefacts of bad source data
+(wrong frets, impossible stretches, pitch-hint conflicts), not algorithm
+bugs. **At every observed anomaly, source quality MUST be assessed
+before attributing the anomaly to the algorithm.**
+
+The module `src/fretwise/quality.py` implements this protocol:
+
+```python
+from fretwise.parser import get_adapter
+from fretwise.quality import assess_source_quality
+
+adapter = get_adapter(path)
+events = adapter.parse(path)
+report = assess_source_quality(events)
+print(report.verdict, report.rationale)
+# verdict ∈ {"clean", "suspect", "bad"}
+```
+
+Features captured per file:
+- `pitch_hint_conflicts` — string_hint + fret_hint ≠ parsed pitch
+- `very_high_fret_count` — frets > 24 (real guitars stop at 22–24)
+- `excessive_chord_span_count` — chord onsets with span > 5 frets
+- `density` — notes per beat (> 10 = dubious transcription)
+
+Thresholds (documented in `quality.py` module docstring):
+- `clean`   : no warnings or one minor flag
+- `suspect` : ≥ 2 suspect flags (re-examine)
+- `bad`     : any bad threshold exceeded (exclude from metrics)
+
+**Recommendation for ML evaluation**: filter the corpus by quality
+verdict before computing accuracy. A 30% raw accuracy on a corpus 20%
+polluted by bad data masks a 38% real accuracy on clean data — and the
+direction of fix is "improve annotation pipeline" not "improve algo".
+
+**Cross-check with the harvester `validator.py`**: GuitarDataSet has its
+own biomechanical validation (span ≤ 5, no same finger on multiple
+frets). The two validators complement each other:
+- `fretwise/quality.py` operates on `list[NoteEvent]` (post-parse)
+- `harvester/validator.py` operates on `FingeredNote` / `NoteSequence`
+  (post-annotation)
+
+Tested for the 5 golden-set source files: all `clean`. Confirms that the
+pathologies in the golden set are real algorithm issues, not artefacts.
+
+---
+
+## 7. Versionning et compatibilité
 
 - **Version du modèle** : pas de schema version explicite aujourd'hui.
   L'équipe ML devrait taguer son dataset avec le commit FretWise sur
