@@ -1129,7 +1129,10 @@ def resolve_chord_learned_fingers(
             (i, resolved[i]) for i in indices
             if resolved[i].state.fret > 0 and resolved[i].state.finger is not Finger.OPEN
         ]
-        if len(fretted_pairs) < 1:
+        # Require at least 2 fretted notes — single-fretted "chords" (one
+        # fret + open strings) are out of the classifier's training
+        # distribution and produce noisy predictions.
+        if len(fretted_pairs) < 2:
             continue
         n_open = sum(
             1 for i in indices

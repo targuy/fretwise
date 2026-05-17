@@ -675,6 +675,38 @@ def _parse_representation_mode(value: str | None) -> RepresentationMode:
     raise HTTPException(400, f"Unknown representation_mode: {value!r}")
 
 
+_CHORD_FINGER_CLASSIFIER: object | None = None
+_CHORD_FINGER_CLASSIFIER_LOADED: bool = False
+
+
+def _get_chord_finger_classifier() -> object | None:
+    """Lazy-load the optional ChordFingerClassifier (Phase 2 ONNX model).
+
+    Loaded once per process; returns None when the model file or
+    ``onnxruntime`` are not available so the web app keeps serving with the
+    rule-based pipeline.
+    """
+    global _CHORD_FINGER_CLASSIFIER, _CHORD_FINGER_CLASSIFIER_LOADED
+    if _CHORD_FINGER_CLASSIFIER_LOADED:
+        return _CHORD_FINGER_CLASSIFIER
+    _CHORD_FINGER_CLASSIFIER_LOADED = True
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    model_path = model_dir / "finger_classifier.onnx"
+    spec_path = model_dir / "finger_classifier_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedChordFingerClassifier
+        _CHORD_FINGER_CLASSIFIER = LearnedChordFingerClassifier(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        _CHORD_FINGER_CLASSIFIER = None
+    return _CHORD_FINGER_CLASSIFIER
+
+
 def _run_legacy_pipeline(
     events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
 ) -> tuple[list[FingeringResult], dict[str, int]]:
@@ -683,7 +715,10 @@ def _run_legacy_pipeline(
     cost_fn = CostFunction(weights=weights, rule_preferences=rule_preferences)
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
-    return run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+    return run_pipeline(
+        events, generator, optimizer, pattern_matcher=matcher,
+        chord_finger_classifier=_get_chord_finger_classifier(),
+    )
 
 
 def _infer_title_artist(filepath: Path) -> tuple[str, str]:
