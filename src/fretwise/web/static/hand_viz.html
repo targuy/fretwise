@@ -850,7 +850,7 @@ function capsule(a, b, wA, wB, fillRef, strokeCol) {
                 A${r1},${r1} 0 0 1 ${Ax},${Ay} Z`;
   return el("path", {
     d: path, fill: fillRef || "url(#skinGrad)",
-    stroke: strokeCol || "rgba(170,120,95,0.55)", "stroke-width": 1.2,
+    stroke: "none",
   });
 }
 
@@ -937,21 +937,21 @@ function drawHand(layer, shadowLayer, sim, t) {
                barFill: "rgba(255,179,71,0.22)", barStroke: "#ffb347",
                nailFill: "#fff7ef", nailStroke: "rgba(95,60,45,0.78)", textColor: "#3a241c",
                opacity: 1.0 },
-    planted: { ring: "#72dcff", ringFill: "rgba(114,220,255,0.32)",
-               bodyFill: "rgba(175,238,255,0.78)", bodyStroke: "rgba(100,210,255,0.95)",
-               barFill: "rgba(175,238,255,0.50)", barStroke: "#72dcff",
-               nailFill: "rgba(230,250,255,0.82)", nailStroke: "rgba(40,120,150,0.88)", textColor: "#113844",
-               opacity: 0.88 },
-    hover:   { ring: "#ff8880", ringFill: "rgba(255,136,128,0.28)",
-               bodyFill: "rgba(255,178,172,0.82)", bodyStroke: "rgba(255,120,110,0.95)",
+    planted: { ring: "#72dcff", ringFill: "rgba(114,220,255,0.30)",
+               bodyFill: "rgba(160,230,255,0.32)", bodyStroke: "rgba(100,210,255,0.90)",
+               barFill: "rgba(160,230,255,0.22)", barStroke: "#72dcff",
+               nailFill: "rgba(220,248,255,0.50)", nailStroke: "rgba(40,120,150,0.70)", textColor: "#113844",
+               opacity: 0.70 },
+    hover:   { ring: "#ff8880", ringFill: "rgba(255,136,128,0.25)",
+               bodyFill: "rgba(255,160,148,0.32)", bodyStroke: "rgba(255,120,110,0.90)",
                barFill: "none", barStroke: "none",
-               nailFill: "rgba(255,235,232,0.85)", nailStroke: "rgba(160,55,50,0.88)", textColor: "#5c1e1b",
-               opacity: 0.82 },
-    idle:    { ring: "#9b4a45", ringFill: "rgba(255,95,87,0.08)",
-               bodyFill: "rgba(226,182,148,0.42)", bodyStroke: "rgba(140,95,75,0.36)",
+               nailFill: "rgba(255,228,224,0.55)", nailStroke: "rgba(160,55,50,0.70)", textColor: "#5c1e1b",
+               opacity: 0.70 },
+    idle:    { ring: "#ff6b5e", ringFill: "rgba(255,107,94,0.20)",
+               bodyFill: "rgba(255,100,85,0.75)", bodyStroke: "rgba(200,60,50,0.80)",
                barFill: "none",  barStroke: "none",
-               nailFill: "rgba(245,236,226,0.58)", nailStroke: "rgba(120,70,70,0.45)",
-               textColor: "rgba(60,35,35,0.65)", opacity: 0.50 },
+               nailFill: "rgba(255,210,205,0.80)", nailStroke: "rgba(160,50,40,0.60)",
+               textColor: "rgba(255,255,255,0.85)", opacity: 0.72 },
   };
 
   /* Draw each finger */
@@ -1284,7 +1284,11 @@ window.addEventListener("message", (ev) => {
 
     if (CURRENT_SIM && CURRENT_DATA) {
       const st = sampleState(tNow, CURRENT_DATA.frames);
-      CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
+      /* Only animate the hand when playing; freeze in place on pause so
+         the user can inspect/screenshot the current finger positions. */
+      if (playing) {
+        CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
+      }
       drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
       drawOverlay(st, tNow, CURRENT_CHORD_GROUPS);
 
