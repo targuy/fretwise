@@ -6,6 +6,31 @@
 
 ---
 
+## DEC-008 — 2026-05-17 — Roadmap post "no public sequential GT"
+
+**Owner décision** : PO
+**Contexte** : GDS-005 confirme qu'aucune source publique de doigtés main gauche
+séquentiels n'existe (1 518 GP scannés = 0 annotation `leftHandFinger`, Mutopia
+LilyPond pas annoté, DadaGP supprime les doigtés). Implications stratégiques
+escaladées au PO dans Fretwise-005.
+**Reco PM** : reporter Phase 3 (neural sequential cost), engager 1-2 sessions
+d'annotation manuelle par le PO-musicien pour 50-100 transitions, faire B
+integration avec validation par golden set uniquement.
+**Décision PO** (réponses 1/2/3) :
+  - **1. Phase 3 reportée** : OK — pas de GT, pas de training supervisé pertinent
+  - **2. Annotation séquentielle manuelle PO** : NON — pas dans le scope d'effort
+  - **3. B integration** : OUI — heuristique validée par audit + golden set, pas
+    bloquée par l'absence de GT externe
+**Conséquences** :
+  - Phase 3 hors roadmap court terme (réévaluer si Iino 2025 devient accessible)
+  - B integration devient la priorité 1 côté FretWise
+  - Pas de golden set séquentiel manuel — on s'appuie sur les XFAIL existants + le
+    audit RP/IM agrégé comme métriques de qualité B
+  - GDS reste sur Phase 2 (chord finger classifier) en parallèle
+  - Le tuning-awareness de `quality.py` reste à corriger (P2)
+
+---
+
 ## DEC-007 — 2026-05-17 — R-C6 string-diagonal — finding D-shape barre mirror error
 
 **Owner décision** : Data (analyse) + PM (escalation)
