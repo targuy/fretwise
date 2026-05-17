@@ -16,6 +16,7 @@ from fretwise.scoring import (
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
     resolve_chord_finger_span,
+    resolve_chord_learned_fingers,
     resolve_chord_partial_barre,
     resolve_chord_stretch,
     resolve_chord_string_diagonal,
@@ -68,6 +69,7 @@ def run_pipeline(
     generator: StateGenerator,
     optimizer: ViterbiOptimizer,
     pattern_matcher: PatternMatcher | None = None,
+    chord_finger_classifier: object | None = None,
 ) -> tuple[list[FingeringResult], dict[str, int]]:
     """Run generate → pattern-match → Viterbi → post-process with per-voice separation.
 
@@ -133,6 +135,8 @@ def run_pipeline(
         results = resolve_chord_finger_ordering(results)
         results = resolve_chord_finger_span(results)
         results = resolve_chord_string_diagonal(results)
+        if chord_finger_classifier is not None:
+            results = resolve_chord_learned_fingers(results, chord_finger_classifier)
         results = resolve_section_consistency(results)
         all_results.extend(results)
 
