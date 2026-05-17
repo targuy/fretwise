@@ -917,11 +917,18 @@ function capsule(a, b, wA, wB, fillRef, strokeCol) {
 function fingerShape(ik, w, fillRef) {
   /* Build a smooth continuous finger silhouette from MCP root to fingertip.
      The base is flared (wider than the finger proper) and its root point is
-     pushed back into the palm so there is no visible gap between finger and palm. */
-  const rootX = ik.mcp.x;
-  const rootY = ik.mcp.y + 14;        // extend slightly below MCP into the palm area
+     pushed back INTO the palm by extending past the MCP in the direction
+     away from the finger body (pip→mcp continued), ensuring no visual gap. */
+  // Direction FROM pip TOWARD mcp and continuing past (= toward the palm above).
+  const rdx = ik.mcp.x - ik.pip.x;
+  const rdy = ik.mcp.y - ik.pip.y; // will be negative (upward) since pip is below mcp
+  const rlen = Math.hypot(rdx, rdy) || 0.001;
+  const root = {
+    x: ik.mcp.x + rdx / rlen * 24,   // 24px upward into palm
+    y: ik.mcp.y + rdy / rlen * 24,
+  };
   const pts = [
-    { x: rootX, y: rootY },           // palm anchor (hidden under palm shape)
+    root,                              // palm anchor — hidden under palm shape
     ik.mcp,
     ik.pip,
     ik.dip,
@@ -1002,7 +1009,17 @@ function drawHand(layer, shadowLayer, sim, t) {
 
   drawThumb(layer, sim.thumb);
 
-  /* Forearm: comes UP from the player (bottom of scene) toward the neck.
+  /* Thenar eminence: fleshy mound connecting the thumb base to the palm.
+     Drawn AFTER the thumb and BEFORE the palm so the palm covers its inner edge
+     and it seamlessly bridges the gap between thumb and index-finger side. */
+  const thenarX = (sim.thumb.x + idxMcp.x) * 0.5 - 4;
+  const thenarY = (sim.thumb.y + pivotY) * 0.5 + 4;
+  layer.appendChild(el("ellipse", {
+    cx: thenarX, cy: thenarY, rx: 26, ry: 20,
+    fill: "url(#skinGrad)", stroke: "none",
+  }));
+
+(bottom of scene) toward the neck.
      Stops just below the board; the wrist is conceptually hidden behind it. */
   layer.appendChild(el("path", {
     d: `M${forearmX - 78},${SCENE_H + 40}
@@ -1027,12 +1044,14 @@ function drawHand(layer, shadowLayer, sim, t) {
     rx: 6,
   }));
 
-  /* Palm (ABOVE the neck): tilted quadrilateral following the wrist pivot. */
+  /* Palm (ABOVE the neck): tilted quadrilateral following the wrist pivot.
+     The bottom edge extends past the MCP pivot line so finger bases emerge
+     from within the palm rather than floating above it. */
   layer.appendChild(el("path", {
-    d: `M${palmMcpL},${pivotY - 4}
+    d: `M${palmMcpL},${pivotY + 12}
         Q${palmCX - palmHalfW - 10},${palmCY} ${palmTopX - palmHalfW + 8},${palmTopY + 18}
         Q${palmTopX},${palmTopY} ${palmTopX + palmHalfW - 8},${palmTopY + 18}
-        Q${palmCX + palmHalfW + 10},${palmCY} ${palmMcpR},${pivotY - 4}
+        Q${palmCX + palmHalfW + 10},${palmCY} ${palmMcpR},${pivotY + 12}
         Z`,
     fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
   }));
@@ -1091,27 +1110,6 @@ function drawHand(layer, shadowLayer, sim, t) {
     gFinger.appendChild(fingerShape(ik, w, fillRef));
     layer.appendChild(gFinger);
 
-    /* Note-on explosion: expanding amber ring at the fingertip, only on active press. */
-    if (role === "active") {
-      const sincePress = t - fg.lastOnset;
-      if (sincePress >= 0 && sincePress < 0.32) {
-        const k = 1 - sincePress / 0.32;
-        layer.appendChild(el("circle", {
-          cx: ik.tip.x, cy: ik.tip.y,
-          r: 14 + 24 * (1 - k),
-          fill: "none",
-          stroke: `rgba(255,185,30,${(0.90 * k).toFixed(3)})`,
-          "stroke-width": (4 * k).toFixed(2),
-        }));
-        layer.appendChild(el("circle", {
-          cx: ik.tip.x, cy: ik.tip.y,
-          r: 8 + 12 * (1 - k),
-          fill: `rgba(255,230,80,${(0.50 * k).toFixed(3)})`,
-          stroke: "none",
-        }));
-      }
-    }
-
     /* Fingernail: solid oval, no dark outline. */
     const nailAngle = angleDeg(ik.dip, ik.tip);
     layer.appendChild(el("ellipse", {
@@ -1136,6 +1134,42 @@ function drawHand(layer, shadowLayer, sim, t) {
       "font-size": 14, "font-weight": 800,
       fill: pal.textColor,
     }, FINGER_LABEL[fname]));
+
+    /* Note-on explosion: 3-ring amber burst at the fret contact point.
+       Drawn AFTER nail+label so it appears on top of everything.
+       Uses ik.tip (string contact) so the ring bursts right where the note plays. */
+    if (role === "active") {
+      const sincePress = t - fg.lastOnset;
+      if (sincePress >= 0 && sincePress < 0.45) {
+        const k = 1 - sincePress / 0.45;
+        /* Outer fast-expanding ring */
+        layer.appendChild(el("circle", {
+          cx: ik.tip.x, cy: ik.tip.y,
+          r: (10 + 38 * (1 - k)).toFixed(1),
+          fill: "none",
+          stroke: `rgba(255,220,30,${(0.92 * k).toFixed(3)})`,
+          "stroke-width": (3.5 * k).toFixed(2),
+        }));
+        /* Middle ring, slightly delayed */
+        if (sincePress < 0.30) {
+          const k2 = 1 - sincePress / 0.30;
+          layer.appendChild(el("circle", {
+            cx: ik.tip.x, cy: ik.tip.y,
+            r: (6 + 20 * (1 - k2)).toFixed(1),
+            fill: "none",
+            stroke: `rgba(255,255,120,${(0.80 * k2).toFixed(3)})`,
+            "stroke-width": (2.5 * k2).toFixed(2),
+          }));
+        }
+        /* Inner glow fill — concentrated flash */
+        layer.appendChild(el("circle", {
+          cx: ik.tip.x, cy: ik.tip.y,
+          r: (4 + 10 * (1 - k)).toFixed(1),
+          fill: `rgba(255,255,180,${(0.70 * k).toFixed(3)})`,
+          stroke: "none",
+        }));
+      }
+    }
   }
 }
 
