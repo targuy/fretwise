@@ -6,6 +6,35 @@
 
 ---
 
+## DEC-010 — 2026-05-17 — Quality.py tuning-awareness fix
+
+**Owner décision** : Data (autonome via PM)
+**Contexte** : quality scan corpus partitions/ a montré 22.6 % "bad" verdict, dominé par "100% pitch-hint conflicts". Diagnostic : `quality.py` utilisait `STANDARD_TUNING = [E4, B3, G3, D3, A2, E2]` hardcodé pour vérifier `pitch == tuning[string-1] + fret`. Tous les fichiers en drop-D / half-step down / drop-C avaient 100 % de conflits par construction — false positive.
+**Reco PM** : inférer la tuning depuis les events eux-mêmes (most common `pitch - fret_hint` par corde) plutôt que de hardcoder EADGBE. Self-contained, pas de dépendance parser metadata.
+**Décision** : appliqué (commit `003f19e`).
+**Conséquences mesurées** :
+  - Re-run quality scan corpus v2 : **bad 22.6 % → 6.7 %** (337 → 100 files), clean 77.2 % → 93.0 % (1151 → 1386)
+  - 235 fichiers reclassés "bad" → "clean" — c'étaient des faux positifs tuning
+  - Les 100 fichiers restants "bad" sont de vraies anomalies (frets > 24, chord spans > 5 frets, density > 10)
+  - Métrique de qualité désormais fiable pour FretWise audits et GDS training set filtering
+  - 9 tests verts dont 2 nouveaux (drop-D, half-step down)
+
+---
+
+## DEC-009 — 2026-05-17 — B integration delivered + mesures positives
+
+**Owner décision** : Data (autonome via PM)
+**Contexte** : B integration committed (`0564d4b`) selon DEC-008 GO. Mesures requises pour validation.
+**Reco PM** : audit distribution + golden set side-by-side.
+**Décision** : livré et mesuré.
+**Conséquences** :
+  - Corpus 2 060 000 notes : MIDDLE +1.81 pp (F2 correction structurelle), Ratio RP/IM 0.5696 → 0.555 (-2.5 %)
+  - Golden set : +2 fix (Bb King m8 + m94 100% PINKY corrigés), -1 régression (Cream Sunshine PINKY 23 % → 25.3 % whole-piece). Net +1.
+  - Régression Cream Sunshine = tradeoff connu de B (intra-segment shift cost = 0 autorise PINKY plus librement). Tracked comme XFAIL.
+  - 936/937 tests verts (SVG pré-existant), 12 nouveaux tests B integration (`e068b08`)
+
+---
+
 ## DEC-008 — 2026-05-17 — Roadmap post "no public sequential GT"
 
 **Owner décision** : PO
