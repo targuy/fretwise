@@ -6,6 +6,7 @@
  */
 
 import { activateSoundfont, deleteSoundfont, downloadFile, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { getMaskedMeasures, renderAuditBanner, resetAuditBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
@@ -379,6 +380,9 @@ async function selectTrack(trackId, trackName) {
       getRulePreferences(),
     );
     initRenderer(data);
+    renderAuditBanner(data?.audit, {
+      onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
+    });
   } catch (err) {
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
@@ -532,6 +536,7 @@ function _syncCoreSvgFingering() {
   };
 
   const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
+  const masked = getMaskedMeasures();  // 1-based measure indices to hide
   const tabNotes = svg.querySelectorAll('text.fw-tab-note');
   for (const noteText of tabNotes) {
     const onset = Number.parseFloat(noteText.getAttribute('data-onset') || '');
@@ -540,6 +545,13 @@ function _syncCoreSvgFingering() {
 
     const resultNote = byOnsetString.get(`${onset.toFixed(6)}:${tabString}`);
     if (!resultNote || Number.parseInt(resultNote.fret, 10) <= 0) continue;
+
+    // Audit masking: skip the finger class for notes in flagged movements
+    // (user can override via the per-movement checkbox in the audit banner).
+    if (masked.size > 0 && resultNote.measure_index != null
+        && masked.has(resultNote.measure_index)) {
+      continue;
+    }
 
     const fc = fingerClassMap[resultNote.finger];
     if (!fc) continue;
