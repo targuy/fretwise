@@ -214,6 +214,99 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
     assert payload["results"][0]["string"] == 1
 
 
+def test_solve_endpoint_embeds_audit_field(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """The /api/solve response must include an 'audit' field auto-computed
+    from events + results + section_markers."""
+    from fretwise.models import Finger, FingeringResult, FingeringState
+
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+    app = create_app(tmp_path)
+
+    class _AdapterWithMeasures(_DummyAdapter):
+        # Override the default Intro marker — keep it simple so the audit
+        # produces a deterministic shape.
+        section_markers = {1: "Movement A", 3: "Movement B"}
+
+        def parse(self, _path: Path) -> list[NoteEvent]:
+            return [
+                NoteEvent(
+                    pitch=64, onset=0.0, duration=0.5, tempo=120.0,
+                    measure_index=1,
+                ),
+                NoteEvent(
+                    pitch=66, onset=1.0, duration=0.5, tempo=120.0,
+                    measure_index=2,
+                ),
+                NoteEvent(
+                    pitch=67, onset=2.0, duration=0.5, tempo=120.0,
+                    measure_index=3,
+                ),
+                NoteEvent(
+                    pitch=69, onset=3.0, duration=0.5, tempo=120.0,
+                    measure_index=4,
+                ),
+            ]
+
+    adapter = _AdapterWithMeasures()
+
+    def _fake_load(
+        _filepath: Path, *, track_id: int | None = None,
+    ) -> tuple[Any, list[NoteEvent]]:
+        del track_id
+        return adapter, adapter.parse(file_path)
+
+    def _fake_legacy(
+        events: list[NoteEvent], *, rule_preferences: Any = None
+    ) -> tuple[list[Any], dict[str, int]]:
+        del rule_preferences
+        # Use real FingeringResult so audit_score can read measure_index +
+        # voice_hint via the embedded NoteEvent.
+        out: list[FingeringResult] = []
+        for i, ev in enumerate(events):
+            state = FingeringState(
+                string_num=3, fret=5, finger=Finger.INDEX, hand_position=5,
+            )
+            out.append(FingeringResult(
+                note_id=i, note_event=ev, state=state,
+                cost=1.0, alternatives=[],
+            ))
+        return out, {"parsed": len(events)}
+
+    def _fake_core(*_args: Any, **kwargs: Any) -> Any:
+        del kwargs
+        return SimpleNamespace(svg="<svg/>", conformance_issues=[])
+
+    monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
+    monkeypatch.setattr("fretwise.web.app._run_legacy_pipeline", _fake_legacy)
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
+    # Force ML model off so the test doesn't depend on the ONNX file.
+    monkeypatch.setattr(
+        "fretwise.web.app._get_player_cost_model", lambda: None,
+    )
+
+    endpoint = _route_endpoint(app, "/api/solve/{filename}")
+    payload = asyncio.run(endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    ))
+
+    assert "audit" in payload
+    audit = payload["audit"]
+    assert audit["available"] is True
+    assert audit["overall"] in ("clean", "suspect", "bad")
+    assert audit["ml_signal_available"] is False
+    # Explicit section markers → 2 movements named Movement A / Movement B.
+    movements = audit["movements"]
+    assert len(movements) == 2
+    assert [m["span"]["name"] for m in movements] == ["Movement A", "Movement B"]
+    assert all(m["span"]["source"] == "explicit" for m in movements)
+    # All notes are cheap and the source is clean → both movements clean.
+    assert all(m["verdict"] == "clean" for m in movements)
+
+
 def test_export_pdf_core_engine_uses_requested_representation_mode(
     monkeypatch: Any, tmp_path: Path
 ) -> None:

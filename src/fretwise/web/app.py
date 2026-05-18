@@ -13,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from . import settings as _settings
 from .songs_index import enrich_file_info, load_index
 
+from fretwise.audit import audit_score
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
@@ -245,6 +246,9 @@ def _register_routes(app: FastAPI) -> None:
             ),
             "stats": stats,
             "results": [_serialize_result(r) for r in results],
+            "audit": _safe_audit(
+                events, results, section_markers,
+            ),
         }
 
     @app.get("/api/export/pdf/{filename}")
@@ -754,6 +758,33 @@ def _run_legacy_pipeline(
         events, generator, optimizer, pattern_matcher=matcher,
         chord_finger_classifier=_get_chord_finger_classifier(),
     )
+
+
+def _safe_audit(
+    events: list[NoteEvent],
+    results: list[FingeringResult],
+    section_markers: dict[int, str] | None,
+) -> dict[str, Any]:
+    """Compute the audit and serialize it. Never raises.
+
+    Falls back to ``{"available": False, "error": "..."}`` if anything goes
+    wrong (broken model, edge case events, etc.) so the solve endpoint stays
+    responsive even when the audit logic has a bug.
+    """
+    import dataclasses
+
+    try:
+        report = audit_score(
+            events,
+            results,
+            section_markers=section_markers or None,
+            ml_cost_model=_get_player_cost_model(),
+        )
+        payload = dataclasses.asdict(report)
+        payload["available"] = True
+        return payload
+    except Exception as exc:  # pragma: no cover — defensive
+        return {"available": False, "error": str(exc)}
 
 
 def _infer_title_artist(filepath: Path) -> tuple[str, str]:
