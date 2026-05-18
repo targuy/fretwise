@@ -365,25 +365,23 @@ let _prefetchAbortToken = 0;
 function _prefetchAllTrackModes(filename, tracks) {
   const myToken = ++_prefetchAbortToken;
   const prefs = getRulePreferences();
-  const requests = [];
-  for (const t of tracks) {
+  // Order: every mode for the CURRENT track first, then every mode for the
+  // other tracks. The first batch covers the most likely next click (mode
+  // change on the visible track); subsequent batches warm the rest in the
+  // background. No artificial throttle — browsers cap concurrent HTTP/1.1
+  // requests per origin (~6), which acts as natural backpressure and lets
+  // the foreground response come back first.
+  const orderedTracks = [...tracks].sort((a, b) => {
+    if (a.id === currentTrackId) return -1;
+    if (b.id === currentTrackId) return 1;
+    return 0;
+  });
+  for (const t of orderedTracks) {
     for (const mode of _PREFETCH_MODES) {
-      requests.push({ trackId: t.id, mode });
+      if (myToken !== _prefetchAbortToken) return;
+      fetchSolve(filename, t.id, mode, prefs).catch(() => { /* silent */ });
     }
   }
-  // Stagger lightly so the network panel stays readable and so the user's
-  // foreground solve never queues behind 30+ background requests.
-  let i = 0;
-  const tick = () => {
-    if (myToken !== _prefetchAbortToken) return;  // newer file opened
-    if (i >= requests.length) return;
-    const { trackId, mode } = requests[i++];
-    fetchSolve(filename, trackId, mode, prefs).catch(() => { /* silent */ });
-    // ~6 requests/second keeps the server thread pool from saturating on
-    // very large libraries while still warming the cache quickly.
-    setTimeout(tick, 160);
-  };
-  tick();
 }
 
 // ── Tab viewer ──────────────────────────────────────────────────────

@@ -208,56 +208,76 @@ def _register_routes(app: FastAPI) -> None:
             return cached
         view_mode = _parse_representation_mode(representation_mode)
 
-        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
-
-        if not events:
-            raise HTTPException(404, "No notes found in file")
-
-        rule_preferences = RulePreferences(
-            same_finger_motion_penalty=same_finger_motion_penalty,
-            infer_implicit_legato=infer_implicit_legato,
+        # Step 1 — legacy pipeline + adapter metadata + audit. This is the
+        # expensive piece (~2s on AC/DC) and it's *mode-independent*, so we
+        # cache it by (file, track, prefs) only. Subsequent view changes on
+        # the same file/track hit this cache and only re-run the core/SVG
+        # render (~90ms).
+        base_key = _legacy_cache_key(
+            filepath, track_id,
+            same_finger_motion_penalty, infer_implicit_legato,
         )
-        results, stats = _run_legacy_pipeline(
-            events,
-            rule_preferences=rule_preferences,
-        )
+        base = _legacy_cache_get(base_key)
+        if base is None:
+            adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+            if not events:
+                raise HTTPException(404, "No notes found in file")
+            rule_preferences = RulePreferences(
+                same_finger_motion_penalty=same_finger_motion_penalty,
+                infer_implicit_legato=infer_implicit_legato,
+            )
+            results, stats = _run_legacy_pipeline(
+                events, rule_preferences=rule_preferences,
+            )
+            section_markers: dict[int, str] = dict(
+                getattr(adapter, "section_markers", {}) or {}
+            )
+            base = {
+                "adapter": adapter,
+                "events": events,
+                "results": results,
+                "stats": stats,
+                "track_name": getattr(adapter, "track_name", "") or "",
+                "midi_program": getattr(adapter, "midi_program", -1),
+                "section_markers": section_markers,
+                "chord_diagrams": [
+                    _serialize_chord_diagram(cd)
+                    for cd in list(getattr(adapter, "chord_diagrams", []) or [])
+                ],
+                "chord_markers": dict(
+                    getattr(adapter, "chord_markers", {}) or {}
+                ),
+                "tempo": events[0].tempo if events else 120.0,
+                "beats_per_measure": float(
+                    getattr(adapter, "beats_per_measure", 4.0)
+                ),
+                "serialized_results": [_serialize_result(r) for r in results],
+                "audit": _safe_audit(events, results, section_markers),
+            }
+            _legacy_cache_put(base_key, base)
+
+        # Step 2 — mode-dependent core/SVG render. Cheap (~90ms) so we run
+        # it every time the per-mode response cache misses.
         core_result = _run_core_pipeline_for_events(
-            filepath,
-            adapter,
-            events,
+            filepath, base["adapter"], base["events"],
             representation_mode=view_mode,
         )
 
-        # Extract metadata from adapter
-        track_name: str = getattr(adapter, "track_name", "") or ""
-        midi_program: int = getattr(adapter, "midi_program", -1)
-        section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
-        chord_diagrams: list[ChordDiagram] = list(
-            getattr(adapter, "chord_diagrams", []) or []
-        )
-        chord_markers: dict[str, str] = dict(
-            getattr(adapter, "chord_markers", {}) or {}
-        )
-
-        # Parse artist/title from filename
+        # Parse artist/title from filename (cheap, redo each time).
         auto_title, auto_artist = _infer_title_artist(filepath)
-
-        # Determine tempo and time signature
-        tempo = events[0].tempo if events else 120.0
-        beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
 
         payload: dict[str, Any] = {
             "title": auto_title,
             "artist": auto_artist,
-            "track_name": track_name,
-            "midi_program": midi_program,
+            "track_name": base["track_name"],
+            "midi_program": base["midi_program"],
             "mode": "performance",
             "representation_mode": view_mode.value,
-            "tempo": tempo,
-            "beats_per_measure": beats_per_measure,
-            "section_markers": section_markers,
-            "chord_diagrams": [_serialize_chord_diagram(cd) for cd in chord_diagrams],
-            "chord_markers": chord_markers,
+            "tempo": base["tempo"],
+            "beats_per_measure": base["beats_per_measure"],
+            "section_markers": base["section_markers"],
+            "chord_diagrams": base["chord_diagrams"],
+            "chord_markers": base["chord_markers"],
             "core_svg": core_result.svg,
             "core_conformance_issues": len(core_result.conformance_issues),
             "measure_regions": _extract_measure_regions(
@@ -265,11 +285,9 @@ def _register_routes(app: FastAPI) -> None:
                 getattr(core_result, "canonical_score", None),
                 mode=view_mode.value,
             ),
-            "stats": stats,
-            "results": [_serialize_result(r) for r in results],
-            "audit": _safe_audit(
-                events, results, section_markers,
-            ),
+            "stats": base["stats"],
+            "results": base["serialized_results"],
+            "audit": base["audit"],
         }
         _solve_cache_put(cache_key, payload)
         return payload
@@ -825,6 +843,16 @@ _SOLVE_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
 # evict its own freshly-stored entries.
 _SOLVE_CACHE_MAX = 128
 
+# Legacy-results cache, layer below _SOLVE_CACHE. Keyed by (file, mtime,
+# track, prefs) — crucially NOT by representation_mode, since the Viterbi
+# pipeline output is mode-independent. Profiled cold solve = 2.0s in
+# the legacy pipeline + 0.09s in the core/SVG render, so changing the
+# view (= same legacy results, different SVG) becomes a 100ms operation
+# instead of a 2s one. The per-mode _SOLVE_CACHE stays on top to keep
+# repeat-click hits at ~50ms (no SVG re-build, no JSON re-serialise).
+_LEGACY_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
+_LEGACY_CACHE_MAX = 32
+
 
 def _solve_cache_key(
     filepath: Path,
@@ -865,6 +893,42 @@ def _solve_cache_put(key: tuple, payload: dict[str, Any]) -> None:
 def _solve_cache_clear() -> None:
     """Public-by-convention helper used by tests."""
     _SOLVE_CACHE.clear()
+    _LEGACY_CACHE.clear()
+
+
+def _legacy_cache_key(
+    filepath: Path,
+    track_id: int | None,
+    same_finger_motion_penalty: bool,
+    infer_implicit_legato: bool,
+) -> tuple:
+    """Cache key for the legacy pipeline output (mode-independent)."""
+    try:
+        mtime = filepath.stat().st_mtime_ns
+    except OSError:
+        mtime = 0
+    return (
+        str(filepath),
+        mtime,
+        track_id,
+        bool(same_finger_motion_penalty),
+        bool(infer_implicit_legato),
+    )
+
+
+def _legacy_cache_get(key: tuple) -> dict[str, Any] | None:
+    entry = _LEGACY_CACHE.get(key)
+    if entry is None:
+        return None
+    _LEGACY_CACHE.move_to_end(key)
+    return entry
+
+
+def _legacy_cache_put(key: tuple, entry: dict[str, Any]) -> None:
+    _LEGACY_CACHE[key] = entry
+    _LEGACY_CACHE.move_to_end(key)
+    while len(_LEGACY_CACHE) > _LEGACY_CACHE_MAX:
+        _LEGACY_CACHE.popitem(last=False)
 
 
 def _get_chord_finger_classifier() -> object | None:
