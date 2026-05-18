@@ -792,7 +792,7 @@ def _render_reference_path_glyph(
 
     return (
         f'<g transform="translate({origin_x:.4f},{origin_y:.4f}) scale({scale:.6f})">'
-        f'<path d="{reference_glyph.svg_path_data}"{path_transform} fill="currentColor"/>'
+        f'<path d="{reference_glyph.svg_path_data}"{path_transform} fill="black"/>'
         "</g>"
     )
 
