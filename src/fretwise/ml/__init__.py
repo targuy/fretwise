@@ -39,6 +39,7 @@ __all__ = [
     "FixedChordFingerClassifier",
     "LearnedChordFingerClassifier",
     "extract_chord_features",
+    "validate_assignment",
 ]
 
 
@@ -302,6 +303,87 @@ def extract_chord_features(
         ]
 
     return feature_vectors
+
+
+def validate_assignment(
+    strings: list[int | None],
+    fingers: list[int | None],
+) -> dict:
+    """Physical playability sanity check on a per-string finger assignment.
+
+    Mirrored from GuitarDataSet's ``validate_assignment.py`` (delivered in
+    GuitarDataset-008-handoff.md). Identical semantics — kept in sync. Used
+    as a post-Phase 2 sanity gate in ``resolve_chord_learned_fingers``: when
+    the learned classifier emits an assignment that fails validation, the
+    resolver falls back to the rule-based output.
+
+    Args:
+        strings: 6-element list (index 0 = low E = FretWise string_num 6).
+            ``None`` = muted, ``0`` = open, ``>0`` = fretted.
+        fingers: 6-element list. ``1`` = INDEX, ``2`` = MIDDLE, ``3`` = RING,
+            ``4`` = PINKY. ``None`` for non-fretted positions.
+
+    Returns:
+        ``{"valid": bool, "violations": list[str]}``.
+    """
+    violations: list[str] = []
+    finger_names = ["INDEX", "MIDDLE", "RING", "PINKY"]
+
+    fretted: list[tuple[int, int, int]] = []
+    for i in range(6):
+        if strings[i] is not None and strings[i] > 0 and fingers[i] is not None:
+            fretted.append((i, strings[i], fingers[i]))
+
+    if not fretted:
+        return {"valid": True, "violations": []}
+
+    # Check 1: a finger can only press multiple frets if INDEX with span <= 1
+    # (partial barre tolerance).
+    finger_frets: dict[int, set[int]] = {}
+    for _, fret, finger in fretted:
+        finger_frets.setdefault(finger, set()).add(fret)
+    for finger, frets in finger_frets.items():
+        if len(frets) <= 1:
+            continue
+        sorted_frets = sorted(frets)
+        if finger == 1 and sorted_frets[-1] - sorted_frets[0] <= 1:
+            continue
+        violations.append(
+            f"{finger_names[finger-1]} assigned to multiple frets: {sorted_frets}"
+        )
+
+    # Check 2: ordering — fingers should be monotone with fret position,
+    # allowing 1-fret inversions (common in barre + extension shapes).
+    sorted_by_fret = sorted(fretted, key=lambda x: (x[1], x[0]))
+    for i in range(len(sorted_by_fret) - 1):
+        _, fret_a, finger_a = sorted_by_fret[i]
+        _, fret_b, finger_b = sorted_by_fret[i + 1]
+        if fret_a < fret_b and finger_a > finger_b:
+            fret_gap = fret_b - fret_a
+            if fret_gap <= 1:
+                continue
+            violations.append(
+                f"Ordering violation: {finger_names[finger_a-1]} at fret {fret_a} "
+                f"> {finger_names[finger_b-1]} at fret {fret_b}"
+            )
+
+    # Check 3: INDEX-PINKY stretch <= 5 frets.
+    finger_min_max: dict[int, tuple[int, int]] = {}
+    for _, fret, finger in fretted:
+        existing = finger_min_max.get(finger)
+        if existing is None:
+            finger_min_max[finger] = (fret, fret)
+        else:
+            finger_min_max[finger] = (min(existing[0], fret), max(existing[1], fret))
+
+    if 1 in finger_min_max and 4 in finger_min_max:
+        index_max = finger_min_max[1][1]
+        pinky_min = finger_min_max[4][0]
+        span = pinky_min - index_max
+        if span > 5:
+            violations.append(f"Extreme stretch: {span} frets between INDEX and PINKY")
+
+    return {"valid": len(violations) == 0, "violations": violations}
 
 
 class LearnedChordFingerClassifier(ChordFingerClassifier):
