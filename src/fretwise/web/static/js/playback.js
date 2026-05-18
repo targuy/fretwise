@@ -355,7 +355,12 @@ export class PlaybackEngine {
     if (this.isPlaying) return;
     this.isPlaying = true;
     this._startMeasure = this.renderer.cursorMeasure;
-    this._startTime = performance.now();
+    // Resume at the sub-measure offset captured by the last pause() (if any),
+    // so a pause+resume mid-measure picks up exactly where it stopped instead
+    // of restarting the current measure from beat 0.
+    const resumeOffsetSec = this._resumeSubMeasureSec || 0;
+    this._startTime = performance.now() - resumeOffsetSec * 1000;
+    this._resumeSubMeasureSec = 0;  // consumed
     this._lastScheduledMeasure = -1;
 
     if ((this.metronome || this.audioEnabled) && !this._audioCtx) {
@@ -370,11 +375,15 @@ export class PlaybackEngine {
       this._audioCtx.resume();
     }
 
-    // Schedule the first measure immediately (cursor hasn't moved yet)
+    // Schedule the first measure immediately (cursor hasn't moved yet).
+    // skipBeforeMeasureSec drops the notes that have already played before
+    // the pause point so they don't replay on resume.
     const m0 = this._startMeasure;
     this._lastScheduledMeasure = m0;
     if (this.metronome) this._scheduleMetronomeMeasure(m0);
-    if (this.audioEnabled) this._scheduleMeasureNotes(m0);
+    if (this.audioEnabled) {
+      this._scheduleMeasureNotes(m0, 0, resumeOffsetSec);
+    }
 
     this._tick();
   }
@@ -390,9 +399,13 @@ export class PlaybackEngine {
       this._raf = null;
     }
     // Snap the cursor to the matching measure so getCurrentTimeSec()
-    // returns `frozen` while paused (spm-granular is enough here).
-    const m = Math.floor(frozen / this.secondsPerMeasure);
+    // returns `frozen` while paused (spm-granular is enough here), and
+    // remember the sub-measure offset so play() can restore the exact
+    // position instead of restarting the measure from its first beat.
+    const spm = this.secondsPerMeasure;
+    const m = Math.floor(frozen / spm);
     if (this.renderer) this.renderer.cursorMeasure = Math.max(0, Math.min(m, this.totalMeasures - 1));
+    this._resumeSubMeasureSec = Math.max(0, frozen - m * spm);
     // Cut all already-scheduled audio immediately so notes don't ring
     // past the pause point and don't double when play resumes.
     if (this._spessa) {
@@ -424,6 +437,11 @@ export class PlaybackEngine {
   goToMeasure(m) {
     const wasPlaying = this.isPlaying;
     this.pause();
+    // An explicit seek to a measure boundary discards any sub-measure
+    // pause offset captured just above by pause() — otherwise resuming
+    // after a seek would start with a stale offset from the previous
+    // measure.
+    this._resumeSubMeasureSec = 0;
     this.renderer.cursorMeasure = Math.max(0, Math.min(m, this.totalMeasures - 1));
     this.renderer.render();
     if (this.onMeasureChange) this.onMeasureChange(this.renderer.cursorMeasure);
@@ -712,7 +730,7 @@ export class PlaybackEngine {
    *  @param {number} measureIdx
    *  @param {number} [offsetSec=0] — extra delay (seconds) before first note
    */
-  _scheduleMeasureNotes(measureIdx, offsetSec = 0) {
+  _scheduleMeasureNotes(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
     if (!this._audioCtx || !this.audioEnabled) return;
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
@@ -724,7 +742,9 @@ export class PlaybackEngine {
       const secPerBeat = (60 / this.tempo) / this.speed;
       const now = this._audioCtx.currentTime;
       for (const note of notes) {
-        const when = now + offsetSec + (note.onset - measureOnset) * secPerBeat;
+        const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+        if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+        const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
         const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
         const velocity = this._dynamicToVelocity(note.dynamic);
         this._spessa.noteOn(0, note.pitch, velocity, false, when);
@@ -737,7 +757,9 @@ export class PlaybackEngine {
       const secPerBeat = (60 / this.tempo) / this.speed;
       const now = this._audioCtx.currentTime;
       for (const note of notes) {
-        const when = now + offsetSec + (note.onset - measureOnset) * secPerBeat;
+        const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+        if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+        const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
         const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
         const gain = this._dynamicToVelocity(note.dynamic) / 127;
         this._synth.play(note.pitch, when, { duration, gain });
@@ -750,7 +772,7 @@ export class PlaybackEngine {
     // Schedule secondary audio channels (same AudioContext time base = perfect sync)
     for (const ch of this._secondaryChannels) {
       if (!ch.enabled || !ch.synth) continue;
-      this._scheduleChannelNotes(ch, measureIdx, offsetSec);
+      this._scheduleChannelNotes(ch, measureIdx, offsetSec, skipBeforeMeasureSec);
     }
   }
 
@@ -759,7 +781,7 @@ export class PlaybackEngine {
    * @param {number} measureIdx
    * @param {number} [offsetSec=0]
    */
-  _scheduleChannelNotes(ch, measureIdx, offsetSec = 0) {
+  _scheduleChannelNotes(ch, measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
     if (!ch.synth || !ch.enabled || !this._audioCtx || !this.audioEnabled) return;
     const chNotes = ch.measures[measureIdx];
     if (!chNotes || !chNotes.length) return;
@@ -769,7 +791,9 @@ export class PlaybackEngine {
 
     if (this._spessa) {
       for (const note of chNotes) {
-        const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
+        const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
+        if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+        const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
         const duration = Math.max(0.08, note.duration * chSpb - 0.025);
         const velocity = Math.min(127, Math.round(this._dynamicToVelocity(note.dynamic) * ch.gain));
         this._spessa.noteOn(ch.midiChannel, note.pitch, velocity, false, when);
@@ -779,7 +803,9 @@ export class PlaybackEngine {
     }
 
     for (const note of chNotes) {
-      const when = chNow + offsetSec + (note.onset - chMeasureOnset) * chSpb;
+      const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
+      if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+      const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
       const duration = Math.max(0.08, note.duration * chSpb - 0.025);
       const gain = (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain;
       ch.synth.play(note.pitch, when, { duration, gain });
