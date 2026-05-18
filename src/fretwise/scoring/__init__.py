@@ -1176,6 +1176,33 @@ def resolve_chord_learned_fingers(
             )
             continue
 
+        # Post-inference sanity check (GDS validate_assignment): if the
+        # predicted assignment is not physically playable, fall back to
+        # the rule-based output for this chord. Cost layer = ~0.12% of
+        # chord predictions per GDS-008.
+        try:
+            from fretwise.ml import validate_assignment as _validate
+            strings_arr: list[int | None] = [None] * 6
+            fingers_arr: list[int | None] = [None] * 6
+            _finger_int = {
+                "index": 1, "middle": 2, "ring": 3, "pinky": 4,
+            }
+            for (_, r), name in zip(fretted_pairs, predicted):
+                gds_idx = 6 - r.state.string_num  # FretWise 1=high e → GDS 5
+                if 0 <= gds_idx < 6:
+                    strings_arr[gds_idx] = r.state.fret
+                    fingers_arr[gds_idx] = _finger_int.get(name.lower())
+            result = _validate(strings_arr, fingers_arr)
+            if not result["valid"]:
+                logger.info(
+                    "ML chord assignment failed sanity check at onset %s "
+                    "(%s); falling back to rule-based.",
+                    any_event.onset, "; ".join(result["violations"]),
+                )
+                continue
+        except Exception as exc:
+            logger.warning("validate_assignment crashed: %s — keeping ML output", exc)
+
         for (orig_idx, r), finger_name in zip(fretted_pairs, predicted):
             try:
                 new_finger = Finger(finger_name.lower())

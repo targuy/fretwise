@@ -124,3 +124,51 @@ def test_fixed_classifier_preserves_input_order() -> None:
 def test_fixed_classifier_is_chord_finger_classifier() -> None:
     cls = FixedChordFingerClassifier()
     assert isinstance(cls, ChordFingerClassifier)
+
+
+# ---------------------------------------------------------------------------
+# validate_assignment (GDS sanity check)
+# ---------------------------------------------------------------------------
+
+
+def test_validate_assignment_clean_chord() -> None:
+    from fretwise.ml import validate_assignment
+    # Open C major: string list low E first. fingers 1=I, 2=M, 3=R, 4=P.
+    result = validate_assignment(
+        strings=[None, 3, 2, 0, 1, 0],
+        fingers=[None, 3, 2, None, 1, None],
+    )
+    assert result["valid"]
+    assert result["violations"] == []
+
+
+def test_validate_assignment_dup_finger_different_frets() -> None:
+    from fretwise.ml import validate_assignment
+    # MIDDLE on fret 5 and fret 7 — invalid (only INDEX with span <= 1 OK).
+    result = validate_assignment(
+        strings=[None, None, 5, 7, None, None],
+        fingers=[None, None, 2, 2, None, None],
+    )
+    assert not result["valid"]
+    assert any("MIDDLE" in v for v in result["violations"])
+
+
+def test_validate_assignment_index_barre_adjacent_ok() -> None:
+    from fretwise.ml import validate_assignment
+    # INDEX barre across frets 5 and 5 (a true barre) — valid.
+    result = validate_assignment(
+        strings=[5, 5, None, None, None, None],
+        fingers=[1, 1, None, None, None, None],
+    )
+    assert result["valid"]
+
+
+def test_validate_assignment_extreme_stretch_flagged() -> None:
+    from fretwise.ml import validate_assignment
+    # INDEX at fret 1, PINKY at fret 8 = stretch 7 frets > 5.
+    result = validate_assignment(
+        strings=[1, None, None, None, None, 8],
+        fingers=[1, None, None, None, None, 4],
+    )
+    assert not result["valid"]
+    assert any("stretch" in v.lower() for v in result["violations"])
