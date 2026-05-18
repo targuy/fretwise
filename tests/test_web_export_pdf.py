@@ -201,12 +201,10 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
     monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
 
     endpoint = _route_endpoint(app, "/api/solve/{filename}")
-    payload = asyncio.run(
-        endpoint(
-            filename="song.gp",
-            track_id=None,
-            representation_mode="standard+tablature",
-        )
+    payload = endpoint(
+        filename="song.gp",
+        track_id=None,
+        representation_mode="standard+tablature",
     )
     assert payload["representation_mode"] == "standard_tablature"
     assert payload["core_svg"] == "<svg id='core'/>"
@@ -250,14 +248,14 @@ def test_solve_endpoint_caches_repeat_calls(
     monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
 
     endpoint = _route_endpoint(app, "/api/solve/{filename}")
-    asyncio.run(endpoint(
+    endpoint(
         filename="song.gp", track_id=None,
         representation_mode="standard+tablature",
-    ))
-    asyncio.run(endpoint(
+    )
+    endpoint(
         filename="song.gp", track_id=None,
         representation_mode="standard+tablature",
-    ))
+    )
     # Second call must be served from cache → pipeline runs exactly once.
     assert call_count["pipeline"] == 1
     assert call_count["core"] == 1
@@ -337,10 +335,10 @@ def test_solve_endpoint_embeds_audit_field(
     )
 
     endpoint = _route_endpoint(app, "/api/solve/{filename}")
-    payload = asyncio.run(endpoint(
+    payload = endpoint(
         filename="song.gp", track_id=None,
         representation_mode="standard+tablature",
-    ))
+    )
 
     assert "audit" in payload
     audit = payload["audit"]
