@@ -1313,6 +1313,7 @@ def _extract_events(
                             measure_index=bar_num + 1,
                             tuplet_actual=beat_tuplet_actual,
                             tuplet_normal=beat_tuplet_normal,
+                            source_note_id=note_id,
                         )
                     )
 

@@ -89,6 +89,14 @@
         <path d="M13 13h2v3h-2v-3z" fill="currentColor" stroke="none"/>
       </svg>
     </button>
+    <!-- GP export (saves the loaded GP file with FretWise's LH fingerings injected) -->
+    <button class="ic-btn" id="btn-header-gp" title="Export GP avec doigtés" aria-label="Export GP">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 3H6v18h12V7z"/>
+        <path d="M14 3v4h4"/>
+        <text x="12" y="17" font-size="6" text-anchor="middle" fill="currentColor" stroke="none">GP</text>
+      </svg>
+    </button>
     <!-- Back to file list (only shown in viewer mode) -->
     <button class="ic-btn" id="btn-header-back" title="Back to file list" aria-label="Back" style="display:none">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -305,6 +313,7 @@
     </select>
     <!-- Hidden PDF + back (functionality via header buttons) -->
     <button class="tb-btn" id="btn-export-pdf" style="display:none" title="Export PDF">PDF</button>
+    <button class="tb-btn" id="btn-export-gp" style="display:none" title="Export GP avec doigtés">GP</button>
     <button class="ic-btn" id="btn-download-gp" title="Download original Guitar Pro file" style="display:none">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     </button>
@@ -346,6 +355,14 @@
           <button id="set-index-apply" class="tx-btn">Apply</button>
         </div>
         <p class="settings-hint">TSV file with columns: filename, title, artist, genre, year, guitar, rig, …</p>
+      </div>
+    </section>
+    <section class="settings-section">
+      <h3>Doigtés</h3>
+      <div class="settings-field">
+        <button id="set-refresh-fingerings" class="tx-btn">Recalculer tous les doigtés</button>
+        <span id="set-refresh-fingerings-status" class="sf-upload-status" style="margin-left:10px"></span>
+        <p class="settings-hint">Ré-écrit chaque fichier <code>.gp</code> du répertoire avec les doigtés calculés par FretWise (suffixe <code>_fingered.gp</code>, l'original reste intact). Utile après une mise à jour du modèle ML.</p>
       </div>
     </section>
     <section class="settings-section">

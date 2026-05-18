@@ -55,6 +55,23 @@ export async function fetchSolve(filename, trackId, representationMode, preferen
   return res.json();
 }
 
+export async function fetchExportGp(filename, trackId) {
+  let url = `/api/export/gp/${encodeURIComponent(filename)}`;
+  if (trackId !== null && trackId !== undefined) url += `?track_id=${trackId}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'GP export failed' }));
+    throw new Error(err.detail || 'GP export failed');
+  }
+  const blob = await res.blob();
+  const disposition = res.headers.get('content-disposition') || '';
+  const m = disposition.match(/filename="([^"]+)"/);
+  const annotatedNotes = parseInt(
+    res.headers.get('x-fretwise-annotated-notes') || '0', 10,
+  );
+  return { blob, filename: m ? m[1] : 'fingered.gp', annotatedNotes };
+}
+
 export async function downloadFile(filename) {
   const url = `/api/download/${encodeURIComponent(filename)}`;
   const res = await fetch(url);

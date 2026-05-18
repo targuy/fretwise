@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateSoundfont, deleteSoundfont, downloadFile, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateSoundfont, deleteSoundfont, downloadFile, fetchExportGp, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
@@ -55,6 +55,7 @@ const btnMetronome  = $('#btn-metronome');
 const btnFollow     = $('#btn-follow');
 const btnFingering  = $('#btn-fingering');
 const btnExportPdf  = $('#btn-export-pdf');
+const btnExportGp   = $('#btn-export-gp');
 const btnDownloadGp = $('#btn-download-gp');
 const pdfExportStatus = $('#pdf-export-status');
 const btnBackFiles  = $('#btn-back-files');
@@ -89,6 +90,7 @@ const headerMetaTrack  = $('#header-meta-track');
 const headerMetaTempo  = $('#header-meta-tempo');
 const btnHeaderBack    = $('#btn-header-back');
 const btnHeaderPdf     = $('#btn-header-pdf');
+const btnHeaderGp      = $('#btn-header-gp');
 
 // Header
 const btnLegend     = $('#btn-legend');
@@ -433,6 +435,38 @@ async function selectTrack(trackId, trackName) {
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
     ctx.fillText(`Error: ${err.message}`, 200, 50);
+  }
+}
+
+async function exportGP() {
+  if (!currentFile) return;
+  if (!currentFile.toLowerCase().endsWith('.gp')) {
+    _setPdfExportStatus(
+      'Export GP réservé aux fichiers GP 7/8 (.gp)', 'warn',
+    );
+    return;
+  }
+  const originalLabel = btnHeaderGp?.getAttribute('aria-label') || 'Export GP';
+  if (btnHeaderGp) {
+    btnHeaderGp.disabled = true;
+    btnHeaderGp.setAttribute('aria-label', 'Export…');
+  }
+  _setPdfExportStatus('Export GP…', 'neutral');
+  try {
+    const { blob, filename, annotatedNotes } = await fetchExportGp(
+      currentFile, currentTrackId,
+    );
+    _downloadBlob(blob, filename);
+    _setPdfExportStatus(
+      `Export GP OK (${annotatedNotes} doigtés écrits)`, 'ok',
+    );
+  } catch (err) {
+    _setPdfExportStatus(`Export GP failed: ${err.message}`, 'error');
+  } finally {
+    if (btnHeaderGp) {
+      btnHeaderGp.disabled = false;
+      btnHeaderGp.setAttribute('aria-label', originalLabel);
+    }
   }
 }
 
@@ -1534,6 +1568,10 @@ if (btnExportPdf) {
   btnExportPdf.addEventListener('click', exportPDF);
 }
 
+if (btnExportGp) {
+  btnExportGp.addEventListener('click', exportGP);
+}
+
 if (btnMetronome) {
   btnMetronome.addEventListener('click', () => {
     if (!playback) return;
@@ -1557,6 +1595,68 @@ if (btnHeaderBack) {
     renderer = null;
     playback = null;
     loadFiles();
+  });
+}
+
+if (btnHeaderGp) {
+  btnHeaderGp.addEventListener('click', exportGP);
+}
+
+const btnRefreshFingerings = $('#set-refresh-fingerings');
+const refreshFingeringsStatus = $('#set-refresh-fingerings-status');
+if (btnRefreshFingerings) {
+  btnRefreshFingerings.addEventListener('click', async () => {
+    const ok = window.confirm(
+      'Cette opération va ré-écrire un fichier <nom>_fingered.gp à côté '
+      + 'de chaque .gp de votre bibliothèque. L\'original reste intact. '
+      + 'Sur de gros corpus ça peut prendre plusieurs minutes. Continuer ?'
+    );
+    if (!ok) return;
+    btnRefreshFingerings.disabled = true;
+    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Démarrage…';
+    try {
+      const res = await fetch('/api/library/refresh-fingerings', { method: 'POST' });
+      if (!res.ok || !res.body) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      let processed = 0;
+      let total = 0;
+      let okCount = 0;
+      let errCount = 0;
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let nl;
+        while ((nl = buf.indexOf('\n')) !== -1) {
+          const line = buf.slice(0, nl).trim();
+          buf = buf.slice(nl + 1);
+          if (!line) continue;
+          let msg;
+          try { msg = JSON.parse(line); } catch (_) { continue; }
+          if (msg.event === 'start') {
+            total = msg.total_files || 0;
+            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `0 / ${total}`;
+          } else if (msg.event === 'done') {
+            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
+              `Terminé : ${msg.ok} OK, ${msg.errors} erreurs, ${msg.skipped} ignorés.`;
+          } else if (msg.status) {
+            processed++;
+            if (msg.status === 'ok') okCount++;
+            if (msg.status === 'error') errCount++;
+            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
+              `${processed} / ${total}  (${okCount} OK, ${errCount} erreurs) — ${msg.file}`;
+          }
+        }
+      }
+    } catch (err) {
+      if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `Erreur : ${err.message}`;
+    } finally {
+      btnRefreshFingerings.disabled = false;
+    }
   });
 }
 

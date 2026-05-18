@@ -130,6 +130,12 @@ class NoteEvent:
     # ── Source measure anchor (optional) ──────────────────────────────────────
     measure_index: int | None = None    # 1-based measure number from source parser
 
+    # ── Source-format note identifier (optional, parser-provided) ────────────
+    # GPIF (GP 7/8) gives each <Note id="X"> a stable id. Propagating it
+    # through the pipeline lets the GP writer match FingeringResults back
+    # to the exact source XML element when re-injecting LeftFingering.
+    source_note_id: str | None = None
+
     # ── Tuplet ─────────────────────────────────────────────────────────────────
     tuplet_actual: int | None = None    # actual note count (e.g. 3 for a triplet)
     tuplet_normal: int | None = None    # normal note count (e.g. 2 for a triplet)
