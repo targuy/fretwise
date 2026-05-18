@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import bisect
+
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
@@ -169,6 +171,8 @@ def layout_to_render_scene(
                     sn = getattr(_meas, "section_name", "")
                     if sn:
                         _section_measures[_meas.number] = sn
+    # Build tempo-change lookup: {measure_number: bpm} — only measures where tempo changes.
+    _tempo_by_measure: dict[int, int] = _build_tempo_by_measure(score)
     page_systems: list[SystemScene] = []
     for system_index, system_layout in enumerate(page_layout.systems, start=1):
         staff_scenes: list[StaffScene] = []
@@ -263,17 +267,7 @@ def layout_to_render_scene(
                                 metadata={"index": str(i), "fifths": str(key_fifths)},
                             )
                         )
-            if system_index == 1 and staff_index == 1 and score.tempo_marks:
-                bpm = int(round(score.tempo_marks[0].bpm))
-                staff_layer.text_instances.append(
-                    TextInstance(
-                        text=f"♩ = {bpm}",
-                        x=staff_layout.x + 2.0,
-                        y=staff_layout.y - 16.0,
-                        font_size=9.0,
-                        metadata={"kind": "tempo"},
-                    )
-                )
+            # Tempo marks are rendered per-measure inside the measure loop below.
 
             if has_standard:
                 staff_layer.recipe_instances.append(
@@ -407,6 +401,23 @@ def layout_to_render_scene(
                                 },
                             )
                         )
+                # Tempo mark at this measure (if the tempo changes here).
+                _measure_bpm = _tempo_by_measure.get(measure_layout.measure_number)
+                if _measure_bpm is not None:
+                    # Anchor the tempo mark just above the measure number so it
+                    # stays in the correct inter-system gap regardless of mode.
+                    _tempo_y = measure_number_y - 14.0
+                    _tempo_x = measure_layout.x + (18.0 if measure_index == 0 else 2.0)
+                    notes_layer.text_instances.append(
+                        TextInstance(
+                            text=f"♩ = {_measure_bpm}",
+                            x=_tempo_x,
+                            y=_tempo_y,
+                            font_family="Helvetica-Bold",
+                            font_size=10.0,
+                            metadata={"kind": "tempo"},
+                        )
+                    )
                 for event_layout in measure_layout.event_layouts:
                     event_type = event_layout.metadata.get("event_type")
                     if event_type != "RestEvent":
@@ -1025,6 +1036,39 @@ def _tab_note_y_from_metadata(
     string_num = _safe_int(metadata.get("tab_string")) or 3
     string_num = max(1, min(6, string_num))
     return tab_y + (string_num - 1) * tab_spacing
+
+
+def _build_tempo_by_measure(score: Score) -> dict[int, int]:
+    """Return {measure_number: bpm} for every measure where tempo changes.
+
+    Uses the canonical measure list to determine each measure's start onset
+    (from the first event in the measure), then bisects the sorted tempo_marks
+    list to find the active BPM.  Only measures where the BPM differs from
+    the previous measure are included, so the renderer can skip unchanged bars.
+    """
+    if not score.tempo_marks:
+        return {}
+    tm_onsets = [tm.onset for tm in score.tempo_marks]
+    tm_bpms = [tm.bpm for tm in score.tempo_marks]
+    result: dict[int, int] = {}
+    prev_bpm: float | None = None
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                for measure in staff.measures:
+                    # Find the earliest event onset in this measure.
+                    all_events = [e for v in measure.voices for e in v.events]
+                    if not all_events:
+                        continue
+                    measure_onset = min(e.onset for e in all_events)
+                    idx = bisect.bisect_right(tm_onsets, measure_onset) - 1
+                    idx = max(0, idx)
+                    bpm = tm_bpms[idx]
+                    if prev_bpm is None or abs(bpm - prev_bpm) > 0.5:
+                        result[measure.number] = int(round(bpm))
+                        prev_bpm = bpm
+                return result  # Only process first track/staff
+    return result
 
 
 def _score_time_signature(score: Score) -> tuple[int, int]:
