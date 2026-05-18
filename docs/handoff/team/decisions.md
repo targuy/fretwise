@@ -6,6 +6,30 @@
 
 ---
 
+## DEC-012 — 2026-05-18 — Phase 3 RÉACTIVÉE (GAPS jackpot)
+
+**Owner décision** : Data (autonome via PM)
+**Contexte** : GDS-008 livre les résultats du grep GAPS dataset (demande #17) :
+**72 585 annotations sequential fingering sur 400 700 notes = 18.1 % coverage**,
+3.6× au-dessus du seuil 5 % défini dans DEC-008. License GAPS = CC BY-NC-SA
+4.0 → conforme DEC-011 (research mode).
+**Reco PM** : inverser DEC-008. Phase 3 (neural sequential cost) sort de
+"deferred" → "active roadmap".
+**Décision** : appliquée. Côté FretWise rien à faire immédiatement (interfaces
+`PlayerCostModel` figées depuis commit `c2276b3` — `transition_cost`,
+`emission_cost`). Côté GDS : training Phase 3 à lancer sur GAPS, et potentiellement
+ClassClef quand pipeline complet.
+**Conséquences** :
+  - Roadmap court terme : Phase 3 v1 sur GAPS, Phase 3 v2 avec ClassClef bulk
+  - Phase 2.5 (chord-to-chord transitions synthétiques) abandonnée — GDS recommande
+    direct Phase 3 sur données réelles
+  - Validate_assignment intégré (commit `5d25a14`) comme sanity gate Phase 2 — pattern
+    réutilisable pour Phase 3 si nécessaire
+  - 4 questions ouvertes Q-P3.1 à Q-P3.4 (architecture, granularité, mapping pitch→position,
+    volume seuil) escaladées à GDS dans Fretwise-010
+
+---
+
 ## DEC-011 — 2026-05-18 — PO research mode (bypass license restrictions)
 
 **Owner décision** : PO
