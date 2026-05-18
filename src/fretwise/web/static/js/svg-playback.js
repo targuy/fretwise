@@ -19,6 +19,8 @@ export class SvgCursorDriver {
     this._rects = [];
     /** @type {SVGLineElement|null} */
     this._line = null;
+    /** @type {Array<{onset:number, x:number}>} sorted by onset */
+    this._noteAnchors = [];
   }
 
   /**
@@ -48,6 +50,24 @@ export class SvgCursorDriver {
     this._line.setAttribute('y1', '0'); this._line.setAttribute('y2', '0');
     this._line.setAttribute('visibility', 'hidden');
     svg.appendChild(this._line);
+
+    // Build the note-anchor table once. Each tab note in the SVG carries
+    // its onset (beats from song start) + its X position; the cursor's
+    // tick() uses these to interpolate position by *actual note spacing*
+    // instead of by uniform time fraction within the measure (which is
+    // wrong whenever notes aren't evenly spaced — triplets, syncopes,
+    // dotted figures…).
+    const onsetToX = new Map();
+    for (const noteText of svg.querySelectorAll('text.fw-tab-note')) {
+      const onset = parseFloat(noteText.getAttribute('data-onset') || 'NaN');
+      const x = parseFloat(noteText.getAttribute('x') || 'NaN');
+      if (!isFinite(onset) || !isFinite(x)) continue;
+      // Multiple strings at the same onset share the same X column — keep
+      // the first encountered to avoid duplicate (and identical) anchors.
+      if (!onsetToX.has(onset)) onsetToX.set(onset, x);
+    }
+    this._noteAnchors = Array.from(onsetToX, ([onset, x]) => ({ onset, x }))
+      .sort((a, b) => a.onset - b.onset);
   }
 
   /**
@@ -82,12 +102,55 @@ export class SvgCursorDriver {
     const measureIdx = Math.floor(onset / beatsPerMeasure);
     const region = this.regions.find(r => r.measure_idx === measureIdx);
     if (!region) { this._line.setAttribute('visibility', 'hidden'); return; }
-    const fraction = Math.min(1, (onset - measureIdx * beatsPerMeasure) / beatsPerMeasure);
-    const x = (region.x + fraction * region.width).toFixed(2);
+
+    const x = this._noteSnappedX(onset, region, beatsPerMeasure).toFixed(2);
     this._line.setAttribute('x1', x); this._line.setAttribute('x2', x);
     this._line.setAttribute('y1', region.y0.toFixed(2));
     this._line.setAttribute('y2', region.y1.toFixed(2));
     this._line.setAttribute('visibility', 'visible');
+  }
+
+  /**
+   * Compute the cursor's X by interpolating between *adjacent note anchors*
+   * (each carrying onset + X), so the line lands exactly on each note at
+   * its onset and slides linearly between consecutive notes by elapsed
+   * time. Falls back to the uniform measure-width interpolation when no
+   * tab-note anchors are available (e.g. pure standard-staff mode).
+   *
+   * @private
+   * @returns {number} cursor X in SVG units
+   */
+  _noteSnappedX(onset, region, beatsPerMeasure) {
+    const anchors = this._noteAnchors;
+    if (anchors.length > 0) {
+      // Binary search for the largest anchor with onset <= current onset.
+      let lo = 0, hi = anchors.length - 1, prevIdx = -1;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (anchors[mid].onset <= onset) { prevIdx = mid; lo = mid + 1; }
+        else { hi = mid - 1; }
+      }
+      const next = prevIdx + 1;
+      const a = prevIdx >= 0 ? anchors[prevIdx] : null;
+      const b = next < anchors.length ? anchors[next] : null;
+      if (a && b) {
+        const span = b.onset - a.onset;
+        if (span > 0) {
+          const frac = Math.max(0, Math.min(1, (onset - a.onset) / span));
+          return a.x + frac * (b.x - a.x);
+        }
+        return a.x;
+      }
+      if (a) return a.x;
+      if (b) return b.x;
+    }
+    // Fallback — no anchors (standard-staff-only mode, or anchors not yet
+    // built): use the legacy uniform-time interpolation within the measure.
+    const measureIdx = Math.floor(onset / beatsPerMeasure);
+    const fraction = Math.min(
+      1, (onset - measureIdx * beatsPerMeasure) / beatsPerMeasure,
+    );
+    return region.x + fraction * region.width;
   }
 
   /** Hide the red cursor line (on pause / stop). */

@@ -392,11 +392,22 @@ function populateTrackSwitcher(_trackId) {
 
 async function selectTrack(trackId, trackName) {
   currentTrackId = trackId;
-  // Stop playback when switching tracks
-  if (playback && playback.isPlaying) {
-    playback.pause();
-    updatePlayButton(false);
-    stopCursorLoop();
+  // Capture playback position BEFORE pausing/recreating so we can restore
+  // it on the new track. Without this, switching tracks always restarts
+  // from measure 0 — confirmed annoying by the PO.
+  let restorePos = null;
+  if (playback) {
+    const wasPlaying = playback.isPlaying;
+    if (wasPlaying) {
+      playback.pause();
+      updatePlayButton(false);
+      stopCursorLoop();
+    }
+    restorePos = {
+      measure: playback.renderer?.cursorMeasure ?? 0,
+      subMeasureSec: playback._resumeSubMeasureSec || 0,
+      wasPlaying,
+    };
   }
   showPage('viewer');
   populateTrackSwitcher(trackId);
@@ -429,6 +440,26 @@ async function selectTrack(trackId, trackName) {
     renderAuditBanner(data?.audit, {
       onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
     });
+    // Restore playback position from the previous track on the new one.
+    // Clamp to the new track's measure count to handle tracks of different
+    // lengths. Resume playback if it was playing before the switch.
+    if (restorePos && playback) {
+      const clamped = Math.max(
+        0,
+        Math.min(restorePos.measure, (playback.totalMeasures || 1) - 1),
+      );
+      if (playback.renderer) playback.renderer.cursorMeasure = clamped;
+      playback._resumeSubMeasureSec = restorePos.subMeasureSec;
+      if (playback.onMeasureChange) playback.onMeasureChange(clamped);
+      if (playback.onTimeChange) {
+        playback.onTimeChange(playback.getCurrentTimeSec());
+      }
+      if (restorePos.wasPlaying) {
+        playback.play();
+        updatePlayButton(true);
+        startCursorLoop();
+      }
+    }
   } catch (err) {
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
