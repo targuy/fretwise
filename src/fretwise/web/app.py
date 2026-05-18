@@ -189,6 +189,13 @@ def _register_routes(app: FastAPI) -> None:
     ) -> dict[str, Any]:
         """Run the full pipeline and return results as JSON."""
         filepath = _resolve_file(app, filename)
+        cache_key = _solve_cache_key(
+            filepath, track_id, representation_mode,
+            same_finger_motion_penalty, infer_implicit_legato,
+        )
+        cached = _solve_cache_get(cache_key)
+        if cached is not None:
+            return cached
         view_mode = _parse_representation_mode(representation_mode)
 
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
@@ -229,7 +236,7 @@ def _register_routes(app: FastAPI) -> None:
         tempo = events[0].tempo if events else 120.0
         beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
 
-        return {
+        payload: dict[str, Any] = {
             "title": auto_title,
             "artist": auto_artist,
             "track_name": track_name,
@@ -254,6 +261,8 @@ def _register_routes(app: FastAPI) -> None:
                 events, results, section_markers,
             ),
         }
+        _solve_cache_put(cache_key, payload)
+        return payload
 
     @app.get("/api/export/pdf/{filename}")
     async def export_pdf(
@@ -691,6 +700,55 @@ _CHORD_FINGER_CLASSIFIER: object | None = None
 _CHORD_FINGER_CLASSIFIER_LOADED: bool = False
 _PLAYER_COST_MODEL: object | None = None
 _PLAYER_COST_MODEL_LOADED: bool = False
+
+# In-memory LRU cache for /api/solve responses. Keyed by (file, mtime, params)
+# so it auto-invalidates when the source file is edited. Bounded entry count
+# keeps total memory predictable (each response ~ 200-500 KB SVG + results).
+from collections import OrderedDict as _OrderedDict  # noqa: E402
+
+_SOLVE_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
+_SOLVE_CACHE_MAX = 32
+
+
+def _solve_cache_key(
+    filepath: Path,
+    track_id: int | None,
+    representation_mode: str,
+    same_finger_motion_penalty: bool,
+    infer_implicit_legato: bool,
+) -> tuple:
+    try:
+        mtime = filepath.stat().st_mtime_ns
+    except OSError:
+        mtime = 0
+    return (
+        str(filepath),
+        mtime,
+        track_id,
+        representation_mode,
+        bool(same_finger_motion_penalty),
+        bool(infer_implicit_legato),
+    )
+
+
+def _solve_cache_get(key: tuple) -> dict[str, Any] | None:
+    payload = _SOLVE_CACHE.get(key)
+    if payload is None:
+        return None
+    _SOLVE_CACHE.move_to_end(key)  # LRU touch
+    return payload
+
+
+def _solve_cache_put(key: tuple, payload: dict[str, Any]) -> None:
+    _SOLVE_CACHE[key] = payload
+    _SOLVE_CACHE.move_to_end(key)
+    while len(_SOLVE_CACHE) > _SOLVE_CACHE_MAX:
+        _SOLVE_CACHE.popitem(last=False)
+
+
+def _solve_cache_clear() -> None:
+    """Public-by-convention helper used by tests."""
+    _SOLVE_CACHE.clear()
 
 
 def _get_chord_finger_classifier() -> object | None:
