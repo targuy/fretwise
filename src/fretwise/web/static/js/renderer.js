@@ -1253,74 +1253,69 @@ export class TabRenderer {
   }
 
   // ── Rest symbol on the TAB staff (vertically centered between strings) ───
+  //
+  // Uses the proper rest SVG glyphs shipped in /static/img/rests/ rather than
+  // hand-drawn approximations. Images are pre-loaded once on the first call
+  // and cached on the renderer instance so subsequent paints are synchronous.
+
+  _ensureRestGlyphsLoaded() {
+    if (this._restGlyphs) return;
+    this._restGlyphs = {};
+    const PATHS = {
+      half:         '/static/img/rests/half.svg',
+      quarter:      '/static/img/rests/quarter.svg',
+      eighth:       '/static/img/rests/eighth.svg',
+      sixteenth:    '/static/img/rests/sixteenth.svg',
+      thirtysecond: '/static/img/rests/thirtysecond.svg',
+    };
+    for (const [kind, src] of Object.entries(PATHS)) {
+      const img = new Image();
+      img.onload = () => {
+        // Re-render once the SVG is decoded so the rest replaces the
+        // empty placeholder oval. Cheap (debounced by browser frame).
+        try { this.render(); } catch (_) { /* renderer torn down */ }
+      };
+      img.src = src;
+      this._restGlyphs[kind] = img;
+    }
+  }
+
+  _selectRestGlyph(duration) {
+    if (duration >= 2.0)  return this._restGlyphs.half;
+    if (duration >= 1.0)  return this._restGlyphs.quarter;
+    if (duration >= 0.5)  return this._restGlyphs.eighth;
+    if (duration >= 0.25) return this._restGlyphs.sixteenth;
+    return this._restGlyphs.thirtysecond;
+  }
 
   _drawRestOnStaff(ctx, x, sysY, duration) {
-    // Draw rest symbol centered vertically in the TAB staff (between the strings)
+    this._ensureRestGlyphsLoaded();
     const midY = sysY + ABOVE_STRINGS + STRINGS_H / 2;
 
-    // Clear oval behind the symbol so it reads cleanly over string lines
+    // Clear an oval behind the glyph so the string lines do not cut through.
     ctx.fillStyle = this._bgScore;
     ctx.beginPath();
     ctx.ellipse(x, midY, 9, 14, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = COL_TEXT;
-    ctx.strokeStyle = COL_TEXT;
-
-    if (duration >= 1.0) {
-      // Quarter rest: zigzag
-      const top = midY - 8;
-      ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + 3,  top);
-      ctx.lineTo(x - 2,  top + 4);
-      ctx.lineTo(x + 2,  top + 8);
-      ctx.lineTo(x - 3,  top + 12);
-      ctx.lineTo(x + 1,  top + 16);
-      ctx.stroke();
-      ctx.lineCap = 'butt'; ctx.lineJoin = 'miter';
-    } else if (duration >= 0.5) {
-      // Eighth rest: filled dot + curved hook
-      ctx.beginPath();
-      ctx.arc(x + 2, midY - 5, 2.2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.lineWidth = 1.5; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + 2, midY - 3);
-      ctx.bezierCurveTo(x + 4, midY - 1, x + 1, midY + 1, x - 1, midY + 3);
-      ctx.bezierCurveTo(x - 3, midY + 5, x - 2, midY + 7, x, midY + 8);
-      ctx.stroke();
-      ctx.lineCap = 'butt';
-    } else if (duration >= 0.25) {
-      // Sixteenth rest: two dots + two stacked hooks
-      ctx.beginPath(); ctx.arc(x + 2, midY - 7, 2.0, 0, Math.PI * 2); ctx.fill();
-      ctx.lineWidth = 1.4; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(x + 2, midY - 5);
-      ctx.bezierCurveTo(x + 4, midY - 3, x + 1, midY - 1, x - 1, midY + 1);
-      ctx.bezierCurveTo(x - 3, midY + 3, x - 2, midY + 4, x, midY + 5);
-      ctx.stroke();
-      ctx.beginPath(); ctx.arc(x + 2, midY - 1, 2.0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(x + 2, midY + 1);
-      ctx.bezierCurveTo(x + 4, midY + 3, x + 1, midY + 5, x - 1, midY + 7);
-      ctx.bezierCurveTo(x - 3, midY + 9, x - 2, midY + 10, x, midY + 11);
-      ctx.stroke();
-      ctx.lineCap = 'butt';
-    } else {
-      // 32nd rest: three dots + three hooks
-      for (const [dy, doFill] of [[-9, true], [-3, true], [3, true]]) {
-        ctx.beginPath(); ctx.arc(x + 2, midY + dy, 1.8, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.lineWidth = 1.3; ctx.lineCap = 'round';
-      for (const dy of [-7, -1, 5]) {
-        ctx.beginPath();
-        ctx.moveTo(x + 2, midY + dy + 2);
-        ctx.bezierCurveTo(x + 4, midY + dy + 4, x - 1, midY + dy + 5, x - 1, midY + dy + 7);
-        ctx.stroke();
-      }
-      ctx.lineCap = 'butt';
+    const img = this._selectRestGlyph(duration);
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      // Still loading — leave the cleared oval. _invalidate will trigger a
+      // repaint once the image is decoded.
+      return;
     }
+
+    // Target visual heights tuned to the existing zigzag/dot dimensions
+    // (≈ 20 px for quarter, smaller for shorter values; half-rest is short
+    // because it sits on top of a staff line in real notation).
+    const targetH = duration >= 2.0 ? 8
+                  : duration >= 1.0 ? 22
+                  : duration >= 0.5 ? 18
+                  : duration >= 0.25 ? 22
+                  : 26;
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const targetW = targetH * aspect;
+    ctx.drawImage(img, x - targetW / 2, midY - targetH / 2, targetW, targetH);
   }
 
   _drawRestStem(ctx, x, baseY, duration) {
