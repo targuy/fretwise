@@ -9,7 +9,7 @@
 
 ## DOING
 
-- `[pm]` Idle — Phase 2 ML **activée par défaut** CLI + web. Validée empiriquement sur 7 fichiers (ZZ Top La Grange : PINKY 185→13, massive). Demande #13 features calibration toujours utile pour rigor mais non bloquante.
+- `[pm]` Idle — **Phase 2 ML calibrée** (#13 LIVRÉE, ALL FEATURES MATCH) + **suite tests 100 % verte** (951/0 fail, premier clean run de la session). Watcher actif pour next GDS message.
 
 ## TODO — Priority 1 (next 24h)
 
@@ -41,8 +41,13 @@
 
 ## DONE
 
-### Session 2026-05-17
+### Session 2026-05-17 / 2026-05-18
 
+- `[pm]` **SVG test fix** (`180f783`) — drop string_label emission in tab modes. Suite tests 100 % verte (951/0). Note : commit a embarqué WIP user pré-existant sur `builders.py` (tempo-by-measure logic), à split si besoin.
+- `[pm]` **Phase 2 calibration #13 LIVRÉE** (`33d3561`) — 3 bugs corrigés dans `extract_chord_features` (sort direction, string_gap signed/abs, ctx_fret indexation). ALL FEATURES MATCH GDS reference sur les 3 chords de calibration.
+- `[pm]` `chore(deps)` `3f75bd2` — onnxruntime dans extras `[ml]`
+- `[pm]` DEC-011 PO research mode (`775ea70`) — ClassClef + similar débloqués
+- `[pm]` Trigger remote wake-up 2026-05-19 04:00 Paris (id `trig_01J7zaYE66bTBy1zNy4TeDMJ`)
 - `[pm]` **Phase 2 activée par défaut** (`a7d38f8`) — CLI + web app. Fallback gracieux si model absent. Validation empirique sur 7 fichiers : ZZ Top La Grange PINKY 185→13, MIDDLE +340. Sequence cases (Bb King, Cream) inchangés (Phase 2 n'agit qu'aux chord onsets).
 - `[pm]` **Phase 2 ML INTÉGRÉE** (`7261f0f`) — LearnedChordFingerClassifier + extract_chord_features + resolve_chord_learned_fingers. ONNX 97.7% accuracy. Opt-in via `run_pipeline(chord_finger_classifier=...)`. 950/951 tests verts. Fretwise-007 envoyé.
 - `[data]` **Quality.py tuning-awareness fix** (`003f19e`) — DEC-010 — infère tuning per-string depuis events. Corpus bad 22.6 % → **6.7 %** (re-classified 235 false positives drop-D/half-step). Métrique fiable maintenant.
