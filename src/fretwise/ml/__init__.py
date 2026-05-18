@@ -38,7 +38,9 @@ __all__ = [
     "FixedPlayerCost",
     "FixedChordFingerClassifier",
     "LearnedChordFingerClassifier",
+    "LearnedPlayerCost",
     "extract_chord_features",
+    "extract_transition_features",
     "validate_assignment",
 ]
 
@@ -496,3 +498,267 @@ class FixedChordFingerClassifier(ChordFingerClassifier):
         for (orig_idx, _note), finger in zip(sorted_with_idx, fingers_sorted):
             result[orig_idx] = finger.value
         return result
+
+
+# ---------------------------------------------------------------------------
+# Phase 3 — Learned transition cost (GuitarDataSet v2 ONNX)
+# ---------------------------------------------------------------------------
+
+# Feature order matches GuitarDataSet's training set exactly.
+# See data/models/transition_cost_v2_spec.json (26 features).
+# Convention note: model uses 0-indexed strings (0 = high E, 5 = low E),
+# FW uses 1-indexed (1 = high E, 6 = low E). Conversion happens at the
+# PlayerCostModel boundary; extract_transition_features expects model-side
+# (0-indexed) string values to match the calibration JSON.
+_PHASE3_FEATURE_NAMES: tuple[str, ...] = (
+    "curr_fret", "curr_is_high_fret", "curr_is_open", "curr_midi",
+    "curr_string", "curr_string_group",
+    "fret_distance", "fret_distance_abs",
+    "interval_abs", "interval_direction", "interval_semitones",
+    "position_shift",
+    "prev_finger", "prev_finger_is_index", "prev_finger_is_open",
+    "prev_finger_is_pinky",
+    "prev_fret", "prev_is_high_fret", "prev_is_open", "prev_midi",
+    "prev_string", "prev_string_group",
+    "same_fret", "same_string",
+    "string_distance", "string_distance_abs",
+)
+
+# Model class index → finger name (output softmax has 5 classes).
+_PHASE3_FINGER_FROM_INDEX: tuple[str, ...] = (
+    "open", "index", "middle", "ring", "pinky",
+)
+_PHASE3_FINGER_TO_INDEX: dict[str, int] = {
+    name: i for i, name in enumerate(_PHASE3_FINGER_FROM_INDEX)
+}
+
+# Standard tuning open-string MIDI pitches indexed by model string number
+# (0 = high E, 5 = low E). Used to derive prev_midi / curr_midi when the
+# caller passes only (string, fret) — matches FW's STANDARD_TUNING values.
+_PHASE3_OPEN_STRING_MIDI: tuple[int, ...] = (64, 59, 55, 50, 45, 40)
+
+
+def extract_transition_features(
+    prev_string_model: int,
+    prev_fret: int,
+    prev_finger_model: int,
+    curr_string_model: int,
+    curr_fret: int,
+    prev_midi: int | None = None,
+    curr_midi: int | None = None,
+) -> dict[str, float]:
+    """Build the 26-feature dict for a single transition (prev → curr).
+
+    Aligned with ``data/models/transition_cost_v2_spec.json`` and verified
+    bit-for-bit against ``transition_cost_v2_calibration.json`` (3 cases).
+
+    All inputs use the **model's 0-indexed string convention**:
+    ``string=0`` is high E, ``string=5`` is low E. Callers operating in
+    FretWise's 1-indexed convention (``string_num`` 1-6, with 1=high E)
+    must subtract 1 before calling.
+
+    MIDI is an explicit model input (not always derivable from string+fret
+    when the source piece uses a non-standard tuning — calibration
+    example 3 demonstrates this). When ``prev_midi`` / ``curr_midi`` are
+    omitted, they default to ``STANDARD_TUNING[string] + fret``.
+
+    Args:
+        prev_string_model: 0-indexed string of the previous note (0..5).
+        prev_fret: Fret of the previous note (0..24).
+        prev_finger_model: Previous finger as model class index
+            (0=open, 1=index, 2=middle, 3=ring, 4=pinky).
+        curr_string_model: 0-indexed string of the current note (0..5).
+        curr_fret: Fret of the current note (0..24).
+        prev_midi: MIDI pitch of the previous note. Defaults to
+            ``STANDARD_TUNING[prev_string_model] + prev_fret``.
+        curr_midi: MIDI pitch of the current note. Defaults to
+            ``STANDARD_TUNING[curr_string_model] + curr_fret``.
+
+    Returns:
+        Dict keyed by feature name, ordered by ``_PHASE3_FEATURE_NAMES``
+        when iterated. Values are all ``float``.
+    """
+    if prev_midi is None:
+        prev_midi = _PHASE3_OPEN_STRING_MIDI[prev_string_model] + prev_fret
+    if curr_midi is None:
+        curr_midi = _PHASE3_OPEN_STRING_MIDI[curr_string_model] + curr_fret
+
+    fret_distance = curr_fret - prev_fret
+    interval_semitones = curr_midi - prev_midi
+    interval_abs = abs(interval_semitones)
+    if interval_semitones > 0:
+        interval_direction = 1.0
+    elif interval_semitones < 0:
+        interval_direction = -1.0
+    else:
+        interval_direction = 0.0
+
+    # string_group: 0 if model_string <= 2 (treble: high E, B, G),
+    # 1 if model_string >= 3 (bass: D, A, low E). Per spec v3.
+    curr_string_group = 0.0 if curr_string_model <= 2 else 1.0
+    prev_string_group = 0.0 if prev_string_model <= 2 else 1.0
+
+    return {
+        "curr_fret": float(curr_fret),
+        "curr_is_high_fret": 1.0 if curr_fret >= 7 else 0.0,
+        "curr_is_open": 1.0 if curr_fret == 0 else 0.0,
+        "curr_midi": float(curr_midi),
+        "curr_string": float(curr_string_model),
+        "curr_string_group": curr_string_group,
+        "fret_distance": float(fret_distance),
+        "fret_distance_abs": float(abs(fret_distance)),
+        "interval_abs": float(interval_abs),
+        "interval_direction": interval_direction,
+        "interval_semitones": float(interval_semitones),
+        "position_shift": 1.0 if abs(fret_distance) > 4 else 0.0,
+        "prev_finger": float(prev_finger_model),
+        "prev_finger_is_index": 1.0 if prev_finger_model == 1 else 0.0,
+        "prev_finger_is_open": 1.0 if prev_finger_model == 0 else 0.0,
+        "prev_finger_is_pinky": 1.0 if prev_finger_model == 4 else 0.0,
+        "prev_fret": float(prev_fret),
+        "prev_is_high_fret": 1.0 if prev_fret >= 7 else 0.0,
+        "prev_is_open": 1.0 if prev_fret == 0 else 0.0,
+        "prev_midi": float(prev_midi),
+        "prev_string": float(prev_string_model),
+        "prev_string_group": prev_string_group,
+        "same_fret": 1.0 if prev_fret == curr_fret else 0.0,
+        "same_string": 1.0 if prev_string_model == curr_string_model else 0.0,
+        "string_distance": float(curr_string_model - prev_string_model),
+        "string_distance_abs": float(abs(curr_string_model - prev_string_model)),
+    }
+
+
+class LearnedPlayerCost(PlayerCostModel):
+    """ONNX-backed transition cost (GuitarDataSet Phase 3 v2).
+
+    Loads the XGBoost-derived ONNX model and returns Viterbi-compatible
+    additive cost ``-log(p[curr_finger])`` for each transition. Emission
+    cost is 0.0 — the v2 model is transition-only (no per-note emission).
+
+    The 26 model features do not depend on tempo, articulation, techniques,
+    chord membership, or any other ``PlayerContext`` field (spec v3
+    ``context_fields_not_used``). The ``context`` argument is therefore
+    accepted but ignored.
+
+    Args:
+        model_path: Path to the .onnx file (data/models/transition_cost_v2.onnx).
+        spec_path: Optional path to the spec JSON; validated at load time
+            for feature-name drift.
+
+    Raises:
+        ImportError: If ``onnxruntime`` is not installed.
+        FileNotFoundError: If model_path does not exist.
+    """
+
+    def __init__(self, model_path: str, spec_path: str | None = None) -> None:
+        try:
+            import onnxruntime  # noqa: F401
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError(
+                "onnxruntime is required for LearnedPlayerCost. "
+                "Install it via 'pip install onnxruntime' or "
+                "'pip install fretwise[ml]'."
+            ) from exc
+
+        import json
+        from pathlib import Path as _P
+
+        model_p = _P(model_path)
+        if not model_p.exists():
+            raise FileNotFoundError(f"ONNX model not found: {model_path}")
+
+        if spec_path:
+            spec = json.loads(_P(spec_path).read_text(encoding="utf-8"))
+            assert tuple(spec["feature_names"]) == _PHASE3_FEATURE_NAMES, (
+                "Phase 3 feature spec drift between FretWise and the trained "
+                "model. Compare src/fretwise/ml/__init__.py "
+                f"_PHASE3_FEATURE_NAMES with {spec_path}::feature_names."
+            )
+
+        import onnxruntime as ort
+        self._session = ort.InferenceSession(str(model_p))
+        self._input_name = self._session.get_inputs()[0].name
+        # Output 0 = labels (int64), output 1 = probabilities (float32[N, 5]).
+        # We always want probabilities for cost computation.
+        self._prob_output_name = self._session.get_outputs()[1].name
+
+    def _predict_probs(
+        self,
+        prev_string_model: int,
+        prev_fret: int,
+        prev_finger_model: int,
+        curr_string_model: int,
+        curr_fret: int,
+        prev_midi: int | None = None,
+        curr_midi: int | None = None,
+    ) -> list[float]:
+        """Run ONNX inference for a single transition; return 5 probabilities.
+
+        MIDI overrides are forwarded to ``extract_transition_features`` — use
+        them when a non-standard tuning means the standard-tuning derivation
+        would yield wrong pitches.
+        """
+        try:
+            import numpy as np
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError("numpy required for ONNX inference") from exc
+
+        features = extract_transition_features(
+            prev_string_model=prev_string_model,
+            prev_fret=prev_fret,
+            prev_finger_model=prev_finger_model,
+            curr_string_model=curr_string_model,
+            curr_fret=curr_fret,
+            prev_midi=prev_midi,
+            curr_midi=curr_midi,
+        )
+        row = np.asarray(
+            [[features[name] for name in _PHASE3_FEATURE_NAMES]],
+            dtype=np.float32,
+        )
+        outputs = self._session.run(
+            [self._prob_output_name], {self._input_name: row},
+        )
+        probs = outputs[0][0]
+        return [float(p) for p in probs]
+
+    def transition_cost(
+        self,
+        prev_string: int,
+        prev_fret: int,
+        prev_finger: str,
+        curr_string: int,
+        curr_fret: int,
+        curr_finger: str,
+        hand_position: int,
+        context: PlayerContext,
+    ) -> float:
+        """Viterbi-additive cost: ``-log(p[curr_finger])``.
+
+        FW conventions (1-indexed strings, finger string enum) are
+        converted to model conventions (0-indexed strings, integer
+        finger class) at the boundary.
+        """
+        import math
+
+        prev_finger_idx = _PHASE3_FINGER_TO_INDEX.get(prev_finger, 0)
+        curr_finger_idx = _PHASE3_FINGER_TO_INDEX.get(curr_finger, 0)
+        probs = self._predict_probs(
+            prev_string_model=prev_string - 1,
+            prev_fret=prev_fret,
+            prev_finger_model=prev_finger_idx,
+            curr_string_model=curr_string - 1,
+            curr_fret=curr_fret,
+        )
+        p = probs[curr_finger_idx]
+        return -math.log(max(p, 1e-9))
+
+    def emission_cost(
+        self,
+        string: int,
+        fret: int,
+        finger: str,
+        hand_position: int,
+        context: PlayerContext,
+    ) -> float:
+        return 0.0

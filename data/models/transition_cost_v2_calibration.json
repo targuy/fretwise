@@ -1,0 +1,219 @@
+{
+  "model_version": "v2",
+  "model_file": "xgb_transition_cost_v2.json",
+  "onnx_file": "transition_cost_v2.onnx",
+  "n_features": 26,
+  "feature_order": [
+    "curr_fret",
+    "curr_is_high_fret",
+    "curr_is_open",
+    "curr_midi",
+    "curr_string",
+    "curr_string_group",
+    "fret_distance",
+    "fret_distance_abs",
+    "interval_abs",
+    "interval_direction",
+    "interval_semitones",
+    "position_shift",
+    "prev_finger",
+    "prev_finger_is_index",
+    "prev_finger_is_open",
+    "prev_finger_is_pinky",
+    "prev_fret",
+    "prev_is_high_fret",
+    "prev_is_open",
+    "prev_midi",
+    "prev_string",
+    "prev_string_group",
+    "same_fret",
+    "same_string",
+    "string_distance",
+    "string_distance_abs"
+  ],
+  "cost_definition": "-log(p[ground_truth_finger]) -- Viterbi path cost (sum of neg log-probs)",
+  "note": "features_expected extracted from real training data row, not fabricated",
+  "context_fields_not_in_model": [
+    "onset_prev",
+    "onset_curr",
+    "tempo",
+    "articulation_curr",
+    "techniques_curr",
+    "is_chord_member_curr",
+    "chord_size_curr",
+    "time_to_next_note"
+  ],
+  "examples": [
+    {
+      "label": "trivial_adjacent_fret",
+      "description": "Same string, fret 1->2, index->middle",
+      "prev_state": {
+        "string": 2,
+        "fret": 1,
+        "finger": "index",
+        "midi": 56
+      },
+      "curr_state": {
+        "string": 2,
+        "fret": 2,
+        "midi": 57,
+        "ground_truth_finger": "middle"
+      },
+      "features_expected": {
+        "curr_fret": 2.0,
+        "curr_is_high_fret": 0.0,
+        "curr_is_open": 0.0,
+        "curr_midi": 57.0,
+        "curr_string": 2.0,
+        "curr_string_group": 0.0,
+        "fret_distance": 1.0,
+        "fret_distance_abs": 1.0,
+        "interval_abs": 1.0,
+        "interval_direction": 1.0,
+        "interval_semitones": 1.0,
+        "position_shift": 0.0,
+        "prev_finger": 1.0,
+        "prev_finger_is_index": 1.0,
+        "prev_finger_is_open": 0.0,
+        "prev_finger_is_pinky": 0.0,
+        "prev_fret": 1.0,
+        "prev_is_high_fret": 0.0,
+        "prev_is_open": 0.0,
+        "prev_midi": 56.0,
+        "prev_string": 2.0,
+        "prev_string_group": 0.0,
+        "same_fret": 0.0,
+        "same_string": 1.0,
+        "string_distance": 0.0,
+        "string_distance_abs": 0.0
+      },
+      "model_output": {
+        "probabilities": {
+          "open": 4.9e-05,
+          "index": 0.194179,
+          "middle": 0.617481,
+          "ring": 0.178495,
+          "pinky": 0.009796
+        },
+        "predicted_finger": "middle",
+        "ground_truth_finger": "middle",
+        "predicted_cost": 0.4821,
+        "cost_definition": "-log(p[ground_truth_finger])"
+      }
+    },
+    {
+      "label": "chord_onset_barre",
+      "description": "Open string -> fret 1 barre (string 5), finger=index",
+      "prev_state": {
+        "string": 1,
+        "fret": 0,
+        "finger": "open",
+        "midi": 59
+      },
+      "curr_state": {
+        "string": 5,
+        "fret": 1,
+        "midi": 41,
+        "ground_truth_finger": "index"
+      },
+      "features_expected": {
+        "curr_fret": 1.0,
+        "curr_is_high_fret": 0.0,
+        "curr_is_open": 0.0,
+        "curr_midi": 41.0,
+        "curr_string": 5.0,
+        "curr_string_group": 1.0,
+        "fret_distance": 1.0,
+        "fret_distance_abs": 1.0,
+        "interval_abs": 18.0,
+        "interval_direction": -1.0,
+        "interval_semitones": -18.0,
+        "position_shift": 0.0,
+        "prev_finger": 0.0,
+        "prev_finger_is_index": 0.0,
+        "prev_finger_is_open": 1.0,
+        "prev_finger_is_pinky": 0.0,
+        "prev_fret": 0.0,
+        "prev_is_high_fret": 0.0,
+        "prev_is_open": 1.0,
+        "prev_midi": 59.0,
+        "prev_string": 1.0,
+        "prev_string_group": 0.0,
+        "same_fret": 0.0,
+        "same_string": 0.0,
+        "string_distance": 4.0,
+        "string_distance_abs": 4.0
+      },
+      "model_output": {
+        "probabilities": {
+          "open": 0.000128,
+          "index": 0.952191,
+          "middle": 0.040586,
+          "ring": 0.00694,
+          "pinky": 0.000154
+        },
+        "predicted_finger": "index",
+        "ground_truth_finger": "index",
+        "predicted_cost": 0.049,
+        "cost_definition": "-log(p[ground_truth_finger])"
+      }
+    },
+    {
+      "label": "long_position_shift",
+      "description": "Fret 15->19 (jump=4), finger=index",
+      "prev_state": {
+        "string": 1,
+        "fret": 15,
+        "finger": "middle",
+        "midi": 60
+      },
+      "curr_state": {
+        "string": 0,
+        "fret": 19,
+        "midi": 59,
+        "ground_truth_finger": "index"
+      },
+      "features_expected": {
+        "curr_fret": 19.0,
+        "curr_is_high_fret": 1.0,
+        "curr_is_open": 0.0,
+        "curr_midi": 59.0,
+        "curr_string": 0.0,
+        "curr_string_group": 0.0,
+        "fret_distance": 4.0,
+        "fret_distance_abs": 4.0,
+        "interval_abs": 1.0,
+        "interval_direction": -1.0,
+        "interval_semitones": -1.0,
+        "position_shift": 0.0,
+        "prev_finger": 2.0,
+        "prev_finger_is_index": 0.0,
+        "prev_finger_is_open": 0.0,
+        "prev_finger_is_pinky": 0.0,
+        "prev_fret": 15.0,
+        "prev_is_high_fret": 1.0,
+        "prev_is_open": 0.0,
+        "prev_midi": 60.0,
+        "prev_string": 1.0,
+        "prev_string_group": 0.0,
+        "same_fret": 0.0,
+        "same_string": 0.0,
+        "string_distance": -1.0,
+        "string_distance_abs": 1.0
+      },
+      "model_output": {
+        "probabilities": {
+          "open": 0.007244,
+          "index": 0.802484,
+          "middle": 0.170784,
+          "ring": 0.014884,
+          "pinky": 0.004604
+        },
+        "predicted_finger": "index",
+        "ground_truth_finger": "index",
+        "predicted_cost": 0.22,
+        "cost_definition": "-log(p[ground_truth_finger])"
+      }
+    }
+  ]
+}
