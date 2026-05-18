@@ -6,6 +6,24 @@
 
 ---
 
+## DEC-013 — 2026-05-18 — Web UI urgent kickoff (4 PO décisions)
+
+**Owner décision** : PO
+**Contexte** : 5 défauts UX cadrés dans `docs/handoff/team/plans/web-ui-urgent.md` (commit `9bd8578`). 4 questions PO ouvertes pour kickoff.
+**Décisions PO** :
+  1. **Ordre des sprints** : U1 → U2 → U3+U4 → U5 ✅ (risque croissant, OK)
+  2. **Stack tests automatisés** : Playwright ✅
+  3. **U5 modal** : ouverture depuis Setup ET right-click sur onglet voix ✅
+  4. **U4-b Solo voice** : texte "Solo" (pas icône 🎯) ✅
+**Conséquences** :
+  - Branche dédiée `feature/web-ui-urgent` créée à partir de `refactor/p0-notation-fixes`
+  - Sprint 1 (U1 nav Setup) démarre immédiatement
+  - Playwright à installer en dev-deps quand on attaque les tests automatisés (Sprint 1 ou plus tard)
+  - U5 modal accessible par 2 chemins : bouton "Instrument" en Setup + right-click sur onglet voix
+  - Footer U4-b affichera texte "Solo" (lisibilité accessibility > brevity icône)
+
+---
+
 ## DEC-012 — 2026-05-18 — Phase 3 RÉACTIVÉE (GAPS jackpot)
 
 **Owner décision** : Data (autonome via PM)
