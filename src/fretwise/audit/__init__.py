@@ -38,14 +38,19 @@ __all__ = [
 ]
 
 
-# Tuned defaults — refine on corpus evidence.
+# Tuned defaults — calibrated on the partitions/ corpus.
+# Rationale: rock music in performance mode (γ=2) has uniformly high costs
+# and the ML model (GAPS 32% accuracy) is rarely confident — so naive
+# thresholds fire on every piece. The audit is meant to surface SYSTEM
+# LIMITS, not normal difficulty. The bar is therefore very high.
 DEFAULT_SILENT_MEASURE_THRESHOLD = 2     # ≥ N silent measures = movement break
-DEFAULT_HIGH_COST_PERCENTILE = 0.95      # Notes above this are "expensive"
-DEFAULT_HIGH_COST_RATIO_BAD = 0.20       # ≥ 20% expensive notes = signal red
-DEFAULT_HIGH_COST_RATIO_SUSPECT = 0.10   # ≥ 10% expensive notes = signal amber
-DEFAULT_ML_ENTROPY_THRESHOLD = 1.0       # Bits ≈ entropy of a 2-way coin flip
-DEFAULT_ML_UNCERTAIN_RATIO_BAD = 0.40
-DEFAULT_ML_UNCERTAIN_RATIO_SUSPECT = 0.20
+DEFAULT_HIGH_COST_RATIO_BAD = 0.75       # ≥ 75% of notes are 3× baseline cost
+DEFAULT_HIGH_COST_RATIO_SUSPECT = 0.50   # ≥ 50% of notes are 3× baseline cost
+# Max entropy on 5 classes = log2(5) ≈ 2.32 bits. Threshold 2.0 means
+# "the model is essentially guessing across most classes."
+DEFAULT_ML_ENTROPY_THRESHOLD = 2.0
+DEFAULT_ML_UNCERTAIN_RATIO_BAD = 0.85    # ≥ 85% of transitions near-uniform
+DEFAULT_ML_UNCERTAIN_RATIO_SUSPECT = 0.70
 
 
 @dataclass(frozen=True)
@@ -279,15 +284,17 @@ def audit_score(
     )
     source_report = assess_source_quality(events)
 
-    # Baseline cost for "expensive" notes: median of the cheaper half of the
-    # piece. Using the piece-wide median fails when a large fraction of notes
-    # are expensive (median itself becomes high → threshold rises with it,
-    # nothing exceeds it). The lower-half median anchors on what "easy notes"
-    # cost in this piece and lets the expensive ones stand out.
+    # Baseline cost for "expensive" notes: 10th percentile of all costs.
+    # Captures "what the easy notes cost in this piece" without being
+    # skewed by majority — robust even when 80%+ of notes are expensive
+    # (the lower-half median fails there because the bottom half still
+    # contains expensive notes if they dominate).
+    # If everything is uniformly expensive, the threshold stays high and
+    # nothing flags — that's correct: uniformly hard ≠ system at limit.
     all_costs = sorted(r.cost for r in results if r.cost is not None)
     if all_costs:
-        lower_half = all_costs[: max(1, len(all_costs) // 2)]
-        baseline_cost = statistics.median(lower_half)
+        p10_index = max(0, int(len(all_costs) * 0.10))
+        baseline_cost = all_costs[p10_index]
     else:
         baseline_cost = 0.0
 
@@ -402,31 +409,36 @@ def _audit_one_movement(
                 and not ml_red
             )
 
-    # Verdict combination:
-    #  - bad if source is bad, OR two-or-more signals are red.
-    #  - suspect if one signal is red OR multiple are amber.
-    #  - clean otherwise.
-    red_count = sum([source_red, cost_red, ml_red])
-    amber_count = sum([source_amber, cost_amber, ml_amber])
-
+    # Verdict combination — conservative cascade. Algo and ML signals are
+    # noisy in isolation (rock music has uniformly high costs; the v3 model
+    # has 32% GAPS accuracy and rarely emits confident softmax), so they
+    # only count as red when they CO-OCCUR with another signal. Source
+    # quality is the most reliable individual signal and stands alone.
     if source_red:
         reasons.append("source_bad")
     if cost_red:
         reasons.append("high_cost_density")
     if ml_red:
         reasons.append("ml_uncertain")
-    if not red_count:
-        if source_amber:
-            reasons.append("source_suspect")
-        if cost_amber:
-            reasons.append("elevated_cost")
-        if ml_amber:
-            reasons.append("ml_borderline")
+    if source_amber and not source_red:
+        reasons.append("source_suspect")
+    if cost_amber and not cost_red:
+        reasons.append("elevated_cost")
+    if ml_amber and not ml_red:
+        reasons.append("ml_borderline")
 
     verdict: Literal["clean", "suspect", "bad"]
-    if source_red or red_count >= 2:
+    if source_red:
         verdict = "bad"
-    elif red_count == 1 or amber_count >= 2:
+    elif cost_red and ml_red:
+        # Both algo and ML say "limit" — strong combined signal.
+        verdict = "bad"
+    elif source_amber and (cost_red or ml_red):
+        verdict = "suspect"
+    elif cost_red or ml_red:
+        # One strong but noisy signal alone → soft warning.
+        verdict = "suspect"
+    elif source_amber and (cost_amber or ml_amber):
         verdict = "suspect"
     else:
         verdict = "clean"
