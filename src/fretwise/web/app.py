@@ -29,7 +29,11 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
-from fretwise.pdf_conformance import core_pdf_conformance_report
+from fretwise.export.pdf_tab import render_pdf_tab
+from fretwise.pdf_conformance import (
+    core_pdf_conformance_report,
+    legacy_shadow_pdf_conformance_report,
+)
 from fretwise.pipeline import run_pipeline
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 
@@ -265,13 +269,17 @@ def _register_routes(app: FastAPI) -> None:
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        pdf_bytes, conformance_issues = _render_core_pdf_payload(
-            filepath,
-            adapter,
-            events,
-            representation_mode=view_mode,
+        # Legacy renderer for PDF export — restores LH finger annotations
+        # missing from core/backends/pdf.py (Phase 4 refactor regression).
+        # Conformance is computed in shadow against the core engine so we
+        # still track new-architecture parity.
+        pdf_bytes = _render_legacy_pdf_payload(filepath, adapter, events)
+        shadow_issues, shadow_failed = _shadow_core_conformance_outcome(
+            filepath, adapter, events, representation_mode=view_mode,
         )
-        conformance_report = core_pdf_conformance_report(conformance_issues)
+        conformance_report = legacy_shadow_pdf_conformance_report(
+            shadow_issues, shadow_failed=shadow_failed,
+        )
 
         auto_title, auto_artist = _infer_title_artist(filepath)
         filename_base = auto_title if not auto_artist else f"{auto_artist} - {auto_title}"
@@ -281,7 +289,7 @@ def _register_routes(app: FastAPI) -> None:
             media_type="application/pdf",
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}"',
-                "X-Fretwise-Pdf-Engine": "core",
+                "X-Fretwise-Pdf-Engine": "legacy",
                 "X-Fretwise-Conformance-Issues": str(conformance_report.issue_count),
                 "X-Fretwise-Conformance-Report": conformance_report.to_header_value(),
             },
@@ -802,6 +810,77 @@ def _infer_source_format(path: Path) -> str:
     if suffix == "gp":
         return "gpif"
     return suffix
+
+
+def _render_legacy_pdf_payload(
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+) -> bytes:
+    """Render the PDF via the legacy renderer (export/pdf_tab.py).
+
+    The new core/backends/pdf.py renderer lost LH finger annotations
+    during the Phase 4 refactor. Until those are ported, the web export
+    routes through the legacy renderer (same as the CLI ``-f pdf`` path)
+    so the user sees the fingerings they see on screen.
+    """
+    import tempfile
+
+    results, _stats = _run_legacy_pipeline(events)
+    if not results:
+        raise HTTPException(500, "Pipeline returned no fingering results")
+
+    auto_title, auto_artist = _infer_title_artist(filepath)
+    track_name = getattr(adapter, "track_name", "") or ""
+    beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+    chord_diagrams = list(getattr(adapter, "chord_diagrams", []) or [])
+
+    with tempfile.NamedTemporaryFile(
+        suffix=".pdf", delete=False,
+    ) as tmp:
+        tmp_path = Path(tmp.name)
+    try:
+        render_pdf_tab(
+            results,
+            tmp_path,
+            title=auto_title,
+            artist=auto_artist,
+            beats_per_measure=beats_per_measure,
+            instrument=track_name,
+            mode_label="performance mode",
+            section_markers=section_markers or None,
+            chord_diagrams=chord_diagrams or None,
+        )
+        return tmp_path.read_bytes()
+    finally:
+        try:
+            tmp_path.unlink()
+        except OSError:
+            pass
+
+
+def _shadow_core_conformance_outcome(
+    filepath: Path,
+    adapter: Any,
+    events: list[NoteEvent],
+    *,
+    representation_mode: RepresentationMode,
+) -> tuple[int, bool]:
+    """Run the core pipeline in shadow mode to report conformance issues.
+
+    Mirrors ``fretwise.cli._shadow_core_conformance_outcome``; the legacy
+    PDF route uses this to surface architectural drift via response
+    headers without blocking the export.
+    """
+    try:
+        core_result = _run_core_pipeline_for_events(
+            filepath, adapter, events,
+            representation_mode=representation_mode,
+        )
+    except Exception:
+        return 0, True
+    return len(core_result.conformance_issues), False
 
 
 def _render_core_pdf_payload(

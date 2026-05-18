@@ -307,9 +307,11 @@ def test_solve_endpoint_embeds_audit_field(
     assert all(m["verdict"] == "clean" for m in movements)
 
 
-def test_export_pdf_core_engine_uses_requested_representation_mode(
+def test_export_pdf_uses_legacy_engine_and_shadows_core_conformance(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
+    """Export goes through the legacy renderer (fingering present); the core
+    engine is run in shadow to report conformance via response headers."""
     file_path = tmp_path / "song.gp"
     file_path.touch()
     app = create_app(tmp_path)
@@ -325,18 +327,24 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
 
     captured: dict[str, Any] = {}
 
-    def _fake_render(
-        _filepath: Path,
-        _adapter: Any,
-        _events: list[NoteEvent],
-        *,
-        representation_mode: RepresentationMode,
-    ) -> tuple[bytes, int]:
-        captured["representation_mode"] = representation_mode
-        return b"%PDF-core", 0
+    def _fake_legacy_render(
+        _filepath: Path, _adapter: Any, _events: list[NoteEvent],
+    ) -> bytes:
+        captured["legacy_called"] = True
+        return b"%PDF-legacy"
+
+    def _fake_shadow(
+        _filepath: Path, _adapter: Any, _events: list[NoteEvent],
+        *, representation_mode: RepresentationMode,
+    ) -> tuple[int, bool]:
+        captured["shadow_representation_mode"] = representation_mode
+        return 0, False
 
     monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
-    monkeypatch.setattr("fretwise.web.app._render_core_pdf_payload", _fake_render)
+    monkeypatch.setattr("fretwise.web.app._render_legacy_pdf_payload", _fake_legacy_render)
+    monkeypatch.setattr(
+        "fretwise.web.app._shadow_core_conformance_outcome", _fake_shadow,
+    )
 
     endpoint = _route_endpoint(app, "/api/export/pdf/{filename}")
     response = asyncio.run(
@@ -347,8 +355,9 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
         )
     )
     assert response.status_code == 200
-    assert response.headers["x-fretwise-pdf-engine"] == "core"
-    assert captured["representation_mode"] == RepresentationMode.TAB_RHYTHM
+    assert response.headers["x-fretwise-pdf-engine"] == "legacy"
+    assert captured["legacy_called"] is True
+    assert captured["shadow_representation_mode"] == RepresentationMode.TAB_RHYTHM
 
 
 def test_run_core_pipeline_for_events_propagates_measure_time_signatures(
