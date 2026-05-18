@@ -180,14 +180,20 @@ def _register_routes(app: FastAPI) -> None:
         }
 
     @app.get("/api/solve/{filename}")
-    async def solve_file(
+    def solve_file(
         filename: str,
         track_id: int | None = Query(None),
         representation_mode: str = Query("standard_tablature"),
         same_finger_motion_penalty: bool = Query(True),
         infer_implicit_legato: bool = Query(True),
     ) -> dict[str, Any]:
-        """Run the full pipeline and return results as JSON."""
+        """Run the full pipeline and return results as JSON.
+
+        Sync def so FastAPI runs each request in its thread pool — concurrent
+        solve requests (e.g. the frontend prefetch fanning out N tracks ×
+        M modes) actually execute in parallel instead of serialising on the
+        single asyncio event loop.
+        """
         filepath = _resolve_file(app, filename)
         cache_key = _solve_cache_key(
             filepath, track_id, representation_mode,
@@ -707,7 +713,10 @@ _PLAYER_COST_MODEL_LOADED: bool = False
 from collections import OrderedDict as _OrderedDict  # noqa: E402
 
 _SOLVE_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
-_SOLVE_CACHE_MAX = 32
+# 128 entries ≈ 64–128 MB max (4 modes × ~32 tracks). Bumped from 32 so that
+# the background prefetch (frontend fires N × M solves on file open) doesn't
+# evict its own freshly-stored entries.
+_SOLVE_CACHE_MAX = 128
 
 
 def _solve_cache_key(

@@ -332,10 +332,56 @@ async function selectFile(filename) {
     }
     // Auto-select first track — skip the intermediate track-selector page
     await selectTrack(tracks[0].id, tracks[0].name);
+    // Warm the server-side solve cache for every track × representation
+    // mode while the user is reading the first one. Runs entirely in the
+    // background; failures are silent (next interactive solve will retry).
+    _prefetchAllTrackModes(filename, tracks);
   } catch (err) {
     const libEmpty = $('#lib-empty');
     if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `Error loading "${sanitize(filename)}": ${sanitize(err.message)}`; }
   }
+}
+
+const _PREFETCH_MODES = [
+  MODES.STANDARD_TABLATURE,
+  MODES.TABLATURE,
+  MODES.STANDARD,
+  MODES.TABLATURE_RHYTHM,
+];
+let _prefetchAbortToken = 0;
+
+/**
+ * Fire-and-forget solve requests for every (track × mode) combination so the
+ * server-side LRU cache is warm by the time the user clicks anything. The
+ * primary (foreground) solve has already been issued by selectTrack; we
+ * deliberately re-issue the same call here so it short-circuits on the
+ * server-side cache without doing any work.
+ *
+ * A token guards against stale prefetches when the user opens a new file
+ * before the previous prefetch fan-out has finished.
+ */
+function _prefetchAllTrackModes(filename, tracks) {
+  const myToken = ++_prefetchAbortToken;
+  const prefs = getRulePreferences();
+  const requests = [];
+  for (const t of tracks) {
+    for (const mode of _PREFETCH_MODES) {
+      requests.push({ trackId: t.id, mode });
+    }
+  }
+  // Stagger lightly so the network panel stays readable and so the user's
+  // foreground solve never queues behind 30+ background requests.
+  let i = 0;
+  const tick = () => {
+    if (myToken !== _prefetchAbortToken) return;  // newer file opened
+    if (i >= requests.length) return;
+    const { trackId, mode } = requests[i++];
+    fetchSolve(filename, trackId, mode, prefs).catch(() => { /* silent */ });
+    // ~6 requests/second keeps the server thread pool from saturating on
+    // very large libraries while still warming the cache quickly.
+    setTimeout(tick, 160);
+  };
+  tick();
 }
 
 // ── Tab viewer ──────────────────────────────────────────────────────
