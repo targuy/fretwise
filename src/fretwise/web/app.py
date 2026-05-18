@@ -333,62 +333,88 @@ def _register_routes(app: FastAPI) -> None:
         )
 
     @app.post("/api/library/refresh-fingerings")
-    def refresh_library_fingerings() -> Response:
+    def refresh_library_fingerings(
+        workers: int | None = Query(
+            None, ge=1, le=16,
+            description="Number of parallel worker processes (default = min(8, cpu_count)).",
+        ),
+        force: bool = Query(
+            False,
+            description="If false (default), skip files whose _fingered.gp already exists and is newer than the source.",
+        ),
+    ) -> Response:
         """Recompute fingerings for every GP 7/8 file in the fixtures dir.
+
+        Multiprocessing pool — each worker carries its own parser + ONNX
+        session, so on a multi-core machine the wall-clock is roughly
+        ``serial_time / min(workers, cpu_count)`` minus a one-shot worker
+        warm-up (~1 s per worker).
+
+        Skip-on-resume — when ``force=false`` (the default), a source file
+        whose ``<stem>_fingered.gp`` already exists *and* is newer than the
+        source is skipped. Pass ``?force=true`` to re-process everything.
 
         Streams one JSON line per processed file via text/plain so the
         frontend can show live progress without a separate polling loop.
-        Each output line is::
-
-            {"file": "...", "status": "ok"|"skip"|"error", "annotated": N, "out": "...", "error": "..."}
-
-        Files written next to the source as ``<stem>_fingered.gp`` — the
-        original is never touched. Already-fingered output files
-        (suffix ``_fingered.gp``) are skipped so re-runs are safe.
         """
         from fastapi.responses import StreamingResponse
+        from concurrent.futures import ProcessPoolExecutor, as_completed
         import json as _json
+        import os as _os
 
         fixtures_dir: Path = app.state.fixtures_dir  # type: ignore[attr-defined]
-        files = sorted(fixtures_dir.glob("*.gp"))
-        files = [f for f in files if not f.stem.endswith("_fingered")]
+        all_files = sorted(fixtures_dir.glob("*.gp"))
+        sources = [f for f in all_files if not f.stem.endswith("_fingered")]
+
+        # Skip files already fingered (unless force=true).
+        to_process: list[Path] = []
+        pre_skipped: list[Path] = []
+        for f in sources:
+            out_path = f.with_name(f"{f.stem}_fingered{f.suffix}")
+            if not force and out_path.exists():
+                try:
+                    if out_path.stat().st_mtime >= f.stat().st_mtime:
+                        pre_skipped.append(f)
+                        continue
+                except OSError:
+                    pass
+            to_process.append(f)
+
+        n_workers = workers or min(8, _os.cpu_count() or 4)
 
         def _emit() -> Any:
             yield _json.dumps({
                 "event": "start",
-                "total_files": len(files),
+                "total_files": len(sources),
+                "to_process": len(to_process),
+                "pre_skipped": len(pre_skipped),
+                "workers": n_workers,
             }) + "\n"
+            for f in pre_skipped:
+                yield _json.dumps({
+                    "file": f.name, "status": "skip",
+                    "reason": "already fingered",
+                }) + "\n"
             ok = err = skipped = 0
-            for f in files:
-                try:
-                    _, events = _load_adapter_and_events(f, track_id=None)
-                    if not events:
-                        skipped += 1
-                        yield _json.dumps({
-                            "file": f.name, "status": "skip",
-                            "reason": "no notes",
-                        }) + "\n"
-                        continue
-                    results, _stats = _run_legacy_pipeline(events)
-                    mapping = fingerings_by_source_id(results)
-                    gp_bytes = write_gp_with_fingerings(f, mapping)
-                    out = f.with_name(f"{f.stem}_fingered{f.suffix}")
-                    out.write_bytes(gp_bytes)
-                    ok += 1
-                    yield _json.dumps({
-                        "file": f.name, "status": "ok",
-                        "annotated": len(mapping),
-                        "out": out.name,
-                    }) + "\n"
-                except Exception as exc:  # noqa: BLE001 — keep streaming
-                    err += 1
-                    yield _json.dumps({
-                        "file": f.name, "status": "error",
-                        "error": str(exc),
-                    }) + "\n"
+            if to_process:
+                with ProcessPoolExecutor(max_workers=n_workers) as pool:
+                    futures = {
+                        pool.submit(_process_single_gp, str(f)): f
+                        for f in to_process
+                    }
+                    for fut in as_completed(futures):
+                        result = fut.result()
+                        if result["status"] == "ok":
+                            ok += 1
+                        elif result["status"] == "error":
+                            err += 1
+                        else:
+                            skipped += 1
+                        yield _json.dumps(result) + "\n"
             yield _json.dumps({
                 "event": "done",
                 "ok": ok, "errors": err, "skipped": skipped,
+                "pre_skipped": len(pre_skipped),
             }) + "\n"
 
         return StreamingResponse(_emit(), media_type="text/plain")
@@ -1048,6 +1074,49 @@ def _infer_source_format(path: Path) -> str:
     if suffix == "gp":
         return "gpif"
     return suffix
+
+
+def _process_single_gp(path_str: str) -> dict[str, Any]:
+    """Worker — full pipeline for one GP file, returns a JSON-safe status dict.
+
+    Runs in a separate process (ProcessPoolExecutor target), so it must be
+    self-contained: import everything it needs locally and never touch
+    module-level FastAPI state. Each worker pays a one-shot warm-up
+    (parser + ONNX session) on its first call, then amortises across
+    every subsequent file it handles.
+    """
+    from pathlib import Path as _P
+
+    p = _P(path_str)
+    try:
+        from fretwise.parser import get_adapter
+        from fretwise.pipeline import run_pipeline
+        from fretwise.generator import StateGenerator
+        from fretwise.optimizer import ViterbiOptimizer
+        from fretwise.patterns import PatternMatcher
+        from fretwise.scoring import CostFunction, CostWeights
+
+        adapter = get_adapter(p)
+        events = adapter.parse(p)
+        if not events:
+            return {
+                "file": p.name, "status": "skip", "reason": "no notes",
+            }
+        cost_fn = CostFunction(weights=CostWeights.performance())
+        results, _stats = run_pipeline(
+            events, StateGenerator(), ViterbiOptimizer(cost_fn),
+            pattern_matcher=PatternMatcher(),
+        )
+        mapping = fingerings_by_source_id(results)
+        gp_bytes = write_gp_with_fingerings(p, mapping)
+        out = p.with_name(f"{p.stem}_fingered{p.suffix}")
+        out.write_bytes(gp_bytes)
+        return {
+            "file": p.name, "status": "ok",
+            "annotated": len(mapping), "out": out.name,
+        }
+    except Exception as exc:  # noqa: BLE001 — never break the pool
+        return {"file": p.name, "status": "error", "error": str(exc)}
 
 
 def _render_legacy_pdf_payload(
