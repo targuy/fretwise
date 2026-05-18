@@ -43,6 +43,8 @@
 
 ### Session 2026-05-17 / 2026-05-18
 
+- `[pm]` **Phase 3 ML câblée dans CostFunction (branche `feature/phase3-integration`)** — `CostFunction.__init__` accepte `player_cost_model`; `transition_cost` court-circuite quand γ=0 (reference/musical) et appelle le modèle quand γ>0 (performance/learning) avec fallback graceful exception → c_joueur=0. CLI + web auto-load `data/models/transition_cost_v2.onnx` (mirroir Phase 2). +4 tests wiring (recorder double + γ=0 short-circuit + exception safety + état sans modèle). Suite 972/0 fail.
+- `[pm]` **Phase 3 implémentée (branche `feature/phase3-integration`)** — commit `1e1e6ac` : `LearnedPlayerCost` ONNX-backed + `extract_transition_features` 26 features. Parity bit-pour-bit sur 3 cas calibration (probas ±1e-4, cost ±1e-3). Artefacts copiés `data/models/` (ONNX gitignored, spec + calibration commités). 13 tests parity.
 - `[pm]` **Fretwise-012 envoyé** — ACK Phase 3 v2 + 3 blockers identifiés (artefacts absents shared dir, format ONNX vs XGB JSON, GAPS holdout vs baseline FW rule-based, calibration JSON manquante). 4 demandes consolidées #23-26.
 - `[pm]` **SVG test fix** (`180f783`) — drop string_label emission in tab modes. Suite tests 100 % verte (951/0). Note : commit a embarqué WIP user pré-existant sur `builders.py` (tempo-by-measure logic), à split si besoin.
 - `[pm]` **Phase 2 calibration #13 LIVRÉE** (`33d3561`) — 3 bugs corrigés dans `extract_chord_features` (sort direction, string_gap signed/abs, ctx_fret indexation). ALL FEATURES MATCH GDS reference sur les 3 chords de calibration.
