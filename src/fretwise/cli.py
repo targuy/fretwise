@@ -66,6 +66,49 @@ def _load_chord_finger_classifier() -> object | None:
         return None
 
 
+def _print_audit_summary(
+    events: list,
+    results: list,
+    adapter: object,
+    player_cost_model: object | None,
+) -> None:
+    """Print per-movement audit verdict to stderr (verbose mode).
+
+    Never raises — audit failure is logged but doesn't break the solve.
+    """
+    try:
+        from fretwise.audit import audit_score
+        section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+        report = audit_score(
+            events, results,
+            section_markers=section_markers or None,
+            ml_cost_model=player_cost_model,
+        )
+    except Exception as exc:
+        click.echo(f"Audit failed: {exc}", err=True)
+        return
+
+    bad_count = sum(1 for m in report.movements if m.verdict == "bad")
+    suspect_count = sum(1 for m in report.movements if m.verdict == "suspect")
+    ml_note = " (ML signal: on)" if report.ml_signal_available else " (ML signal: off)"
+    click.echo(
+        f"Audit: overall={report.overall}  "
+        f"|  {len(report.movements)} movement(s)  "
+        f"|  bad={bad_count} suspect={suspect_count}{ml_note}",
+        err=True,
+    )
+    for m in report.movements:
+        if m.verdict == "clean":
+            continue  # only print non-clean movements (signal-to-noise)
+        reasons = ",".join(m.reasons) or "-"
+        click.echo(
+            f"  - mvt {m.span.measure_start}-{m.span.measure_end} "
+            f"({m.span.name}, {m.span.source}): "
+            f"{m.verdict}  reasons=[{reasons}]  notes={m.note_count}",
+            err=True,
+        )
+
+
 def _load_player_cost_model() -> object | None:
     """Load the optional PlayerCostModel (Phase 3 ONNX transition cost).
 
@@ -389,6 +432,7 @@ def solve(
             f"|  total cost = {total_cost:.2f}",
             err=True,
         )
+        _print_audit_summary(events, results, adapter, player_cost_model)
 
     # --- resolve output format -----------------------------------------------
     if output is None and fmt is None:
