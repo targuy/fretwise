@@ -3,13 +3,13 @@
 > **Format** : 4 colonnes (TODO / DOING / BLOCKED / DONE).
 > **Tags** : `[role]` au début de chaque carte (cf. `roles.md`).
 > **Mise à jour** : à chaque commit ou status check par le PM.
-> **Dernière revue** : 2026-05-17 (post round-trip 4 avec GDS).
+> **Dernière revue** : 2026-05-18 (post Fretwise-012 envoyé).
 
 ---
 
 ## DOING
 
-- `[pm]` Idle — **Phase 2 ML calibrée** (#13 LIVRÉE, ALL FEATURES MATCH) + **suite tests 100 % verte** (951/0 fail, premier clean run de la session). Watcher actif pour next GDS message.
+- `[pm]` **GuitarDataset-011-handoff.md reçu (14:20)** — récap explicite des 4 blockers : #23 (6 fichiers livrés), #24 (ONNX option A, diff conversion = 1.2e-7), #25 (**baseline gate PASSED** : v2 30.8 % > best baseline most_frequent 25.5 % = GO intégration), #26 (3 cas calibration). 26 features = prev_state(10) + curr_state(6) + pair(10), zero context. Per-class GAPS : ring 44 %, pinky 36 %, index 33 %, middle 29 %, open 0 % (biais CC-only — modèle final all-data 62.4 % in-sample). **Phase 3 INTÉGRATION GO** côté GDS.
 
 ## TODO — Priority 1 (next 24h)
 
@@ -43,6 +43,7 @@
 
 ### Session 2026-05-17 / 2026-05-18
 
+- `[pm]` **Fretwise-012 envoyé** — ACK Phase 3 v2 + 3 blockers identifiés (artefacts absents shared dir, format ONNX vs XGB JSON, GAPS holdout vs baseline FW rule-based, calibration JSON manquante). 4 demandes consolidées #23-26.
 - `[pm]` **SVG test fix** (`180f783`) — drop string_label emission in tab modes. Suite tests 100 % verte (951/0). Note : commit a embarqué WIP user pré-existant sur `builders.py` (tempo-by-measure logic), à split si besoin.
 - `[pm]` **Phase 2 calibration #13 LIVRÉE** (`33d3561`) — 3 bugs corrigés dans `extract_chord_features` (sort direction, string_gap signed/abs, ctx_fret indexation). ALL FEATURES MATCH GDS reference sur les 3 chords de calibration.
 - `[pm]` `chore(deps)` `3f75bd2` — onnxruntime dans extras `[ml]`
