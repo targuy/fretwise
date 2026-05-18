@@ -214,6 +214,55 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
     assert payload["results"][0]["string"] == 1
 
 
+def test_solve_endpoint_caches_repeat_calls(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """Second identical /api/solve call must hit the cache (no re-pipeline)."""
+    from fretwise.web.app import _solve_cache_clear
+
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+    app = create_app(tmp_path)
+    adapter = _DummyAdapter()
+    _solve_cache_clear()
+
+    call_count = {"pipeline": 0, "core": 0}
+
+    def _fake_load(
+        _filepath: Path, *, track_id: int | None = None,
+    ) -> tuple[Any, list[NoteEvent]]:
+        del track_id
+        return adapter, adapter.parse(file_path)
+
+    def _fake_legacy(
+        events: list[NoteEvent], *, rule_preferences: Any = None,
+    ) -> tuple[list[Any], dict[str, int]]:
+        call_count["pipeline"] += 1
+        return [_legacy_result() for _ in events], {"parsed": len(events)}
+
+    def _fake_core(*_args: Any, **kwargs: Any) -> Any:
+        del kwargs
+        call_count["core"] += 1
+        return SimpleNamespace(svg="<svg/>", conformance_issues=[])
+
+    monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
+    monkeypatch.setattr("fretwise.web.app._run_legacy_pipeline", _fake_legacy)
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
+
+    endpoint = _route_endpoint(app, "/api/solve/{filename}")
+    asyncio.run(endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    ))
+    asyncio.run(endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    ))
+    # Second call must be served from cache → pipeline runs exactly once.
+    assert call_count["pipeline"] == 1
+    assert call_count["core"] == 1
+
+
 def test_solve_endpoint_embeds_audit_field(
     monkeypatch: Any, tmp_path: Path
 ) -> None:

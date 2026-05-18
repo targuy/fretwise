@@ -722,6 +722,42 @@ class LearnedPlayerCost(PlayerCostModel):
         probs = outputs[0][0]
         return [float(p) for p in probs]
 
+    def _predict_probs_batch(
+        self,
+        transitions: Sequence[tuple[int, int, int, int, int]],
+    ) -> list[list[float]]:
+        """Batch inference: one ONNX call for N transitions.
+
+        Each entry in ``transitions`` is the 5-tuple
+        ``(prev_string_model, prev_fret, prev_finger_model,
+          curr_string_model, curr_fret)``. Standard-tuning MIDI is derived
+        internally; callers that need non-standard tuning should use the
+        single-row ``_predict_probs`` path.
+
+        Returns one ``[p_open, p_index, p_middle, p_ring, p_pinky]`` row per
+        input, in the same order. Empty input → empty list (no ONNX call).
+        """
+        if not transitions:
+            return []
+        try:
+            import numpy as np
+        except ImportError as exc:  # pragma: no cover
+            raise ImportError("numpy required for ONNX inference") from exc
+
+        rows: list[list[float]] = []
+        for ps, pf, pfin, cs, cf in transitions:
+            features = extract_transition_features(
+                prev_string_model=ps, prev_fret=pf, prev_finger_model=pfin,
+                curr_string_model=cs, curr_fret=cf,
+            )
+            rows.append([features[name] for name in _PHASE3_FEATURE_NAMES])
+        x = np.asarray(rows, dtype=np.float32)
+        outputs = self._session.run(
+            [self._prob_output_name], {self._input_name: x},
+        )
+        probs_matrix = outputs[0]
+        return [[float(p) for p in row] for row in probs_matrix]
+
     def transition_cost(
         self,
         prev_string: int,
