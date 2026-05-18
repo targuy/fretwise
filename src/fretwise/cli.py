@@ -75,8 +75,8 @@ def _load_player_cost_model() -> object | None:
     """
     from pathlib import Path
     model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
-    model_path = model_dir / "transition_cost_v2.onnx"
-    spec_path = model_dir / "transition_cost_v2_spec.json"
+    model_path = model_dir / "transition_cost_v3.onnx"
+    spec_path = model_dir / "transition_cost_v3_spec.json"
     if not model_path.exists():
         return None
     try:

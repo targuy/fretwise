@@ -1,7 +1,7 @@
 {
-  "model_version": "v2",
-  "model_file": "xgb_transition_cost_v2.json",
-  "onnx_file": "transition_cost_v2.onnx",
+  "model_version": "v3",
+  "model_file": "xgb_transition_cost_v3.json",
+  "onnx_file": "transition_cost_v3.onnx",
   "n_features": 26,
   "feature_order": [
     "curr_fret",
@@ -32,7 +32,8 @@
     "string_distance_abs"
   ],
   "cost_definition": "-log(p[ground_truth_finger]) -- Viterbi path cost (sum of neg log-probs)",
-  "note": "features_expected extracted from real training data row, not fabricated",
+  "note": "v3: all examples use unified 0=high_E convention. Example c (GAPS) string indices updated from v2.",
+  "string_convention": "0=high_E for all sources (unified in v3)",
   "context_fields_not_in_model": [
     "onset_prev",
     "onset_curr",
@@ -46,6 +47,8 @@
   "examples": [
     {
       "label": "trivial_adjacent_fret",
+      "source": "classclef",
+      "string_convention": "0=high_E",
       "description": "Same string, fret 1->2, index->middle",
       "prev_state": {
         "string": 2,
@@ -89,20 +92,22 @@
       },
       "model_output": {
         "probabilities": {
-          "open": 4.9e-05,
-          "index": 0.194179,
-          "middle": 0.617481,
-          "ring": 0.178495,
-          "pinky": 0.009796
+          "open": 2.8e-05,
+          "index": 0.193716,
+          "middle": 0.616015,
+          "ring": 0.179524,
+          "pinky": 0.010716
         },
         "predicted_finger": "middle",
         "ground_truth_finger": "middle",
-        "predicted_cost": 0.4821,
+        "predicted_cost": 0.4845,
         "cost_definition": "-log(p[ground_truth_finger])"
       }
     },
     {
       "label": "chord_onset_barre",
+      "source": "classclef",
+      "string_convention": "0=high_E",
       "description": "Open string -> fret 1 barre (string 5), finger=index",
       "prev_state": {
         "string": 1,
@@ -146,29 +151,31 @@
       },
       "model_output": {
         "probabilities": {
-          "open": 0.000128,
-          "index": 0.952191,
-          "middle": 0.040586,
-          "ring": 0.00694,
-          "pinky": 0.000154
+          "open": 0.00011,
+          "index": 0.950647,
+          "middle": 0.044658,
+          "ring": 0.00437,
+          "pinky": 0.000215
         },
         "predicted_finger": "index",
         "ground_truth_finger": "index",
-        "predicted_cost": 0.049,
+        "predicted_cost": 0.0506,
         "cost_definition": "-log(p[ground_truth_finger])"
       }
     },
     {
       "label": "long_position_shift",
-      "description": "Fret 15->19 (jump=4), finger=index",
+      "source": "gaps",
+      "string_convention": "0=high_E",
+      "description": "Fret 15->19 (jump=4), cross-string, finger=index. v3: strings now in 0=high_E (was 0=low_E in v2).",
       "prev_state": {
-        "string": 1,
+        "string": 4,
         "fret": 15,
         "finger": "middle",
         "midi": 60
       },
       "curr_state": {
-        "string": 0,
+        "string": 5,
         "fret": 19,
         "midi": 59,
         "ground_truth_finger": "index"
@@ -178,8 +185,8 @@
         "curr_is_high_fret": 1.0,
         "curr_is_open": 0.0,
         "curr_midi": 59.0,
-        "curr_string": 0.0,
-        "curr_string_group": 0.0,
+        "curr_string": 5.0,
+        "curr_string_group": 1.0,
         "fret_distance": 4.0,
         "fret_distance_abs": 4.0,
         "interval_abs": 1.0,
@@ -194,20 +201,20 @@
         "prev_is_high_fret": 1.0,
         "prev_is_open": 0.0,
         "prev_midi": 60.0,
-        "prev_string": 1.0,
-        "prev_string_group": 0.0,
+        "prev_string": 4.0,
+        "prev_string_group": 1.0,
         "same_fret": 0.0,
         "same_string": 0.0,
-        "string_distance": -1.0,
+        "string_distance": 1.0,
         "string_distance_abs": 1.0
       },
       "model_output": {
         "probabilities": {
-          "open": 0.007244,
-          "index": 0.802484,
-          "middle": 0.170784,
-          "ring": 0.014884,
-          "pinky": 0.004604
+          "open": 0.008876,
+          "index": 0.802535,
+          "middle": 0.168836,
+          "ring": 0.015933,
+          "pinky": 0.00382
         },
         "predicted_finger": "index",
         "ground_truth_finger": "index",
