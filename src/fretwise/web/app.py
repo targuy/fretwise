@@ -29,6 +29,10 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
+from fretwise.export.gp_writer import (
+    fingerings_by_source_id,
+    write_gp_with_fingerings,
+)
 from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.pdf_conformance import (
     core_pdf_conformance_report,
@@ -307,6 +311,109 @@ def _register_routes(app: FastAPI) -> None:
                 "X-Fretwise-Pdf-Engine": "legacy",
                 "X-Fretwise-Conformance-Issues": str(conformance_report.issue_count),
                 "X-Fretwise-Conformance-Report": conformance_report.to_header_value(),
+            },
+        )
+
+    @app.post("/api/library/refresh-fingerings")
+    def refresh_library_fingerings() -> Response:
+        """Recompute fingerings for every GP 7/8 file in the fixtures dir.
+
+        Streams one JSON line per processed file via text/plain so the
+        frontend can show live progress without a separate polling loop.
+        Each output line is::
+
+            {"file": "...", "status": "ok"|"skip"|"error", "annotated": N, "out": "...", "error": "..."}
+
+        Files written next to the source as ``<stem>_fingered.gp`` — the
+        original is never touched. Already-fingered output files
+        (suffix ``_fingered.gp``) are skipped so re-runs are safe.
+        """
+        from fastapi.responses import StreamingResponse
+        import json as _json
+
+        fixtures_dir: Path = app.state.fixtures_dir  # type: ignore[attr-defined]
+        files = sorted(fixtures_dir.glob("*.gp"))
+        files = [f for f in files if not f.stem.endswith("_fingered")]
+
+        def _emit() -> Any:
+            yield _json.dumps({
+                "event": "start",
+                "total_files": len(files),
+            }) + "\n"
+            ok = err = skipped = 0
+            for f in files:
+                try:
+                    _, events = _load_adapter_and_events(f, track_id=None)
+                    if not events:
+                        skipped += 1
+                        yield _json.dumps({
+                            "file": f.name, "status": "skip",
+                            "reason": "no notes",
+                        }) + "\n"
+                        continue
+                    results, _stats = _run_legacy_pipeline(events)
+                    mapping = fingerings_by_source_id(results)
+                    gp_bytes = write_gp_with_fingerings(f, mapping)
+                    out = f.with_name(f"{f.stem}_fingered{f.suffix}")
+                    out.write_bytes(gp_bytes)
+                    ok += 1
+                    yield _json.dumps({
+                        "file": f.name, "status": "ok",
+                        "annotated": len(mapping),
+                        "out": out.name,
+                    }) + "\n"
+                except Exception as exc:  # noqa: BLE001 — keep streaming
+                    err += 1
+                    yield _json.dumps({
+                        "file": f.name, "status": "error",
+                        "error": str(exc),
+                    }) + "\n"
+            yield _json.dumps({
+                "event": "done",
+                "ok": ok, "errors": err, "skipped": skipped,
+            }) + "\n"
+
+        return StreamingResponse(_emit(), media_type="text/plain")
+
+    @app.get("/api/export/gp/{filename}")
+    def export_gp(
+        filename: str,
+        track_id: int | None = Query(None),
+    ) -> Response:
+        """Export the loaded GP file with computed LH fingerings injected.
+
+        Only GP 7/8 (GPIF zip) is supported — older GP3/4/5 binary formats
+        have no LeftFingering attribute round-trip and PyGuitarPro doesn't
+        write them. The output filename is suffixed with ``_fingered``.
+        """
+        filepath = _resolve_file(app, filename)
+        if filepath.suffix.lower() != ".gp":
+            raise HTTPException(
+                400, "GP export only supports Guitar Pro 7/8 (.gp) files",
+            )
+
+        _, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        results, _stats = _run_legacy_pipeline(events)
+        if not results:
+            raise HTTPException(500, "Pipeline returned no fingering results")
+
+        mapping = fingerings_by_source_id(results)
+        try:
+            gp_bytes = write_gp_with_fingerings(filepath, mapping)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+
+        out_name = f"{filepath.stem}_fingered{filepath.suffix}"
+        safe_name = re.sub(r"[^a-zA-Z0-9._ -]+", "_", out_name).strip()
+        return Response(
+            content=gp_bytes,
+            media_type="application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}"',
+                "X-Fretwise-Annotated-Notes": str(len(mapping)),
             },
         )
 
