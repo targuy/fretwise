@@ -25,54 +25,58 @@ from fretwise.models import FingeringResult
 
 GPIF_CONTENT_NAME = "Content/score.gpif"
 
-# Model class index → GPIF fingering value. GPIF uses the same convention
-# as the v3 ONNX model (0 = open/thumb, 1 = index, 2 = middle, 3 = ring,
-# 4 = pinky). FretWise's Finger enum values are lower-case strings; map
-# them here so the writer is self-contained.
-_FINGER_TO_GPIF_INT: dict[str, int] = {
-    "open": 0,
-    "index": 1,
-    "middle": 2,
-    "ring": 3,
-    "pinky": 4,
+# Guitar Pro 7/8 stores LeftFingering as a *letter* using the Spanish
+# classical-guitar convention (P pulgar / I índice / M medio / A anular /
+# C chiquito), as a direct child of <Note> — NOT inside <Properties>.
+# Verified by saving a fingered note inside Guitar Pro and inspecting the
+# resulting score.gpif.
+_FINGER_TO_GPIF_LETTER: dict[str, str] = {
+    "open": "P",     # thumb (rare on guitar; GP keeps "P" for it)
+    "index": "I",
+    "middle": "M",
+    "ring": "A",
+    "pinky": "C",
 }
 
 
 def fingerings_by_source_id(
     results: list[FingeringResult],
-) -> dict[str, int]:
-    """Extract ``{source_note_id → gpif_finger_int}`` from solver results.
+) -> dict[str, str]:
+    """Extract ``{source_note_id → gpif_finger_letter}`` from solver results.
 
     Skips notes whose source_note_id is missing (non-GPIF parsers) and
-    open-string fingerings on string > 0 when the finger is "open"
-    (those don't need a LeftFingering annotation in real notation).
+    open-string fingerings (those don't need a LeftFingering annotation
+    in real notation).
     """
-    out: dict[str, int] = {}
+    out: dict[str, str] = {}
     for r in results:
         nid = r.note_event.source_note_id
         if not nid:
             continue
         finger_value = r.state.finger.value
-        gpif_int = _FINGER_TO_GPIF_INT.get(finger_value)
-        if gpif_int is None:
+        # Open-string notes (fret=0) don't carry a left-hand finger,
+        # regardless of which finger label the resolver attached.
+        if r.state.fret == 0:
             continue
-        # Open-string notes (fret=0) don't carry a left-hand finger.
-        if r.state.fret == 0 and gpif_int == 0:
+        letter = _FINGER_TO_GPIF_LETTER.get(finger_value)
+        if letter is None:
             continue
-        out[nid] = gpif_int
+        out[nid] = letter
     return out
 
 
 def write_gp_with_fingerings(
     source_path: Path,
-    fingerings: Mapping[str, int],
+    fingerings: Mapping[str, str],
 ) -> bytes:
     """Return the bytes of a new GP archive with LeftFingering injected.
 
     Args:
         source_path: Existing GP 7/8 file to use as template.
-        fingerings: Mapping ``{source_note_id (str) → gpif_finger_int}``
-            obtained from :func:`fingerings_by_source_id`.
+        fingerings: Mapping ``{source_note_id (str) → gpif_finger_letter}``
+            obtained from :func:`fingerings_by_source_id`. Letters use the
+            Spanish classical convention (P/I/M/A/C) the way Guitar Pro
+            writes them.
 
     Returns:
         Bytes of the rewritten zip archive. Caller is responsible for
@@ -110,56 +114,52 @@ def write_gp_with_fingerings(
     return out.getvalue()
 
 
-# Regex for the existing LeftFingering Property block — strip it before
-# re-injecting so re-runs are idempotent (re-saving a previously fingered
-# file does not stack annotations).
+# Regex for the existing LeftFingering element — strip it before re-
+# injecting so re-runs are idempotent (re-saving a previously fingered
+# file does not stack annotations). Matches the direct-child <Note>
+# placement Guitar Pro actually writes.
 _EXISTING_LEFT_FINGERING_RE = re.compile(
-    r"\s*<Property name=\"LeftFingering\">.*?</Property>",
-    flags=re.DOTALL,
+    r"\s*<LeftFingering>[^<]*</LeftFingering>",
 )
 
 
-def _inject_left_fingering(xml: str, fingerings: Mapping[str, int]) -> str:
-    """Insert a LeftFingering Property on each matching Note in the XML.
+def _inject_left_fingering(xml: str, fingerings: Mapping[str, str]) -> str:
+    """Insert a ``<LeftFingering>X</LeftFingering>`` on each matching Note.
 
-    Removes any pre-existing LeftFingering blocks (idempotent re-saves),
-    then appends a fresh one inside each Note's ``<Properties>`` container
-    when ``source_note_id`` appears in the ``fingerings`` map.
+    Removes any pre-existing LeftFingering elements first (idempotent
+    re-saves), then inserts a fresh one as a direct child of ``<Note>``
+    immediately after the opening tag — the exact placement Guitar Pro
+    uses when saving a manually-annotated finger.
 
-    Format used::
+    Format (verified by inspecting a GP-saved score)::
 
-        <Property name="LeftFingering">
-          <Fingering>1</Fingering>
-        </Property>
+        <Note id="35">
+          <LeftFingering>I</LeftFingering>
+          <InstrumentArticulation>0</InstrumentArticulation>
+          <Properties>…</Properties>
+        </Note>
 
-    where the integer is 0=thumb 1=index 2=middle 3=ring 4=pinky.
+    Letters follow the Spanish classical convention: P/I/M/A/C
+    (thumb / index / middle / ring / pinky).
     """
     if not fingerings:
         return xml
 
-    # Strip stale LeftFingering blocks (re-save idempotency).
+    # Strip stale LeftFingering elements (re-save idempotency).
     xml = _EXISTING_LEFT_FINGERING_RE.sub("", xml)
 
     def _patch_note(match: re.Match[str]) -> str:
         note_block = match.group(0)
         note_id = match.group(1)
-        finger_int = fingerings.get(note_id)
-        if finger_int is None:
+        letter = fingerings.get(note_id)
+        if letter is None:
             return note_block
-        # Append inside the Properties container. If the Note has no
-        # <Properties>, create one (rare for guitar tracks, but safe).
-        new_prop = (
-            f'<Property name="LeftFingering">'
-            f'<Fingering>{finger_int}</Fingering>'
-            f'</Property>'
-        )
-        if "</Properties>" in note_block:
-            return note_block.replace(
-                "</Properties>", f"{new_prop}</Properties>", 1,
-            )
-        # No Properties container: insert one just before </Note>.
+        injection = f"<LeftFingering>{letter}</LeftFingering>"
+        # Insert as the first child of <Note>, between the opening tag
+        # and the first existing child — matches Guitar Pro's own layout.
+        open_tag = f'<Note id="{note_id}">'
         return note_block.replace(
-            "</Note>", f"<Properties>{new_prop}</Properties></Note>", 1,
+            open_tag, f"{open_tag}{injection}", 1,
         )
 
     note_re = re.compile(
