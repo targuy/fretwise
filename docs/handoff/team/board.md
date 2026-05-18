@@ -9,7 +9,7 @@
 
 ## DOING
 
-- `[pm]` **GuitarDataset-011-handoff.md reçu (14:20)** — récap explicite des 4 blockers : #23 (6 fichiers livrés), #24 (ONNX option A, diff conversion = 1.2e-7), #25 (**baseline gate PASSED** : v2 30.8 % > best baseline most_frequent 25.5 % = GO intégration), #26 (3 cas calibration). 26 features = prev_state(10) + curr_state(6) + pair(10), zero context. Per-class GAPS : ring 44 %, pinky 36 %, index 33 %, middle 29 %, open 0 % (biais CC-only — modèle final all-data 62.4 % in-sample). **Phase 3 INTÉGRATION GO** côté GDS.
+- `[pm]` **Migration v2 → v3 LIVRÉE** sur `feature/phase3-integration`. Artefacts v3 copiés dans `data/models/`, loaders CLI+web pointent v3, tests re-anchored sur v3 calibration. v2 artefacts supprimés (spec + calibration + onnx local). Suite 972/0 fail (parité ONNX probas ±1e-4, cost 0.4845 sur ex1). Production : web app `performance` mode utilise v3 dès rechargement.
 
 ## TODO — Priority 1 (next 24h)
 

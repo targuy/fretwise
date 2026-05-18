@@ -1,6 +1,6 @@
 {
-  "model_file": "transition_cost_v2.onnx",
-  "fallback_model_file": "xgb_transition_cost_v2.json",
+  "model_file": "transition_cost_v3.onnx",
+  "fallback_model_file": "xgb_transition_cost_v3.json",
   "feature_names": [
     "curr_fret",
     "curr_is_high_fret",
@@ -193,10 +193,14 @@
   },
   "string_convention": {
     "indexing": "0-based",
-    "range": [0, 5],
-    "mapping": "0=high_E (thinnest, avg MIDI 68), 1=B, 2=G, 3=D, 4=A, 5=low_E (thickest, avg MIDI 55)",
+    "range": [
+      0,
+      5
+    ],
+    "mapping": "0=high_E (thinnest, avg MIDI 68), 1=B, 2=G, 3=D, 4=A, 5=low_E (thickest, avg MIDI 43)",
     "string_group": "0-2 = treble (group 0), 3-5 = bass (group 1)",
-    "note": "Same direction as GPIF: 0=high E, 5=low E. FW calibration example uses 1-based (1-6 where 6=low E). Subtract 1 to match model input."
+    "note": "v3: UNIFIED convention across all sources. 0=high_E, 5=low_E. Same direction as GPIF. FW 1-based (1-6): subtract 1.",
+    "v2_bug_fixed": "v2 had mixed conventions (ClassClef=0-highE, GAPS=0-lowE). v3 unified to 0=high_E for all."
   },
   "context_fields_not_used": [
     "tempo",

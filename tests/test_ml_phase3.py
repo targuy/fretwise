@@ -28,9 +28,9 @@ from fretwise.ml import (
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-CALIB_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v2_calibration.json"
-MODEL_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v2.onnx"
-SPEC_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v2_spec.json"
+CALIB_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v3_calibration.json"
+MODEL_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v3.onnx"
+SPEC_PATH = REPO_ROOT / "data" / "models" / "transition_cost_v3_spec.json"
 
 ATOL = 1e-4  # ONNX inference precision tolerance
 
@@ -217,9 +217,9 @@ def test_transition_cost_via_fw_boundary_standard_tuning(
         hand_position=1,
         context=PlayerContext(onset=0.0, duration=1.0, tempo=120.0),
     )
-    # Calibration expected_cost for example 1 = 0.4821.
-    assert math.isclose(cost, 0.4821, abs_tol=1e-3), (
-        f"FW-boundary cost on example 1: actual={cost:.6f} expected=0.4821"
+    # v3 calibration expected_cost for example 1 = 0.4845.
+    assert math.isclose(cost, 0.4845, abs_tol=1e-3), (
+        f"FW-boundary cost on example 1: actual={cost:.6f} expected=0.4845"
     )
 
 
