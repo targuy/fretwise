@@ -65,6 +65,29 @@ def _load_chord_finger_classifier() -> object | None:
     except (ImportError, FileNotFoundError, AssertionError):
         return None
 
+
+def _load_player_cost_model() -> object | None:
+    """Load the optional PlayerCostModel (Phase 3 ONNX transition cost).
+
+    Same defensive pattern as ``_load_chord_finger_classifier``. Only
+    contributes when the active CostWeights preset has ``gamma > 0``
+    (performance / learning modes).
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_path = model_dir / "transition_cost_v2.onnx"
+    spec_path = model_dir / "transition_cost_v2_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPlayerCost
+        return LearnedPlayerCost(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        return None
+
 _MODES = {
     "reference": CostWeights.reference,
     "performance": CostWeights.performance,
@@ -335,7 +358,8 @@ def solve(
 
     generator = StateGenerator()
     weights = _MODES[mode]()
-    cost_fn = CostFunction(weights=weights)
+    player_cost_model = _load_player_cost_model() if weights.gamma > 0 else None
+    cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
 

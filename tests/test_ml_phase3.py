@@ -232,3 +232,117 @@ def test_emission_cost_is_zero(learned_cost) -> None:
         context=PlayerContext(onset=0.0, duration=1.0, tempo=120.0),
     )
     assert cost == 0.0
+
+
+# ---------------------------------------------------------------------------
+# CostFunction wiring (Phase 3 injection into Viterbi scoring)
+# ---------------------------------------------------------------------------
+
+
+def _make_state(string_num: int, fret: int, finger: str, hand_position: int):
+    from fretwise.models import Finger, FingeringState
+    return FingeringState(
+        string_num=string_num,
+        fret=fret,
+        finger=Finger(finger),
+        hand_position=hand_position,
+    )
+
+
+def _make_note(onset: float = 0.0) -> object:
+    from fretwise.models import NoteEvent
+    return NoteEvent(pitch=60, onset=onset, duration=0.5, tempo=120.0)
+
+
+class _RecordingPlayerCost:
+    """PlayerCostModel double that returns a fixed cost and records calls."""
+
+    def __init__(self, fixed_cost: float = 0.7):
+        self.fixed_cost = fixed_cost
+        self.calls: list[dict] = []
+
+    def transition_cost(self, **kwargs):
+        self.calls.append(kwargs)
+        return self.fixed_cost
+
+    def emission_cost(self, **kwargs):
+        return 0.0
+
+
+def test_costfunction_without_model_unchanged() -> None:
+    """No player_cost_model → c_joueur stays at 0 (legacy behaviour)."""
+    from fretwise.scoring import CostFunction, CostWeights
+
+    cost_fn = CostFunction(weights=CostWeights.performance())
+    s1 = _make_state(3, 5, "index", 5)
+    s2 = _make_state(3, 7, "ring", 5)
+    cost = cost_fn.transition_cost(s1, s2, _make_note(), index=1)
+    # We don't care about exact value, just that it runs and returns a float.
+    assert isinstance(cost, float) and cost >= 0.0
+
+
+def test_costfunction_calls_model_when_gamma_positive() -> None:
+    """Performance mode (γ=2) + injected model → transition_cost is called."""
+    from fretwise.scoring import CostFunction, CostWeights
+
+    recorder = _RecordingPlayerCost(fixed_cost=0.5)
+    cost_fn = CostFunction(
+        weights=CostWeights.performance(),  # γ=2.0
+        player_cost_model=recorder,
+    )
+    s1 = _make_state(3, 5, "index", 5)
+    s2 = _make_state(3, 7, "ring", 5)
+    cost_fn.transition_cost(s1, s2, _make_note(), index=1)
+    assert len(recorder.calls) == 1
+    call = recorder.calls[0]
+    # FW conventions preserved at the boundary (1-indexed strings, str finger).
+    assert call["prev_string"] == 3
+    assert call["prev_fret"] == 5
+    assert call["prev_finger"] == "index"
+    assert call["curr_string"] == 3
+    assert call["curr_fret"] == 7
+    assert call["curr_finger"] == "ring"
+
+
+def test_costfunction_skips_model_when_gamma_zero() -> None:
+    """Reference mode (γ=0) short-circuits the model call (ONNX latency saved)."""
+    from fretwise.scoring import CostFunction, CostWeights
+
+    recorder = _RecordingPlayerCost()
+    cost_fn = CostFunction(
+        weights=CostWeights.reference(),  # γ=0.0
+        player_cost_model=recorder,
+    )
+    cost_fn.transition_cost(
+        _make_state(3, 5, "index", 5),
+        _make_state(3, 7, "ring", 5),
+        _make_note(),
+        index=1,
+    )
+    assert recorder.calls == [], (
+        "Model should not be called when gamma == 0"
+    )
+
+
+def test_costfunction_model_exception_does_not_break_viterbi() -> None:
+    """A broken model never breaks the Viterbi run — fallback to c_joueur=0."""
+    from fretwise.scoring import CostFunction, CostWeights
+
+    class _Broken:
+        def transition_cost(self, **kwargs):
+            raise RuntimeError("simulated model failure")
+
+        def emission_cost(self, **kwargs):
+            return 0.0
+
+    cost_fn = CostFunction(
+        weights=CostWeights.performance(),
+        player_cost_model=_Broken(),
+    )
+    cost = cost_fn.transition_cost(
+        _make_state(3, 5, "index", 5),
+        _make_state(3, 7, "ring", 5),
+        _make_note(),
+        index=1,
+    )
+    assert isinstance(cost, float) and cost >= 0.0

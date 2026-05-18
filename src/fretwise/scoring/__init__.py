@@ -221,6 +221,7 @@ class CostFunction:
         weights: CostWeights | None = None,
         profile: PlayerProfile | None = None,
         rule_preferences: RulePreferences | None = None,
+        player_cost_model: object | None = None,
     ) -> None:
         self._weights = weights or CostWeights.reference()
         self._profile = profile or default_profile()
@@ -229,6 +230,11 @@ class CostFunction:
         # the pipeline before each voice's Viterbi run via set_segment_anchors.
         # None disables segment-aware shift (fallback to A' tolerance).
         self._segment_anchors: list[int | None] | None = None
+        # Phase 3: optional learned transition-cost model (PlayerCostModel).
+        # When set and gamma > 0, contributes -log(p[curr_finger]) per
+        # transition. Typed loosely to avoid pulling fretwise.ml at module
+        # load (no onnxruntime required for the rule-based pipeline).
+        self._player_cost_model = player_cost_model
 
     def set_segment_anchors(self, anchors: list[int | None]) -> None:
         """Activate segment-aware shift cost for the next Viterbi run.
@@ -286,9 +292,46 @@ class CostFunction:
             segment_anchor_curr=anchor_curr,
         )
         c_music = compute_musical_cost(s1, s2, note)
-        c_joueur = 0.0  # stub — Phase 3
+        # Phase 3: learned transition cost contributes only when a model is
+        # injected AND gamma > 0. The gamma check short-circuits the ONNX
+        # call for reference / musical modes where γ=0 (free regardless).
+        c_joueur = 0.0
+        if self._player_cost_model is not None and w.gamma > 0:
+            c_joueur = self._call_player_cost_model(s1, s2, note)
         c_peda = 0.0    # stub — Phase 3
         return w.alpha * c_meca + w.beta * c_music + w.gamma * c_joueur + w.delta * c_peda
+
+    def _call_player_cost_model(
+        self,
+        s1: FingeringState,
+        s2: FingeringState,
+        note: NoteEvent,
+    ) -> float:
+        """Bridge FretWise state convention → PlayerCostModel.transition_cost.
+
+        Catches any model-side exception and returns 0.0 so a broken model
+        never breaks the Viterbi run. Phase 2's resolve_chord_learned_fingers
+        uses the same defensive pattern.
+        """
+        from fretwise.ml import PlayerContext
+
+        try:
+            return self._player_cost_model.transition_cost(  # type: ignore[union-attr]
+                prev_string=s1.string_num,
+                prev_fret=s1.fret,
+                prev_finger=s1.finger.value,
+                curr_string=s2.string_num,
+                curr_fret=s2.fret,
+                curr_finger=s2.finger.value,
+                hand_position=s2.hand_position,
+                context=PlayerContext(
+                    onset=note.onset,
+                    duration=note.duration,
+                    tempo=note.tempo,
+                ),
+            )
+        except Exception:
+            return 0.0
 
     def emission_cost(self, state: FingeringState) -> float:
         """Initial cost for the first note in a sequence.

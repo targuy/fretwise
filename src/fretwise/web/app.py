@@ -677,6 +677,8 @@ def _parse_representation_mode(value: str | None) -> RepresentationMode:
 
 _CHORD_FINGER_CLASSIFIER: object | None = None
 _CHORD_FINGER_CLASSIFIER_LOADED: bool = False
+_PLAYER_COST_MODEL: object | None = None
+_PLAYER_COST_MODEL_LOADED: bool = False
 
 
 def _get_chord_finger_classifier() -> object | None:
@@ -707,12 +709,45 @@ def _get_chord_finger_classifier() -> object | None:
     return _CHORD_FINGER_CLASSIFIER
 
 
+def _get_player_cost_model() -> object | None:
+    """Lazy-load the optional PlayerCostModel (Phase 3 ONNX transition cost).
+
+    Same defensive pattern as ``_get_chord_finger_classifier``. Only takes
+    effect when CostWeights has ``gamma > 0`` (the web app uses
+    ``performance`` mode by default → γ=2.0 → model active).
+    """
+    global _PLAYER_COST_MODEL, _PLAYER_COST_MODEL_LOADED
+    if _PLAYER_COST_MODEL_LOADED:
+        return _PLAYER_COST_MODEL
+    _PLAYER_COST_MODEL_LOADED = True
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    model_path = model_dir / "transition_cost_v2.onnx"
+    spec_path = model_dir / "transition_cost_v2_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPlayerCost
+        _PLAYER_COST_MODEL = LearnedPlayerCost(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        _PLAYER_COST_MODEL = None
+    return _PLAYER_COST_MODEL
+
+
 def _run_legacy_pipeline(
     events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
 ) -> tuple[list[FingeringResult], dict[str, int]]:
     weights = CostWeights.performance()
     generator = StateGenerator()
-    cost_fn = CostFunction(weights=weights, rule_preferences=rule_preferences)
+    player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
+    cost_fn = CostFunction(
+        weights=weights,
+        rule_preferences=rule_preferences,
+        player_cost_model=player_cost_model,
+    )
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
     return run_pipeline(
