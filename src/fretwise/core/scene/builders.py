@@ -282,7 +282,7 @@ def layout_to_render_scene(
                     staff_x=staff_layout.x,
                     tab_y=tab_y,
                     tab_spacing=tab_spacing,
-                    open_pitches=_extract_open_pitches(score) if has_tab_rhythm else None,
+                    open_pitches=None,
                 )
             _append_measure_barlines(
                 staff_layer,
