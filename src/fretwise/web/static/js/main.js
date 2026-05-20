@@ -28,6 +28,113 @@ const _mutedSecondaryTracks = new Map();
 
 let _followPlayhead = true;  // when false, user is exploring — no auto-scroll
 
+// ── Debug overlay (toggle Shift+D) ──────────────────────────────────
+// Read-only live snapshot of all coordinates / scroll states involved in
+// the U2 centering bug. No production effect; activated manually.
+let _debugOverlayOn = false;
+let _debugOverlayRaf = null;
+
+function _formatDebugLine(label, parts) {
+  return `${label.padEnd(9)}` + parts.map(p => `${p.k}=${p.v}`).join('  ');
+}
+
+function _renderDebugOverlay() {
+  const el = document.getElementById('debug-overlay');
+  if (!el || !_debugOverlayOn) return;
+
+  const mode = (typeof getSelectedRepresentationMode === 'function')
+    ? getSelectedRepresentationMode() : 'unknown';
+  const cont  = document.getElementById('tab-container');
+  const svgC  = document.getElementById('core-svg-view');
+  const body  = document.body;
+
+  const measure = (typeof renderer !== 'undefined' && renderer)
+    ? (renderer.cursorMeasure ?? 0) : '—';
+
+  // System geometry as seen by playback._scrollCursorIntoView
+  let sysInfo = 'no renderer';
+  if (typeof renderer !== 'undefined' && renderer && renderer.systems) {
+    const m = renderer.cursorMeasure || 0;
+    const sysIdx = renderer.systems.findIndex(
+      s => m >= s.startMeasure && m < s.startMeasure + s.measures.length,
+    );
+    const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
+    const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
+    const sysMid = sysY + SYSTEM_H / 2;
+    const clientH = cont ? cont.clientHeight : 0;
+    const centerTarget = Math.max(0, sysMid - clientH / 2);
+    const drift = cont ? Math.round(cont.scrollTop - centerTarget) : 0;
+    let driftCls = 'dbg-drift-ok';
+    if (Math.abs(drift) > 80) driftCls = 'dbg-drift-high';
+    else if (Math.abs(drift) > 20) driftCls = 'dbg-drift-mid';
+    sysInfo =
+      `sysIdx=${sysIdx}  sysY=${sysY}  sysMid=${sysMid}` +
+      `  target=${Math.round(centerTarget)}` +
+      `  <span class="${driftCls}">drift=${drift > 0 ? '+' : ''}${drift}</span>`;
+  }
+
+  const followStates = [
+    `main=${_followPlayhead}`,
+    `playback=${typeof playback !== 'undefined' && playback ? playback._followPlayhead : '—'}`,
+    `svg=${typeof _svgDriver !== 'undefined' && _svgDriver ? _svgDriver.followPlayhead : '—'}`,
+  ].join('  ');
+
+  // Count visible scrollbars on the right edge (heuristic): elements whose
+  // computed overflow-y is 'scroll' or 'auto' AND scrollHeight > clientHeight.
+  const scrollables = [
+    ['body', body],
+    ['tabCont', cont],
+    ['svgView', svgC],
+    ['svgView.parent', svgC?.parentElement],
+  ].filter(([_, e]) => e)
+    .map(([name, e]) => {
+      const cs = getComputedStyle(e);
+      const oy = cs.overflowY;
+      const isScrollable = (oy === 'scroll' || oy === 'auto') && e.scrollHeight > e.clientHeight;
+      return { name, oy, isScrollable, scroll: e.scrollTop, client: e.clientHeight, full: e.scrollHeight };
+    });
+  const visibleScrollbars = scrollables.filter(s => s.isScrollable).length;
+
+  const lines = [
+    `<span class="dbg-title">─── DEBUG (Shift+D = close) ───</span>`,
+    `mode      ${mode}`,
+    `follow    ${followStates}`,
+    `cursor    measure=${measure}`,
+    `system    ${sysInfo}`,
+    `viewport  innerW=${window.innerWidth}  innerH=${window.innerHeight}`,
+    `bars      visible-scrollbars=${visibleScrollbars}`,
+    ...scrollables.map(s =>
+      `${s.name.padEnd(10)}oy=${s.oy.padEnd(7)} scroll=${s.scroll.toString().padStart(4)}  client=${s.client.toString().padStart(4)}  full=${s.full.toString().padStart(5)}  ${s.isScrollable ? '*' : ' '}`,
+    ),
+  ];
+  el.innerHTML = lines.join('\n');
+
+  _debugOverlayRaf = requestAnimationFrame(_renderDebugOverlay);
+}
+
+function _toggleDebugOverlay() {
+  const el = document.getElementById('debug-overlay');
+  if (!el) return;
+  _debugOverlayOn = !_debugOverlayOn;
+  el.style.display = _debugOverlayOn ? '' : 'none';
+  if (_debugOverlayOn) {
+    _renderDebugOverlay();
+  } else if (_debugOverlayRaf) {
+    cancelAnimationFrame(_debugOverlayRaf);
+    _debugOverlayRaf = null;
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  // Shift+D toggles the overlay. Ignore when typing in inputs.
+  if (e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+    const tag = (document.activeElement?.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || document.activeElement?.isContentEditable) return;
+    e.preventDefault();
+    _toggleDebugOverlay();
+  }
+});
+
 // ── DOM references ──────────────────────────────────────────────────
 
 const $  = (sel) => document.querySelector(sel);
