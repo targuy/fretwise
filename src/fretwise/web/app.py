@@ -14,6 +14,11 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
+from fretwise.auth.config import load_auth_config
+from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
+from fretwise.auth.secrets import UserSecretsStore
+from fretwise.auth.users import UserStore
+from fretwise.auth.web import current_request_user, setup_auth
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
@@ -147,8 +152,33 @@ def create_app(
     # down, so we fall back to local and surface the error via /api/storage.
     _set_storage_backend(app, cfg, fixtures_dir)
 
+    # Multi-user mode (opt-in). When OIDC is configured, each request is served
+    # from the logged-in user's own cloud storage; the server hosts no shared
+    # partition library. When not configured, the app stays single-user.
+    app.state.multiuser = False
+    app.state.auth_error = None
+    _setup_multiuser(app)
+
     _register_routes(app)
     return app
+
+
+def _setup_multiuser(app: FastAPI) -> None:
+    """Enable OIDC auth + per-user storage if configured (best-effort)."""
+    auth_cfg = load_auth_config()
+    if not auth_cfg.enabled:
+        return
+    try:
+        user_store = UserStore(auth_cfg.data_dir)
+        secrets_store = UserSecretsStore(auth_cfg.data_dir)
+        setup_auth(app, auth_cfg, user_store, secrets_store)
+        app.state.user_store = user_store
+        app.state.secrets_store = secrets_store
+        app.state.cache_root = auth_cfg.cache_root
+        app.state.multiuser = True
+    except Exception as exc:  # noqa: BLE001 - degrade to single-user, never crash boot
+        # Most likely the [auth] extra (authlib) is not installed.
+        app.state.auth_error = str(exc)
 
 
 def _set_storage_backend(app: FastAPI, cfg: dict[str, Any], local_root: Path) -> None:
@@ -178,7 +208,7 @@ def _register_routes(app: FastAPI) -> None:
         configured cloud store).
         """
         cfg = _settings.load()
-        storage: StorageBackend = app.state.storage
+        storage: StorageBackend = _current_storage(app)
         songs = load_index(cfg.get("index_path", ""))
 
         try:
@@ -456,7 +486,7 @@ def _register_routes(app: FastAPI) -> None:
         # The in-place multiprocessing batch only works on a local directory
         # (workers glob + read + write files by path). Cloud backends report a
         # clear error rather than silently no-op'ing.
-        storage: StorageBackend = app.state.storage
+        storage: StorageBackend = _current_storage(app)
         if not storage.supports_batch_refresh or storage.local_root is None:
             raise HTTPException(
                 400,
@@ -616,7 +646,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.post("/api/upload")
     async def upload_file(file: UploadFile = File(...)) -> dict[str, str]:
         """Upload a score file into the active storage backend."""
-        storage: StorageBackend = app.state.storage
+        storage: StorageBackend = _current_storage(app)
         try:
             safe_name = safe_score_name(file.filename or "upload")
         except StorageValidationError as exc:
@@ -631,7 +661,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.get("/api/download/{filename}")
     async def download_file(filename: str) -> Response:
         """Download the original score file from the active storage backend."""
-        storage: StorageBackend = app.state.storage
+        storage: StorageBackend = _current_storage(app)
         try:
             safe_name = safe_score_name(filename)
         except StorageValidationError as exc:
@@ -965,9 +995,20 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/storage")
     async def storage_status() -> JSONResponse:
-        """Report the active storage backend and its health."""
-        storage: StorageBackend = app.state.storage
+        """Report the active storage backend and its health.
+
+        In multi-user mode this reflects the logged-in user's own backend, and
+        reports ``configured: false`` (rather than erroring) when they have not
+        connected storage yet.
+        """
+        try:
+            storage = _current_storage(app)
+        except HTTPException as exc:
+            if exc.status_code == 409:  # storage not configured for this user
+                return JSONResponse({"configured": False, "backend": None})
+            raise
         return JSONResponse({
+            "configured": True,
             "backend": storage.name,
             "supports_batch_refresh": storage.supports_batch_refresh,
             "local_root": str(storage.local_root) if storage.local_root else None,
@@ -989,6 +1030,30 @@ def _register_routes(app: FastAPI) -> None:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _current_storage(app: FastAPI) -> StorageBackend:
+    """Return the storage backend serving the current request.
+
+    Single-user mode: the process-wide backend (``app.state.storage``).
+    Multi-user mode: the logged-in user's *own* cloud backend, resolved fresh
+    from their (non-secret) config + decrypted credentials — never shared with
+    other users, and never the on-server local backend.
+    """
+    if not getattr(app.state, "multiuser", False):
+        return app.state.storage
+    user = current_request_user()
+    if user is None:
+        raise HTTPException(401, "Authentication required")
+    credentials = app.state.secrets_store.get(user.id)
+    try:
+        return resolve_user_storage(
+            user, credentials, cache_root=app.state.cache_root,
+        )
+    except StorageNotConfigured as exc:
+        raise HTTPException(409, str(exc))
+    except StorageError as exc:
+        raise HTTPException(400, f"Storage error: {exc}")
 
 
 def _resolve_file(app: FastAPI, filename: str) -> Path:

@@ -20,15 +20,26 @@ from fretwise.storage.credentials import load_s3_credentials
 from fretwise.storage.remote import RemoteStorageBackend
 
 
-def _build_client(endpoint_url: str | None, region: str | None) -> Any:
-    """Create a boto3 S3 client, raising a clear error if boto3 is missing."""
+def _build_client(
+    endpoint_url: str | None,
+    region: str | None,
+    credentials: dict[str, str] | None = None,
+) -> Any:
+    """Create a boto3 S3 client, raising a clear error if boto3 is missing.
+
+    Args:
+        endpoint_url: Custom endpoint for non-AWS providers.
+        region: Optional region name.
+        credentials: Explicit boto3 credential kwargs (per-user). When ``None``
+            the process-wide env / secrets-file chain is used (single-user mode).
+    """
     try:
         import boto3  # type: ignore[import-untyped]
     except ImportError as exc:  # pragma: no cover - depends on optional extra
         raise StorageBackendUnavailable(
             "S3 storage requires boto3. Install it with: pip install 'fretwise[cloud]'"
         ) from exc
-    kwargs: dict[str, Any] = dict(load_s3_credentials())
+    kwargs: dict[str, Any] = dict(credentials) if credentials else dict(load_s3_credentials())
     if endpoint_url:
         kwargs["endpoint_url"] = endpoint_url
     if region:

@@ -1,0 +1,135 @@
+"""Resolve a per-user storage backend from their config + decrypted credentials.
+
+Every partition request is served from the *logged-in user's own* cloud storage.
+The server keeps no shared library: the on-server ``local`` backend is rejected
+here, and downloads land only in a transient, per-user cache directory.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from collections.abc import Callable
+from pathlib import Path
+from typing import Any
+
+from fretwise.auth.models import USER_STORAGE_BACKENDS, User
+from fretwise.storage.base import (
+    StorageBackend,
+    StorageError,
+    StorageValidationError,
+)
+
+# A constructor builds a backend from (non-secret config, credentials, cache_dir).
+Constructor = Callable[[dict[str, Any], dict[str, Any], Path], StorageBackend]
+
+
+class StorageNotConfigured(StorageError):
+    """Raised when a user has not yet configured their storage backend."""
+
+
+def user_cache_dir(cache_root: Path, user_id: str) -> Path:
+    """Return the transient per-user download cache directory.
+
+    Isolated per user (hashed id) so cached downloads are never shared across
+    users. This is a processing cache only — not a persistent library.
+    """
+    digest = hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:32]
+    return Path(cache_root) / digest
+
+
+def _build_s3(config: dict[str, Any], creds: dict[str, Any], cache_dir: Path) -> StorageBackend:
+    from fretwise.storage.s3 import S3StorageBackend, _build_client
+
+    s3_creds: dict[str, str] = {}
+    if creds.get("access_key_id"):
+        s3_creds["aws_access_key_id"] = str(creds["access_key_id"])
+    if creds.get("secret_access_key"):
+        s3_creds["aws_secret_access_key"] = str(creds["secret_access_key"])
+    if creds.get("session_token"):
+        s3_creds["aws_session_token"] = str(creds["session_token"])
+    client = _build_client(
+        config.get("endpoint_url") or None,
+        config.get("region") or None,
+        credentials=s3_creds or None,
+    )
+    return S3StorageBackend(
+        bucket=str(config.get("bucket", "")),
+        prefix=str(config.get("prefix", "")),
+        cache_dir=cache_dir,
+        client=client,
+    )
+
+
+def _build_webdav(config: dict[str, Any], creds: dict[str, Any], cache_dir: Path) -> StorageBackend:
+    from fretwise.storage.webdav import WebDavStorageBackend, _build_client
+
+    base_url = str(config.get("base_url", ""))
+    auth = None
+    if creds.get("username"):
+        auth = (str(creds["username"]), str(creds.get("password", "")))
+    client = _build_client(base_url if base_url.endswith("/") else base_url + "/", auth)
+    return WebDavStorageBackend(base_url=base_url, cache_dir=cache_dir, client=client)
+
+
+def _build_gdrive(config: dict[str, Any], creds: dict[str, Any], cache_dir: Path) -> StorageBackend:
+    from fretwise.storage.gdrive import GoogleDriveStorageBackend, service_from_oauth
+
+    service = service_from_oauth(creds)
+    return GoogleDriveStorageBackend(
+        folder_id=str(config.get("folder_id", "")),
+        cache_dir=cache_dir,
+        service=service,
+    )
+
+
+DEFAULT_CONSTRUCTORS: dict[str, Constructor] = {
+    "s3": _build_s3,
+    "webdav": _build_webdav,
+    "gdrive": _build_gdrive,
+}
+
+
+def resolve_user_storage(
+    user: User,
+    credentials: dict[str, Any] | None,
+    *,
+    cache_root: Path,
+    constructors: dict[str, Constructor] | None = None,
+) -> StorageBackend:
+    """Build the storage backend for *user* from their config + credentials.
+
+    Args:
+        user: The authenticated user.
+        credentials: Decrypted credential dict (from the secrets store).
+        cache_root: Base directory for transient per-user download caches.
+        constructors: Backend constructor map (injectable for tests).
+
+    Raises:
+        StorageNotConfigured: The user has not configured a backend yet.
+        StorageValidationError: The configured backend is not user-selectable
+            (e.g. the on-server ``local`` backend).
+    """
+    ctors = constructors if constructors is not None else DEFAULT_CONSTRUCTORS
+    backend = user.storage_backend
+    if not backend:
+        raise StorageNotConfigured(
+            "No storage configured. Connect your cloud storage in settings — "
+            "FretWise does not host partitions on the server."
+        )
+    if backend not in USER_STORAGE_BACKENDS:
+        raise StorageValidationError(
+            f"Storage backend {backend!r} is not available to users "
+            "(the server stores no partitions)."
+        )
+    ctor = ctors.get(backend)
+    if ctor is None:
+        raise StorageValidationError(f"Unsupported storage backend: {backend!r}")
+    return ctor(user.storage_config, credentials or {}, user_cache_dir(cache_root, user.id))
+
+
+__all__ = [
+    "DEFAULT_CONSTRUCTORS",
+    "StorageNotConfigured",
+    "resolve_user_storage",
+    "user_cache_dir",
+]
