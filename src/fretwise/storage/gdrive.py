@@ -53,6 +53,33 @@ def _build_service() -> Any:
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 
+def service_from_oauth(token: dict[str, Any]) -> Any:
+    """Build a Drive v3 service from a per-user OAuth token grant.
+
+    Used in multi-user mode: each user authorises FretWise to access *their own*
+    Drive (no server-side service account). ``token`` carries the fields stored
+    after the OAuth consent: ``token``, ``refresh_token``, ``token_uri``,
+    ``client_id``, ``client_secret`` and optionally ``scopes``.
+    """
+    try:
+        from google.oauth2.credentials import Credentials  # type: ignore[import-untyped]
+        from googleapiclient.discovery import build  # type: ignore[import-untyped]
+    except ImportError as exc:  # pragma: no cover - depends on optional extra
+        raise StorageBackendUnavailable(
+            "Google Drive storage requires google-api-python-client and "
+            "google-auth. Install with: pip install 'fretwise[cloud]'"
+        ) from exc
+    creds = Credentials(
+        token=token.get("token"),
+        refresh_token=token.get("refresh_token"),
+        token_uri=token.get("token_uri", "https://oauth2.googleapis.com/token"),
+        client_id=token.get("client_id"),
+        client_secret=token.get("client_secret"),
+        scopes=token.get("scopes", _SCOPES),
+    )
+    return build("drive", "v3", credentials=creds, cache_discovery=False)
+
+
 class GoogleDriveStorageBackend(RemoteStorageBackend):
     """Store score files in a single Google Drive folder."""
 
