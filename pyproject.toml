@@ -33,6 +33,14 @@ dev = [
 ml = [
     "onnxruntime>=1.20",
 ]
+# Cloud partitions storage backends (S3-compatible / WebDAV / Google Drive).
+# Install only what you need; each backend imports its SDK lazily.
+cloud = [
+    "boto3>=1.34",                      # S3-compatible (AWS S3, MinIO, R2, B2…)
+    "httpx>=0.27",                      # WebDAV / Nextcloud
+    "google-api-python-client>=2.0",    # Google Drive
+    "google-auth>=2.0",                 # Google Drive auth
+]
 
 [project.scripts]
 fretwise = "fretwise.cli:main"
