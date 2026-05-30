@@ -9,8 +9,8 @@ from typing import Any
 _CONFIG_DIR = Path(os.environ.get("FRETWISE_CONFIG_DIR", str(Path.home() / ".fretwise")))
 _CONFIG_FILE = _CONFIG_DIR / "config.json"
 
-DEFAULT_PARTITIONS_DIR = r"C:\Users\benoi\iCloudDrive\partitions\partitions"
-DEFAULT_INDEX_PATH = r"C:\Users\benoi\iCloudDrive\partitions\data\songs_index.tsv"
+DEFAULT_PARTITIONS_DIR = str(Path(__file__).resolve().parents[3] / "partitions")
+DEFAULT_INDEX_PATH = ""
 DEFAULT_SOUNDFONTS_DIR = "data/sounds"
 
 _DEFAULTS: dict[str, Any] = {

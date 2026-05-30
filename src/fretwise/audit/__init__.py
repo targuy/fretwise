@@ -23,9 +23,16 @@ from __future__ import annotations
 
 import math
 import statistics
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Literal, Sequence
+from typing import Literal
 
+from fretwise.biomechanics import (
+    BiomechanicalReport,
+    BiomechanicalSeverity,
+    BiomechanicalViolation,
+    validate_fingering_results,
+)
 from fretwise.models import FingeringResult, NoteEvent
 from fretwise.quality import assess_source_quality
 
@@ -109,12 +116,15 @@ class AuditReport:
             convenience; the per-movement signal is recomputed locally).
         ml_signal_available: True iff the audit consumed a learned cost
             model (consumers may render an "audit limited" hint when False).
+        biomechanical_report: Pure final-fingering guard report. Consumers can
+            inspect exact violation codes without re-running validation.
     """
 
     movements: list[MovementVerdict]
     overall: Literal["clean", "suspect", "bad"]
     source_quality_verdict: str
     ml_signal_available: bool
+    biomechanical_report: BiomechanicalReport | None = None
 
     @property
     def bad_movements(self) -> list[MovementVerdict]:
@@ -283,6 +293,8 @@ def audit_score(
         events, section_markers, silent_measure_threshold,
     )
     source_report = assess_source_quality(events)
+    biomechanical_report = validate_fingering_results(results)
+    biomechanical_by_measure = biomechanical_report.by_measure()
 
     # Baseline cost for "expensive" notes: 10th percentile of all costs.
     # Captures "what the easy notes cost in this piece" without being
@@ -318,10 +330,16 @@ def audit_score(
             if r.note_event.measure_index is not None
             and span.measure_start <= r.note_event.measure_index <= span.measure_end
         ]
+        movement_biomechanical = [
+            violation
+            for measure in range(span.measure_start, span.measure_end + 1)
+            for violation in biomechanical_by_measure.get(measure, [])
+        ]
         verdicts.append(_audit_one_movement(
             span=span,
             movement_events=movement_events,
             movement_results=movement_results,
+            movement_biomechanical=movement_biomechanical,
             piece_baseline_cost=baseline_cost,
             ml_entropy_by_result=ml_entropy_by_result,
             ml_available=ml_available,
@@ -338,6 +356,7 @@ def audit_score(
         overall=overall,
         source_quality_verdict=source_report.verdict,
         ml_signal_available=ml_available,
+        biomechanical_report=biomechanical_report,
     )
 
 
@@ -346,6 +365,7 @@ def _audit_one_movement(
     span: MovementSpan,
     movement_events: list[NoteEvent],
     movement_results: list[FingeringResult],
+    movement_biomechanical: list[BiomechanicalViolation],
     piece_baseline_cost: float,
     ml_entropy_by_result: dict[int, float],
     ml_available: bool,
@@ -385,6 +405,22 @@ def _audit_one_movement(
         high_cost_ratio >= DEFAULT_HIGH_COST_RATIO_SUSPECT and not cost_red
     )
 
+    # Signal 2b: deterministic final-output biomechanical validation. Unlike
+    # cost density, this is a hard structural signal: fatal violations mean the
+    # final fingering contains an anatomically invalid state or chord.
+    biomechanical_fatal_count = sum(
+        1 for violation in movement_biomechanical
+        if violation.severity == BiomechanicalSeverity.FATAL
+    )
+    biomechanical_high_count = sum(
+        1 for violation in movement_biomechanical
+        if violation.severity == BiomechanicalSeverity.HIGH
+    )
+    signals["biomechanical_fatal_count"] = float(biomechanical_fatal_count)
+    signals["biomechanical_high_count"] = float(biomechanical_high_count)
+    biomechanical_red = biomechanical_fatal_count > 0
+    biomechanical_amber = biomechanical_high_count > 0 and not biomechanical_red
+
     # Signal 3: ML uncertainty (entropy of softmax). Only fires when a model
     # was supplied. Entropy is the honest signal per advisor — flat
     # distributions mean "the model doesn't know," independent of
@@ -418,17 +454,23 @@ def _audit_one_movement(
         reasons.append("source_bad")
     if cost_red:
         reasons.append("high_cost_density")
+    if biomechanical_red:
+        reasons.append("biomechanical_fatal")
     if ml_red:
         reasons.append("ml_uncertain")
     if source_amber and not source_red:
         reasons.append("source_suspect")
     if cost_amber and not cost_red:
         reasons.append("elevated_cost")
+    if biomechanical_amber:
+        reasons.append("biomechanical_high")
     if ml_amber and not ml_red:
         reasons.append("ml_borderline")
 
     verdict: Literal["clean", "suspect", "bad"]
-    if source_red:
+    if biomechanical_red:
+        verdict = "bad"
+    elif source_red:
         verdict = "bad"
     elif cost_red and ml_red:
         # Both algo and ML say "limit" — strong combined signal.

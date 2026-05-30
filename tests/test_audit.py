@@ -1,15 +1,8 @@
 """Tests for ``fretwise.audit`` — pure module (no ONNX required)."""
 from __future__ import annotations
 
-from fretwise.audit import (
-    AuditReport,
-    MovementSpan,
-    MovementVerdict,
-    audit_score,
-    split_by_movement,
-)
+from fretwise.audit import AuditReport, audit_score, split_by_movement
 from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -128,6 +121,37 @@ def test_audit_clean_short_piece_no_ml() -> None:
     assert len(report.movements) == 1
     assert report.movements[0].verdict == "clean"
     assert report.movements[0].reasons == []
+    assert report.biomechanical_report is not None
+    assert report.biomechanical_report.is_clean
+
+
+def test_audit_biomechanical_fatal_marks_movement_bad() -> None:
+    event = NoteEvent(
+        pitch=60,
+        onset=0.0,
+        duration=0.5,
+        tempo=120.0,
+        measure_index=1,
+    )
+    invalid = FingeringResult(
+        note_id=0,
+        note_event=event,
+        state=FingeringState(
+            string_num=3,
+            fret=5,
+            finger=Finger.OPEN,
+            hand_position=5,
+        ),
+        cost=1.0,
+    )
+
+    report = audit_score([event], [invalid])
+
+    assert report.overall == "bad"
+    assert report.biomechanical_report is not None
+    assert report.biomechanical_report.fatal_count == 1
+    assert report.movements[0].verdict == "bad"
+    assert "biomechanical_fatal" in report.movements[0].reasons
 
 
 def test_audit_half_high_cost_alone_stays_clean() -> None:

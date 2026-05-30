@@ -660,8 +660,11 @@ def resolve_chord_stretch(
         if len(indices) < 2:
             continue
 
-        fretted = [(idx, resolved[idx].state.string_num, resolved[idx].state.fret)
-                   for idx in indices if resolved[idx].state.fret > 0]
+        fretted = [
+            (idx, resolved[idx].state.string_num, resolved[idx].state.fret)
+            for idx in indices
+            if resolved[idx].state.fret > 0 and not resolved[idx].note_event.muted
+        ]
         if len(fretted) < 2:
             continue
 
@@ -747,6 +750,16 @@ def resolve_chord_stretch(
     return resolved
 
 
+def _are_contiguous(values: list[int]) -> bool:
+    if len(values) < 2:
+        return True
+    ordered = sorted(set(values))
+    return len(ordered) == len(values) and all(
+        current + 1 == following
+        for current, following in zip(ordered, ordered[1:], strict=False)
+    )
+
+
 def resolve_chord_conflicts(results: list[FingeringResult]) -> list[FingeringResult]:
     """Fix physically impossible finger assignments within chords.
 
@@ -775,16 +788,28 @@ def resolve_chord_conflicts(results: list[FingeringResult]) -> list[FingeringRes
         # Iteratively resolve conflicts (one pass per conflict, up to group size).
         for _ in range(len(indices)):
             used_fingers: set[Finger] = set()
+            used_index_barres: dict[int, list[int]] = defaultdict(list)
             conflict_idx: int | None = None
 
             for result_idx in indices:
-                f = resolved[result_idx].state.finger
+                state = resolved[result_idx].state
+                f = state.finger
                 if f == Finger.OPEN:
                     continue
+                if f == Finger.INDEX:
+                    barre_strings = used_index_barres[state.fret]
+                    if barre_strings and state.string_num not in barre_strings:
+                        candidate_strings = barre_strings + [state.string_num]
+                        if _are_contiguous(candidate_strings):
+                            barre_strings.append(state.string_num)
+                            used_fingers.add(f)
+                            continue
                 if f in used_fingers:
                     conflict_idx = result_idx
                     break
                 used_fingers.add(f)
+                if f == Finger.INDEX:
+                    used_index_barres[state.fret].append(state.string_num)
 
             if conflict_idx is None:
                 break  # no more conflicts in this onset group
@@ -1316,7 +1341,7 @@ def resolve_finger_continuity(
 
             # Scan backwards until we find the most recent occurrence of this
             # string, or exceed the lookback window.
-            prev_finger: Finger | None = None
+            prev_state: FingeringState | None = None
             for look_back in range(1, oi + 1):
                 prev_onset = sorted_onsets[oi - look_back]
                 if curr_onset - prev_onset > lookback_beats:
@@ -1329,15 +1354,23 @@ def resolve_finger_continuity(
                         continue
                     same_string_found = True
                     if prev_r.state.fret == curr_r.state.fret and prev_r.state.fret != 0:
-                        prev_finger = prev_r.state.finger  # same position → reuse
+                        prev_state = prev_r.state  # same position → reuse
                     # Different fret on same string → finger has moved; no reuse.
                     break
 
                 if same_string_found:
                     break  # found the most recent history for this string
 
-            if prev_finger is None or prev_finger == curr_r.state.finger:
+            if prev_state is None or prev_state.finger == curr_r.state.finger:
                 continue  # nothing to fix
+
+            if (
+                curr_r.note_event.measure_index is not None
+                and prev_r.note_event.measure_index is not None
+                and curr_r.note_event.measure_index != prev_r.note_event.measure_index
+                and curr_r.state.hand_position != prev_state.hand_position
+            ):
+                continue  # phrase/measure boundary: keep the new hand position.
 
             # Guard: don't propagate a finger already used by another note in
             # the same chord — that would create a new conflict.
@@ -1347,6 +1380,7 @@ def resolve_finger_continuity(
                 if other_idx != curr_idx
                 and resolved[other_idx].state.finger != Finger.OPEN
             }
+            prev_finger = prev_state.finger
             if prev_finger in fingers_already_used:
                 continue  # propagating would cause a chord finger conflict
 
@@ -1471,9 +1505,11 @@ def _find_partial_barre(
 
     Rule:
       * Contiguous-string subset of >= 2 notes → partial barre (always).
-      * Non-contiguous subset of >= 3 notes at the same lowest fret → full
-        barre across the gaps (the index is physically flat across the neck;
-        for 3+ notes the barre is always the natural fingering).
+            * Non-contiguous subset of >= 3 notes at the same lowest fret → full
+                barre across the gaps (the index is physically flat across the neck).
+            * Two non-contiguous endpoints are only a barre when they span at least
+                four string steps (wide E/A-shape territory). Short two-endpoint clamps
+                such as 6-7-6 are left to separate fingers.
 
     Args:
         chord_notes: list of (note_idx, string_num, fret) for the fretted
@@ -1500,27 +1536,14 @@ def _find_partial_barre(
     if is_contiguous:
         return [idx for idx, _ in lowest_notes], lowest_fret
 
-    # Case 2 — non-contiguous lowest-fret notes.  Accept as a FULL barre
-    # only if there are 3+ notes (the physical reality of a flat index
-    # across the neck in E/A-shape barre chords).  For 2 non-contiguous
-    # notes, two separate fingers are the natural choice.
-    if len(lowest_notes) >= 3:
+    # Case 2 — non-contiguous lowest-fret notes. Accept as a FULL barre when
+    # 3+ notes clearly anchor the flattened index, or when two endpoints span
+    # a wide E/A-shape barre. Short two-endpoint clamps with a fretted note
+    # between them (e.g. Django 6-7-6-8) should use separate fingers.
+    string_span = strings[-1] - strings[0]
+    if len(lowest_notes) >= 3 or string_span >= 4:
         return [idx for idx, _ in lowest_notes], lowest_fret
 
-    # Case 3 — contiguous sub-run within a larger non-contiguous set.
-    best: list[tuple[int, int]] = [lowest_notes[0]]
-    current: list[tuple[int, int]] = [lowest_notes[0]]
-    for n in lowest_notes[1:]:
-        if n[1] == current[-1][1] + 1:
-            current.append(n)
-        else:
-            if len(current) > len(best):
-                best = list(current)
-            current = [n]
-    if len(current) > len(best):
-        best = current
-    if len(best) >= 2:
-        return [idx for idx, _ in best], lowest_fret
     return None, None
 
 
@@ -1556,6 +1579,7 @@ def resolve_chord_partial_barre(
             for idx in indices
             if resolved[idx].state.fret > 0
             and resolved[idx].state.finger is not Finger.OPEN
+            and not resolved[idx].note_event.muted
         ]
         if len(fretted) < 2:
             continue
@@ -1588,7 +1612,8 @@ def resolve_chord_partial_barre(
              for idx in indices
              if idx not in barre_set
              and resolved[idx].state.fret > 0
-             and resolved[idx].state.finger is not Finger.OPEN],
+             and resolved[idx].state.finger is not Finger.OPEN
+             and not resolved[idx].note_event.muted],
             key=lambda t: (t[1], t[2]),
         )
         available = [Finger.MIDDLE, Finger.RING, Finger.PINKY]
@@ -1673,6 +1698,7 @@ def resolve_chord_unified_hand_position(
             idx for idx in indices
             if resolved[idx].state.fret > 0
             and resolved[idx].state.finger is not Finger.OPEN
+            and not resolved[idx].note_event.muted
         ]
         if len(fretted) < 2:
             continue
@@ -1736,8 +1762,8 @@ def resolve_arpeggio_chord_fingering(
 
     Groups consecutive non-open notes into windows where all fretted positions
     fit within ``max_span`` frets.  Within each window every note is
-    re-fingerised to a single hand_position (the minimum natural hp of the
-    window) and the appropriate finger derived from its fret offset.
+    re-fingerised to a single hand_position anchored on the lowest played fret,
+    and the appropriate finger derived from its fret offset.
 
     This prevents the hand from oscillating by ±1–2 frets across an arpeggio
     that a guitarist would play entirely from one chord shape.
@@ -1787,6 +1813,12 @@ def resolve_arpeggio_chord_fingering(
             if rj.note_event.onset - onset0 > window_beats:
                 break
             if (
+                r0.note_event.measure_index is not None
+                and rj.note_event.measure_index is not None
+                and rj.note_event.measure_index != r0.note_event.measure_index
+            ):
+                break
+            if (
                 rj.state.fret == 0
                 or rj.state.finger is Finger.OPEN
                 or rj.note_event.muted
@@ -1808,12 +1840,7 @@ def resolve_arpeggio_chord_fingering(
             i += 1
             continue
 
-        # Compute target hand_position: minimum natural hp across window.
-        target_hp = min(
-            resolved[k].state.hand_position for k in window_indices
-        )
-        if target_hp < 1:
-            target_hp = 1
+        target_hp = max(1, min_fret)
 
         # Re-fingerise each note: choose the finger whose natural position
         # (target_hp + offset) best matches the note's fret.
@@ -2277,6 +2304,8 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
 
     for onset in sorted(onset_to_indices.keys()):
         indices = onset_to_indices[onset]
+        if len(indices) < 2:
+            continue
         abs_shape = frozenset(
             (resolved[i].state.string_num, resolved[i].state.fret) for i in indices
         )

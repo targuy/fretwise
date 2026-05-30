@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -38,7 +39,7 @@ from fretwise.pdf_conformance import (
     core_pdf_conformance_report,
     legacy_shadow_pdf_conformance_report,
 )
-from fretwise.pipeline import run_pipeline
+from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 
 # ---------------------------------------------------------------------------
@@ -77,6 +78,8 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
 
     # Store config
     app.state.fixtures_dir = fixtures_dir
+    app.state._batch_cancel = threading.Event()
+    app.state._batch_running = False
 
     _register_routes(app)
     return app
@@ -332,15 +335,27 @@ def _register_routes(app: FastAPI) -> None:
             },
         )
 
+    @app.delete("/api/library/refresh-fingerings")
+    def cancel_refresh_fingerings() -> dict[str, bool]:
+        """Signal a running refresh-fingerings batch to stop gracefully."""
+        app.state._batch_cancel.set()
+        return {"cancelled": True}
+
     @app.post("/api/library/refresh-fingerings")
     def refresh_library_fingerings(
         workers: int | None = Query(
-            None, ge=1, le=16,
-            description="Number of parallel worker processes (default = min(8, cpu_count)).",
+            None, ge=1, le=8,
+            description=(
+                "Number of parallel worker processes "
+                "(default = min(cpu_count, 4))."
+            ),
         ),
         force: bool = Query(
             False,
-            description="If false (default), skip files whose _fingered.gp already exists and is newer than the source.",
+            description=(
+                "If false (default), skip files whose _fingered.gp already "
+                "exists and is newer than the source."
+            ),
         ),
     ) -> Response:
         """Recompute fingerings for every GP 7/8 file in the fixtures dir.
@@ -357,10 +372,11 @@ def _register_routes(app: FastAPI) -> None:
         Streams one JSON line per processed file via text/plain so the
         frontend can show live progress without a separate polling loop.
         """
-        from fastapi.responses import StreamingResponse
-        from concurrent.futures import ProcessPoolExecutor, as_completed
         import json as _json
         import os as _os
+        from concurrent.futures import ProcessPoolExecutor, as_completed
+
+        from fastapi.responses import StreamingResponse
 
         fixtures_dir: Path = app.state.fixtures_dir  # type: ignore[attr-defined]
         all_files = sorted(fixtures_dir.glob("*.gp"))
@@ -380,7 +396,9 @@ def _register_routes(app: FastAPI) -> None:
                     pass
             to_process.append(f)
 
-        n_workers = workers or min(8, _os.cpu_count() or 4)
+        n_workers = workers if workers is not None else min(_os.cpu_count() or 4, 4)
+        app.state._batch_cancel.clear()
+        app.state._batch_running = True
 
         def _emit() -> Any:
             yield _json.dumps({
@@ -396,26 +414,59 @@ def _register_routes(app: FastAPI) -> None:
                     "reason": "already fingered",
                 }) + "\n"
             ok = err = skipped = 0
-            if to_process:
-                with ProcessPoolExecutor(max_workers=n_workers) as pool:
-                    futures = {
-                        pool.submit(_process_single_gp, str(f)): f
-                        for f in to_process
-                    }
-                    for fut in as_completed(futures):
-                        result = fut.result()
-                        if result["status"] == "ok":
-                            ok += 1
-                        elif result["status"] == "error":
-                            err += 1
-                        else:
-                            skipped += 1
-                        yield _json.dumps(result) + "\n"
-            yield _json.dumps({
-                "event": "done",
-                "ok": ok, "errors": err, "skipped": skipped,
-                "pre_skipped": len(pre_skipped),
-            }) + "\n"
+            elapsed_times: list[float] = []
+            try:
+                if to_process:
+                    with ProcessPoolExecutor(max_workers=n_workers) as pool:
+                        futures = {
+                            pool.submit(_process_single_gp, str(f)): f
+                            for f in to_process
+                        }
+                        for fut in as_completed(futures):
+                            if app.state._batch_cancel.is_set():
+                                pool.shutdown(cancel_futures=True, wait=False)
+                                yield _json.dumps({
+                                    "event": "cancelled",
+                                    "ok": ok, "errors": err, "skipped": skipped,
+                                }) + "\n"
+                                return
+                            result = fut.result()
+                            if result["status"] == "ok":
+                                ok += 1
+                                if "elapsed_s" in result:
+                                    elapsed_times.append(result["elapsed_s"])
+                            elif result["status"] == "error":
+                                err += 1
+                            else:
+                                skipped += 1
+                            done = ok + err + skipped
+                            avg_s = (
+                                sum(elapsed_times) / len(elapsed_times)
+                                if elapsed_times else None
+                            )
+                            remaining = len(to_process) - done
+                            eta_s = (
+                                round(avg_s * remaining / n_workers)
+                                if avg_s and remaining > 0 else None
+                            )
+                            result["done"] = done
+                            result["total"] = len(to_process)
+                            if avg_s is not None:
+                                result["avg_s"] = round(avg_s, 2)
+                            if eta_s is not None:
+                                result["eta_s"] = eta_s
+                            yield _json.dumps(result) + "\n"
+                yield _json.dumps({
+                    "event": "done",
+                    "ok": ok, "errors": err, "skipped": skipped,
+                    "pre_skipped": len(pre_skipped),
+                    "avg_s": (
+                        round(sum(elapsed_times) / len(elapsed_times), 2)
+                        if elapsed_times else None
+                    ),
+                }) + "\n"
+            finally:
+                app.state._batch_running = False
 
         return StreamingResponse(_emit(), media_type="text/plain")
 
@@ -440,11 +491,19 @@ def _register_routes(app: FastAPI) -> None:
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        results, _stats = _run_legacy_pipeline(events)
-        if not results:
+        payload = _run_legacy_pipeline_with_guard(events)
+        if not payload.results:
             raise HTTPException(500, "Pipeline returned no fingering results")
 
-        mapping = fingerings_by_source_id(results)
+        guard = _guard_summary(payload)
+        if payload.biomechanical_report.fatal_count:
+            raise HTTPException(
+                409,
+                "Biomechanical guard failed before GP export: "
+                f"{guard['fatal']} fatal violation(s), measures={guard['measures']}",
+            )
+
+        mapping = fingerings_by_source_id(payload.results)
         try:
             gp_bytes = write_gp_with_fingerings(filepath, mapping)
         except ValueError as exc:
@@ -458,6 +517,8 @@ def _register_routes(app: FastAPI) -> None:
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}"',
                 "X-Fretwise-Annotated-Notes": str(len(mapping)),
+                "X-Fretwise-Biomechanical-Fatal": str(guard["fatal"]),
+                "X-Fretwise-Biomechanical-High": str(guard["high"]),
             },
         )
 
@@ -756,7 +817,11 @@ def _register_routes(app: FastAPI) -> None:
     @app.get("/api/settings")
     async def get_settings() -> JSONResponse:
         """Get current user settings."""
-        return JSONResponse(_settings.load())
+        cfg = _settings.load()
+        # Always reflect the runtime-active directory (may differ from config.json
+        # when the server was launched with --dir).
+        cfg["partitions_dir"] = str(app.state.fixtures_dir)  # type: ignore[attr-defined]
+        return JSONResponse(cfg)
 
     @app.post("/api/settings")
     async def update_settings(request: Request) -> JSONResponse:
@@ -1032,6 +1097,35 @@ def _run_legacy_pipeline(
     )
 
 
+def _run_legacy_pipeline_with_guard(
+    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
+) -> PipelineResult:
+    weights = CostWeights.performance()
+    generator = StateGenerator()
+    player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
+    cost_fn = CostFunction(
+        weights=weights,
+        rule_preferences=rule_preferences,
+        player_cost_model=player_cost_model,
+    )
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher = PatternMatcher()
+    return run_pipeline_with_guard_report(
+        events, generator, optimizer, pattern_matcher=matcher,
+        chord_finger_classifier=_get_chord_finger_classifier(),
+    )
+
+
+def _guard_summary(payload: PipelineResult) -> dict[str, Any]:
+    measures = sorted(payload.biomechanical_report.by_measure().keys())
+    return {
+        "fatal": payload.biomechanical_report.fatal_count,
+        "high": payload.biomechanical_report.high_count,
+        "measures": measures[:20],
+        "measure_count": len(measures),
+    }
+
+
 def _safe_audit(
     events: list[NoteEvent],
     results: list[FingeringResult],
@@ -1089,8 +1183,9 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
 
     p = _P(path_str)
     try:
+        import time as _time
         from fretwise.parser import get_adapter
-        from fretwise.pipeline import run_pipeline
+        from fretwise.pipeline import run_pipeline_with_guard_report
         from fretwise.generator import StateGenerator
         from fretwise.optimizer import ViterbiOptimizer
         from fretwise.patterns import PatternMatcher
@@ -1102,11 +1197,24 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
             return {
                 "file": p.name, "status": "skip", "reason": "no notes",
             }
-        cost_fn = CostFunction(weights=CostWeights.performance())
-        results, _stats = run_pipeline(
+        weights = CostWeights.performance()
+        player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
+        cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
+        t0 = _time.monotonic()
+        payload = run_pipeline_with_guard_report(
             events, StateGenerator(), ViterbiOptimizer(cost_fn),
             pattern_matcher=PatternMatcher(),
+            chord_finger_classifier=_get_chord_finger_classifier(),
         )
+        if payload.biomechanical_report.fatal_count:
+            return {
+                "file": p.name,
+                "status": "error",
+                "error": "biomechanical guard failed",
+                "guard": _guard_summary(payload),
+            }
+        results = payload.results
+        elapsed_s = round(_time.monotonic() - t0, 2)
         mapping = fingerings_by_source_id(results)
         gp_bytes = write_gp_with_fingerings(p, mapping)
         out = p.with_name(f"{p.stem}_fingered{p.suffix}")
@@ -1114,6 +1222,7 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
         return {
             "file": p.name, "status": "ok",
             "annotated": len(mapping), "out": out.name,
+            "elapsed_s": elapsed_s,
         }
     except Exception as exc:  # noqa: BLE001 — never break the pool
         return {"file": p.name, "status": "error", "error": str(exc)}

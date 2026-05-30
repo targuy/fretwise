@@ -3,6 +3,7 @@
 Usage:
     fretwise parse song.gp5
     fretwise solve song.gp5
+    fretwise finger song.gp
     fretwise solve song.gp5 --mode performance --output song_fingered.pdf
     fretwise solve song.gp5 --mode learning --output song_fingered.txt
     fretwise info song.gp5
@@ -30,6 +31,7 @@ from fretwise.export import (
     render_staff_pdf,
     render_text_report,
 )
+from fretwise.export.gp_writer import fingerings_by_source_id, write_gp_with_fingerings
 from fretwise.generator import StateGenerator
 from fretwise.models import FingeringResult
 from fretwise.optimizer import ViterbiOptimizer
@@ -40,7 +42,7 @@ from fretwise.pdf_conformance import (
     core_pdf_conformance_report,
     legacy_shadow_pdf_conformance_report,
 )
-from fretwise.pipeline import run_pipeline
+from fretwise.pipeline import PipelineResult, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights
 
 
@@ -131,6 +133,74 @@ def _load_player_cost_model() -> object | None:
     except (ImportError, FileNotFoundError, AssertionError):
         return None
 
+
+def _guarded_pipeline_result(
+    events: list[Any],
+    mode: str,
+) -> tuple[PipelineResult, object | None]:
+    weights = _MODES[mode]()
+    player_cost_model = _load_player_cost_model() if weights.gamma > 0 else None
+    cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher = PatternMatcher()
+    payload = run_pipeline_with_guard_report(
+        events,
+        StateGenerator(),
+        optimizer,
+        pattern_matcher=matcher,
+        chord_finger_classifier=_load_chord_finger_classifier(),
+    )
+    return payload, player_cost_model
+
+
+def _format_guard_measures(payload: PipelineResult) -> str:
+    measures = sorted(payload.biomechanical_report.by_measure())
+    if not measures:
+        return "-"
+    shown = ",".join(str(measure) for measure in measures[:20])
+    if len(measures) > 20:
+        shown += f",...(+{len(measures) - 20})"
+    return shown
+
+
+def _write_guarded_gp_file(
+    source: Path,
+    output: Path,
+    payload: PipelineResult,
+    *,
+    quiet: bool,
+) -> None:
+    if source.suffix.lower() != ".gp":
+        click.echo(
+            "Error: GP regeneration only supports Guitar Pro 7/8 (.gp) files.",
+            err=True,
+        )
+        sys.exit(1)
+    if payload.biomechanical_report.fatal_count:
+        click.echo(
+            "Error: biomechanical guard failed before GP export: "
+            f"{payload.biomechanical_report.fatal_count} fatal violation(s), "
+            f"measures={_format_guard_measures(payload)}",
+            err=True,
+        )
+        sys.exit(1)
+
+    mapping = fingerings_by_source_id(payload.results)
+    try:
+        gp_bytes = write_gp_with_fingerings(source, mapping)
+    except ValueError as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    output.write_bytes(gp_bytes)
+    if not quiet:
+        click.echo(
+            f"GP written to '{output}' "
+            f"({len(mapping)} annotated note(s), "
+            f"fatal={payload.biomechanical_report.fatal_count}, "
+            f"high={payload.biomechanical_report.high_count})."
+        )
+
 _MODES = {
     "reference": CostWeights.reference,
     "performance": CostWeights.performance,
@@ -138,7 +208,7 @@ _MODES = {
     "learning": CostWeights.learning,
 }
 
-_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined")
+_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined", "gp")
 
 _SUPPORTED_INPUT = {
     ".gp3": "GuitarPro 3",
@@ -158,6 +228,7 @@ _SUPPORTED_OUTPUT = {
     "pdf": "Professional A4 PDF tablature with LH finger annotations",
     "staff": "Standard music notation (treble clef) PDF",
     "combined": "Standard notation + tab stacked PDF",
+    "gp": "Guitar Pro 7/8 GPIF with LeftFingering annotations",
 }
 
 
@@ -175,6 +246,7 @@ def main() -> None:
       fretwise parse song.gp5         # list all notes with candidate states
       fretwise solve song.gp5         # print JSON fingerings to stdout
       fretwise solve song.gp5 -o out.pdf   # export PDF tablature
+    fretwise finger song.gp         # write song_fingered.gp
       fretwise formats                # list supported file formats
     """
 
@@ -306,7 +378,7 @@ def parse(file: Path, verbose: bool, limit: int, quiet: bool) -> None:
     default=None,
     help=(
         "Force output format, overriding the file extension. "
-        "Choices: json, txt, pdf."
+        "Choices: json, txt, pdf, staff, combined, gp."
     ),
 )
 @click.option(
@@ -388,6 +460,7 @@ def solve(
       .json            - full note-by-note JSON (fingering + alternatives + cost)
       .txt             - ASCII tablature + text report (plain text)
       .pdf             - A4 PDF tablature with LH finger annotations
+            .gp              - Guitar Pro 7/8 file annotated with LeftFingering
 
     Use --format / -f to override the format inferred from the output extension.
     Use --format staff or --format combined with a .pdf output path
@@ -399,13 +472,6 @@ def solve(
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
 
-    generator = StateGenerator()
-    weights = _MODES[mode]()
-    player_cost_model = _load_player_cost_model() if weights.gamma > 0 else None
-    cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
-    optimizer = ViterbiOptimizer(cost_fn)
-    matcher = PatternMatcher()
-
     try:
         events = adapter.parse(file)
     except (UnsupportedFormatError, ParseError) as exc:
@@ -416,11 +482,9 @@ def solve(
         click.echo("No notes found.")
         return
 
-    classifier = _load_chord_finger_classifier()
-    results, stats = run_pipeline(
-        events, generator, optimizer, pattern_matcher=matcher,
-        chord_finger_classifier=classifier,
-    )
+    payload, player_cost_model = _guarded_pipeline_result(events, mode)
+    results = payload.results
+    stats = payload.stats
     if not results:
         click.echo("No valid fingering states could be generated.", err=True)
         sys.exit(1)
@@ -583,9 +647,75 @@ def solve(
         if not quiet:
             click.echo(f"Combined PDF written to '{output}'.")
 
+    elif effective_fmt == "gp":
+        _write_guarded_gp_file(file, output, payload, quiet=quiet)
+
     else:
         click.echo(f"Error: Unsupported format '{effective_fmt}'.", err=True)
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# finger
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise finger song.gp\n"
+        "  fretwise finger song.gp -o song_checked.gp\n"
+        "  fretwise finger song.gp --mode learning\n"
+    )
+)
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Output .gp path (default: FILE stem suffixed with _fingered).",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(list(_MODES.keys())),
+    default="performance",
+    show_default=True,
+    help="Weighting mode for the cost function.",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress success messages; errors still go to stderr.",
+)
+def finger(file: Path, output: Path | None, mode: str, quiet: bool) -> None:
+    """Regenerate one Guitar Pro 7/8 file with left-hand fingerings."""
+    if file.suffix.lower() != ".gp":
+        click.echo(
+            "Error: 'finger' only supports Guitar Pro 7/8 (.gp) files.",
+            err=True,
+        )
+        sys.exit(1)
+
+    try:
+        adapter = get_adapter(file)
+        events = adapter.parse(file)
+    except (UnsupportedFormatError, ParseError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    if not events:
+        click.echo("No notes found.")
+        return
+
+    payload, _player_cost_model = _guarded_pipeline_result(events, mode)
+    if not payload.results:
+        click.echo("No valid fingering states could be generated.", err=True)
+        sys.exit(1)
+
+    output_path = output or file.with_name(f"{file.stem}_fingered{file.suffix}")
+    _write_guarded_gp_file(file, output_path, payload, quiet=quiet)
 
 
 # ---------------------------------------------------------------------------
@@ -882,3 +1012,7 @@ def _results_to_json(results: list[FingeringResult]) -> str:
 
 def _print_json(results: list[FingeringResult]) -> None:
     click.echo(_results_to_json(results))
+
+
+if __name__ == "__main__":
+    main()
