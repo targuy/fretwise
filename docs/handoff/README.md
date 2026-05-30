@@ -20,6 +20,7 @@
 |---|---|---|
 | `README.md` | Les deux équipes | Ce fichier — orchestration |
 | `MODEL_SPEC.md` | **Équipe ML** | Schémas FretWise, contrats pipeline, points d'intégration ML |
+| `REQUEST_TO_GUITARDATASET_ML_TRAINING_SPEC_V2.md` | **Équipe ML** | Demande détaillée de nouveaux modèles, datasets, labels, métriques et artefacts |
 | `QUESTIONS_FROM_FRETWISE.md` | **Équipe ML** | Ce que FretWise a besoin de savoir |
 
 ## Règles de coordination

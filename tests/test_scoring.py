@@ -17,6 +17,7 @@ from fretwise.scoring import (
     cost_sequential_crossing,
     cost_stretch,
     cost_string_change,
+    resolve_arpeggio_chord_fingering,
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
     resolve_chord_finger_span,
@@ -691,19 +692,46 @@ class TestResolveChordConflicts:
         out = resolve_chord_conflicts([r0, r1])
         assert out[0].state.finger != out[1].state.finger
 
+    def test_index_barre_same_fret_contiguous_strings_is_preserved(self) -> None:
+        results = [
+            _fr(0, 0.0, 1, 5, Finger.INDEX),
+            _fr(1, 0.0, 2, 5, Finger.INDEX),
+            _fr(2, 0.0, 3, 7, Finger.RING),
+        ]
+
+        out = resolve_chord_conflicts(results)
+
+        assert out[0].state.finger is Finger.INDEX
+        assert out[1].state.finger is Finger.INDEX
+        assert out[2].state.finger is Finger.RING
+
 
 # ---------------------------------------------------------------------------
 # resolve_finger_continuity
 # ---------------------------------------------------------------------------
 
 
-def _seq_fr(note_id: int, onset: float, string_num: int, fret: int, finger: Finger) -> FingeringResult:
+def _seq_fr(
+    note_id: int,
+    onset: float,
+    string_num: int,
+    fret: int,
+    finger: Finger,
+    hand_position: int | None = None,
+    measure_index: int | None = None,
+) -> FingeringResult:
     """Helper: FingeringResult with no alternatives (continuity from scratch)."""
     _offsets = {Finger.INDEX: 0, Finger.MIDDLE: 1, Finger.RING: 2, Finger.PINKY: 3}
     offset = _offsets.get(finger, 0)
-    hp = max(1, fret - offset) if fret > 0 else 1
+    hp = hand_position if hand_position is not None else max(1, fret - offset) if fret > 0 else 1
     state = FingeringState(string_num=string_num, fret=fret, finger=finger, hand_position=hp)
-    note = NoteEvent(pitch=60, onset=onset, duration=1.0, tempo=120.0)
+    note = NoteEvent(
+        pitch=60,
+        onset=onset,
+        duration=1.0,
+        tempo=120.0,
+        measure_index=measure_index,
+    )
     return FingeringResult(note_id=note_id, note_event=note, state=state, cost=1.0)
 
 
@@ -774,6 +802,17 @@ class TestResolveFingerContinuity:
         # Conflict prevention: should NOT propagate.
         assert len(out) == 3  # no crash
 
+    def test_measure_boundary_with_new_hand_position_breaks_continuity(self) -> None:
+        results = [
+            _seq_fr(0, 0.0, 3, 2, Finger.MIDDLE, hand_position=1, measure_index=6),
+            _seq_fr(1, 1.0, 3, 2, Finger.INDEX, hand_position=2, measure_index=7),
+        ]
+
+        out = resolve_finger_continuity(results)
+
+        assert out[1].state.finger is Finger.INDEX
+        assert out[1].state.hand_position == 2
+
 
 # ---------------------------------------------------------------------------
 # resolve_chord_partial_barre
@@ -817,17 +856,38 @@ class TestResolveChordPartialBarre:
         for r in out:
             assert r.state.hand_position == 7
 
-    def test_no_adjacent_same_fret_no_rewrite(self) -> None:
-        # s1 f7 and s3 f7 — NOT adjacent (s2 missing).
-        # Two separate fingers on non-contiguous strings should not be barred.
+    def test_non_contiguous_two_endpoint_barre_is_not_invented(self) -> None:
+        # Django-style 6-7-6-8: two same-fret endpoints with a fretted note
+        # between them should not become an index clamp around the middle finger.
         results = [
-            _chord_fr(0, 0.0, 1, 7, Finger.INDEX,  7),
-            _chord_fr(1, 0.0, 3, 7, Finger.MIDDLE, 6),
-            _chord_fr(2, 0.0, 4, 9, Finger.RING,   7),
+            _chord_fr(0, 0.0, 2, 6, Finger.MIDDLE, 5),
+            _chord_fr(1, 0.0, 3, 7, Finger.RING, 5),
+            _chord_fr(2, 0.0, 4, 6, Finger.INDEX, 6),
+            _chord_fr(3, 0.0, 1, 8, Finger.PINKY, 5),
         ]
         out = resolve_chord_partial_barre(results)
-        # No contiguous barre → preserved
-        assert out[1].state.finger is Finger.MIDDLE
+        assert [r.state.finger for r in out] == [
+            Finger.MIDDLE,
+            Finger.RING,
+            Finger.INDEX,
+            Finger.PINKY,
+        ]
+
+    def test_wide_non_contiguous_two_endpoint_barre_is_allowed(self) -> None:
+        # A-shape barre, e.g. 5-7-7-7-5: the index spans a wide range.
+        results = [
+            _chord_fr(0, 0.0, 1, 5, Finger.MIDDLE, 4),
+            _chord_fr(1, 0.0, 2, 7, Finger.PINKY, 4),
+            _chord_fr(2, 0.0, 3, 7, Finger.RING, 5),
+            _chord_fr(3, 0.0, 4, 7, Finger.INDEX, 7),
+            _chord_fr(4, 0.0, 5, 5, Finger.MIDDLE, 4),
+        ]
+
+        out = resolve_chord_partial_barre(results)
+
+        assert out[0].state.finger is Finger.INDEX
+        assert out[4].state.finger is Finger.INDEX
+        assert all(result.state.hand_position == 5 for result in out)
 
     def test_two_adjacent_notes_form_barre(self) -> None:
         # s2 f5 + s1 f5, contiguous at same fret.
@@ -968,6 +1028,54 @@ class TestResolvePinkyRunToIndex:
         out = resolve_pinky_run_to_index(results)
         assert [r.note_id for r in out] == [10, 11, 12]
         assert all(r.note_event is results[i].note_event for i, r in enumerate(out))
+
+
+class TestResolveArpeggioChordFingering:
+    def test_stabilisation_anchors_on_lowest_played_fret(self) -> None:
+        results = [
+            _fr_hp(0, 0.0, 5, 7, Finger.PINKY, 4),
+            _fr_hp(1, 1.0, 4, 7, Finger.PINKY, 4),
+            _fr_hp(2, 2.0, 3, 5, Finger.MIDDLE, 4),
+            _fr_hp(3, 3.5, 3, 7, Finger.PINKY, 4),
+            _fr_hp(4, 3.75, 3, 5, Finger.MIDDLE, 4),
+        ]
+
+        out = resolve_arpeggio_chord_fingering(results)
+
+        assert [r.state.finger for r in out] == [
+            Finger.RING,
+            Finger.RING,
+            Finger.INDEX,
+            Finger.RING,
+            Finger.INDEX,
+        ]
+        assert [r.state.hand_position for r in out] == [5, 5, 5, 5, 5]
+
+    def test_stabilisation_does_not_pull_previous_measure_down(self) -> None:
+        results = [
+            _fr(0, 0.0, 5, 7, Finger.INDEX),
+            _fr(1, 1.0, 4, 7, Finger.MIDDLE),
+            _fr(2, 2.0, 3, 5, Finger.INDEX),
+            _fr(3, 3.5, 3, 7, Finger.MIDDLE),
+            _fr(4, 3.75, 3, 5, Finger.INDEX),
+            _fr(5, 4.0, 3, 4, Finger.INDEX),
+        ]
+        for result in results[:5]:
+            result.note_event.measure_index = 1
+        results[5].note_event.measure_index = 2
+
+        out = resolve_arpeggio_chord_fingering(results)
+
+        assert [r.state.finger for r in out[:5]] == [
+            Finger.RING,
+            Finger.RING,
+            Finger.INDEX,
+            Finger.RING,
+            Finger.INDEX,
+        ]
+        assert [r.state.hand_position for r in out[:5]] == [5, 5, 5, 5, 5]
+        assert out[5].state.finger is Finger.INDEX
+        assert out[5].state.hand_position == 4
 
 
 # ---------------------------------------------------------------------------
@@ -1168,14 +1276,15 @@ class TestResolveSectionConsistency:
         out = resolve_section_consistency(results)
         assert out[0].state.finger == Finger.INDEX
 
-    def test_repeated_shape_gets_canonical_finger(self) -> None:
-        # Same (string, fret) at two different onsets — second should match first.
+    def test_repeated_single_note_keeps_contextual_finger(self) -> None:
+        # Same single note at two different onsets can require different fingers
+        # depending on the local hand position; section consistency is for shapes.
         results = [
-            _fr(0, 0.0, 3, 5, Finger.INDEX),    # first → canonical = INDEX
-            _fr(1, 4.0, 3, 5, Finger.MIDDLE),   # second → should become INDEX
+            _fr(0, 0.0, 3, 5, Finger.INDEX),
+            _fr(1, 4.0, 3, 5, Finger.MIDDLE),
         ]
         out = resolve_section_consistency(results)
-        assert out[1].state.finger == Finger.INDEX
+        assert out[1].state.finger == Finger.MIDDLE
 
     def test_different_fret_not_affected(self) -> None:
         results = [

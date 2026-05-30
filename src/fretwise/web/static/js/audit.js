@@ -14,6 +14,8 @@ const REASON_LABELS = {
   source_suspect: 'Source suspecte',
   high_cost_density: 'Coût très élevé',
   elevated_cost: 'Coût élevé',
+  biomechanical_fatal: 'Biomécanique impossible',
+  biomechanical_high: 'Biomécanique risquée',
   ml_uncertain: 'Modèle ML incertain',
   ml_borderline: 'ML hésitant',
 };

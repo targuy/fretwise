@@ -211,22 +211,28 @@ const handVizPanel  = $('#hand-viz-panel');
 const handVizFrame  = $('#hand-viz-frame');
 const handVizClose  = $('#hand-viz-close');
 const handVizResync = $('#hand-viz-resync');
+const handVizPopout = $('#hand-viz-popout');
 const handVizDrag   = $('#hand-viz-drag');
+let handVizPopupWindow = null;
 
 // ── Page routing ────────────────────────────────────────────────────
 
 function showPage(page) {
   const isViewer = page === 'viewer';
+  const isSettings = page === 'settings';
   fileSelector.style.display  = page === 'files'    ? '' : 'none';
   trackSelector.style.display = page === 'tracks'   ? '' : 'none';
   tabViewer.style.display     = isViewer ? '' : 'none';
   toolbar.style.display       = isViewer ? '' : 'none';
-  if (settingsPage)     settingsPage.style.display     = page === 'settings' ? '' : 'none';
+  if (settingsPage)     settingsPage.style.display     = isSettings ? '' : 'none';
   if (headerMeta)       headerMeta.style.display       = isViewer ? '' : 'none';
   if (btnHeaderBack)    btnHeaderBack.style.display    = isViewer ? '' : 'none';
   if (btnDownloadGp)    btnDownloadGp.style.display    = isViewer ? '' : 'none';
   const tabsBar = $('#track-tabs-bar');
   if (tabsBar) tabsBar.style.display = isViewer ? '' : 'none';
+  // Update settings nav: "Back to song" only active when a track is loaded
+  const setBackViewer = $('#set-back-viewer');
+  if (setBackViewer) setBackViewer.disabled = !(currentTrackId != null && currentFile != null);
   // Ensure the old bottom bar class doesn't shift bottom elements
   document.body.classList.remove('has-multitrack-bar');
 }
@@ -1256,7 +1262,9 @@ function initRenderer(data) {
   // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
   playback.onTimeChange = (sec) => {
     if (tcCurrent) tcCurrent.textContent = _fmtTime(sec);
-    if (handVizPanel && handVizPanel.style.display !== 'none') _postHandVizTime();
+    const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
+    const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
+    if (panelVisible || popupVisible) _postHandVizTime();
   };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
   playback.enableAudio();
@@ -1739,60 +1747,176 @@ if (btnHeaderGp) {
 }
 
 const btnRefreshFingerings = $('#set-refresh-fingerings');
+const btnRefreshResume = $('#set-refresh-resume');
+const btnRefreshForceSave = $('#set-refresh-force-save');
+const btnRefreshStop = $('#set-refresh-stop');
+const refreshWorkers = $('#set-refresh-workers');
+const refreshWorkersValue = $('#set-refresh-workers-value');
 const refreshFingeringsStatus = $('#set-refresh-fingerings-status');
-if (btnRefreshFingerings) {
-  btnRefreshFingerings.addEventListener('click', async () => {
+const refreshProgressWrap = $('#set-refresh-progress-wrap');
+const refreshProgress = $('#set-refresh-progress');
+const refreshEta = $('#set-refresh-eta');
+
+function _setRefreshRunning(running) {
+  if (btnRefreshFingerings) btnRefreshFingerings.disabled = running;
+  if (btnRefreshResume) btnRefreshResume.disabled = running;
+  if (btnRefreshForceSave) btnRefreshForceSave.disabled = running;
+  if (btnRefreshStop) { btnRefreshStop.style.display = running ? '' : 'none'; btnRefreshStop.disabled = false; }
+  if (refreshWorkers) refreshWorkers.disabled = running;
+  if (refreshProgressWrap) refreshProgressWrap.style.display = running ? '' : 'none';
+}
+
+function _refreshWorkerCount() {
+  const raw = Number.parseInt(refreshWorkers?.value || '4', 10);
+  return Math.max(1, Math.min(8, Number.isFinite(raw) ? raw : 4));
+}
+
+function _syncRefreshWorkersLabel() {
+  const count = _refreshWorkerCount();
+  if (refreshWorkers) refreshWorkers.value = String(count);
+  if (refreshWorkersValue) refreshWorkersValue.textContent = String(count);
+}
+
+if (refreshWorkers) {
+  _syncRefreshWorkersLabel();
+  refreshWorkers.addEventListener('input', _syncRefreshWorkersLabel);
+}
+
+if (btnRefreshStop) {
+  btnRefreshStop.addEventListener('click', async () => {
+    btnRefreshStop.disabled = true;
+    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Annulation en cours…';
+    try { await fetch('/api/library/refresh-fingerings', { method: 'DELETE' }); } catch (_) {}
+  });
+}
+
+async function _runRefreshFingerings({ confirmRun = true, forceOverride = null, confirmMessage = null } = {}) {
+  if (confirmRun) {
     const ok = window.confirm(
-      'Cette opération va ré-écrire un fichier <nom>_fingered.gp à côté '
-      + 'de chaque .gp de votre bibliothèque. L\'original reste intact. '
-      + 'Sur de gros corpus ça peut prendre plusieurs minutes. Continuer ?'
+      confirmMessage || (
+        'Cette opération complète les fichiers <nom>_fingered.gp manquants ou périmés '
+        + 'dans le dossier de partitions. Les originaux restent intacts. '
+        + 'Sur de gros corpus ça peut prendre plusieurs minutes. Continuer ?'
+      )
     );
     if (!ok) return;
-    btnRefreshFingerings.disabled = true;
-    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Démarrage…';
-    try {
-      const res = await fetch('/api/library/refresh-fingerings', { method: 'POST' });
-      if (!res.ok || !res.body) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = '';
-      let processed = 0;
-      let total = 0;
-      let okCount = 0;
-      let errCount = 0;
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        let nl;
-        while ((nl = buf.indexOf('\n')) !== -1) {
-          const line = buf.slice(0, nl).trim();
-          buf = buf.slice(nl + 1);
-          if (!line) continue;
-          let msg;
-          try { msg = JSON.parse(line); } catch (_) { continue; }
-          if (msg.event === 'start') {
-            total = msg.total_files || 0;
-            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `0 / ${total}`;
-          } else if (msg.event === 'done') {
+  }
+  _setRefreshRunning(true);
+  if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Démarrage…';
+  if (refreshProgress) { refreshProgress.value = 0; refreshProgress.max = 100; }
+  if (refreshEta) refreshEta.textContent = '';
+  try {
+    const forceChecked = forceOverride ?? ($('#set-refresh-force')?.checked ?? false);
+    const params = new URLSearchParams({ workers: String(_refreshWorkerCount()) });
+    if (forceChecked) params.set('force', 'true');
+    const refreshUrl = `/api/library/refresh-fingerings?${params.toString()}`;
+    const res = await fetch(refreshUrl, { method: 'POST' });
+    if (!res.ok || !res.body) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let okCount = 0;
+    let errCount = 0;
+    let totalFiles = 0;
+    let toProcess = 0;
+    let preSkipped = 0;
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) !== -1) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line) continue;
+        let msg;
+        try { msg = JSON.parse(line); } catch (_) { continue; }
+        if (msg.event === 'start') {
+          totalFiles = msg.total_files || 0;
+          toProcess = msg.to_process || 0;
+          preSkipped = msg.pre_skipped || 0;
+          const progressMax = totalFiles || toProcess || 1;
+          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = preSkipped; }
+          const preSkipTxt = preSkipped > 0 ? `, ${preSkipped} déjà à jour` : '';
+          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
+            `${preSkipped} / ${progressMax} traités${preSkipTxt} — ${toProcess} à faire (${msg.workers} workers)`;
+        } else if (msg.event === 'done') {
+          const preSkip = msg.pre_skipped ?? preSkipped;
+          const doneTotal = preSkip + (msg.ok || 0) + (msg.errors || 0) + (msg.skipped || 0);
+          const progressMax = totalFiles || doneTotal || 1;
+          const preSkipTxt = preSkip > 0 ? `, ${preSkip} déjà à jour` : '';
+          const avgTxt = msg.avg_s ? ` — ${msg.avg_s}s/fichier` : '';
+          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
+            `Terminé : ${doneTotal} / ${progressMax} — ${msg.ok} OK, ${msg.errors} erreurs, ${msg.skipped} ignorés${preSkipTxt}${avgTxt}.`;
+          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = progressMax; }
+          if (refreshEta) refreshEta.textContent = '';
+        } else if (msg.event === 'cancelled') {
+          const doneTotal = preSkipped + (msg.ok || 0) + (msg.errors || 0) + (msg.skipped || 0);
+          const progressMax = totalFiles || doneTotal || 1;
+          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = doneTotal; }
+          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
+            `Annulé — ${doneTotal} / ${progressMax} traités (${msg.ok} OK, ${msg.errors} erreurs, ${preSkipped} déjà à jour). Cliquez sur Reprise pour continuer.`;
+          if (refreshEta) refreshEta.textContent = '';
+          if (btnRefreshResume) btnRefreshResume.style.display = '';
+        } else if (msg.status) {
+          if (msg.status === 'ok') okCount++;
+          if (msg.status === 'error') errCount++;
+          // Pool results have "done"; pre-skipped lines don't.
+          if (msg.done != null) {
+            const doneTotal = preSkipped + msg.done;
+            const progressMax = totalFiles || toProcess || 1;
+            if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = doneTotal; }
+            const pct = progressMax > 0 ? ` (${Math.round((doneTotal / progressMax) * 100)}%)` : '';
             if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-              `Terminé : ${msg.ok} OK, ${msg.errors} erreurs, ${msg.skipped} ignorés.`;
-          } else if (msg.status) {
-            processed++;
-            if (msg.status === 'ok') okCount++;
-            if (msg.status === 'error') errCount++;
-            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-              `${processed} / ${total}  (${okCount} OK, ${errCount} erreurs) — ${msg.file}`;
+              `${doneTotal} / ${progressMax}${pct}  (${okCount} OK, ${errCount} err, ${preSkipped} déjà à jour) — ${msg.file}`;
+            if (refreshEta) {
+              if (msg.eta_s != null) {
+                const m = Math.floor(msg.eta_s / 60);
+                const s = msg.eta_s % 60;
+                const etaTxt = m > 0 ? `${m}m ${s}s` : `${s}s`;
+                const avgTxt = msg.avg_s ? `${msg.avg_s}s/fichier · ` : '';
+                refreshEta.textContent = `${avgTxt}ETA : ${etaTxt}`;
+              } else if (msg.avg_s) {
+                refreshEta.textContent = `${msg.avg_s}s/fichier`;
+              }
+            }
           }
         }
       }
-    } catch (err) {
-      if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `Erreur : ${err.message}`;
-    } finally {
-      btnRefreshFingerings.disabled = false;
     }
+  } catch (err) {
+    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `Erreur : ${err.message}`;
+  } finally {
+    _setRefreshRunning(false);
+  }
+}
+
+if (btnRefreshFingerings) {
+  btnRefreshFingerings.addEventListener('click', () => {
+    if (btnRefreshResume) btnRefreshResume.style.display = 'none';
+    _runRefreshFingerings({ confirmRun: true });
+  });
+}
+
+if (btnRefreshForceSave) {
+  btnRefreshForceSave.addEventListener('click', () => {
+    if (btnRefreshResume) btnRefreshResume.style.display = 'none';
+    _runRefreshFingerings({
+      confirmRun: true,
+      forceOverride: true,
+      confirmMessage:
+        'Cette opération recalculera TOUS les fichiers .gp du dossier de partitions '
+        + 'et remplacera leurs fichiers <nom>_fingered.gp. Les originaux .gp restent intacts. Continuer ?',
+    });
+  });
+}
+
+if (btnRefreshResume) {
+  btnRefreshResume.addEventListener('click', () => {
+    btnRefreshResume.style.display = 'none';
+    _runRefreshFingerings({ confirmRun: false, forceOverride: false });
   });
 }
 
@@ -1958,13 +2082,15 @@ function _buildHandVizPayload() {
 }
 
 function _postHandVizData() {
-  if (!handVizFrame || !handVizFrame.contentWindow) return;
   const payload = _buildHandVizPayload();
   if (!payload) return;
-  handVizFrame.contentWindow.postMessage(
-    { type: 'fretwise-hand-data', payload },
-    '*',
-  );
+  const message = { type: 'fretwise-hand-data', payload };
+  if (handVizFrame && handVizFrame.contentWindow) {
+    handVizFrame.contentWindow.postMessage(message, '*');
+  }
+  if (handVizPopupWindow && !handVizPopupWindow.closed) {
+    handVizPopupWindow.postMessage(message, '*');
+  }
   // After reinstalling data, also push current time so the iframe starts
   // at the right place instead of t=0.
   _postHandVizTime();
@@ -1976,14 +2102,30 @@ function _reloadHandVizFrame() {
 }
 
 function _postHandVizTime() {
-  if (!handVizFrame || !handVizFrame.contentWindow) return;
-  if (!handVizPanel || handVizPanel.style.display === 'none') return;
+  const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
+  const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
+  if (!panelVisible && !popupVisible) return;
   if (!playback || typeof playback.getCurrentTimeSec !== 'function') return;
-  handVizFrame.contentWindow.postMessage(
-    { type: 'fretwise-hand-seek', t: playback.getCurrentTimeSec(),
-      playing: !!playback.isPlaying },
-    '*',
-  );
+  const message = {
+    type: 'fretwise-hand-seek',
+    t: playback.getCurrentTimeSec(),
+    playing: !!playback.isPlaying,
+  };
+  if (panelVisible && handVizFrame && handVizFrame.contentWindow) {
+    handVizFrame.contentWindow.postMessage(message, '*');
+  }
+  if (popupVisible) handVizPopupWindow.postMessage(message, '*');
+}
+
+function _openHandVizPopup() {
+  const features = 'popup=yes,width=760,height=680,left=80,top=40,resizable=yes,scrollbars=yes';
+  if (!handVizPopupWindow || handVizPopupWindow.closed) {
+    handVizPopupWindow = window.open(`/static/hand_viz.html?v=${Date.now()}`, 'fretwise-hand-viz', features);
+  } else {
+    handVizPopupWindow.focus();
+  }
+  setTimeout(_postHandVizData, 350);
+  setTimeout(_postHandVizTime, 450);
 }
 
 function _toggleHandViz() {
@@ -2009,6 +2151,7 @@ if (handVizResync) handVizResync.addEventListener('click', () => {
   _reloadHandVizFrame();
   setTimeout(_postHandVizData, 250);
 });
+if (handVizPopout) handVizPopout.addEventListener('click', _openHandVizPopup);
 
 // Make the panel draggable by its header.
 if (handVizDrag && handVizPanel) {
@@ -2022,8 +2165,9 @@ if (handVizDrag && handVizPanel) {
   });
   window.addEventListener('mousemove', (e) => {
     if (!drag) return;
-    const x = Math.max(4, Math.min(window.innerWidth  - 60,  e.clientX - drag.dx));
-    const y = Math.max(4, Math.min(window.innerHeight - 60,  e.clientY - drag.dy));
+    const rect = handVizPanel.getBoundingClientRect();
+    const x = Math.max(12 - rect.width, Math.min(window.innerWidth - 48, e.clientX - drag.dx));
+    const y = Math.max(4, Math.min(window.innerHeight - 48, e.clientY - drag.dy));
     handVizPanel.style.left   = x + 'px';
     handVizPanel.style.top    = y + 'px';
     handVizPanel.style.right  = 'auto';
@@ -2499,6 +2643,23 @@ if (btnSettings) {
   btnSettings.addEventListener('click', () => {
     showPage('settings');
     initSettingsPage();
+  });
+}
+
+// ── Settings page navigation ────────────────────────────────────────
+const setBackViewerBtn = $('#set-back-viewer');
+if (setBackViewerBtn) {
+  setBackViewerBtn.addEventListener('click', () => {
+    if (currentTrackId != null && currentFile != null) {
+      showPage('viewer');
+    }
+  });
+}
+
+const setBackFilesBtn = $('#set-back-files');
+if (setBackFilesBtn) {
+  setBackFilesBtn.addEventListener('click', () => {
+    loadFiles();
   });
 }
 

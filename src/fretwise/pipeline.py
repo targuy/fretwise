@@ -7,12 +7,16 @@ sorted by onset for rendering.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
+from fretwise.biomechanics import BiomechanicalReport, validate_fingering_results
 from fretwise.generator import StateGenerator
 from fretwise.models import FingeringResult, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
 from fretwise.scoring import (
     CostFunction,
+    resolve_arpeggio_chord_fingering,
     resolve_chord_conflicts,
     resolve_chord_finger_ordering,
     resolve_chord_finger_span,
@@ -20,7 +24,6 @@ from fretwise.scoring import (
     resolve_chord_partial_barre,
     resolve_chord_stretch,
     resolve_chord_string_diagonal,
-    resolve_arpeggio_chord_fingering,
     resolve_chord_unified_hand_position,
     resolve_finger_continuity,
     resolve_pinky_run_to_index,
@@ -28,6 +31,15 @@ from fretwise.scoring import (
     resolve_sedentary_fingers,
 )
 from fretwise.segmentation import Position, segment_into_positions
+
+
+@dataclass(frozen=True)
+class PipelineResult:
+    """Additive pipeline payload including final guard validation."""
+
+    results: list[FingeringResult]
+    stats: dict[str, int]
+    biomechanical_report: BiomechanicalReport
 
 
 def _anchors_from_segments(
@@ -45,6 +57,42 @@ def _anchors_from_segments(
             if 0 <= i < n_notes:
                 anchors[i] = seg.anchor
     return anchors
+
+
+def _state_signature(results: list[FingeringResult]) -> tuple[tuple[int, int, str, int], ...]:
+    """Return a compact signature of final state choices for convergence checks."""
+    return tuple(
+        (
+            result.state.string_num,
+            result.state.fret,
+            result.state.finger.value,
+            result.state.hand_position,
+        )
+        for result in results
+    )
+
+
+def _resolve_final_chord_guards(results: list[FingeringResult]) -> list[FingeringResult]:
+    """Run final chord repair passes until stable.
+
+    Earlier resolvers such as section consistency or learned chord inference can
+    reintroduce duplicate fingers or crossed chord assignments. This final pass
+    keeps the public optimizer contract intact while ensuring the sequence that
+    reaches export has been rechecked by the deterministic chord rules.
+    """
+    resolved = list(results)
+    for _ in range(3):
+        before = _state_signature(resolved)
+        resolved = resolve_chord_partial_barre(resolved)
+        resolved = resolve_chord_conflicts(resolved)
+        resolved = resolve_chord_finger_ordering(resolved)
+        resolved = resolve_chord_finger_span(resolved)
+        resolved = resolve_chord_string_diagonal(resolved)
+        resolved = resolve_chord_partial_barre(resolved)
+        resolved = resolve_chord_unified_hand_position(resolved)
+        if _state_signature(resolved) == before:
+            break
+    return resolved
 
 
 def split_by_voice(events: list[NoteEvent]) -> dict[int, list[NoteEvent]]:
@@ -168,21 +216,14 @@ def run_pipeline(
     for i, r in enumerate(all_results):
         r.note_id = i
 
-    # Partial-barre detection — collapse adjacent-string same-fret chord
-    # subsets into an INDEX barre.  Must run AFTER chord-conflicts so the
-    # duplicated INDEX created by the barre is not undone.
-    all_results = resolve_chord_partial_barre(all_results)
-
-    # Unified hand-position — snap every note of a chord to the same
-    # hand_position (= lowest fret of the chord).  Cleans up the generator's
-    # per-finger natural-hp assignment once the barre is applied.
-    all_results = resolve_chord_unified_hand_position(all_results)
+    all_results = _resolve_final_chord_guards(all_results)
 
     # Pinky-run correction — overrides Viterbi's (locally cheap but
     # musically poor) choice of keeping the pinky planted for repeated
     # same-fret strikes.  Must run BEFORE sedentary annotation so the
     # latter sees the corrected finger assignments.
     all_results = resolve_pinky_run_to_index(all_results)
+    all_results = _resolve_final_chord_guards(all_results)
 
     # Sedentary/planted fingers — read-only w.r.t. FingeringState.  Runs on the
     # merged, fully-resolved list so every active finger decision is final and
@@ -197,3 +238,29 @@ def run_pipeline(
         "dropped": total_dropped,
     }
     return all_results, stats
+
+
+def run_pipeline_with_guard_report(
+    events: list[NoteEvent],
+    generator: StateGenerator,
+    optimizer: ViterbiOptimizer,
+    pattern_matcher: PatternMatcher | None = None,
+    chord_finger_classifier: object | None = None,
+) -> PipelineResult:
+    """Run the legacy pipeline and validate final biomechanical invariants.
+
+    This API preserves the public ``run_pipeline`` tuple contract while giving
+    callers access to a pure final-output guard report.
+    """
+    results, stats = run_pipeline(
+        events,
+        generator,
+        optimizer,
+        pattern_matcher=pattern_matcher,
+        chord_finger_classifier=chord_finger_classifier,
+    )
+    return PipelineResult(
+        results=results,
+        stats=stats,
+        biomechanical_report=validate_fingering_results(results),
+    )

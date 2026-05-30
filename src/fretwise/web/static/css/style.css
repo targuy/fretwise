@@ -975,12 +975,12 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* ── Floating hand-viz panel ──────────────────────────── */
 .floating-panel {
   position: fixed;
-  bottom: 86px;
-  right: 24px;
-  width: 760px;
-  height: 420px;
-  min-width: 420px;
-  min-height: 260px;
+  top: 16px;
+  right: 28px;
+  width: min(715px, calc(100vw - 56px));
+  height: min(610px, calc(100vh - 32px));
+  min-width: 620px;
+  min-height: 520px;
   background: #14161a;
   color: #d6d8db;
   border: 1px solid #3b3e44;
@@ -1025,6 +1025,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border: none;
   background: #0f1013;
   width: 100%;
+  min-height: 0;
 }
 
 /* ── Legend HTML card layout ──────────────────────────── */
@@ -1287,6 +1288,32 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 /* ═══════════════ Settings Page ═══════════════ */
+.settings-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.settings-nav-btn {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  font-size: 12px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+/* All text buttons inside the settings panel override the icon-size defaults */
+.settings-wrap .tx-btn {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 14px;
+}
+#set-back-viewer:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .settings-wrap {
   max-width: 640px;
   margin: 0 auto;
@@ -1319,12 +1346,55 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 
 .settings-field { margin-bottom: 16px; }
 
+.settings-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.settings-inline-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.settings-slider-row {
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  max-width: 360px;
+  margin-top: 10px;
+}
+
+.settings-slider-row input[type="range"] {
+  width: 100%;
+}
+
+.settings-slider-row output {
+  font: 600 13px/1 var(--font-ui, inherit);
+  text-align: right;
+  color: var(--fg-1);
+}
+
 .settings-field label {
   display: block;
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 6px;
   color: var(--fg-0);
+}
+
+.settings-field .settings-inline-check {
+  display: flex;
+  margin-bottom: 0;
+}
+
+.settings-field .settings-slider-row label {
+  margin-bottom: 0;
 }
 
 .settings-path-row { display: flex; gap: 8px; }
@@ -1632,6 +1702,9 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   /* Hand viz panel: smaller on mobile */
   #hand-viz-panel {
     width: min(280px, 90vw) !important;
+    min-width: 0;
+    height: min(440px, 78vh) !important;
+    min-height: 320px;
   }
 }
 
