@@ -853,7 +853,10 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
 
     from fretwise.web.app import create_app
 
-    app = create_app(Path(fixtures_dir).resolve())
+    app = create_app(
+        Path(fixtures_dir).resolve(),
+        allowed_hosts=_web_allowed_hosts(host),
+    )
     click.echo(f"FretWise web -> http://{host}:{port}")
     click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
     click.echo("Press Ctrl+C to stop.\n")
@@ -895,7 +898,10 @@ def gui(port: int, fixtures_dir: str, host: str) -> None:
     from fretwise.web.app import create_app
 
     url = f"http://{host}:{port}"
-    app = create_app(Path(fixtures_dir).resolve())
+    app = create_app(
+        Path(fixtures_dir).resolve(),
+        allowed_hosts=_web_allowed_hosts(host),
+    )
     click.echo(f"FretWise GUI -> {url}")
     click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
     click.echo("Press Ctrl+C to stop.\n")
@@ -907,6 +913,29 @@ def gui(port: int, fixtures_dir: str, host: str) -> None:
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
+
+def _web_allowed_hosts(host: str) -> list[str] | None:
+    """Compute the Host-header allowlist for the web server.
+
+    Loopback binds keep the secure loopback-only default. A concrete bind
+    address is added to the allowlist so the server stays reachable. Binding
+    to ``0.0.0.0`` exposes the (unauthenticated) API on every interface, so we
+    warn and defer to ``FRETWISE_ALLOWED_HOSTS`` (returning ``None`` lets
+    ``create_app`` read that env var) rather than silently trusting all hosts.
+    """
+    loopback = {"127.0.0.1", "localhost", "::1", ""}
+    if host in loopback:
+        return None  # create_app applies the loopback-only default / env var
+    if host == "0.0.0.0":  # noqa: S104 - user explicitly opted into all interfaces
+        click.echo(
+            "Warning: binding to 0.0.0.0 exposes the unauthenticated API on all "
+            "interfaces. Set FRETWISE_ALLOWED_HOSTS to the hostname(s) clients "
+            "use (or '*' to disable the Host-header guard).",
+            err=True,
+        )
+        return None
+    return ["localhost", "127.0.0.1", "[::1]", "testserver", host]
 
 
 _NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]

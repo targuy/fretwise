@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import threading
 from pathlib import Path
@@ -10,9 +11,7 @@ from typing import Any
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-
-from . import settings as _settings
-from .songs_index import enrich_file_info, load_index
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
 from fretwise.core import run_core_pipeline_from_raw
@@ -20,6 +19,11 @@ from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.notation_mode import is_valid_mode as _is_valid_notation_mode
+from fretwise.export.gp_writer import (
+    fingerings_by_source_id,
+    write_gp_with_fingerings,
+)
+from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
@@ -30,17 +34,14 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
-from fretwise.export.gp_writer import (
-    fingerings_by_source_id,
-    write_gp_with_fingerings,
-)
-from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.pdf_conformance import (
-    core_pdf_conformance_report,
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
+
+from . import settings as _settings
+from .songs_index import enrich_file_info, load_index
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -48,20 +49,74 @@ from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
+# Score formats the web app is allowed to read, parse and serve. Every
+# file-serving / parsing route is confined to this allowlist so that a
+# mis-pointed ``partitions_dir`` (see ``update_settings``) can never be used
+# to read arbitrary files such as ``id_rsa`` or ``/etc/passwd``.
+_SUPPORTED_SCORE_EXTS: frozenset[str] = frozenset({
+    ".gp3", ".gp4", ".gp5", ".gp",
+    ".xml", ".mxl", ".musicxml",
+    ".mid", ".midi",
+})
 
-def create_app(fixtures_dir: Path | None = None) -> FastAPI:
+# Soundfont formats accepted by the upload/activate/delete endpoints.
+_SUPPORTED_SOUNDFONT_EXTS: frozenset[str] = frozenset({".sf2", ".sf3", ".dls"})
+
+# Upload size ceilings (bytes). Uploads are streamed and rejected with HTTP 413
+# once the limit is exceeded, so a single request can never exhaust memory.
+_MAX_SCORE_UPLOAD_BYTES = 50 * 1024 * 1024          # 50 MiB — score files are small
+_MAX_SOUNDFONT_UPLOAD_BYTES = 512 * 1024 * 1024     # 512 MiB — SF2 banks can be large
+
+# Hostnames accepted by the Host-header guard (DNS-rebinding protection).
+# Loopback-only by default; override with FRETWISE_ALLOWED_HOSTS (comma list,
+# ``*`` to disable) when intentionally exposing the server on a LAN.
+_DEFAULT_ALLOWED_HOSTS: tuple[str, ...] = (
+    "localhost", "127.0.0.1", "[::1]", "testserver",
+)
+
+
+def _resolve_allowed_hosts(allowed_hosts: list[str] | None) -> list[str]:
+    """Build the TrustedHost allowlist from arg → env → loopback default."""
+    if allowed_hosts:
+        return list(allowed_hosts)
+    env = os.environ.get("FRETWISE_ALLOWED_HOSTS", "").strip()
+    if env:
+        return [h.strip() for h in env.split(",") if h.strip()]
+    return list(_DEFAULT_ALLOWED_HOSTS)
+
+
+def create_app(
+    fixtures_dir: Path | None = None,
+    *,
+    allowed_hosts: list[str] | None = None,
+) -> FastAPI:
     """Create and configure the FastAPI application.
 
     Args:
         fixtures_dir: Directory containing GP/MusicXML/MIDI files.
                       Defaults to the configured partitions_dir from settings.
+        allowed_hosts: Host header allowlist for the DNS-rebinding guard.
+                       Defaults to loopback only (overridable via the
+                       ``FRETWISE_ALLOWED_HOSTS`` environment variable).
     """
     app = FastAPI(title="FretWise", version="0.4.0")
 
-    # Prevent browser from caching JS/CSS during development
+    # Reject requests whose Host header is not in the allowlist. Without this a
+    # malicious web page could use DNS rebinding to reach the loopback server
+    # and drive its (unauthenticated) settings/upload/download endpoints.
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=_resolve_allowed_hosts(allowed_hosts),
+    )
+
+    # Cache-busting for dev assets + baseline hardening headers.
     @app.middleware("http")
-    async def _no_cache_static(request: Request, call_next: Any) -> Any:
+    async def _security_and_cache_headers(request: Request, call_next: Any) -> Any:
         response = await call_next(request)
+        # Defensive headers applied to every response.
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
         path = request.url.path
         if path.startswith("/static/") and path.endswith((".js", ".css", ".html")):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -105,14 +160,9 @@ def _register_routes(app: FastAPI) -> None:
 
         songs = load_index(cfg.get("index_path", ""))
 
-        supported = {
-            ".gp3", ".gp4", ".gp5", ".gp",
-            ".xml", ".mxl", ".musicxml",
-            ".mid", ".midi",
-        }
         files = []
         for f in sorted(fixtures.iterdir()):
-            if f.suffix.lower() in supported and f.is_file():
+            if f.suffix.lower() in _SUPPORTED_SCORE_EXTS and f.is_file():
                 info: dict[str, Any] = {
                     "name": f.name,
                     "stem": f.stem,
@@ -378,6 +428,11 @@ def _register_routes(app: FastAPI) -> None:
 
         from fastapi.responses import StreamingResponse
 
+        # Refuse to start a second batch on top of a running one — two pools
+        # would contend for CPU and double-write the same _fingered.gp outputs.
+        if app.state._batch_running:  # type: ignore[attr-defined]
+            raise HTTPException(409, "A refresh batch is already running")
+
         fixtures_dir: Path = app.state.fixtures_dir  # type: ignore[attr-defined]
         all_files = sorted(fixtures_dir.glob("*.gp"))
         sources = [f for f in all_files if not f.stem.endswith("_fingered")]
@@ -528,11 +583,17 @@ def _register_routes(app: FastAPI) -> None:
         safe_name = Path(file.filename or "upload").name
         if not safe_name:
             raise HTTPException(400, "Invalid filename")
-        supported = {".gp3", ".gp4", ".gp5", ".gp", ".xml", ".mxl", ".musicxml", ".mid", ".midi"}
-        if Path(safe_name).suffix.lower() not in supported:
+        if Path(safe_name).suffix.lower() not in _SUPPORTED_SCORE_EXTS:
             raise HTTPException(400, f"Unsupported file type: {Path(safe_name).suffix}")
+        content = await _read_upload_limited(file, _MAX_SCORE_UPLOAD_BYTES)
         dest: Path = app.state.fixtures_dir / safe_name
-        content = await file.read()
+        # Re-check containment in case fixtures_dir itself is a symlink target.
+        try:
+            (dest.parent.resolve() / safe_name).relative_to(
+                app.state.fixtures_dir.resolve()
+            )
+        except ValueError:
+            raise HTTPException(403, "Access denied")
         dest.write_bytes(content)
         return {"name": safe_name, "status": "ok"}
 
@@ -783,12 +844,17 @@ def _register_routes(app: FastAPI) -> None:
         sf_dir.mkdir(parents=True, exist_ok=True)
 
         fname = Path(file.filename or "upload.sf2").name
-        if not fname.lower().endswith((".sf2", ".sf3", ".dls")):
+        if Path(fname).suffix.lower() not in _SUPPORTED_SOUNDFONT_EXTS:
             raise HTTPException(400, "Only .sf2, .sf3, and .dls files are accepted")
 
         dest = sf_dir / fname
+        # Confine the destination to the soundfonts directory.
         try:
-            content = await file.read()
+            dest.resolve().relative_to(sf_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Path traversal not allowed")
+        content = await _read_upload_limited(file, _MAX_SOUNDFONT_UPLOAD_BYTES)
+        try:
             dest.write_bytes(content)
         except OSError as exc:
             raise HTTPException(500, f"Failed to save file: {exc}")
@@ -808,6 +874,12 @@ def _register_routes(app: FastAPI) -> None:
             sf_dir = Path(__file__).parents[3] / sf_dir
 
         filepath = sf_dir / sf_name
+        # Same traversal guard as delete_soundfont — never activate (and later
+        # serve) a path outside the soundfonts directory.
+        try:
+            filepath.resolve().relative_to(sf_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Path traversal not allowed")
         if not filepath.exists():
             raise HTTPException(404, f"Soundfont not found: {sf_name}")
 
@@ -858,18 +930,52 @@ def _register_routes(app: FastAPI) -> None:
 
 
 def _resolve_file(app: FastAPI, filename: str) -> Path:
-    """Resolve a filename to a safe path within fixtures_dir."""
+    """Resolve a filename to a safe score-file path within fixtures_dir.
+
+    Three independent guards:
+      1. Strip to the basename so the request can only name a file directly
+         inside ``fixtures_dir`` (no ``../`` traversal, no absolute paths).
+      2. Reject any extension outside :data:`_SUPPORTED_SCORE_EXTS`. This is
+         what stops a re-pointed ``partitions_dir`` (``POST /api/settings``)
+         from being used to read arbitrary files such as ``id_rsa``.
+      3. Confirm the resolved path is still contained in ``fixtures_dir``
+         (defence in depth against symlink games).
+    """
     # Sanitize: only allow the filename component
     safe_name = Path(filename).name
+    if Path(safe_name).suffix.lower() not in _SUPPORTED_SCORE_EXTS:
+        raise HTTPException(400, f"Unsupported file type: {safe_name}")
     filepath = app.state.fixtures_dir / safe_name
     if not filepath.exists():
         raise HTTPException(404, f"File not found: {safe_name}")
-    # Prevent path traversal
+    # Prevent path traversal / symlink escape
     try:
         filepath.resolve().relative_to(app.state.fixtures_dir.resolve())
     except ValueError:
         raise HTTPException(403, "Access denied")
     return filepath
+
+
+async def _read_upload_limited(file: UploadFile, max_bytes: int) -> bytes:
+    """Read an upload into memory, aborting with HTTP 413 past *max_bytes*.
+
+    Streams the body in chunks so an oversized (or maliciously huge) upload is
+    rejected before it can exhaust process memory.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(
+                413,
+                f"File too large (limit {max_bytes // (1024 * 1024)} MiB)",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def _load_adapter_and_events(
@@ -1184,11 +1290,12 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
     p = _P(path_str)
     try:
         import time as _time
-        from fretwise.parser import get_adapter
-        from fretwise.pipeline import run_pipeline_with_guard_report
+
         from fretwise.generator import StateGenerator
         from fretwise.optimizer import ViterbiOptimizer
+        from fretwise.parser import get_adapter
         from fretwise.patterns import PatternMatcher
+        from fretwise.pipeline import run_pipeline_with_guard_report
         from fretwise.scoring import CostFunction, CostWeights
 
         adapter = get_adapter(p)
