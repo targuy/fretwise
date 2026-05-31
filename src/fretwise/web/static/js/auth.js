@@ -23,16 +23,29 @@
     return { ok: res.ok, status: res.status, data };
   }
 
+  function providerLabel(name) {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
+
   async function loadMethods() {
     try {
       const res = await fetch("/api/auth/methods");
       const m = await res.json();
-      if (m.providers && m.providers.includes("google")) {
-        const oidc = $("#oidc");
-        const gbtn = $("#google-btn");
-        if (oidc) oidc.hidden = false;
-        if (gbtn) gbtn.hidden = false;
+      const providers = m.providers || [];
+      if (providers.length === 0) return;
+      const oidc = $("#oidc");
+      const container = $("#oidc-buttons");
+      if (container) {
+        container.innerHTML = "";
+        providers.forEach(function (name) {
+          const a = document.createElement("a");
+          a.className = "btn-oidc";
+          a.href = "/auth/login/" + encodeURIComponent(name);
+          a.textContent = "Continue with " + providerLabel(name);
+          container.appendChild(a);
+        });
       }
+      if (oidc) oidc.hidden = false;
     } catch (_e) { /* providers are optional */ }
   }
 
