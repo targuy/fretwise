@@ -90,7 +90,14 @@ pip install -e ".[cloud]"     # the cloud SDKs users will use (boto3, httpx, goo
 | `POST /api/storage/disconnect` | Remove the user's storage + credentials. |
 
 When auth is enabled, **all `/api/*` routes require a session** (except
-`/api/me`) — unauthenticated requests get `401`.
+`/api/me`) — unauthenticated requests get `401`. Server-global operations
+(`GET`/`POST /api/settings`, `/api/soundfonts/*` upload/delete/activate, and
+`/api/library/refresh-fingerings`) additionally require an **admin** account
+(`403` otherwise). Per-user file routes are scoped to the caller's own storage.
+
+If an OIDC provider is configured but auth cannot be initialised (missing
+`[auth]` extra or `FRETWISE_SECRET_KEY`), the server **refuses to start**
+(fail-closed) rather than silently serving the local library without auth.
 
 ### Connecting storage
 
@@ -130,8 +137,8 @@ the encrypted per-user secrets store.
 
 - The transient per-user cache is not yet auto-evicted on logout; add a TTL or
   logout-time purge for stricter "no content on server" guarantees.
-- Global settings/soundfont routes are shared server config; in multi-user mode
-  they require login but are not yet per-user.
+- Global settings/soundfont routes are shared server config and are now
+  admin-only in multi-user mode (not per-user).
 - Batch fingering refresh remains local-only (cloud users get a clear `400`).
 
 ---
