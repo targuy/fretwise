@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 import threading
 from pathlib import Path
@@ -10,16 +11,24 @@ from typing import Any
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-
-from . import settings as _settings
-from .songs_index import enrich_file_info, load_index
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
+from fretwise.auth.config import load_auth_config
+from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
+from fretwise.auth.secrets import UserSecretsStore
+from fretwise.auth.users import UserStore
+from fretwise.auth.web import current_request_user, setup_auth
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.notation_mode import is_valid_mode as _is_valid_notation_mode
+from fretwise.export.gp_writer import (
+    fingerings_by_source_id,
+    write_gp_with_fingerings,
+)
+from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
@@ -30,17 +39,24 @@ from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.patterns import PatternMatcher
-from fretwise.export.gp_writer import (
-    fingerings_by_source_id,
-    write_gp_with_fingerings,
-)
-from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.pdf_conformance import (
-    core_pdf_conformance_report,
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
+from fretwise.storage import (
+    SUPPORTED_SCORE_EXTS,
+    StorageBackend,
+    StorageError,
+    StorageNotFoundError,
+    StorageValidationError,
+    build_backend,
+    safe_score_name,
+)
+from fretwise.storage.local import LocalStorageBackend
+
+from . import settings as _settings
+from .songs_index import enrich_file_info, load_index
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -48,20 +64,71 @@ from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 
 _STATIC_DIR = Path(__file__).parent / "static"
 
+# Score formats the web app is allowed to read, parse and serve. Every
+# file-serving / parsing route is confined to this allowlist so that a
+# mis-pointed ``partitions_dir`` (see ``update_settings``) can never be used
+# to read arbitrary files such as ``id_rsa`` or ``/etc/passwd``. Single source
+# of truth lives in :mod:`fretwise.storage`.
+_SUPPORTED_SCORE_EXTS: frozenset[str] = SUPPORTED_SCORE_EXTS
 
-def create_app(fixtures_dir: Path | None = None) -> FastAPI:
+# Soundfont formats accepted by the upload/activate/delete endpoints.
+_SUPPORTED_SOUNDFONT_EXTS: frozenset[str] = frozenset({".sf2", ".sf3", ".dls"})
+
+# Upload size ceilings (bytes). Uploads are streamed and rejected with HTTP 413
+# once the limit is exceeded, so a single request can never exhaust memory.
+_MAX_SCORE_UPLOAD_BYTES = 50 * 1024 * 1024          # 50 MiB — score files are small
+_MAX_SOUNDFONT_UPLOAD_BYTES = 512 * 1024 * 1024     # 512 MiB — SF2 banks can be large
+
+# Hostnames accepted by the Host-header guard (DNS-rebinding protection).
+# Loopback-only by default; override with FRETWISE_ALLOWED_HOSTS (comma list,
+# ``*`` to disable) when intentionally exposing the server on a LAN.
+_DEFAULT_ALLOWED_HOSTS: tuple[str, ...] = (
+    "localhost", "127.0.0.1", "[::1]", "testserver",
+)
+
+
+def _resolve_allowed_hosts(allowed_hosts: list[str] | None) -> list[str]:
+    """Build the TrustedHost allowlist from arg → env → loopback default."""
+    if allowed_hosts:
+        return list(allowed_hosts)
+    env = os.environ.get("FRETWISE_ALLOWED_HOSTS", "").strip()
+    if env:
+        return [h.strip() for h in env.split(",") if h.strip()]
+    return list(_DEFAULT_ALLOWED_HOSTS)
+
+
+def create_app(
+    fixtures_dir: Path | None = None,
+    *,
+    allowed_hosts: list[str] | None = None,
+) -> FastAPI:
     """Create and configure the FastAPI application.
 
     Args:
         fixtures_dir: Directory containing GP/MusicXML/MIDI files.
                       Defaults to the configured partitions_dir from settings.
+        allowed_hosts: Host header allowlist for the DNS-rebinding guard.
+                       Defaults to loopback only (overridable via the
+                       ``FRETWISE_ALLOWED_HOSTS`` environment variable).
     """
     app = FastAPI(title="FretWise", version="0.4.0")
 
-    # Prevent browser from caching JS/CSS during development
+    # Reject requests whose Host header is not in the allowlist. Without this a
+    # malicious web page could use DNS rebinding to reach the loopback server
+    # and drive its (unauthenticated) settings/upload/download endpoints.
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=_resolve_allowed_hosts(allowed_hosts),
+    )
+
+    # Cache-busting for dev assets + baseline hardening headers.
     @app.middleware("http")
-    async def _no_cache_static(request: Request, call_next: Any) -> Any:
+    async def _security_and_cache_headers(request: Request, call_next: Any) -> Any:
         response = await call_next(request)
+        # Defensive headers applied to every response.
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
         path = request.url.path
         if path.startswith("/static/") and path.endswith((".js", ".css", ".html")):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -69,8 +136,8 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
             response.headers["Expires"] = "0"
         return response
 
+    cfg = _settings.load()
     if fixtures_dir is None:
-        cfg = _settings.load()
         fixtures_dir = Path(cfg.get("partitions_dir", str(Path(__file__).parents[3] / "partitions")))
 
     # Mount static files
@@ -80,9 +147,48 @@ def create_app(fixtures_dir: Path | None = None) -> FastAPI:
     app.state.fixtures_dir = fixtures_dir
     app.state._batch_cancel = threading.Event()
     app.state._batch_running = False
+    # Pluggable partitions storage (local by default; S3 / WebDAV / GDrive when
+    # configured). A misconfigured cloud backend must not take the whole server
+    # down, so we fall back to local and surface the error via /api/storage.
+    _set_storage_backend(app, cfg, fixtures_dir)
+
+    # Multi-user mode (opt-in). When OIDC is configured, each request is served
+    # from the logged-in user's own cloud storage; the server hosts no shared
+    # partition library. When not configured, the app stays single-user.
+    app.state.multiuser = False
+    app.state.auth_error = None
+    _setup_multiuser(app)
 
     _register_routes(app)
     return app
+
+
+def _setup_multiuser(app: FastAPI) -> None:
+    """Enable OIDC auth + per-user storage if configured (best-effort)."""
+    auth_cfg = load_auth_config()
+    if not auth_cfg.enabled:
+        return
+    try:
+        user_store = UserStore(auth_cfg.data_dir)
+        secrets_store = UserSecretsStore(auth_cfg.data_dir)
+        setup_auth(app, auth_cfg, user_store, secrets_store)
+        app.state.user_store = user_store
+        app.state.secrets_store = secrets_store
+        app.state.cache_root = auth_cfg.cache_root
+        app.state.multiuser = True
+    except Exception as exc:  # noqa: BLE001 - degrade to single-user, never crash boot
+        # Most likely the [auth] extra (authlib) is not installed.
+        app.state.auth_error = str(exc)
+
+
+def _set_storage_backend(app: FastAPI, cfg: dict[str, Any], local_root: Path) -> None:
+    """Build the configured storage backend, falling back to local on error."""
+    try:
+        app.state.storage = build_backend(cfg, local_root=local_root)
+        app.state.storage_error = None
+    except StorageError as exc:
+        app.state.storage = LocalStorageBackend(local_root)
+        app.state.storage_error = str(exc)
 
 
 def _register_routes(app: FastAPI) -> None:
@@ -96,30 +202,29 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/files")
     async def list_files() -> JSONResponse:
-        """List available score files, enriched with songs_index metadata."""
-        cfg = _settings.load()
-        # Re-read fixtures_dir from settings in case it was updated at runtime
-        fixtures: Path = app.state.fixtures_dir
-        if not fixtures.exists():
-            return JSONResponse([])
+        """List available score files, enriched with songs_index metadata.
 
+        Works against whichever storage backend is active (local directory or a
+        configured cloud store).
+        """
+        cfg = _settings.load()
+        storage: StorageBackend = _current_storage(app)
         songs = load_index(cfg.get("index_path", ""))
 
-        supported = {
-            ".gp3", ".gp4", ".gp5", ".gp",
-            ".xml", ".mxl", ".musicxml",
-            ".mid", ".midi",
-        }
+        try:
+            objects = storage.list_scores()
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+
         files = []
-        for f in sorted(fixtures.iterdir()):
-            if f.suffix.lower() in supported and f.is_file():
-                info: dict[str, Any] = {
-                    "name": f.name,
-                    "stem": f.stem,
-                    "format": f.suffix.lstrip(".").upper(),
-                }
-                info = enrich_file_info(info, songs)
-                files.append(info)
+        for obj in objects:
+            info: dict[str, Any] = {
+                "name": obj.name,
+                "stem": obj.stem,
+                "format": obj.format,
+            }
+            info = enrich_file_info(info, songs)
+            files.append(info)
         return JSONResponse(files)
 
     @app.get("/api/tracks/{filename}")
@@ -378,7 +483,23 @@ def _register_routes(app: FastAPI) -> None:
 
         from fastapi.responses import StreamingResponse
 
-        fixtures_dir: Path = app.state.fixtures_dir  # type: ignore[attr-defined]
+        # The in-place multiprocessing batch only works on a local directory
+        # (workers glob + read + write files by path). Cloud backends report a
+        # clear error rather than silently no-op'ing.
+        storage: StorageBackend = _current_storage(app)
+        if not storage.supports_batch_refresh or storage.local_root is None:
+            raise HTTPException(
+                400,
+                "Batch fingering refresh is only supported on local storage "
+                f"(active backend: {storage.name}).",
+            )
+
+        # Refuse to start a second batch on top of a running one — two pools
+        # would contend for CPU and double-write the same _fingered.gp outputs.
+        if app.state._batch_running:  # type: ignore[attr-defined]
+            raise HTTPException(409, "A refresh batch is already running")
+
+        fixtures_dir: Path = storage.local_root
         all_files = sorted(fixtures_dir.glob("*.gp"))
         sources = [f for f in all_files if not f.stem.endswith("_fingered")]
 
@@ -524,28 +645,34 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.post("/api/upload")
     async def upload_file(file: UploadFile = File(...)) -> dict[str, str]:
-        """Upload a score file to the fixtures directory."""
-        safe_name = Path(file.filename or "upload").name
-        if not safe_name:
-            raise HTTPException(400, "Invalid filename")
-        supported = {".gp3", ".gp4", ".gp5", ".gp", ".xml", ".mxl", ".musicxml", ".mid", ".midi"}
-        if Path(safe_name).suffix.lower() not in supported:
-            raise HTTPException(400, f"Unsupported file type: {Path(safe_name).suffix}")
-        dest: Path = app.state.fixtures_dir / safe_name
-        content = await file.read()
-        dest.write_bytes(content)
+        """Upload a score file into the active storage backend."""
+        storage: StorageBackend = _current_storage(app)
+        try:
+            safe_name = safe_score_name(file.filename or "upload")
+        except StorageValidationError as exc:
+            raise HTTPException(400, str(exc))
+        content = await _read_upload_limited(file, _MAX_SCORE_UPLOAD_BYTES)
+        try:
+            storage.write_bytes(safe_name, content)
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
         return {"name": safe_name, "status": "ok"}
 
     @app.get("/api/download/{filename}")
     async def download_file(filename: str) -> Response:
-        """Download the original score file."""
-        filepath = _resolve_file(app, filename)
+        """Download the original score file from the active storage backend."""
+        storage: StorageBackend = _current_storage(app)
         try:
-            content = filepath.read_bytes()
-        except OSError as exc:
-            raise HTTPException(500, f"Could not read file: {exc}")
-        safe_name = Path(filename).name
-        suffix = filepath.suffix.lower()
+            safe_name = safe_score_name(filename)
+        except StorageValidationError as exc:
+            raise HTTPException(400, str(exc))
+        try:
+            content = storage.read_bytes(safe_name)
+        except StorageNotFoundError:
+            raise HTTPException(404, f"File not found: {safe_name}")
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+        suffix = Path(safe_name).suffix.lower()
         media_types = {
             ".gp3": "application/octet-stream",
             ".gp4": "application/octet-stream",
@@ -783,12 +910,17 @@ def _register_routes(app: FastAPI) -> None:
         sf_dir.mkdir(parents=True, exist_ok=True)
 
         fname = Path(file.filename or "upload.sf2").name
-        if not fname.lower().endswith((".sf2", ".sf3", ".dls")):
+        if Path(fname).suffix.lower() not in _SUPPORTED_SOUNDFONT_EXTS:
             raise HTTPException(400, "Only .sf2, .sf3, and .dls files are accepted")
 
         dest = sf_dir / fname
+        # Confine the destination to the soundfonts directory.
         try:
-            content = await file.read()
+            dest.resolve().relative_to(sf_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Path traversal not allowed")
+        content = await _read_upload_limited(file, _MAX_SOUNDFONT_UPLOAD_BYTES)
+        try:
             dest.write_bytes(content)
         except OSError as exc:
             raise HTTPException(500, f"Failed to save file: {exc}")
@@ -808,6 +940,12 @@ def _register_routes(app: FastAPI) -> None:
             sf_dir = Path(__file__).parents[3] / sf_dir
 
         filepath = sf_dir / sf_name
+        # Same traversal guard as delete_soundfont — never activate (and later
+        # serve) a path outside the soundfonts directory.
+        try:
+            filepath.resolve().relative_to(sf_dir.resolve())
+        except ValueError:
+            raise HTTPException(403, "Path traversal not allowed")
         if not filepath.exists():
             raise HTTPException(404, f"Soundfont not found: {sf_name}")
 
@@ -825,7 +963,13 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.post("/api/settings")
     async def update_settings(request: Request) -> JSONResponse:
-        """Update user settings. Partial update supported."""
+        """Update user settings. Partial update supported.
+
+        Changing the storage backend or its configuration rebuilds the active
+        backend in place (falling back to local if the new config is invalid).
+        Credentials are never accepted here — they live in the env / secrets
+        file (see fretwise.storage.credentials).
+        """
         try:
             body = await request.json()
         except Exception:
@@ -838,7 +982,38 @@ def _register_routes(app: FastAPI) -> None:
             app.state.fixtures_dir = p
 
         updated = _settings.save(body)
+
+        # Rebuild the storage backend when anything storage-related changed.
+        storage_keys = {
+            "partitions_dir", "storage_backend", "storage_cache_dir",
+            "storage_s3", "storage_webdav", "storage_gdrive",
+        }
+        if storage_keys & set(body):
+            _set_storage_backend(app, updated, app.state.fixtures_dir)
+
         return JSONResponse(updated)
+
+    @app.get("/api/storage")
+    async def storage_status() -> JSONResponse:
+        """Report the active storage backend and its health.
+
+        In multi-user mode this reflects the logged-in user's own backend, and
+        reports ``configured: false`` (rather than erroring) when they have not
+        connected storage yet.
+        """
+        try:
+            storage = _current_storage(app)
+        except HTTPException as exc:
+            if exc.status_code == 409:  # storage not configured for this user
+                return JSONResponse({"configured": False, "backend": None})
+            raise
+        return JSONResponse({
+            "configured": True,
+            "backend": storage.name,
+            "supports_batch_refresh": storage.supports_batch_refresh,
+            "local_root": str(storage.local_root) if storage.local_root else None,
+            "error": getattr(app.state, "storage_error", None),
+        })
 
     @app.get("/api/song-info/{filename}")
     async def get_song_info(filename: str) -> JSONResponse:
@@ -857,19 +1032,76 @@ def _register_routes(app: FastAPI) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _resolve_file(app: FastAPI, filename: str) -> Path:
-    """Resolve a filename to a safe path within fixtures_dir."""
-    # Sanitize: only allow the filename component
-    safe_name = Path(filename).name
-    filepath = app.state.fixtures_dir / safe_name
-    if not filepath.exists():
-        raise HTTPException(404, f"File not found: {safe_name}")
-    # Prevent path traversal
+def _current_storage(app: FastAPI) -> StorageBackend:
+    """Return the storage backend serving the current request.
+
+    Single-user mode: the process-wide backend (``app.state.storage``).
+    Multi-user mode: the logged-in user's *own* cloud backend, resolved fresh
+    from their (non-secret) config + decrypted credentials — never shared with
+    other users, and never the on-server local backend.
+    """
+    if not getattr(app.state, "multiuser", False):
+        return app.state.storage
+    user = current_request_user()
+    if user is None:
+        raise HTTPException(401, "Authentication required")
+    credentials = app.state.secrets_store.get(user.id)
     try:
-        filepath.resolve().relative_to(app.state.fixtures_dir.resolve())
-    except ValueError:
-        raise HTTPException(403, "Access denied")
-    return filepath
+        return resolve_user_storage(
+            user, credentials, cache_root=app.state.cache_root,
+        )
+    except StorageNotConfigured as exc:
+        raise HTTPException(409, str(exc))
+    except StorageError as exc:
+        raise HTTPException(400, f"Storage error: {exc}")
+
+
+def _resolve_file(app: FastAPI, filename: str) -> Path:
+    """Resolve a filename to a readable local score path via the storage backend.
+
+    Guards (all enforced by the storage layer):
+      1. The name is reduced to a basename with a supported score extension —
+         no traversal, no absolute paths, no arbitrary file types.
+      2. The object must exist in the active store.
+      3. For cloud backends the object is downloaded into a local cache and the
+         cached path is returned, so parsers (which need a real file) work
+         transparently. For the local backend the real path is returned.
+    """
+    storage: StorageBackend = _current_storage(app)
+    try:
+        safe_name = safe_score_name(filename)
+    except StorageValidationError as exc:
+        raise HTTPException(400, str(exc))
+    if not storage.exists(safe_name):
+        raise HTTPException(404, f"File not found: {safe_name}")
+    try:
+        return storage.ensure_local(safe_name)
+    except StorageNotFoundError:
+        raise HTTPException(404, f"File not found: {safe_name}")
+    except StorageError as exc:
+        raise HTTPException(502, f"Storage error: {exc}")
+
+
+async def _read_upload_limited(file: UploadFile, max_bytes: int) -> bytes:
+    """Read an upload into memory, aborting with HTTP 413 past *max_bytes*.
+
+    Streams the body in chunks so an oversized (or maliciously huge) upload is
+    rejected before it can exhaust process memory.
+    """
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_bytes:
+            raise HTTPException(
+                413,
+                f"File too large (limit {max_bytes // (1024 * 1024)} MiB)",
+            )
+        chunks.append(chunk)
+    return b"".join(chunks)
 
 
 def _load_adapter_and_events(
@@ -928,7 +1160,7 @@ _PLAYER_COST_MODEL_LOADED: bool = False
 # keeps total memory predictable (each response ~ 200-500 KB SVG + results).
 from collections import OrderedDict as _OrderedDict  # noqa: E402
 
-_SOLVE_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
+_SOLVE_CACHE: _OrderedDict[tuple, dict[str, Any]] = _OrderedDict()
 # 128 entries ≈ 64–128 MB max (4 modes × ~32 tracks). Bumped from 32 so that
 # the background prefetch (frontend fires N × M solves on file open) doesn't
 # evict its own freshly-stored entries.
@@ -941,7 +1173,7 @@ _SOLVE_CACHE_MAX = 128
 # view (= same legacy results, different SVG) becomes a 100ms operation
 # instead of a 2s one. The per-mode _SOLVE_CACHE stays on top to keep
 # repeat-click hits at ~50ms (no SVG re-build, no JSON re-serialise).
-_LEGACY_CACHE: "_OrderedDict[tuple, dict[str, Any]]" = _OrderedDict()
+_LEGACY_CACHE: _OrderedDict[tuple, dict[str, Any]] = _OrderedDict()
 _LEGACY_CACHE_MAX = 32
 
 
@@ -1184,11 +1416,12 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
     p = _P(path_str)
     try:
         import time as _time
-        from fretwise.parser import get_adapter
-        from fretwise.pipeline import run_pipeline_with_guard_report
+
         from fretwise.generator import StateGenerator
         from fretwise.optimizer import ViterbiOptimizer
+        from fretwise.parser import get_adapter
         from fretwise.patterns import PatternMatcher
+        from fretwise.pipeline import run_pipeline_with_guard_report
         from fretwise.scoring import CostFunction, CostWeights
 
         adapter = get_adapter(p)

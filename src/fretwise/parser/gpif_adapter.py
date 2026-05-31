@@ -24,9 +24,27 @@ import logging
 import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
+from typing import IO
+
+try:
+    # defusedxml neutralises entity-expansion ("billion laughs") and external
+    # entity attacks that stdlib ElementTree is vulnerable to. Preferred for
+    # parsing the untrusted .gp upload.
+    from defusedxml.ElementTree import parse as _defused_parse  # type: ignore[import-untyped]
+
+    _HAVE_DEFUSEDXML = True
+except ImportError:  # pragma: no cover - exercised only without the extra dep
+    _defused_parse = None
+    _HAVE_DEFUSEDXML = False
 
 from fretwise.models import (
-    Articulation, BendType, ChordDiagram, Dynamic, HarmonicType, NoteEvent, SlideType,
+    Articulation,
+    BendType,
+    ChordDiagram,
+    Dynamic,
+    HarmonicType,
+    NoteEvent,
+    SlideType,
 )
 from fretwise.parser.base import BaseParser, ParseError, UnsupportedFormatError
 
@@ -367,12 +385,25 @@ class GpifAdapter(BaseParser):
 # ---------------------------------------------------------------------------
 
 
+def _safe_parse_xml(source: IO[bytes]) -> ET.Element:
+    """Parse untrusted GPIF XML, hardened against entity-expansion DoS.
+
+    Uses defusedxml when installed; otherwise falls back to stdlib
+    ElementTree (which still performs no external-entity resolution but is
+    vulnerable to internal-entity "billion laughs" expansion — install the
+    ``defusedxml`` dependency to close that gap).
+    """
+    if _HAVE_DEFUSEDXML and _defused_parse is not None:
+        return _defused_parse(source).getroot()  # type: ignore[no-any-return]
+    return ET.parse(source).getroot()
+
+
 def _load_gpif(path: Path) -> ET.Element:
     """Open the .gp ZIP and return the parsed GPIF XML root element."""
     try:
         with zipfile.ZipFile(path) as zf:
             with zf.open("Content/score.gpif") as f:
-                return ET.parse(f).getroot()
+                return _safe_parse_xml(f)
     except zipfile.BadZipFile as exc:
         raise ParseError(f"'{path}' is not a valid ZIP/GP archive.") from exc
     except KeyError as exc:

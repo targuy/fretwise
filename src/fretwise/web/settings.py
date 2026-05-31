@@ -19,6 +19,14 @@ _DEFAULTS: dict[str, Any] = {
     "soundfonts_dir": DEFAULT_SOUNDFONTS_DIR,
     "active_soundfont": "",
     "soundfont_assignments": {},  # filename -> sf2 name
+    # --- Partitions storage backend (see fretwise.storage) ---
+    # Credentials are NEVER stored here; they come from the environment /
+    # secrets file (see fretwise.storage.credentials).
+    "storage_backend": "local",   # local | s3 | webdav | gdrive
+    "storage_cache_dir": "",      # optional cache dir override for cloud backends
+    "storage_s3": {},             # {bucket, prefix, endpoint_url, region}
+    "storage_webdav": {},         # {base_url}
+    "storage_gdrive": {},         # {folder_id}
 }
 
 
