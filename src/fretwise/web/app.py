@@ -1067,7 +1067,7 @@ def _resolve_file(app: FastAPI, filename: str) -> Path:
          cached path is returned, so parsers (which need a real file) work
          transparently. For the local backend the real path is returned.
     """
-    storage: StorageBackend = app.state.storage
+    storage: StorageBackend = _current_storage(app)
     try:
         safe_name = safe_score_name(filename)
     except StorageValidationError as exc:
