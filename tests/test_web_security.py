@@ -9,9 +9,12 @@ from typing import Any
 import pytest
 from fastapi import HTTPException
 
+from fretwise.auth.models import User
+from fretwise.auth.web import _REQUEST_USER
 from fretwise.web.app import (
     _MAX_SCORE_UPLOAD_BYTES,
     _read_upload_limited,
+    _require_admin,
     _resolve_allowed_hosts,
     _resolve_file,
     create_app,
@@ -96,3 +99,49 @@ def test_resolve_allowed_hosts_env_override(monkeypatch: Any) -> None:
 def test_resolve_allowed_hosts_explicit_arg_wins(monkeypatch: Any) -> None:
     monkeypatch.setenv("FRETWISE_ALLOWED_HOSTS", "ignored.test")
     assert _resolve_allowed_hosts(["only.test"]) == ["only.test"]
+
+
+# --- _require_admin: server-global routes gated in multi-user ---------------
+
+def test_require_admin_is_noop_in_single_user(tmp_path: Path) -> None:
+    app = create_app(tmp_path)  # no auth configured -> single-user
+    assert app.state.multiuser is False
+    _require_admin(app)  # must not raise
+
+
+def test_require_admin_blocks_anonymous_and_non_admin(tmp_path: Path) -> None:
+    app = create_app(tmp_path)
+    app.state.multiuser = True  # simulate multi-user without standing up OIDC
+
+    # Anonymous (no request user) -> 401
+    with pytest.raises(HTTPException) as exc:
+        _require_admin(app)
+    assert exc.value.status_code == 401
+
+    # Authenticated non-admin -> 403
+    token = _REQUEST_USER.set(User(id="google:u", is_admin=False))
+    try:
+        with pytest.raises(HTTPException) as exc:
+            _require_admin(app)
+        assert exc.value.status_code == 403
+    finally:
+        _REQUEST_USER.reset(token)
+
+    # Admin -> allowed
+    token = _REQUEST_USER.set(User(id="google:a", is_admin=True))
+    try:
+        _require_admin(app)  # must not raise
+    finally:
+        _REQUEST_USER.reset(token)
+
+
+def test_multiuser_setup_fails_closed_without_secret_key(monkeypatch: Any) -> None:
+    """Configuring OIDC but no FRETWISE_SECRET_KEY must refuse to boot, never
+    silently degrade to unauthenticated single-user."""
+    pytest.importorskip("authlib")
+    monkeypatch.setenv("FRETWISE_GOOGLE_CLIENT_ID", "x")
+    monkeypatch.setenv("FRETWISE_GOOGLE_CLIENT_SECRET", "y")
+    monkeypatch.delenv("FRETWISE_SECRET_KEY", raising=False)
+    monkeypatch.delenv("FRETWISE_AUTH_ENABLED", raising=False)
+    with pytest.raises(RuntimeError):
+        create_app()
