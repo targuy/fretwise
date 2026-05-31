@@ -13,10 +13,18 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-# Backends a user is allowed to choose. The on-server "local" backend is
-# intentionally excluded: the server must not host a shared library of
-# partitions (copyright — users are responsible for their own files).
+# Backends a regular user is allowed to choose. The on-server "local" backend
+# is intentionally excluded here: ordinary users must not store a shared library
+# on the server (copyright — they are responsible for their own files). Admins
+# may additionally use the server-local library (see ``allowed_backends``).
 USER_STORAGE_BACKENDS: frozenset[str] = frozenset({"s3", "webdav", "gdrive"})
+
+
+def allowed_backends(is_admin: bool) -> frozenset[str]:
+    """Backends a user may select, widening to include ``local`` for admins."""
+    if is_admin:
+        return USER_STORAGE_BACKENDS | {"local"}
+    return USER_STORAGE_BACKENDS
 
 
 @dataclass
@@ -28,8 +36,10 @@ class User:
         email: Email from the identity provider.
         name: Display name from the identity provider.
         created_at: Epoch seconds of first login.
-        storage_backend: One of :data:`USER_STORAGE_BACKENDS`, or ``""`` when the
-            user has not configured storage yet.
+        is_admin: Whether the user may use the server-local partitions library
+            (set from the ``FRETWISE_ADMIN_EMAILS`` allowlist at login).
+        storage_backend: A backend allowed for this user (see
+            :func:`allowed_backends`), or ``""`` when not configured yet.
         storage_config: Non-secret backend config (bucket/prefix/endpoint_url,
             base_url, folder_id …). Never contains credentials.
     """
@@ -38,6 +48,7 @@ class User:
     email: str = ""
     name: str = ""
     created_at: float = field(default_factory=time.time)
+    is_admin: bool = False
     storage_backend: str = ""
     storage_config: dict[str, Any] = field(default_factory=dict)
 
@@ -48,6 +59,7 @@ class User:
             "email": self.email,
             "name": self.name,
             "created_at": self.created_at,
+            "is_admin": self.is_admin,
             "storage_backend": self.storage_backend,
             "storage_config": self.storage_config,
         }
@@ -60,6 +72,7 @@ class User:
             email=str(data.get("email", "")),
             name=str(data.get("name", "")),
             created_at=float(data.get("created_at", time.time())),
+            is_admin=bool(data.get("is_admin", False)),
             storage_backend=str(data.get("storage_backend", "")),
             storage_config=dict(data.get("storage_config", {}) or {}),
         )
@@ -67,7 +80,7 @@ class User:
     @property
     def has_storage(self) -> bool:
         """Whether the user has a usable storage backend configured."""
-        return self.storage_backend in USER_STORAGE_BACKENDS
+        return self.storage_backend in allowed_backends(self.is_admin)
 
 
-__all__ = ["USER_STORAGE_BACKENDS", "User"]
+__all__ = ["USER_STORAGE_BACKENDS", "User", "allowed_backends"]

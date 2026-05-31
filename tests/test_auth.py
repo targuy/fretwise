@@ -13,7 +13,7 @@ from typing import Any
 import pytest
 
 from fretwise.auth.crypto import CipherUnavailable, get_cipher
-from fretwise.auth.models import User
+from fretwise.auth.models import User, allowed_backends
 from fretwise.auth.resolver import (
     StorageNotConfigured,
     resolve_user_storage,
@@ -22,6 +22,7 @@ from fretwise.auth.resolver import (
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 from fretwise.storage.base import StorageValidationError
+from fretwise.storage.local import LocalStorageBackend
 
 # --- User model -------------------------------------------------------------
 
@@ -143,3 +144,45 @@ def test_user_cache_dirs_are_distinct() -> None:
     a = user_cache_dir(Path("/cache"), "google:1")
     b = user_cache_dir(Path("/cache"), "google:2")
     assert a != b
+
+
+# --- admin-only local storage (Option B) ------------------------------------
+
+def test_allowed_backends_widen_for_admin() -> None:
+    assert "local" not in allowed_backends(is_admin=False)
+    assert "local" in allowed_backends(is_admin=True)
+    # cloud backends available to everyone
+    assert {"s3", "webdav", "gdrive"} <= allowed_backends(is_admin=False)
+
+
+def test_admin_can_use_server_local_library(tmp_path: Path) -> None:
+    server_lib = tmp_path / "partitions"
+    server_lib.mkdir()
+    user = User(id="g:admin", is_admin=True, storage_backend="local")
+    backend = resolve_user_storage(
+        user, None, cache_root=tmp_path / "cache", local_root=server_lib,
+    )
+    assert isinstance(backend, LocalStorageBackend)
+    assert backend.local_root == server_lib
+
+
+def test_non_admin_local_is_rejected(tmp_path: Path) -> None:
+    user = User(id="g:user", is_admin=False, storage_backend="local")
+    with pytest.raises(StorageValidationError):
+        resolve_user_storage(
+            user, None, cache_root=tmp_path, local_root=tmp_path / "partitions",
+        )
+
+
+def test_admin_local_without_local_root_is_unavailable(tmp_path: Path) -> None:
+    user = User(id="g:admin", is_admin=True, storage_backend="local")
+    with pytest.raises(StorageValidationError):
+        resolve_user_storage(user, None, cache_root=tmp_path, local_root=None)
+
+
+def test_user_store_refreshes_admin_flag(tmp_path: Path) -> None:
+    store = UserStore(tmp_path)
+    store.get_or_create("g:1", email="a@b.c", is_admin=False)
+    promoted = store.get_or_create("g:1", email="a@b.c", is_admin=True)
+    assert promoted.is_admin is True
+    assert store.get("g:1").is_admin is True
