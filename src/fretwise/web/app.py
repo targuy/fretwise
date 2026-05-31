@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
+from fretwise.auth.accounts import LocalAccountStore
 from fretwise.auth.config import load_auth_config
 from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
 from fretwise.auth.secrets import UserSecretsStore
@@ -177,18 +178,19 @@ def _setup_multiuser(app: FastAPI) -> None:
     try:
         user_store = UserStore(auth_cfg.data_dir)
         secrets_store = UserSecretsStore(auth_cfg.data_dir)
-        setup_auth(app, auth_cfg, user_store, secrets_store)
+        account_store = LocalAccountStore(auth_cfg.data_dir)
+        setup_auth(app, auth_cfg, user_store, secrets_store, account_store)
         app.state.user_store = user_store
         app.state.secrets_store = secrets_store
+        app.state.account_store = account_store
         app.state.cache_root = auth_cfg.cache_root
         app.state.multiuser = True
     except Exception as exc:  # noqa: BLE001 - re-raised below as a clear setup error
         raise RuntimeError(
-            "Multi-user authentication is configured (an OIDC provider is set) "
-            f"but could not be initialised: {exc}. Refusing to start without "
-            "auth. Install the auth extra (pip install 'fretwise[auth]') and set "
-            "FRETWISE_SECRET_KEY, or unset the OIDC provider variables to run "
-            "single-user."
+            "Multi-user authentication is configured but could not be "
+            f"initialised: {exc}. Refusing to start without auth. Install the "
+            "auth extra (pip install 'fretwise[auth]') and set FRETWISE_SECRET_KEY, "
+            "or unset FRETWISE_AUTH_ENABLED and the OIDC variables to run single-user."
         ) from exc
 
 
@@ -205,9 +207,12 @@ def _set_storage_backend(app: FastAPI, cfg: dict[str, Any], local_root: Path) ->
 def _register_routes(app: FastAPI) -> None:
     """Register all API and page routes."""
 
-    @app.get("/", response_class=HTMLResponse)
-    async def index() -> HTMLResponse:
-        """Serve the main single-page app."""
+    @app.get("/")
+    async def index() -> Response:
+        """Serve the main single-page app (redirect to login if unauthenticated)."""
+        if getattr(app.state, "multiuser", False) and current_request_user() is None:
+            from fastapi.responses import RedirectResponse
+            return RedirectResponse(url="/login", status_code=303)
         html_path = _STATIC_DIR / "index.html"
         return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 

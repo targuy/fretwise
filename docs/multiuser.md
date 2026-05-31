@@ -24,8 +24,12 @@ FretWise  ── per request ──▶ resolve the logged-in user's OWN cloud st
 User's cloud  ◀── partitions live here, never on the FretWise server
 ```
 
-- **Auth:** OpenID Connect. Google is a preset; any compliant OIDC provider can
-  be added. First successful login **auto-creates** the account (self-service).
+- **Auth:** two methods, usable together —
+  - **Email + password** with email confirmation: register at `/register`, get
+    an activation link by email, then sign in at `/login`. Passwords are stored
+    as PBKDF2 hashes; accounts are inactive until the link is opened.
+  - **OpenID Connect** (Google preset or any OIDC provider) — first login
+    **auto-creates** the account (self-service).
 - **Identity → storage:** a pure-ASGI middleware resolves the session user and
   binds it to the request; every partition route is then served from *that
   user's* backend, resolved fresh per request (no cross-user sharing).
@@ -65,9 +69,22 @@ fretwise/auth/
 | `FRETWISE_AUTH_ENABLED` | Force-enable (otherwise auto-on when a provider is set). |
 | `FRETWISE_DATA_DIR` | Where users + encrypted secrets are stored. |
 | `FRETWISE_STORAGE_CACHE_ROOT` | Transient per-user download cache root. |
+| `FRETWISE_AUTH_ENABLED` | `1` to enable email/password auth without any OIDC provider. |
 | `FRETWISE_ADMIN_EMAILS` | Comma-separated emails granted admin rights (access to the server-local library). |
 | `FRETWISE_GOOGLE_CLIENT_ID` / `_SECRET` | Google login (requests Drive scope). |
 | `FRETWISE_OIDC_ISSUER` / `_CLIENT_ID` / `_CLIENT_SECRET` / `_NAME` | Generic OIDC provider. |
+| `FRETWISE_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` / `_TLS` | SMTP for activation emails. If unset, the activation link is logged (dev fallback). |
+
+### Email + password endpoints / pages
+
+| Route | Description |
+|---|---|
+| `GET /login`, `GET /register` | Sign-in / sign-up pages (served only in multi-user mode). |
+| `GET /api/auth/methods` | Which methods are available (`password` + OIDC `providers`). |
+| `POST /api/auth/register` | `{email, password}` → creates an inactive account, emails an activation link. Generic response (no email enumeration). |
+| `GET /auth/activate?token=…` | Activates the account, redirects to `/login?activated=1`. |
+| `POST /api/auth/login` | `{email, password}` → sets the session (`403` if not activated, `401` if wrong). |
+| `POST /api/auth/resend` | `{email}` → re-sends an activation link if the account is inactive. |
 
 Install the auth extra:
 
