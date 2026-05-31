@@ -164,7 +164,13 @@ def create_app(
 
 
 def _setup_multiuser(app: FastAPI) -> None:
-    """Enable OIDC auth + per-user storage if configured (best-effort)."""
+    """Enable OIDC auth + per-user storage when configured.
+
+    Fail-closed: if an OIDC provider is configured but initialisation fails
+    (missing ``[auth]`` extra, no ``FRETWISE_SECRET_KEY``, …) we refuse to start
+    rather than silently degrading to the single-user mode, which would serve
+    the local partitions library with **no authentication at all**.
+    """
     auth_cfg = load_auth_config()
     if not auth_cfg.enabled:
         return
@@ -176,9 +182,14 @@ def _setup_multiuser(app: FastAPI) -> None:
         app.state.secrets_store = secrets_store
         app.state.cache_root = auth_cfg.cache_root
         app.state.multiuser = True
-    except Exception as exc:  # noqa: BLE001 - degrade to single-user, never crash boot
-        # Most likely the [auth] extra (authlib) is not installed.
-        app.state.auth_error = str(exc)
+    except Exception as exc:  # noqa: BLE001 - re-raised below as a clear setup error
+        raise RuntimeError(
+            "Multi-user authentication is configured (an OIDC provider is set) "
+            f"but could not be initialised: {exc}. Refusing to start without "
+            "auth. Install the auth extra (pip install 'fretwise[auth]') and set "
+            "FRETWISE_SECRET_KEY, or unset the OIDC provider variables to run "
+            "single-user."
+        ) from exc
 
 
 def _set_storage_backend(app: FastAPI, cfg: dict[str, Any], local_root: Path) -> None:
@@ -443,6 +454,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.delete("/api/library/refresh-fingerings")
     def cancel_refresh_fingerings() -> dict[str, bool]:
         """Signal a running refresh-fingerings batch to stop gracefully."""
+        _require_admin(app)
         app.state._batch_cancel.set()
         return {"cancelled": True}
 
@@ -477,6 +489,7 @@ def _register_routes(app: FastAPI) -> None:
         Streams one JSON line per processed file via text/plain so the
         frontend can show live progress without a separate polling loop.
         """
+        _require_admin(app)
         import json as _json
         import os as _os
         from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -878,6 +891,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.delete("/api/soundfonts/{sf_name}")
     async def delete_soundfont(sf_name: str) -> JSONResponse:
         """Delete a soundfont file."""
+        _require_admin(app)
         cfg = _settings.load()
         sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
         if not sf_dir.is_absolute():
@@ -902,6 +916,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.post("/api/soundfonts/upload")
     async def upload_soundfont(file: UploadFile) -> JSONResponse:
         """Upload a new soundfont file."""
+        _require_admin(app)
         cfg = _settings.load()
         sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
         if not sf_dir.is_absolute():
@@ -934,6 +949,7 @@ def _register_routes(app: FastAPI) -> None:
     @app.post("/api/soundfonts/{sf_name}/activate")
     async def activate_soundfont(sf_name: str) -> JSONResponse:
         """Set a soundfont as the active one for new songs."""
+        _require_admin(app)
         cfg = _settings.load()
         sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
         if not sf_dir.is_absolute():
@@ -954,7 +970,12 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/settings")
     async def get_settings() -> JSONResponse:
-        """Get current user settings."""
+        """Get current server settings (admin-only in multi-user mode).
+
+        These are server-global settings that also expose filesystem paths, so
+        in multi-user mode they are restricted to admins.
+        """
+        _require_admin(app)
         cfg = _settings.load()
         # Always reflect the runtime-active directory (may differ from config.json
         # when the server was launched with --dir).
@@ -963,13 +984,14 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.post("/api/settings")
     async def update_settings(request: Request) -> JSONResponse:
-        """Update user settings. Partial update supported.
+        """Update server settings (admin-only in multi-user mode). Partial update.
 
         Changing the storage backend or its configuration rebuilds the active
         backend in place (falling back to local if the new config is invalid).
         Credentials are never accepted here — they live in the env / secrets
         file (see fretwise.storage.credentials).
         """
+        _require_admin(app)
         try:
             body = await request.json()
         except Exception:
@@ -1030,6 +1052,23 @@ def _register_routes(app: FastAPI) -> None:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _require_admin(app: FastAPI) -> None:
+    """Guard server-global operations.
+
+    Single-user mode: no-op (the operator is the only user). Multi-user mode:
+    require an authenticated **admin** (``FRETWISE_ADMIN_EMAILS``). Regular users
+    must not be able to mutate server-wide settings, soundfonts, or the local
+    library batch.
+    """
+    if not getattr(app.state, "multiuser", False):
+        return
+    user = current_request_user()
+    if user is None:
+        raise HTTPException(401, "Authentication required")
+    if not user.is_admin:
+        raise HTTPException(403, "Admin privileges required")
 
 
 def _current_storage(app: FastAPI) -> StorageBackend:
