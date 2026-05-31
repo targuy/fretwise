@@ -53,10 +53,14 @@ class UserStore:
         os.replace(tmp, path)
         return user
 
-    def get_or_create(self, user_id: str, *, email: str = "", name: str = "") -> User:
+    def get_or_create(
+        self, user_id: str, *, email: str = "", name: str = "", is_admin: bool = False,
+    ) -> User:
         """Return the existing user or create one (self-service signup).
 
-        Profile fields are refreshed from the identity provider on each login.
+        Profile fields — including admin status, derived from the configured
+        admin-email allowlist — are refreshed from the identity provider on
+        each login.
         """
         existing = self.get(user_id)
         if existing is not None:
@@ -65,10 +69,12 @@ class UserStore:
                 existing.email, changed = email, True
             if name and existing.name != name:
                 existing.name, changed = name, True
+            if existing.is_admin != is_admin:
+                existing.is_admin, changed = is_admin, True
             if changed:
                 self.save(existing)
             return existing
-        return self.save(User(id=user_id, email=email, name=name))
+        return self.save(User(id=user_id, email=email, name=name, is_admin=is_admin))
 
     def set_storage(self, user_id: str, backend: str, config: dict[str, object]) -> User:
         """Update a user's (non-secret) storage configuration."""

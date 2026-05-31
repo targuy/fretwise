@@ -29,9 +29,15 @@ User's cloud  ◀── partitions live here, never on the FretWise server
 - **Identity → storage:** a pure-ASGI middleware resolves the session user and
   binds it to the request; every partition route is then served from *that
   user's* backend, resolved fresh per request (no cross-user sharing).
-- **No local library:** the on-server `local` backend is **rejected** for users
-  (`resolve_user_storage`). Cloud downloads land only in a transient, per-user
-  cache directory used for parsing — not a persistent collection.
+- **No local library for regular users:** the on-server `local` backend is
+  **rejected** for ordinary users (`resolve_user_storage`). Cloud downloads land
+  only in a transient, per-user cache directory used for parsing — not a
+  persistent collection.
+- **Admin-only server library (Option B):** users whose email is in
+  `FRETWISE_ADMIN_EMAILS` may additionally select the server-hosted `local`
+  partitions directory (the original `--dir`/`partitions_dir`). Use this to
+  curate a vetted, freely-distributable set. Regular users never see it; only
+  put content there that you have the right to host.
 - **Credentials:** stored per user, **encrypted at rest** (Fernet) with a
   server key; never written to plain config, never logged, never shared.
 
@@ -59,6 +65,7 @@ fretwise/auth/
 | `FRETWISE_AUTH_ENABLED` | Force-enable (otherwise auto-on when a provider is set). |
 | `FRETWISE_DATA_DIR` | Where users + encrypted secrets are stored. |
 | `FRETWISE_STORAGE_CACHE_ROOT` | Transient per-user download cache root. |
+| `FRETWISE_ADMIN_EMAILS` | Comma-separated emails granted admin rights (access to the server-local library). |
 | `FRETWISE_GOOGLE_CLIENT_ID` / `_SECRET` | Google login (requests Drive scope). |
 | `FRETWISE_OIDC_ISSUER` / `_CLIENT_ID` / `_CLIENT_SECRET` / `_NAME` | Generic OIDC provider. |
 
@@ -100,6 +107,8 @@ Per-backend credential keys:
 - **webdav:** `username`, `password` (config: `base_url`)
 - **gdrive:** none needed — reuses the **Google login OAuth grant** captured at
   sign-in (config: `folder_id`). Sign in with Google (Drive permission) first.
+- **local:** admins only; no credentials/config — serves the server's
+  `partitions_dir`. Rejected for non-admins.
 
 `config` is stored on the user record (non-secret); `credentials` go only into
 the encrypted per-user secrets store.

@@ -82,12 +82,18 @@ class AuthConfig:
     data_dir: Path
     cache_root: Path
     providers: list[OIDCProvider] = field(default_factory=list)
+    # Lower-cased emails granted admin rights (access to the server-local
+    # partitions library). From FRETWISE_ADMIN_EMAILS (comma-separated).
+    admin_emails: frozenset[str] = field(default_factory=frozenset)
 
     def provider(self, name: str) -> OIDCProvider | None:
         for p in self.providers:
             if p.name == name:
                 return p
         return None
+
+    def is_admin_email(self, email: str) -> bool:
+        return bool(email) and email.strip().lower() in self.admin_emails
 
 
 def load_auth_config() -> AuthConfig:
@@ -97,6 +103,11 @@ def load_auth_config() -> AuthConfig:
     data_dir = Path(os.environ.get("FRETWISE_DATA_DIR", str(Path.home() / ".fretwise" / "data")))
     default_cache = str(Path(tempfile.gettempdir()) / "fretwise-cache")
     cache_root = Path(os.environ.get("FRETWISE_STORAGE_CACHE_ROOT", default_cache))
+    admin_emails = frozenset(
+        e.strip().lower()
+        for e in os.environ.get("FRETWISE_ADMIN_EMAILS", "").split(",")
+        if e.strip()
+    )
     return AuthConfig(
         enabled=enabled,
         secret_key=os.environ.get("FRETWISE_SECRET_KEY", ""),
@@ -104,6 +115,7 @@ def load_auth_config() -> AuthConfig:
         data_dir=data_dir,
         cache_root=cache_root,
         providers=providers,
+        admin_emails=admin_emails,
     )
 
 
