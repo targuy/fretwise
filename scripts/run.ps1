@@ -20,6 +20,19 @@ if (-not (Get-Command pixi -ErrorAction SilentlyContinue)) {
   Write-Error "pixi not found - run scripts\install.ps1 first"; exit 1
 }
 
+# Auto-load multi-user / OIDC config from .env if present (see .env.example).
+$envFile = Join-Path $Root ".env"
+if (Test-Path $envFile) {
+  Write-Host "==> Loading .env (multi-user config)"
+  Get-Content $envFile | ForEach-Object {
+    $line = $_.Trim()
+    if ($line -and -not $line.StartsWith('#') -and $line.Contains('=')) {
+      $k, $v = $line.Split('=', 2)
+      [System.Environment]::SetEnvironmentVariable($k.Trim(), $v.Trim())
+    }
+  }
+}
+
 if ($args.Count -eq 0) {
   $bindHost = if ($env:HOST) { $env:HOST } else { '127.0.0.1' }
   $port     = if ($env:PORT) { $env:PORT } else { '8080' }
