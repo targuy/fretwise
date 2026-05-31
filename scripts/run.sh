@@ -21,6 +21,12 @@ command -v pixi >/dev/null 2>&1 || export PATH="$HOME/.pixi/bin:$PATH"
 command -v pixi >/dev/null 2>&1 || {
   echo "error: pixi not found — run scripts/install.sh first" >&2; exit 1; }
 
+# Auto-load multi-user / OIDC config from .env if present (see .env.example).
+if [ -f "$ROOT/.env" ]; then
+  echo "==> Loading .env (multi-user config)"
+  set -a; . "$ROOT/.env"; set +a
+fi
+
 if [ "$#" -eq 0 ]; then
   HOST="${HOST:-127.0.0.1}"; PORT="${PORT:-8080}"
   echo "==> FretWise web UI -> http://${HOST}:${PORT}   (Ctrl+C to stop)"
