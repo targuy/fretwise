@@ -11,12 +11,19 @@ from __future__ import annotations
 
 import json
 from contextvars import ContextVar
+from pathlib import Path
 from typing import Any
 
+from fretwise.auth.accounts import EmailAlreadyRegistered, LocalAccountStore, normalize_email
 from fretwise.auth.config import AuthConfig
+from fretwise.auth.mailer import SmtpConfig, load_smtp_config, send_activation_email
 from fretwise.auth.models import User, allowed_backends
+from fretwise.auth.passwords import verify_password
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
+
+# Static auth pages live in the web package (src/fretwise/web/static).
+_STATIC_DIR = Path(__file__).resolve().parents[1] / "web" / "static"
 
 # Holds the authenticated user for the current request. Set by the pure-ASGI
 # middleware below (which runs in the same task as the endpoint, so the value
@@ -24,7 +31,13 @@ from fretwise.auth.users import UserStore
 _REQUEST_USER: ContextVar[User | None] = ContextVar("fretwise_request_user", default=None)
 
 # /api paths reachable without authentication when multi-user mode is on.
-_PUBLIC_API_PATHS = frozenset({"/api/me"})
+_PUBLIC_API_PATHS = frozenset({
+    "/api/me",
+    "/api/auth/methods",
+    "/api/auth/register",
+    "/api/auth/login",
+    "/api/auth/resend",
+})
 
 
 def current_request_user() -> User | None:
@@ -80,11 +93,13 @@ def setup_auth(
     config: AuthConfig,
     user_store: UserStore,
     secrets_store: UserSecretsStore,
+    account_store: LocalAccountStore,
+    *,
+    smtp_config: SmtpConfig | None = None,
 ) -> None:
-    """Install session + OIDC auth and per-user storage routes onto *app*."""
-    from authlib.integrations.starlette_client import OAuth  # type: ignore[import-untyped]
+    """Install session auth (email/password + optional OIDC) and routes."""
     from fastapi import APIRouter, HTTPException, Request
-    from fastapi.responses import JSONResponse, RedirectResponse
+    from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
     from starlette.middleware.sessions import SessionMiddleware
 
     if not config.secret_key:
@@ -93,16 +108,24 @@ def setup_auth(
             "(used for session signing and credential encryption)."
         )
 
-    oauth = OAuth()
-    for p in config.providers:
-        oauth.register(
-            name=p.name,
-            client_id=p.client_id,
-            client_secret=p.client_secret,
-            server_metadata_url=p.server_metadata_url,
-            client_kwargs={"scope": p.scopes, "access_type": "offline", "prompt": "consent"},
-        )
-    app.state.oauth = oauth
+    smtp_cfg = smtp_config if smtp_config is not None else load_smtp_config()
+
+    # OIDC is optional — only pull in Authlib when a provider is configured, so
+    # email/password-only deployments don't need it.
+    oauth = None
+    if config.providers:
+        from authlib.integrations.starlette_client import OAuth  # type: ignore[import-untyped]
+
+        oauth = OAuth()
+        for p in config.providers:
+            oauth.register(
+                name=p.name,
+                client_id=p.client_id,
+                client_secret=p.client_secret,
+                server_metadata_url=p.server_metadata_url,
+                client_kwargs={"scope": p.scopes, "access_type": "offline", "prompt": "consent"},
+            )
+        app.state.oauth = oauth
 
     # Order matters: add the user-context middleware first so that, after the
     # SessionMiddleware is added (and becomes outer), the session is already
@@ -117,6 +140,116 @@ def setup_auth(
 
     router = APIRouter()
 
+    def _abs_url(request: Request, path: str) -> str:
+        base = config.base_url or str(request.base_url).rstrip("/")
+        return f"{base}{path}"
+
+    def _serve_page(name: str) -> Any:
+        html = (_STATIC_DIR / name).read_text(encoding="utf-8")
+        return HTMLResponse(content=html)
+
+    # --- Page routes (login / register) -----------------------------------
+
+    @router.get("/login")
+    async def login_page() -> Any:
+        if current_request_user() is not None:
+            return RedirectResponse(url="/", status_code=303)
+        return _serve_page("login.html")
+
+    @router.get("/register")
+    async def register_page() -> Any:
+        if current_request_user() is not None:
+            return RedirectResponse(url="/", status_code=303)
+        return _serve_page("register.html")
+
+    @router.get("/api/auth/methods")
+    async def auth_methods() -> JSONResponse:
+        return JSONResponse({
+            "password": True,
+            "providers": [p.name for p in config.providers],
+        })
+
+    # --- Email + password (local accounts) --------------------------------
+
+    @router.post("/api/auth/register")
+    async def register_account(request: Request) -> JSONResponse:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+        email = str(body.get("email", ""))
+        password = str(body.get("password", ""))
+        try:
+            account = account_store.register(email, password)
+        except EmailAlreadyRegistered:
+            # Don't reveal whether the email already exists (anti-enumeration).
+            return JSONResponse(
+                {"status": "ok", "message": "Check your email to activate your account."}
+            )
+        except ValueError as exc:
+            raise HTTPException(400, str(exc))
+        send_activation_email(
+            account.email,
+            _abs_url(request, f"/auth/activate?token={account.activation_token}"),
+            config=smtp_cfg,
+        )
+        return JSONResponse(
+            {"status": "ok", "message": "Check your email to activate your account."}
+        )
+
+    @router.get("/auth/activate")
+    async def activate_account(request: Request, token: str = "") -> Any:
+        account = account_store.activate(token)
+        if account is None:
+            return RedirectResponse(url="/login?error=activation", status_code=303)
+        user_store.get_or_create(
+            account.user_id, email=account.email,
+            is_admin=config.is_admin_email(account.email),
+        )
+        return RedirectResponse(url="/login?activated=1", status_code=303)
+
+    @router.post("/api/auth/login")
+    async def local_login(request: Request) -> JSONResponse:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+        email = normalize_email(str(body.get("email", "")))
+        password = str(body.get("password", ""))
+        existing = account_store.get(email)
+        if existing is not None and not existing.is_active and verify_password(
+            password, existing.password_hash
+        ):
+            raise HTTPException(403, "Account not activated — check your email.")
+        account = account_store.verify_login(email, password)
+        if account is None:
+            raise HTTPException(401, "Invalid email or password.")
+        user = user_store.get_or_create(
+            account.user_id, email=account.email,
+            is_admin=config.is_admin_email(account.email),
+        )
+        request.session["user_id"] = user.id
+        return JSONResponse({"status": "ok"})
+
+    @router.post("/api/auth/resend")
+    async def resend_activation(request: Request) -> JSONResponse:
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+        account = account_store.new_activation_token(normalize_email(str(body.get("email", ""))))
+        if account is not None and not account.is_active and account.activation_token:
+            send_activation_email(
+                account.email,
+                _abs_url(request, f"/auth/activate?token={account.activation_token}"),
+                config=smtp_cfg,
+            )
+        return JSONResponse(
+            {"status": "ok", "message": "If the account exists and is inactive, a link was sent."}
+        )
+
+    # --- OIDC (optional) --------------------------------------------------
+
     def _redirect_uri(request: Request, provider: str) -> str:
         if config.base_url:
             return f"{config.base_url}/auth/callback/{provider}"
@@ -125,6 +258,8 @@ def setup_auth(
     @router.get("/auth/login")
     @router.get("/auth/login/{provider}")
     async def login(request: Request, provider: str | None = None) -> Any:
+        if oauth is None:
+            raise HTTPException(404, "No OIDC provider configured")
         provider = provider or (config.providers[0].name if config.providers else "")
         client = oauth.create_client(provider)
         if client is None:
