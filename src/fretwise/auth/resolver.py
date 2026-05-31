@@ -12,7 +12,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from fretwise.auth.models import USER_STORAGE_BACKENDS, User
+from fretwise.auth.models import User, allowed_backends
 from fretwise.storage.base import (
     StorageBackend,
     StorageError,
@@ -94,6 +94,7 @@ def resolve_user_storage(
     credentials: dict[str, Any] | None,
     *,
     cache_root: Path,
+    local_root: Path | None = None,
     constructors: dict[str, Constructor] | None = None,
 ) -> StorageBackend:
     """Build the storage backend for *user* from their config + credentials.
@@ -102,12 +103,14 @@ def resolve_user_storage(
         user: The authenticated user.
         credentials: Decrypted credential dict (from the secrets store).
         cache_root: Base directory for transient per-user download caches.
-        constructors: Backend constructor map (injectable for tests).
+        local_root: Server partitions directory. Only used to back the
+            ``local`` backend for **admin** users; ignored otherwise.
+        constructors: Cloud backend constructor map (injectable for tests).
 
     Raises:
         StorageNotConfigured: The user has not configured a backend yet.
-        StorageValidationError: The configured backend is not user-selectable
-            (e.g. the on-server ``local`` backend).
+        StorageValidationError: The configured backend is not available to this
+            user (e.g. a non-admin selecting the on-server ``local`` backend).
     """
     ctors = constructors if constructors is not None else DEFAULT_CONSTRUCTORS
     backend = user.storage_backend
@@ -116,11 +119,18 @@ def resolve_user_storage(
             "No storage configured. Connect your cloud storage in settings — "
             "FretWise does not host partitions on the server."
         )
-    if backend not in USER_STORAGE_BACKENDS:
+    if backend not in allowed_backends(user.is_admin):
         raise StorageValidationError(
-            f"Storage backend {backend!r} is not available to users "
-            "(the server stores no partitions)."
+            f"Storage backend {backend!r} is not available to this user "
+            "(the on-server library is admin-only)."
         )
+    if backend == "local":
+        # Admin-only access to the server-hosted partitions library.
+        if local_root is None:
+            raise StorageValidationError("Server-local storage is not available.")
+        from fretwise.storage.local import LocalStorageBackend
+
+        return LocalStorageBackend(local_root)
     ctor = ctors.get(backend)
     if ctor is None:
         raise StorageValidationError(f"Unsupported storage backend: {backend!r}")

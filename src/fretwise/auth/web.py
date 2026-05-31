@@ -14,7 +14,7 @@ from contextvars import ContextVar
 from typing import Any
 
 from fretwise.auth.config import AuthConfig
-from fretwise.auth.models import USER_STORAGE_BACKENDS, User
+from fretwise.auth.models import User, allowed_backends
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 
@@ -142,8 +142,10 @@ def setup_auth(
         if not subject:
             raise HTTPException(400, "Identity provider returned no subject")
         uid = f"{provider}:{subject}"
+        email = userinfo.get("email", "")
         user_store.get_or_create(
-            uid, email=userinfo.get("email", ""), name=userinfo.get("name", ""),
+            uid, email=email, name=userinfo.get("name", ""),
+            is_admin=config.is_admin_email(email),
         )
         request.session["user_id"] = uid
 
@@ -181,8 +183,10 @@ def setup_auth(
             "id": user.id,
             "email": user.email,
             "name": user.name,
+            "is_admin": user.is_admin,
             "storage_backend": user.storage_backend,
             "has_storage": user.has_storage,
+            "available_backends": sorted(allowed_backends(user.is_admin)),
         })
 
     @router.post("/api/storage/connect")
@@ -196,12 +200,18 @@ def setup_auth(
         except Exception:
             raise HTTPException(400, "Invalid JSON body")
         backend = str(body.get("backend", "")).lower()
-        if backend not in USER_STORAGE_BACKENDS:
+        permitted = allowed_backends(user.is_admin)
+        if backend not in permitted:
             raise HTTPException(
-                400, f"backend must be one of {sorted(USER_STORAGE_BACKENDS)}",
+                400, f"backend must be one of {sorted(permitted)}",
             )
         config_part = dict(body.get("config", {}) or {})
         credentials = dict(body.get("credentials", {}) or {})
+
+        # Admin-only server-local library: no credentials, no config needed.
+        if backend == "local":
+            user_store.set_storage(user.id, "local", {})
+            return JSONResponse({"status": "connected", "backend": "local"})
 
         # Google Drive can reuse the OAuth grant captured at login.
         if backend == "gdrive" and not credentials:

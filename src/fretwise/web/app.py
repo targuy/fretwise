@@ -1048,7 +1048,9 @@ def _current_storage(app: FastAPI) -> StorageBackend:
     credentials = app.state.secrets_store.get(user.id)
     try:
         return resolve_user_storage(
-            user, credentials, cache_root=app.state.cache_root,
+            user, credentials,
+            cache_root=app.state.cache_root,
+            local_root=app.state.fixtures_dir,  # admin-only server-local library
         )
     except StorageNotConfigured as exc:
         raise HTTPException(409, str(exc))
