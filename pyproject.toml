@@ -17,6 +17,7 @@ dependencies = [
     "click",
     "reportlab",
     "PyYAML",
+    "defusedxml>=0.7",
     "fastapi>=0.110",
     "uvicorn[standard]>=0.29",
     "python-multipart>=0.0.9",
@@ -31,6 +32,20 @@ dev = [
 ]
 ml = [
     "onnxruntime>=1.20",
+]
+# Cloud partitions storage backends (S3-compatible / WebDAV / Google Drive).
+# Install only what you need; each backend imports its SDK lazily.
+cloud = [
+    "boto3>=1.34",                      # S3-compatible (AWS S3, MinIO, R2, B2…)
+    "httpx>=0.27",                      # WebDAV / Nextcloud
+    "google-api-python-client>=2.0",    # Google Drive
+    "google-auth>=2.0",                 # Google Drive auth
+]
+# Multi-user OIDC authentication + per-user encrypted credentials.
+auth = [
+    "authlib>=1.3",         # OIDC / OAuth2 client (Google + generic providers)
+    "itsdangerous>=2.0",    # signed session cookies (Starlette SessionMiddleware)
+    "cryptography>=42",     # encrypt per-user credentials at rest
 ]
 
 [project.scripts]
