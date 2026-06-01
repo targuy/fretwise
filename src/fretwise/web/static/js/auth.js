@@ -56,6 +56,8 @@
       showBanner("success", "Your account is activated — you can sign in now.");
     } else if (params.get("error") === "activation") {
       showBanner("error", "This activation link is invalid or has expired. Sign in to resend one.");
+    } else if (params.get("error") === "oauth") {
+      showBanner("error", "Sign-in with your provider failed or was cancelled. Please try again.");
     }
 
     const form = $("#login-form");

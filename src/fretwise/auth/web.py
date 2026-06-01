@@ -10,9 +10,21 @@ lazily inside :func:`setup_auth`, so importing this module never requires them.
 from __future__ import annotations
 
 import json
+import logging
 from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
+
+# FastAPI is always available here: this module is only imported by the web app
+# (fretwise.web.app), which depends on FastAPI. These names must live in the
+# module globals — with ``from __future__ import annotations`` active, FastAPI
+# resolves route annotations (e.g. ``request: Request``) against the function's
+# module globals, not its enclosing-function locals. Keeping the import inside
+# ``setup_auth`` made every route annotation unresolvable, so FastAPI treated
+# ``request`` as a required query param and every auth endpoint returned 422.
+# Genuinely optional deps (Authlib, Starlette SessionMiddleware) stay lazy below.
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from fretwise.auth.accounts import EmailAlreadyRegistered, LocalAccountStore, normalize_email
 from fretwise.auth.config import AuthConfig
@@ -21,6 +33,8 @@ from fretwise.auth.models import User, allowed_backends
 from fretwise.auth.passwords import verify_password
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
+
+_LOG = logging.getLogger("fretwise.auth")
 
 # Static auth pages live in the web package (src/fretwise/web/static).
 _STATIC_DIR = Path(__file__).resolve().parents[1] / "web" / "static"
@@ -98,8 +112,6 @@ def setup_auth(
     smtp_config: SmtpConfig | None = None,
 ) -> None:
     """Install session auth (email/password + optional OIDC) and routes."""
-    from fastapi import APIRouter, HTTPException, Request
-    from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
     from starlette.middleware.sessions import SessionMiddleware
 
     if not config.secret_key:
@@ -264,15 +276,34 @@ def setup_auth(
         client = oauth.create_client(provider)
         if client is None:
             raise HTTPException(404, f"Unknown auth provider: {provider}")
-        return await client.authorize_redirect(request, _redirect_uri(request, provider))
+        # Google only returns a refresh token (needed for long-lived Drive access)
+        # when access_type=offline AND prompt=consent are on the *authorization*
+        # URL. Authlib forwards `prompt` from client_kwargs but drops the
+        # Google-specific `access_type`, so pass it explicitly here.
+        extra: dict[str, str] = {}
+        if provider == "google":
+            extra = {"access_type": "offline", "prompt": "consent", "include_granted_scopes": "true"}
+        return await client.authorize_redirect(
+            request, _redirect_uri(request, provider), **extra
+        )
 
     @router.get("/auth/callback/{provider}", name="auth_callback")
     async def auth_callback(request: Request, provider: str) -> Any:
         client = oauth.create_client(provider)
         if client is None:
             raise HTTPException(404, f"Unknown auth provider: {provider}")
-        token = await client.authorize_access_token(request)
-        userinfo = token.get("userinfo") or await client.userinfo(token=token)
+        # The token exchange can fail for reasons outside our control: the user
+        # declined consent, Google refused a restricted scope (unverified app /
+        # non-test-user), or the CSRF state cookie was lost. Authlib raises
+        # (OAuthError, MismatchingStateError, …) for these. Don't let them become
+        # an opaque 500 — log the cause and send the user back to /login with a
+        # readable banner instead.
+        try:
+            token = await client.authorize_access_token(request)
+            userinfo = token.get("userinfo") or await client.userinfo(token=token)
+        except Exception as exc:  # noqa: BLE001 - surface as a clean login error
+            _LOG.warning("OIDC callback failed for provider %s: %r", provider, exc)
+            return RedirectResponse(url="/login?error=oauth", status_code=303)
         subject = userinfo.get("sub") or userinfo.get("email")
         if not subject:
             raise HTTPException(400, "Identity provider returned no subject")
@@ -296,7 +327,7 @@ def setup_auth(
                     "token_uri": "https://oauth2.googleapis.com/token",
                     "client_id": config.provider("google").client_id,  # type: ignore[union-attr]
                     "client_secret": config.provider("google").client_secret,  # type: ignore[union-attr]
-                    "scopes": ["https://www.googleapis.com/auth/drive.file"],
+                    "scopes": ["https://www.googleapis.com/auth/drive"],
                 }
                 secrets_store.set(uid, existing)
             except Exception:  # noqa: BLE001 - never fail login on secret write
@@ -348,14 +379,36 @@ def setup_auth(
             user_store.set_storage(user.id, "local", {})
             return JSONResponse({"status": "connected", "backend": "local"})
 
-        # Google Drive can reuse the OAuth grant captured at login.
-        if backend == "gdrive" and not credentials:
-            stored = secrets_store.get(user.id) or {}
-            credentials = dict(stored.get("google_oauth", {}))
+        # Google Drive reuses the OAuth grant captured at login. Store it under
+        # the "google_oauth" key — the same shape the login callback writes — so
+        # a later re-login (e.g. to widen the Drive scope) transparently updates
+        # the token the resolver uses, instead of leaving a stale flat copy.
+        if backend == "gdrive":
+            if not credentials:
+                stored = secrets_store.get(user.id) or {}
+                credentials = dict(stored.get("google_oauth", {}))
             if not credentials:
                 raise HTTPException(
                     400, "Sign in with Google (Drive permission) before connecting Drive.",
                 )
+            # Keep all scores in one app-owned folder; create (or reuse) it now
+            # and remember its id, unless the caller supplied one.
+            if not config_part.get("folder_id"):
+                from fretwise.storage.gdrive import ensure_app_folder, service_from_oauth
+
+                try:
+                    service = service_from_oauth(credentials)
+                    config_part["folder_id"] = ensure_app_folder(service)
+                except Exception as exc:  # noqa: BLE001 - surface a clean setup error
+                    raise HTTPException(502, f"Could not set up the Drive folder: {exc}")
+            try:
+                existing = secrets_store.get(user.id) or {}
+                existing["google_oauth"] = credentials
+                secrets_store.set(user.id, existing)
+            except Exception as exc:  # noqa: BLE001 - surface a clean setup error
+                raise HTTPException(500, f"Could not store credentials: {exc}")
+            user_store.set_storage(user.id, "gdrive", config_part)
+            return JSONResponse({"status": "connected", "backend": "gdrive"})
 
         try:
             secrets_store.set(user.id, credentials)

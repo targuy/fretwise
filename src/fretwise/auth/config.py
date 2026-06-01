@@ -53,8 +53,11 @@ def _load_providers() -> list[OIDCProvider]:
             client_id=g_id,
             client_secret=g_secret,
             server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-            # request offline Drive access so users can use their own Drive
-            scopes="openid email profile https://www.googleapis.com/auth/drive.file",
+            # Full Drive access so FretWise can list/read files the user drops
+            # into the FretWise folder manually (drive.file only sees app-created
+            # files). This is a Google "restricted" scope: keep test-users set
+            # or verify the app for production.
+            scopes="openid email profile https://www.googleapis.com/auth/drive",
         ))
     o_issuer = os.environ.get("FRETWISE_OIDC_ISSUER", "")
     o_id = os.environ.get("FRETWISE_OIDC_CLIENT_ID", "")

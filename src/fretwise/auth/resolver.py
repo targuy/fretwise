@@ -74,7 +74,10 @@ def _build_webdav(config: dict[str, Any], creds: dict[str, Any], cache_dir: Path
 def _build_gdrive(config: dict[str, Any], creds: dict[str, Any], cache_dir: Path) -> StorageBackend:
     from fretwise.storage.gdrive import GoogleDriveStorageBackend, service_from_oauth
 
-    service = service_from_oauth(creds)
+    # The OAuth grant is stored under "google_oauth" (login + connect both write
+    # that shape); fall back to a flat dict for older records / direct callers.
+    token = creds.get("google_oauth") or creds
+    service = service_from_oauth(token)
     return GoogleDriveStorageBackend(
         folder_id=str(config.get("folder_id", "")),
         cache_dir=cache_dir,
