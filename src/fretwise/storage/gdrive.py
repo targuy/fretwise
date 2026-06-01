@@ -80,6 +80,41 @@ def service_from_oauth(token: dict[str, Any]) -> Any:
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 
+_APP_FOLDER_MIME = "application/vnd.google-apps.folder"
+
+
+def ensure_app_folder(service: Any, name: str = "FretWise") -> str:
+    """Return the id of the app's dedicated Drive folder, creating it if needed.
+
+    With the minimal ``drive.file`` scope FretWise can only see files (and
+    folders) it created itself, so we keep all scores inside one app-owned
+    folder. A ``name`` lookup finds a previously created folder; otherwise a new
+    one is created. Returns the Drive folder id to store as ``folder_id``.
+    """
+    escaped = name.replace("'", "\\'")
+    resp = (
+        service.files()
+        .list(
+            q=(
+                f"name = '{escaped}' and mimeType = '{_APP_FOLDER_MIME}' "
+                "and trashed = false"
+            ),
+            fields="files(id, name)",
+            pageSize=1,
+        )
+        .execute()
+    )
+    files = resp.get("files", [])
+    if files:
+        return str(files[0]["id"])
+    created = (
+        service.files()
+        .create(body={"name": name, "mimeType": _APP_FOLDER_MIME}, fields="id")
+        .execute()
+    )
+    return str(created["id"])
+
+
 class GoogleDriveStorageBackend(RemoteStorageBackend):
     """Store score files in a single Google Drive folder."""
 
@@ -194,4 +229,4 @@ class GoogleDriveStorageBackend(RemoteStorageBackend):
         self._service.files().delete(fileId=file_id).execute()
 
 
-__all__ = ["GoogleDriveStorageBackend"]
+__all__ = ["GoogleDriveStorageBackend", "ensure_app_folder", "service_from_oauth"]

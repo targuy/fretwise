@@ -245,3 +245,55 @@ def test_webdav_parse_multistatus_filters_collections() -> None:
     assert names == ["Song One.gp"]  # folder + .txt filtered out
     assert objects[0].size == 123
     assert objects[0].modified > 0
+
+
+# --- Google Drive app-folder bootstrap --------------------------------------
+
+class _FakeDriveCall:
+    def __init__(self, result: dict) -> None:
+        self._result = result
+
+    def execute(self) -> dict:
+        return self._result
+
+
+class _FakeDriveFiles:
+    def __init__(self, existing: list[dict], created_id: str) -> None:
+        self._existing = existing
+        self._created_id = created_id
+        self.created_bodies: list[dict] = []
+
+    def list(self, **_kwargs: object) -> _FakeDriveCall:
+        return _FakeDriveCall({"files": list(self._existing)})
+
+    def create(self, *, body: dict, fields: str = "") -> _FakeDriveCall:  # noqa: ARG002
+        self.created_bodies.append(body)
+        return _FakeDriveCall({"id": self._created_id})
+
+
+class _FakeDriveService:
+    def __init__(self, existing: list[dict], created_id: str = "new-folder") -> None:
+        self._files = _FakeDriveFiles(existing, created_id)
+
+    def files(self) -> _FakeDriveFiles:
+        return self._files
+
+
+def test_ensure_app_folder_creates_when_absent() -> None:
+    from fretwise.storage.gdrive import ensure_app_folder
+
+    svc = _FakeDriveService(existing=[], created_id="fid-123")
+    folder_id = ensure_app_folder(svc, name="FretWise")
+    assert folder_id == "fid-123"
+    body = svc.files().created_bodies[0]
+    assert body["name"] == "FretWise"
+    assert body["mimeType"] == "application/vnd.google-apps.folder"
+
+
+def test_ensure_app_folder_reuses_existing() -> None:
+    from fretwise.storage.gdrive import ensure_app_folder
+
+    svc = _FakeDriveService(existing=[{"id": "existing-1", "name": "FretWise"}])
+    folder_id = ensure_app_folder(svc, name="FretWise")
+    assert folder_id == "existing-1"
+    assert svc.files().created_bodies == []  # did not create a duplicate

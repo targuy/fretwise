@@ -128,7 +128,10 @@ def create_app(
         response = await call_next(request)
         # Defensive headers applied to every response.
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
-        response.headers.setdefault("X-Frame-Options", "DENY")
+        # SAMEORIGIN (not DENY): still blocks other sites from framing us
+        # (clickjacking), but allows our own same-origin iframe — the floating
+        # hand-fretting visualisation panel loads /static/hand_viz.html in one.
+        response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         path = request.url.path
         if path.startswith("/static/") and path.endswith((".js", ".css", ".html")):

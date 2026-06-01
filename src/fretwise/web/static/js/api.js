@@ -178,6 +178,35 @@ export async function uploadSoundfont(file) {
   return res.json();
 }
 
+/** Current authenticated user + storage status. Returns null in single-user mode. */
+export async function fetchMe() {
+  const res = await fetch('/api/me');
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function connectStorage(backend, config = {}) {
+  const res = await fetch('/api/storage/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backend, config }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Connect failed' }));
+    throw new Error(err.detail || 'Connect failed');
+  }
+  return res.json();
+}
+
+export async function disconnectStorage() {
+  const res = await fetch('/api/storage/disconnect', { method: 'POST' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Disconnect failed' }));
+    throw new Error(err.detail || 'Disconnect failed');
+  }
+  return res.json();
+}
+
 export async function activateSoundfont(name) {
   const res = await fetch(`/api/soundfonts/${encodeURIComponent(name)}/activate`, { method: 'POST' });
   if (!res.ok) throw new Error('Activate failed');

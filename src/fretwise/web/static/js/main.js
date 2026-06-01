@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateSoundfont, deleteSoundfont, downloadFile, fetchExportGp, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateSoundfont, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
@@ -2663,6 +2663,82 @@ if (setBackFilesBtn) {
   });
 }
 
+async function _renderCloudStatus(me) {
+  const section = $('#settings-cloud-section');
+  const statusEl = $('#cloud-status');
+  const connectBtn = $('#cloud-connect-gdrive');
+  const disconnectBtn = $('#cloud-disconnect');
+  const signinLink = $('#cloud-signin');
+  if (!section) return;
+  // Single-user mode (no auth): /api/me unavailable → keep section hidden.
+  if (!me || !me.authenticated) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  const connected = !!me.has_storage && !!me.storage_backend;
+  if (connected) {
+    statusEl.textContent = `✓ Connected: ${me.storage_backend}` +
+      (me.email ? ` (${me.email})` : '');
+    connectBtn.style.display = 'none';
+    signinLink.style.display = 'none';
+    disconnectBtn.style.display = '';
+  } else {
+    statusEl.textContent = 'No storage connected yet — connect your Google Drive to load and save scores.';
+    disconnectBtn.style.display = 'none';
+    const canGdrive = (me.available_backends || []).includes('gdrive');
+    connectBtn.style.display = canGdrive ? '' : 'none';
+    signinLink.style.display = 'none';
+  }
+}
+
+async function _initCloudStorage() {
+  let me = null;
+  try { me = await fetchMe(); } catch (_e) { me = null; }
+  await _renderCloudStatus(me);
+
+  const connectBtn = $('#cloud-connect-gdrive');
+  const disconnectBtn = $('#cloud-disconnect');
+  const signinLink = $('#cloud-signin');
+  const msg = $('#cloud-status-msg');
+
+  if (connectBtn && !connectBtn.dataset.wired) {
+    connectBtn.dataset.wired = '1';
+    connectBtn.addEventListener('click', async () => {
+      if (msg) msg.textContent = 'Connecting to Google Drive…';
+      connectBtn.disabled = true;
+      try {
+        await connectStorage('gdrive');
+        if (msg) msg.textContent = '✓ Connected.';
+        await _renderCloudStatus(await fetchMe());
+        await loadFiles();
+      } catch (err) {
+        if (msg) msg.textContent = '✗ ' + err.message;
+        // Needs a Google sign-in (Drive permission) first.
+        if (signinLink && /sign in with google/i.test(err.message || '')) {
+          signinLink.style.display = '';
+        }
+      } finally {
+        connectBtn.disabled = false;
+      }
+    });
+  }
+
+  if (disconnectBtn && !disconnectBtn.dataset.wired) {
+    disconnectBtn.dataset.wired = '1';
+    disconnectBtn.addEventListener('click', async () => {
+      if (msg) msg.textContent = 'Disconnecting…';
+      disconnectBtn.disabled = true;
+      try {
+        await disconnectStorage();
+        if (msg) msg.textContent = 'Disconnected.';
+        await _renderCloudStatus(await fetchMe());
+      } catch (err) {
+        if (msg) msg.textContent = '✗ ' + err.message;
+      } finally {
+        disconnectBtn.disabled = false;
+      }
+    });
+  }
+}
+
 async function initSettingsPage() {
   try {
     const cfg = await fetchSettings();
@@ -2673,6 +2749,8 @@ async function initSettingsPage() {
   } catch (err) {
     console.error('Failed to load settings:', err);
   }
+
+  await _initCloudStorage();
 
   await _loadSoundfontsPanel();
 
