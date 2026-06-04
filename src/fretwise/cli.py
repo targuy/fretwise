@@ -34,7 +34,7 @@ from fretwise.export import (
 )
 from fretwise.export.gp_writer import fingerings_by_source_id, write_gp_with_fingerings
 from fretwise.generator import StateGenerator
-from fretwise.models import FingeringResult
+from fretwise.models import Finger, FingeringResult, FingeringState
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
@@ -734,6 +734,156 @@ def finger(file: Path, output: Path | None, mode: str, quiet: bool) -> None:
 
 
 # ---------------------------------------------------------------------------
+# convert
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise convert song.gp song.musicxml          # GP -> MusicXML\n"
+        "  fretwise convert song.mid song.musicxml         # MIDI -> MusicXML\n"
+        "  fretwise convert song.gp out.xml --to musicxml  # force target\n"
+        "  fretwise convert song.gp out.gp                 # re-annotate GP fingerings\n"
+        "  fretwise convert song.gp plain.musicxml --no-fingering\n"
+    )
+)
+@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
+@click.argument("output_file", type=click.Path(path_type=Path))
+@click.option(
+    "--to",
+    "to_fmt",
+    type=click.Choice(["gp", "musicxml"]),
+    default=None,
+    help="Target format. Default: inferred from OUTPUT extension (.gp / .musicxml / .xml).",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(list(_MODES.keys())),
+    default="performance",
+    show_default=True,
+    help="Cost-function weighting for the fingerings embedded in the output.",
+)
+@click.option(
+    "--no-fingering",
+    "no_fingering",
+    is_flag=True,
+    help="Convert notes / rhythm / meter only — skip fingering optimisation.",
+)
+@click.option(
+    "--title",
+    default=None,
+    metavar="TEXT",
+    help="Title metadata (default: parsed from the input filename).",
+)
+@click.option(
+    "--artist",
+    default=None,
+    metavar="TEXT",
+    help="Artist/composer metadata (default: parsed from the input filename).",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress success messages; errors still go to stderr.",
+)
+def convert(
+    input_file: Path,
+    output_file: Path,
+    to_fmt: str | None,
+    mode: str,
+    no_fingering: bool,
+    title: str | None,
+    artist: str | None,
+    quiet: bool,
+) -> None:
+    """Convert a score between formats via the canonical model.
+
+    \b
+    Supported conversions:
+      <any> -> .musicxml / .xml   from GuitarPro, MusicXML or MIDI input
+      .gp   -> .gp                re-annotate the source GP with FretWise fingerings
+
+    The time signature and tempo are carried faithfully from the source when the
+    input format records them (Guitar Pro). MusicXML / MIDI inputs that omit the
+    meter default to 4/4. MusicXML -> Guitar Pro (generating a .gp from scratch)
+    is not yet implemented — convert to .gp only from a .gp source.
+
+    Use --to to force the target when the output extension is ambiguous.
+    """
+    # --- resolve the target format --------------------------------------------
+    target = (to_fmt or output_file.suffix.lstrip(".").lower())
+    if target == "xml":
+        target = "musicxml"
+    if target not in ("gp", "musicxml"):
+        click.echo(
+            f"Error: cannot infer target format from '{output_file.suffix}'. "
+            "Use --to {gp,musicxml} or a .gp/.musicxml/.xml output path.",
+            err=True,
+        )
+        sys.exit(1)
+
+    # --- parse the source -----------------------------------------------------
+    try:
+        adapter = get_adapter(input_file)
+        events = adapter.parse(input_file)
+    except (UnsupportedFormatError, ParseError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+    if not events:
+        click.echo("No notes found.", err=True)
+        sys.exit(1)
+
+    # --- target: Guitar Pro ---------------------------------------------------
+    # Generating a .gp from scratch is not implemented yet, so GP output is only
+    # possible by re-annotating a .gp source (the 'finger' path).
+    if target == "gp":
+        if input_file.suffix.lower() != ".gp":
+            click.echo(
+                "Error: conversion to Guitar Pro is only supported from a .gp "
+                "source (generating a .gp from scratch is not yet implemented).",
+                err=True,
+            )
+            sys.exit(1)
+        payload, _ = _guarded_pipeline_result(events, mode)
+        if not payload.results:
+            click.echo("No valid fingering states could be generated.", err=True)
+            sys.exit(1)
+        _write_guarded_gp_file(input_file, output_file, payload, quiet=quiet)
+        return
+
+    # --- target: MusicXML -----------------------------------------------------
+    auto_title, auto_artist = _auto_title_artist(input_file)
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    time_denominator = int(getattr(adapter, "time_denominator", 4) or 4)
+
+    if no_fingering:
+        results: list[FingeringResult] = _unfingered_results(events)
+    else:
+        payload, _ = _guarded_pipeline_result(events, mode)
+        results = payload.results or _unfingered_results(events)
+
+    write_musicxml(
+        results,
+        output_file,
+        title=title if title is not None else auto_title,
+        artist=artist if artist is not None else auto_artist,
+        instrument=track_name,
+        beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
+    )
+    if not quiet:
+        fingered = "fingered" if not no_fingering else "notes-only"
+        click.echo(
+            f"MusicXML written to '{output_file}' "
+            f"({len(results)} note(s), {fingered}, "
+            f"{_time_signature_label(beats_per_measure, time_denominator)})."
+        )
+
+
+# ---------------------------------------------------------------------------
 # info
 # ---------------------------------------------------------------------------
 
@@ -1064,6 +1214,41 @@ def _run_core_pipeline_for_events(
         raw_score,
         representation_mode=representation_mode,
     )
+
+
+def _auto_title_artist(path: Path) -> tuple[str, str]:
+    """Parse an ``Artist-Title-MM-DD-YYYY`` style stem into ``(title, artist)``.
+
+    Falls back to ``(stem, "")`` when the stem has no ``Artist-Title`` split.
+    """
+    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", path.stem).strip()
+    parts = clean_stem.split("-", 1)
+    if len(parts) == 2:
+        return parts[1].strip(), parts[0].strip()
+    return clean_stem, ""
+
+
+def _unfingered_results(events: list[Any]) -> list[FingeringResult]:
+    """Wrap NoteEvents as un-fingered FingeringResults (no optimizer run).
+
+    The MusicXML writer consumes ``FingeringResult`` objects; for ``--no-fingering``
+    we pair each event with a placeholder state. The writer skips the
+    ``<technical>`` block for ``string_num <= 0``, so these render as plain staff
+    notation with no tablature.
+    """
+    placeholder = FingeringState(
+        string_num=0, fret=0, finger=Finger.OPEN, hand_position=1,
+    )
+    return [
+        FingeringResult(note_id=i, note_event=ev, state=placeholder, cost=0.0)
+        for i, ev in enumerate(events)
+    ]
+
+
+def _time_signature_label(beats_per_measure: float, time_denominator: int) -> str:
+    """Human-readable meter from quarter-beats + denominator, e.g. (3.0, 8) → '6/8'."""
+    numerator = max(1, round(beats_per_measure * time_denominator / 4.0))
+    return f"{numerator}/{time_denominator}"
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:

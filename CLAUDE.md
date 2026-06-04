@@ -468,10 +468,10 @@ Pipeline complet parse → generate → score → optimize livré, et largement 
 
 **Tâches :**
 - [x] **Export MusicXML** — `fretwise solve … -o out.musicxml` ([export/musicxml_writer.py](src/fretwise/export/musicxml_writer.py)) : notes, durées, mesures (quantifiées), tablature `<string>`/`<fret>` + doigté `<fingering>` par note (accords compris). S'ouvre dans MuseScore/Finale/Guitar Pro. Round-trip vérifié.
-- [ ] **Export Guitar Pro complet** — génération d'un `.gp` from scratch (au-delà de la simple injection de doigtés dans un fichier source)
-- [ ] **Conversion GP → MusicXML** et **MusicXML → GP** via le modèle canonique (round-trip)
-- [ ] **CLI `convert`** — `fretwise convert in.gp out.musicxml` (+ option `--to {gp,musicxml}` ; doigtés optimisés optionnels)
-- [ ] **Tests de round-trip** — invariants préservés (hauteurs, rythme, mesures, accordage, doigtés) sur les fixtures
+- [ ] **Export Guitar Pro complet** — génération d'un `.gp` from scratch (au-delà de la simple injection de doigtés dans un fichier source). *Bloque la conversion MusicXML → GP.*
+- [x] **Conversion GP → MusicXML** via le modèle canonique (signature rythmique réelle préservée, compound meters type 6/8 compris). *MusicXML → GP reste à faire (dépend de l'export GP from scratch).*
+- [x] **CLI `convert`** — `fretwise convert in.gp out.musicxml` (+ `--to {gp,musicxml}`, `--no-fingering`, `--mode`). GP/MusicXML/MIDI → MusicXML ; `.gp` → `.gp` (réannotation). Tempo + signature rythmique lus de la source.
+- [x] **Tests de round-trip** — invariants préservés (hauteurs, rythme, mesures, signature, doigtés) — [tests/test_cli_convert.py](tests/test_cli_convert.py).
 
 **Critères de succès :**
 - Conversion sans perte des informations communes aux deux formats sur les morceaux de test
