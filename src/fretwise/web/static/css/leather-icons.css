@@ -85,6 +85,16 @@
 .fw-ico--cloud-connect     { background-image: image-set(url("/static/img/icons/cloud-connect.png") 1x,     url("/static/img/icons/cloud-connect@2x.png") 2x); }
 .fw-ico--download-gp       { background-image: image-set(url("/static/img/icons/download-gp.png") 1x,       url("/static/img/icons/download-gp@2x.png") 2x); }
 
+/* ---- icon swap (icons.js) ------------------------------------------------ */
+/* Once a button is iconified, its inline vector glyph is hidden in favour of
+ * the knob span icons.js inserted. Text-only glyph buttons (play, loop A/B)
+ * hide their character with font-size:0; the knob span keeps its own px size,
+ * and export buttons keep their PDF/GP/XML label (only the <svg> is hidden). */
+.fw-iconified > svg { display: none !important; }
+#btn-play.fw-iconified,
+#btn-loop-a.fw-iconified,
+#btn-loop-b.fw-iconified { font-size: 0; }
+
 /* ---- leather plaque button re-skin (applied to icon buttons) ------------ */
 /* Apply .lthr-btn to .ic-btn / .tx-btn so the button itself looks like the
  * carved leather plaque the icons sit on. Works on every color theme. */
@@ -137,11 +147,28 @@ body {
     var(--bg-0);
 }
 
-/* EXCEPTIONS — the photo must NOT show under the lists or the partitions:
- *  • Library / file list: solid leather surface so rows stay readable.
- *  • Score / partition: keeps its cream paper (set via --bg-score and the
- *    #core-svg-view rule in style.css). */
-#file-selector {
-  background: var(--bg-0);
+/* Wood on EVERY chrome surface — header, track tabs, bottom toolbar, mixer,
+ * library and settings. A dark scrim is layered over the photo for legibility;
+ * `fixed` attachment lines the grain up with the body so the bars read as
+ * cut-outs of one continuous wood top. */
+#header,
+#track-tabs-bar,
+#toolbar,
+#multi-track-bar {
+  background:
+    linear-gradient(rgba(22,13,6,0.56), rgba(22,13,6,0.66)),
+    url("/static/img/BACKGROUND.png") center center / cover no-repeat fixed !important;
+}
+/* Lists / forms get a heavier scrim so dense rows + inputs stay readable. */
+#file-selector,
+#settings-page {
+  background:
+    linear-gradient(rgba(20,12,6,0.80), rgba(20,12,6,0.84)),
+    url("/static/img/BACKGROUND.png") center center / cover no-repeat fixed !important;
   min-height: 100vh;
 }
+
+/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood.
+ * (#core-svg-view / --bg-score in style.css; reasserted here so the body photo
+ * can never bleed into the score area.) */
+#tab-container { background: var(--bg-score) !important; }

@@ -11,6 +11,7 @@ import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
+import { applyLeatherIcons } from './icons.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
@@ -1909,30 +1910,29 @@ function _rebuildTrackTabs(primaryTrackId) {
     const isMuted = !isPrimary && muted.has(t.id);
     // Treat a missing kind as guitar so existing files render unchanged.
     const isGuitar = isGuitarKind(t.kind);
+    // Guitar keeps the rotating palette colour (so several guitars stay
+    // distinct) but now shares the SAME badge + colour-bar + left-border layout
+    // as every other kind. Non-guitar kinds use their fixed tint + glyph.
     const kindStyle = isGuitar
-      ? null
+      ? { color: _TRACK_COLORS[i % _TRACK_COLORS.length], glyph: '🎸' }
       : (_NON_GUITAR_KIND_STYLE[String(t.kind).toLowerCase()]
          || _NON_GUITAR_KIND_STYLE.other);
-    // Guitar → rotating palette (unchanged); non-guitar → kind tint.
-    const color = isGuitar
-      ? _TRACK_COLORS[i % _TRACK_COLORS.length]
-      : kindStyle.color;
+    const color = kindStyle.color;
     const label = sanitize(t.name || `Track ${t.id}`);
     const tuning = _tuningLabel(t.tuning);
     const metaText = tuning ? `${tuning} · ${t.id}` : `Track ${t.id}`;
-    const kindBadge = trackKindLabel(t.kind); // '' for guitar
+    const kindBadge = isGuitar ? 'GUITAR' : trackKindLabel(t.kind);
 
     const tab = document.createElement('div');
     tab.className = 'track-tab';
     tab.dataset.active = isPrimary ? '1' : '0';
     tab.dataset.trackId = t.id;
     tab.dataset.kind = isGuitar ? 'guitar' : String(t.kind).toLowerCase();
-    if (!isGuitar) {
-      // Tinted left border + faint kind wash so non-guitar tabs read as a
-      // visually distinct family without depending on style.css edits.
-      tab.style.borderLeft = `3px solid ${color}`;
-      tab.style.opacity = '0.92';
-    }
+    // Tinted left border so every tab (guitars included) reads as part of the
+    // same coloured family. Non-guitar tabs are dimmed a touch so the active
+    // guitar still stands out.
+    tab.style.borderLeft = `3px solid ${color}`;
+    if (!isGuitar) tab.style.opacity = '0.92';
 
     const colorBar = document.createElement('div');
     colorBar.className = 'track-tab-color';
@@ -2117,8 +2117,14 @@ async function _restoreSecondaryTracks(primaryTrackId) {
 
 function updatePlayButton(playing) {
   if (btnPlay) {
-    btnPlay.textContent = playing ? '⏸' : '▶';
     btnPlay.title = playing ? 'Pause' : 'Play';
+    btnPlay.classList.toggle('is-playing', playing);
+    // When the leather knob icon has been applied (icons.js inserts a child
+    // span), setting textContent would wipe it — so only write the ▶/⏸ glyph
+    // in the un-iconified fallback.
+    if (!btnPlay.classList.contains('fw-iconified')) {
+      btnPlay.textContent = playing ? '⏸' : '▶';
+    }
   }
 }
 
@@ -3635,3 +3641,7 @@ if (setIndexApply) {
 // ── Boot ────────────────────────────────────────────────────────────
 
 loadFiles();
+// Swap built-in button glyphs for the metallic knob icon set. Async + best
+// effort; the static header/toolbar buttons already exist (this module is
+// deferred), so a single pass covers them.
+applyLeatherIcons();
