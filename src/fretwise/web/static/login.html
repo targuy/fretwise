@@ -13,26 +13,30 @@
 
     <div id="banner" class="auth-banner" hidden></div>
 
-    <form id="login-form" class="auth-form" autocomplete="on">
-      <label>Email
-        <input type="email" name="email" required autocomplete="username" />
-      </label>
-      <label>Password
-        <input type="password" name="password" required autocomplete="current-password" />
-      </label>
-      <button type="submit" class="btn-primary">Sign in</button>
-    </form>
-
-    <div id="resend-row" class="auth-resend" hidden>
-      <button id="resend-btn" type="button" class="btn-link">Resend activation email</button>
+    <!-- Primary: Google / OIDC sign-in (large). Shown when a provider is set. -->
+    <div id="oidc" class="auth-oidc-primary" hidden>
+      <div id="oidc-buttons" class="oidc-buttons oidc-buttons-large"></div>
     </div>
 
-    <div id="oidc" class="auth-oidc" hidden>
-      <div class="auth-divider"><span>or</span></div>
-      <div id="oidc-buttons" class="oidc-buttons"></div>
-    </div>
+    <!-- Secondary: local accounts (small) — e.g. the env-configured admin. -->
+    <section class="auth-local">
+      <div class="auth-divider"><span>Local accounts</span></div>
+      <form id="login-form" class="auth-form auth-form-compact" autocomplete="on">
+        <label>Username
+          <input type="text" name="email" required autocomplete="username" />
+        </label>
+        <label>Password
+          <input type="password" name="password" required autocomplete="current-password" />
+        </label>
+        <button type="submit" class="btn-secondary">Sign in</button>
+      </form>
 
-    <p class="auth-foot">No account? <a href="/register">Create one</a></p>
+      <div id="resend-row" class="auth-resend" hidden>
+        <button id="resend-btn" type="button" class="btn-link">Resend activation email</button>
+      </div>
+
+      <p class="auth-foot">No account? <a href="/register">Create one</a></p>
+    </section>
   </main>
   <script src="/static/js/auth.js"></script>
   <script>FretwiseAuth.initLogin();</script>

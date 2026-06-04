@@ -41,8 +41,14 @@ def render_scene_to_svg(scene: RenderScene) -> str:
 
     page = scene.document_scene.pages[0]
     out: list[str] = [
+        # Keep explicit px width/height (needed for rasterization, e.g. PDF and
+        # the visual snapshot tests) AND a viewBox so the browser can scale it.
+        # CSS (#core-svg-view > svg { width:100%; height:auto }) overrides these
+        # in the browser to make the score fill the container width responsively
+        # instead of looking narrow/cut on wide screens.
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{page.width}" '
-        f'height="{page.height}" viewBox="0 0 {page.width} {page.height}">',
+        f'height="{page.height}" viewBox="0 0 {page.width} {page.height}" '
+        f'preserveAspectRatio="xMidYMid meet">',
         f'<text x="30" y="24" font-family="Inter, system-ui, sans-serif" '
         f'font-size="14" font-weight="600" fill="#1a1a1a">'
         f"{escape(scene.document_scene.title)}</text>",
@@ -464,11 +470,36 @@ def _render_glyph(
             f'class="fw-notehead-harmonic" data-event-id="{event_id}"/>'
         )
     if glyph_id == "clef":
+        clef = str((metadata or {}).get("clef", "treble"))
+        if clef == "percussion":
+            # The neutral/percussion clef is two thick vertical bars centred on
+            # the middle staff line. Drawn as SVG rects (not a font glyph) so it
+            # always renders — the Unicode drum-clef char is absent from common
+            # browser fonts and showed up as a missing-glyph box.
+            sp = float((metadata or {}).get("staff_spacing", 8.0)) or 8.0
+            bar_h = sp * 2.0          # spans ~2 staff spaces (lines 2–4)
+            bar_w = sp * 0.42
+            gap = sp * 0.40
+            top = y - bar_h / 2.0
+            x1 = x + sp * 0.3
+            x2 = x1 + bar_w + gap
+            return (
+                f'<g class="fw-clef fw-clef-percussion">'
+                f'<rect x="{x1:.2f}" y="{top:.2f}" width="{bar_w:.2f}" '
+                f'height="{bar_h:.2f}" fill="black"/>'
+                f'<rect x="{x2:.2f}" y="{top:.2f}" width="{bar_w:.2f}" '
+                f'height="{bar_h:.2f}" fill="black"/>'
+                f"</g>"
+            )
+        # Treble (G) U+1D11E and bass (F) U+1D122 musical symbols render from
+        # the Bravura/serif font stack.
+        char = {"bass": "\U0001D122"}.get(clef, "\U0001D11E")
         return (
             f'<text x="{x:.2f}" y="{y:.2f}" '
             f'font-family="Bravura,Times New Roman,serif" '
-            f'font-size="{max(18.0, size):.2f}" dominant-baseline="middle">'
-            "𝄞</text>"
+            f'font-size="{max(18.0, size):.2f}" dominant-baseline="middle" '
+            f'class="fw-clef fw-clef-{escape(clef)}">'
+            f"{char}</text>"
         )
     if glyph_id == "time_signature":
         numerator = int(metadata.get("numerator", 4))

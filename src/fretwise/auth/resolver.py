@@ -117,6 +117,12 @@ def resolve_user_storage(
     """
     ctors = constructors if constructors is not None else DEFAULT_CONSTRUCTORS
     backend = user.storage_backend
+    if not backend and user.is_admin and local_root is not None:
+        # Admins default to the server-local partitions library, so the local
+        # admin sees the on-disk catalogue immediately after logging in without
+        # first connecting a cloud backend. (They can still connect cloud
+        # storage later, which sets storage_backend and takes precedence.)
+        backend = "local"
     if not backend:
         raise StorageNotConfigured(
             "No storage configured. Connect your cloud storage in settings — "

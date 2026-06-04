@@ -435,44 +435,49 @@ fretwise solve song.gp5 --mode learning --output song_fingered.json --verbose
 
 # Calibrer le profil joueur
 fretwise calibrate --output data/profiles/mon_profil.json
+
+# Convertir entre formats (court terme — voir roadmap)
+fretwise convert song.gp out.musicxml
+fretwise convert song.musicxml out.gp --to gp
 ```
 
 ---
 
 ## 🚀 Phases de développement
 
-### Phase actuelle : **Phase 1 — MVP**
+### Phase 1 — MVP ✅ **terminée**
 
-**Objectif :** pipeline complet parse → generate → score → optimize, sur fichiers GuitarPro uniquement.
+Pipeline complet parse → generate → score → optimize livré, et largement dépassé depuis :
+- ✅ Modèles de données (`NoteEvent`, `FingeringState`, `FingeringResult`)
+- ✅ Parsers : GuitarPro gp3/4/5 (PyGuitarPro), GP7/8 (GPIF), MusicXML (music21), MIDI (mido)
+- ✅ Générateur d'états, scoring mécanique/musical, Viterbi, profil joueur
+- ✅ CLI (`parse, solve, finger, info, formats, web, gui`), export GP annoté, PDF/SVG/ASCII tab
+- ✅ Suite de tests verte (≥ 1090 tests), couverture large
 
-**Sprint 1 (S1) — Fondations :**
-- [ ] Setup projet (pyproject.toml, pytest, ruff, mypy, GitHub Actions)
-- [ ] Modèles de données : `NoteEvent`, `FingeringState`, `FingeringResult`
-- [ ] Parser GP : adaptateur PyGuitarPro → liste de `NoteEvent`
-- [ ] Générateur d'états : toutes positions valides sur manche 22 frets, accordage EADGBE
-- [ ] 5-10 fichiers GP de test, morceaux simples
+> Le projet a depuis étendu son périmètre bien au-delà du MVP : moteur de notation/gravure (`core/`), web FastAPI + auth multi-utilisateurs OIDC, stockage cloud pluggable (S3/WebDAV/GDrive), composants ML (ONNX), biomécanique.
 
-**Livrable S1 :** `fretwise parse song.gp5` affiche la séquence de notes avec états possibles.
+---
 
-**Sprint 2 (S2) — Scoring et Viterbi :**
-- [ ] Fonction de coût mécanique `C_méca` (4 composantes : shift, étirement, corde, doigt)
-- [ ] Inférence de doigt depuis position (F - P + 1)
-- [ ] Algorithme Viterbi
-- [ ] Stubs M3 (retourne 0 contrainte) et M6 (profil « moyen » fixe)
+### 🎯 Plan à court terme — Interopérabilité des formats (priorité actuelle)
 
-**Livrable S2 :** `fretwise solve song.gp5` produit tablature annotée + JSON.
+**Objectif :** faire de FretWise un convertisseur fiable entre **MusicXML** et **Guitar Pro**, en passant par le modèle canonique interne, avec les doigtés optimisés préservés.
 
-**Sprint 3 (S3) — Intégration :**
-- [ ] CLI complète (parse, solve, export)
-- [ ] Export GP annoté (leftHandFinger via PyGuitarPro)
-- [ ] Benchmark initial sur 10-20 morceaux
-- [ ] README et guide d'installation
+**État de départ :**
+- Import : MusicXML ✅, Guitar Pro ✅ (gp3/4/5 + gp7/8), MIDI ✅
+- Export : Guitar Pro ⚠️ **partiel** (annotation LeftFingering dans un .gp existant, pas de génération from scratch), MusicXML ❌ **absent**, conversion croisée ❌ **absente**
 
-**Critères de succès Phase 1 :**
-- Pipeline complet sans erreur sur 20 morceaux de test
-- Pas de shift impossible, pas d'étirement surhumain dans les doigtés produits
-- Temps de calcul < 1 seconde pour un morceau de 3 minutes à 120 BPM
-- Couverture de tests ≥ 80%
+**Tâches :**
+- [x] **Export MusicXML** — `fretwise solve … -o out.musicxml` ([export/musicxml_writer.py](src/fretwise/export/musicxml_writer.py)) : notes, durées, mesures (quantifiées), tablature `<string>`/`<fret>` + doigté `<fingering>` par note (accords compris). S'ouvre dans MuseScore/Finale/Guitar Pro. Round-trip vérifié.
+- [ ] **Export Guitar Pro complet** — génération d'un `.gp` from scratch (au-delà de la simple injection de doigtés dans un fichier source)
+- [ ] **Conversion GP → MusicXML** et **MusicXML → GP** via le modèle canonique (round-trip)
+- [ ] **CLI `convert`** — `fretwise convert in.gp out.musicxml` (+ option `--to {gp,musicxml}` ; doigtés optimisés optionnels)
+- [ ] **Tests de round-trip** — invariants préservés (hauteurs, rythme, mesures, accordage, doigtés) sur les fixtures
+
+**Critères de succès :**
+- Conversion sans perte des informations communes aux deux formats sur les morceaux de test
+- Doigtés (LeftFingering) préservés dans les deux sens
+- Round-trip GP → MusicXML → GP stable (pas de dérive de hauteurs/rythme)
+- Couverture de tests maintenue ≥ 80%
 
 ---
 

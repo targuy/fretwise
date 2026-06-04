@@ -18,9 +18,14 @@ import logging
 import math
 from typing import Protocol
 
+from fretwise.config import config
 from fretwise.models import FingeringResult, FingeringState, NoteEvent
 
 logger = logging.getLogger(__name__)
+
+# Number of top alternative states retained per note in each FingeringResult.
+# Sourced from fretwise.config -> defaults.yaml: ``optimizer.max_alternatives``.
+_MAX_ALTERNATIVES: int = config().optimizer.max_alternatives
 
 
 class CostFunctionProtocol(Protocol):
@@ -169,7 +174,7 @@ class ViterbiOptimizer:
                     note_event=note,
                     state=chosen,
                     cost=chosen_cost,
-                    alternatives=alternatives[:3],  # top 3 alternatives
+                    alternatives=alternatives[:_MAX_ALTERNATIVES],  # top N alternatives
                 )
             )
 

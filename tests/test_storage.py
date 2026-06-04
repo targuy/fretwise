@@ -174,7 +174,13 @@ class _FakeS3Client:
 
     def head_object(self, *, Bucket: str, Key: str) -> dict:  # noqa: N803
         if Key not in self.objects:
-            raise RuntimeError("404")
+            # Mirror real boto3: a missing object raises a 404 ClientError,
+            # which is what S3StorageBackend.stat() catches to report "absent".
+            from botocore.exceptions import ClientError  # type: ignore[import-untyped]
+
+            raise ClientError(
+                {"Error": {"Code": "404", "Message": "Not Found"}}, "HeadObject"
+            )
         return {"ContentLength": len(self.objects[Key])}
 
     def get_object(self, *, Bucket: str, Key: str) -> dict:  # noqa: N803

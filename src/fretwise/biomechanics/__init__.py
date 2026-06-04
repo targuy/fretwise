@@ -12,11 +12,17 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from fretwise.config import config
 from fretwise.models import Finger, FingeringResult
 
-STANDARD_TUNING: tuple[int, int, int, int, int, int] = (64, 59, 55, 50, 45, 40)
-DEFAULT_MAX_FRET = 24
-DEFAULT_ONSET_PRECISION = 6
+# Constants sourced from fretwise.config -> defaults.yaml: ``biomechanics``.
+_BIOMECH_CONFIG = config().biomechanics
+
+STANDARD_TUNING: tuple[int, ...] = tuple(_BIOMECH_CONFIG.standard_tuning)
+DEFAULT_MAX_FRET = _BIOMECH_CONFIG.max_fret
+DEFAULT_ONSET_PRECISION = _BIOMECH_CONFIG.onset_precision
+_DEFAULT_MAX_CHORD_SPAN = _BIOMECH_CONFIG.max_chord_span
+_DEFAULT_MAX_SHIFT_PER_BEAT = _BIOMECH_CONFIG.max_shift_per_beat
 
 _FINGER_OFFSET: dict[Finger, int] = {
     Finger.INDEX: 0,
@@ -34,12 +40,12 @@ _FINGER_RANK: dict[Finger, int] = {
 }
 
 _MAX_FINGER_PAIR_SPAN: dict[tuple[int, int], int] = {
-    (0, 1): 2,
-    (0, 2): 3,
-    (0, 3): 4,
-    (1, 2): 2,
-    (1, 3): 3,
-    (2, 3): 2,
+    (0, 1): _BIOMECH_CONFIG.max_finger_pair_span.index_middle,
+    (0, 2): _BIOMECH_CONFIG.max_finger_pair_span.index_ring,
+    (0, 3): _BIOMECH_CONFIG.max_finger_pair_span.index_pinky,
+    (1, 2): _BIOMECH_CONFIG.max_finger_pair_span.middle_ring,
+    (1, 3): _BIOMECH_CONFIG.max_finger_pair_span.middle_pinky,
+    (2, 3): _BIOMECH_CONFIG.max_finger_pair_span.ring_pinky,
 }
 
 
@@ -70,10 +76,10 @@ class BiomechanicalRuleConfig:
 
     open_string_pitches: tuple[int, ...] = STANDARD_TUNING
     max_fret: int = DEFAULT_MAX_FRET
-    max_chord_span: int = 4
+    max_chord_span: int = _DEFAULT_MAX_CHORD_SPAN
     onset_precision: int = DEFAULT_ONSET_PRECISION
     enforce_natural_hand_position: bool = False
-    max_shift_per_beat: float = 8.0
+    max_shift_per_beat: float = _DEFAULT_MAX_SHIFT_PER_BEAT
 
 
 @dataclass(frozen=True)

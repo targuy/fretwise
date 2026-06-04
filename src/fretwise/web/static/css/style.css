@@ -157,6 +157,23 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .ic-btn:hover { background: var(--bg-2); color: var(--fg-0); border-color: var(--line-2); }
 .ic-btn[data-on="1"] { background: var(--bg-3); border-color: var(--line-1); color: var(--fg-0); }
 
+/* Header export buttons: larger, with a short label beside the icon so PDF /
+   GP / XML are easy to tell apart. */
+.ic-btn-export {
+  width: auto; height: 34px;
+  flex-direction: row;
+  gap: 4px;
+  padding: 0 9px;
+  border-color: var(--line-2);
+}
+.ic-btn-export .ic-btn-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.ic-btn-export:hover { border-color: var(--line-1); }
+
 .header-btn {
   background: transparent;
   border: 1px solid var(--line-2);
@@ -304,6 +321,41 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
   scrollbar-width: none;
 }
 #track-tabs-bar::-webkit-scrollbar { display: none; }
+
+/* Overflow chevrons — shown only when the tabs bar overflows horizontally.
+   Positioned (fixed) over the left/right edges of #track-tabs-bar so a plain
+   mouse (no horizontal wheel / trackpad) can still reach off-screen tabs. */
+.track-tabs-chevron {
+  position: fixed;
+  top: 44px;
+  height: 56px;
+  width: 34px;
+  z-index: 91;
+  display: none;            /* JS toggles to 'flex' when overflowing */
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-1);
+  background: var(--bg-1);
+  opacity: 0.96;
+  transition: opacity 0.12s, color 0.12s;
+}
+.track-tabs-chevron:hover { color: var(--signal); opacity: 1; }
+.track-tabs-chevron:disabled { display: none !important; }
+.track-tabs-chevron[hidden] { display: none !important; }
+.track-tabs-chevron-left {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-1) 60%, transparent);
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+.track-tabs-chevron-right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-1) 60%, transparent);
+  justify-content: flex-end;
+  padding-right: 4px;
+}
 
 .track-tab {
   display: flex;
@@ -549,6 +601,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   background: var(--bg-score) !important;
   padding: 16px 24px;
   box-sizing: border-box;
+}
+/* Make the score SVG fill the available width (responsive) instead of sitting
+ * at a fixed page-width that looks narrow / cut on wide screens. Height is
+ * derived from the viewBox aspect ratio; the container scrolls vertically. */
+#core-svg-view > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
 }
 #tab-canvas {
   display: block;
@@ -1098,9 +1159,84 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 
 .lib-search-bar input[type="search"] { flex: 1 1 200px; }
 
+/* Song metadata workflow: a compact dropdown trigger styled to match the
+   search/filter controls + the dark dropdown theme (.instr-dropdown). */
+.lib-meta-wrap { display: flex; align-items: stretch; }
+
+.lib-meta-btn {
+  padding: 7px 12px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 13px;
+  font-family: var(--ui);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-meta-btn:hover { background: var(--bg-3); border-color: var(--signal); }
+.lib-meta-btn:focus { border-color: var(--signal); outline: none; }
+
+.lib-meta-hint {
+  font-size: 11px;
+  color: var(--fg-2);
+}
+
+.lib-meta-status {
+  font-size: 12px;
+  color: #888;
+  min-height: 14px;
+}
+
+.lib-meta-menu { width: 240px; }
+
 .lib-search-bar input:focus,
 .lib-search-bar select:focus {
   border-color: var(--signal);
+}
+
+/* A–Z alphabetical index bar. Sits between the search/filter header and the
+   table; clicking a letter jumps to the first matching entry. */
+.lib-az-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px 20px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line-2);
+}
+.lib-az-bar:empty { display: none; }
+.lib-az-letter {
+  min-width: 20px;
+  padding: 2px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--fg-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-3);
+  cursor: pointer;
+  font-family: var(--ui);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.lib-az-letter:hover:not(:disabled) {
+  background: var(--bg-2);
+  color: var(--fg-0);
+  border-color: var(--line-2);
+}
+.lib-az-letter:disabled {
+  color: var(--fg-3, var(--fg-2));
+  opacity: 0.3;
+  cursor: default;
+}
+.lib-row-flash > td {
+  animation: lib-row-flash 0.8s ease-out;
+}
+@keyframes lib-row-flash {
+  from { background: var(--bg-3); }
+  to { background: transparent; }
 }
 
 .lib-search-bar select option { background: var(--bg-1); color: var(--fg-0); }
@@ -1267,9 +1403,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   text-transform: uppercase;
   letter-spacing: 0.04em;
   width: 40%;
+  vertical-align: top;
 }
 
-.song-info-table td { padding: 6px 8px; color: var(--fg-0); }
+.song-info-table td {
+  padding: 6px 8px;
+  color: var(--fg-0);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
 
 .song-info-table tr { border-bottom: 1px solid var(--line-2); }
 
@@ -1712,6 +1854,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 @media (max-width: 640px) and (orientation: landscape) {
   .app-header { height: 36px; }
   #track-tabs-bar { top: 36px; }
+  .track-tabs-chevron { top: 36px; }
 }
 
 /* ── Touch swipe support ── */
@@ -1800,3 +1943,35 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   user-select: none;
 }
 .audit-mvt-toggle input { margin: 0; }
+
+/* ── Song loading banner + spinner (B3.2 / B2.1) ─────────────────────── */
+.song-loading-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(120, 160, 255, 0.12);
+  border: 1px solid rgba(120, 160, 255, 0.30);
+  color: #cdd6f4;
+  font-size: 13px;
+  font-weight: 600;
+}
+.song-loading-spinner {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(180, 200, 255, 0.35);
+  border-top-color: rgba(180, 200, 255, 0.95);
+  border-radius: 50%;
+  animation: fw-spin 0.7s linear infinite;
+}
+@keyframes fw-spin { to { transform: rotate(360deg); } }
+/* Tabs are visually dimmed while a solve is in flight (set inline in JS too,
+   so this is just a belt-and-braces cursor hint). */
+#track-tabs-bar.tabs-busy { cursor: progress; }
+
+@media (prefers-reduced-motion: reduce) {
+  .song-loading-spinner { animation-duration: 2s; }
+}

@@ -1,0 +1,378 @@
+# =============================================================================
+# FretWise — Centralized default configuration
+# =============================================================================
+#
+# This file is the single source of truth for the project's TUNABLE constants:
+# scoring weights & cost coefficients, generator/biomechanics limits, notation
+# and page-layout metrics, export defaults, and web-server settings.
+#
+# Every value here MIRRORS the literal currently hardcoded in the code. Loading
+# this file and reading a value back yields exactly the same behaviour as the
+# inline literal — this is a refactor, not a tuning change. Adjust a value here
+# to retune a domain without editing source.
+#
+# Loaded by ``fretwise.config`` (see ``config/__init__.py``). An optional
+# override file pointed to by the ``FRETWISE_CONFIG`` env var is deep-merged
+# over these defaults.
+#
+# Conventions:
+#   * Lengths are in SVG/PDF points (pt) unless noted.
+#   * MIDI pitches are integers 0-127.
+#   * Beats are quarter-note beats unless noted.
+#   * Each entry carries a comment with its source location and meaning.
+#
+# OUT OF SCOPE (kept inline in code, intentionally NOT here):
+#   raw SVG glyph-path coordinates, per-note inline drawing offsets, fixed
+#   music-theory tables (pitch-class names, circle-of-fifths), dict-lookup
+#   fallbacks, structural invariants (4 fretting fingers, hand_position >= 1).
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Scoring (M4) — composite cost function C = a*C_meca + b*C_music + c + d
+# Source: src/fretwise/scoring/__init__.py
+# -----------------------------------------------------------------------------
+scoring:
+  # Composite cost weighting presets (alpha=C_meca, beta=C_music, gamma=C_joueur,
+  # delta=C_peda).
+  weights:
+    reference:   [1.0, 1.0, 0.0, 0.0]   # benchmark: meca+music only
+    performance: [1.0, 0.5, 2.0, 0.0]   # concert: prioritise player feasibility
+    musical:     [1.0, 2.0, 1.0, 0.0]   # interpretation: prioritise musicality
+    learning:    [1.0, 0.5, 1.0, 1.5]   # practice: activates pedagogical cost
+  # Default CostWeights dataclass fields (used when no preset is passed).
+  default_weights:
+    alpha: 1.0   # C_meca weight
+    beta: 1.0    # C_music weight
+    gamma: 0.0   # C_joueur weight
+    delta: 0.0   # C_peda weight
+
+  # Per-finger intrinsic difficulty (index baseline = 1.0).
+  finger_base_cost:
+    open: 0.0
+    index: 1.0
+    middle: 1.15
+    ring: 1.3
+    pinky: 1.5
+  # Anatomical rank on the neck (open=-1 .. pinky=3).
+  finger_rank:
+    open: -1
+    index: 0
+    middle: 1
+    ring: 2
+    pinky: 3
+  # Natural fret offset from hand_position.
+  finger_offset:
+    index: 0
+    middle: 1
+    ring: 2
+    pinky: 3
+  # Max comfortable fret span per finger-rank pair (frets).
+  max_finger_pair_span:
+    index_middle: 2    # rank (0,1)
+    index_ring: 3      # rank (0,2)
+    index_pinky: 4     # rank (0,3) = chord stretch limit
+    middle_ring: 2     # rank (1,2)
+    middle_pinky: 3    # rank (1,3)
+    ring_pinky: 2      # rank (2,3)
+
+  # Mechanical cost (C_meca) tuning.
+  position_shift_tolerance_frets: 1       # hp-delta absorbed before counting a real shift
+  position_shift_open_factor: 0.35        # discount on shift cost when an open string is involved
+  position_shift_min_seconds: 0.1         # floor on note seconds (caps tempo_factor)
+  stretch_high_fret_relief: 0.3           # max fret-spacing relief above fret 12
+  stretch_high_fret_pivot: 12.0           # fret at which relief saturates
+  same_fret_finger_swap_penalty: 4.0      # swapping finger on same string+fret
+
+  # Sequential crossing (R-S1).
+  sequential_cross_penalty: 2.0           # fret/finger-direction mismatch
+  shift_exempt_threshold_frets: 1         # hp shift above this exempts ordering rules
+
+  # Same-finger motion penalty.
+  same_finger_motion_min_seconds: 0.2     # floor on note seconds for tempo_factor
+  same_finger_motion_fret_weight: 1.5     # weight on |delta fret|
+  same_finger_motion_string_weight: 0.75  # weight on |delta string|
+  implicit_legato_max_duration_beats: 0.5 # 1-fret same-string move treated as legato below this
+
+  # Chord / arpeggio resolver limits (biomechanical).
+  chord_max_fret_span: 4                  # R-W1 max fret window for a chord
+  partial_barre_min_string_span: 4        # two-endpoint barre needs >= this string span
+  finger_continuity_lookback_beats: 8.0   # arpeggio finger-reuse lookback window
+  arpeggio_window_beats: 4.0              # max onset span for one arpeggio chord
+  arpeggio_max_span_frets: 4              # max fret reach to qualify as one window
+  arpeggio_min_notes: 3                   # min notes to trigger stabilisation
+
+  # Pinky-run correction.
+  pinky_run_min: 3                        # run length that triggers rewrite
+  pinky_run_window: 8                     # notes before/after inspected for shared hp
+
+  # Sedentary / planted-finger detection.
+  sedentary_max_inactive_beats: 4.0       # beats a finger may stay planted without reuse
+  sedentary_reuse_lookahead_notes: 4      # notes within which next reuse must occur (R3a)
+  sedentary_chord_context_beats: 2.0      # onset gap qualifying same-chord context (R3b)
+  sedentary_reach_below: 1                # planted fret reach below hp (max(1, hp-1))
+  sedentary_reach_above: 4                # planted fret reach above hp (hp+4)
+
+  # Musical cost (C_music) penalties.
+  musical:
+    legato_cross_string_penalty: 5.0      # hammer/pull/legato across strings
+    slide_cross_string_penalty: 5.0       # slide across strings
+    vibrato_open_string_penalty: 4.0      # vibrato on open string (impossible)
+    vibrato_low_fret_penalty: 1.5         # vibrato on frets 1-2
+    vibrato_low_fret_max: 2               # fret ceiling for the low-fret vibrato penalty
+    wide_vibrato_low_penalty: 1.0         # wide vibrato on frets 1-3
+    wide_vibrato_fret_max: 3              # fret ceiling for wide-vibrato penalty
+    bend_open_string_penalty: 6.0         # bend on open string (impossible)
+    bend_heavy_wound_factor: 1.5          # per-unit bend cost on strings 5-6
+    bend_heavy_wound_min_string: 5        # string number at/above which "heavy wound" applies
+    bend_medium_wound_factor: 0.8         # per-unit bend cost on string 4
+    harmonic_wrong_fret_penalty: 4.0      # natural harmonic on wrong node fret
+    tapping_low_fret_penalty: 1.5         # tapping below fret 5
+    tapping_low_fret_max: 5               # fret below which tapping penalty applies
+    # Documentation-only: natural-harmonic node positions. The live code compares
+    # against note.harmonic_fret, NOT this list — kept here for reference.
+    natural_harmonic_frets: [5, 7, 12, 19]
+
+# -----------------------------------------------------------------------------
+# Generator (M2) — state-space generation
+# Source: src/fretwise/generator/__init__.py
+# -----------------------------------------------------------------------------
+generator:
+  standard_tuning: [64, 59, 55, 50, 45, 40]  # MIDI open-string pitches, EADGBE, index = string-1
+  max_fret: 22                                # highest fret on a standard 22-fret neck
+  max_open_hand_position: 12                  # highest hand position tracked for open-string states
+
+# -----------------------------------------------------------------------------
+# Biomechanics — pure post-Viterbi validation
+# Source: src/fretwise/biomechanics/__init__.py
+# NOTE: distinct standard_tuning/max_fret from the generator (24-fret validator).
+# -----------------------------------------------------------------------------
+biomechanics:
+  standard_tuning: [64, 59, 55, 50, 45, 40]   # MIDI open-string pitches, high-to-low (strings 1..6)
+  max_fret: 24                                 # highest fret accepted by the validator
+  onset_precision: 6                           # decimals used to group simultaneous (same-onset) notes
+  max_chord_span: 4                            # max fret span within one simultaneous chord
+  max_shift_per_beat: 8.0                      # threshold (frets/beat) for flagging extreme hand shifts
+  # Max fret span between a pair of fretting fingers, by finger-rank pair.
+  max_finger_pair_span:
+    index_middle: 2    # (0,1)
+    index_ring: 3      # (0,2)
+    index_pinky: 4     # (0,3)
+    middle_ring: 2     # (1,2)
+    middle_pinky: 3    # (1,3)
+    ring_pinky: 2      # (2,3)
+
+# -----------------------------------------------------------------------------
+# Optimizer (M5) — Viterbi
+# Source: src/fretwise/optimizer/__init__.py
+# -----------------------------------------------------------------------------
+optimizer:
+  max_alternatives: 3   # number of top alternative states retained per note in FingeringResult
+
+# -----------------------------------------------------------------------------
+# Export — MusicXML writer, shared page geometry, PDF tab, standard staff
+# Sources: src/fretwise/export/musicxml_writer.py, export/pdf_tab.py,
+#          export/staff_renderer.py
+# -----------------------------------------------------------------------------
+export:
+  # MusicXML export (musicxml_writer.py).
+  musicxml:
+    written_octave_shift: 12        # semitones added to every written pitch (guitar notates 8va)
+    default_beats_per_measure: 4.0  # time-signature numerator (N/4) default
+    default_tempo_bpm: 120.0        # fallback tempo (BPM) when results carry none
+    min_note_quarter_length: 0.25   # guard floor for zero/negative-length notes (quarter lengths)
+    quantize_divisors: [4, 3, 6]    # notatable grid divisors: 16ths, 8th-triplets, sextuplets
+
+  # Shared A4 page geometry (pdf_tab.py + staff_renderer.py, identical).
+  page:
+    width_pt: 595.0    # A4 page width
+    height_pt: 842.0   # A4 page height
+    margin_pt: 28.5    # page margin
+
+  # PDF tablature renderer (pdf_tab.py).
+  pdf_tab:
+    num_strings: 6                  # strings drawn in the tab staff
+    string_spacing_pt: 10.0         # vertical gap between adjacent string lines
+    tab_label_w_pt: 34.0            # left label column width ("TAB" + string names)
+    stem_gap_pt: 2.5                # gap between string-1 and stem base
+    stem_h_pt: 14.0                 # total stem height above string-1
+    chord_y_pt: 22.0                # chord-name baseline above sys_y
+    tempo_y_pt: 38.0                # tempo/time-sig baseline above sys_y
+    top_pad_pt: 4.0                 # padding above the text belt
+    below_strings_pt: 6.0           # padding below the lowest string
+    inter_system_gap_pt: 8.0        # vertical gap between systems
+    oval_h_pt: 7.0                  # fret-number oval height (+/-3.5 pt)
+    oval_w_1digit_pt: 10.0          # oval width for 1-digit fret
+    oval_w_2digit_pt: 13.5          # oval width for 2-digit fret 10+
+    fret_font_size_pt: 6.0          # fret-number font size
+    lh_finger_font_size_pt: 4.5     # left-hand finger label font size
+    lh_finger_y_pt: -5.5            # LH finger baseline offset from string_y
+    rh_finger_font_size_pt: 5.0     # right-hand finger label font size
+    rh_finger_y_pt: -5.5            # RH finger baseline offset from string_y
+    min_col_step_pt: 14.0           # minimum x step between consecutive onset columns
+    left_pad_pt: 9.0                # padding inside measure left edge
+    measure_number_y_pt: 31.0       # measure-number baseline above sys_y
+    unit_w_pt: 11.0                 # pt per rhythmic unit for variable measure widths
+    min_measure_w_pt: 42.0          # minimum measure width (whole-note measure)
+    max_measure_w_pt: 200.0         # maximum measure width (very dense measure)
+    rest_center_y_pt: 25.0          # rest-centre offset below sys_y
+    rest_disc_radius_pt: 6.0        # radius of white disc behind small rests
+    rest_disc_line_width_pt: 0.7    # line width of the disc ring
+    measures_per_system_min: 2      # lower cap on measures per system
+    measures_per_system_max: 6      # upper cap on measures per system
+    sname_x_offset_pt: 26.0         # string-name right-edge x offset from margin
+    tab_x_offset_pt: 8.0            # "T/A/B" centre x offset from margin
+    chord_diagram_cell_w_pt: 7.0    # header chord-diagram cell width
+    chord_diagram_cell_h_pt: 7.0    # header chord-diagram cell height
+    chord_diagram_fret_rows: 5      # fret rows per header chord diagram
+    chord_diagram_max: 12           # max chord diagrams shown in header strip
+    chord_diagram_cols: 8           # chord diagrams per header row
+    beam_h_pt: 2.5                  # beam-bar height
+    beam_gap_pt: 3.0                # gap between primary/secondary beam bars
+    rest_gap_threshold_beats: 0.115 # min gap (beats, ~1/32) that forces a rest / breaks a beam group
+    checksum_tolerance_beats: 0.10  # measure-coverage deviation that triggers the red flag
+
+  # Standard-notation staff renderer (staff_renderer.py).
+  staff:
+    num_lines: 5                       # staff lines
+    staff_spacing_pt: 8.0              # distance between adjacent staff lines
+    clef_w_pt: 34.0                    # clef/label column width
+    min_stem_clearance_spaces: 3.5     # min stem length in staff spaces
+    stem_up_threshold_midi: 71         # MIDI pitch (B4); stems up below, down above
+    notehead_rx_pt: 4.5                # notehead ellipse horizontal radius
+    notehead_ry_pt: 3.2                # notehead ellipse vertical radius
+    above_staff_base_pt: 32.0          # base room above top staff line
+    below_staff_base_pt: 24.0          # base room below bottom staff line
+    inter_system_gap_pt: 10.0          # vertical gap between staff systems
+    ledger_pad_pt: 14.0                # extra padding over actual ledger-line extent
+    beam_h_pt: 3.0                     # beam-bar height
+    beam_gap_pt: 3.0                   # gap between beam bars
+    diatonic_per_octave: 7             # diatonic steps per octave
+    measures_per_system_min: 2         # lower cap on auto measures per system
+    measures_per_system_max: 6         # upper cap on auto measures per system
+    measures_per_system_width_divisor: 90  # px-per-measure divisor for auto mps
+
+# -----------------------------------------------------------------------------
+# Notation core — clef references, percussion placement, key-signature glyphs
+# Sources: src/fretwise/core/notation_utils.py, core/scene/builders.py
+# -----------------------------------------------------------------------------
+notation:
+  # Clef diatonic reference pitches (bottom staff-line diatonic index =
+  # octave*7 + letter_step).
+  clef_reference:
+    treble_bottom_line_diatonic_index: 30   # E4 (treble bottom line)
+    bass_bottom_line_diatonic_index: 18     # G2 (bass bottom line)
+  # Percussion (drum) staff placement.
+  percussion:
+    default_staff_step: 4   # slot for unmapped GM keys (middle line)
+  # Key-signature glyph layout (treble clef).
+  key_signature:
+    start_x: 24.0          # x offset from staff x, right of clef
+    accidental_step: 6.5   # horizontal gap between key-sig accidentals
+    timesig_pad: 7.0       # extra pad between last key-sig acc and time sig
+
+# -----------------------------------------------------------------------------
+# Layout — page/system/measure placement metrics
+# Sources: src/fretwise/core/layout/rules.py, core/scene/builders.py
+# All lengths in SVG points (pt) unless noted.
+# -----------------------------------------------------------------------------
+layout:
+  # LayoutRules dataclass defaults (rules.py).
+  rules:
+    page_width: 1200.0                # default page width
+    page_height: 380.0                # default page height
+    margin_x: 60.0                    # left/right page margin
+    margin_y: 72.0                    # top/bottom page margin
+    content_width: 1080.0             # usable system width
+    system_height: 168.0              # height of one system
+    system_gap: 14.0                  # vertical gap between systems
+    staff_height: 168.0               # staff block height
+    measure_min_width: 120.0          # min measure width, TAB
+    measure_max_width: 480.0          # max measure width
+    measure_lr_pad: 20.0              # left+right inner pad per measure
+    row_top: 88.0                     # y of first TAB string row / staff origin
+    row_spacing: 10.0                 # vertical gap between TAB string rows
+    space_per_beat: 32.0              # horizontal pt allocated per beat (TAB)
+    min_note_width: 14.0              # min horizontal slot per onset, TAB
+    min_event_spacing: 14.0           # collision-avoidance min spacing
+    standard_space_per_beat: 48.0     # per-beat width when standard staff present
+    standard_min_note_width: 20.0     # min onset slot, standard notation
+    standard_measure_min_width: 180.0 # min measure width, standard notation
+    system_leading_inset: 52.0        # left inset of first measure in a system
+    standard_staff_spacing: 8.0       # distance between standard staff lines
+    tab_staff_spacing: 10.0           # distance between TAB lines
+    standard_tab_gap: 40.0            # vertical gap standard-staff -> TAB
+    notehead_rx: 3.9                  # notehead ellipse x-radius
+    notehead_ry: 2.8                  # notehead ellipse y-radius
+    notehead_rotation_deg: -20.0      # notehead tilt (degrees)
+    notehead_stroke_width: 0.8        # notehead outline stroke
+    stem_notehead_dx: 3.3             # stem x offset from notehead centre
+    rest_block_width: 8.0             # fallback rest glyph width
+    rest_block_height: 3.0            # fallback rest glyph height
+
+  # Scene builder metrics (builders.py). Several mirror LayoutRules as fallbacks
+  # used when a value is missing from page_layout.metadata.
+  scene:
+    page_width: 1200.0                          # fallback page width
+    page_height: 380.0                          # fallback page height
+    margin_x: 60.0                              # page margin x
+    margin_y: 40.0                              # page margin y
+    staff_width: 1080.0                         # staff width
+    staff_height: 240.0                         # staff height
+    tab_spacing: 10.0                           # TAB line spacing fallback
+    standard_staff_spacing: 8.0                 # standard staff line spacing fallback
+    standard_tab_clearance: 40.0                # std->TAB gap fallback
+    rest_gap_break: 0.115                       # onset gap (beats) that breaks a beam group
+    tab_span_pad: 6.0                           # technique-span horizontal padding
+    beam_gap: 3.0                               # gap between stacked beams, standard
+    flag_stack_spacing: 3.5                     # gap between stacked flags
+    tab_rhythm_beam_thickness: 3.1              # TAB-rhythm beam thickness
+    tab_rhythm_beam_gap: 3.4                    # gap between TAB-rhythm beams
+    tab_rhythm_flag_spacing: 4.1                # gap between TAB-rhythm flags
+    tab_rhythm_stem_width: 0.95                 # TAB-rhythm stem stroke
+    secondary_beam_hook_len: 8.0                # length of partial-beam hook
+    min_stem_length: 18.0                       # minimum TAB-rhythm stem length
+    max_beam_slope: 0.35                        # max beam slope (rise/run ratio)
+    max_beam_vertical_delta: 16.0               # max beam endpoint y delta
+    standard_stem_length_spaces: 3.5            # default stem length (staff-spaces)
+    standard_beamed_stem_min_spaces: 3.5        # min beamed stem (staff-spaces)
+    standard_stem_max_spaces: 5.0               # max stem length (staff-spaces)
+    standard_beamed_stem_max_spaces: 5.0        # max beamed stem (staff-spaces)
+    standard_stem_outer_extension_spaces: 1.5   # beam-side stem extension (staff-spaces)
+    notehead_stem_x_offset: 3.3                 # stem x offset from notehead fallback
+    notehead_rx: 3.9                            # notehead x-radius fallback
+    notehead_ry: 2.8                            # notehead y-radius fallback
+    notehead_rotation_deg: -20.0                # notehead tilt fallback (deg)
+    notehead_stroke_width: 0.8                  # notehead stroke fallback
+    rest_block_width: 8.0                       # fallback rest width
+    rest_block_height: 3.0                      # fallback rest height
+    arc_onset_tolerance: 0.06                   # onset match tolerance for tie/slur arcs (beats)
+
+# -----------------------------------------------------------------------------
+# Web server / app
+# Sources: src/fretwise/web/app.py, web/settings.py
+# -----------------------------------------------------------------------------
+web:
+  # Upload size ceilings (bytes). Streamed uploads rejected with HTTP 413 once
+  # exceeded.
+  max_score_upload_bytes: 52428800        # 50 MiB score-file upload cap
+  max_soundfont_upload_bytes: 536870912   # 512 MiB SF2/soundfont upload cap
+  # Host-header guard (DNS-rebinding protection). Loopback-only by default;
+  # overridable at runtime via FRETWISE_ALLOWED_HOSTS.
+  default_allowed_hosts:
+    - localhost
+    - "127.0.0.1"
+    - "[::1]"
+    - testserver
+  # In-process response caches (bounded by entry count, LRU eviction).
+  solve_cache_max_entries: 128            # per-mode /api/solve payload cache size (entries)
+  legacy_cache_max_entries: 32            # mode-independent legacy-pipeline result cache size (entries)
+  # Default fallbacks when the parser/adapter supplies no value.
+  default_tempo_bpm: 120.0                # fallback tempo (BPM)
+  default_beats_per_measure: 4.0          # fallback time-signature numerator (beats/measure)
+  # Default standard-tuning open-string MIDI pitches for single-track
+  # MusicXML/MIDI inputs that expose no tuning (E2 A2 D3 G3 B3 E4).
+  default_guitar_tuning: [40, 45, 50, 55, 59, 64]
+  # Persistent user-settings defaults (settings.py).
+  settings_defaults:
+    soundfonts_dir: "data/sounds"         # default soundfont directory (relative to project root)
+    storage_backend: "local"              # default partitions storage backend (local|s3|webdav|gdrive)

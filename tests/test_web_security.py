@@ -145,3 +145,93 @@ def test_multiuser_setup_fails_closed_without_secret_key(monkeypatch: Any) -> No
     monkeypatch.delenv("FRETWISE_AUTH_ENABLED", raising=False)
     with pytest.raises(RuntimeError):
         create_app()
+
+
+# --- env-configured local admin (password login, no OIDC) -------------------
+
+def _clear_auth_env(monkeypatch: Any) -> None:
+    for var in (
+        "FRETWISE_AUTH_ENABLED", "FRETWISE_GOOGLE_CLIENT_ID", "FRETWISE_GOOGLE_CLIENT_SECRET",
+        "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
+        "FRETWISE_ADMIN_EMAILS", "FRETWISE_ADMIN_EMAIL", "FRETWISE_ADMIN_PASSWORD_HASH",
+        "FRETWISE_SECRET_KEY", "FRETWISE_BASE_URL",
+    ):
+        monkeypatch.delenv(var, raising=False)
+
+
+def test_local_admin_no_oidc_seeds_admin_and_logs_in(monkeypatch: Any, tmp_path: Path) -> None:
+    """Local admin (email + password hash, no OIDC) boots into multi-user mode,
+    seeds a pre-activated admin, and serves password login + admin-only routes."""
+    pytest.importorskip("itsdangerous")
+    from starlette.testclient import TestClient
+
+    from fretwise.auth.passwords import hash_password
+
+    _clear_auth_env(monkeypatch)
+    monkeypatch.setenv("FRETWISE_SECRET_KEY", "test-secret-key-not-a-password")
+    monkeypatch.setenv("FRETWISE_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("FRETWISE_ADMIN_EMAIL", "admin@example.com")
+    # NOTE: the password is hashed here at test time; only the hash hits the env.
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWORD_HASH", hash_password("test-admin-password"))
+
+    app = create_app(tmp_path / "partitions")
+    assert app.state.multiuser is True
+
+    # The admin account was seeded, pre-activated, from the env hash.
+    seeded = app.state.account_store.get("admin@example.com")
+    assert seeded is not None and seeded.is_active
+
+    with TestClient(app) as client:
+        # No OIDC providers, password method available.
+        methods = client.get("/api/auth/methods").json()
+        assert methods["password"] is True
+        assert methods["providers"] == []
+
+        # Wrong password -> 401.
+        bad = client.post(
+            "/api/auth/login", json={"email": "admin@example.com", "password": "wrong"},
+        )
+        assert bad.status_code == 401
+
+        # Correct password -> session established, recognised as admin.
+        ok = client.post(
+            "/api/auth/login",
+            json={"email": "admin@example.com", "password": "test-admin-password"},
+        )
+        assert ok.status_code == 200
+        me = client.get("/api/me").json()
+        assert me["authenticated"] is True and me["is_admin"] is True
+        # Admin gets the server-local library as a storage option.
+        assert "local" in me["available_backends"]
+
+
+def test_local_admin_reseed_is_idempotent_across_app_creates(
+    monkeypatch: Any, tmp_path: Path,
+) -> None:
+    pytest.importorskip("itsdangerous")
+    from fretwise.auth.passwords import hash_password
+
+    _clear_auth_env(monkeypatch)
+    monkeypatch.setenv("FRETWISE_SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("FRETWISE_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("FRETWISE_ADMIN_EMAIL", "admin@example.com")
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWORD_HASH", hash_password("first-pw"))
+
+    app1 = create_app(tmp_path / "partitions")
+    assert app1.state.account_store.verify_login("admin@example.com", "first-pw") is not None
+
+    # Recreate the app with a rotated hash -> the stored credential updates.
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWORD_HASH", hash_password("second-pw"))
+    app2 = create_app(tmp_path / "partitions")
+    store = app2.state.account_store
+    assert store.verify_login("admin@example.com", "second-pw") is not None
+    assert store.verify_login("admin@example.com", "first-pw") is None
+    # Still exactly one account file (idempotent, no duplicates).
+    assert len(list((tmp_path / "data" / "accounts").glob("*.json"))) == 1
+
+
+def test_single_user_mode_unchanged_when_no_auth(monkeypatch: Any, tmp_path: Path) -> None:
+    _clear_auth_env(monkeypatch)
+    app = create_app(tmp_path)
+    assert app.state.multiuser is False
+    assert app.state.__dict__.get("account_store") is None  # no auth wiring in single-user

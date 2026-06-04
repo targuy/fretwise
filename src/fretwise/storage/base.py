@@ -29,6 +29,12 @@ SUPPORTED_SCORE_EXTS: frozenset[str] = frozenset({
     ".mid", ".midi",
 })
 
+# Per-user song-metadata catalog (TSV). It is *not* a score, so it is not part
+# of SUPPORTED_SCORE_EXTS (it never appears in ``list_scores``), but the storage
+# layer must still allow reading/writing this single, fixed name so the LLM
+# metadata-enrichment workflow can persist it next to the user's scores.
+CATALOG_NAME: str = "songs.tsv"
+
 
 class StorageError(Exception):
     """Base error for the storage layer."""
@@ -90,6 +96,10 @@ def safe_score_name(name: str) -> str:
     base = Path(name).name
     if not base or base in {".", ".."}:
         raise StorageValidationError(f"Invalid filename: {name!r}")
+    # The metadata catalog is a fixed, non-score companion file; allow it through
+    # so the song-catalog workflow can persist it alongside the user's scores.
+    if base == CATALOG_NAME:
+        return base
     if Path(base).suffix.lower() not in SUPPORTED_SCORE_EXTS:
         raise StorageValidationError(f"Unsupported file type: {base}")
     return base
@@ -151,6 +161,7 @@ class StorageBackend(ABC):
 
 
 __all__ = [
+    "CATALOG_NAME",
     "SUPPORTED_SCORE_EXTS",
     "StorageBackend",
     "StorageBackendUnavailable",

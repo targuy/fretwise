@@ -18,23 +18,27 @@ from pathlib import Path
 from reportlab.lib.units import mm  # type: ignore[import-untyped]
 from reportlab.pdfgen import canvas as rl_canvas  # type: ignore[import-untyped]
 
+from fretwise.config import config
 from fretwise.models import Finger, FingeringResult
 
 # ---------------------------------------------------------------------------
 # Layout constants (pt — 1 pt = 1/72 inch)
 # ---------------------------------------------------------------------------
 
-_PAGE_W = 595.0
-_PAGE_H = 842.0
-_MARGIN = 28.5
+_PAGE_CFG = config().export.page
+_STAFF_CFG = config().export.staff
+
+_PAGE_W: float = _PAGE_CFG.width_pt
+_PAGE_H: float = _PAGE_CFG.height_pt
+_MARGIN: float = _PAGE_CFG.margin_pt
 
 # Staff geometry
-_NUM_LINES = 5
-_STAFF_SPACING = 8.0          # distance between adjacent staff lines (pt)
+_NUM_LINES: int = _STAFF_CFG.num_lines
+_STAFF_SPACING: float = _STAFF_CFG.staff_spacing_pt  # distance between adjacent staff lines (pt)
 _STAFF_HEIGHT = (_NUM_LINES - 1) * _STAFF_SPACING  # 32 pt
 
 # Clef / label column
-_CLEF_W = 34.0
+_CLEF_W: float = _STAFF_CFG.clef_w_pt
 _NOTES_X0 = _MARGIN + _CLEF_W  # 62.5 pt — matches tab _STRINGS_X0
 
 # Stem
@@ -43,26 +47,26 @@ _NOTES_X0 = _MARGIN + _CLEF_W  # 62.5 pt — matches tab _STRINGS_X0
 # For a single note this is the full stem length from its own center.
 # For chords, the stem is extended so the farthest note from the tip still
 # has at least this clearance.
-_MIN_STEM_CLEARANCE = 3.5 * _STAFF_SPACING   # 28.0 pt
-_STEM_UP_THRESHOLD = 71       # MIDI B4 — stems up below, stems down above
+_MIN_STEM_CLEARANCE: float = _STAFF_CFG.min_stem_clearance_spaces * _STAFF_SPACING   # 28.0 pt
+_STEM_UP_THRESHOLD: int = _STAFF_CFG.stem_up_threshold_midi  # MIDI B4 — stems up below, down above
 
 # Notehead
-_NH_RX = 4.5                  # notehead ellipse horizontal radius
-_NH_RY = 3.2                  # notehead ellipse vertical radius
+_NH_RX: float = _STAFF_CFG.notehead_rx_pt  # notehead ellipse horizontal radius
+_NH_RY: float = _STAFF_CFG.notehead_ry_pt  # notehead ellipse vertical radius
 
 # System extents — base values; will be overridden per-system by
 # _compute_system_extents() to handle notes with many ledger lines.
-_ABOVE_STAFF_BASE = 32.0      # room for ledger lines / stems above top line
-_BELOW_STAFF_BASE = 24.0      # room for ledger below + dynamics
+_ABOVE_STAFF_BASE: float = _STAFF_CFG.above_staff_base_pt  # room above top line
+_BELOW_STAFF_BASE: float = _STAFF_CFG.below_staff_base_pt  # room for ledger below + dynamics
 # Export the old names as aliases so combined_renderer keeps working.
 _ABOVE_STAFF = _ABOVE_STAFF_BASE
 _BELOW_STAFF = _BELOW_STAFF_BASE
 _SYSTEM_H = _ABOVE_STAFF_BASE + _STAFF_HEIGHT + _BELOW_STAFF_BASE  # ~88 pt
-_INTER_SYSTEM_GAP = 10.0
+_INTER_SYSTEM_GAP: float = _STAFF_CFG.inter_system_gap_pt
 _SYSTEM_PITCH = _SYSTEM_H + _INTER_SYSTEM_GAP
 
 # Extra padding added on top of the actual ledger-line extent (pt)
-_LEDGER_PAD = 14.0
+_LEDGER_PAD: float = _STAFF_CFG.ledger_pad_pt
 
 # Accidental glyphs (Unicode)
 _SHARP = "♯"
@@ -70,8 +74,8 @@ _FLAT = "♭"
 _NATURAL = "♮"
 
 # Beam
-_BEAM_H = 3.0
-_BEAM_GAP = 3.0
+_BEAM_H: float = _STAFF_CFG.beam_h_pt
+_BEAM_GAP: float = _STAFF_CFG.beam_gap_pt
 
 # Colours
 _COL_BLACK = (0, 0, 0)
@@ -104,7 +108,7 @@ _PC_TO_DIATONIC: dict[int, tuple[int, int]] = {
 }
 
 # How many diatonic steps per octave
-_DIATONIC_PER_OCTAVE = 7
+_DIATONIC_PER_OCTAVE: int = _STAFF_CFG.diatonic_per_octave
 
 # Finger → annotation letter (left of notehead)
 _FINGER_LETTER: dict[str, str] = {
@@ -785,7 +789,13 @@ def _build_systems(
     if forced_mps is not None and forced_mps > 0:
         mps = forced_mps
     else:
-        mps = max(2, min(6, int(available_w / 90)))
+        mps = max(
+            _STAFF_CFG.measures_per_system_min,
+            min(
+                _STAFF_CFG.measures_per_system_max,
+                int(available_w / _STAFF_CFG.measures_per_system_width_divisor),
+            ),
+        )
 
     systems: list[tuple[list[list[FingeringResult]], list[float]]] = []
     i = 0

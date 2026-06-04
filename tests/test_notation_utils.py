@@ -8,6 +8,8 @@ from fretwise.core.notation_utils import (
     diatonic_step_from_metadata,
     diatonic_step_from_name,
     diatonic_step_index,
+    is_x_notehead_drum,
+    percussion_note_y,
     standard_note_y,
 )
 
@@ -135,3 +137,98 @@ class TestStandardNoteY:
         y_e4 = standard_note_y(64, staff_y_origin=0.0, staff_spacing=4.0)
         y_c4 = standard_note_y(60, staff_y_origin=0.0, staff_spacing=4.0)
         assert y_c4 - y_e4 == pytest.approx(4.0)  # one full staff_spacing
+
+    def test_default_clef_is_treble(self) -> None:
+        y_default = standard_note_y(64, staff_y_origin=0.0, staff_spacing=4.0)
+        y_treble = standard_note_y(64, staff_y_origin=0.0, staff_spacing=4.0, clef="treble")
+        assert y_default == pytest.approx(y_treble)
+
+    def test_unknown_clef_falls_back_to_treble(self) -> None:
+        y_unknown = standard_note_y(64, staff_y_origin=0.0, staff_spacing=4.0, clef="alto")
+        y_treble = standard_note_y(64, staff_y_origin=0.0, staff_spacing=4.0, clef="treble")
+        assert y_unknown == pytest.approx(y_treble)
+
+
+class TestBassClefNoteY:
+    """Bass clef anchors the bottom line on G2 (MIDI 43)."""
+
+    def test_g2_is_on_bottom_line(self) -> None:
+        y = standard_note_y(43, staff_y_origin=10.0, staff_spacing=4.0, clef="bass")
+        assert y == pytest.approx(10.0 + 4 * 4.0)  # 26.0 — bottom line
+
+    def test_low_bass_note_sits_near_staff_not_far_below(self) -> None:
+        # E1 (MIDI 28) is the low B-string of a guitar/bass; on a bass clef it
+        # is only a couple of ledger lines below, NOT a dozen as on treble.
+        staff_spacing = 8.0
+        topline = 0.0
+        bottom_line = topline + 4 * staff_spacing  # 32
+        y_bass = standard_note_y(
+            40, staff_y_origin=topline, staff_spacing=staff_spacing, clef="bass"
+        )
+        y_treble = standard_note_y(
+            40, staff_y_origin=topline, staff_spacing=staff_spacing, clef="treble"
+        )
+        # On bass clef the note stays close to the staff band; on treble it is
+        # forced far below (large positive Y).
+        assert y_bass < y_treble
+        # Within ~3 ledger lines of the bottom line on bass clef.
+        assert y_bass - bottom_line < 6 * staff_spacing
+
+    def test_bass_octave_up_subtracts_seven_half_spaces(self) -> None:
+        y_g2 = standard_note_y(43, staff_y_origin=0.0, staff_spacing=4.0, clef="bass")
+        y_g3 = standard_note_y(55, staff_y_origin=0.0, staff_spacing=4.0, clef="bass")
+        assert y_g2 - y_g3 == pytest.approx(14.0)
+
+
+class TestPercussionNoteY:
+    """GM drums map to fixed staff slots, never placed by pitch."""
+
+    def test_kick_near_bottom_of_staff(self) -> None:
+        spacing = 8.0
+        topline = 0.0
+        bottom_line = topline + 4 * spacing  # 32
+        y_kick = percussion_note_y(36, staff_y_origin=topline, staff_spacing=spacing)
+        # Kick sits at/near the bottom space — below the middle, above bottom ledger.
+        assert y_kick > topline + 2 * spacing
+        assert y_kick <= bottom_line + spacing
+
+    def test_snare_on_middle_line(self) -> None:
+        spacing = 8.0
+        topline = 0.0
+        middle_line = topline + 2 * spacing  # 16
+        y_snare = percussion_note_y(38, staff_y_origin=topline, staff_spacing=spacing)
+        assert y_snare == pytest.approx(middle_line)
+
+    def test_hihat_at_or_above_top_line(self) -> None:
+        spacing = 8.0
+        topline = 0.0
+        y_hh = percussion_note_y(42, staff_y_origin=topline, staff_spacing=spacing)
+        # Hi-hat sits on or above the top line (smaller / equal Y than topline).
+        assert y_hh <= topline + spacing / 2
+
+    def test_all_gm_drums_stay_within_one_ledger(self) -> None:
+        spacing = 8.0
+        topline = 0.0
+        bottom_line = topline + 4 * spacing
+        for key in range(35, 60):
+            y = percussion_note_y(key, staff_y_origin=topline, staff_spacing=spacing)
+            # Within one ledger line above the top / below the bottom.
+            assert topline - 2 * spacing <= y <= bottom_line + 2 * spacing, key
+
+    def test_unknown_key_lands_on_middle_line(self) -> None:
+        spacing = 8.0
+        topline = 0.0
+        y = percussion_note_y(99, staff_y_origin=topline, staff_spacing=spacing)
+        assert y == pytest.approx(topline + 2 * spacing)
+
+
+class TestIsXNoteheadDrum:
+    """Cymbals/hi-hats use 'x' noteheads; drums use normal heads."""
+
+    @pytest.mark.parametrize("key", [42, 44, 46, 49, 51, 57, 59])
+    def test_cymbals_and_hihats_are_x(self, key: int) -> None:
+        assert is_x_notehead_drum(key) is True
+
+    @pytest.mark.parametrize("key", [35, 36, 38, 40, 41, 45, 47, 48, 50])
+    def test_drums_are_normal_heads(self, key: int) -> None:
+        assert is_x_notehead_drum(key) is False

@@ -1,0 +1,33 @@
+# FretWise local song catalog — example / template
+#
+# This is an OFFLINE, user-editable metadata catalog. No network lookup is ever
+# performed. Copy this file to "songs.tsv" (or any path) and point the web
+# "index_path" setting at it. Edit by hand or export TSV from a spreadsheet.
+#
+# Format:
+#   * Tab-separated values, UTF-8 (a leading BOM is fine).
+#   * The first NON-COMMENT row below is the header naming the columns.
+#   * Lines beginning with "#" here are documentation; the real catalog file you
+#     create does not need them (DictReader will simply ignore unknown rows that
+#     lack a key, but it is cleanest to start with the header row).
+#
+# Columns (all optional except the key):
+#   filename  Key — the score filename, e.g. "Aerosmith - Back In The Saddle.gp".
+#             Matched on the full name AND the extension-less stem, so either
+#             works. Aliases: file / name / stem.
+#   title     Song title.
+#   artist    Performing artist / composer.
+#   album     Album the track belongs to.
+#   genre     Musical genre (also feeds the library Genre filter).
+#   year      Release / recording year.
+#   notes     Free-form notes (tuning, capo, difficulty, ...).
+#
+# Non-empty catalog values OVERRIDE values parsed from the filename. Anything
+# you leave blank is filled in from the filename. album/genre/notes are only
+# ever shown when you supply them here.
+#
+# The header row and two example rows below show the layout (replace them with
+# your own data — do not commit your real catalog):
+filename	title	artist	album	genre	year	notes
+Aerosmith - Back In The Saddle - 10-16-2024.gp	Back in the Saddle	Aerosmith	Rocks	Hard Rock	1976	Drop D feel, watch the slide intro
+Pink Floyd - Time.gp	Time	Pink Floyd	The Dark Side of the Moon	Progressive Rock	1973	Standard tuning; tasteful bends

@@ -6,7 +6,7 @@
 # With arguments -> passes them to the `fretwise` CLI.
 #
 # Examples:
-#   scripts/run.sh                          # web UI on 127.0.0.1:8080
+#   scripts/run.sh                          # web UI on localhost:8080
 #   HOST=0.0.0.0 PORT=9090 scripts/run.sh   # web UI reachable on the network
 #   scripts/run.sh solve song.gp5 --mode performance
 #   scripts/run.sh parse song.gp5
@@ -28,7 +28,7 @@ if [ -f "$ROOT/.env" ]; then
 fi
 
 if [ "$#" -eq 0 ]; then
-  HOST="${HOST:-127.0.0.1}"; PORT="${PORT:-8080}"
+  HOST="${HOST:-localhost}"; PORT="${PORT:-8080}"
   echo "==> FretWise web UI -> http://${HOST}:${PORT}   (Ctrl+C to stop)"
   exec env COPYFILE_DISABLE=1 pixi run fretwise web --host "$HOST" --port "$PORT"
 else

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import bisect
 
+from fretwise.config import config as _config
+
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
@@ -11,6 +13,8 @@ from fretwise.core.notation_mode import has_standard as _has_standard_mode
 from fretwise.core.notation_mode import has_tab as _has_tab_mode
 from fretwise.core.notation_utils import (
     diatonic_step_from_metadata as _diatonic_step_from_metadata,
+    is_x_notehead_drum as _is_x_notehead_drum,
+    percussion_note_y as _notation_percussion_note_y,
     standard_note_y as _notation_standard_note_y,
 )
 from .render_helpers import (
@@ -40,48 +44,54 @@ from fretwise.core.scene.models import (
     TextInstance,
 )
 
-_PAGE_W = 1200.0
-_PAGE_H = 380.0
-_MARGIN_X = 60.0
-_MARGIN_Y = 40.0
-_STAFF_W = 1080.0
-_STAFF_H = 240.0
+# Tunable scene metrics are sourced from the centralized config
+# (src/fretwise/config/defaults.yaml -> layout.scene). Values mirror the prior
+# inline literals exactly; this is a refactor, not a tuning change. Derived
+# constants (e.g. _TAB_Y, _STANDARD_STEM_TOP_Y) stay computed from these bases.
+_SCENE_CFG = _config().layout.scene
+
+_PAGE_W = _SCENE_CFG.page_width
+_PAGE_H = _SCENE_CFG.page_height
+_MARGIN_X = _SCENE_CFG.margin_x
+_MARGIN_Y = _SCENE_CFG.margin_y
+_STAFF_W = _SCENE_CFG.staff_width
+_STAFF_H = _SCENE_CFG.staff_height
 _TAB_Y = _MARGIN_Y + 60.0
-_TAB_SPACING = 10.0
+_TAB_SPACING = _SCENE_CFG.tab_spacing
 _STAFF_STD_Y = _MARGIN_Y - 8.0
-_STAFF_STD_SPACING = 8.0
-_STAFF_TAB_CLEARANCE = 40.0
+_STAFF_STD_SPACING = _SCENE_CFG.standard_staff_spacing
+_STAFF_TAB_CLEARANCE = _SCENE_CFG.standard_tab_clearance
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 2 * _STAFF_STD_SPACING
 _STANDARD_STEM_BOTTOM_Y = _STAFF_STD_Y + 6 * _STAFF_STD_SPACING
 _STANDARD_REST_CENTER_Y = _STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING
 _STANDARD_REST_VOICE_OFFSET = 2.0 * _STAFF_STD_SPACING
 _TAB_RHYTHM_BEAM_Y = _TAB_Y + 5.0 * _TAB_SPACING + 14.0
 _TAB_RHYTHM_REST_CENTER_Y = _TAB_Y + 5.0 * _TAB_SPACING + 8.0
-_REST_GAP_BREAK = 0.115
-_TAB_SPAN_PAD = 6.0
-_BEAM_GAP = 3.0
-_FLAG_STACK_SPACING = 3.5
-_TAB_RHYTHM_BEAM_THICKNESS = 3.1
-_TAB_RHYTHM_BEAM_GAP = 3.4
-_TAB_RHYTHM_FLAG_SPACING = 4.1
-_TAB_RHYTHM_STEM_WIDTH = 0.95
-_SECONDARY_BEAM_HOOK_LEN = 8.0
-_MIN_STEM_LENGTH = 18.0
-_MAX_BEAM_SLOPE = 0.35
-_MAX_BEAM_VERTICAL_DELTA = 16.0
-_STANDARD_STEM_LENGTH_SPACES = 3.5
-_STANDARD_BEAMED_STEM_MIN_SPACES = 3.5
-_STANDARD_STEM_MAX_SPACES = 5.0
-_STANDARD_BEAMED_STEM_MAX_SPACES = 5.0
-_STANDARD_STEM_OUTER_EXTENSION_SPACES = 1.5
-_NOTEHEAD_STEM_X_OFFSET = 3.3
-_NOTEHEAD_RX = 3.9
-_NOTEHEAD_RY = 2.8
-_NOTEHEAD_ROTATION_DEG = -20.0
-_NOTEHEAD_STROKE_WIDTH = 0.8
-_REST_BLOCK_WIDTH = 8.0
-_REST_BLOCK_HEIGHT = 3.0
-_ARC_ONSET_TOLERANCE = 0.06
+_REST_GAP_BREAK = _SCENE_CFG.rest_gap_break
+_TAB_SPAN_PAD = _SCENE_CFG.tab_span_pad
+_BEAM_GAP = _SCENE_CFG.beam_gap
+_FLAG_STACK_SPACING = _SCENE_CFG.flag_stack_spacing
+_TAB_RHYTHM_BEAM_THICKNESS = _SCENE_CFG.tab_rhythm_beam_thickness
+_TAB_RHYTHM_BEAM_GAP = _SCENE_CFG.tab_rhythm_beam_gap
+_TAB_RHYTHM_FLAG_SPACING = _SCENE_CFG.tab_rhythm_flag_spacing
+_TAB_RHYTHM_STEM_WIDTH = _SCENE_CFG.tab_rhythm_stem_width
+_SECONDARY_BEAM_HOOK_LEN = _SCENE_CFG.secondary_beam_hook_len
+_MIN_STEM_LENGTH = _SCENE_CFG.min_stem_length
+_MAX_BEAM_SLOPE = _SCENE_CFG.max_beam_slope
+_MAX_BEAM_VERTICAL_DELTA = _SCENE_CFG.max_beam_vertical_delta
+_STANDARD_STEM_LENGTH_SPACES = _SCENE_CFG.standard_stem_length_spaces
+_STANDARD_BEAMED_STEM_MIN_SPACES = _SCENE_CFG.standard_beamed_stem_min_spaces
+_STANDARD_STEM_MAX_SPACES = _SCENE_CFG.standard_stem_max_spaces
+_STANDARD_BEAMED_STEM_MAX_SPACES = _SCENE_CFG.standard_beamed_stem_max_spaces
+_STANDARD_STEM_OUTER_EXTENSION_SPACES = _SCENE_CFG.standard_stem_outer_extension_spaces
+_NOTEHEAD_STEM_X_OFFSET = _SCENE_CFG.notehead_stem_x_offset
+_NOTEHEAD_RX = _SCENE_CFG.notehead_rx
+_NOTEHEAD_RY = _SCENE_CFG.notehead_ry
+_NOTEHEAD_ROTATION_DEG = _SCENE_CFG.notehead_rotation_deg
+_NOTEHEAD_STROKE_WIDTH = _SCENE_CFG.notehead_stroke_width
+_REST_BLOCK_WIDTH = _SCENE_CFG.rest_block_width
+_REST_BLOCK_HEIGHT = _SCENE_CFG.rest_block_height
+_ARC_ONSET_TOLERANCE = _SCENE_CFG.arc_onset_tolerance
 _SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
 
 # Key signature glyph layout constants (treble clef).
@@ -90,9 +100,9 @@ _SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
 _KEY_SIG_SHARP_Y_MULT: tuple[float, ...] = (0.0, 1.5, -0.5, 1.0, 2.5, 0.5, 2.0)
 # Flats: Bb Eb Ab Db Gb Cb Fb
 _KEY_SIG_FLAT_Y_MULT: tuple[float, ...] = (2.0, 0.5, 2.5, 1.0, 3.0, 1.5, 3.5)
-_KEY_SIG_START_X = 24.0   # offset from staff_layout.x (right of clef)
-_KEY_SIG_ACC_STEP = 6.5   # horizontal gap between consecutive accidentals
-_KEY_SIG_TIMESIG_PAD = 7.0  # extra padding between last key sig acc and time sig
+_KEY_SIG_START_X = _config().notation.key_signature.start_x  # offset from staff_layout.x
+_KEY_SIG_ACC_STEP = _config().notation.key_signature.accidental_step  # gap between accidentals
+_KEY_SIG_TIMESIG_PAD = _config().notation.key_signature.timesig_pad  # pad before time sig
 
 # Circle-of-fifths: diatonic step indices (mod 7) altered by the key signature.
 # Sharp order: F C G D A E B
@@ -134,6 +144,26 @@ def _layout_float(page_layout: PageLayout, key: str, default: float) -> float:
         return default
 
 
+# Diatonic step (absolute, C0 = 0) of each clef's bottom staff line.  The
+# standard-staff note-Y math is anchored on this reference so that notes land
+# on the staff for the instrument's natural register:
+#   treble → E4 (MIDI 64), bass → G2 (MIDI 43), percussion → unused (neutral).
+_E4_DIATONIC_INDEX = _config().notation.clef_reference.treble_bottom_line_diatonic_index
+_G2_DIATONIC_INDEX = _config().notation.clef_reference.bass_bottom_line_diatonic_index
+
+
+def _score_clef(score: Score) -> str:
+    """Return the standard-staff clef for the score's first staff.
+
+    Falls back to ``"treble"`` so single-track guitar scores are unaffected.
+    """
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                return getattr(staff, "clef", "treble") or "treble"
+    return "treble"
+
+
 def canonical_to_render_scene(score: Score, *, mode: str = "tablature") -> RenderScene:
     """Build a scene representation from canonical score through layout."""
     page_layout = canonical_to_page_layout(score, mode=mode)
@@ -147,6 +177,8 @@ def layout_to_render_scene(
     has_tab = _has_tab_mode(mode)
     has_standard = _has_standard_mode(mode)
     has_tab_rhythm = mode == "tablature_rhythm"
+    clef = _score_clef(score)
+    is_percussion = clef == "percussion"
     staff_spacing = _layout_float(page_layout, "standard_staff_spacing", _STAFF_STD_SPACING)
     tab_spacing = _layout_float(page_layout, "tab_staff_spacing", _TAB_SPACING)
     standard_tab_gap = _layout_float(page_layout, "standard_tab_gap", _STAFF_TAB_CLEARANCE)
@@ -244,17 +276,29 @@ def layout_to_render_scene(
                     )
                 )
             if has_standard:
+                # Bass clef sits a line lower than treble; percussion clef is
+                # centred.  The y reference keeps the clef visually anchored to
+                # its defining staff line.
+                if clef == "bass":
+                    clef_y = staff_std_y + 1.0 * staff_spacing
+                elif clef == "percussion":
+                    clef_y = staff_std_y + 2.0 * staff_spacing
+                else:
+                    clef_y = staff_std_y + 2.0 * staff_spacing
                 staff_layer.glyph_instances.append(
                     GlyphInstance(
                         glyph_id="clef",
                         x=staff_layout.x + 8.0,
-                        y=staff_std_y + 2.0 * staff_spacing,
+                        y=clef_y,
                         size=31.0,
-                        metadata={"clef": "treble"},
+                        # staff_spacing lets the SVG backend draw a font-free
+                        # percussion (neutral two-bar) clef sized to the staff.
+                        metadata={"clef": clef, "staff_spacing": staff_spacing},
                     )
                 )
                 # Key signature glyphs (sharps or flats) — shown on every system.
-                if key_sig_count > 0:
+                # Percussion staves carry no key signature.
+                if key_sig_count > 0 and not is_percussion:
                     ks_glyph = "key_sig_sharp" if key_fifths > 0 else "key_sig_flat"
                     ks_y_mults = _KEY_SIG_SHARP_Y_MULT if key_fifths > 0 else _KEY_SIG_FLAT_Y_MULT
                     for i in range(key_sig_count):
@@ -340,6 +384,7 @@ def layout_to_render_scene(
                     measure_layout.event_layouts,
                     staff_std_y=staff_std_y,
                     staff_spacing=staff_spacing,
+                    clef=clef,
                 )
                 standard_visible_event_ids = _standard_visible_event_ids(
                     measure_layout.event_layouts
@@ -351,6 +396,7 @@ def layout_to_render_scene(
                     staff_spacing=staff_spacing,
                     notehead_rx=notehead_rx,
                     visible_event_ids=standard_visible_event_ids,
+                    clef=clef,
                 )
                 measure_number_x = measure_layout.x + (18.0 if measure_index == 0 else 2.0)
                 measure_number_y = staff_std_y - 6.0 if has_standard else tab_y - 6.0
@@ -425,7 +471,12 @@ def layout_to_render_scene(
                         _tn = _safe_int(event_layout.metadata.get("tuplet_normal"))
                         if _ta and _tn and _ta != _tn:
                             tuplet_by_onset[round(event_layout.onset, 6)] = (_ta, _tn)
-                    if has_tab and event_type != "RestEvent":
+                    # Harmonic *resultant* overtones are a standard-staff-only
+                    # diamond notehead; they have no string/fret and must not
+                    # produce a tab digit (but must still reach the standard plane
+                    # below, so this only gates the tab block — never ``continue``).
+                    tab_hidden = event_layout.metadata.get("tab_hidden") == "true"
+                    if has_tab and event_type != "RestEvent" and not tab_hidden:
                         techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                         if "muted" in techniques:
                             text = "X"
@@ -524,6 +575,7 @@ def layout_to_render_scene(
                                 event_layout.metadata,
                                 staff_std_y=staff_std_y,
                                 staff_spacing=staff_spacing,
+                                clef=clef,
                             )
                             techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                             pitch = _safe_int(event_layout.metadata.get("pitch_notated")) or 64
@@ -604,9 +656,19 @@ def layout_to_render_scene(
                                     )
                                 )
                                 shown_accidentals_by_step[diatonic_step] = accidental
-                            if "muted" in techniques:
+                            is_dyad_fundamental = (
+                                event_layout.metadata.get("harmonic_dyad_fundamental") == "true"
+                            )
+                            if is_percussion and _is_x_notehead_drum(pitch):
+                                # Hi-hats, cymbals and the ride use an 'x'-shaped
+                                # notehead.  The muted glyph already renders as an X.
                                 notehead_glyph = "notehead_muted"
-                            elif "harmonic" in techniques:
+                            elif "muted" in techniques:
+                                notehead_glyph = "notehead_muted"
+                            elif "harmonic" in techniques and not is_dyad_fundamental:
+                                # The diamond belongs to the resultant overtone; the
+                                # fretted fundamental of a harmonic dyad keeps a normal
+                                # notehead (matching Guitar Pro / MuseScore).
                                 notehead_glyph = "notehead_harmonic"
                             else:
                                 notehead_glyph = "notehead"
@@ -838,13 +900,24 @@ def _append_note_text(
 
 
 def _standard_note_y(
-    metadata: dict[str, str], *, staff_std_y: float, staff_spacing: float
+    metadata: dict[str, str],
+    *,
+    staff_std_y: float,
+    staff_spacing: float,
+    clef: str = "treble",
 ) -> float:
     pitch_raw = metadata.get("pitch_notated", "64")
     try:
         pitch = int(pitch_raw)
     except ValueError:
         pitch = 64
+
+    if clef == "percussion":
+        return _notation_percussion_note_y(
+            pitch,
+            staff_y_origin=staff_std_y,
+            staff_spacing=staff_spacing,
+        )
 
     step_raw = str(metadata.get("pitch_step", "")).strip().upper() or None
     octave_raw = str(metadata.get("pitch_octave", "")).strip()
@@ -860,6 +933,7 @@ def _standard_note_y(
         staff_spacing=staff_spacing,
         step=step_raw,
         octave=octave,
+        clef=clef,
     )
 
 
@@ -1283,6 +1357,7 @@ def _stem_direction_by_onset_voice(
     *,
     staff_std_y: float,
     staff_spacing: float,
+    clef: str = "treble",
 ) -> dict[tuple[float, int], str]:
     grouped_note_ys: dict[tuple[float, int], list[float]] = {}
     # Track which voices are active at each specific onset, not globally.
@@ -1302,6 +1377,7 @@ def _stem_direction_by_onset_voice(
             getattr(event, "metadata", {}),
             staff_std_y=staff_std_y,
             staff_spacing=staff_spacing,
+            clef=clef,
         )
         grouped_note_ys.setdefault((onset, voice_number), []).append(note_y)
 
@@ -1328,6 +1404,7 @@ def _standard_notehead_offsets_by_event_id(
     staff_spacing: float,
     notehead_rx: float,
     visible_event_ids: set[str] | None = None,
+    clef: str = "treble",
 ) -> dict[str, float]:
     by_key: dict[tuple[float, int], list[tuple[str, float]]] = {}
     # Keep packed chord clusters readable by alternating displaced heads when
@@ -1350,6 +1427,7 @@ def _standard_notehead_offsets_by_event_id(
             metadata,
             staff_std_y=staff_std_y,
             staff_spacing=staff_spacing,
+            clef=clef,
         )
         by_key.setdefault((onset, voice_number), []).append((event_id, note_y))
 
@@ -2428,42 +2506,160 @@ def _beam_groups(
     measure_number: int,
     time_denominator: int = 4,
 ) -> list[list[tuple[float, float, float]]]:
+    """Group consecutive short stems into meter-aware beam groups.
+
+    The fundamental beam break is the quarter-note beat (and any rest gap).
+    In simple duple/quadruple meters (e.g. 4/4, 2/4, 2/2) a run made up
+    entirely of eighth notes sitting on the eighth-note grid is then beamed
+    by the half-note unit (4 eighths per group in 4/4), matching MuseScore's
+    default.  Runs that contain a sixteenth (or shorter), a tuplet/off-grid
+    onset, or a rest gap keep the per-beat break so secondary beams stay
+    readable.
+
+    Args:
+        stems: ``(x, onset, duration)`` tuples sorted by onset (durations in
+            quarter-note beats).
+        beats_per_measure: Time-signature numerator (quarter-beat count).
+        measure_number: 1-based measure index (sets the absolute beat origin).
+        time_denominator: Time-signature denominator (4 for x/4 meters).
+
+    Returns:
+        Beam groups; each is a list of ``(x, onset, duration)`` with ≥ 2 stems.
+    """
     if len(stems) < 2:
         return []
 
-    # One beam group per quarter-note beat.  This is the simplest
-    # universal rule and matches the user's "group per beat" expectation
-    # for all meters: 6/8 → 3 groups, 4/4 → 4 groups, 3/4 → 3 groups.
     q_beats = beats_per_measure  # already in quarter-note beat units
-    beat_group_q = 1.0  # one q-beat per group
-    num_groups = q_beats
-
     measure_onset = max(0.0, (measure_number - 1) * q_beats)
-    beat_boundaries = frozenset(
-        round(measure_onset + k * beat_group_q, 9)
-        for k in range(1, num_groups)
-    )
 
+    # First split on the quarter-note beat and on rest gaps, keeping singleton
+    # groups so the half-bar merge below can reason about adjacency.
+    quarter_groups, gap_before = _quarter_beam_groups(
+        stems, measure_onset=measure_onset, beats_per_measure=beats_per_measure
+    )
+    merged = _merge_eighth_beam_groups(
+        quarter_groups,
+        gap_before=gap_before,
+        measure_onset=measure_onset,
+        beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
+    )
+    return [group for group in merged if len(group) >= 2]
+
+
+def _quarter_beam_groups(
+    stems: list[tuple[float, float, float]],
+    *,
+    measure_onset: float,
+    beats_per_measure: int,
+) -> tuple[list[list[tuple[float, float, float]]], list[bool]]:
+    """Split stems at every quarter-beat boundary and rest gap.
+
+    Returns the per-quarter groups (singletons retained) plus a parallel list
+    of flags marking whether each group is preceded by a rest gap (which must
+    block any later half-bar merge).
+    """
+    beat_boundaries = frozenset(
+        round(measure_onset + k, 9) for k in range(1, beats_per_measure)
+    )
     groups: list[list[tuple[float, float, float]]] = []
+    gap_before: list[bool] = []
     current: list[tuple[float, float, float]] = []
     for x, onset, duration in stems:
         if not current:
             current.append((x, onset, duration))
+            gap_before.append(False)
             continue
         _prev_x, prev_onset, prev_duration = current[-1]
         prev_end = prev_onset + prev_duration
         has_rest_gap = (onset - prev_end) >= _REST_GAP_BREAK
         crosses_beat = any(prev_onset < bb <= onset for bb in beat_boundaries)
         if has_rest_gap or crosses_beat:
-            if len(current) >= 2:
-                groups.append(current)
+            groups.append(current)
             current = [(x, onset, duration)]
+            gap_before.append(has_rest_gap)
             continue
         current.append((x, onset, duration))
-
-    if len(current) >= 2:
+    if current:
         groups.append(current)
-    return groups
+    return groups, gap_before
+
+
+# Beam-unit (in quarter-note beats) for an all-eighth run in simple meters.
+# 4/4 and 2/2-style meters beam eighths by the half note (2 beats); other
+# simple meters keep the per-beat unit so the half-bar merge is a no-op.
+def _eighth_beam_unit(beats_per_measure: int, time_denominator: int) -> float:
+    """Return the quarter-beat span of one eighth-note beam group.
+
+    A value of 1.0 disables the half-bar merge (per-beat grouping); 2.0 beams
+    eighths by the half note as in 4/4.
+    """
+    if time_denominator == 4 and beats_per_measure % 2 == 0 and beats_per_measure >= 4:
+        # Simple quadruple (4/4, 8/4, …): half-note beam unit for eighths.
+        return 2.0
+    if time_denominator == 2:
+        # Cut-time family (2/2, 4/2): the notated beat already spans 2 quarters.
+        return 2.0
+    return 1.0
+
+
+def _group_is_pure_eighth_on_grid(
+    group: list[tuple[float, float, float]], *, measure_onset: float
+) -> bool:
+    """True if every note is an eighth (1 flag) sitting on the eighth grid.
+
+    Sixteenths (2 flags) force a per-beat break; tuplet / off-beat onsets do
+    not land on the 0.5-beat grid and must not be merged across beats.
+    """
+    for _x, onset, duration in group:
+        if _flag_count(duration) != 1:
+            return False
+        rel = onset - measure_onset
+        if abs(round(rel / 0.5) * 0.5 - rel) > 1e-6:
+            return False
+    return True
+
+
+def _merge_eighth_beam_groups(
+    quarter_groups: list[list[tuple[float, float, float]]],
+    *,
+    gap_before: list[bool],
+    measure_onset: float,
+    beats_per_measure: int,
+    time_denominator: int,
+) -> list[list[tuple[float, float, float]]]:
+    """Merge adjacent per-beat groups into half-bar eighth-note beam groups.
+
+    Two consecutive quarter groups merge when they share the same eighth-beam
+    unit window, are contiguous (no rest gap between them), and both contain
+    only on-grid eighth notes.  This reproduces MuseScore's grouping of four
+    eighths per half note in 4/4 while leaving sixteenth/tuplet runs per beat.
+    """
+    unit = _eighth_beam_unit(beats_per_measure, time_denominator)
+    if unit <= 1.0:
+        return quarter_groups
+
+    merged: list[list[tuple[float, float, float]]] = []
+    for idx, group in enumerate(quarter_groups):
+        if not merged:
+            merged.append(list(group))
+            continue
+        prev = merged[-1]
+        same_unit = (
+            int((group[0][1] - measure_onset) // unit)
+            == int((prev[0][1] - measure_onset) // unit)
+        )
+        contiguous = not gap_before[idx]
+        if (
+            same_unit
+            and contiguous
+            and _group_is_pure_eighth_on_grid(prev, measure_onset=measure_onset)
+            and _group_is_pure_eighth_on_grid(group, measure_onset=measure_onset)
+        ):
+            prev.extend(group)
+        else:
+            merged.append(list(group))
+    return merged
 
 
 

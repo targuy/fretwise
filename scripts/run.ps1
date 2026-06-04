@@ -34,7 +34,7 @@ if (Test-Path $envFile) {
 }
 
 if ($args.Count -eq 0) {
-  $bindHost = if ($env:HOST) { $env:HOST } else { '127.0.0.1' }
+  $bindHost = if ($env:HOST) { $env:HOST } else { 'localhost' }
   $port     = if ($env:PORT) { $env:PORT } else { '8080' }
   Write-Host "==> FretWise web UI -> http://${bindHost}:${port}   (Ctrl+C to stop)"
   pixi run fretwise web --host $bindHost --port $port
