@@ -378,6 +378,11 @@ def _note_midi(note_el: ET.Element) -> int | None:
 
 def _set_technical(note_el: ET.Element, state: object) -> None:
     """Replace ``note_el``'s ``<technical>`` with string/fret/finger from state."""
+    # Un-fingered placeholder (string_num <= 0, e.g. a --no-fingering convert):
+    # emit no tablature block so the note stays plain staff notation rather than
+    # an invalid <string>0</string>.
+    if int(getattr(state, "string_num", 0)) <= 0:
+        return
     notations = note_el.find("notations")
     if notations is None:
         notations = ET.SubElement(note_el, "notations")
