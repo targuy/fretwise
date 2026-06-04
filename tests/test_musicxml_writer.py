@@ -131,6 +131,34 @@ def test_gap_between_notes_produces_a_rest() -> None:
     assert any(n.find("rest") is not None for n in _melodic_notes(root))
 
 
+def _time_signature(root: ET.Element) -> tuple[str, str]:
+    t = next(root.iter("time"))
+    return (t.findtext("beats", ""), t.findtext("beat-type", ""))
+
+
+def test_compound_meter_uses_real_denominator() -> None:
+    # 6/8 is stored as 3.0 QUARTER beats; the writer must recover the 6/8 meter
+    # from (beats_per_measure=3.0, time_denominator=8) — NOT emit 3/4.
+    results = [
+        _fr(0, 64, 0.0, 1, 0, Finger.OPEN, duration=0.5),
+        _fr(1, 60, 0.5, 5, 3, Finger.RING, duration=0.5),
+    ]
+    root = ET.fromstring(
+        render_musicxml(results, beats_per_measure=3.0, time_denominator=8)
+    )
+    assert _time_signature(root) == ("6", "8")
+
+
+def test_default_meter_remains_four_four() -> None:
+    # Backward compatibility: the default (4.0 quarter beats, denominator 4) and
+    # the legacy single-arg call both notate as 4/4.
+    results = [_fr(0, 64, 0.0, 1, 0, Finger.OPEN)]
+    assert _time_signature(ET.fromstring(render_musicxml(results))) == ("4", "4")
+    assert _time_signature(
+        ET.fromstring(render_musicxml(results, beats_per_measure=4.0))
+    ) == ("4", "4")
+
+
 def test_metadata_title_and_composer_are_written() -> None:
     results = [_fr(0, 60, 0.0, 5, 3, Finger.RING)]
     root = ET.fromstring(render_musicxml(results, title="My Song", artist="Me"))

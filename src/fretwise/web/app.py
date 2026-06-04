@@ -158,7 +158,9 @@ def create_app(
 
     cfg = _settings.load()
     if fixtures_dir is None:
-        fixtures_dir = Path(cfg.get("partitions_dir", str(Path(__file__).parents[3] / "partitions")))
+        fixtures_dir = Path(
+            cfg.get("partitions_dir", str(Path(__file__).parents[3] / "partitions"))
+        )
 
     # Mount static files
     app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
@@ -805,6 +807,7 @@ def _register_routes(app: FastAPI) -> None:
         track_name = getattr(adapter, "track_name", "") or ""
         xml = render_musicxml(
             payload.results, title=title, artist=artist, instrument=track_name,
+            time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
         )
 
         guard = _guard_summary(payload)
@@ -854,6 +857,7 @@ def _register_routes(app: FastAPI) -> None:
             if not events:
                 continue
             beats = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+            denom = int(getattr(adapter, "time_denominator", 4) or 4)
             if kind == KIND_GUITAR:
                 payload = _run_legacy_pipeline_with_guard(events)
                 results = payload.results or _staff_only_results(events)
@@ -869,6 +873,7 @@ def _register_routes(app: FastAPI) -> None:
                     "kind": kind,
                     "results": results,
                     "beats_per_measure": beats,
+                    "time_denominator": denom,
                 }
             )
 
@@ -942,7 +947,9 @@ def _register_routes(app: FastAPI) -> None:
     async def get_soundfont() -> Response:
         """Stream the bundled SF2 soundfont file for in-browser synthesis."""
         # Project root is 4 levels up from this file (src/fretwise/web/app.py)
-        sf2_path = Path(__file__).parent.parent.parent.parent / "data" / "sounds" / "Shan SGM-Pro 11.SF2"
+        sf2_path = (
+            Path(__file__).parents[3] / "data" / "sounds" / "Shan SGM-Pro 11.SF2"
+        )
         if not sf2_path.exists():
             raise HTTPException(404, "Soundfont file not found")
         return Response(

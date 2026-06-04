@@ -209,6 +209,7 @@ def _build_part(
     instrument: str,
     beats_per_measure: float,
     spec: _PartSpec,
+    time_denominator: int = 4,
 ) -> tuple[Any, list[list[FingeringResult]]]:
     """Build one quantized music21 ``Part`` and its matching onset groups.
 
@@ -223,6 +224,8 @@ def _build_part(
         instrument: Part/instrument name (becomes ``<part-name>``).
         beats_per_measure: Beats per measure (time signature ``N/4``).
         spec: Per-kind notation policy (clef, octave shift, transpose).
+        time_denominator: Time-signature denominator (e.g. 8 for 6/8). With the
+            default 4 the notated meter is ``int(beats_per_measure)/4``.
 
     Returns:
         ``(part, groups)`` where ``groups`` is onset-ordered and each group is
@@ -272,7 +275,13 @@ def _build_part(
     # an F clef (same octave convention), drums a percussion clef, vocal/other a
     # plain treble clef at concert pitch.
     part.insert(0.0, getattr(m21.clef, spec.clef)())
-    part.insert(0.0, m21.meter.TimeSignature(f"{int(beats_per_measure)}/4"))
+    # Recover the real time signature. ``beats_per_measure`` is in QUARTER beats
+    # (numerator * 4/denominator), so the notated numerator is
+    # beats_per_measure * denominator / 4 — e.g. 6/8 stores 3.0 quarter beats and
+    # must notate as 6/8, not 3/4. With the default denominator 4 this collapses
+    # to int(beats_per_measure)/4, preserving prior output for simple meters.
+    ts_numerator = max(1, round(beats_per_measure * time_denominator / 4.0))
+    part.insert(0.0, m21.meter.TimeSignature(f"{ts_numerator}/{time_denominator}"))
     tempo_bpm = results[0].note_event.tempo if results else _MUSICXML_CFG.default_tempo_bpm
     part.insert(0.0, m21.tempo.MetronomeMark(number=round(tempo_bpm)))
 
@@ -292,6 +301,7 @@ def _prepare(
     artist: str,
     instrument: str,
     beats_per_measure: float,
+    time_denominator: int = 4,
 ) -> tuple[Any, list[list[FingeringResult]]]:
     """Build a single-part quantized Score and its matching onset groups.
 
@@ -304,6 +314,7 @@ def _prepare(
         results, m21,
         instrument=instrument,
         beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
         spec=_SPEC_GUITAR,
     )
 
@@ -325,6 +336,7 @@ def build_score(
     artist: str = "",
     instrument: str = "",
     beats_per_measure: float = 4.0,
+    time_denominator: int = 4,
 ) -> Any:
     """Build a quantized music21 Score from fingering results.
 
@@ -346,6 +358,7 @@ def build_score(
         artist=artist,
         instrument=instrument,
         beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
     )
     return score
 
@@ -527,6 +540,7 @@ def render_musicxml(
     artist: str = "",
     instrument: str = "",
     beats_per_measure: float = 4.0,
+    time_denominator: int = 4,
 ) -> str:
     """Render fingering results as a MusicXML document string.
 
@@ -554,6 +568,7 @@ def render_musicxml(
         artist=artist,
         instrument=instrument,
         beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
     )
     m21 = _safe_import_music21()
     notated = _make_notation_one_based(score, m21)
@@ -585,8 +600,10 @@ def render_musicxml_multi(
             * ``results`` (list[FingeringResult]): the notes. Guitar parts carry
               real fingering states; staff-only kinds carry un-fingered results
               (string/fret/finger ignored);
-            * ``beats_per_measure`` (float, optional): time signature ``N/4``
-              (default ``4.0``).
+            * ``beats_per_measure`` (float, optional): measure length in quarter
+              beats (default ``4.0``);
+            * ``time_denominator`` (int, optional): time-signature denominator
+              (default ``4``; e.g. ``8`` for 6/8).
 
         title: Work title metadata.
         artist: Composer/artist metadata.
@@ -611,6 +628,7 @@ def render_musicxml_multi(
                 part.get("beats_per_measure", _MUSICXML_CFG.default_beats_per_measure)
                 or _MUSICXML_CFG.default_beats_per_measure
             ),
+            time_denominator=int(part.get("time_denominator", 4) or 4),
             spec=spec,
         )
         built.append((part_el, groups, spec))
@@ -684,6 +702,7 @@ def write_musicxml(
     artist: str = "",
     instrument: str = "",
     beats_per_measure: float = 4.0,
+    time_denominator: int = 4,
 ) -> None:
     """Write fingering results to a ``.musicxml`` file.
 
@@ -693,7 +712,8 @@ def write_musicxml(
         title: Work title metadata.
         artist: Composer/artist metadata.
         instrument: Part/instrument name.
-        beats_per_measure: Beats per measure (time signature ``N/4``).
+        beats_per_measure: Measure length in quarter beats.
+        time_denominator: Time-signature denominator (e.g. 8 for 6/8).
     """
     xml = render_musicxml(
         results,
@@ -701,6 +721,7 @@ def write_musicxml(
         artist=artist,
         instrument=instrument,
         beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
     )
     Path(output_path).write_text(xml, encoding="utf-8")
 
