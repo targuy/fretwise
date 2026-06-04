@@ -490,6 +490,54 @@ def test_canonical_to_render_scene_standard_prefers_note_spelling_accidental_hin
     assert "accidental_sharp" not in note_glyph_ids
 
 
+def test_canonical_to_render_scene_harmonic_renders_dyad() -> None:
+    # A 12th-fret natural harmonic (fretted D#3 = 51) must render as a dyad:
+    # the fundamental as a fret "12" tab digit + normal notehead, plus a diamond
+    # notehead for the resultant overtone (D#4 = 63) that has NO tab digit.
+    harmonic = NoteEvent(
+        pitch=51,
+        onset=0.0,
+        duration=1.0,
+        tempo=120.0,
+        articulation=Articulation.HARMONIC,
+        dynamic=Dynamic.MF,
+        voice_hint=0,
+        string_hint=6,
+        fret_hint=12,
+        harmonic_type="natural",
+        harmonic_fret=12,
+        harmonic_resultant_pitch=63,
+    )
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"), source_format="gpif", events=[harmonic]
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score, representation_mode=RepresentationMode.STANDARD_TAB
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notes_layer = staff.layer_groups[1]
+
+    note_glyphs = [g for g in notes_layer.glyph_instances if g.glyph_id.startswith("notehead")]
+    glyph_ids = [g.glyph_id for g in note_glyphs]
+    # Exactly one diamond (the resultant) and one normal head (the fundamental).
+    assert glyph_ids.count("notehead_harmonic") == 1
+    assert glyph_ids.count("notehead") == 1
+
+    diamond = next(g for g in note_glyphs if g.glyph_id == "notehead_harmonic")
+    fundamental = next(g for g in note_glyphs if g.glyph_id == "notehead")
+    resultant_id = str(diamond.metadata.get("event_id"))
+    fundamental_id = str(fundamental.metadata.get("event_id"))
+    assert resultant_id.endswith("h")  # resultant uses the "<id>h" suffix
+    assert not fundamental_id.endswith("h")
+
+    # The resultant carries no tab digit; the fundamental's fret "12" does.
+    tab_note_texts = [t for t in notes_layer.text_instances if t.metadata.get("kind") == "note"]
+    tab_event_ids = {str(t.metadata.get("event_id")) for t in tab_note_texts}
+    assert resultant_id not in tab_event_ids
+    assert fundamental_id in tab_event_ids
+    assert any(t.text == "12" for t in tab_note_texts)
+
+
 def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
@@ -1470,3 +1518,109 @@ def test_run_core_pipeline_from_raw_end_to_end() -> None:
     assert result.canonical_score.tracks
     assert result.conformance_issues == []
     assert "<svg" in result.svg
+
+
+def _single_note_score(*, clef: str, pitch: int, pitches: list[int] | None = None) -> Score:
+    """Build a minimal one-measure canonical score with an explicit clef."""
+    midis = pitches if pitches is not None else [pitch]
+    events = [
+        CanonicalNoteEvent(
+            event_id=f"n{idx}",
+            onset=float(idx),
+            duration=1.0,
+            voice=0,
+            pitch_notated=p,
+            pitch_sounding=p,
+        )
+        for idx, p in enumerate(midis)
+    ]
+    return Score(
+        score_id="s-clef",
+        title="clef",
+        tracks=[
+            Track(
+                track_id="t1",
+                name="Track 1",
+                staff_groups=[
+                    StaffGroup(
+                        group_id="g1",
+                        staves=[
+                            Staff(
+                                staff_id="st1",
+                                clef=clef,
+                                measures=[
+                                    Measure(
+                                        number=1,
+                                        time_signature=TimeSignature(numerator=4, denominator=4),
+                                        voices=[Voice(number=0, events=events)],
+                                    )
+                                ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+
+def _notehead_ys(staff) -> list[float]:  # type: ignore[no-untyped-def]
+    ys: list[float] = []
+    for layer in staff.layer_groups:
+        for glyph in layer.glyph_instances:
+            if glyph.glyph_id.startswith("notehead"):
+                ys.append(glyph.y)
+    return ys
+
+
+def test_bass_clef_places_low_note_near_staff_not_far_below() -> None:
+    # E2 (MIDI 40) is the low open string of a bass.  On treble clef it would be
+    # forced many ledger lines below; on bass clef it sits on/near the staff.
+    bass_scene = canonical_to_render_scene(
+        _single_note_score(clef="bass", pitch=40),
+        mode=RepresentationMode.STANDARD.value,
+    )
+    treble_scene = canonical_to_render_scene(
+        _single_note_score(clef="treble", pitch=40),
+        mode=RepresentationMode.STANDARD.value,
+    )
+    bass_staff = bass_scene.document_scene.pages[0].systems[0].staves[0]
+    treble_staff = treble_scene.document_scene.pages[0].systems[0].staves[0]
+    bass_y = _notehead_ys(bass_staff)[0]
+    treble_y = _notehead_ys(treble_staff)[0]
+    # On bass clef the low note is higher (smaller Y) — i.e. closer to / inside
+    # the staff band — than the same note forced onto a treble staff.
+    assert bass_y < treble_y
+
+
+def test_percussion_clef_collapses_drum_notes_into_staff_band() -> None:
+    # GM drum keys: kick(36), snare(38), closed hi-hat(42), crash(49), low tom(45).
+    drum_keys = [36, 38, 42, 49, 45]
+    scene = canonical_to_render_scene(
+        _single_note_score(clef="percussion", pitch=38, pitches=drum_keys),
+        mode=RepresentationMode.STANDARD.value,
+    )
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    ys = _notehead_ys(staff)
+    assert len(ys) == len(drum_keys)
+    # Heads must collapse into a tight band (no ledger-line explosion).  With an
+    # 8px staff spacing the staff is ~32px tall; allow a small margin for ledgers.
+    assert max(ys) - min(ys) <= 5 * 8.0
+
+
+def test_percussion_clef_uses_x_noteheads_for_cymbals() -> None:
+    # Closed hi-hat (42) and crash (49) → 'x' notehead; kick (36) → normal head.
+    scene = canonical_to_render_scene(
+        _single_note_score(clef="percussion", pitch=42, pitches=[36, 42, 49]),
+        mode=RepresentationMode.STANDARD.value,
+    )
+    staff = scene.document_scene.pages[0].systems[0].staves[0]
+    glyph_ids = [
+        glyph.glyph_id
+        for layer in staff.layer_groups
+        for glyph in layer.glyph_instances
+        if glyph.glyph_id.startswith("notehead")
+    ]
+    # Two cymbals get the x-shaped (muted) head, the kick keeps a normal head.
+    assert glyph_ids.count("notehead_muted") == 2
+    assert glyph_ids.count("notehead") == 1

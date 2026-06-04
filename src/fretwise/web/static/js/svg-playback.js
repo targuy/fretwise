@@ -21,6 +21,10 @@ export class SvgCursorDriver {
     this._line = null;
     /** @type {Array<{onset:number, x:number}>} sorted by onset */
     this._noteAnchors = [];
+    /** When false the user is exploring freely — highlight() stops auto-scrolling
+     *  (the red line still tracks). Mirrors main.js `_followPlayhead`; the Follow
+     *  toolbar button / click-to-seek toggle it via main.js `_setFollowPlayhead`. */
+    this.followPlayhead = true;
   }
 
   /**
@@ -86,9 +90,26 @@ export class SvgCursorDriver {
       rect.classList.toggle('loop', inLoop && !isActive);
       if (isActive) activeRect = rect;
     }
-    // Scroll active measure into view within the SVG container
-    if (activeRect) {
-      activeRect.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Scroll the active measure into view — but ONLY within the score container
+    // (#core-svg-view), never the page/body, and CLAMPED to the container's
+    // scrollable range. The previous activeRect.scrollIntoView() scrolled every
+    // scrollable ancestor and was unbounded, so after the first system playback
+    // could fling the view far past the content into the blank tail (the user
+    // then had to scroll way back up to find the staves). Centering on the
+    // active rect and clamping to [0, scrollHeight - clientHeight] prevents that.
+    if (this.followPlayhead && activeRect && this.container) {
+      const c = this.container;
+      const r = activeRect.getBoundingClientRect();
+      const cr = c.getBoundingClientRect();
+      if (r.height > 0 && cr.height > 0) {
+        const relTop = (r.top - cr.top) + c.scrollTop;       // rect top in scroll space
+        const target = relTop - c.clientHeight / 2 + r.height / 2;  // center it
+        const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
+        const clamped = Math.max(0, Math.min(target, maxTop));
+        if (Math.abs(clamped - c.scrollTop) > 2) {
+          c.scrollTo({ top: clamped, behavior: 'smooth' });
+        }
+      }
     }
   }
 

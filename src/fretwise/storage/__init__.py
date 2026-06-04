@@ -15,6 +15,7 @@ modules and pull in optional dependencies only when actually constructed via
 """
 
 from fretwise.storage.base import (
+    CATALOG_NAME,
     SUPPORTED_SCORE_EXTS,
     StorageBackend,
     StorageBackendUnavailable,
@@ -28,6 +29,7 @@ from fretwise.storage.factory import build_backend
 from fretwise.storage.local import LocalStorageBackend
 
 __all__ = [
+    "CATALOG_NAME",
     "SUPPORTED_SCORE_EXTS",
     "LocalStorageBackend",
     "StorageBackend",

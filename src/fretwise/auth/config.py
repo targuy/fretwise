@@ -13,6 +13,11 @@ Relevant environment variables::
     FRETWISE_DATA_DIR            where users + encrypted secrets live
     FRETWISE_STORAGE_CACHE_ROOT  transient per-user download cache root
 
+    # Local admin login (no Google/OIDC required)
+    FRETWISE_ADMIN_EMAIL         email for the pre-seeded local admin account
+    FRETWISE_ADMIN_PASSWORD_HASH PBKDF2 hash of the admin password (NEVER the
+                                 plaintext) — generate it with `fretwise hash-password`
+
     # Google (preset)
     FRETWISE_GOOGLE_CLIENT_ID / FRETWISE_GOOGLE_CLIENT_SECRET
     # Generic OIDC provider
@@ -88,6 +93,11 @@ class AuthConfig:
     # Lower-cased emails granted admin rights (access to the server-local
     # partitions library). From FRETWISE_ADMIN_EMAILS (comma-separated).
     admin_emails: frozenset[str] = field(default_factory=frozenset)
+    # Pre-seeded local admin account: email + a PBKDF2 password *hash* (never a
+    # plaintext password). When both are set, a pre-activated admin account is
+    # ensured on startup so the app is usable without any OIDC provider.
+    admin_email: str = ""
+    admin_password_hash: str = ""
 
     def provider(self, name: str) -> OIDCProvider | None:
         for p in self.providers:
@@ -98,19 +108,47 @@ class AuthConfig:
     def is_admin_email(self, email: str) -> bool:
         return bool(email) and email.strip().lower() in self.admin_emails
 
+    @property
+    def has_local_admin(self) -> bool:
+        """Whether an env-configured local admin account should be seeded."""
+        return bool(self.admin_email and self.admin_password_hash)
+
 
 def load_auth_config() -> AuthConfig:
     """Build the :class:`AuthConfig` from the environment."""
     providers = _load_providers()
-    enabled = _env_bool("FRETWISE_AUTH_ENABLED") or bool(providers)
+    # Local admin account, configured in the (gitignored) .env. Primary form is a
+    # plain username + password:
+    #     FRETWISE_ADMIN=benoit
+    #     FRETWISE_ADMIN_PASSWD=<REMOVED_SECRET>
+    # The plaintext is read only from the environment (never committed) and hashed
+    # here at startup, so the on-disk account store holds a hash, not the password.
+    # The username is used directly as the local-login identifier (the email/
+    # password login route treats it as an opaque key). The older
+    # FRETWISE_ADMIN_EMAIL + FRETWISE_ADMIN_PASSWORD_HASH form is still accepted.
+    admin_email = os.environ.get("FRETWISE_ADMIN_EMAIL", "").strip().lower()
+    admin_password_hash = os.environ.get("FRETWISE_ADMIN_PASSWORD_HASH", "").strip()
+    admin_username = os.environ.get("FRETWISE_ADMIN", "").strip().lower()
+    admin_passwd = os.environ.get("FRETWISE_ADMIN_PASSWD", "")
+    if admin_username and admin_passwd:
+        from fretwise.auth.passwords import hash_password
+        admin_email = admin_username  # used as the local login identifier/key
+        admin_password_hash = hash_password(admin_passwd)
+    has_local_admin = bool(admin_email and admin_password_hash)
+    # A configured local admin (email + password hash) is enough to turn auth on:
+    # password login then works with no OIDC provider configured.
+    enabled = _env_bool("FRETWISE_AUTH_ENABLED") or bool(providers) or has_local_admin
     data_dir = Path(os.environ.get("FRETWISE_DATA_DIR", str(Path.home() / ".fretwise" / "data")))
     default_cache = str(Path(tempfile.gettempdir()) / "fretwise-cache")
     cache_root = Path(os.environ.get("FRETWISE_STORAGE_CACHE_ROOT", default_cache))
-    admin_emails = frozenset(
+    admin_emails = set(
         e.strip().lower()
         for e in os.environ.get("FRETWISE_ADMIN_EMAILS", "").split(",")
         if e.strip()
     )
+    # The local admin email is implicitly an admin (server-local library access).
+    if admin_email:
+        admin_emails.add(admin_email)
     return AuthConfig(
         enabled=enabled,
         secret_key=os.environ.get("FRETWISE_SECRET_KEY", ""),
@@ -118,7 +156,9 @@ def load_auth_config() -> AuthConfig:
         data_dir=data_dir,
         cache_root=cache_root,
         providers=providers,
-        admin_emails=admin_emails,
+        admin_emails=frozenset(admin_emails),
+        admin_email=admin_email,
+        admin_password_hash=admin_password_hash,
     )
 
 

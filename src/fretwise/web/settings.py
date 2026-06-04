@@ -6,12 +6,16 @@ import os
 from pathlib import Path
 from typing import Any
 
+from fretwise.config import config as _fw_config
+
 _CONFIG_DIR = Path(os.environ.get("FRETWISE_CONFIG_DIR", str(Path.home() / ".fretwise")))
 _CONFIG_FILE = _CONFIG_DIR / "config.json"
 
+_SETTINGS_DEFAULTS = _fw_config().web.settings_defaults
+
 DEFAULT_PARTITIONS_DIR = str(Path(__file__).resolve().parents[3] / "partitions")
 DEFAULT_INDEX_PATH = ""
-DEFAULT_SOUNDFONTS_DIR = "data/sounds"
+DEFAULT_SOUNDFONTS_DIR = str(_SETTINGS_DEFAULTS.soundfonts_dir)
 
 _DEFAULTS: dict[str, Any] = {
     "partitions_dir": DEFAULT_PARTITIONS_DIR,
@@ -22,7 +26,7 @@ _DEFAULTS: dict[str, Any] = {
     # --- Partitions storage backend (see fretwise.storage) ---
     # Credentials are NEVER stored here; they come from the environment /
     # secrets file (see fretwise.storage.credentials).
-    "storage_backend": "local",   # local | s3 | webdav | gdrive
+    "storage_backend": str(_SETTINGS_DEFAULTS.storage_backend),   # local | s3 | webdav | gdrive
     "storage_cache_dir": "",      # optional cache dir override for cloud backends
     "storage_s3": {},             # {bucket, prefix, endpoint_url, region}
     "storage_webdav": {},         # {base_url}

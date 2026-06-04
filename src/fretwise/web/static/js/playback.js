@@ -37,6 +37,14 @@ export class PlaybackEngine {
     this._secondaryChannels = [];
 
     this._followPlayhead = true;  // scroll follows the playhead
+    // When the score is shown as server-rendered SVG (Staff / Mixed views),
+    // the SvgCursorDriver owns scrolling of #core-svg-view. This engine's
+    // canvas-geometry scroll (#tab-container) MUST then stay out of the way:
+    // #core-svg-view is position:absolute;inset:0 inside #tab-container, so
+    // scrolling the outer container shoves the (absolutely positioned) SVG box
+    // up and out of frame, fighting the inner scroll. Set by main.js per
+    // render; false ⇒ canvas (Tab) mode where this engine scrolls normally.
+    this.usesSvgCursor = false;
 
     // Callbacks
     this.onMeasureChange = null;
@@ -59,6 +67,51 @@ export class PlaybackEngine {
     }
     const cursor = this.renderer ? (this.renderer.cursorMeasure || 0) : 0;
     return cursor * spm;
+  }
+
+  /**
+   * Re-point this engine at a freshly built renderer (e.g. after a track or
+   * representation-mode switch) WITHOUT tearing down the AudioContext or
+   * reloading the soundfont. This is the fast path used by tab switching:
+   * recreating a PlaybackEngine re-fetches and re-parses the (multi-MB) SF2
+   * soundfont every time, which is the dominant tab-switch cost.
+   *
+   * Stops any in-flight audio, resets the per-song scheduling state and the
+   * secondary channels (they are re-added by the caller for the new primary
+   * track), but keeps the synth, AudioContext, master gain and volume intact.
+   *
+   * @param {import('./renderer.js').TabRenderer} renderer
+   * @param {Object} opts
+   * @param {number} [opts.tempo]
+   * @param {number} [opts.beatsPerMeasure]
+   */
+  rebind(renderer, opts = {}) {
+    // Stop anything currently sounding before swapping the score out.
+    try { this.pause(); } catch (_) { /* not playing */ }
+    if (this._spessa) {
+      try { this._spessa.stopAll?.(); } catch (_) {}
+    } else if (this._synth && this._synth !== 'spessa') {
+      try { this._synth.stop(); } catch (_) {}
+    }
+    // Drop secondary channels of the previous primary track; the caller
+    // re-adds the ones that apply to the new primary track.
+    for (const ch of this._secondaryChannels) {
+      if (ch.synth && ch.synth !== 'spessa') { try { ch.synth.stop(); } catch (_) {} }
+    }
+    this._secondaryChannels = [];
+
+    this.renderer = renderer;
+    this.tempo = opts.tempo || renderer.tempo || 120;
+    this.bpm = opts.beatsPerMeasure || renderer.bpm || 4;
+    this.speed = 1.0;
+    this.loopStart = -1;
+    this.loopEnd = -1;
+    this._startMeasure = 0;
+    this._lastScheduledMeasure = -1;
+    this._resumeSubMeasureSec = 0;
+    // Default to canvas scrolling; main.js re-asserts this per render once it
+    // knows whether an SvgCursorDriver was created for the new view mode.
+    this.usesSvgCursor = false;
   }
 
   get totalMeasures() {
@@ -90,6 +143,21 @@ export class PlaybackEngine {
       if (!ch.synth) this._loadChannelInstrument(ch).catch(() => {});
     }
     return true;
+  }
+
+  /**
+   * Resume the AudioContext if the browser left it suspended (autoplay policy).
+   * Browsers only permit resume() from within a user-gesture handler, so this
+   * must be called from a click / keydown / touch listener. Safe to call when
+   * there is no context yet (no-op) or when already running.
+   *
+   * @returns {Promise<void>}
+   */
+  async resumeAudioContext() {
+    if (!this._audioCtx) return;
+    if (this._audioCtx.state === 'suspended') {
+      try { await this._audioCtx.resume(); } catch (_) { /* ignore */ }
+    }
   }
 
   disableAudio() {
@@ -578,6 +646,10 @@ export class PlaybackEngine {
   }
 
   _scrollCursorIntoView() {
+    // SVG views (Staff / Mixed): the SvgCursorDriver scrolls #core-svg-view.
+    // Scrolling #tab-container here too would drag the absolutely-positioned
+    // SVG box out of frame, so do nothing and let the driver own it.
+    if (this.usesSvgCursor) return;
     if (!this._followPlayhead) return;
     const canvas = this.renderer.canvas;
     const container = canvas.parentElement;

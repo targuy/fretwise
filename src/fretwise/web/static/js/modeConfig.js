@@ -59,3 +59,49 @@ export function hasStandard(mode) {
 export function isValidMode(mode) {
   return Object.values(MODES).includes(mode);
 }
+
+// ── Track kind ──────────────────────────────────────────────────────
+//
+// The backend tags every track with a ``kind`` field
+// (``guitar`` | ``bass`` | ``drums`` | ``vocal`` | ``other``) on both
+// ``/api/tracks`` and the ``/api/solve`` response. Only guitar tracks
+// carry tablature + fingering data; every other kind is rendered as
+// standard staff notation with the tablature-only / mixed view toggles
+// and the fingering UI disabled.
+
+/** Canonical track-kind identifier constants. */
+export const TRACK_KINDS = /** @type {const} */ ({
+  GUITAR: 'guitar',
+  BASS: 'bass',
+  DRUMS: 'drums',
+  VOCAL: 'vocal',
+  OTHER: 'other',
+});
+
+/**
+ * Return true when *kind* denotes a fretted instrument FretWise can finger.
+ *
+ * Defensive by design: a missing / unknown ``kind`` is treated as guitar so
+ * the UI degrades to today's behaviour if the backend has not yet shipped the
+ * field. Only an explicit non-guitar kind switches the UI into staff-only
+ * mode.
+ *
+ * @param {string | null | undefined} kind
+ * @returns {boolean}
+ */
+export function isGuitarKind(kind) {
+  if (kind == null || kind === '') return true;
+  return String(kind).toLowerCase() === TRACK_KINDS.GUITAR;
+}
+
+/**
+ * Short uppercase badge label for a track *kind* (e.g. ``BASS``, ``DRUMS``).
+ * Guitar tracks return an empty string — they need no badge.
+ *
+ * @param {string | null | undefined} kind
+ * @returns {string}
+ */
+export function trackKindLabel(kind) {
+  if (isGuitarKind(kind)) return '';
+  return String(kind).toUpperCase();
+}

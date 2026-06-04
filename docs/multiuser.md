@@ -6,8 +6,11 @@ files of its own** — users are responsible for acquiring the rights to the fil
 they load, and their content is never shared with other users or kept as a
 server-side library.
 
-Multi-user mode is **opt-in**: with no OIDC provider configured, FretWise runs
-exactly as the original single-user tool (unchanged behaviour and tests).
+Multi-user mode is **opt-in**: with no OIDC provider, no local admin, and
+`FRETWISE_AUTH_ENABLED` unset, FretWise runs exactly as the original single-user
+tool (unchanged behaviour and tests). It can also run with a single
+password-protected **local admin** and no Google at all — see
+[Local admin login](#local-admin-login-no-google--oidc).
 
 ---
 
@@ -71,9 +74,68 @@ fretwise/auth/
 | `FRETWISE_STORAGE_CACHE_ROOT` | Transient per-user download cache root. |
 | `FRETWISE_AUTH_ENABLED` | `1` to enable email/password auth without any OIDC provider. |
 | `FRETWISE_ADMIN_EMAILS` | Comma-separated emails granted admin rights (access to the server-local library). |
+| `FRETWISE_ADMIN_EMAIL` | Email for a pre-seeded **local admin** account (password login, no Google needed). |
+| `FRETWISE_ADMIN_PASSWORD_HASH` | PBKDF2 **hash** of the admin password (never the plaintext). Generate with `fretwise hash-password`. |
 | `FRETWISE_GOOGLE_CLIENT_ID` / `_SECRET` | Google login (requests Drive scope). |
 | `FRETWISE_OIDC_ISSUER` / `_CLIENT_ID` / `_CLIENT_SECRET` / `_NAME` | Generic OIDC provider. |
 | `FRETWISE_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` / `_TLS` | SMTP for activation emails. If unset, the activation link is logged (dev fallback). |
+
+For OAuth/OIDC, always open the app with the same origin as `FRETWISE_BASE_URL`.
+For example, if `FRETWISE_BASE_URL=http://localhost:8080`, start login from
+`http://localhost:8080` too. Starting from `http://127.0.0.1:8080` stores the
+OAuth state under a different browser cookie origin, and the callback can fail
+with `mismatching_state`.
+
+### Local admin login (no Google / OIDC)
+
+You can run FretWise with a single password-protected admin and **no OIDC
+provider at all**.
+
+**Simplest form — username + password in your (gitignored) `.env`:**
+
+```
+FRETWISE_ADMIN=benoit
+FRETWISE_ADMIN_PASSWD=<REMOVED_SECRET>
+```
+
+The username is the login identifier and the password is read **only** from the
+environment — it is hashed at startup, so the on-disk account store never holds
+the plaintext (and `.env` is gitignored, so it never reaches the repo). On the
+`/login` page Google sign-in is shown large at the top; the username/password
+fields appear below under a small **"Local accounts"** heading. Setting these two
+vars turns auth on by itself, with no OIDC provider required.
+
+**Alternative — pre-hashed (for shared/committed config):**
+`FRETWISE_ADMIN_EMAIL` + `FRETWISE_ADMIN_PASSWORD_HASH` ensures a pre-activated
+admin account with that email and a precomputed hash. The admin logs in at
+`/login` with email + password — no activation email, no Google round-trip.
+
+The admin is granted admin rights, so they use the **server-local partitions
+library** (the `local` storage backend, served from the `fretwise web --dir`
+directory) — the same behaviour as the old single-operator setup.
+
+The password is **never** stored in plaintext anywhere. You provide only a
+precomputed PBKDF2 hash, generated with the `hash-password` command:
+
+```bash
+# Prompts for the password (not echoed), prints the hash to stdout:
+export FRETWISE_ADMIN_EMAIL=me@example.com
+export FRETWISE_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export FRETWISE_ADMIN_PASSWORD_HASH="$(fretwise hash-password)"
+
+fretwise web --dir ./partitions
+# → open http://localhost:8080, log in with me@example.com + your password
+```
+
+`fretwise hash-password` reads the password interactively (twice, to confirm) and
+prints only the hash. Use `fretwise hash-password --stdin` to read it from a pipe
+in non-interactive setups. Seeding is **idempotent**: restarting with a changed
+`FRETWISE_ADMIN_PASSWORD_HASH` rotates the stored hash; an unchanged hash is a
+no-op.
+
+> `FRETWISE_SECRET_KEY` is still required (session signing). If auth is configured
+> but the secret key (or the `[auth]` extra) is missing, the server refuses to
+> start rather than silently running unauthenticated.
 
 ### Email + password endpoints / pages
 

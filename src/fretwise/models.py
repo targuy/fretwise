@@ -101,8 +101,18 @@ class NoteEvent:
 
     # ── Harmonics ─────────────────────────────────────────────────────────────
     # harmonic_type: "natural" | "pinch" | "harp" | "artificial" | None
+    # The note keeps its FUNDAMENTAL sounding pitch in ``pitch`` (the finger is at
+    # the fretted/touched position, e.g. a 12th-fret natural harmonic on D#3=51
+    # keeps pitch=51, fret_hint=12).  ``harmonic_resultant_pitch`` carries the
+    # sounding pitch of the resulting overtone (51 + node offset = 63) when the
+    # touched node maps to a known offset.  Engravers render this as a second,
+    # diamond-notehead "resultant" stacked with the fundamental — matching how
+    # Guitar Pro / MuseScore draw harmonics — without fretting it independently
+    # or assigning it a finger.  ``None`` when the node offset is unknown (then
+    # ``pitch`` is the only sounding note and is drawn as a lone diamond).
     harmonic_type: str | None = None
     harmonic_fret: int | None = None    # overtone fret (natural harmonic)
+    harmonic_resultant_pitch: int | None = None  # sounding MIDI of the overtone
 
     # ── Performance modifiers ─────────────────────────────────────────────────
     muted: bool = False                 # x note — percussive, no clear pitch

@@ -124,6 +124,21 @@ def test_resolver_rejects_local_backend(tmp_path: Path) -> None:
         resolve_user_storage(user, None, cache_root=tmp_path)
 
 
+def test_resolver_admin_defaults_to_local_library(tmp_path: Path) -> None:
+    # An admin with no backend selected falls back to the server-local library,
+    # so the env-configured local admin sees partitions right after logging in.
+    from fretwise.storage.local import LocalStorageBackend
+
+    lib = tmp_path / "partitions"
+    lib.mkdir()
+    admin = User(id="admin", is_admin=True)  # storage_backend == ""
+    backend = resolve_user_storage(admin, None, cache_root=tmp_path, local_root=lib)
+    assert isinstance(backend, LocalStorageBackend)
+    # A non-admin with no backend still must connect cloud storage first.
+    with pytest.raises(StorageNotConfigured):
+        resolve_user_storage(User(id="u2"), None, cache_root=tmp_path, local_root=lib)
+
+
 def test_resolver_builds_per_user_backend(tmp_path: Path) -> None:
     record: dict[str, Any] = {}
     user = User(id="u1", storage_backend="s3", storage_config={"bucket": "mine"})
@@ -186,3 +201,114 @@ def test_user_store_refreshes_admin_flag(tmp_path: Path) -> None:
     promoted = store.get_or_create("g:1", email="a@b.c", is_admin=True)
     assert promoted.is_admin is True
     assert store.get("g:1").is_admin is True
+
+
+# --- env-configured local admin config --------------------------------------
+
+def test_load_auth_config_local_admin_enables_auth(monkeypatch: Any) -> None:
+    from fretwise.auth.config import load_auth_config
+    from fretwise.auth.passwords import hash_password
+
+    # Clear anything that could turn auth on independently.
+    for var in (
+        "FRETWISE_AUTH_ENABLED", "FRETWISE_GOOGLE_CLIENT_ID", "FRETWISE_GOOGLE_CLIENT_SECRET",
+        "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
+        "FRETWISE_ADMIN_EMAILS",
+    ):
+        monkeypatch.delenv(var, raising=False)
+    pw_hash = hash_password("admin-config-pw")
+    monkeypatch.setenv("FRETWISE_ADMIN_EMAIL", "Boss@Example.com")
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWORD_HASH", pw_hash)
+
+    cfg = load_auth_config()
+    assert cfg.enabled is True            # local admin alone turns auth on
+    assert cfg.providers == []            # …with no OIDC provider
+    assert cfg.has_local_admin is True
+    assert cfg.admin_email == "boss@example.com"          # normalized
+    assert cfg.admin_password_hash == pw_hash
+    assert cfg.is_admin_email("boss@example.com") is True  # implicitly admin
+
+
+def test_load_auth_config_admin_username_password(monkeypatch: Any) -> None:
+    # The local .env form: FRETWISE_ADMIN=<username> + FRETWISE_ADMIN_PASSWD=<plaintext>.
+    # The username becomes the login key; the plaintext is hashed at load time so
+    # the config never carries it verbatim.
+    from fretwise.auth.config import load_auth_config
+    from fretwise.auth.passwords import verify_password
+
+    for var in (
+        "FRETWISE_AUTH_ENABLED", "FRETWISE_GOOGLE_CLIENT_ID", "FRETWISE_GOOGLE_CLIENT_SECRET",
+        "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
+        "FRETWISE_ADMIN_EMAILS", "FRETWISE_ADMIN_EMAIL", "FRETWISE_ADMIN_PASSWORD_HASH",
+    ):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("FRETWISE_ADMIN", "Benoit")
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWD", "<REMOVED_SECRET>")
+
+    cfg = load_auth_config()
+    assert cfg.enabled is True
+    assert cfg.has_local_admin is True
+    assert cfg.admin_email == "benoit"                  # username, normalized, used as key
+    assert cfg.is_admin_email("benoit") is True
+    assert cfg.admin_password_hash and cfg.admin_password_hash != "<REMOVED_SECRET>"
+    assert verify_password("<REMOVED_SECRET>", cfg.admin_password_hash) is True
+    assert verify_password("wrong", cfg.admin_password_hash) is False
+
+
+def test_load_auth_config_no_admin_stays_single_user(monkeypatch: Any) -> None:
+    from fretwise.auth.config import load_auth_config
+
+    for var in (
+        "FRETWISE_AUTH_ENABLED", "FRETWISE_GOOGLE_CLIENT_ID", "FRETWISE_GOOGLE_CLIENT_SECRET",
+        "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
+        "FRETWISE_ADMIN_EMAIL", "FRETWISE_ADMIN_PASSWORD_HASH",
+    ):
+        monkeypatch.delenv(var, raising=False)
+    cfg = load_auth_config()
+    assert cfg.enabled is False
+    assert cfg.has_local_admin is False
+
+
+def test_load_auth_config_email_without_hash_does_not_enable(monkeypatch: Any) -> None:
+    from fretwise.auth.config import load_auth_config
+
+    for var in (
+        "FRETWISE_AUTH_ENABLED", "FRETWISE_GOOGLE_CLIENT_ID", "FRETWISE_GOOGLE_CLIENT_SECRET",
+        "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
+    ):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("FRETWISE_ADMIN_EMAIL", "boss@example.com")
+    monkeypatch.delenv("FRETWISE_ADMIN_PASSWORD_HASH", raising=False)
+    cfg = load_auth_config()
+    assert cfg.has_local_admin is False
+    assert cfg.enabled is False  # email alone (no hash) does not enable auth
+
+
+# --- `fretwise hash-password` CLI -------------------------------------------
+
+def test_hash_password_cli_stdin_prints_verifiable_hash() -> None:
+    from click.testing import CliRunner
+
+    from fretwise.auth.passwords import verify_password
+    from fretwise.cli import main
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["hash-password", "--stdin"], input="cli-test-password\n")
+    assert result.exit_code == 0
+    printed = result.output.strip().splitlines()[-1]
+    assert printed.startswith("pbkdf2_sha256$")
+    assert verify_password("cli-test-password", printed)
+    assert not verify_password("other-password", printed)
+    # The plaintext is never echoed back.
+    assert "cli-test-password" not in printed
+
+
+def test_hash_password_cli_rejects_short_password() -> None:
+    from click.testing import CliRunner
+
+    from fretwise.cli import main
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["hash-password", "--stdin"], input="short\n")
+    assert result.exit_code == 1
+    assert "at least 8" in result.output

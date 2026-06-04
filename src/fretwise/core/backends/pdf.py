@@ -401,8 +401,13 @@ def _draw_glyph(
         return
 
     if glyph_id == "clef":
+        clef = str((metadata or {}).get("clef", "treble"))
+        # ReportLab base-14 fonts lack SMuFL clef glyphs, so use the
+        # conventional clef letters: treble = G clef, bass = F clef,
+        # percussion = the neutral two-bar symbol (rendered as "||").
+        char = {"bass": "F", "percussion": "||"}.get(clef, "G")
         canvas.setFont("Times-Roman", max(10.0, size))
-        canvas.drawString(x, y_pdf, "G")
+        canvas.drawString(x, y_pdf, char)
         return
 
     if glyph_id == "time_signature":

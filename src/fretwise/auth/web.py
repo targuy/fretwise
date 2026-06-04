@@ -122,6 +122,14 @@ def setup_auth(
 
     smtp_cfg = smtp_config if smtp_config is not None else load_smtp_config()
 
+    # Seed the env-configured local admin (email + precomputed password hash).
+    # Idempotent: creates the pre-activated admin on first start, refreshes the
+    # hash on later starts if it changed. This makes FretWise usable with a
+    # password login even when no OIDC provider is configured.
+    if config.has_local_admin:
+        admin = account_store.ensure_admin(config.admin_email, config.admin_password_hash)
+        user_store.get_or_create(admin.user_id, email=admin.email, is_admin=True)
+
     # OIDC is optional — only pull in Authlib when a provider is configured, so
     # email/password-only deployments don't need it.
     oauth = None
@@ -337,7 +345,11 @@ def setup_auth(
     @router.get("/auth/logout")
     async def logout(request: Request) -> Any:
         request.session.pop("user_id", None)
-        return RedirectResponse(url="/", status_code=303)
+        # Land on the login page (not "/"), so after signing out of Google the
+        # user can immediately sign in again — e.g. as the local admin. When
+        # unauthenticated, /login serves the login page (it only bounces to "/"
+        # when a session is still active).
+        return RedirectResponse(url="/login", status_code=303)
 
     @router.get("/api/me")
     async def me() -> JSONResponse:

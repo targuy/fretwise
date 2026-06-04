@@ -13,19 +13,25 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
+from fretwise.config import config
 from fretwise.models import Finger, FingeringState, NoteEvent
 
 logger = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------
-# Constants
+# Constants (sourced from fretwise.config -> defaults.yaml: ``generator``)
 # -------------------------------------------------------------------------
 
+_GENERATOR_CONFIG = config().generator
+
 # MIDI note values for open strings in standard EADGBE tuning (index = string - 1).
-STANDARD_TUNING: list[int] = [64, 59, 55, 50, 45, 40]
+STANDARD_TUNING: list[int] = list(_GENERATOR_CONFIG.standard_tuning)
 
 # Maximum fret number supported (standard 22-fret neck).
-MAX_FRET: int = 22
+MAX_FRET: int = _GENERATOR_CONFIG.max_fret
+
+# Highest hand position tracked for open-string states.
+_MAX_OPEN_HAND_POSITION: int = _GENERATOR_CONFIG.max_open_hand_position
 
 # Fingers that can fret a note (open strings handled separately).
 _FRETTING_FINGERS: list[Finger] = [
@@ -57,7 +63,7 @@ class GeneratorConfig:
 
     open_string_pitches: list[int] = None  # type: ignore[assignment]
     max_fret: int = MAX_FRET
-    max_open_hand_position: int = 12
+    max_open_hand_position: int = _MAX_OPEN_HAND_POSITION
 
     def __post_init__(self) -> None:
         if self.open_string_pitches is None:

@@ -30,9 +30,53 @@ from fretwise.core.canonical.models import (
 from fretwise.core.ingest import CompletedScore
 from fretwise.models import NoteEvent as LegacyNoteEvent
 
+# Instrument-family → standard-staff clef.  Unknown/other families fall back to
+# treble so behaviour is never worse than the legacy guitar-only assumption.
+_KIND_TO_CLEF: dict[str, str] = {
+    "guitar": "treble",
+    "bass": "bass",
+    "drums": "percussion",
+    "percussion": "percussion",
+    "vocal": "treble",
+    "other": "treble",
+}
 
-def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
-    """Convert a completed score into the canonical semantic model."""
+
+def _clef_for_kind(kind: str) -> str:
+    """Return the standard-staff clef glyph for an instrument family."""
+    return _KIND_TO_CLEF.get((kind or "guitar").strip().lower(), "treble")
+
+
+def _uses_guitar_octave(kind: str) -> bool:
+    """Whether notated pitch is written one octave above sounding.
+
+    Guitar AND bass are transposing instruments that sound one octave below
+    written pitch (treble-8vb / bass-8vb), so both are *notated* a written
+    octave above sounding (written = sounding + 12). Without this, a low bass
+    (e.g. a 6-string's open B/Eb) lands ~7 ledger lines below the staff and
+    collides with the staff beneath it (bug B3.4); the shift keeps it on the
+    staff and matches MuseScore. Vocals sit at sounding pitch on treble, and
+    drums carry no real pitch — neither applies the shift.
+    """
+    return (kind or "guitar").strip().lower() in ("guitar", "bass")
+
+
+def completed_to_canonical_score(
+    completed_score: CompletedScore,
+    *,
+    track_kind: str = "guitar",
+) -> Score:
+    """Convert a completed score into the canonical semantic model.
+
+    Args:
+        completed_score: The completed input-phase score.
+        track_kind: Instrument family of the track ("guitar"|"bass"|"drums"|
+            "vocal"|"other").  Drives the staff clef and the written-pitch
+            octave convention.  Defaults to ``"guitar"`` so existing
+            single-track guitar callers are unaffected.
+    """
+    kind = (track_kind or "guitar").strip().lower() or "guitar"
+    guitar_octave = _uses_guitar_octave(kind)
     title = Path(completed_score.source_path).stem or "untitled"
     beats_per_measure = _safe_beats_per_measure(completed_score.beats_per_measure)
     time_denominator = getattr(completed_score, "time_denominator", 4)
@@ -46,9 +90,10 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
     for note_index, note in enumerate(completed_score.notes):
         measure_idx = _measure_index_for_note(note, beats_per_measure=beats_per_measure)
         chord_name = chord_markers_by_onset.get(round(note.onset, 6))
-        measures.setdefault(measure_idx, []).append(
-            (note_index, _map_note(note_index, note, chord_name=chord_name))
-        )
+        for canonical_note in _map_note(
+            note_index, note, chord_name=chord_name, guitar_octave=guitar_octave
+        ):
+            measures.setdefault(measure_idx, []).append((note_index, canonical_note))
 
     max_measure_idx = max(measures.keys(), default=-1)
 
@@ -110,12 +155,15 @@ def completed_to_canonical_score(completed_score: CompletedScore) -> Score:
             )
         )
 
-    staff = Staff(staff_id="staff-1", clef="treble", measures=canonical_measures)
+    staff = Staff(
+        staff_id="staff-1", clef=_clef_for_kind(kind), measures=canonical_measures
+    )
     staff_group = StaffGroup(group_id="group-1", name="main", staves=[staff])
     track = Track(
         track_id="track-1",
         name=completed_score.track_name or "Track 1",
         staff_groups=[staff_group],
+        kind=kind,
     )
     first_tempo = completed_score.notes[0].tempo if completed_score.notes else 120.0
 
@@ -175,7 +223,17 @@ def _map_note(
     note: LegacyNoteEvent,
     *,
     chord_name: str | None = None,
-) -> CanonicalNoteEvent:
+    guitar_octave: bool = True,
+) -> list[CanonicalNoteEvent]:
+    """Map one legacy note to its canonical event(s).
+
+    A harmonic produces TWO stacked canonical events — exactly as Guitar Pro and
+    MuseScore draw it: the fretted *fundamental* (normal notehead, carries the
+    string/fret so the optimizer fingers the real position) plus a *resultant*
+    overtone (diamond notehead, no tab/fingering) when the touched node maps to a
+    known offset (``note.harmonic_resultant_pitch``).  All other notes map to a
+    single event.  The list is ordered fundamental-first.
+    """
     techniques: list[Technique] = []
     if note.articulation.value != "normal":
         techniques.append(Technique(name=note.articulation.value))
@@ -210,6 +268,13 @@ def _map_note(
         layout_hints.append(LayoutHint(key="tuplet_actual", value=str(note.tuplet_actual)))
         layout_hints.append(LayoutHint(key="tuplet_normal", value=str(note.tuplet_normal)))
 
+    has_resultant = note.harmonic_resultant_pitch is not None
+    if has_resultant:
+        # The fundamental is the *played* note: keep its normal notehead (the
+        # diamond belongs to the resultant added below).  This hint tells the
+        # scene builder to override the otherwise-harmonic notehead glyph.
+        layout_hints.append(LayoutHint(key="harmonic_dyad_fundamental", value="true"))
+
     tab_info: TabInfo | None = None
     if note.string_hint is not None or note.fret_hint is not None:
         tab_info = TabInfo(
@@ -221,23 +286,70 @@ def _map_note(
 
     dynamic = Dynamic(mark=note.dynamic.value)
     voice = note.voice_hint if note.voice_hint is not None else 0
-    return CanonicalNoteEvent(
+    fundamental = CanonicalNoteEvent(
         event_id=f"n{note_index}",
         onset=note.onset,
         duration=note.duration,
         voice=voice,
-        pitch_notated=_to_notated_pitch(note),
+        pitch_notated=_to_notated_pitch(note, guitar_octave=guitar_octave),
         pitch_sounding=note.pitch,
         tab_info=tab_info,
         techniques=techniques,
         dynamic=dynamic,
         layout_hints=layout_hints,
     )
+    if not has_resultant:
+        return [fundamental]
+    return [
+        fundamental,
+        _harmonic_resultant_event(
+            note_index, note, voice=voice, guitar_octave=guitar_octave
+        ),
+    ]
 
 
-def _to_notated_pitch(note: LegacyNoteEvent) -> int:
-    # Guitar notation is conventionally written one octave above sounding pitch.
-    if note.string_hint is not None:
+def _harmonic_resultant_event(
+    note_index: int,
+    note: LegacyNoteEvent,
+    *,
+    voice: int,
+    guitar_octave: bool = True,
+) -> CanonicalNoteEvent:
+    """Build the diamond-notehead overtone stacked over a harmonic fundamental.
+
+    The resultant has no ``tab_info`` (it is neither fretted nor fingered) and is
+    marked ``harmonic_resultant`` / ``tab_hidden`` so the engraver draws only a
+    diamond notehead in the standard staff and never a tab digit.  Its sounding
+    pitch is ``note.harmonic_resultant_pitch``; the notated pitch follows the same
+    guitar octave-up convention as every other note (+12).
+    """
+    resultant_pitch = note.harmonic_resultant_pitch
+    assert resultant_pitch is not None  # guarded by caller
+    layout_hints = [
+        LayoutHint(key="harmonic_resultant", value="true"),
+        LayoutHint(key="tab_hidden", value="true"),
+    ]
+    return CanonicalNoteEvent(
+        event_id=f"n{note_index}h",
+        onset=note.onset,
+        duration=note.duration,
+        voice=voice,
+        pitch_notated=resultant_pitch + 12
+        if (guitar_octave and note.string_hint is not None)
+        else resultant_pitch,
+        pitch_sounding=resultant_pitch,
+        tab_info=None,
+        techniques=[Technique(name="harmonic")],
+        dynamic=Dynamic(mark=note.dynamic.value),
+        layout_hints=layout_hints,
+    )
+
+
+def _to_notated_pitch(note: LegacyNoteEvent, *, guitar_octave: bool = True) -> int:
+    # Guitar notation is conventionally written one octave above sounding pitch
+    # (treble-8vb).  Bass/vocal/drums are written at sounding pitch, so the
+    # +12 shift is applied only for the guitar octave convention.
+    if guitar_octave and note.string_hint is not None:
         return note.pitch + 12
     return note.pitch
 

@@ -158,6 +158,7 @@ def _measure_packs(
     if not track.staff_groups or not track.staff_groups[0].staves:
         return []
     staff = track.staff_groups[0].staves[0]
+    clef = getattr(staff, "clef", "treble") or "treble"
 
     packs: list[_MeasurePack] = []
     for measure in staff.measures:
@@ -176,6 +177,7 @@ def _measure_packs(
             rules=rules,
             measure_width=raw_width,
             mode=mode,
+            clef=clef,
         )
         packs.append(
             _MeasurePack(
@@ -216,6 +218,7 @@ def _measure_event_layouts(
     rules: LayoutRules,
     measure_width: float | None = None,
     mode: str = "standard_tablature",
+    clef: str = "treble",
 ) -> tuple[list[EventLayout], list[CollisionIssue]]:
     del measure_number
     # Use the caller-provided width so that proportional x values are consistent
@@ -258,6 +261,7 @@ def _measure_event_layouts(
                         event.pitch_notated,
                         staff_y_origin=rules.row_top,
                         staff_spacing=rules.standard_staff_spacing,
+                        clef=clef,
                     )
                 else:
                     y = string_row_y(string_num=string_num, rules=rules)

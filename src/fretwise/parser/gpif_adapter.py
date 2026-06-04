@@ -68,6 +68,74 @@ _NOTE_VALUE_BEATS: dict[str, float] = {
 # Slide flag values that map to an outgoing slide articulation.
 _SLIDE_OUT_FLAGS: frozenset[int] = frozenset({1, 2, 4, 32, 64})
 
+# Maps the GP7/8 HarmonicType text (sibling <Property name="HarmonicType">
+# <HType>…</HType>) to a HarmonicType constant.  GP8 emits lowercase tokens;
+# older GP5 spellings (PascalCase) are accepted too for back-compat.  "feedback"
+# and "semi" have no dedicated constant: a feedback harmonic behaves like an
+# artificial one and a semi-harmonic like a natural one.
+_HARMONIC_TYPE_MAP: dict[str, str] = {
+    "natural": HarmonicType.NATURAL,
+    "naturalharmonic": HarmonicType.NATURAL,
+    "artificial": HarmonicType.ARTIFICIAL,
+    "artificialharmonic": HarmonicType.ARTIFICIAL,
+    "pinch": HarmonicType.PINCH,
+    "pinchharmonic": HarmonicType.PINCH,
+    "tapped": HarmonicType.HARP,
+    "harp": HarmonicType.HARP,
+    "semi": HarmonicType.NATURAL,
+    "feedback": HarmonicType.ARTIFICIAL,
+}
+
+# Maps a harmonic node fret (the point touched on the string, GP8 stores it as a
+# float like "12.000000") to the number of semitones the resulting overtone
+# sounds *above* the fretted/fundamental pitch.  These are the standard guitar
+# natural-harmonic nodes; the same offsets apply to artificial/feedback nodes in
+# GP, confirmed against the MuseScore reference.  Both members of each node pair
+# (e.g. 7 and 19) produce the same overtone.
+_HARMONIC_NODE_SEMITONES: dict[int, int] = {
+    12: 12,   # 2nd harmonic — octave
+    24: 24,   # 4th harmonic — two octaves
+    7: 19,    # 3rd harmonic — octave + fifth
+    19: 19,
+    5: 24,    # 4th harmonic — two octaves
+    4: 28,    # 5th harmonic — two octaves + major third
+    9: 28,
+    16: 28,
+    3: 31,    # 6th harmonic — two octaves + fifth (node ≈ fret 3.2)
+    2: 36,    # 8th harmonic — three octaves (node ≈ fret 2.4)
+}
+
+
+def _harmonic_node_offset(harmonic_fret: int | None) -> int:
+    """Return semitones the harmonic overtone sounds above the fretted pitch.
+
+    Args:
+        harmonic_fret: Harmonic node fret (rounded to the nearest int), or None.
+
+    Returns:
+        Semitone offset for a known node, otherwise 0 (leave pitch unchanged).
+    """
+    if harmonic_fret is None:
+        return 0
+    return _HARMONIC_NODE_SEMITONES.get(harmonic_fret, 0)
+
+
+def _parse_int_fret(text: str | None) -> int | None:
+    """Parse a GPIF fret string into an int, tolerating floats like "12.000000".
+
+    Args:
+        text: Raw fret text, e.g. "12", "12.000000", "2.400000" or None.
+
+    Returns:
+        The rounded integer fret, or None when *text* is empty/unparseable.
+    """
+    if not text:
+        return None
+    try:
+        return int(round(float(text)))
+    except (ValueError, TypeError):
+        return None
+
 
 def _compute_chord_fingers(frets: list[int]) -> list[int]:
     """Assign finger numbers to chord diagram dots.
@@ -225,6 +293,36 @@ class GpifAdapter(BaseParser):
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
         return _list_guitar_tracks(root)
 
+    def list_all_tracks(self, path: Path) -> list[tuple[int, str, list[int], str]]:
+        """Return every track in the file as (track_id, name, open_pitches, kind).
+
+        Lists *all* instruments (vocals, bass, drums, …) in score order — not
+        just guitars — so multitrack callers (e.g. the web ``/api/tracks``
+        route) can display the full song. The ``kind`` value
+        (``"guitar"`` | ``"bass"`` | ``"drums"`` | ``"vocal"`` | ``"other"``)
+        tells the caller whether the fingering optimizer applies to the track.
+
+        Use :meth:`list_guitar_tracks` instead when you only want fingerable
+        guitar tracks.
+
+        Args:
+            path: Path to a .gp file.
+
+        Returns:
+            ``(track_id, track_name, open_string_pitches, kind)`` per track,
+            in the original GPIF order.
+
+        Raises:
+            ParseError: If the file is missing or the GPIF cannot be read.
+        """
+        if not path.exists():
+            raise ParseError(f"File not found: {path}")
+        try:
+            root = _load_gpif(path)
+        except Exception as exc:
+            raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
+        return _list_all_tracks(root)
+
     def parse_track(self, path: Path, track_id: int) -> list[NoteEvent]:
         """Parse a specific track by its numeric track_id.
 
@@ -261,7 +359,15 @@ class GpifAdapter(BaseParser):
                 break
 
         if not open_pitches:
-            raise ParseError(f"Track {track_id} has no tuning data in '{path}'.")
+            # Non-guitar tracks (e.g. vocals/percussion without a tuning) can
+            # still be parsed for staff-only rendering: NoteEvent pitches come
+            # from each note's MIDI number, not from the open-string tuning.
+            # string_hint is meaningless without a tuning but unused downstream
+            # for non-fingered (staff-only) tracks.
+            logger.info(
+                "Track %s in '%s' has no tuning data; parsing pitches only "
+                "(string hints unavailable).", track_id, path,
+            )
         track_index = _track_bar_index(root, track_id)
         if track_index is None:
             raise ParseError(f"Track {track_id} not found in '{path}'.")
@@ -578,6 +684,7 @@ class _NoteData:
     __slots__ = (
         "gpif_string", "fret", "midi_pitch", "is_tie_dest", "articulation", "let_ring",
         "bend_value", "bend_type", "slide_type", "harmonic_type", "harmonic_fret",
+        "harmonic_resultant_pitch",
         "muted", "palm_muted", "tapping", "accent", "accent_strong", "tremolo_picking",
         "vibrato_wide",
         "pitch_step", "pitch_accidental", "pitch_octave",
@@ -597,6 +704,7 @@ class _NoteData:
         slide_type: str | None = None,
         harmonic_type: str | None = None,
         harmonic_fret: int | None = None,
+        harmonic_resultant_pitch: int | None = None,
         muted: bool = False,
         palm_muted: bool = False,
         tapping: bool = False,
@@ -626,6 +734,7 @@ class _NoteData:
         self.slide_type = slide_type
         self.harmonic_type = harmonic_type
         self.harmonic_fret = harmonic_fret
+        self.harmonic_resultant_pitch = harmonic_resultant_pitch
         self.muted = muted
         self.palm_muted = palm_muted
         self.tapping = tapping
@@ -681,26 +790,99 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
         note_props = _parse_note_properties(props)
         pitch_step, pitch_accidental, pitch_octave = _parse_notated_pitch(props)
 
+        # GP7/8 carries several interpretation marks as *direct children* of the
+        # <Note> element (siblings of <Properties>), NOT as named Properties:
+        #   <LetRing/>, <Vibrato>Slight|Wide</Vibrato>, <Accent>flags</Accent>,
+        #   <AntiAccent>…</AntiAccent>.  These must be read off ``note`` itself;
+        #   looking them up in ``props`` always misses them.
+        let_ring = note.find("LetRing") is not None
+
+        vibrato_wide = note_props["vibrato_wide"]
+        articulation = note_props["articulation"]
+        vib_el = note.find("Vibrato")
+        if vib_el is not None:
+            vib_text = (vib_el.text or "").strip()
+            if "Wide" in vib_text:
+                vibrato_wide = True
+                if articulation == Articulation.NORMAL:
+                    articulation = Articulation.WIDE_VIBRATO
+            elif articulation == Articulation.NORMAL:
+                articulation = Articulation.VIBRATO
+
+        # <Accent> text is a flags bitmask (GP8): 4 = accent (>), 8 = heavy
+        # accent (marcato).  Lower flag values (1/2) are detached/staccato hints.
+        accent = note_props["accent"]
+        accent_strong = note_props["accent_strong"]
+        acc_el = note.find("Accent")
+        if acc_el is not None:
+            try:
+                acc_flags = int((acc_el.text or "0").strip())
+            except ValueError:
+                acc_flags = 0
+            if acc_flags & 8:
+                accent_strong = True
+            elif acc_flags & 4:
+                accent = True
+
+        # <AntiAccent> marks a ghost / very-soft note.
+        ghost = note_props["ghost"] or note.find("AntiAccent") is not None
+
+        # GP7/8 stores the harmonic type and node fret as *separate sibling*
+        # Properties — <Property name="HarmonicType"><HType>natural</HType></…>
+        # and <Property name="HarmonicFret"><HFret>12.000000</HFret></…> — NOT as
+        # children of the <Harmonic> property (which only holds an <Enable/>).
+        # _parse_note_properties looks inside props["Harmonic"] and so always
+        # misses both; read them off the sibling props here and override.
+        harmonic_type = note_props["harmonic_type"]
+        harmonic_fret = note_props["harmonic_fret"]
+        if "HarmonicType" in props:
+            htype_text = (props["HarmonicType"].findtext("HType") or "").strip()
+            harmonic_type = _HARMONIC_TYPE_MAP.get(htype_text.lower(), HarmonicType.NATURAL)
+        if "HarmonicFret" in props:
+            parsed_fret = _parse_int_fret(props["HarmonicFret"].findtext("HFret"))
+            if parsed_fret is not None:
+                harmonic_fret = parsed_fret
+        # A bare <Harmonic><Enable/></Harmonic> (or any sibling above) means the
+        # note is a harmonic even when _parse_note_properties left it NORMAL.
+        if harmonic_type is not None and articulation == Articulation.NORMAL:
+            articulation = Articulation.HARMONIC
+
+        # A harmonic sounds as TWO notes, exactly as Guitar Pro / MuseScore draw
+        # it: the fretted *fundamental* (where the finger sits — e.g. a 12th-fret
+        # natural harmonic on D#3=51) plus the resulting *overtone* a node offset
+        # above it (51 + 12 = D#4=63), drawn as a stacked diamond notehead.  The
+        # fundamental keeps its sounding pitch (``midi_pitch``), its string/fret,
+        # and its notated spelling so the optimizer fingers the real position and
+        # the staff shows the played note; ``harmonic_resultant_pitch`` carries
+        # the overtone for the engraver to add the diamond.  Unknown nodes
+        # (offset 0) have no separate overtone — the lone note stays a harmonic.
+        harmonic_resultant_pitch: int | None = None
+        if harmonic_type is not None:
+            offset = _harmonic_node_offset(harmonic_fret)
+            if offset:
+                harmonic_resultant_pitch = midi_pitch + offset
+
         result[nid] = _NoteData(
             gpif_string, fret, midi_pitch, is_tie_dest,
-            articulation=note_props["articulation"],
-            let_ring="LetRing" in props,
+            articulation=articulation,
+            let_ring=let_ring,
             bend_value=note_props["bend_value"],
             bend_type=note_props["bend_type"],
             slide_type=note_props["slide_type"],
-            harmonic_type=note_props["harmonic_type"],
-            harmonic_fret=note_props["harmonic_fret"],
+            harmonic_type=harmonic_type,
+            harmonic_fret=harmonic_fret,
+            harmonic_resultant_pitch=harmonic_resultant_pitch,
             muted=note_props["muted"],
             palm_muted=note_props["palm_muted"],
             tapping=note_props["tapping"],
-            accent=note_props["accent"],
-            accent_strong=note_props["accent_strong"],
+            accent=accent,
+            accent_strong=accent_strong,
             tremolo_picking=note_props["tremolo_picking"],
-            vibrato_wide=note_props["vibrato_wide"],
+            vibrato_wide=vibrato_wide,
             pitch_step=pitch_step,
             pitch_accidental=pitch_accidental,
             pitch_octave=pitch_octave,
-            ghost=note_props["ghost"],
+            ghost=ghost,
             staccato=note_props["staccato"],
             slap=note_props["slap"],
             pop=note_props["pop"],
@@ -944,7 +1126,13 @@ def _parse_bend(bend_prop: ET.Element) -> tuple[float | None, str | None]:
 
 
 def _parse_harmonic(harm_prop: ET.Element) -> tuple[str | None, int | None]:
-    """Parse a Harmonic Property element into (harmonic_type, fret)."""
+    """Parse a *nested-layout* Harmonic Property element into (type, fret).
+
+    Back-compat helper for the legacy GP5-style layout where the type/fret live
+    inside the <Harmonic> property.  GP7/8 instead emits sibling
+    ``HarmonicType``/``HarmonicFret`` Properties, which :func:`_build_note_map`
+    reads directly.  Tolerates float fret strings (e.g. "12.000000").
+    """
     harm_el = harm_prop.find("HarmonicType")
     if harm_el is None:
         # Try direct type text
@@ -953,40 +1141,159 @@ def _parse_harmonic(harm_prop: ET.Element) -> tuple[str | None, int | None]:
         type_text = harm_el.text or ""
     type_text = type_text.strip()
 
-    fret_text = harm_prop.findtext("Fret") or harm_prop.findtext("HarmonicFret") or ""
-    try:
-        harm_fret: int | None = int(fret_text)
-    except ValueError:
-        harm_fret = None
+    harm_fret = _parse_int_fret(
+        harm_prop.findtext("Fret") or harm_prop.findtext("HarmonicFret")
+    )
 
-    type_map: dict[str, str] = {
-        "Natural": HarmonicType.NATURAL,
-        "NaturalHarmonic": HarmonicType.NATURAL,
-        "Artificial": HarmonicType.ARTIFICIAL,
-        "ArtificialHarmonic": HarmonicType.ARTIFICIAL,
-        "Pinch": HarmonicType.PINCH,
-        "PinchHarmonic": HarmonicType.PINCH,
-        "Tapped": HarmonicType.HARP,
-        "Harp": HarmonicType.HARP,
-        "Semi": HarmonicType.NATURAL,
-    }
-    h_type: str | None = type_map.get(type_text, HarmonicType.NATURAL)
+    h_type: str | None = _HARMONIC_TYPE_MAP.get(type_text.lower(), HarmonicType.NATURAL)
     return h_type, harm_fret
 
 
 # ---------------------------------------------------------------------------
-# Track selection
+# Track selection & classification
 # ---------------------------------------------------------------------------
+
+#: Standard MIDI program ranges used to classify a track when the GPIF
+#: ``InstrumentSet/Type`` is ambiguous (GP often stores vocals as "cello", etc.).
+_GUITAR_PROGRAMS = frozenset(range(24, 32))  # 24=Nylon … 31=Guitar Harmonics
+_BASS_PROGRAMS = frozenset(range(32, 40))  # 32=Acoustic Bass … 39=Synth Bass 2
+#: GM voice/choir patches (52=Choir Aahs, 53=Voice Oohs, 54=Synth Voice, 85=Lead Voice).
+_VOCAL_PROGRAMS = frozenset({52, 53, 54, 85})
+
+#: ``InstrumentSet/Type`` values that are *never* guitars. Shared by
+#: :func:`_list_guitar_tracks` and :func:`_find_guitar_track` so the guitar-only
+#: callers agree on what to skip.
+_EXCLUDED_TYPES = frozenset(
+    {"drumkit", "voice", "electricbass", "acousticbass", "saxophone", "trumpet",
+     "trombone", "violin", "cello", "piano", "organ", "strings"}
+)
+
+# Track-kind string constants. Plain strings (not an Enum) so they serialise
+# straight to JSON for the web API and frontend without extra conversion.
+KIND_GUITAR = "guitar"
+KIND_BASS = "bass"
+KIND_DRUMS = "drums"
+KIND_VOCAL = "vocal"
+KIND_OTHER = "other"
+
+
+def _classify_track_kind(inst_type: str, program: int, name: str) -> str:
+    """Classify a GPIF track as guitar / bass / drums / vocal / other.
+
+    The classifier combines three GPIF signals, most-specific first:
+
+    1. ``InstrumentSet/Type`` substrings (``drumkit``, ``guitar``, ``bass``) —
+       the authoritative signal when present.
+    2. The Standard MIDI program number (24–31 guitar, 32–39 bass, choir
+       patches → vocal).
+    3. The track *name* (e.g. "Lead Vocals") — the only reliable signal for
+       vocals, which Guitar Pro frequently stores with a ``cello`` instrument
+       type and a cello MIDI program (42).
+
+    Args:
+        inst_type: ``InstrumentSet/Type`` text, lower-cased (may be empty).
+        program: Standard MIDI program 0–127, or -1 if unknown.
+        name: Track name (e.g. ``"Layne Staley | Lead Vocals"``).
+
+    Returns:
+        One of :data:`KIND_GUITAR`, :data:`KIND_BASS`, :data:`KIND_DRUMS`,
+        :data:`KIND_VOCAL`, :data:`KIND_OTHER`.
+    """
+    inst = inst_type.lower()
+    lname = name.lower()
+
+    # 1. Drums — unambiguous from type; never has a meaningful pitch program.
+    if "drum" in inst or "percussion" in inst:
+        return KIND_DRUMS
+
+    # 2. Vocals — name is the only dependable cue (GP stores voice as cello).
+    #    Guard against false positives like "voicing" by matching whole-ish words.
+    if any(tok in lname for tok in ("vocal", "voce", "voix", "gesang", "lead voc",
+                                    "backing voc", "choir")) or "voice" in inst:
+        return KIND_VOCAL
+    if program in _VOCAL_PROGRAMS:
+        return KIND_VOCAL
+
+    # 3. Bass — explicit type or GM bass program range.
+    if "bass" in inst or program in _BASS_PROGRAMS:
+        return KIND_BASS
+
+    # 4. Guitar — explicit type or GM guitar program range.
+    if "guitar" in inst or program in _GUITAR_PROGRAMS:
+        return KIND_GUITAR
+
+    return KIND_OTHER
+
+
+def classify_kind_for_program(program: int, name: str = "") -> str:
+    """Public helper: classify a track kind from a MIDI program (+ optional name).
+
+    Thin wrapper around the internal classifier for callers (e.g. the web
+    layer) that only know a track's Standard MIDI program and name — for
+    instance non-GP adapters, or a GP track whose ``midi_program`` was captured
+    by :meth:`GpifAdapter.parse_track` but whose full track listing is not at
+    hand.
+
+    Args:
+        program: Standard MIDI program 0–127, or -1 if unknown.
+        name: Optional track name (used to detect vocals).
+
+    Returns:
+        One of :data:`KIND_GUITAR`, :data:`KIND_BASS`, :data:`KIND_DRUMS`,
+        :data:`KIND_VOCAL`, :data:`KIND_OTHER`.
+    """
+    return _classify_track_kind("", program, name)
+
+
+def _track_tuning_pitches(track: ET.Element) -> list[int]:
+    """Return the open-string MIDI pitches of a track's first staff (may be [])."""
+    staff = track.find("Staves/Staff")
+    if staff is None:
+        return []
+    props = {p.get("name", ""): p for p in staff.findall("Properties/Property")}
+    tuning = props.get("Tuning")
+    if tuning is None:
+        return []
+    pitches_text = tuning.findtext("Pitches") or ""
+    return [int(x) for x in pitches_text.split() if x.strip()]
+
+
+def _list_all_tracks(root: ET.Element) -> list[tuple[int, str, list[int], str]]:
+    """Return every track as (track_id, name, open_pitches, kind), in score order.
+
+    Unlike :func:`_list_guitar_tracks` this lists *all* instruments (vocals,
+    bass, drums, …), not just guitars, preserving the GPIF track order so the
+    frontend can show the full multitrack score. The ``kind`` field
+    (:data:`KIND_GUITAR` … :data:`KIND_OTHER`) lets callers decide whether to
+    run the fingering optimizer.
+
+    Args:
+        root: Parsed ``score.gpif`` document root.
+
+    Returns:
+        ``(track_id, name, open_pitches, kind)`` for each ``<Track>`` with a
+        numeric id, ordered exactly as they appear in the GPIF.
+    """
+    tracks: list[tuple[int, str, list[int], str]] = []
+    for track in root.findall("Tracks/Track"):
+        tid_str = track.get("id", "")
+        if not tid_str.isdigit():
+            continue
+        tid = int(tid_str)
+
+        name = track.findtext("Name", "").strip()
+        inst_type = (track.findtext("InstrumentSet/Type") or "").lower()
+        program_text = track.findtext(".//MIDI/Program") or ""
+        program = int(program_text) if program_text.isdigit() else -1
+        pitches = _track_tuning_pitches(track)
+        kind = _classify_track_kind(inst_type, program, name)
+        tracks.append((tid, name, pitches, kind))
+
+    return tracks
 
 
 def _list_guitar_tracks(root: ET.Element) -> list[tuple[int, str, list[int]]]:
     """Return all guitar tracks as (track_id, name, open_pitches), best first."""
-    _GUITAR_PROGRAMS = frozenset(range(24, 32))
-    _EXCLUDED_TYPES = frozenset(
-        {"drumkit", "voice", "electricbass", "acousticbass", "saxophone", "trumpet",
-         "trombone", "violin", "cello", "piano", "organ", "strings"}
-    )
-
     results: list[tuple[tuple[int, int], int, str, list[int]]] = []
 
     for track in root.findall("Tracks/Track"):
@@ -1042,12 +1349,6 @@ def _find_guitar_track(root: ET.Element) -> tuple[int | None, list[int]]:
     Returns:
         (None, []) if no suitable track is found.
     """
-    _GUITAR_PROGRAMS = frozenset(range(24, 32))  # 24=Nylon, 31=Guitar Harmonics
-    _EXCLUDED_TYPES = frozenset(
-        {"drumkit", "voice", "electricbass", "acousticbass", "saxophone", "trumpet",
-         "trombone", "violin", "cello", "piano", "organ", "strings"}
-    )
-
     candidates: list[tuple[tuple[int, int], int, list[int]]] = []  # (score, tid, pitches)
 
     for track in root.findall("Tracks/Track"):
@@ -1324,6 +1625,7 @@ def _extract_events(
                             slide_type=nd.slide_type,
                             harmonic_type=nd.harmonic_type,
                             harmonic_fret=nd.harmonic_fret,
+                            harmonic_resultant_pitch=nd.harmonic_resultant_pitch,
                             muted=nd.muted,
                             palm_muted=nd.palm_muted,
                             tapping=nd.tapping,

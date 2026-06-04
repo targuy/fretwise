@@ -30,6 +30,7 @@ from fretwise.export import (
     render_pdf_tab,
     render_staff_pdf,
     render_text_report,
+    write_musicxml,
 )
 from fretwise.export.gp_writer import fingerings_by_source_id, write_gp_with_fingerings
 from fretwise.generator import StateGenerator
@@ -208,7 +209,7 @@ _MODES = {
     "learning": CostWeights.learning,
 }
 
-_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined", "gp")
+_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined", "gp", "musicxml", "xml")
 
 _SUPPORTED_INPUT = {
     ".gp3": "GuitarPro 3",
@@ -229,6 +230,8 @@ _SUPPORTED_OUTPUT = {
     "staff": "Standard music notation (treble clef) PDF",
     "combined": "Standard notation + tab stacked PDF",
     "gp": "Guitar Pro 7/8 GPIF with LeftFingering annotations",
+    "musicxml": "MusicXML with tab (string/fret) + LH fingering — opens in "
+    "MuseScore/Finale/Guitar Pro",
 }
 
 
@@ -650,6 +653,18 @@ def solve(
     elif effective_fmt == "gp":
         _write_guarded_gp_file(file, output, payload, quiet=quiet)
 
+    elif effective_fmt in ("musicxml", "xml"):
+        write_musicxml(
+            results,
+            output,
+            title=pdf_title,
+            artist=pdf_artist,
+            instrument=track_name,
+            beats_per_measure=beats_per_measure,
+        )
+        if not quiet:
+            click.echo(f"MusicXML written to '{output}'.")
+
     else:
         click.echo(f"Error: Unsupported format '{effective_fmt}'.", err=True)
         sys.exit(1)
@@ -833,7 +848,7 @@ def formats() -> None:
     type=click.Path(file_okay=False),
     help="Directory containing score files to browse (default: ./partitions).",
 )
-@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+@click.option("--host", default="localhost", show_default=True, help="Bind address.")
 def web(port: int, fixtures_dir: str, host: str) -> None:
     """Launch the interactive Songsterr-style web tab viewer.
 
@@ -873,7 +888,7 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
     type=click.Path(file_okay=False),
     help="Directory containing score files to browse (default: ./partitions).",
 )
-@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+@click.option("--host", default="localhost", show_default=True, help="Bind address.")
 def gui(port: int, fixtures_dir: str, host: str) -> None:
     """Launch the web GUI and open it in the default browser.
 
@@ -908,6 +923,49 @@ def gui(port: int, fixtures_dir: str, host: str) -> None:
 
     threading.Timer(1.0, lambda: webbrowser.open(url)).start()
     uvicorn.run(app, host=host, port=port, log_level="warning")
+
+
+# ---------------------------------------------------------------------------
+# hash-password
+# ---------------------------------------------------------------------------
+
+
+@main.command(name="hash-password")
+@click.option(
+    "--stdin", "from_stdin", is_flag=True, default=False,
+    help="Read the password from stdin (one line) instead of prompting.",
+)
+def hash_password_cmd(from_stdin: bool) -> None:
+    """Hash an admin password for FRETWISE_ADMIN_PASSWORD_HASH.
+
+    \b
+    Prompts for a password (not echoed) and prints its PBKDF2 hash. Paste the
+    hash into the FRETWISE_ADMIN_PASSWORD_HASH environment variable together
+    with FRETWISE_ADMIN_EMAIL to enable a local admin login (no Google needed).
+    The plaintext password is never stored or printed.
+
+    \b
+    Example:
+      export FRETWISE_ADMIN_EMAIL=me@example.com
+      export FRETWISE_ADMIN_PASSWORD_HASH="$(fretwise hash-password)"
+    """
+    import getpass
+    import sys
+
+    from fretwise.auth.passwords import hash_password
+
+    if from_stdin:
+        password = sys.stdin.readline().rstrip("\n")
+    else:
+        password = getpass.getpass("Password: ")
+        confirm = getpass.getpass("Confirm: ")
+        if password != confirm:
+            click.echo("Error: passwords do not match.", err=True)
+            raise SystemExit(1)
+    if len(password) < 8:
+        click.echo("Error: password must be at least 8 characters.", err=True)
+        raise SystemExit(1)
+    click.echo(hash_password(password))
 
 
 # ---------------------------------------------------------------------------

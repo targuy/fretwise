@@ -5,26 +5,61 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateSoundfont, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSoundfonts, fetchTracks, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateSoundfont, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
-import { MODES, MODE_LABELS, DEFAULT_MODE } from './modeConfig.js';
+import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
 let currentFile = null;
 let currentTrackId = null;
 let currentTracks = [];   // all tracks for the current file
+// Kind of the currently-displayed primary track (guitar|bass|drums|vocal|
+// other). Defaults to guitar so the UI behaves exactly as before until the
+// backend supplies a kind. Drives the staff-only lock for non-guitar tracks.
+let _currentTrackKind = 'guitar';
+// Remembers the last view mode chosen while a guitar track was active so that
+// switching to a non-guitar track (forced to Staff) and back does not leave
+// the guitar track stuck in Staff view. Defaults to the standard default.
+let _lastGuitarMode = DEFAULT_MODE;
 let renderer = null;
 let playback = null;
 let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
+// Client-side solve cache: key `${file}#${trackId}#${mode}#${prefsKey}` →
+// /api/solve response. Avoids re-hitting the network (and re-deserialising a
+// large payload) when the user flips back to a track/mode already viewed.
+const _solveCache = new Map();
 // key: primaryTrackId → Set<secondaryTrackId> — tracks explicitly muted by the user
 const _mutedSecondaryTracks = new Map();
+
+/** Stable cache key for a solve request (file, track, mode, rule prefs). */
+function _solveCacheKey(file, trackId, mode, prefs) {
+  const p = prefs || {};
+  const prefsKey = `${p.sameFingerPenalty !== false ? 1 : 0}`
+    + `:${p.inferImplicitLegato !== false ? 1 : 0}`;
+  return `${file}#${trackId}#${mode}#${prefsKey}`;
+}
+
+/**
+ * Solve with a client-side cache. The first call for a (file, track, mode,
+ * prefs) tuple hits the network; subsequent calls return the cached payload
+ * synchronously-fast (still a Promise for a uniform API). The server keeps its
+ * own LRU cache, but reusing the parsed JS object also skips re-deserialising
+ * a multi-thousand-note payload on every tab switch.
+ */
+async function _cachedSolve(file, trackId, mode, prefs) {
+  const key = _solveCacheKey(file, trackId, mode, prefs);
+  if (_solveCache.has(key)) return _solveCache.get(key);
+  const data = await fetchSolve(file, trackId, mode, prefs);
+  _solveCache.set(key, data);
+  return data;
+}
 
 let _followPlayhead = true;  // when false, user is exploring — no auto-scroll
 
@@ -198,6 +233,7 @@ const headerMetaTempo  = $('#header-meta-tempo');
 const btnHeaderBack    = $('#btn-header-back');
 const btnHeaderPdf     = $('#btn-header-pdf');
 const btnHeaderGp      = $('#btn-header-gp');
+const btnHeaderMusicXml = $('#btn-header-musicxml');
 
 // Header
 const btnLegend     = $('#btn-legend');
@@ -230,6 +266,10 @@ function showPage(page) {
   if (btnDownloadGp)    btnDownloadGp.style.display    = isViewer ? '' : 'none';
   const tabsBar = $('#track-tabs-bar');
   if (tabsBar) tabsBar.style.display = isViewer ? '' : 'none';
+  // Chevrons follow the bar; recompute after the display change applies.
+  if (typeof _updateTrackTabsChevrons === 'function') {
+    requestAnimationFrame(_updateTrackTabsChevrons);
+  }
   // Update settings nav: "Back to song" only active when a track is loaded
   const setBackViewer = $('#set-back-viewer');
   if (setBackViewer) setBackViewer.disabled = !(currentTrackId != null && currentFile != null);
@@ -240,6 +280,7 @@ function showPage(page) {
 // ── File selector (library table) ──────────────────────────────────
 
 let _allFiles = [];
+let _storageStatus = null;  // /api/storage result, fetched when the library is empty
 let _libSort = { col: 'title', dir: 1 };
 let _libSearch = '';
 let _libGenreFilter = '';
@@ -249,6 +290,9 @@ async function loadFiles() {
   showPage('files');
   try {
     _allFiles = await fetchFiles();
+    // When the library is empty, the storage status tells us WHY (no backend
+    // connected vs an empty cloud folder) so the empty-state can guide the user.
+    _storageStatus = _allFiles.length === 0 ? await fetchStorage() : null;
     _populateLibFilters();
     _renderLibTable();
   } catch (err) {
@@ -288,6 +332,26 @@ function _populateLibFilters() {
   }
 }
 
+// Choose the empty-state message. Distinguishes "no search match" (the library
+// has files, the filters hid them) from a genuinely empty library, and within
+// the latter distinguishes a not-yet-connected cloud backend from an empty
+// cloud folder vs the single-user local-directory case.
+function _emptyLibraryMessage() {
+  const filtersActive = _libSearch || _libGenreFilter || _libFormatFilter;
+  if (_allFiles.length > 0 && filtersActive) {
+    return 'No scores match your search or filters.';
+  }
+  const s = _storageStatus;
+  if (s && s.configured === false) {
+    return 'No storage connected. Connect your cloud storage (e.g. Google Drive) '
+      + 'in Settings ⚙, or upload a file below.';
+  }
+  if (s && s.configured && s.backend && s.backend !== 'local') {
+    return `Your ${s.backend} storage has no scores yet — upload a file below to get started.`;
+  }
+  return 'No files found. Check your partition directory in Settings, or upload a file below.';
+}
+
 function _renderLibTable() {
   const tbody = $('#lib-table-body');
   const empty = $('#lib-empty');
@@ -320,8 +384,12 @@ function _renderLibTable() {
   });
 
   if (rows.length === 0) {
-    if (empty) empty.style.display = '';
+    if (empty) {
+      empty.style.display = '';
+      empty.textContent = _emptyLibraryMessage();
+    }
     tbody.innerHTML = '';
+    _renderAzBar([]);
     return;
   }
   if (empty) empty.style.display = 'none';
@@ -331,6 +399,7 @@ function _renderLibTable() {
     const tr = document.createElement('tr');
     tr.className = 'lib-row';
     tr.dataset.file = f.name;
+    tr.dataset.sortkey = _libNavKey(f);
 
     const title = f.meta?.title || f.stem || f.name;
     const artist = f.meta?.artist || '—';
@@ -380,6 +449,65 @@ function _renderLibTable() {
       arrow.textContent = '';
     }
   });
+
+  _renderAzBar(rows);
+}
+
+// The value used by the A–Z bar to bucket a row. Follows the active table sort
+// when it is by 'artist' or 'title'; otherwise falls back to title so the bar
+// still makes sense when sorting by year/genre/format.
+function _libNavKey(f) {
+  const col = (_libSort.col === 'artist') ? 'artist' : 'title';
+  const val = col === 'artist'
+    ? (f.meta?.artist || '')
+    : (f.meta?.title || f.stem || f.name || '');
+  return String(val).trim().toUpperCase();
+}
+
+// Map a sort key to its index bucket: A–Z, or '#' for anything else (digits,
+// symbols, empty).
+function _libNavBucket(key) {
+  const c = (key || '').charAt(0);
+  return (c >= 'A' && c <= 'Z') ? c : '#';
+}
+
+// Build the A–Z index bar. Letters with no matching entry are disabled/dimmed;
+// clicking a letter scrolls the table to its first matching row.
+function _renderAzBar(rows) {
+  const bar = $('#lib-az-bar');
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  const present = new Set();
+  for (const f of rows) present.add(_libNavBucket(_libNavKey(f)));
+
+  const letters = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+  for (const letter of letters) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'lib-az-letter';
+    btn.textContent = letter;
+    if (!present.has(letter)) {
+      btn.disabled = true;
+    } else {
+      btn.addEventListener('click', () => _scrollToLetter(letter));
+    }
+    bar.appendChild(btn);
+  }
+}
+
+// Scroll the table to the first row whose nav key falls in the given bucket.
+function _scrollToLetter(letter) {
+  const tbody = $('#lib-table-body');
+  if (!tbody) return;
+  for (const tr of tbody.querySelectorAll('tr.lib-row')) {
+    if (_libNavBucket(tr.dataset.sortkey || '') === letter) {
+      tr.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      tr.classList.add('lib-row-flash');
+      setTimeout(() => tr.classList.remove('lib-row-flash'), 800);
+      return;
+    }
+  }
 }
 
 function _esc(s) {
@@ -394,17 +522,49 @@ async function _showSongInfo(f) {
   content.innerHTML = '<div class="song-info-loading">Loading…</div>';
   panel.classList.add('open');
 
-  let meta = f.meta || {};
+  // Base = the already-enriched meta from the file list (filename + catalog
+  // merged). Overlay any non-empty fields from the catalog row endpoint on top.
+  const meta = { ...(f.meta || {}) };
   try {
     const fetched = await fetchSongInfo(f.name);
-    if (fetched) meta = fetched;
+    if (fetched) {
+      for (const [k, v] of Object.entries(fetched)) {
+        if (v != null && String(v).trim() !== '') meta[k] = v;
+      }
+    }
   } catch (_) {}
 
   const title = meta.title || f.stem || f.name;
-  const rows = Object.entries(meta)
-    .filter(([k]) => k !== 'filename' && k !== 'file' && k !== 'name')
-    .map(([k, v]) => `<tr><th>${_esc(k)}</th><td>${_esc(String(v || '—'))}</td></tr>`)
-    .join('');
+
+  // Bookkeeping/key columns that should never show as displayable metadata.
+  const HIDE = new Set(['filename', 'file', 'name', 'stem', 'title']);
+  // Preferred display order for the known catalog fields.
+  const ORDER = ['artist', 'album', 'genre', 'year', 'notes'];
+  const LABELS = {
+    artist: 'Artist', album: 'Album', genre: 'Genre',
+    year: 'Year', notes: 'Notes',
+  };
+
+  const seen = new Set();
+  const ordered = [];
+  for (const k of ORDER) {
+    if (k in meta) { ordered.push(k); seen.add(k); }
+  }
+  // Append any extra catalog columns the user added, in their own order.
+  for (const k of Object.keys(meta)) {
+    if (!HIDE.has(k) && !seen.has(k)) ordered.push(k);
+  }
+  // Always show the core fields even if blank, so the panel reads consistently.
+  for (const k of ['artist', 'album', 'genre', 'year', 'notes']) {
+    if (!ordered.includes(k)) ordered.push(k);
+  }
+
+  const _label = (k) => LABELS[k] || (k.charAt(0).toUpperCase() + k.slice(1));
+  const rows = ordered.map((k) => {
+    const v = meta[k];
+    const disp = (v == null || String(v).trim() === '') ? '—' : String(v);
+    return `<tr><th>${_esc(_label(k))}</th><td>${_esc(disp)}</td></tr>`;
+  }).join('');
 
   content.innerHTML = `
     <div class="song-info-title">${_esc(title)}</div>
@@ -434,6 +594,7 @@ async function _showSongInfo(f) {
 async function selectFile(filename) {
   currentFile = filename;
   _notesCache.clear();
+  _solveCache.clear();
   _mutedSecondaryTracks.clear();
 
   try {
@@ -442,11 +603,14 @@ async function selectFile(filename) {
     if (!tracks.length) {
       // Stay on file selector and surface the error
       const libEmpty = $('#lib-empty');
-      if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `No guitar tracks found in "${sanitize(filename)}".`; }
+      if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `No tracks found in "${sanitize(filename)}".`; }
       return;
     }
-    // Auto-select first track — skip the intermediate track-selector page
-    await selectTrack(tracks[0].id, tracks[0].name);
+    // Auto-select the first guitar track to preserve the prior UX (the
+    // backend now returns every track, not just guitars). Fall back to the
+    // first track when the song has no guitar at all.
+    const firstGuitar = tracks.find((t) => isGuitarKind(t.kind)) || tracks[0];
+    await selectTrack(firstGuitar.id, firstGuitar.name);
     // Warm the server-side solve cache for every track × representation
     // mode while the user is reading the first one. Runs entirely in the
     // background; failures are silent (next interactive solve will retry).
@@ -490,9 +654,18 @@ function _prefetchAllTrackModes(filename, tracks) {
     return 0;
   });
   for (const t of orderedTracks) {
-    for (const mode of _PREFETCH_MODES) {
+    // Non-guitar tracks only ever render in staff view, so warm just that
+    // mode. Missing/unknown kind is treated as guitar (warm every mode).
+    const modes = isGuitarKind(t.kind) ? _PREFETCH_MODES : [MODES.STANDARD];
+    for (const mode of modes) {
       if (myToken !== _prefetchAbortToken) return;
-      fetchSolve(filename, t.id, mode, prefs).catch(() => { /* silent */ });
+      const key = _solveCacheKey(filename, t.id, mode, prefs);
+      if (_solveCache.has(key)) continue;  // already warm — skip the round-trip
+      // Warm BOTH the server LRU and our client-side object cache so the next
+      // interactive switch to this (track, mode) renders without any network.
+      fetchSolve(filename, t.id, mode, prefs)
+        .then((data) => { _solveCache.set(key, data); })
+        .catch(() => { /* silent — interactive solve will retry */ });
     }
   }
 }
@@ -503,8 +676,28 @@ function populateTrackSwitcher(_trackId) {
   // Track switching is now handled by the multi-track bar name clicks — no-op
 }
 
+// Monotonic token: every selectTrack bumps it, so a slow solve that resolves
+// after the user has clicked another tab is discarded instead of overwriting
+// the newer view. Also doubles as a re-entrancy / rapid-click guard.
+let _selectTrackToken = 0;
+
 async function selectTrack(trackId, trackName) {
+  const myToken = ++_selectTrackToken;
   currentTrackId = trackId;
+  // Resolve the track kind from the loaded list and lock the UI before any
+  // solve is requested. Non-guitar tracks are forced to staff-only view so
+  // we never ask the backend for tablature / fingering they cannot provide;
+  // guitar tracks restore the user's last guitar view mode (so a detour
+  // through a non-guitar track does not strand them in Staff view).
+  _currentTrackKind = _trackKindById(trackId);
+  if (selRepresentationMode) {
+    const target = _isCurrentTrackGuitar() ? _lastGuitarMode : MODES.STANDARD;
+    if (selRepresentationMode.value !== target) {
+      selRepresentationMode.value = target;
+      _syncViewSegPills();
+    }
+  }
+  _applyTrackKindLock();
   // Capture playback position BEFORE pausing/recreating so we can restore
   // it on the new track. Without this, switching tracks always restarts
   // from measure 0 — confirmed annoying by the PO.
@@ -541,14 +734,35 @@ async function selectTrack(trackId, trackName) {
   ctx.textAlign = 'center';
   ctx.fillText('Computing fingerings…', 50, 50);
 
+  // Loading feedback + tab lock: show the banner and disable the track tabs
+  // so the user cannot stack up multiple solves with rapid clicks. Cleared in
+  // the finally block once this solve has rendered (or been superseded).
+  _setSongLoading(true);
+  _setTabsBusy(true);
+
   try {
     const representationMode = getSelectedRepresentationMode();
-    const data = await fetchSolve(
+    const data = await _cachedSolve(
       currentFile,
       trackId,
       representationMode,
       getRulePreferences(),
     );
+    // A newer selectTrack started while we were awaiting — drop this stale
+    // result so it cannot clobber the view the user is now looking at.
+    if (myToken !== _selectTrackToken) return;
+    // Reconcile kind with the authoritative solve response: if /api/tracks
+    // lacked a kind but the solve payload carries one, trust the latter and
+    // re-apply the lock (covers a backend that only tags kind on /api/solve).
+    if (data && data.kind != null && data.kind !== _currentTrackKind) {
+      _currentTrackKind = data.kind;
+      if (!_isCurrentTrackGuitar() && selRepresentationMode
+          && selRepresentationMode.value !== MODES.STANDARD) {
+        selRepresentationMode.value = MODES.STANDARD;
+        _syncViewSegPills();
+      }
+      _applyTrackKindLock();
+    }
     initRenderer(data);
     renderAuditBanner(data?.audit, {
       onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
@@ -574,9 +788,49 @@ async function selectTrack(trackId, trackName) {
       }
     }
   } catch (err) {
+    if (myToken !== _selectTrackToken) return;
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
     ctx.fillText(`Error: ${err.message}`, 200, 50);
+  } finally {
+    // Only the most recent selectTrack clears the busy state — a superseded
+    // (stale) solve must not re-enable the tabs while a newer one is still
+    // in flight.
+    if (myToken === _selectTrackToken) {
+      _setSongLoading(false);
+      _setTabsBusy(false);
+    }
+  }
+}
+
+// ── Loading feedback (B3.2 / B2.1) ───────────────────────────────────
+//
+// A non-blocking banner shown while a track is being solved + rendered, plus
+// a guard that disables the track tabs so a second click cannot queue another
+// solve before the first finishes. Both are owned by the frontend team; the
+// banner element is created lazily so no index.html change is required beyond
+// the (separately added) markup.
+
+function _setSongLoading(on) {
+  const banner = document.getElementById('song-loading-banner');
+  if (!banner) return;
+  banner.style.display = on ? 'flex' : 'none';
+}
+
+function _setTabsBusy(busy) {
+  const bar = document.getElementById('track-tabs-bar');
+  if (bar) {
+    bar.classList.toggle('tabs-busy', busy);
+    bar.querySelectorAll('.track-tab').forEach((tab) => {
+      tab.style.pointerEvents = busy ? 'none' : '';
+      tab.style.opacity = busy ? '0.55' : '';
+    });
+  }
+  // The multi-track mixer names also switch the primary track — lock them too.
+  if (_multiTrackBar) {
+    _multiTrackBar.querySelectorAll('.mt-name').forEach((el) => {
+      el.style.pointerEvents = busy ? 'none' : '';
+    });
   }
 }
 
@@ -603,13 +857,94 @@ async function exportGP() {
       `Export GP OK (${annotatedNotes} doigtés écrits)`, 'ok',
     );
   } catch (err) {
-    _setPdfExportStatus(`Export GP failed: ${err.message}`, 'error');
+    // The backend returns a self-contained, user-facing message (incl. the
+    // biomechanical-guard block), so show it verbatim without a prefix.
+    _setPdfExportStatus(err.message || 'Export GP échoué', 'error');
   } finally {
     if (btnHeaderGp) {
       btnHeaderGp.disabled = false;
       btnHeaderGp.setAttribute('aria-label', originalLabel);
     }
   }
+}
+
+async function exportMusicXML(scope = 'current') {
+  if (!currentFile) return;
+  const isAll = scope === 'all';
+  const originalLabel = btnHeaderMusicXml?.getAttribute('aria-label') || 'Export MusicXML';
+  if (btnHeaderMusicXml) {
+    btnHeaderMusicXml.disabled = true;
+    btnHeaderMusicXml.setAttribute('aria-label', 'Export…');
+  }
+  const scopeLabel = isAll ? 'all tracks' : 'current track';
+  _setPdfExportStatus(`Export MusicXML (${scopeLabel})…`, 'neutral');
+  try {
+    const { blob, filename, noteCount } = isAll
+      ? await fetchExportMusicXmlAll(currentFile, currentTrackId)
+      : await fetchExportMusicXml(currentFile, currentTrackId);
+    _downloadBlob(blob, filename);
+    _setPdfExportStatus(`Export MusicXML OK — ${scopeLabel} (${noteCount} notes)`, 'ok');
+  } catch (err) {
+    // Be defensive: a backend without scope support may 404 the "all" request.
+    if (isAll && /\b404\b|not found|unsupported|scope/i.test(err.message || '')) {
+      _setPdfExportStatus('All-tracks export not available on this server', 'warn');
+    } else {
+      _setPdfExportStatus(`Export MusicXML failed: ${err.message}`, 'error');
+    }
+  } finally {
+    if (btnHeaderMusicXml) {
+      btnHeaderMusicXml.disabled = false;
+      btnHeaderMusicXml.setAttribute('aria-label', originalLabel);
+    }
+  }
+}
+
+// Small scope-choice menu anchored under the MusicXML header button.
+let _musicXmlScopeMenu = null;
+function _closeMusicXmlScopeMenu() {
+  if (_musicXmlScopeMenu) {
+    _musicXmlScopeMenu.remove();
+    _musicXmlScopeMenu = null;
+  }
+}
+function _openMusicXmlScopeMenu(anchorBtn) {
+  _closeMusicXmlScopeMenu();
+  const menu = document.createElement('div');
+  menu.className = 'instr-dropdown musicxml-scope-menu';
+  menu.setAttribute('role', 'menu');
+  menu.setAttribute('aria-label', 'MusicXML export scope');
+
+  const choices = [
+    { scope: 'current', label: 'Current track', hint: 'This track only (default)' },
+    { scope: 'all', label: 'All tracks', hint: 'Every track in one file' },
+  ];
+  for (const c of choices) {
+    const btn = document.createElement('button');
+    btn.className = 'instr-item';
+    btn.setAttribute('role', 'menuitem');
+    btn.innerHTML = `<strong>${sanitize(c.label)}</strong><br>`
+      + `<span style="opacity:0.65;font-size:11px">${sanitize(c.hint)}</span>`;
+    btn.addEventListener('click', () => {
+      _closeMusicXmlScopeMenu();
+      exportMusicXML(c.scope);
+    });
+    menu.appendChild(btn);
+  }
+
+  document.body.appendChild(menu);
+  _musicXmlScopeMenu = menu;
+
+  const rect = anchorBtn.getBoundingClientRect();
+  const menuWidth = menu.offsetWidth || 260;
+  let left = rect.right - menuWidth;
+  if (left < 8) left = 8;
+  if (left + menuWidth > window.innerWidth - 8) left = window.innerWidth - menuWidth - 8;
+  menu.style.left = `${left}px`;
+  menu.style.top = `${rect.bottom + 4}px`;
+
+  setTimeout(() => {
+    document.addEventListener('click', _closeMusicXmlScopeMenu, { once: true });
+  }, 0);
 }
 
 async function exportPDF() {
@@ -692,11 +1027,101 @@ function _representationModeLabel(mode) {
   return (MODE_LABELS[mode] || MODE_LABELS[DEFAULT_MODE]).toUpperCase();
 }
 
+// ── Track-kind UI lock ──────────────────────────────────────────────
+//
+// Guitar tracks expose tablature, the Tab/Mixed view toggles and the
+// left-hand fingering UI exactly as before. Non-guitar tracks (bass tabbed
+// as `other`, drums, vocal, …) have no fingering and no tablature: we force
+// the staff-only view and disable the Tab + Mixed pills and the fingering
+// controls so the user cannot request data that does not exist.
+
+/**
+ * Resolve the ``kind`` of a track from the loaded track list.
+ *
+ * @param {number} trackId
+ * @returns {string} kind string, defaulting to ``'guitar'`` when unknown.
+ */
+function _trackKindById(trackId) {
+  const t = (currentTracks || []).find((x) => x.id === trackId);
+  return t?.kind || 'guitar';
+}
+
+/** True when the currently-displayed primary track is a fretted guitar. */
+function _isCurrentTrackGuitar() {
+  return isGuitarKind(_currentTrackKind);
+}
+
+/**
+ * Enable / disable the Tab + Mixed view pills and the fingering toolbar
+ * buttons according to the current track kind. For non-guitar tracks the
+ * tablature-bearing pills (Mixed, Tab) and the fingering / hand-overlay
+ * controls are visually disabled and non-interactive; only the Staff pill
+ * stays active. Guitar tracks restore every control. Idempotent and safe to
+ * call repeatedly (e.g. after each ``selectTrack``).
+ */
+function _applyTrackKindLock() {
+  const guitar = _isCurrentTrackGuitar();
+
+  // View pills: Staff is always available; Mixed / Tab require tablature.
+  // style.css is owned by another team, so the disabled look is applied via
+  // inline styles (opacity / cursor / pointer-events) rather than a class.
+  document.querySelectorAll('.view-seg-btn').forEach((btn) => {
+    const needsTab = btn.dataset.mode !== MODES.STANDARD;
+    const lock = !guitar && needsTab;
+    btn.disabled = lock;
+    btn.classList.toggle('view-seg-disabled', lock);
+    if (lock) {
+      btn.setAttribute('aria-disabled', 'true');
+      btn.setAttribute('tabindex', '-1');
+      btn.style.opacity = '0.35';
+      btn.style.cursor = 'not-allowed';
+      btn.style.pointerEvents = 'none';
+      btn.title = 'Tablature unavailable for non-guitar tracks';
+    } else {
+      btn.removeAttribute('aria-disabled');
+      btn.removeAttribute('tabindex');
+      btn.style.opacity = '';
+      btn.style.cursor = '';
+      btn.style.pointerEvents = '';
+      // Restore the original tooltip (set in index.html).
+      if (btn.dataset.mode === MODES.STANDARD) btn.title = 'Standard notation';
+      else if (btn.dataset.mode === MODES.STANDARD_TABLATURE) {
+        btn.title = 'Standard + Tab (default)';
+      } else if (btn.dataset.mode === MODES.TABLATURE) btn.title = 'Tablature only';
+    }
+  });
+
+  // Fingering button + fretboard / hand-overlay panel make no sense without
+  // fingering data. Hide them entirely for non-guitar tracks.
+  const fingeringControls = [btnFingering, btnHandViz];
+  for (const el of fingeringControls) {
+    if (el) el.style.display = guitar ? '' : 'none';
+  }
+  // The hand-movement-lane preference lives inside the prefs panel.
+  const handPrefItem = document.querySelector('.tb-pref-hand-overlay');
+  if (handPrefItem && !guitar) handPrefItem.style.display = 'none';
+
+  // Close the floating fretboard panel if it was left open from a guitar
+  // track — it has nothing to show for a non-guitar one.
+  if (!guitar && handVizPanel && handVizPanel.style.display !== 'none') {
+    handVizPanel.style.display = 'none';
+    if (btnHandViz) btnHandViz.classList.remove('tb-btn-active');
+  }
+}
+
 function applyRepresentationModeView(data) {
-  const representationMode = data?.representation_mode || getSelectedRepresentationMode();
+  // Non-guitar tracks are always shown as staff, regardless of what mode the
+  // backend echoed back (covers a tab-mode solve issued before the kind was
+  // known). Guitar tracks keep the requested / echoed mode unchanged.
+  const representationMode = _isCurrentTrackGuitar()
+    ? (data?.representation_mode || getSelectedRepresentationMode())
+    : MODES.STANDARD;
   if (selRepresentationMode && selRepresentationMode.value !== representationMode) {
     selRepresentationMode.value = representationMode;
   }
+  // Keep the segmented-control highlight in step with the (possibly coerced)
+  // select value without dispatching a re-solve.
+  _syncViewSegPills();
   if (metaViewMode) {
     metaViewMode.textContent = _representationModeLabel(representationMode);
   }
@@ -1201,6 +1626,12 @@ function initRenderer(data) {
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
   renderer = new TabRenderer(tabCanvas, data);
+  // Non-guitar tracks carry no fingering: never draw finger annotations and
+  // keep the (hidden) fingering toggle inactive. Defensive — the solve
+  // response also exposes `fingered:false` for these tracks.
+  if (!_isCurrentTrackGuitar() || data.fingered === false) {
+    renderer.showFingering = false;
+  }
   renderer.render();
   // Notify the floating hand-viz panel that fresh fingering data is ready.
   window.dispatchEvent(new CustomEvent('fretwise:renderer-ready'));
@@ -1237,18 +1668,22 @@ function initRenderer(data) {
   }
 
   // Playback engine
-  // Stop and release any existing playback engine
-  if (playback) {
-    try { playback.pause(); } catch (_) {}
-    try { playback.disableAudio(); } catch (_) {}
-    playback = null;
-  }
+  // Reuse the existing engine across track / mode switches so we do NOT tear
+  // down the AudioContext and re-fetch + re-parse the (multi-MB) SF2 soundfont
+  // every time — that reload was the dominant tab-switch cost (B1.2). rebind()
+  // swaps in the new renderer + tempo, stops in-flight audio and clears the
+  // secondary channels (re-added below), but keeps the loaded synth alive.
   updatePlayButton(false);
   stopCursorLoop();
-  playback = new PlaybackEngine(renderer, {
+  const engineOpts = {
     tempo: data.tempo || 120,
     beatsPerMeasure: data.beats_per_measure || 4,
-  });
+  };
+  if (playback) {
+    playback.rebind(renderer, engineOpts);
+  } else {
+    playback = new PlaybackEngine(renderer, engineOpts);
+  }
   // Set GM MIDI program (SpessaSynth) and infer MusyngKite instrument (fallback)
   playback.setMidiProgram(data.midi_program ?? -1);
   playback.setInstrument(data.track_name || '');
@@ -1291,8 +1726,7 @@ function initRenderer(data) {
     if (m >= 0 && playback) {
       // If playing and user clicks elsewhere: stop following, jump there
       if (playback.isPlaying) {
-        _followPlayhead = false;
-        _updateFollowButton();
+        _setFollowPlayhead(false);
       }
       playback.goToMeasure(m);
     }
@@ -1313,6 +1747,12 @@ function initRenderer(data) {
   if (_svgMode !== MODES.TABLATURE && data.measure_regions?.length && coreSvgView) {
     _svgDriver = new SvgCursorDriver(coreSvgView, data);
     _svgDriver.init();
+    _svgDriver.followPlayhead = _followPlayhead;
+    // SVG view: the driver scrolls #core-svg-view. Tell the engine to suppress
+    // its own canvas-geometry scroll of #tab-container (which would otherwise
+    // drag the absolutely-positioned SVG box out of frame — the "narrowing"
+    // playback bug).
+    playback.usesSvgCursor = true;
     playback.onMeasureChange = (m) => {
       _svgDriver.highlight(m, playback.loopStart, playback.loopEnd);
     };
@@ -1330,14 +1770,15 @@ function initRenderer(data) {
       const m = _svgDriver.measureAtClick(e);
       if (m >= 0) {
         if (playback?.isPlaying) {
-          _followPlayhead = false;
-          _updateFollowButton();
+          _setFollowPlayhead(false);
         }
         playback.goToMeasure(m);
       }
     };
   } else {
     if (coreSvgView) coreSvgView.onclick = null;
+    // Canvas (Tab) view: this engine scrolls #tab-container normally.
+    playback.usesSvgCursor = false;
   }
 
   // Speed
@@ -1364,8 +1805,7 @@ function initRenderer(data) {
   _rebuildTrackTabs(currentTrackId);
   _restoreSecondaryTracks(currentTrackId); // re-enable previously active secondary tracks
   updatePlayButton(false);
-  _followPlayhead = true;
-  _updateFollowButton();
+  _setFollowPlayhead(true);
 }
 
 // ── Track tabs bar ──────────────────────────────────────────────────
@@ -1386,6 +1826,76 @@ function _tuningLabel(tuning) {
   return tuning.map(n => NAMES[n % 12]).join('');
 }
 
+// Distinct colour-bar tint for every non-guitar track kind (guitar keeps the
+// rotating palette so its tabs look exactly as before). Emoji glyph gives an
+// at-a-glance icon next to the kind badge.
+const _NON_GUITAR_KIND_STYLE = {
+  bass:  { color: 'oklch(0.62 0.10 40)',  glyph: '🎸' },
+  drums: { color: 'oklch(0.55 0.02 0)',   glyph: '🥁' },
+  vocal: { color: 'oklch(0.68 0.12 350)', glyph: '🎤' },
+  other: { color: 'oklch(0.60 0.02 250)', glyph: '🎹' },
+};
+
+// ── Track-tab horizontal navigation (mouse-friendly) ────────────────
+// The tabs bar scrolls horizontally but hides its scrollbar, so on a plain
+// mouse (no horizontal wheel/trackpad) off-screen tabs are unreachable. We
+// (1) translate vertical wheel into horizontal scroll, and (2) show left/right
+// chevrons only when the bar overflows, hiding the arrow once that end is hit.
+let _trackTabsNavWired = false;
+
+function _updateTrackTabsChevrons() {
+  const bar = $('#track-tabs-bar');
+  const left = $('#track-tabs-chevron-left');
+  const right = $('#track-tabs-chevron-right');
+  if (!bar || !left || !right) return;
+  // Hide both chevrons entirely when the bar itself is hidden or fits.
+  const barHidden = bar.style.display === 'none' || bar.offsetParent === null;
+  const overflowing = bar.scrollWidth > bar.clientWidth + 1;
+  if (barHidden || !overflowing) {
+    left.hidden = true;
+    right.hidden = true;
+    return;
+  }
+  const maxScroll = bar.scrollWidth - bar.clientWidth;
+  const atStart = bar.scrollLeft <= 1;
+  const atEnd = bar.scrollLeft >= maxScroll - 1;
+  left.hidden = atStart;
+  right.hidden = atEnd;
+}
+
+function _scrollTrackTabs(direction) {
+  const bar = $('#track-tabs-bar');
+  if (!bar) return;
+  // One "tab width" ≈ first tab's outer width, fallback to a sensible default.
+  const firstTab = bar.querySelector('.track-tab');
+  const step = firstTab ? firstTab.offsetWidth + 4 : 180;
+  bar.scrollBy({ left: direction * step, behavior: 'smooth' });
+}
+
+function _wireTrackTabsNav() {
+  if (_trackTabsNavWired) return;
+  const bar = $('#track-tabs-bar');
+  const left = $('#track-tabs-chevron-left');
+  const right = $('#track-tabs-chevron-right');
+  if (!bar) return;
+  _trackTabsNavWired = true;
+
+  // Vertical wheel → horizontal scroll. Only intercept when there is overflow
+  // and the gesture is predominantly vertical (leave native horizontal alone).
+  bar.addEventListener('wheel', (e) => {
+    if (bar.scrollWidth <= bar.clientWidth + 1) return;
+    if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    bar.scrollLeft += e.deltaY;
+    e.preventDefault();
+    _updateTrackTabsChevrons();
+  }, { passive: false });
+
+  bar.addEventListener('scroll', _updateTrackTabsChevrons, { passive: true });
+
+  if (left) left.addEventListener('click', () => _scrollTrackTabs(-1));
+  if (right) right.addEventListener('click', () => _scrollTrackTabs(1));
+}
+
 function _rebuildTrackTabs(primaryTrackId) {
   const bar = $('#track-tabs-bar');
   if (!bar) return;
@@ -1397,15 +1907,32 @@ function _rebuildTrackTabs(primaryTrackId) {
     const isPrimary = t.id === primaryTrackId;
     const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
     const isMuted = !isPrimary && muted.has(t.id);
-    const color = _TRACK_COLORS[i % _TRACK_COLORS.length];
+    // Treat a missing kind as guitar so existing files render unchanged.
+    const isGuitar = isGuitarKind(t.kind);
+    const kindStyle = isGuitar
+      ? null
+      : (_NON_GUITAR_KIND_STYLE[String(t.kind).toLowerCase()]
+         || _NON_GUITAR_KIND_STYLE.other);
+    // Guitar → rotating palette (unchanged); non-guitar → kind tint.
+    const color = isGuitar
+      ? _TRACK_COLORS[i % _TRACK_COLORS.length]
+      : kindStyle.color;
     const label = sanitize(t.name || `Track ${t.id}`);
     const tuning = _tuningLabel(t.tuning);
     const metaText = tuning ? `${tuning} · ${t.id}` : `Track ${t.id}`;
+    const kindBadge = trackKindLabel(t.kind); // '' for guitar
 
     const tab = document.createElement('div');
     tab.className = 'track-tab';
     tab.dataset.active = isPrimary ? '1' : '0';
     tab.dataset.trackId = t.id;
+    tab.dataset.kind = isGuitar ? 'guitar' : String(t.kind).toLowerCase();
+    if (!isGuitar) {
+      // Tinted left border + faint kind wash so non-guitar tabs read as a
+      // visually distinct family without depending on style.css edits.
+      tab.style.borderLeft = `3px solid ${color}`;
+      tab.style.opacity = '0.92';
+    }
 
     const colorBar = document.createElement('div');
     colorBar.className = 'track-tab-color';
@@ -1413,7 +1940,16 @@ function _rebuildTrackTabs(primaryTrackId) {
 
     const body = document.createElement('div');
     body.className = 'track-tab-body';
-    body.innerHTML = `<div class="track-tab-name">${label}</div><div class="track-tab-meta">${metaText}</div>`;
+    const badgeHTML = kindBadge
+      ? `<span class="track-kind-badge" style="display:inline-block;`
+        + `font-family:var(--mono);font-size:8.5px;font-weight:700;`
+        + `letter-spacing:0.04em;padding:0 4px;margin-right:4px;border-radius:3px;`
+        + `background:${color};color:#fff;vertical-align:1px;">`
+        + `${kindStyle.glyph} ${sanitize(kindBadge)}</span>`
+      : '';
+    body.innerHTML =
+      `<div class="track-tab-name">${badgeHTML}${label}</div>`
+      + `<div class="track-tab-meta">${metaText}</div>`;
 
     // Instrument picker button
     const instrBtn = document.createElement('button');
@@ -1458,6 +1994,11 @@ function _rebuildTrackTabs(primaryTrackId) {
 
     bar.appendChild(tab);
   }
+
+  // Wire the mouse-navigation handlers once, then refresh chevron visibility
+  // after the new tabs have laid out.
+  _wireTrackTabsNav();
+  requestAnimationFrame(_updateTrackTabsChevrons);
 }
 
 // ── Multi-track audio mixer ─────────────────────────────────────────
@@ -1589,26 +2130,47 @@ function _updateFollowButton() {
     : 'Click to follow playhead again';
 }
 
+/**
+ * Single source of truth for the "follow playhead" state. Propagates the flag
+ * to BOTH scroll owners — the canvas engine (`playback._followPlayhead`, which
+ * was previously never updated, so its click-to-explore comment never worked)
+ * and the SVG driver (`_svgDriver.followPlayhead`) — then refreshes the button.
+ * @param {boolean} on
+ */
+function _setFollowPlayhead(on) {
+  _followPlayhead = on;
+  if (playback) playback._followPlayhead = on;
+  if (_svgDriver) _svgDriver.followPlayhead = on;
+  _updateFollowButton();
+}
+
 if (btnFollow) {
   btnFollow.addEventListener('click', () => {
-    _followPlayhead = true;
-    _updateFollowButton();
-    // Immediately scroll to current playhead position
-    if (playback && renderer) {
-      const m = renderer.cursorMeasure || 0;
-      const sys = renderer.systems?.find(
-        s => m >= s.startMeasure && m < s.startMeasure + s.measures.length
+    _setFollowPlayhead(true);
+    // Immediately recenter on the current playhead position.
+    if (!playback || !renderer) return;
+    // SVG (Staff / Mixed): the driver scrolls #core-svg-view. The canvas
+    // geometry below does not apply (and #tab-container is no longer scrolled).
+    if (playback.usesSvgCursor && _svgDriver) {
+      _svgDriver.highlight(
+        renderer.cursorMeasure || 0, playback.loopStart, playback.loopEnd,
       );
-      if (sys) {
-        const container = tabCanvas.parentElement;
-        if (container) {
-          const sysIdx = renderer.systems.indexOf(sys);
-          const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
-          const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
-          container.scrollTo({ top: Math.max(0, sysY - container.offsetHeight / 2 + SYSTEM_H / 2), behavior: 'smooth' });
-        }
-        _autoScrollTarget = null;
+      return;
+    }
+    // Canvas (Tab): scroll #tab-container by system geometry.
+    const m = renderer.cursorMeasure || 0;
+    const sys = renderer.systems?.find(
+      s => m >= s.startMeasure && m < s.startMeasure + s.measures.length
+    );
+    if (sys) {
+      const container = tabCanvas.parentElement;
+      if (container) {
+        const sysIdx = renderer.systems.indexOf(sys);
+        const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
+        const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
+        container.scrollTo({ top: Math.max(0, sysY - container.offsetHeight / 2 + SYSTEM_H / 2), behavior: 'smooth' });
       }
+      _autoScrollTarget = null;
     }
   });
 }
@@ -1628,9 +2190,14 @@ if (btnDownloadGp) {
 if (btnPlay) {
   btnPlay.addEventListener('click', () => {
     if (!playback) return;
+    // Autoplay policy: the AudioContext was created (and possibly resumed)
+    // outside a gesture during render, so it may still be suspended. This
+    // click IS a user gesture, so resume here to guarantee sound on first
+    // play (B1.3). enableAudio() also (re)kicks the synth load if needed.
+    playback.resumeAudioContext();
+    if (!playback.audioEnabled) playback.enableAudio();
     if (!playback.isPlaying) {
-      _followPlayhead = true;  // resume following when starting play
-      _updateFollowButton();
+      _setFollowPlayhead(true);  // resume following when starting play
     }
     playback.toggle();
     updatePlayButton(playback.isPlaying);
@@ -1744,6 +2311,23 @@ if (btnHeaderBack) {
 
 if (btnHeaderGp) {
   btnHeaderGp.addEventListener('click', exportGP);
+}
+
+if (btnHeaderMusicXml) {
+  // Default click = current track (unchanged). Shift/Alt-click or right-click
+  // opens a small menu to choose current vs all tracks.
+  btnHeaderMusicXml.addEventListener('click', (e) => {
+    if (e.shiftKey || e.altKey) {
+      e.preventDefault();
+      _openMusicXmlScopeMenu(btnHeaderMusicXml);
+    } else {
+      exportMusicXML('current');
+    }
+  });
+  btnHeaderMusicXml.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    _openMusicXmlScopeMenu(btnHeaderMusicXml);
+  });
 }
 
 const btnRefreshFingerings = $('#set-refresh-fingerings');
@@ -1969,6 +2553,12 @@ document.addEventListener('input', (e) => {
 if (selRepresentationMode) {
   selRepresentationMode.addEventListener('change', () => {
     _syncViewSegPills();
+    // Remember the user's explicit choice while on a guitar track so it can
+    // be restored after a detour through a non-guitar track. Recorded before
+    // re-solving, since selectTrack reads _lastGuitarMode at its top.
+    if (_isCurrentTrackGuitar()) {
+      _lastGuitarMode = selRepresentationMode.value || DEFAULT_MODE;
+    }
     if (currentFile && currentTrackId != null) {
       selectTrack(currentTrackId, songArtist.textContent);
     }
@@ -1986,6 +2576,8 @@ function _syncViewSegPills() {
 document.querySelectorAll('.view-seg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (!selRepresentationMode) return;
+    // Ignore clicks on a pill locked for the current (non-guitar) track.
+    if (btn.disabled || btn.classList.contains('view-seg-disabled')) return;
     selRepresentationMode.value = btn.dataset.mode;
     selRepresentationMode.dispatchEvent(new Event('change'));
   });
@@ -1997,6 +2589,7 @@ if (prefSameFingerPenalty) {
   prefSameFingerPenalty.addEventListener('change', () => {
     if (currentFile && currentTrackId != null) {
       _notesCache.clear();
+      _solveCache.clear();
       selectTrack(currentTrackId, songArtist.textContent);
     }
   });
@@ -2006,6 +2599,7 @@ if (prefInferLegato) {
   prefInferLegato.addEventListener('change', () => {
     if (currentFile && currentTrackId != null) {
       _notesCache.clear();
+      _solveCache.clear();
       selectTrack(currentTrackId, songArtist.textContent);
     }
   });
@@ -2203,6 +2797,160 @@ if (uploadInput) {
   });
 }
 
+// ── Song metadata workflow (enrich catalog via the user's own LLM) ──────────
+//
+// Three-step flow: export the song list (JSON) → run the LLM prompt in your own
+// LLM → import the LLM's JSON output to merge titles/artists/etc. into the
+// catalog. Endpoints are owned by the backend; we degrade gracefully on errors.
+
+let _metaDropdown = null;
+
+function _closeMetaDropdown() {
+  if (_metaDropdown) { _metaDropdown.remove(); _metaDropdown = null; }
+  const btn = $('#lib-meta-btn');
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function _setMetaStatus(msg, kind) {
+  const el = $('#lib-meta-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.color = kind === 'error' ? '#ff5555' : kind === 'ok' ? '#4caf50' : '#888';
+}
+
+async function _metaDownloadSongList() {
+  _setMetaStatus('Preparing song list…');
+  try {
+    const { blob, filename } = await fetchSongListDownload();
+    _downloadBlob(blob, filename);
+    _setMetaStatus(`✓ Downloaded ${filename}`, 'ok');
+  } catch (err) {
+    _setMetaStatus(`✗ ${err.message || err}`, 'error');
+  }
+}
+
+async function _metaDownloadPrompt() {
+  _setMetaStatus('Preparing prompt…');
+  try {
+    const { blob, filename } = await fetchLlmPrompt();
+    _downloadBlob(blob, filename);
+    _setMetaStatus(`✓ Downloaded ${filename}`, 'ok');
+  } catch (err) {
+    _setMetaStatus(`✗ ${err.message || err}`, 'error');
+  }
+}
+
+async function _metaImportMetadata(file) {
+  if (!file) return;
+  _setMetaStatus(`Importing ${file.name}…`);
+  let parsed;
+  try {
+    const text = await file.text();
+    parsed = JSON.parse(text);
+  } catch (_err) {
+    _setMetaStatus('✗ Could not read file: invalid JSON', 'error');
+    return;
+  }
+  try {
+    const res = await importSongMetadata(parsed);
+    const updated = res.updated ?? 0;
+    const added = res.added ?? 0;
+    const total = res.total ?? 0;
+    _setMetaStatus(
+      `✓ Catalog updated: ${updated} updated, ${added} added (${total} total)`,
+      'ok',
+    );
+    await loadFiles();
+  } catch (err) {
+    _setMetaStatus(`✗ ${err.message || err}`, 'error');
+  }
+}
+
+function _openMetaDropdown(anchorBtn) {
+  _closeMetaDropdown();
+  const dd = document.createElement('div');
+  dd.className = 'instr-dropdown lib-meta-menu';
+  dd.setAttribute('role', 'menu');
+
+  const items = [
+    { label: '1. Download song list (JSON)', action: _metaDownloadSongList },
+    { label: '2. Download LLM prompt', action: _metaDownloadPrompt },
+    {
+      label: '3. Import metadata (JSON)…',
+      action: () => {
+        const input = $('#lib-meta-import-input');
+        if (input) input.click();
+      },
+    },
+  ];
+
+  for (const item of items) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'instr-item';
+    btn.setAttribute('role', 'menuitem');
+    btn.textContent = item.label;
+    btn.addEventListener('click', () => {
+      _closeMetaDropdown();
+      item.action();
+    });
+    dd.appendChild(btn);
+  }
+
+  document.body.appendChild(dd);
+  _metaDropdown = dd;
+  anchorBtn.setAttribute('aria-expanded', 'true');
+
+  const rect = anchorBtn.getBoundingClientRect();
+  let left = rect.left;
+  let top = rect.bottom + 4;
+  if (left + 240 > window.innerWidth) left = window.innerWidth - 248;
+  if (top + 160 > window.innerHeight) top = rect.top - 164;
+  dd.style.left = `${left}px`;
+  dd.style.top = `${top}px`;
+
+  setTimeout(() => {
+    document.addEventListener('click', _closeMetaDropdown, { once: true });
+  }, 0);
+}
+
+const metaBtn = $('#lib-meta-btn');
+if (metaBtn) {
+  metaBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (_metaDropdown) { _closeMetaDropdown(); return; }
+    _openMetaDropdown(metaBtn);
+  });
+}
+
+const metaImportInput = $('#lib-meta-import-input');
+if (metaImportInput) {
+  metaImportInput.addEventListener('change', async () => {
+    const file = metaImportInput.files[0];
+    await _metaImportMetadata(file);
+    metaImportInput.value = '';
+  });
+}
+
+// ── Audio autoplay-policy unlock ────────────────────────────────────
+//
+// Browsers create the AudioContext in a "suspended" state and refuse to
+// resume() it outside a user gesture. We enable audio during render (no
+// gesture), so without this the very first playback is silent (B1.3). A
+// one-shot capture-phase listener on the first real user interaction resumes
+// the context (and re-kicks the synth load if it failed before any gesture).
+function _unlockAudioOnFirstGesture() {
+  if (playback) {
+    playback.resumeAudioContext();
+    if (!playback.audioEnabled) playback.enableAudio();
+  }
+}
+['pointerdown', 'keydown', 'touchstart'].forEach((evt) => {
+  document.addEventListener(evt, _unlockAudioOnFirstGesture, {
+    capture: true, passive: true,
+  });
+});
+
 // ── Keyboard shortcuts ──────────────────────────────────────────────
 
 document.addEventListener('keydown', (e) => {
@@ -2212,6 +2960,8 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     case ' ':
       e.preventDefault();
+      playback.resumeAudioContext();
+      if (!playback.audioEnabled) playback.enableAudio();
       playback.toggle();
       updatePlayButton(playback.isPlaying);
       break;
@@ -2248,6 +2998,7 @@ window.addEventListener('resize', () => {
       renderer._buildSystems();
       renderer.render();
     }
+    _updateTrackTabsChevrons();
   }, 200);
 });
 
@@ -2465,6 +3216,11 @@ function _tickSvgCursor() {
 
 function _drawCursorOverlay() {
   if (!cursorCanvas || !renderer || !playback) return;
+  // SVG views (Staff / Mixed): the canvas + its red line are hidden and the
+  // SvgCursorDriver draws the real cursor (_tickSvgCursor) and owns scrolling.
+  // Skip entirely — otherwise this would run a canvas-geometry window scroll
+  // off the hidden canvas, fighting the SVG scroll and shoving it out of frame.
+  if (playback.usesSvgCursor) return;
 
   // Match cursor canvas size exactly to tab canvas
   const dpr = window.devicePixelRatio || 1;
@@ -2693,6 +3449,22 @@ async function _initCloudStorage() {
   let me = null;
   try { me = await fetchMe(); } catch (_e) { me = null; }
   await _renderCloudStatus(me);
+
+  // Sign-out button: shown only when authenticated (multi-user mode). Lets the
+  // user log out of Google so they can sign in as the local admin instead.
+  const logoutBtn = $('#btn-logout');
+  if (logoutBtn) {
+    if (me && me.authenticated) {
+      logoutBtn.style.display = '';
+      logoutBtn.title = me.email ? `Se déconnecter (${me.email})` : 'Se déconnecter';
+      if (!logoutBtn.dataset.wired) {
+        logoutBtn.dataset.wired = '1';
+        logoutBtn.addEventListener('click', () => { window.location.href = '/auth/logout'; });
+      }
+    } else {
+      logoutBtn.style.display = 'none';
+    }
+  }
 
   const connectBtn = $('#cloud-connect-gdrive');
   const disconnectBtn = $('#cloud-disconnect');

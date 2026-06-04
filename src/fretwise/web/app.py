@@ -20,6 +20,7 @@ from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 from fretwise.auth.web import current_request_user, setup_auth
+from fretwise.config import config as _fw_config
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
@@ -29,16 +30,23 @@ from fretwise.export.gp_writer import (
     fingerings_by_source_id,
     write_gp_with_fingerings,
 )
+from fretwise.export.musicxml_writer import render_musicxml, render_musicxml_multi
 from fretwise.export.pdf_tab import render_pdf_tab
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
+    Finger,
     FingeringResult,
+    FingeringState,
     NoteEvent,
 )
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
+from fretwise.parser.gpif_adapter import (
+    KIND_GUITAR,
+    classify_kind_for_program,
+)
 from fretwise.patterns import PatternMatcher
 from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
@@ -46,6 +54,7 @@ from fretwise.pdf_conformance import (
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 from fretwise.storage import (
+    CATALOG_NAME,
     SUPPORTED_SCORE_EXTS,
     StorageBackend,
     StorageError,
@@ -57,7 +66,14 @@ from fretwise.storage import (
 from fretwise.storage.local import LocalStorageBackend
 
 from . import settings as _settings
-from .songs_index import enrich_file_info, load_index
+from .songs_index import (
+    METADATA_PROMPT,
+    enrich_file_info,
+    load_index,
+    load_index_from_text,
+    merge_catalog,
+    parse_filename_metadata,
+)
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -77,15 +93,15 @@ _SUPPORTED_SOUNDFONT_EXTS: frozenset[str] = frozenset({".sf2", ".sf3", ".dls"})
 
 # Upload size ceilings (bytes). Uploads are streamed and rejected with HTTP 413
 # once the limit is exceeded, so a single request can never exhaust memory.
-_MAX_SCORE_UPLOAD_BYTES = 50 * 1024 * 1024          # 50 MiB — score files are small
-_MAX_SOUNDFONT_UPLOAD_BYTES = 512 * 1024 * 1024     # 512 MiB — SF2 banks can be large
+# Sourced from config (web.max_score_upload_bytes / web.max_soundfont_upload_bytes).
+_MAX_SCORE_UPLOAD_BYTES = int(_fw_config().web.max_score_upload_bytes)          # 50 MiB
+_MAX_SOUNDFONT_UPLOAD_BYTES = int(_fw_config().web.max_soundfont_upload_bytes)  # 512 MiB
 
 # Hostnames accepted by the Host-header guard (DNS-rebinding protection).
 # Loopback-only by default; override with FRETWISE_ALLOWED_HOSTS (comma list,
 # ``*`` to disable) when intentionally exposing the server on a LAN.
-_DEFAULT_ALLOWED_HOSTS: tuple[str, ...] = (
-    "localhost", "127.0.0.1", "[::1]", "testserver",
-)
+# Sourced from config (web.default_allowed_hosts).
+_DEFAULT_ALLOWED_HOSTS: tuple[str, ...] = tuple(_fw_config().web.default_allowed_hosts)
 
 
 def _resolve_allowed_hosts(allowed_hosts: list[str] | None) -> list[str]:
@@ -168,12 +184,13 @@ def create_app(
 
 
 def _setup_multiuser(app: FastAPI) -> None:
-    """Enable OIDC auth + per-user storage when configured.
+    """Enable password / OIDC auth + per-user storage when configured.
 
-    Fail-closed: if an OIDC provider is configured but initialisation fails
-    (missing ``[auth]`` extra, no ``FRETWISE_SECRET_KEY``, …) we refuse to start
-    rather than silently degrading to the single-user mode, which would serve
-    the local partitions library with **no authentication at all**.
+    Fail-closed: if auth is configured (an OIDC provider, a local admin, or
+    ``FRETWISE_AUTH_ENABLED``) but initialisation fails (missing ``[auth]``
+    extra, no ``FRETWISE_SECRET_KEY``, …) we refuse to start rather than silently
+    degrading to single-user mode, which would serve the local partitions
+    library with **no authentication at all**.
     """
     auth_cfg = load_auth_config()
     if not auth_cfg.enabled:
@@ -226,9 +243,8 @@ def _register_routes(app: FastAPI) -> None:
         Works against whichever storage backend is active (local directory or a
         configured cloud store).
         """
-        cfg = _settings.load()
         storage: StorageBackend = _current_storage(app)
-        songs = load_index(cfg.get("index_path", ""))
+        songs = _load_catalog(app)
 
         try:
             objects = storage.list_scores()
@@ -248,7 +264,22 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/tracks/{filename}")
     async def list_tracks(filename: str) -> list[dict[str, Any]]:
-        """List guitar tracks in a file."""
+        """List every track in a file with its instrument ``kind``.
+
+        Response: a JSON array (one object per track, in score order) with::
+
+            {
+              "id":     int,           # track id to pass to /api/solve & /api/notes
+              "name":   str,           # display name
+              "tuning": list[int],     # open-string MIDI pitches ([] if none)
+              "kind":   str            # "guitar"|"bass"|"drums"|"vocal"|"other"
+            }
+
+        All tracks are returned (vocals/bass/drums included), not only guitars.
+        The frontend uses ``kind`` to decide rendering: only ``"guitar"`` tracks
+        get the fingering optimizer (see /api/solve ``fingered`` flag); the rest
+        render as standard-notation staves.
+        """
         filepath = _resolve_file(app, filename)
 
         try:
@@ -257,17 +288,32 @@ def _register_routes(app: FastAPI) -> None:
             raise HTTPException(400, str(exc))
 
         tracks = []
-        if hasattr(adapter, "list_guitar_tracks"):
-            raw_tracks = adapter.list_guitar_tracks(filepath)
-            for track_id, name, tuning in raw_tracks:
+        if hasattr(adapter, "list_all_tracks"):
+            # GP 7/8: full multitrack listing with per-track kind.
+            for track_id, name, tuning, kind in adapter.list_all_tracks(filepath):
                 tracks.append({
                     "id": track_id,
                     "name": name,
                     "tuning": tuning,
+                    "kind": kind,
+                })
+        elif hasattr(adapter, "list_guitar_tracks"):
+            # Adapters that only expose guitar tracks (treat them as guitars).
+            for track_id, name, tuning in adapter.list_guitar_tracks(filepath):
+                tracks.append({
+                    "id": track_id,
+                    "name": name,
+                    "tuning": tuning,
+                    "kind": KIND_GUITAR,
                 })
         else:
-            # MusicXML/MIDI: single-track
-            tracks.append({"id": 0, "name": "Guitar", "tuning": [40, 45, 50, 55, 59, 64]})
+            # MusicXML/MIDI: single-track, assumed guitar.
+            tracks.append({
+                "id": 0,
+                "name": "Guitar",
+                "tuning": [40, 45, 50, 55, 59, 64],
+                "kind": KIND_GUITAR,
+            })
 
         return tracks
 
@@ -278,10 +324,15 @@ def _register_routes(app: FastAPI) -> None:
         same_finger_motion_penalty: bool = Query(True),
         infer_implicit_legato: bool = Query(True),
     ) -> dict[str, Any]:
-        """Return Viterbi-fingered notes for a track (audio-only, no rendering).
+        """Return notes for a track (audio-only, no rendering).
 
         Lighter than /api/solve: skips the core rendering pipeline entirely.
         Used by the multi-track audio mixer to load secondary track note data.
+
+        Guitar tracks are Viterbi-fingered (``fingered: true``); non-guitar
+        tracks (vocals/bass/drums/other) are returned staff-only with null
+        string/fret/finger fields (``fingered: false``). Response includes the
+        track ``kind`` and ``fingered`` flag.
         """
         filepath = _resolve_file(app, filename)
 
@@ -289,14 +340,22 @@ def _register_routes(app: FastAPI) -> None:
         if not events:
             raise HTTPException(404, "No notes found in file")
 
-        rule_preferences = RulePreferences(
-            same_finger_motion_penalty=same_finger_motion_penalty,
-            infer_implicit_legato=infer_implicit_legato,
-        )
-        results, _ = _run_legacy_pipeline(
-            events,
-            rule_preferences=rule_preferences,
-        )
+        kind = _track_kind(adapter, filepath, track_id)
+        fingered = kind == KIND_GUITAR
+        if fingered:
+            rule_preferences = RulePreferences(
+                same_finger_motion_penalty=same_finger_motion_penalty,
+                infer_implicit_legato=infer_implicit_legato,
+            )
+            results, _ = _run_legacy_pipeline(
+                events,
+                rule_preferences=rule_preferences,
+            )
+            serialized_results = [_serialize_result(r) for r in results]
+        else:
+            serialized_results = [
+                _serialize_staff_note(ev, i + 1) for i, ev in enumerate(events)
+            ]
         track_name: str = getattr(adapter, "track_name", "") or ""
         midi_program: int = getattr(adapter, "midi_program", -1)
         tempo = events[0].tempo if events else 120.0
@@ -305,9 +364,11 @@ def _register_routes(app: FastAPI) -> None:
         return {
             "track_name": track_name,
             "midi_program": midi_program,
+            "kind": kind,
+            "fingered": fingered,
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
-            "results": [_serialize_result(r) for r in results],
+            "results": serialized_results,
         }
 
     @app.get("/api/solve/{filename}")
@@ -349,21 +410,39 @@ def _register_routes(app: FastAPI) -> None:
             adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
             if not events:
                 raise HTTPException(404, "No notes found in file")
-            rule_preferences = RulePreferences(
-                same_finger_motion_penalty=same_finger_motion_penalty,
-                infer_implicit_legato=infer_implicit_legato,
-            )
-            results, stats = _run_legacy_pipeline(
-                events, rule_preferences=rule_preferences,
-            )
+            # Classify the instrument: only guitar tracks run the fingering
+            # optimizer (Viterbi). Vocals/bass/drums/other are served staff-only.
+            kind = _track_kind(adapter, filepath, track_id)
+            fingered = kind == KIND_GUITAR
             section_markers: dict[int, str] = dict(
                 getattr(adapter, "section_markers", {}) or {}
             )
+            if fingered:
+                rule_preferences = RulePreferences(
+                    same_finger_motion_penalty=same_finger_motion_penalty,
+                    infer_implicit_legato=infer_implicit_legato,
+                )
+                results, stats = _run_legacy_pipeline(
+                    events, rule_preferences=rule_preferences,
+                )
+                serialized_results = [_serialize_result(r) for r in results]
+                audit = _safe_audit(events, results, section_markers)
+            else:
+                # Staff-only: skip Viterbi entirely. Emit un-fingered notes so
+                # the frontend can still render standard notation / play audio.
+                results = []
+                stats = {"parsed": len(events), "fingered": 0}
+                serialized_results = [
+                    _serialize_staff_note(ev, i + 1) for i, ev in enumerate(events)
+                ]
+                audit = {}
             base = {
                 "adapter": adapter,
                 "events": events,
                 "results": results,
                 "stats": stats,
+                "kind": kind,
+                "fingered": fingered,
                 "track_name": getattr(adapter, "track_name", "") or "",
                 "midi_program": getattr(adapter, "midi_program", -1),
                 "section_markers": section_markers,
@@ -378,16 +457,20 @@ def _register_routes(app: FastAPI) -> None:
                 "beats_per_measure": float(
                     getattr(adapter, "beats_per_measure", 4.0)
                 ),
-                "serialized_results": [_serialize_result(r) for r in results],
-                "audit": _safe_audit(events, results, section_markers),
+                "serialized_results": serialized_results,
+                "audit": audit,
             }
             _legacy_cache_put(base_key, base)
 
         # Step 2 — mode-dependent core/SVG render. Cheap (~90ms) so we run
-        # it every time the per-mode response cache misses.
+        # it every time the per-mode response cache misses. Non-guitar tracks
+        # have no tablature, so force a standard (staff-only) render regardless
+        # of the requested view mode.
+        render_mode = view_mode if base["fingered"] else RepresentationMode.STANDARD
         core_result = _run_core_pipeline_for_events(
             filepath, base["adapter"], base["events"],
-            representation_mode=view_mode,
+            representation_mode=render_mode,
+            track_kind=base.get("kind", "guitar"),
         )
 
         # Parse artist/title from filename (cheap, redo each time).
@@ -398,8 +481,13 @@ def _register_routes(app: FastAPI) -> None:
             "artist": auto_artist,
             "track_name": base["track_name"],
             "midi_program": base["midi_program"],
+            # Track classification + whether the fingering optimizer ran.
+            # Frontend contract: when fingered is False, every entry in
+            # "results" has null string/fret/finger and the SVG is staff-only.
+            "kind": base["kind"],
+            "fingered": base["fingered"],
             "mode": "performance",
-            "representation_mode": view_mode.value,
+            "representation_mode": render_mode.value,
             "tempo": base["tempo"],
             "beats_per_measure": base["beats_per_measure"],
             "section_markers": base["section_markers"],
@@ -410,7 +498,7 @@ def _register_routes(app: FastAPI) -> None:
             "measure_regions": _extract_measure_regions(
                 getattr(core_result, "render_scene", None),
                 getattr(core_result, "canonical_score", None),
-                mode=view_mode.value,
+                mode=render_mode.value,
             ),
             "stats": base["stats"],
             "results": base["serialized_results"],
@@ -639,10 +727,20 @@ def _register_routes(app: FastAPI) -> None:
 
         guard = _guard_summary(payload)
         if payload.biomechanical_report.fatal_count:
+            measures = guard["fatal_measures"]
+            shown = ", ".join(str(m) for m in measures)
+            more = guard["fatal_measure_count"] - len(measures)
+            if more > 0:
+                shown += f", +{more}"
             raise HTTPException(
                 409,
-                "Biomechanical guard failed before GP export: "
-                f"{guard['fatal']} fatal violation(s), measures={guard['measures']}",
+                f"Export GP bloqué : le doigté calculé contient {guard['fatal']} "
+                f"position(s) injouable(s), dans {guard['fatal_measure_count']} "
+                f"mesure(s) (mesures {shown}). Ces positions ne peuvent pas être "
+                "écrites telles quelles dans un fichier Guitar Pro. Revois ces "
+                "mesures dans l'audit, ou ajuste le profil / les préférences, puis "
+                "réessaie. (Astuce : l'export MusicXML ou PDF reste possible pour "
+                "inspecter le rendu.)",
             )
 
         mapping = fingerings_by_source_id(payload.results)
@@ -661,6 +759,134 @@ def _register_routes(app: FastAPI) -> None:
                 "X-Fretwise-Annotated-Notes": str(len(mapping)),
                 "X-Fretwise-Biomechanical-Fatal": str(guard["fatal"]),
                 "X-Fretwise-Biomechanical-High": str(guard["high"]),
+            },
+        )
+
+    @app.get("/api/export/musicxml/{filename}")
+    def export_musicxml(
+        filename: str,
+        track_id: int | None = Query(None),
+        scope: str = Query("current"),
+    ) -> Response:
+        """Export the computed fingerings as a MusicXML score (.musicxml).
+
+        Works for every supported input format (GP, MusicXML, MIDI). The file
+        carries standard notation plus per-note tablature (string/fret) and the
+        optimized left-hand fingering, so it opens in MuseScore, Finale, Dorico
+        or Guitar Pro for visual verification. Unlike the GP export this is a
+        view/verification format, so it is not blocked by the biomechanical
+        guard — any violations are reported via response headers instead.
+
+        Query params:
+            track_id: Track to export when ``scope=current`` (default track if
+                omitted). Ignored when ``scope=all``.
+            scope: ``current`` (default) exports the single selected track as a
+                one-part score — behaviour identical to before this param
+                existed. ``all`` exports every track of the song into one
+                multi-part score: guitar tracks run the fingering optimizer;
+                vocals/bass/drums/other are rendered staff-only. The download
+                filename gets an ``_all`` suffix.
+        """
+        filepath = _resolve_file(app, filename)
+        if scope == "all":
+            return _export_musicxml_all(filepath)
+        if scope not in ("current", ""):
+            raise HTTPException(400, f"Unknown scope: {scope!r}")
+
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        payload = _run_legacy_pipeline_with_guard(events)
+        if not payload.results:
+            raise HTTPException(500, "Pipeline returned no fingering results")
+
+        title, artist = _infer_title_artist(filepath)
+        track_name = getattr(adapter, "track_name", "") or ""
+        xml = render_musicxml(
+            payload.results, title=title, artist=artist, instrument=track_name,
+        )
+
+        guard = _guard_summary(payload)
+        out_name = f"{filepath.stem}.musicxml"
+        safe_name = re.sub(r"[^a-zA-Z0-9._ -]+", "_", out_name).strip()
+        return Response(
+            content=xml.encode("utf-8"),
+            media_type="application/xml",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}"',
+                "X-Fretwise-Note-Count": str(len(payload.results)),
+                "X-Fretwise-Biomechanical-Fatal": str(guard["fatal"]),
+                "X-Fretwise-Biomechanical-High": str(guard["high"]),
+            },
+        )
+
+    def _export_musicxml_all(filepath: Path) -> Response:
+        """Export every track of a song into one multi-part MusicXML score.
+
+        Iterates :meth:`list_all_tracks`, running the fingering optimizer for
+        guitar tracks and emitting staff-only notes for the rest, then renders a
+        single multi-part document. Adapters without ``list_all_tracks`` (single
+        track MusicXML/MIDI, guitar-only GP fallback) degrade to a one-part
+        export covering the default track.
+        """
+        adapter, _ = _load_adapter_and_events(filepath)
+        title, artist = _infer_title_artist(filepath)
+
+        # Enumerate tracks. Adapters that can't list tracks expose just their
+        # default (guitar) track via track_id=None.
+        listed: list[tuple[int | None, str, str]] = []
+        if hasattr(adapter, "list_all_tracks"):
+            try:
+                for tid, name, _tuning, kind in adapter.list_all_tracks(filepath):
+                    listed.append((tid, name, kind))
+            except (ParseError, UnsupportedFormatError):
+                listed = []
+        if not listed:
+            listed = [(None, getattr(adapter, "track_name", "") or "", KIND_GUITAR)]
+
+        parts: list[dict[str, Any]] = []
+        total_notes = 0
+        fatal = 0
+        high = 0
+        for track_id, name, kind in listed:
+            _, events = _load_adapter_and_events(filepath, track_id=track_id)
+            if not events:
+                continue
+            beats = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+            if kind == KIND_GUITAR:
+                payload = _run_legacy_pipeline_with_guard(events)
+                results = payload.results or _staff_only_results(events)
+                guard = _guard_summary(payload)
+                fatal += guard["fatal"]
+                high += guard["high"]
+            else:
+                results = _staff_only_results(events)
+            total_notes += len(results)
+            parts.append(
+                {
+                    "name": name,
+                    "kind": kind,
+                    "results": results,
+                    "beats_per_measure": beats,
+                }
+            )
+
+        if not parts:
+            raise HTTPException(404, "No notes found in file")
+
+        xml = render_musicxml_multi(parts, title=title, artist=artist)
+        out_name = f"{filepath.stem}_all.musicxml"
+        safe_name = re.sub(r"[^a-zA-Z0-9._ -]+", "_", out_name).strip()
+        return Response(
+            content=xml.encode("utf-8"),
+            media_type="application/xml",
+            headers={
+                "Content-Disposition": f'attachment; filename="{safe_name}"',
+                "X-Fretwise-Note-Count": str(total_notes),
+                "X-Fretwise-Part-Count": str(len(parts)),
+                "X-Fretwise-Biomechanical-Fatal": str(fatal),
+                "X-Fretwise-Biomechanical-High": str(high),
             },
         )
 
@@ -1048,13 +1274,97 @@ def _register_routes(app: FastAPI) -> None:
     @app.get("/api/song-info/{filename}")
     async def get_song_info(filename: str) -> JSONResponse:
         """Get full metadata for a specific song from the index."""
-        cfg = _settings.load()
-        songs = load_index(cfg.get("index_path", ""))
+        songs = _load_catalog(app)
         stem = Path(filename).stem
         info = songs.get(filename) or songs.get(stem) or {}
         if not info:
             raise HTTPException(404, f"No metadata found for '{filename}'")
         return JSONResponse(info)
+
+    @app.get("/api/songs/export-list")
+    async def export_song_list(download: int = Query(0)) -> JSONResponse:
+        """Export the user's scores as a JSON list for LLM metadata enrichment.
+
+        Returns ``{"songs": [{"filename", "title", "artist"}], "count": N}`` —
+        one entry per score in the user's storage, with ``title``/``artist``
+        derived from the filename. ``?download=1`` adds a
+        ``Content-Disposition`` attachment header so the browser saves it as
+        ``fretwise-songs.json``.
+        """
+        storage: StorageBackend = _current_storage(app)
+        try:
+            objects = storage.list_scores()
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+
+        songs = []
+        for obj in objects:
+            parsed = parse_filename_metadata(obj.name)
+            songs.append({
+                "filename": obj.name,
+                "title": parsed.get("title", ""),
+                "artist": parsed.get("artist", ""),
+            })
+
+        headers = {}
+        if download:
+            headers["Content-Disposition"] = (
+                'attachment; filename="fretwise-songs.json"'
+            )
+        return JSONResponse({"songs": songs, "count": len(songs)}, headers=headers)
+
+    @app.get("/api/songs/prompt")
+    async def get_metadata_prompt() -> Response:
+        """Serve the LLM prompt used to enrich song metadata (Markdown download)."""
+        return Response(
+            content=METADATA_PROMPT,
+            media_type="text/markdown",
+            headers={
+                "Content-Disposition": 'attachment; filename="fretwise-metadata-prompt.md"',
+            },
+        )
+
+    @app.post("/api/songs/import")
+    async def import_song_metadata(request: Request) -> JSONResponse:
+        """Merge LLM-produced metadata into the user's ``songs.tsv`` catalog.
+
+        Accepts either a top-level JSON array or ``{"songs": [...]}`` of objects
+        with keys ``filename`` (required), ``title``, ``artist``, ``album``,
+        ``genre``, ``year``, ``notes`` (extra keys are ignored). Rows are upserted
+        by ``filename`` into the catalog, which is persisted to storage.
+
+        Returns ``{"updated": N, "added": A, "total": M}``.
+        """
+        try:
+            payload = await request.json()
+        except Exception as exc:  # noqa: BLE001 - any decode error -> 400
+            raise HTTPException(400, f"Invalid JSON body: {exc}")
+
+        if isinstance(payload, dict) and "songs" in payload:
+            payload = payload["songs"]
+        if not isinstance(payload, list):
+            raise HTTPException(400, "Body must be a JSON array (or {\"songs\": [...]})")
+        incoming = [item for item in payload if isinstance(item, dict)]
+
+        storage: StorageBackend = _current_storage(app)
+        try:
+            existing = storage.read_bytes(CATALOG_NAME).decode("utf-8-sig")
+        except StorageNotFoundError:
+            existing = ""
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+
+        text, updated, added = merge_catalog(existing, incoming)
+        try:
+            storage.write_bytes(CATALOG_NAME, text.encode("utf-8"))
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+
+        # load_index_from_text indexes by filename AND stem; count unique rows.
+        total = len({
+            row.get("filename") for row in load_index_from_text(text).values()
+        })
+        return JSONResponse({"updated": updated, "added": added, "total": total})
 
 
 # ---------------------------------------------------------------------------
@@ -1103,6 +1413,24 @@ def _current_storage(app: FastAPI) -> StorageBackend:
         raise HTTPException(409, str(exc))
     except StorageError as exc:
         raise HTTPException(400, f"Storage error: {exc}")
+
+
+def _load_catalog(app: FastAPI) -> dict[str, dict[str, Any]]:
+    """Load the song-metadata catalog for the current request.
+
+    Multi-user mode: read ``songs.tsv`` from the logged-in user's own storage
+    backend, falling back to the ``index_path`` setting if the user has no
+    catalog yet (or storage is not configured/unavailable). Single-user mode:
+    read the configured ``index_path`` file directly.
+    """
+    if getattr(app.state, "multiuser", False):
+        try:
+            storage = _current_storage(app)
+            data = storage.read_bytes(CATALOG_NAME)
+            return load_index_from_text(data.decode("utf-8-sig"))
+        except (StorageNotFoundError, HTTPException, StorageError, UnicodeError):
+            pass  # fall through to the configured local index_path
+    return load_index(_settings.load().get("index_path", ""))
 
 
 def _resolve_file(app: FastAPI, filename: str) -> Path:
@@ -1173,6 +1501,48 @@ def _load_adapter_and_events(
     return adapter, events
 
 
+def _track_kind(adapter: Any, filepath: Path, track_id: int | None) -> str:
+    """Return the instrument kind of a track ("guitar"/"bass"/"drums"/…).
+
+    Only adapters that expose ``list_all_tracks`` (GP 7/8) carry true
+    multi-instrument information; for everything else (MusicXML/MIDI single
+    track, the guitar-only GP fallback) the track is implicitly a guitar — so
+    the fingering optimizer runs exactly as it did before this feature.
+
+    Resolution order:
+
+    1. ``adapter.list_all_tracks(filepath)`` matched by ``track_id`` — the
+       authoritative per-track kind. When ``track_id`` is ``None`` the adapter
+       picked its own default track (always a guitar), so use guitar.
+    2. ``classify_kind_for_program`` from the adapter's captured
+       ``midi_program`` + ``track_name`` — a fallback used only if the listing
+       could not be re-read (e.g. a transient parse error).
+    3. :data:`KIND_GUITAR` — preserves the legacy guitar-only behaviour.
+
+    Args:
+        adapter: The format adapter returned by :func:`get_adapter`.
+        filepath: Source score path.
+        track_id: Requested track id, or ``None`` for the adapter's default.
+
+    Returns:
+        The track-kind string (never empty).
+    """
+    if not hasattr(adapter, "list_all_tracks"):
+        return KIND_GUITAR  # non-GP / guitar-only adapters → always fingered
+    if track_id is None:
+        return KIND_GUITAR  # adapter's default selection is always a guitar
+    try:
+        for tid, _name, _tuning, kind in adapter.list_all_tracks(filepath):
+            if tid == track_id:
+                return str(kind)
+    except (ParseError, UnsupportedFormatError):
+        # Could not re-read the listing — fall back to program/name heuristics.
+        midi_program = int(getattr(adapter, "midi_program", -1) or -1)
+        track_name = getattr(adapter, "track_name", "") or ""
+        return classify_kind_for_program(midi_program, track_name)
+    return KIND_GUITAR  # unknown track id → safest default (fingered)
+
+
 def _parse_representation_mode(value: str | None) -> RepresentationMode:
     """Parse a notation view mode from user input."""
     normalized = re.sub(r"[^a-z0-9]+", "_", (value or "").strip().lower()).strip("_")
@@ -1213,7 +1583,7 @@ _SOLVE_CACHE: _OrderedDict[tuple, dict[str, Any]] = _OrderedDict()
 # 128 entries ≈ 64–128 MB max (4 modes × ~32 tracks). Bumped from 32 so that
 # the background prefetch (frontend fires N × M solves on file open) doesn't
 # evict its own freshly-stored entries.
-_SOLVE_CACHE_MAX = 128
+_SOLVE_CACHE_MAX = int(_fw_config().web.solve_cache_max_entries)
 
 # Legacy-results cache, layer below _SOLVE_CACHE. Keyed by (file, mtime,
 # track, prefs) — crucially NOT by representation_mode, since the Viterbi
@@ -1223,7 +1593,7 @@ _SOLVE_CACHE_MAX = 128
 # instead of a 2s one. The per-mode _SOLVE_CACHE stays on top to keep
 # repeat-click hits at ~50ms (no SVG re-build, no JSON re-serialise).
 _LEGACY_CACHE: _OrderedDict[tuple, dict[str, Any]] = _OrderedDict()
-_LEGACY_CACHE_MAX = 32
+_LEGACY_CACHE_MAX = int(_fw_config().web.legacy_cache_max_entries)
 
 
 def _solve_cache_key(
@@ -1398,12 +1768,26 @@ def _run_legacy_pipeline_with_guard(
 
 
 def _guard_summary(payload: PipelineResult) -> dict[str, Any]:
-    measures = sorted(payload.biomechanical_report.by_measure().keys())
+    from fretwise.biomechanics import BiomechanicalSeverity
+
+    report = payload.biomechanical_report
+    measures = sorted(report.by_measure().keys())
+    fatal_measures = sorted(
+        {
+            v.measure_index
+            for v in report.violations
+            if v.severity == BiomechanicalSeverity.FATAL and v.measure_index is not None
+        }
+    )
     return {
-        "fatal": payload.biomechanical_report.fatal_count,
-        "high": payload.biomechanical_report.high_count,
+        "fatal": report.fatal_count,
+        "high": report.high_count,
         "measures": measures[:20],
         "measure_count": len(measures),
+        # Measures that specifically carry a FATAL violation — what blocks GP
+        # export. Distinct from ``measures`` (every severity).
+        "fatal_measures": fatal_measures[:20],
+        "fatal_measure_count": len(fatal_measures),
     }
 
 
@@ -1435,11 +1819,13 @@ def _safe_audit(
 
 
 def _infer_title_artist(filepath: Path) -> tuple[str, str]:
-    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", filepath.stem).strip()
-    parts = clean_stem.split("-", 1)
-    auto_artist = parts[0].strip() if len(parts) == 2 else ""
-    auto_title = parts[1].strip() if len(parts) == 2 else clean_stem
-    return auto_title, auto_artist
+    """Parse ``(title, artist)`` from a filename like ``Artist - Title - MM-DD-YYYY``.
+
+    Delegates to the shared filename parser so the displayed title is stripped of
+    the trailing date and the artist/title split is consistent with the library.
+    """
+    meta = parse_filename_metadata(filepath.name)
+    return meta.get("title", filepath.stem), meta.get("artist", "")
 
 
 def _infer_source_format(path: Path) -> str:
@@ -1587,12 +1973,14 @@ def _render_core_pdf_payload(
     events: list[NoteEvent],
     *,
     representation_mode: RepresentationMode,
+    track_kind: str = "guitar",
 ) -> tuple[bytes, int]:
     core_result = _run_core_pipeline_for_events(
         filepath,
         adapter,
         events,
         representation_mode=representation_mode,
+        track_kind=track_kind,
     )
     return render_scene_to_pdf_bytes(core_result.render_scene), len(core_result.conformance_issues)
 
@@ -1612,6 +2000,7 @@ def _run_core_pipeline_for_events(
     events: list[NoteEvent],
     *,
     representation_mode: RepresentationMode,
+    track_kind: str = "guitar",
 ) -> Any:
     track_name: str = getattr(adapter, "track_name", "") or ""
     source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
@@ -1635,6 +2024,7 @@ def _run_core_pipeline_for_events(
     return run_core_pipeline_from_raw(
         raw_score,
         representation_mode=representation_mode,
+        track_kind=track_kind,
     )
 
 
@@ -1711,6 +2101,83 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
             k: list(v) for k, v in getattr(r, "planted_fingers", {}).items()
         },
         # Notation fields
+        "let_ring": ne.let_ring,
+        "bend_value": ne.bend_value,
+        "bend_type": ne.bend_type,
+        "slide_type": ne.slide_type,
+        "vibrato_wide": ne.vibrato_wide,
+        "harmonic_type": ne.harmonic_type,
+        "harmonic_fret": ne.harmonic_fret,
+        "muted": ne.muted,
+        "palm_muted": ne.palm_muted,
+        "tapping": ne.tapping,
+        "accent": ne.accent,
+        "accent_strong": ne.accent_strong,
+        "tremolo_picking": ne.tremolo_picking,
+        "tuplet_actual": ne.tuplet_actual,
+        "tuplet_normal": ne.tuplet_normal,
+    }
+
+
+def _staff_only_results(events: list[NoteEvent]) -> list[FingeringResult]:
+    """Wrap NoteEvents as un-fingered FingeringResults for staff-only export.
+
+    Non-guitar tracks (vocals/bass/drums/other) do not run the Viterbi
+    optimizer, but the MusicXML writer consumes ``FingeringResult`` objects. We
+    pair each event with a placeholder :class:`FingeringState`; the multi-part
+    renderer renders these kinds staff-only and never reads the placeholder
+    string/fret/finger (no ``<technical>`` block is emitted).
+
+    Args:
+        events: Parsed note events for one track.
+
+    Returns:
+        A FingeringResult per event, in input order.
+    """
+    placeholder = FingeringState(
+        string_num=0, fret=0, finger=Finger.OPEN, hand_position=1,
+    )
+    return [
+        FingeringResult(note_id=i, note_event=ev, state=placeholder, cost=0.0)
+        for i, ev in enumerate(events)
+    ]
+
+
+def _serialize_staff_note(ne: NoteEvent, note_id: int) -> dict[str, Any]:
+    """Serialize a NoteEvent as a staff-only (un-fingered) note.
+
+    Same JSON shape as :func:`_serialize_result` so the frontend can consume
+    both interchangeably, but the fingering fields (``string``, ``fret``,
+    ``finger``, ``hand_position``, ``cost``, ``planted_fingers``) are ``null``/
+    empty because non-guitar tracks (vocals, bass, drums, …) do not run the
+    Viterbi optimizer. Standard-notation fields (pitch, rhythm, dynamics,
+    articulations) are preserved for staff rendering.
+
+    Args:
+        ne: The parsed note event.
+        note_id: 1-based sequential id (matches the fingered-path numbering).
+
+    Returns:
+        A JSON-friendly dict with ``string``/``fret``/``finger`` set to ``None``.
+    """
+    return {
+        "note_id": note_id,
+        "pitch": ne.pitch,
+        "onset": ne.onset,
+        "duration": ne.duration,
+        "tempo": ne.tempo,
+        "articulation": str(ne.articulation),
+        "dynamic": str(ne.dynamic),
+        "voice_hint": ne.voice_hint,
+        # Fingering fields are null: no optimizer ran for this (non-guitar) track.
+        "string": None,
+        "fret": None,
+        "finger": None,
+        "hand_position": None,
+        "cost": None,
+        "measure_index": ne.measure_index,
+        "planted_fingers": {},
+        # Notation fields (kept for standard-notation rendering).
         "let_ring": ne.let_ring,
         "bend_value": ne.bend_value,
         "bend_type": ne.bend_type,

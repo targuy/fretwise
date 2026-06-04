@@ -11,6 +11,7 @@
 <!-- Genre theme fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&family=Bebas+Neue&family=Anton&family=Oswald:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Metal+Mania&family=Italianno&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Permanent+Marker&family=Bowlby+One&family=Righteous&family=Bungee&family=Bungee+Shade&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Allura&family=Rye&family=Smokum&family=Audiowide&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/leather-icons.css">
 </head>
 <body>
 
@@ -81,26 +82,46 @@
       </svg>
     </button>
     <!-- PDF export (delegates to existing toolbar button) -->
-    <button class="ic-btn" id="btn-header-pdf" title="Export PDF" aria-label="Export PDF">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <button class="ic-btn ic-btn-export" id="btn-header-pdf" title="Export PDF — print-ready tablature with fingerings" aria-label="Export PDF">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 3H6v18h12V7z"/>
         <path d="M14 3v4h4"/>
         <path d="M9 13h1.5a1.5 1.5 0 010 3H9v-3z" fill="currentColor" stroke="none"/>
         <path d="M13 13h2v3h-2v-3z" fill="currentColor" stroke="none"/>
       </svg>
+      <span class="ic-btn-label">PDF</span>
     </button>
     <!-- GP export (saves the loaded GP file with FretWise's LH fingerings injected) -->
-    <button class="ic-btn" id="btn-header-gp" title="Export GP avec doigtés" aria-label="Export GP">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <button class="ic-btn ic-btn-export" id="btn-header-gp" title="Export Guitar Pro file with FretWise left-hand fingerings" aria-label="Export GP">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M14 3H6v18h12V7z"/>
         <path d="M14 3v4h4"/>
-        <text x="12" y="17" font-size="6" text-anchor="middle" fill="currentColor" stroke="none">GP</text>
+        <text x="11" y="18" font-size="7" text-anchor="middle" fill="currentColor" stroke="none">GP</text>
       </svg>
+      <span class="ic-btn-label">GP</span>
+    </button>
+    <!-- MusicXML export (opens in MuseScore/Finale/Guitar Pro for verification) -->
+    <button class="ic-btn ic-btn-export" id="btn-header-musicxml" title="Export MusicXML (.musicxml) — click for current track, Shift/Alt-click or right-click to choose all tracks" aria-label="Export MusicXML">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 3H6v18h12V7z"/>
+        <path d="M14 3v4h4"/>
+        <text x="11" y="18" font-size="6" text-anchor="middle" fill="currentColor" stroke="none">XML</text>
+      </svg>
+      <span class="ic-btn-label">XML</span>
     </button>
     <!-- Back to file list (only shown in viewer mode) -->
     <button class="ic-btn" id="btn-header-back" title="Back to file list" aria-label="Back" style="display:none">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M11 6l-6 6 6 6"/>
+      </svg>
+    </button>
+    <!-- Sign out (shown only when authenticated; lets you log out of Google to
+         sign in as the local admin) -->
+    <button class="ic-btn" id="btn-logout" title="Se déconnecter" aria-label="Sign out" style="display:none">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <path d="M16 17l5-5-5-5"/>
+        <path d="M21 12H9"/>
       </svg>
     </button>
     <!-- Settings -->
@@ -112,7 +133,13 @@
 </header>
 
 <!-- ═══════════════ TRACK TABS BAR ═══════════════ -->
+<button type="button" id="track-tabs-chevron-left" class="track-tabs-chevron track-tabs-chevron-left" aria-label="Scroll track tabs left" hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+</button>
 <div id="track-tabs-bar" style="display:none"></div>
+<button type="button" id="track-tabs-chevron-right" class="track-tabs-chevron track-tabs-chevron-right" aria-label="Scroll track tabs right" hidden>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+</button>
 
 <!-- ═══════════════ FILE SELECTOR (shown initially) ═══════════════ -->
 <div id="file-selector" class="page" style="display:none">
@@ -125,8 +152,17 @@
       <select id="lib-format-filter">
         <option value="">All formats</option>
       </select>
+      <div class="lib-meta-wrap">
+        <button type="button" id="lib-meta-btn" class="lib-meta-btn"
+                title="Enrich your catalog with your own LLM: Export list → run the prompt in your LLM → import the JSON"
+                aria-haspopup="true" aria-expanded="false">Metadata &#9662;</button>
+      </div>
     </div>
+    <div class="lib-meta-hint">Enrich metadata with your LLM: Export list &rarr; run the prompt in your LLM &rarr; import the JSON.</div>
+    <span id="lib-meta-status" class="lib-meta-status" aria-live="polite"></span>
+    <input type="file" id="lib-meta-import-input" accept=".json,application/json" style="display:none">
   </div>
+  <div class="lib-az-bar" id="lib-az-bar" role="navigation" aria-label="Alphabetical index"></div>
   <div class="lib-table-wrap">
     <table class="lib-table" id="lib-table">
       <thead>
@@ -177,6 +213,12 @@
       <span id="meta-view-mode" class="badge badge-green"></span>
       <span id="meta-tempo"></span>
     </div>
+  </div>
+
+  <!-- Loading banner — shown while a track is being solved + rendered -->
+  <div id="song-loading-banner" class="song-loading-banner" style="display:none" role="status" aria-live="polite">
+    <span class="song-loading-spinner" aria-hidden="true"></span>
+    <span class="song-loading-text">Chargement du morceau…</span>
   </div>
 
   <!-- Audit banner — surfaces quality / system-limit warnings per movement -->
@@ -372,10 +414,10 @@
       <div class="settings-field">
         <label for="set-index-path">Songs index file (TSV)</label>
         <div class="settings-path-row">
-          <input id="set-index-path" type="text" placeholder="Path to songs_index.tsv…" />
+          <input id="set-index-path" type="text" placeholder="Path to songs.tsv…" />
           <button id="set-index-apply" class="tx-btn">Apply</button>
         </div>
-        <p class="settings-hint">TSV file with columns: filename, title, artist, genre, year, guitar, rig, …</p>
+        <p class="settings-hint">Offline, tab-separated catalog. Header row + columns: filename, title, artist, album, genre, year, notes. Catalog values override names parsed from filenames. See data/songs.tsv.example.</p>
       </div>
     </section>
     <section class="settings-section">

@@ -117,6 +117,50 @@ class LocalAccountStore:
         )
         return self._save(account)
 
+    def ensure_admin(self, email: str, password_hash: str) -> LocalAccount:
+        """Ensure a pre-activated admin account exists with *email* + *password_hash*.
+
+        Idempotent: creates the account on first call, and updates the stored
+        hash on later calls if it changed (e.g. the operator rotated the
+        password). The account is always active and never carries an activation
+        token, so the admin can log in immediately without email confirmation.
+
+        Args:
+            email: The admin's email address.
+            password_hash: A precomputed PBKDF2 hash (see
+                :mod:`fretwise.auth.passwords`). **Never** a plaintext password.
+
+        Returns:
+            The seeded (or updated) admin account.
+
+        Raises:
+            ValueError: If *email* or *password_hash* is empty.
+        """
+        email = normalize_email(email)
+        if not email:
+            raise ValueError("admin email must not be empty")
+        if not password_hash:
+            raise ValueError("admin password hash must not be empty")
+        existing = self.get(email)
+        if existing is not None:
+            changed = False
+            if existing.password_hash != password_hash:
+                existing.password_hash, changed = password_hash, True
+            if not existing.is_active:
+                existing.is_active, changed = True, True
+            if existing.activation_token is not None:
+                existing.activation_token, existing.token_created, changed = None, 0.0, True
+            return self._save(existing) if changed else existing
+        account = LocalAccount(
+            email=email,
+            password_hash=password_hash,
+            user_id=f"local:{email}",
+            is_active=True,
+            activation_token=None,
+            token_created=0.0,
+        )
+        return self._save(account)
+
     def new_activation_token(self, email: str) -> LocalAccount | None:
         """Issue a fresh activation token (e.g. resend), if the account exists."""
         account = self.get(email)
