@@ -217,5 +217,19 @@ body {
   border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
 }
 
-/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood. */
-#tab-container { background: var(--bg-score) !important; }
+/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood.
+ * Real paper grain (paper.png) sits under a dense cream scrim (~82%) so only a
+ * faint tooth shows through: the engraving stays crisp and the tile seams are
+ * masked by the scrim.  Applied to both the scroll area and the sheet itself
+ * (#core-svg-view carries its own !important cream in style.css, overridden
+ * here since leather-icons.css loads last). */
+#tab-container,
+#core-svg-view {
+  background-color: var(--bg-score) !important;
+  background-image:
+    linear-gradient(rgba(250, 246, 238, 0.82), rgba(250, 246, 238, 0.82)),
+    url("/static/img/paper.png") !important;
+  background-repeat: repeat, repeat !important;
+  background-size: auto, auto !important;
+  background-position: center top !important;
+}
