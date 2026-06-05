@@ -12,11 +12,13 @@ import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
 import { applyLeatherIcons } from './icons.js';
+import { initReview, resetReview } from './review.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
 let currentFile = null;
 let currentTrackId = null;
+let _reviewTrackName = null;
 let currentTracks = [];   // all tracks for the current file
 // Kind of the currently-displayed primary track (guitar|bass|drums|vocal|
 // other). Defaults to guitar so the UI behaves exactly as before until the
@@ -597,6 +599,7 @@ async function selectFile(filename) {
   _notesCache.clear();
   _solveCache.clear();
   _mutedSecondaryTracks.clear();
+  resetReview();
 
   try {
     const tracks = await fetchTracks(filename);
@@ -685,6 +688,7 @@ let _selectTrackToken = 0;
 async function selectTrack(trackId, trackName) {
   const myToken = ++_selectTrackToken;
   currentTrackId = trackId;
+  _reviewTrackName = trackName;  // remembered so the review panel can re-solve
   // Resolve the track kind from the loaded list and lock the UI before any
   // solve is requested. Non-guitar tracks are forced to staff-only view so
   // we never ask the backend for tablature / fingering they cannot provide;
@@ -3662,3 +3666,16 @@ loadFiles();
 // effort; the static header/toolbar buttons already exist (this module is
 // deferred), so a single pass covers them.
 applyLeatherIcons();
+
+// Fingering-review panel (continuous improvement). Reads live app state via
+// getters; `reload` clears the client solve cache and re-runs the current
+// track so a saved choice is reflected immediately.
+initReview({
+  getFile: () => currentFile,
+  getTrackId: () => currentTrackId,
+  isGuitar: () => _isCurrentTrackGuitar(),
+  reload: async () => {
+    _solveCache.clear();
+    if (currentTrackId != null) await selectTrack(currentTrackId, _reviewTrackName);
+  },
+});

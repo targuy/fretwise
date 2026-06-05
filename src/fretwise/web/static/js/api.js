@@ -296,6 +296,49 @@ export async function importSongMetadata(jsonBody) {
   return res.json();
 }
 
+// ── Fingering review & continuous improvement ───────────────────────────────
+
+/** Fetch the ranked list of fingerings to review for a track. */
+export async function fetchReview(filename, trackId) {
+  let url = `/api/review/${encodeURIComponent(filename)}`;
+  if (trackId !== null && trackId !== undefined) url += `?track_id=${trackId}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Review failed' }));
+    throw new Error(err.detail || 'Review failed');
+  }
+  return res.json();
+}
+
+/** Fetch up to N distinct, playable fingerings for one measure. */
+export async function fetchAlternatives(filename, measureIndex, trackId) {
+  const params = new URLSearchParams({ measure_index: String(measureIndex) });
+  if (trackId !== null && trackId !== undefined) params.set('track_id', String(trackId));
+  const url = `/api/review/${encodeURIComponent(filename)}/alternatives?${params}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Alternatives failed' }));
+    throw new Error(err.detail || 'Alternatives failed');
+  }
+  return res.json();
+}
+
+/** Persist a user's chosen fingering for a measure. */
+export async function postReviewChoice(filename, trackId, body) {
+  let url = `/api/review/${encodeURIComponent(filename)}/choice`;
+  if (trackId !== null && trackId !== undefined) url += `?track_id=${trackId}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Save failed' }));
+    throw new Error(err.detail || 'Save failed');
+  }
+  return res.json();
+}
+
 export async function activateSoundfont(name) {
   const res = await fetch(`/api/soundfonts/${encodeURIComponent(name)}/activate`, { method: 'POST' });
   if (!res.ok) throw new Error('Activate failed');
