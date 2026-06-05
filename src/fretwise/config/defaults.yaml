@@ -376,3 +376,28 @@ web:
   settings_defaults:
     soundfonts_dir: "data/sounds"         # default soundfont directory (relative to project root)
     storage_backend: "local"              # default partitions storage backend (local|s3|webdav|gdrive)
+
+# ---------------------------------------------------------------------------
+# Fingering review & continuous improvement (review module).
+# Powers the "doigtés à revoir" panel: flagging, measure-level alternatives,
+# user-feedback capture and immediate re-bias of future solves.
+# ---------------------------------------------------------------------------
+review:
+  enabled: true
+  # A note's Viterbi cost is "high" when it exceeds this multiple of the piece
+  # baseline (10th-percentile cost). Mirrors the audit module's 3x threshold.
+  high_cost_ratio: 3.0
+  high_cost_floor: 5.0          # absolute floor so cheap pieces don't over-flag
+  max_items: 500               # cap on review-list length (logged if truncated)
+  alternatives:
+    count: 4                   # alternatives offered per measure (incl. current)
+    context_measures: 1        # measures of fixed context kept on each side
+    diversity_penalty: 5.0     # cost added to already-emitted in-window states
+    max_attempts: 16           # solve attempts before giving up on more variants
+  bias:
+    enabled: true
+    prefer_weight: 1.5         # cost subtracted for user-preferred transitions
+    reject_weight: 1.5         # cost added for user-rejected transitions
+    use_song_locks: true       # hard-lock corrected notes on re-solve (exact)
+    corpus_name: "feedback_corpus.jsonl"   # global retrain-ready corpus file
+    dir_name: ".fretwise_feedback"          # subdir under the score root
