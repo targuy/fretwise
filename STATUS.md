@@ -1,6 +1,6 @@
 # FretWise — Statut du projet
 
-> Dernière mise à jour : 2026-03-17
+> Dernière mise à jour : 2026-06-05
 
 ---
 
@@ -258,6 +258,21 @@
 | UI : menu mode déplacé dans la toolbar (depuis le header) | ✅ |
 | UI : sélecteur de piste dans la toolbar (changement de voix sans quitter le viewer) | ✅ |
 | Upload de fichier depuis la page d'accueil (POST `/api/upload`) | ✅ |
+
+### 4G — Habillage visuel : bois + boutons-potentiomètres ✅
+
+> Doc : `docs/WEB_UI.md` § "Visual theme". Pipeline d'assets piloté par deux scripts.
+
+| Tâche | Statut |
+|---|---|
+| `scripts/slice_wood.py` : découpe les planches source en tuiles bois (`img/wood/`) | ✅ |
+| Tuiles bois **sans couture** (mirror-tiling depuis zones propres, pas de ligne de pli) | ✅ |
+| Plaques encadrées `light-frame.png`/`dark-frame.png` pour `border-image` 9-slice | ✅ |
+| `scripts/build_leather_icons.py` : 35 icônes potentiomètre métal + symbole gravé | ✅ |
+| Gravure intaglio `_engrave()` (arête éclairée bas-droite, ombre haut-gauche) | ✅ |
+| `leather-icons.css` : chrome bois sombre + panneaux érable clair (re-tokenisation `--fg`/`--bg`) | ✅ |
+| `auth.css` : pages login/register en plaque érable + cadre bois + boutons cuivre | ✅ |
+| Vérification navigateur (bibliothèque réelle ./partitions, login, register) | ✅ |
 
 ---
 

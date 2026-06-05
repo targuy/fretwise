@@ -55,17 +55,28 @@ Unknown values → HTTP 400. The canonical mode strings are owned by `core/notat
 ```
 static/
 ├── index.html              ← single-page shell
-├── css/style.css
+├── login.html              ← auth pages (multi-user mode only)
+├── register.html
+├── css/
+│   ├── style.css           ← base design tokens + layout
+│   ├── leather-icons.css   ← wood/metal theme: knob-icon classes + wood backgrounds
+│   └── auth.css            ← login/register theme (wood plaque + copper buttons)
 ├── hand_viz.html           ← optional hand-viz prototype (consumes hand_viz_data.json)
 ├── js/
 │   ├── main.js             ← routing: file picker → track picker → tab viewer
 │   ├── api.js              ← REST helpers
+│   ├── icons.js            ← swaps button glyphs for the metallic knob icon set
 │   ├── modeConfig.js       ← MIRROR of core/notation_mode.py — keep in sync
 │   ├── renderer.js         ← Canvas tab renderer (Songsterr-style)
 │   ├── svg-playback.js     ← consumes /api/solve `core_svg` + measure_regions
 │   ├── playback.js         ← cursor / speed / loop / metronome
 │   ├── lib/                ← in-tree helpers
 │   └── vendor/             ← third-party libs (e.g. soundfont synth)
+└── img/
+    ├── wood/               ← generated wood tiles (scripts/slice_wood.py)
+    ├── icons/              ← generated knob icons (scripts/build_leather_icons.py)
+    ├── backgrounds.png            ← SOURCE sheet: wood tiles (light/dark, all borders)
+    └── backgrounds with knobs.png ← SOURCE sheet: same tiles + metal knob
 ```
 
 Key conventions:
@@ -73,6 +84,68 @@ Key conventions:
 - **Cursor positioning**: `svg-playback.js` overlays a cursor on the `core_svg` using `measure_regions` (`{measure_idx, x, y0, y1, width}`) returned by `/api/solve`.
 - **PDF download**: `/api/export/pdf/{filename}` is the only PDF route; the legacy `export/pdf_tab.py` is not exposed via the web app.
 - **Keyboard shortcuts**: Space = play/pause, ← → = prev/next, M = metronome (handled in `playback.js`).
+
+---
+
+## Visual theme — wood + metal knobs
+
+The whole UI is skinned as a wood-panelled amp: **dark rosewood** chrome (header,
+toolbar, track-tabs, body) and **light maple** reading panels (library, settings,
+song-info, floating panels, auth cards), with every button rendered as a brushed
+**metal knob** carrying its symbol engraved into the metal.
+
+Two build scripts produce all the artwork from the designer's source sheets. The
+generated PNGs are committed (so the app needs no build step), but re-run the
+scripts whenever the source sheets or glyph definitions change.
+
+### `scripts/slice_wood.py` — wood tiles
+
+- **Input:** `static/img/backgrounds.png` (1407×768 contact sheet — 8×4 grid of
+  light/dark wood tiles in every border variant; `backgrounds with knobs.png` is
+  the same set with a knob, kept for reference).
+- **Output:** `static/img/wood/`
+  - `dark.png` / `light.png` — seamless mirror-tiled base tiles (used **uncut**,
+    `background-repeat`, native 128px). Cores are cropped from verified *clean*
+    interior boxes so no bright cell-edge lands on the mirror fold (a stray light
+    row would otherwise double into a visible seam line).
+  - `dark-strip.png` — wide chrome band.
+  - `light-frame.png` / `dark-frame.png` — fully-framed plaques cropped to the
+    frame's outer edge, for CSS `border-image` 9-slice on panels/cards.
+
+### `scripts/build_leather_icons.py` — knob icons
+
+- **Input:** `static/img/icons/ICON.png` (the metallic volume-knob model).
+- **Output:** `static/img/icons/<name>.png` + `@2x` — one transparent icon per
+  `manifest.json` entry: the button's glyph **engraved** into the brushed-metal
+  disc (intaglio emboss via `_engrave()` — lit lower-right edge, recessed
+  upper-left). `_knob_base.png` / `_disc_base.png` / `_contact.png` are build
+  intermediates (untracked).
+- The glyph for each icon name is a vector primitive in the `GLYPHS` dispatch
+  table; add a button by adding a `manifest.json` entry + a `GLYPHS` lambda.
+
+### Wiring (CSS/JS)
+
+- `css/leather-icons.css` — `--wood-dark`/`--wood-light` tile vars; paints the
+  knob-icon classes (`.fw-ico--<name>`); applies dark wood to chrome and light
+  maple to panels. Light panels work by **re-tokening** `--fg`/`--bg` on the
+  container, which flips the whole subtree to dark-ink-on-light automatically.
+- `js/icons.js` — reads `icons/manifest.json` and swaps each mapped button's
+  inline glyph for a `.fw-ico` span. Idempotent; safe to call after dynamic UI
+  (re)builds.
+- `css/auth.css` — login/register: maple plaque card with the carved wood frame,
+  copper machined buttons, on the dark wood backdrop. Only visible in multi-user
+  mode (single-user serves `index.html` directly with no auth).
+
+### Regenerating
+
+```bash
+python scripts/slice_wood.py          # wood tiles  → img/wood/
+python scripts/build_leather_icons.py # knob icons  → img/icons/*.png (+ legacy BACKGROUND)
+```
+
+> Pillow is the only dependency. `build_leather_icons.py`'s `__main__` also
+> rebuilds the legacy `BACKGROUND.png`, which the CSS no longer references —
+> import `generate_all()` directly to regenerate only the icons.
 
 ---
 

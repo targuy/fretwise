@@ -387,6 +387,29 @@ def _drive(d, cx, cy, r):
 # Generate
 # ---------------------------------------------------------------------------
 
+def _engrave(glyph, ornate: bool) -> Image.Image:
+    """Render a glyph as an *intaglio* (carved-into-metal) feature.
+
+    The shape is stamped into the disc: a bright bottom-right highlight catches
+    the light below the cut, a soft dark halo sinks the top-left — so the symbol
+    reads as machined out of the brushed metal rather than painted on.
+    """
+    layer = Image.new("RGBA", (MASTER, MASTER), (0, 0, 0, 0))
+    glyph(ImageDraw.Draw(layer), MASTER / 2, MASTER * (0.30 if ornate else 0.34))
+    alpha = layer.split()[3]
+    out = Image.new("RGBA", (MASTER, MASTER), (0, 0, 0, 0))
+    # lit lower-right edge of the cut
+    hi = Image.new("RGBA", (MASTER, MASTER), (255, 248, 236, 0))
+    hi.putalpha(alpha.point(lambda a: int(a * 0.55)))
+    out.alpha_composite(hi, (2, 2))
+    # recessed top-left shadow
+    sh = Image.new("RGBA", (MASTER, MASTER), (0, 0, 0, 0))
+    sh.putalpha(alpha.point(lambda a: int(a * 0.5)))
+    out.alpha_composite(sh, (-1, -1))
+    out.alpha_composite(layer)  # the engraving itself
+    return out
+
+
 def generate_all() -> None:
     manifest = json.loads((ICONS / "manifest.json").read_text())
     sizes = manifest["render_sizes"]
@@ -403,8 +426,7 @@ def generate_all() -> None:
             continue
         base = knob if name in ORNATE else disc
         icon = base.copy()
-        d = ImageDraw.Draw(icon)
-        glyph(d, MASTER / 2, MASTER * (0.30 if name in ORNATE else 0.34))
+        icon.alpha_composite(_engrave(glyph, name in ORNATE))
         px = sizes[entry["size"]]
         icon.resize((px, px), Image.LANCZOS).save(ICONS / f"{name}.png")
         icon.resize((px * 2, px * 2), Image.LANCZOS).save(ICONS / f"{name}@2x.png")
