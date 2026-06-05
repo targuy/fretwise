@@ -426,6 +426,7 @@ def _register_routes(app: FastAPI) -> None:
                 )
                 results, stats = _run_legacy_pipeline(
                     events, rule_preferences=rule_preferences,
+                    feedback=_song_feedback(app, filepath),
                 )
                 serialized_results = [_serialize_result(r) for r in results]
                 audit = _safe_audit(events, results, section_markers)
@@ -1373,6 +1374,145 @@ def _register_routes(app: FastAPI) -> None:
         })
         return JSONResponse({"updated": updated, "added": added, "total": total})
 
+    # -- Fingering review & continuous improvement ----------------------------
+
+    @app.get("/api/review/{filename}")
+    def review_file(
+        filename: str, track_id: int | None = Query(None)
+    ) -> dict[str, Any]:
+        """List impossible / suspect / high-cost fingerings, ranked by severity."""
+        from fretwise.review import flag_fingerings
+
+        filepath = _resolve_file(app, filename)
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+        if _track_kind(adapter, filepath, track_id) != KIND_GUITAR:
+            return {"available": False, "reason": "not a guitar track",
+                    "items": [], "counts": {}}
+        payload = _run_legacy_pipeline_with_guard(
+            events, rule_preferences=RulePreferences(),
+            feedback=_song_feedback(app, filepath),
+        )
+        report = flag_fingerings(
+            payload.results, biomech_report=payload.biomechanical_report,
+        )
+        return {
+            "available": True,
+            "filename": filename,
+            "track_id": track_id,
+            "counts": report.counts,
+            "truncated": report.truncated,
+            "items": [_serialize_review_item(it) for it in report.items],
+        }
+
+    @app.get("/api/review/{filename}/alternatives")
+    def review_alternatives_endpoint(
+        filename: str,
+        measure_index: int = Query(...),
+        track_id: int | None = Query(None),
+    ) -> dict[str, Any]:
+        """Return up to N distinct, playable fingerings for a measure."""
+        from fretwise.review import measure_alternatives
+
+        filepath = _resolve_file(app, filename)
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+        payload = _run_legacy_pipeline_with_guard(
+            events, rule_preferences=RulePreferences(),
+            feedback=_song_feedback(app, filepath),
+        )
+        alts = measure_alternatives(
+            events, payload.results, measure_index,
+            player_cost_model=_get_player_cost_model(),
+            chord_finger_classifier=_get_chord_finger_classifier(),
+        )
+        requested = int(_fw_config().review.alternatives.count)
+        return {
+            "filename": filename,
+            "measure_index": measure_index,
+            "requested": requested,
+            "incomplete": len(alts) < requested,
+            "alternatives": [_serialize_alternative(a) for a in alts],
+        }
+
+    @app.post("/api/review/{filename}/choice")
+    async def review_choice(
+        filename: str, request: Request, track_id: int | None = Query(None),
+    ) -> JSONResponse:
+        """Persist a user's preferred fingering and re-bias future solves.
+
+        Saves a per-song sidecar entry and one retrain-ready corpus line, then
+        clears the solve caches so the next solve reflects the choice.
+        """
+        import hashlib
+        from datetime import UTC, datetime
+
+        from fretwise.review import (
+            FeedbackRecord,
+            append_corpus,
+            save_choice,
+        )
+
+        try:
+            body = await request.json()
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(400, f"Invalid JSON body: {exc}")
+        if not isinstance(body, dict):
+            raise HTTPException(400, "Body must be a JSON object")
+
+        chosen = body.get("chosen") or []
+        rejected = body.get("rejected") or []
+        if not isinstance(chosen, list) or not chosen:
+            raise HTTPException(400, "Body must include a non-empty 'chosen' list")
+
+        filepath = _resolve_file(app, filename)
+        user = current_request_user()
+        user_id = getattr(user, "email", None) or getattr(user, "id", None) or "local"
+
+        # Best-effort features from an unbiased baseline solve (for retraining).
+        features_chosen: dict[str, float] = {}
+        features_rejected: dict[str, float] = {}
+        song_hash = ""
+        try:
+            _, events = _load_adapter_and_events(filepath, track_id=track_id)
+            results, _ = _run_legacy_pipeline(events, rule_preferences=RulePreferences())
+            if chosen and isinstance(chosen[0], dict) and "note_id" in chosen[0]:
+                features_chosen = _features_for(results, int(chosen[0]["note_id"]))
+            if rejected and isinstance(rejected[0], dict) and "note_id" in rejected[0]:
+                features_rejected = _features_for(results, int(rejected[0]["note_id"]))
+            song_hash = "sha1:" + hashlib.sha1(filepath.read_bytes()).hexdigest()[:16]
+        except Exception:  # noqa: BLE001 — provenance/features are best-effort
+            pass
+
+        record = FeedbackRecord(
+            song_stem=filepath.stem,
+            measure_index=int(body.get("measure_index", 0)),
+            onset=float(body.get("onset", 0.0)),
+            severity=str(body.get("severity", "")),
+            chosen=chosen,
+            rejected=rejected if isinstance(rejected, list) else [],
+            created_at=datetime.now(UTC).isoformat(),
+            user_id=str(user_id),
+            song_hash=song_hash,
+            track_id=track_id,
+            reasons=body.get("reasons") or [],
+            context=body.get("context") or {},
+            alternatives_offered=body.get("alternatives_offered") or [],
+            features_chosen=features_chosen,
+            features_rejected=features_rejected,
+        )
+        base_dir = _feedback_base_dir(app, filepath)
+        try:
+            save_choice(base_dir, record)
+            append_corpus(base_dir, record)
+        except OSError as exc:
+            raise HTTPException(500, f"Could not persist feedback: {exc}")
+
+        _solve_cache_clear()  # next solve picks up the new lock/bias
+        return JSONResponse({"saved": True, "stem": filepath.stem})
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -1420,6 +1560,105 @@ def _current_storage(app: FastAPI) -> StorageBackend:
         raise HTTPException(409, str(exc))
     except StorageError as exc:
         raise HTTPException(400, f"Storage error: {exc}")
+
+
+def _feedback_base_dir(app: FastAPI, filepath: Path) -> Path:
+    """Resolve the ``.fretwise_feedback`` directory for the current request.
+
+    Prefers the active storage backend's local root; falls back to the score's
+    own parent directory (covers cloud backends without a local root).
+    """
+    from fretwise.review import feedback_dir
+
+    try:
+        root = _current_storage(app).local_root
+    except HTTPException:
+        root = None
+    return feedback_dir(root if root is not None else filepath.parent)
+
+
+def _song_feedback(app: FastAPI, filepath: Path) -> object | None:
+    """Load recorded feedback for a song, or ``None`` when re-bias is disabled.
+
+    Returns a truthy :class:`fretwise.review.SongFeedback` only when the review
+    bias feature is enabled and at least one choice exists, so callers can treat
+    ``None`` as "no re-bias".
+    """
+    from fretwise.config import config as _config
+    from fretwise.review import load_song_feedback
+
+    if not bool(_config().review.bias.enabled):
+        return None
+    fb = load_song_feedback(_feedback_base_dir(app, filepath), filepath.stem)
+    return fb if fb else None
+
+
+_FINGER_MODEL_INDEX: dict[str, int] = {
+    "open": 0, "index": 1, "middle": 2, "ring": 3, "pinky": 4,
+}
+
+
+def _serialize_review_item(item: Any) -> dict[str, Any]:
+    """Serialize a :class:`fretwise.review.ReviewItem` for the API."""
+    return {
+        "item_id": item.item_id,
+        "measure_index": item.measure_index,
+        "onset": item.onset,
+        "note_ids": item.note_ids,
+        "severity": item.severity.value,
+        "score": item.score,
+        "reasons": item.reasons,
+        "current": item.current,
+    }
+
+
+def _serialize_alternative(alt: Any) -> dict[str, Any]:
+    """Serialize a :class:`fretwise.review.MeasureAlternative` for the API."""
+    return {
+        "variant_id": alt.variant_id,
+        "is_current": alt.is_current,
+        "fingerings": alt.fingerings,
+        "cost": alt.cost,
+        "label": alt.label,
+        "playable": alt.playable,
+    }
+
+
+def _features_for(results: list[FingeringResult], note_id: int) -> dict[str, float]:
+    """Best-effort transition features for ``note_id`` (retrain-ready, may be empty).
+
+    Finds the note's in-voice predecessor and extracts the same 26 features used
+    by the learned transition-cost model, so feedback rows can be replayed for
+    offline retraining. Returns ``{}`` when the note or a predecessor is missing.
+    """
+    try:
+        from fretwise.ml import extract_transition_features
+
+        by_id = {r.note_id: r for r in results}
+        cur = by_id.get(note_id)
+        if cur is None:
+            return {}
+        voice = cur.note_event.voice_hint or 0
+        prev: FingeringResult | None = None
+        for r in sorted(results, key=lambda x: x.note_event.onset):
+            if (r.note_event.voice_hint or 0) != voice:
+                continue
+            if r.note_event.onset >= cur.note_event.onset:
+                break
+            prev = r
+        if prev is None:
+            return {}
+        return extract_transition_features(
+            prev_string_model=prev.state.string_num - 1,
+            prev_fret=prev.state.fret,
+            prev_finger_model=_FINGER_MODEL_INDEX.get(prev.state.finger.value, 0),
+            curr_string_model=cur.state.string_num - 1,
+            curr_fret=cur.state.fret,
+            prev_midi=prev.note_event.pitch,
+            curr_midi=cur.note_event.pitch,
+        )
+    except Exception:  # pragma: no cover — features are best-effort
+        return {}
 
 
 def _load_catalog(app: FastAPI) -> dict[str, dict[str, Any]]:
@@ -1736,17 +1975,40 @@ def _get_player_cost_model() -> object | None:
     return _PLAYER_COST_MODEL
 
 
-def _run_legacy_pipeline(
-    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
-) -> tuple[list[FingeringResult], dict[str, int]]:
+def _biased_generator_and_cost(
+    rule_preferences: RulePreferences | None,
+    feedback: object | None,
+) -> tuple[StateGenerator, CostFunction]:
+    """Build the generator + cost function, applying feedback re-bias if any.
+
+    With feedback present: corrected notes are hard-locked to the chosen
+    fingering (exact), and a :class:`FeedbackBiasedPlayerCost` softly biases
+    similar passages (when γ > 0). Without feedback this is identical to the
+    default performance-mode setup.
+    """
     weights = CostWeights.performance()
-    generator = StateGenerator()
-    player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
+    base_pcm = _get_player_cost_model() if weights.gamma > 0 else None
+    generator: StateGenerator = StateGenerator()
+    player_cost_model: object | None = base_pcm
+    if feedback:
+        from fretwise.ml import FixedPlayerCost
+        from fretwise.review import ConstrainedStateGenerator, FeedbackBiasedPlayerCost
+        generator = ConstrainedStateGenerator(StateGenerator(), feedback.locks())  # type: ignore[attr-defined]
+        if weights.gamma > 0:
+            player_cost_model = FeedbackBiasedPlayerCost(base_pcm or FixedPlayerCost(), feedback)  # type: ignore[arg-type]
     cost_fn = CostFunction(
         weights=weights,
         rule_preferences=rule_preferences,
         player_cost_model=player_cost_model,
     )
+    return generator, cost_fn
+
+
+def _run_legacy_pipeline(
+    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None,
+    feedback: object | None = None,
+) -> tuple[list[FingeringResult], dict[str, int]]:
+    generator, cost_fn = _biased_generator_and_cost(rule_preferences, feedback)
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
     return run_pipeline(
@@ -1756,16 +2018,10 @@ def _run_legacy_pipeline(
 
 
 def _run_legacy_pipeline_with_guard(
-    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None
+    events: list[NoteEvent], *, rule_preferences: RulePreferences | None = None,
+    feedback: object | None = None,
 ) -> PipelineResult:
-    weights = CostWeights.performance()
-    generator = StateGenerator()
-    player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
-    cost_fn = CostFunction(
-        weights=weights,
-        rule_preferences=rule_preferences,
-        player_cost_model=player_cost_model,
-    )
+    generator, cost_fn = _biased_generator_and_cost(rule_preferences, feedback)
     optimizer = ViterbiOptimizer(cost_fn)
     matcher = PatternMatcher()
     return run_pipeline_with_guard_report(
