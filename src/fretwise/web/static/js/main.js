@@ -3678,4 +3678,15 @@ initReview({
     _solveCache.clear();
     if (currentTrackId != null) await selectTrack(currentTrackId, _reviewTrackName);
   },
+  // Scroll the score to a 1-based measure so the user can see the flagged spot.
+  focusMeasure: (measureIndex) => {
+    const zeroBased = Math.max(0, (measureIndex || 1) - 1);
+    _setFollowPlayhead(false);  // stop auto-scroll fighting the manual jump
+    if (_svgDriver && _svgDriver.scrollToMeasure) {
+      if (_svgDriver.scrollToMeasure(zeroBased)) return;
+    }
+    if (renderer && typeof renderer.scrollToMeasure === 'function') {
+      renderer.scrollToMeasure(zeroBased);
+    }
+  },
 });
