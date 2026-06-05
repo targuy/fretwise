@@ -10,10 +10,11 @@ plain cost injection, so the Viterbi optimizer (M5) is never modified.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
+from fretwise.biomechanics import validate_fingering_results
 from fretwise.config import ConfigNode, config
-from fretwise.generator import StateGenerator
+from fretwise.generator import STANDARD_TUNING, GeneratorConfig, StateGenerator
 from fretwise.models import FingeringResult, FingeringState, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
@@ -84,6 +85,57 @@ class DiversityCostFunction(CostFunction):
 
 def _note_key(note: NoteEvent) -> _NoteKey:
     return (round(note.onset, 6), note.pitch, note.voice_hint)
+
+
+def _derive_tuning(events: list[NoteEvent]) -> list[int]:
+    """Infer per-string open-string MIDI pitches from the source hints.
+
+    GP tabs encode the real (possibly non-standard / dropped / capo'd) tuning
+    implicitly: ``open_pitch[string] = note.pitch - note.fret``. Using this — not
+    the hard-coded standard tuning — lets free position exploration propose valid
+    alternate voicings (e.g. the same pitch one fret over on another string).
+    Strings never seen fall back to standard tuning.
+    """
+    tuning = list(STANDARD_TUNING)
+    seen: dict[int, int] = {}
+    for e in events:
+        if (
+            e.string_hint is not None and e.fret_hint is not None
+            and 1 <= e.string_hint <= len(tuning) and e.string_hint not in seen
+        ):
+            seen[e.string_hint] = e.pitch - e.fret_hint
+    for string_num, open_pitch in seen.items():
+        tuning[string_num - 1] = open_pitch
+    return tuning
+
+
+class _LocalReVoiceGenerator(StateGenerator):
+    """Generator that offers positions *near* each note's source position.
+
+    For a hinted note it enumerates same-pitch positions within ``window`` frets
+    on the source string, plus the adjacent strings — so alternatives stay local
+    and playable (slide a fret, shift the run, change a finger) instead of
+    re-voicing the whole measure. Un-hinted notes fall back to full exploration.
+    """
+
+    def __init__(self, tuning: list[int], *, window: int = 3) -> None:
+        super().__init__(GeneratorConfig(open_string_pitches=list(tuning)))
+        self._tuning = list(tuning)
+        self._window = window
+
+    def states_for(self, note: NoteEvent) -> list[FingeringState]:
+        if note.string_hint is None or note.fret_hint is None:
+            return super().states_for(note)
+        max_fret = self._config.max_fret
+        out: list[FingeringState] = []
+        for s in range(1, len(self._tuning) + 1):
+            fret = note.pitch - self._tuning[s - 1]
+            if fret < 0 or fret > max_fret:
+                continue
+            if abs(fret - note.fret_hint) > self._window and abs(s - note.string_hint) > 1:
+                continue
+            out.extend(super().states_for(replace(note, string_hint=s, fret_hint=fret)))
+        return out or super().states_for(note)
 
 
 def _window_signature(window: list[FingeringResult]) -> tuple[_BanSig, ...]:
@@ -157,12 +209,23 @@ def measure_alternatives(
     weights = weights or CostWeights.performance()
 
     lo, hi = measure_index - ctx, measure_index + ctx
-    context_events = [
+    in_window = [
         e for e in events
         if e.measure_index is not None and lo <= e.measure_index <= hi
     ]
-    if not any(e.measure_index == measure_index for e in context_events):
+    if not any(e.measure_index == measure_index for e in in_window):
         return []
+
+    # Target-measure notes explore positions NEAR the source (same string within
+    # a fret window, or the same pitch on an adjacent string) so alternatives are
+    # sensible local re-voicings — keep the finger and slide a fret, shift the
+    # run, swap a finger — not a wild full re-voicing. Tuning is derived from the
+    # source so positions are correct on dropped / non-standard tunings.
+    context_events = list(in_window)
+    tuning = _derive_tuning(events)
+    base_generator: StateGenerator = _LocalReVoiceGenerator(
+        tuning, window=int(review_cfg.alternatives.get("fret_window", 3)),
+    )
 
     # Original note ids by identity, to map re-solved notes back.
     orig_id_by_key: dict[_NoteKey, int] = {
@@ -176,7 +239,7 @@ def measure_alternatives(
         and lo <= r.note_event.measure_index <= hi
         and r.note_event.measure_index != measure_index
     }
-    generator = ConstrainedStateGenerator(StateGenerator(), locks)
+    generator = ConstrainedStateGenerator(base_generator, locks)
     matcher = PatternMatcher()
 
     from fretwise.review import marginal_costs  # lazy: avoids import cycle
@@ -190,14 +253,18 @@ def measure_alternatives(
     current_window = [r for r in results if r.note_event.measure_index == measure_index]
     seen.add(_window_signature(current_window))
     banned.update(_window_signature(current_window))
+    current_playable = validate_fingering_results(current_window).fatal_count == 0
     alternatives.append(
         _to_alternative("v1", current_window, orig_id_by_key,
-                        marginal_costs(results), is_current=True, playable=True)
+                        marginal_costs(results), is_current=True,
+                        playable=current_playable)
     )
 
+    # Gather several distinct candidate re-voicings, then keep the best ones.
+    candidates: list[MeasureAlternative] = []
     penalty = base_penalty
     attempts = 0
-    while len(alternatives) < count and attempts < max_attempts:
+    while len(candidates) < count * 3 and attempts < max_attempts:
         attempts += 1
         cost_fn = DiversityCostFunction(
             weights=weights,
@@ -224,7 +291,7 @@ def measure_alternatives(
         ]
         sig = _window_signature(window)
         if sig in seen:
-            penalty *= 1.5  # push harder for genuine diversity
+            penalty *= 1.5  # push for genuine diversity
             continue
         seen.add(sig)
         banned.update(sig)
@@ -233,13 +300,17 @@ def measure_alternatives(
             for v in payload.biomechanical_report.violations
             if v.severity.value == "fatal"
         )
-        alternatives.append(
+        candidates.append(
             _to_alternative(
-                f"v{len(alternatives) + 1}", window, orig_id_by_key,
-                marginal_costs(payload.results),
+                "tmp", window, orig_id_by_key, marginal_costs(payload.results),
                 is_current=False, playable=not fatal_here,
             )
         )
+
+    # Rank: playable first, then lowest cost (closest to the current optimum).
+    candidates.sort(key=lambda a: (0 if a.playable else 1, a.cost))
+    for i, alt in enumerate(candidates[: count - 1]):
+        alternatives.append(replace(alt, variant_id=f"v{i + 2}"))
 
     if len(alternatives) < count:
         logger.info(
