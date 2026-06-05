@@ -424,9 +424,13 @@ def _register_routes(app: FastAPI) -> None:
                     same_finger_motion_penalty=same_finger_motion_penalty,
                     infer_implicit_legato=infer_implicit_legato,
                 )
+                # Only thread feedback when some exists, so the call signature
+                # stays backward-compatible with test stubs (and is a no-op for
+                # the common, no-feedback case).
+                _fb = _song_feedback(app, filepath)
+                _fb_kw = {"feedback": _fb} if _fb else {}
                 results, stats = _run_legacy_pipeline(
-                    events, rule_preferences=rule_preferences,
-                    feedback=_song_feedback(app, filepath),
+                    events, rule_preferences=rule_preferences, **_fb_kw,
                 )
                 serialized_results = [_serialize_result(r) for r in results]
                 audit = _safe_audit(events, results, section_markers)
