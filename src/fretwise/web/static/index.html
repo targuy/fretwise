@@ -15,6 +15,35 @@
 </head>
 <body>
 
+<!-- ═══════════════ SPLASH SCREEN ═══════════════ -->
+<!-- Branded intro; the "TAP TO START" button is part of the artwork, so the
+     whole overlay is clickable.  Dismissed on click / Enter / Space, then
+     removed.  Inline (non-module) so it works on first paint even before
+     main.js loads, and survives a main.js error. -->
+<div id="splash-screen" role="button" tabindex="0" aria-label="Tap to start FretWise"></div>
+<script>
+  (function () {
+    var splash = document.getElementById('splash-screen');
+    if (!splash) return;
+    var done = false;
+    function dismiss() {
+      if (done) return;
+      done = true;
+      splash.classList.add('is-hiding');
+      var remove = function () { if (splash.parentNode) splash.remove(); };
+      splash.addEventListener('transitionend', remove, { once: true });
+      setTimeout(remove, 700); // fallback if transitionend never fires
+    }
+    splash.addEventListener('click', dismiss);
+    splash.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        dismiss();
+      }
+    });
+  })();
+</script>
+
 <!-- ═══════════════ HEADER BAR ═══════════════ -->
 <header id="header">
 
