@@ -123,52 +123,99 @@
 }
 
 /* ============================================================================
- * Leather palette + app background image.
- * style.css loads first, so these :root overrides win and retone the whole UI
- * (header / panels / toolbar / dropdowns) toward the icon leather.
+ * Wood palette + app background tiles.  (Designer sheets sliced by
+ * scripts/slice_wood.py into img/wood/*.png — used UNCUT: tiled or 9-sliced,
+ * never stretched.)  style.css loads first, so these :root overrides win and
+ * retone the whole UI toward the wood + metal-knob look.
+ *
+ * Scheme:  DARK wood on the chrome (header / bars / toolbar) + body backdrop;
+ *          LIGHT maple plaques for the reading panels (library, settings, song
+ *          info, floating panels) — each retokened to dark-ink-on-light so its
+ *          whole subtree flips legible automatically.
  * ========================================================================== */
 :root {
-  --bg-0: oklch(0.16 0.020 55);   /* app background — deep leather       */
-  --bg-1: oklch(0.21 0.028 52);   /* panels — leather plaque             */
+  --wood-dark:  url("/static/img/wood/dark.png");
+  --wood-light: url("/static/img/wood/light.png");
+
+  --bg-0: oklch(0.16 0.020 55);   /* app background — deep wood          */
+  --bg-1: oklch(0.21 0.028 52);   /* panels — wood plaque                */
   --bg-2: oklch(0.26 0.034 50);   /* raised surfaces                     */
   --bg-3: oklch(0.31 0.038 50);   /* hover                               */
-  --signal:      oklch(0.74 0.13 70);   /* accent = copper/gold of icons */
+  --signal:      oklch(0.74 0.13 70);   /* accent = copper/gold of knobs */
   --signal-deep: oklch(0.62 0.14 62);
-  --line-1: oklch(0.42 0.05 45 / .9);   /* borders = leather edges       */
+  --line-1: oklch(0.42 0.05 45 / .9);   /* borders = wood edges          */
   --line-2: oklch(0.40 0.05 45 / .55);
-  /* Score paper (--bg-score cream / --ink-score brown) already suits leather. */
+  /* Score paper (--bg-score cream / --ink-score brown) already suits wood. */
 }
 
-/* The whole application uses BACKGROUND.png as its backdrop, with the leather
- * --bg-0 as a solid fallback underneath the photo. */
+/* Body backdrop — dark wood tiled at native size (no upscale), with the deep
+ * --bg-0 as a solid fallback underneath. `fixed` so the grain stays put while
+ * content scrolls. */
 body {
   background:
-    url("/static/img/BACKGROUND.png") center center / cover no-repeat fixed,
+    var(--wood-dark) repeat fixed,
     var(--bg-0);
+  background-size: 256px 256px, auto;
 }
 
-/* Wood on EVERY chrome surface — header, track tabs, bottom toolbar, mixer,
- * library and settings. A dark scrim is layered over the photo for legibility;
- * `fixed` attachment lines the grain up with the body so the bars read as
- * cut-outs of one continuous wood top. */
+/* DARK wood on every chrome surface — header, track tabs, bottom toolbar,
+ * mixer.  A dark scrim keeps light glyphs/labels readable; `fixed` lines the
+ * grain up with the body so the bars read as cut-outs of one wood top. */
 #header,
 #track-tabs-bar,
 #toolbar,
 #multi-track-bar {
   background:
-    linear-gradient(rgba(22,13,6,0.56), rgba(22,13,6,0.66)),
-    url("/static/img/BACKGROUND.png") center center / cover no-repeat fixed !important;
+    linear-gradient(rgba(22,13,6,0.50), rgba(22,13,6,0.62)),
+    var(--wood-dark) repeat fixed !important;
+  background-size: auto, 256px 256px !important;
 }
-/* Lists / forms get a heavier scrim so dense rows + inputs stay readable. */
+
+/* LIGHT maple plaques — the reading panels.  Redefining the surface/foreground
+ * tokens here re-tones the entire subtree (tables, labels, badges, inputs) to
+ * dark-ink-on-light without touching style.css.  A soft cream scrim over the
+ * maple guarantees text contrast. */
+#file-selector,
+#settings-page,
+#track-selector,
+.song-info-panel,
+.floating-panel {
+  --fg-0: oklch(0.22 0.020 50);
+  --fg-1: oklch(0.32 0.022 50);
+  --fg-2: oklch(0.44 0.022 50);
+  --fg-3: oklch(0.56 0.020 50);
+  --bg-0: transparent;
+  --bg-1: rgba(255, 250, 240, 0.42);
+  --bg-2: rgba(110, 74, 36, 0.14);
+  --bg-3: rgba(110, 74, 36, 0.24);
+  --line-1: rgba(60, 40, 20, 0.48);
+  --line-2: rgba(60, 40, 20, 0.30);
+  --line-3: rgba(60, 40, 20, 0.16);
+  --signal:      oklch(0.52 0.16 55);   /* darker amber reads on light wood */
+  --signal-soft: oklch(0.52 0.16 55 / .16);
+  --signal-deep: oklch(0.42 0.16 50);
+  color: var(--fg-0);
+}
 #file-selector,
 #settings-page {
   background:
-    linear-gradient(rgba(20,12,6,0.80), rgba(20,12,6,0.84)),
-    url("/static/img/BACKGROUND.png") center center / cover no-repeat fixed !important;
+    linear-gradient(rgba(250, 243, 231, 0.56), rgba(250, 243, 231, 0.60)),
+    var(--wood-light) repeat fixed !important;
+  background-size: auto, 256px 256px !important;
   min-height: 100vh;
 }
 
-/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood.
- * (#core-svg-view / --bg-score in style.css; reasserted here so the body photo
- * can never bleed into the score area.) */
+/* Self-contained plaques get the carved maple frame (border-image 9-slice) +
+ * tiled maple interior. */
+#track-selector,
+.song-info-panel,
+.floating-panel {
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.60), rgba(252, 246, 235, 0.66)),
+    var(--wood-light) repeat !important;
+  background-size: auto, 256px 256px !important;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+}
+
+/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood. */
 #tab-container { background: var(--bg-score) !important; }
