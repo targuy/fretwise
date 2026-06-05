@@ -114,6 +114,31 @@ export class SvgCursorDriver {
   }
 
   /**
+   * Scroll a measure into view (centered) and briefly flash it. Independent of
+   * playback follow state — used by the review panel to locate a flagged spot.
+   * @param {number} measureIdx  0-based measure index (matches data-measure).
+   * @returns {boolean} true when the measure rect was found.
+   */
+  scrollToMeasure(measureIdx) {
+    const rect = this._rects.find(
+      (r) => parseInt(r.getAttribute('data-measure') || '-1', 10) === measureIdx,
+    );
+    if (!rect || !this.container) return false;
+    const c = this.container;
+    const r = rect.getBoundingClientRect();
+    const cr = c.getBoundingClientRect();
+    if (r.height > 0 && cr.height > 0) {
+      const relTop = (r.top - cr.top) + c.scrollTop;
+      const target = relTop - c.clientHeight / 2 + r.height / 2;
+      const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
+      c.scrollTo({ top: Math.max(0, Math.min(target, maxTop)), behavior: 'smooth' });
+    }
+    rect.classList.add('review-flash');
+    setTimeout(() => rect.classList.remove('review-flash'), 1600);
+    return true;
+  }
+
+  /**
    * Move the red cursor line to the given beat onset position.
    * @param {number} onset         - current playback position in beats (from song start)
    * @param {number} beatsPerMeasure
