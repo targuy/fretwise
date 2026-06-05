@@ -23,16 +23,26 @@ def _ev(measure: int, onset: float | None = None, pitch: int = 60) -> NoteEvent:
     )
 
 
+# Two far-apart hand positions; alternating them per note makes every transition
+# a large position shift → high *marginal* cost (the audit now scores marginal,
+# not the cumulative FingeringResult.cost, so costliness must come from states).
+_FAR_POS = [
+    (1, 17, Finger.PINKY, 14),
+    (6, 1, Finger.INDEX, 1),
+]
+_CHEAP_POS = (3, 5, Finger.INDEX, 5)
+
+
 def _result(
     note_id: int, measure: int, cost: float = 1.0, voice: int = 0,
+    *, costly: bool = False,
 ) -> FingeringResult:
     event = NoteEvent(
         pitch=60, onset=float(note_id), duration=0.5, tempo=120.0,
         measure_index=measure, voice_hint=voice,
     )
-    state = FingeringState(
-        string_num=3, fret=5, finger=Finger.INDEX, hand_position=5,
-    )
+    s, f, fg, hp = _FAR_POS[note_id % 2] if costly else _CHEAP_POS
+    state = FingeringState(string_num=s, fret=f, finger=fg, hand_position=hp)
     return FingeringResult(
         note_id=note_id, note_event=event, state=state,
         cost=cost, alternatives=[],
@@ -159,12 +169,7 @@ def test_audit_half_high_cost_alone_stays_clean() -> None:
     # conservative cascade, anything below "majority expensive"
     # without source/ML co-signal stays clean.
     events = [_ev(m) for m in range(1, 11)]
-    cheap_costs = [1.0] * 6
-    expensive_costs = [100.0] * 4
-    results = [
-        _result(i, i + 1, cost=c)
-        for i, c in enumerate(cheap_costs + expensive_costs)
-    ]
+    results = [_result(i, i + 1, costly=(i >= 6)) for i in range(10)]  # 4/10
     report = audit_score(events, results)
     assert report.movements[0].verdict == "clean"
 
@@ -174,12 +179,7 @@ def test_audit_high_cost_alone_flags_suspect_not_bad() -> None:
     # One red signal alone (no ML, no source) lands at "suspect", not
     # "bad" — the strong combined verdict requires cost_red AND ml_red.
     events = [_ev(m) for m in range(1, 11)]
-    cheap_costs = [1.0] * 2
-    expensive_costs = [100.0] * 8
-    results = [
-        _result(i, i + 1, cost=c)
-        for i, c in enumerate(cheap_costs + expensive_costs)
-    ]
+    results = [_result(i, i + 1, costly=(i >= 2)) for i in range(10)]  # 8/10
     report = audit_score(events, results)
     assert report.movements[0].verdict == "suspect"
     assert "high_cost_density" in report.movements[0].reasons
@@ -189,12 +189,7 @@ def test_audit_cost_red_and_ml_red_together_flag_bad() -> None:
     # Both algorithmic red (8/10 high cost) AND ML red (uniform softmax)
     # → strong combined signal → bad.
     events = [_ev(m) for m in range(1, 11)]
-    cheap_costs = [1.0] * 2
-    expensive_costs = [100.0] * 8
-    results = [
-        _result(i, i + 1, cost=c)
-        for i, c in enumerate(cheap_costs + expensive_costs)
-    ]
+    results = [_result(i, i + 1, costly=(i >= 2)) for i in range(10)]  # 8/10
     report = audit_score(events, results, ml_cost_model=_StubMLModel())
     assert report.movements[0].verdict == "bad"
     assert "high_cost_density" in report.movements[0].reasons
@@ -205,12 +200,12 @@ def test_audit_per_movement_isolation_explicit_markers() -> None:
     # Movement 1 (m 1-3): clean. Movement 2 (m 4-6): all expensive.
     events = [_ev(m) for m in (1, 2, 3, 4, 5, 6)]
     results = [
-        _result(0, 1, cost=1.0),
-        _result(1, 2, cost=1.0),
-        _result(2, 3, cost=1.0),
-        _result(3, 4, cost=100.0),
-        _result(4, 5, cost=100.0),
-        _result(5, 6, cost=100.0),
+        _result(0, 1),
+        _result(1, 2),
+        _result(2, 3),
+        _result(3, 4, costly=True),
+        _result(4, 5, costly=True),
+        _result(5, 6, costly=True),
     ]
     markers = {1: "Easy", 4: "Hard"}
     report = audit_score(events, results, section_markers=markers)

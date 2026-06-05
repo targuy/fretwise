@@ -35,6 +35,7 @@ from fretwise.biomechanics import (
 )
 from fretwise.models import FingeringResult, NoteEvent
 from fretwise.quality import assess_source_quality
+from fretwise.scoring import marginal_costs
 
 __all__ = [
     "MovementSpan",
@@ -303,7 +304,10 @@ def audit_score(
     # contains expensive notes if they dominate).
     # If everything is uniformly expensive, the threshold stays high and
     # nothing flags — that's correct: uniformly hard ≠ system at limit.
-    all_costs = sorted(r.cost for r in results if r.cost is not None)
+    # Per-note MARGINAL cost (FingeringResult.cost is cumulative — using it makes
+    # every late movement look expensive). Shared with the review module.
+    cost_by_id = marginal_costs(results)
+    all_costs = sorted(cost_by_id.values())
     if all_costs:
         p10_index = max(0, int(len(all_costs) * 0.10))
         baseline_cost = all_costs[p10_index]
@@ -341,6 +345,7 @@ def audit_score(
             movement_results=movement_results,
             movement_biomechanical=movement_biomechanical,
             piece_baseline_cost=baseline_cost,
+            cost_by_id=cost_by_id,
             ml_entropy_by_result=ml_entropy_by_result,
             ml_available=ml_available,
         ))
@@ -367,6 +372,7 @@ def _audit_one_movement(
     movement_results: list[FingeringResult],
     movement_biomechanical: list[BiomechanicalViolation],
     piece_baseline_cost: float,
+    cost_by_id: dict[int, float],
     ml_entropy_by_result: dict[int, float],
     ml_available: bool,
 ) -> MovementVerdict:
@@ -393,7 +399,7 @@ def _audit_one_movement(
     high_cost_threshold = max(piece_baseline_cost * 3, 5.0)
     high_cost_count = sum(
         1 for r in movement_results
-        if r.cost is not None and r.cost > high_cost_threshold
+        if cost_by_id.get(r.note_id, 0.0) > high_cost_threshold
     )
     high_cost_ratio = (
         high_cost_count / len(movement_results) if movement_results else 0.0
