@@ -24,7 +24,7 @@ from fretwise.biomechanics import (
 )
 from fretwise.config import ConfigNode, config
 from fretwise.models import FingeringResult
-from fretwise.scoring import CostFunction, CostWeights
+from fretwise.scoring import marginal_costs
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ __all__ = [
     "feedback_dir",
     "flag_fingerings",
     "load_song_feedback",
+    "marginal_costs",
     "measure_alternatives",
     "save_choice",
 ]
@@ -120,45 +121,6 @@ class _Group:
     severity: Severity = Severity.HIGH_COST
     score: float = 0.0
     reasons: list[str] = field(default_factory=list)
-
-
-def marginal_costs(
-    results: Sequence[FingeringResult],
-    cost_fn: CostFunction | None = None,
-) -> dict[int, float]:
-    """Return the per-note marginal cost keyed by ``note_id``.
-
-    ``FingeringResult.cost`` is the *cumulative* Viterbi path cost, which grows
-    along the piece and is unusable as a per-note difficulty signal. This
-    recomputes the marginal cost of each note from the final chosen states
-    (grouped by voice so transitions stay within a single hand), using a
-    deterministic performance-mode cost function.
-
-    Args:
-        results: Fingered results for the track.
-        cost_fn: Cost function to score with; a performance-mode default is
-            created when ``None``.
-
-    Returns:
-        Map of ``note_id`` → non-negative marginal cost.
-    """
-    fn = cost_fn or CostFunction(weights=CostWeights.performance())
-    by_voice: dict[int, list[FingeringResult]] = {}
-    for r in results:
-        by_voice.setdefault(r.note_event.voice_hint or 0, []).append(r)
-    out: dict[int, float] = {}
-    for voice_results in by_voice.values():
-        ordered = sorted(voice_results, key=lambda r: r.note_event.onset)
-        prev: FingeringResult | None = None
-        for r in ordered:
-            if prev is None:
-                out[r.note_id] = fn.emission_cost(r.state)
-            else:
-                out[r.note_id] = fn.transition_cost(
-                    prev.state, r.state, r.note_event,
-                )
-            prev = r
-    return out
 
 
 def cost_baseline(marginals: Sequence[float]) -> float:

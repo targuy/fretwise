@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -2593,3 +2594,40 @@ def compute_mechanical_cost(
         + cost_same_finger_motion(s1, s2, note, rule_preferences=prefs)
         + cost_sequential_crossing(s1, s2)
     )
+
+
+def marginal_costs(
+    results: Sequence[FingeringResult],
+    cost_fn: CostFunction | None = None,
+) -> dict[int, float]:
+    """Return the per-note *marginal* cost keyed by ``note_id``.
+
+    ``FingeringResult.cost`` is the *cumulative* Viterbi path cost, which grows
+    monotonically along the piece — using it as a per-note signal makes the whole
+    back half of every song look "expensive". This recomputes each note's
+    marginal cost from the final chosen states (grouped by voice so transitions
+    stay within a single hand), with a deterministic performance-mode default.
+
+    Args:
+        results: Fingered results for the track.
+        cost_fn: Cost function to score with; a performance-mode default is
+            created when ``None``.
+
+    Returns:
+        Map of ``note_id`` → non-negative marginal cost.
+    """
+    fn = cost_fn or CostFunction(weights=CostWeights.performance())
+    by_voice: dict[int, list[FingeringResult]] = {}
+    for r in results:
+        by_voice.setdefault(r.note_event.voice_hint or 0, []).append(r)
+    out: dict[int, float] = {}
+    for voice_results in by_voice.values():
+        ordered = sorted(voice_results, key=lambda r: r.note_event.onset)
+        prev: FingeringResult | None = None
+        for r in ordered:
+            if prev is None:
+                out[r.note_id] = fn.emission_cost(r.state)
+            else:
+                out[r.note_id] = fn.transition_cost(prev.state, r.state, r.note_event)
+            prev = r
+    return out
