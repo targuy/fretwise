@@ -200,12 +200,12 @@ async function _openAlternatives(item, row) {
   }
 
   if (!others.length) {
+    row.classList.add('is-noalt');  // nothing actionable here
     const note = document.createElement('p');
     note.className = 'review-altnote';
     note.textContent =
-      'Aucune alternative jouable distincte : sur ce morceau la corde et la ' +
-      'case sont imposées par la source, seul le doigt pourrait changer et le ' +
-      'choix actuel est déjà le meilleur ici.';
+      'Aucune alternative distincte trouvée : le doigté actuel est déjà le ' +
+      'meilleur compromis jouable pour cette mesure.';
     box.appendChild(note);
     return;
   }
