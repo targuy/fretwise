@@ -1705,6 +1705,23 @@ function initRenderer(data) {
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
   playback.enableAudio();
 
+  // Safari/iOS: enableAudio() above creates the AudioContext in a 'suspended'
+  // state because page load is not a user gesture, and the browser only resumes
+  // it from within one. The splash screen now consumes the very first click, so
+  // resume the context on the first user gesture anywhere — the splash dismiss
+  // click bubbles to this capture-phase listener, unlocking sound before any
+  // playback. Self-removing: later play handlers already re-resume as a backup.
+  {
+    const _unlockAudio = () => {
+      playback.resumeAudioContext();
+      if (!playback.audioEnabled) playback.enableAudio();
+      ['pointerdown', 'touchend', 'keydown'].forEach((evt) =>
+        window.removeEventListener(evt, _unlockAudio, { capture: true }));
+    };
+    ['pointerdown', 'touchend', 'keydown'].forEach((evt) =>
+      window.addEventListener(evt, _unlockAudio, { capture: true }));
+  }
+
   // Wire position scrubber
   playback.onPositionChange = (frac) => {
     const pb = $('#position-bar input');
