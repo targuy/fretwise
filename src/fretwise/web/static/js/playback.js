@@ -52,6 +52,32 @@ export class PlaybackEngine {
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
     this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
     this.onTimeChange = null;     // (seconds) → void, called on every tick
+
+    // Audio resilience: browsers suspend/interrupt the AudioContext (tab
+    // backgrounded, OS audio focus loss, autoplay policy). Without this the
+    // sound silently "drops" and never comes back. We auto-resume on tab
+    // refocus + any user gesture, and a watchdog re-resumes while audio is on.
+    this._installAudioResilience();
+  }
+
+  /**
+   * Install always-on guards that auto-resume the AudioContext whenever the
+   * browser suspends it. Idempotent; safe to call once from the constructor.
+   */
+  _installAudioResilience() {
+    if (typeof document === 'undefined' || this._resilienceInstalled) return;
+    this._resilienceInstalled = true;
+    const resume = () => { this.resumeAudioContext(); };
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) resume();
+    });
+    window.addEventListener('focus', resume);
+    window.addEventListener('pointerdown', resume, true);
+    window.addEventListener('keydown', resume, true);
+    // Watchdog: while audio is enabled, keep the context running.
+    this._resilienceTimer = setInterval(() => {
+      if (this.audioEnabled || this.isPlaying) this.resumeAudioContext();
+    }, 4000);
   }
 
   /**
@@ -155,7 +181,9 @@ export class PlaybackEngine {
    */
   async resumeAudioContext() {
     if (!this._audioCtx) return;
-    if (this._audioCtx.state === 'suspended') {
+    // 'interrupted' is the iOS/Safari state after an audio-focus loss (call,
+    // other app); 'suspended' is the standard autoplay/backgrounding state.
+    if (this._audioCtx.state !== 'running') {
       try { await this._audioCtx.resume(); } catch (_) { /* ignore */ }
     }
   }
