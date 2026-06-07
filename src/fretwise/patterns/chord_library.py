@@ -248,7 +248,9 @@ def lookup_chord(name: str) -> ChordDiagram | None:
             return diagram
 
     # 3. Slash chord: try the chord without the bass note.
-    if "/" in name:
+    #    Guard against quality suffixes that contain "/" (e.g. "6/9", "m6/9"):
+    #    only treat as a slash chord when the text after "/" is a note name.
+    if "/" in name and _looks_like_bass_note(name.split("/", 1)[1].strip()):
         root_part = name.split("/")[0].strip()
         result = lookup_chord(root_part)
         if result is not None:
@@ -269,6 +271,21 @@ def lookup_chord(name: str) -> ChordDiagram | None:
 
     logger.debug("No voicing found for chord '%s'.", name)
     return None
+
+
+def _looks_like_bass_note(text: str) -> bool:
+    """True if ``text`` is a bare note name (slash-chord bass), e.g. "G", "F#".
+
+    Distinguishes a real slash bass from a quality suffix that contains "/"
+    such as "9" in "6/9".
+
+    Args:
+        text: The portion of a chord name after the "/".
+
+    Returns:
+        True if it is a note name optionally followed by a single accidental.
+    """
+    return bool(re.fullmatch(r"[A-Ga-g][#b]?", text))
 
 
 def _generate_from_name(name: str) -> ChordDiagram | None:
