@@ -2669,12 +2669,53 @@ if (prefHandOverlay) {
 //     iframe animates in lock-step with parent's playback cursor).
 //
 // See docs/finger_placement_strategy.md for the sedentary-finger logic.
+/**
+ * Build an explicit "no fingering for this track" payload. Posting this (rather
+ * than nothing) lets the hand-viz iframe degrade gracefully — it shows a clear
+ * empty state instead of leaving a stale hand from a previous track or falling
+ * back to its built-in demo lick. Carries `fingered:false` + empty `frames`.
+ */
+function _emptyHandVizPayload(reason) {
+  return {
+    meta: {
+      title: (renderer?.data?.title) || 'FretWise',
+      artist: (renderer?.data?.artist) || '',
+      track: (renderer?.data?.track_name) || '',
+      tempo: (renderer?.data?.tempo) || 120,
+      synced: true,
+      max_seconds: 10,
+      fingered: false,
+      empty_reason: reason || 'no-fingering',
+    },
+    fretboard: {
+      num_frets: 12,
+      scale_length_mm: 648,
+      tuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+      capo: 0,
+      num_strings: 6,
+    },
+    frames: [],
+  };
+}
+
 function _buildHandVizPayload() {
   if (!renderer || !renderer.data || !Array.isArray(renderer.data.results)) {
-    return null;
+    return _emptyHandVizPayload('no-track');
   }
   const results = renderer.data.results;
-  if (results.length === 0) return null;
+  if (results.length === 0) return _emptyHandVizPayload('empty-track');
+  // Staff-only / vocal tracks carry note results but no fretted fingering
+  // (every result is an open string or has no finger / non-positive fret).
+  // Treat that as "no fingering" so the hand panel degrades gracefully.
+  const hasFretted = results.some((r) => {
+    const finger = String(r.finger || 'open');
+    const fret = Number.parseInt(r.fret, 10);
+    return finger !== 'open' && !finger.endsWith('OPEN')
+      && Number.isFinite(fret) && fret > 0;
+  });
+  if (!hasFretted || renderer.data.fingered === false) {
+    return _emptyHandVizPayload('staff-only');
+  }
   const tempo = renderer.data.tempo || 120;
   const frames = [];
   // Time base = parent's playback clock (t=0 at measure 0 beat 0), so
