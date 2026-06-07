@@ -783,6 +783,23 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border-color: var(--signal);
   color: var(--signal);
 }
+.tx-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.tx-btn:disabled:hover { background: var(--bg-2); color: var(--fg-1); }
+/* Busy state: hide the glyph and overlay a spinner (reuses fw-spin). */
+.tx-btn.is-busy { position: relative; }
+.tx-btn.is-busy > svg { visibility: hidden; }
+.tx-btn.is-busy::after {
+  content: "";
+  position: absolute;
+  width: 13px; height: 13px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--signal);
+  border-radius: 50%;
+  animation: fw-spin 0.7s linear infinite;
+}
 
 /* Loop clear button — dual icon states */
 #btn-loop-clear .loop-icon-on { display: none; }
