@@ -176,7 +176,15 @@ def run_pipeline(
         finally:
             if segment_activated and isinstance(cost_fn, CostFunction):
                 cost_fn.clear_segment_anchors()
-        results = resolve_arpeggio_chord_fingering(results)
+        # Cost-aware arpeggio stabilisation: pass the same CostFunction used by
+        # this voice's Viterbi run so the resolver only overrides finger/
+        # hand_position when it is cost-neutral-or-better under the active
+        # weights/profile (segment anchors are cleared above, so the resolver
+        # sees the A' per-state shift cost — the same view a post-Viterbi edit
+        # is judged against). cost_fn may be None for non-CostFunction
+        # optimizers, in which case the resolver keeps its legacy behaviour.
+        arpeggio_cost_fn = cost_fn if isinstance(cost_fn, CostFunction) else None
+        results = resolve_arpeggio_chord_fingering(results, cost_fn=arpeggio_cost_fn)
         results = resolve_finger_continuity(results)
         results = resolve_chord_conflicts(results)
         results = resolve_chord_stretch(results)

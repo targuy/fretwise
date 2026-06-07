@@ -1840,11 +1840,24 @@ _ARPEGGIO_MAX_SPAN: int = int(_SCORING.arpeggio_max_span_frets)
 _ARPEGGIO_MIN_NOTES: int = int(_SCORING.arpeggio_min_notes)
 
 
+# Epsilon slack (in composite-cost units) allowed when judging a cost-aware
+# arpeggio override.  The override is applied when the candidate's total
+# transition cost is no more than ``current + epsilon`` — i.e. cost-neutral
+# (including genuine ties) or strictly cheaper.  The small positive slack lets
+# the anti-oscillation stabilisation still fire on exact ties and on
+# negligible cost differences (floating-point noise), while a real cost
+# increase above the slack blocks the override and preserves Viterbi's choice.
+_ARPEGGIO_COST_EPSILON: float = 1e-6
+
+
 def resolve_arpeggio_chord_fingering(
     results: list[FingeringResult],
     window_beats: float = _ARPEGGIO_WINDOW_BEATS,
     max_span: int = _ARPEGGIO_MAX_SPAN,
     min_notes: int = _ARPEGGIO_MIN_NOTES,
+    *,
+    cost_fn: CostFunction | None = None,
+    cost_epsilon: float = _ARPEGGIO_COST_EPSILON,
 ) -> list[FingeringResult]:
     """Stabilise hand position across arpeggio patterns.
 
@@ -1859,11 +1872,36 @@ def resolve_arpeggio_chord_fingering(
     Notes with open strings, muted notes, or bends/slides that span across the
     window boundary are left untouched.
 
+    Cost-awareness:
+        When ``cost_fn`` is provided, the resolver no longer overrides Viterbi
+        unconditionally.  For each candidate re-finger it evaluates the
+        composite transition cost of the candidate state *in context* — the
+        prev→k and k→next edges against the neighbours **as they currently
+        stand in the (partially re-finger ed) ``resolved`` list** — and only
+        commits the override when the candidate's total cost is
+        ``<= current_total + cost_epsilon`` (cost-neutral-or-better; the
+        epsilon lets exact ties and floating-point-noise differences still get
+        the stabilisation).  Notes within a window are processed left-to-right,
+        so each note is judged against neighbours that have already been
+        committed (anti-oscillation is preserved when it does not fight the
+        cost layer).  The candidate state always carries the anchored
+        ``target_hp`` so the cost's position-shift / stretch terms see the
+        hand_position change.
+
+        When ``cost_fn is None`` the legacy local-stretch guard is used and the
+        behaviour is byte-for-byte backward compatible.
+
     Args:
         results: FingeringResult list sorted by onset.
         window_beats: Maximum beat span for a single arpeggio window.
         max_span: Maximum fret range (fretted notes only) to qualify.
         min_notes: Minimum number of fretted notes required.
+        cost_fn: Optional injected composite ``CostFunction``.  When supplied,
+            overrides are gated on cost-neutral-or-better (see above) instead of
+            the local stretch heuristic.  Uses the same weights/profile as the
+            Viterbi run that produced ``results``.
+        cost_epsilon: Slack (composite-cost units) added to the current cost
+            when comparing.  Defaults to a tiny positive value so ties stabilise.
 
     Returns:
         New list with stabilised arpeggio hand positions.
@@ -1947,22 +1985,32 @@ def resolve_arpeggio_chord_fingering(
             new_finger = _FRETTED_FINGERS[offset]
             if new_finger == r.state.finger and r.state.hand_position == target_hp:
                 continue  # already correct
-            # Validate: only rewrite if the new assignment is not more
-            # stretched than the original (avoid making things worse).
-            old_stretch = abs((r.state.fret - r.state.hand_position)
-                              - _FINGER_OFFSET.get(r.state.finger, 0))
-            new_stretch = abs(offset - _FINGER_OFFSET.get(new_finger, 0))
-            if new_stretch > old_stretch:
-                continue
+            candidate_state = FingeringState(
+                string_num=r.state.string_num,
+                fret=fret,
+                finger=new_finger,
+                hand_position=target_hp,
+            )
+            if cost_fn is not None:
+                # Cost-aware gate: judge the candidate against the injected
+                # composite cost, in context.  Only override when it is
+                # cost-neutral-or-better than keeping the current state.
+                if not _arpeggio_override_is_cost_neutral(
+                    resolved, k, candidate_state, cost_fn, cost_epsilon,
+                ):
+                    continue
+            else:
+                # Legacy local-stretch guard: only rewrite if the new
+                # assignment is not more stretched than the original.
+                old_stretch = abs((r.state.fret - r.state.hand_position)
+                                  - _FINGER_OFFSET.get(r.state.finger, 0))
+                new_stretch = abs(offset - _FINGER_OFFSET.get(new_finger, 0))
+                if new_stretch > old_stretch:
+                    continue
             resolved[k] = FingeringResult(
                 note_id=r.note_id,
                 note_event=r.note_event,
-                state=FingeringState(
-                    string_num=r.state.string_num,
-                    fret=fret,
-                    finger=new_finger,
-                    hand_position=target_hp,
-                ),
+                state=candidate_state,
                 cost=r.cost,
                 alternatives=r.alternatives,
                 planted_fingers=r.planted_fingers,
@@ -1971,6 +2019,46 @@ def resolve_arpeggio_chord_fingering(
         i = j if j > i + 1 else i + 1
 
     return resolved
+
+
+def _arpeggio_override_is_cost_neutral(
+    resolved: list[FingeringResult],
+    k: int,
+    candidate: FingeringState,
+    cost_fn: CostFunction,
+    epsilon: float,
+) -> bool:
+    """Return True if re-fingering note ``k`` to ``candidate`` is cost-neutral.
+
+    Compares the composite transition cost of the candidate state against
+    keeping ``resolved[k]``'s current state, summed over the prev→k and k→next
+    edges.  Neighbours are taken from ``resolved`` as it currently stands (so
+    already-committed re-fingers in the same window are respected).  Edge notes
+    (no prev / no next) simply omit the missing edge from both sums, so the
+    comparison stays symmetric.
+
+    The override is judged acceptable when
+    ``candidate_total <= current_total + epsilon`` — cost-neutral-or-better,
+    with the epsilon admitting exact ties and floating-point noise so genuine
+    arpeggio stabilisation still fires.
+    """
+    current = resolved[k].state
+    current_total = 0.0
+    candidate_total = 0.0
+
+    if k > 0:
+        prev = resolved[k - 1].state
+        note_k = resolved[k].note_event
+        current_total += cost_fn.transition_cost(prev, current, note_k, k)
+        candidate_total += cost_fn.transition_cost(prev, candidate, note_k, k)
+    if k + 1 < len(resolved):
+        nxt = resolved[k + 1]
+        current_total += cost_fn.transition_cost(current, nxt.state, nxt.note_event, k + 1)
+        candidate_total += cost_fn.transition_cost(
+            candidate, nxt.state, nxt.note_event, k + 1,
+        )
+
+    return candidate_total <= current_total + epsilon
 
 
 # ---------------------------------------------------------------------------
