@@ -93,10 +93,15 @@
     <div class="spacer"></div>
     <div class="meta" id="hud-meta"></div>
     <button class="ctrl" id="btn-rewind">Rewind</button>
+    <button class="ctrl" id="btn-3d" title="Bascule rendu 3D (three.js) — expérimental">3D : off</button>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
 
   <div id="scene-wrap">
+    <!-- 3D mount (Milestone 5).  Empty + hidden by default; only populated when
+         the OFF-by-default hand3d feature flag is on AND three.js/WebGL load.
+         The SVG below stays the default, unchanged renderer. -->
+    <div id="scene3d" style="display:none; width:100%;"></div>
     <svg id="scene" viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="fretWire" x1="0" y1="0" x2="0" y2="1">
@@ -213,21 +218,103 @@ const PALM_TOP_FROM_MCP = 130;
 const MCP_MIN_Y = 164;
 const MCP_MAX_Y = 232;
 
-/* Index leftmost, pinky rightmost. */
-const MCP_OFFSETS = { index: -52, middle: -18, ring: +15, pinky: +49 };
+/* ---------- Anatomical hand rig (van der Hulst 2012; Shimawaki CT) ---------
+   The rig is grounded in published functional-anatomy data rather than values
+   eyeballed from photos, and is driven by a single `handScale` factor so the
+   same proportions serve any hand size (small junior hand .. large adult span)
+   and tie into a future per-player profile.  Every px dimension below is
+   `handScale × base proportion`; the default handScale reproduces the historical
+   look exactly (regression-guarded in tests).
+
+   Sources:
+     - Proportions / phalanx ratios: van der Hulst, F.P.R. et al. (2012),
+       "A functional anatomy based kinematic human hand model with simple size
+       adaptation", IEEE ICRA — proximal:middle:distal phalanx lengths and a
+       single isometric size-scaling parameter, exactly the `handScale` idea.
+       Cross-checked against Buryanov & Kotiuk (2010) phalange anthropometry.
+     - Joint flexion limits: Shimawaki et al. CT studies of finger MCP/PIP/DIP
+       maximum flexion (see JOINT_FLEXION_MAX below).
+
+   `handScale` is the single tunable: lengths, segment lengths and knuckle
+   offsets all scale isometrically with it.  1.0 = today's adult-hand default. */
+let handScale = 1.0;
+
+/* Knuckle (MCP) lateral offsets in the palm-local frame, index leftmost.
+   Base spacing is ~33-34 px between adjacent MCPs, centred near zero — the
+   metacarpal heads are roughly evenly spread across the palm.  Scaled by
+   handScale at configure time into the live MCP_OFFSETS used by the matrix. */
+const MCP_OFFSETS_BASE = { index: -52, middle: -18, ring: +15, pinky: +49 };
+let MCP_OFFSETS = { ...MCP_OFFSETS_BASE };   // recomputed by configureRig()
 const HOME_FRET_OFFSET = { index: 0, middle: 1, ring: 2, pinky: 3 };
 
-/* Finger proportions and mobility.  Lengths follow observed hand ratios:
-   middle longest, pinky shortest.  Mobility mirrors common left-hand guitar
-   mechanics: index/middle are independent; ring/pinky have less abduction and
-   tend to follow the wrist/forearm more. */
-const FINGER_TOTAL = { index: 176, middle: 194, ring: 184, pinky: 158 };
+/* Per-finger total length as a multiple of the BASE finger unit (the middle
+   finger = 1.0).  Ordering middle > ring ≈ index > pinky holds, matching
+   van der Hulst / anthropometric data (index and ring are near-equal, ring
+   marginally the longer of the two).  handScale × BASE_FINGER_UNIT × ratio
+   gives px; the default reproduces the prior {176,194,184,158}. */
+const BASE_FINGER_UNIT = 194;   // px length of the middle finger at handScale 1
+const FINGER_LENGTH_RATIO = {
+  index:  176 / BASE_FINGER_UNIT,   // 0.907
+  middle: 194 / BASE_FINGER_UNIT,   // 1.000 (longest)
+  ring:   184 / BASE_FINGER_UNIT,   // 0.948 (≈ index, slightly longer)
+  pinky:  158 / BASE_FINGER_UNIT,   // 0.814 (shortest)
+};
+let FINGER_TOTAL = { index: 176, middle: 194, ring: 184, pinky: 158 };
+
+/* Phalanx length proportions (proximal : middle : distal) as fractions of the
+   finger's total length, from van der Hulst (2012) Table I / Buryanov & Kotiuk
+   (2010).  The proximal phalanx is the longest (≈1.6-1.7× the distal), the
+   middle is intermediate, the distal shortest — these are pure ratios so they
+   are size-independent and need no scaling.  PIP sits at `proximal`, DIP at
+   `proximal + middle` along the finger axis. */
 const FINGER_SEG   = {
   index:  { proximal: 0.44, middle: 0.28, distal: 0.28 },
   middle: { proximal: 0.43, middle: 0.29, distal: 0.28 },
   ring:   { proximal: 0.44, middle: 0.28, distal: 0.28 },
   pinky:  { proximal: 0.46, middle: 0.27, distal: 0.27 },
 };
+
+/* ---------- Joint flexion limits (Shimawaki CT studies) -------------------
+   Maximum active flexion per joint, normalised to the model's 0..1 "flexion"
+   parameter (0 = straight, 1 = the rig's fully-curled silhouette).  Shimawaki
+   et al. report approximate max flexion of MCP ≈ 90°, PIP ≈ 110°, DIP ≈ 70-80°.
+   The dominant joint for the press silhouette is the MCP/PIP curl; we cap the
+   solver's flexion parameter at the PIP-limited value (~0.90) instead of the
+   ad-hoc 0.95, and clamp the base curl-from-reach term at the MCP limit. */
+const JOINT_FLEXION_MAX = {
+  mcp: 90 / 110,   // ≈ 0.818  (MCP max ≈ 90° of the PIP-scaled range)
+  pip: 1.0,        // PIP is the reference joint (≈ 110° → full curl)
+  dip: 78 / 110,   // ≈ 0.709  (DIP max ≈ 78°)
+};
+/* Overall flexion-parameter ceiling: PIP-limited, just under fully curled. */
+const FLEXION_MAX = 0.90;
+/* Base-curl ceiling (reach-driven term, before role boosts): MCP-limited. */
+const BASE_FLEX_MAX = JOINT_FLEXION_MAX.mcp;   // 0.818
+
+/* ---------- DIP↔PIP coupling (tunable, task-dependent) --------------------
+   The natural coupling DIP ≈ ⅔·PIP is only a rule of thumb (Shimawaki; Kapandji
+   "Physiology of the Joints").  For thin fingertip-on-fret contact the distal
+   phalanx is nearly perpendicular to the string and barely flexed, i.e. the LOW
+   end of the coupling range, so press/plant poses use a reduced ratio while
+   idle/hover folds use the relaxed default. */
+const DIP_PIP_COUPLING_DEFAULT = 0.673;  // ≈ ⅔ rule-of-thumb (idle/hover folds)
+const DIP_PIP_COUPLING_PRESS   = 0.42;   // fingertip-on-fret: distal near-straight
+function dipPipCoupling(role) {
+  return (role === "active" || role === "planted")
+    ? DIP_PIP_COUPLING_PRESS
+    : DIP_PIP_COUPLING_DEFAULT;
+}
+
+/* Compute the live px rig from handScale.  Called from configureGeometry() so a
+   payload (or future profile) can resize the whole hand. */
+function configureRig(scale) {
+  handScale = (typeof scale === "number" && scale > 0) ? scale : 1.0;
+  for (const f of ["index", "middle", "ring", "pinky"]) {
+    FINGER_TOTAL[f] = handScale * BASE_FINGER_UNIT * FINGER_LENGTH_RATIO[f];
+    MCP_OFFSETS[f]  = handScale * MCP_OFFSETS_BASE[f];
+  }
+}
+
 const FINGER_WIDTH = { index: 22, middle: 24, ring: 22, pinky: 19 };
 const NAIL_RADIUS  = { index: 12, middle: 13, ring: 12, pinky: 10 };
 const MAX_ABDUCTION_PX = { index: 70, middle: 64, ring: 52, pinky: 43 };
@@ -248,7 +335,7 @@ const REST_TIP_Y_OFFSET = 28;
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 const FINGER_LABEL = { index: "i", middle: "m", ring: "r", pinky: "p" };
-const HAND_MODEL_LABEL = "modele biomecanique v7 paume-matrice pouce-bas";
+const HAND_MODEL_LABEL = "modele biomecanique v8 anatomique handScale";
 
 /* Strict kinematic rules for this top-view model:
   1. The fretboard is fixed. The top of the image is the far/high-E side;
@@ -306,6 +393,13 @@ function noteNameToMidi(name) {
    defaults so older payloads (and the embedded demo) render unchanged. */
 function configureGeometry(data) {
   const fb = (data && data.fretboard) || {};
+
+  // Size-adapt the anatomical hand rig.  handScale comes from the payload's
+  // `hand` block (a future per-player profile) or defaults to 1.0 (today's
+  // adult-hand look).  Driving FINGER_TOTAL / MCP_OFFSETS off a single factor
+  // keeps the rig proportions anatomical at any hand size.
+  const handCfg = (data && data.hand) || {};
+  configureRig(typeof handCfg.scale === "number" ? handCfg.scale : 1.0);
 
   // Tuning drives both the per-string MIDI base and the string count.  The
   // payload lists open strings low→high (index 0 = lowest), matching the API
@@ -504,30 +598,40 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   const nx = -uy;
   const ny = ux;
 
-  const baseFlex = clamp(1 - Math.min(d, maxReach) / L, 0, 0.82);
+  // Base curl from how far the reach falls short of full extension, capped at
+  // the MCP flexion limit (Shimawaki: MCP max ≈ 90°, the BASE_FLEX_MAX ratio).
+  const baseFlex = clamp(1 - Math.min(d, maxReach) / L, 0, BASE_FLEX_MAX);
   const flatness = Math.abs(dx) / Math.max(1, Math.abs(dy));
   const perpendicularBoost = (role === "active" || role === "planted")
     ? clamp((flatness - 0.75) * 0.14 + (abductionOver + reachOver) * 0.0018, 0, 0.24)
     : 0;
   const roleBoost = role === "idle" ? 0.38 : role === "hover" ? 0.18 : 0.04;
-  const flexion = clamp(baseFlex + roleBoost, 0, 0.95);
+  // Total flexion parameter is PIP-limited (the dominant press joint, ≈ 110°),
+  // capped just under the rig's fully-curled silhouette.
+  const flexion = clamp(baseFlex + roleBoost, 0, FLEXION_MAX);
   const sideBias = { index: -0.18, middle: -0.05, ring: 0.12, pinky: 0.24 }[name];
   const curl = (12 + 34 * (flexion + perpendicularBoost))
     * (role === "active" || role === "planted" ? 0.74 : 0.9);
   const tuck = (role === "idle" ? 14 : role === "hover" ? 5 : 0)
     * { index: 0.65, middle: 0.8, ring: 1.08, pinky: 1.24 }[name];
 
+  // PIP bows along the phalanx arc; DIP follows via the tunable DIP↔PIP
+  // coupling rather than a hardcoded ⅔ arc.  For press/plant the distal phalanx
+  // is near-perpendicular to the string and barely flexed (LOW coupling end),
+  // so dipArc < pipArc; idle/hover folds use the relaxed rule-of-thumb.
+  const PIP_ARC = 0.52;
+  const dipArc  = PIP_ARC * dipPipCoupling(role);
   const mcp = { x: mcpX, y: mcpY };
   const tip = { x: tipX, y: tipY };
   const pipBase = interpPoint(mcp, tip, pipT);
   const dipBase = interpPoint(mcp, tip, dipT);
   const pip = {
-    x: pipBase.x + nx * curl * (0.52 + sideBias),
-    y: pipBase.y + ny * curl * 0.52 - tuck * 0.45,
+    x: pipBase.x + nx * curl * (PIP_ARC + sideBias),
+    y: pipBase.y + ny * curl * PIP_ARC - tuck * 0.45,
   };
   const dip = {
-    x: dipBase.x + nx * curl * (0.35 + sideBias * 0.7),
-    y: dipBase.y + ny * curl * 0.35 - tuck * 0.75,
+    x: dipBase.x + nx * curl * (dipArc + sideBias * 0.7),
+    y: dipBase.y + ny * curl * dipArc - tuck * 0.75,
   };
 
   return {
@@ -552,6 +656,31 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
    *simultaneously* active at time t AND on *adjacent* strings.  Sequential
    re-use of the same finger at the same fret on non-adjacent strings (eg
    index alternating between s6 bass and s1 melody) is NOT a barre. */
+/* Normalise a planted-finger payload entry into {string, fret, strings[]}.
+   Accepted shapes (most specific first):
+     [startString, fret, endString]      — an explicit barre range (inclusive)
+     [string, fret, {strings:[...]}]      — an explicit strings list
+     [string, fret]                       — a single-string plant (v1 shape)
+   The returned `strings` is always a contiguous low→high range; `string` is the
+   first (lowest-numbered) string of that range. */
+function parsePlanted(p) {
+  if (!Array.isArray(p)) return { string: 0, fret: 0, strings: [] };
+  const fret = p[1];
+  let strings;
+  if (p.length >= 3 && p[2] && Array.isArray(p[2].strings)) {
+    strings = p[2].strings.slice();
+  } else if (p.length >= 3 && typeof p[2] === "number") {
+    const lo = Math.min(p[0], p[2]);
+    const hi = Math.max(p[0], p[2]);
+    strings = [];
+    for (let s = lo; s <= hi; s++) strings.push(s);
+  } else {
+    strings = [p[0]];
+  }
+  strings.sort((a, b) => a - b);
+  return { string: strings[0], fret, strings };
+}
+
 function sampleState(t, frames) {
   let handPos = 1;
   let lastFrame = null;
@@ -595,8 +724,14 @@ function sampleState(t, frames) {
   if (lastFrame && lastFrame.planted) {
     for (const fname in lastFrame.planted) {
       if (active[fname]) continue;
+      // A planted finger may hold a single string ([string, fret]) or a barre
+      // laid across a contiguous range of strings.  The range is carried either
+      // as a third element ([startString, fret, endString]) or as an explicit
+      // strings array ([..., {strings:[...]}]).  We normalise to {string, fret,
+      // strings[]} so the renderer treats a planted barre exactly like an active
+      // one (centre-targeted finger, bar pad across the range).
       const p = lastFrame.planted[fname];
-      planted[fname] = { string: p[0], fret: p[1] };
+      planted[fname] = parsePlanted(p);
     }
   }
 
@@ -620,10 +755,16 @@ function sampleState(t, frames) {
     }
   }
   for (const fname in planted) {
-    // Planted is always a single string in v1 (model limitation), but check
-    // if an active note of a DIFFERENT finger is pressing the same fret on
-    // adjacent string — we still keep planted as single-string here.
-    planted[fname].strings = [planted[fname].string];
+    // A planted finger can hold a barre across a contiguous string range (carried
+    // in the payload), mirroring how `active` handles barres.  parsePlanted()
+    // already populated `strings`; fall back to the single anchor string when the
+    // payload only gave a point.  We re-anchor `string` to the range's first
+    // string so downstream centre-targeting sees a consistent low→high order.
+    const pl = planted[fname];
+    if (!Array.isArray(pl.strings) || pl.strings.length === 0) {
+      pl.strings = [pl.string];
+    }
+    pl.string = pl.strings[0];
   }
 
   for (const f of frames) {
@@ -1357,9 +1498,176 @@ let playT                = 0;     // internal clock (standalone mode)
 let playing              = true;
 let EXT_SYNCED           = false; // true = parent drives the clock via `seek`
 let extT                 = 0;     // last time received from parent
+let NO_FINGERING         = false; // true = staff-only / empty track, show message
+
+/* ---------- Milestone 5: optional 3D renderer (feature flag, OFF by default) -
+   The 3D hand is a strictly additive, opt-in alternative to the SVG renderer
+   above.  EVERYTHING ABOVE THIS LINE is the unchanged 2.5D path; the default
+   experience never touches three.js.  The flag is read from (in priority order):
+     1. URL param  ?hand3d=1      (explicit per-link opt-in / opt-out with =0)
+     2. localStorage "fretwise.hand3d" === "1"
+   Absence of any flag → false → SVG, unchanged.  three.js is only fetched when
+   the flag is on, via a dynamic import() of ./js/hand3d.js (so the default path
+   carries zero extra bytes).  If that import fails or WebGL is unavailable, we
+   fall back to the SVG view — never a blank/broken panel. */
+const HAND3D_STORAGE_KEY = "fretwise.hand3d";
+function hand3dRequested() {
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    if (params.has("hand3d")) {
+      const v = params.get("hand3d");
+      return v === "" || v === "1" || v === "true";   // ?hand3d, =1, =true → on
+    }
+  } catch (e) { /* no URL (srcdoc/test) → fall through to storage */ }
+  try {
+    if (window.localStorage &&
+        window.localStorage.getItem(HAND3D_STORAGE_KEY) === "1") {
+      return true;
+    }
+  } catch (e) { /* storage blocked → treated as off */ }
+  return false;
+}
+function setHand3dFlag(on) {
+  try {
+    if (window.localStorage) {
+      window.localStorage.setItem(HAND3D_STORAGE_KEY, on ? "1" : "0");
+    }
+  } catch (e) { /* ignore */ }
+}
+
+let HAND3D_ACTIVE   = false;  // true once the 3D renderer is live (SVG hidden)
+let HAND3D_RENDERER = null;   // Hand3DRenderer instance, or null (→ SVG)
+let HAND3D_MODULE   = null;   // cached imported module
+let HAND3D_LOADING  = false;  // guard against concurrent enable() calls
+
+/* Build the per-frame kinematic snapshot the 3D rig consumes.  This is derived
+   ENTIRELY from the SHARED model: the same HandSimulator `sim`, the same
+   solveFinger() IK, and the same geometry helpers the SVG path uses — we do NOT
+   re-solve angles here, we just package the already-solved joints so hand3d.js
+   can re-express them as 3D bones.  Keeping this the single producer guarantees
+   the two renderers never diverge kinematically. */
+function buildKinSnapshot(sim) {
+  const fingers = {};
+  for (const fname of FINGER_ORDER) {
+    const mcp = sim.getMcpPos(fname);
+    const fg  = sim.fingers[fname];
+    const ik  = solveFinger(mcp.x, mcp.y, fg.tipX, fg.tipY, fname, fg.role);
+    fingers[fname] = {
+      ik,
+      role:    fg.role,
+      fret:    fg.fret,
+      strings: fg.strings,
+      width:   fingerPxWidth(fname, fg.fret),
+    };
+  }
+  const idxMcp = sim.getMcpPos("index");
+  const pnkMcp = sim.getMcpPos("pinky");
+  const θ       = sim.wristRot;
+  const nPalmX  = Math.sin(θ);
+  const nPalmY  = -Math.cos(θ);
+  const palmTopX = sim.palmX + nPalmX * PALM_TOP_FROM_MCP;
+  const palmTopY = sim.pivotY + nPalmY * PALM_TOP_FROM_MCP;
+  return {
+    fingers,
+    palm: {
+      mcpL: idxMcp.x - 10,
+      mcpR: pnkMcp.x + 10,
+      topX: palmTopX,
+      topY: palmTopY,
+      botY: sim.pivotY + 12,
+    },
+    forearm: {
+      wristX:   palmTopX + sim.forearmDrift * 0.3,
+      forearmX: palmTopX + sim.forearmDrift,
+      topY:     FOREARM_TOP_Y,
+    },
+    thumb: { x: sim.thumb.x, y: sim.thumb.y, role: sim.thumb.role },
+  };
+}
+
+/* Geometry snapshot for the 3D board — same helpers/constants as the SVG path
+   so the 3D fretboard shares one coordinate space with the hand. */
+function hand3dGeometry() {
+  return {
+    NUT_X,
+    fretX,
+    stringY,
+    stringTop:    STRING_Y_TOP,
+    stringBottom: STRING_Y_BOTTOM,
+    numFrets:     NUM_FRETS,
+    numStrings:   NUM_STRINGS,
+  };
+}
+
+/* Enable the 3D renderer: dynamically import three.js + the rig, create the
+   renderer, and on success hide the SVG and show the 3D canvas.  On ANY failure
+   (import error, WebGL unavailable, construction throw) we stay on SVG and
+   surface a small note — never a broken panel.  Returns true on success. */
+async function enableHand3d() {
+  if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
+  HAND3D_LOADING = true;
+  const mount = document.getElementById("scene3d");
+  const svg   = document.getElementById("scene");
+  try {
+    if (!HAND3D_MODULE) {
+      HAND3D_MODULE = await import("./js/hand3d.js");
+    }
+    const renderer = HAND3D_MODULE.create(mount);
+    if (!renderer) throw new Error("WebGL unavailable or renderer creation failed");
+    HAND3D_RENDERER = renderer;
+    HAND3D_ACTIVE   = true;
+    renderer.setGeometry(hand3dGeometry());
+    if (mount) mount.style.display = "block";
+    if (svg)   svg.style.display   = "none";
+    _syncHand3dButton();
+    return true;
+  } catch (e) {
+    // Fall back to SVG cleanly.
+    HAND3D_RENDERER = null;
+    HAND3D_ACTIVE   = false;
+    if (mount) mount.style.display = "none";
+    if (svg)   svg.style.display   = "block";
+    _syncHand3dButton();
+    return false;
+  } finally {
+    HAND3D_LOADING = false;
+  }
+}
+
+/* Disable the 3D renderer and restore the unchanged SVG view. */
+function disableHand3d() {
+  if (HAND3D_RENDERER) {
+    try { HAND3D_RENDERER.dispose(); } catch (e) { /* ignore */ }
+  }
+  HAND3D_RENDERER = null;
+  HAND3D_ACTIVE   = false;
+  const mount = document.getElementById("scene3d");
+  const svg   = document.getElementById("scene");
+  if (mount) mount.style.display = "none";
+  if (svg)   svg.style.display   = "block";
+  _syncHand3dButton();
+}
+
+function _syncHand3dButton() {
+  const btn = document.getElementById("btn-3d");
+  if (btn) btn.textContent = HAND3D_ACTIVE ? "3D : on" : "3D : off";
+}
+
+/* A payload has no playable fingering when it has zero frames or every frame is
+   an open string / fingerless.  Such tracks (vocal, staff-only, a solve that
+   produced no fretted notes) must degrade gracefully rather than render a
+   broken hand or fall through to the embedded demo. */
+function _hasNoFingering(data) {
+  const frames = (data && Array.isArray(data.frames)) ? data.frames : [];
+  if (data && data.meta && data.meta.fingered === false) return true;
+  if (!frames.length) return true;
+  return !frames.some((f) =>
+    f && f.finger && f.finger !== "open" && typeof f.fret === "number" && f.fret > 0);
+}
 
 function installData(data) {
   CURRENT_DATA         = data;
+  NO_FINGERING         = _hasNoFingering(data);
   // Derive fret/string/tuning/scale/capo geometry from the payload BEFORE the
   // simulator is built — HandSimulator's constructor reads pressX()/stringY(),
   // which depend on the configured geometry.
@@ -1371,6 +1679,48 @@ function installData(data) {
   EXT_SYNCED           = !!(data && data.meta && data.meta.synced);
   formatHUD(data);
   buildFretboard(document.getElementById("layer-fretboard"), data);
+  // Clear any hand drawn for a previous (fingered) track and show/hide the
+  // graceful empty-state message.
+  renderNoFingeringState();
+  // If the 3D renderer is live, refresh its fretboard for the new track's
+  // geometry (string count / fret span can change between tracks).  The SVG
+  // path is geometry-rebuilt by buildFretboard() above; mirror that for 3D.
+  if (HAND3D_ACTIVE && HAND3D_RENDERER) {
+    try { HAND3D_RENDERER.setGeometry(hand3dGeometry()); } catch (e) { /* keep SVG-safe */ }
+  }
+}
+
+/* Show or clear the "no fingering for this track" state.  When active we wipe
+   the hand/shadow/overlay layers (so no stale or broken hand lingers) and draw a
+   centred message; the per-frame loop also early-outs while NO_FINGERING. */
+function renderNoFingeringState() {
+  const layerHand    = document.getElementById("layer-hand");
+  const layerShadow  = document.getElementById("layer-shadow");
+  const layerOverlay = document.getElementById("layer-overlay");
+  if (layerHand)    clearLayer(layerHand);
+  if (layerShadow)  clearLayer(layerShadow);
+  if (layerOverlay) clearLayer(layerOverlay);
+  const logEl = document.getElementById("notelog");
+  if (!NO_FINGERING) {
+    if (logEl) logEl.textContent = "-";
+    return;
+  }
+  if (!layerOverlay) return;
+  const cx = SCENE_W / 2;
+  const cy = SCENE_H / 2;
+  const g = el("g", { id: "no-fingering-msg", "text-anchor": "middle" });
+  g.appendChild(el("text", {
+    x: cx, y: cy - 6,
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-size": 26, "font-weight": 800, fill: "#c6cad1",
+  }, "Aucun doigté pour cette piste"));
+  g.appendChild(el("text", {
+    x: cx, y: cy + 26,
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-size": 15, "font-weight": 500, fill: "#8d929a",
+  }, "No fingering for this track (vocal / staff only)"));
+  layerOverlay.appendChild(g);
+  if (logEl) logEl.textContent = "Aucun doigté pour cette piste.";
 }
 
 /* postMessage support — the parent FretWise UI pushes fingering data
@@ -1507,6 +1857,28 @@ window.addEventListener("message", (ev) => {
   btnPlay.addEventListener("click", () => setPlay(!playing));
   btnRew .addEventListener("click", () => { playT = 0; });
 
+  /* 3D toggle (Milestone 5).  Clicking flips the persisted flag and swaps
+     renderers cleanly.  Default stays SVG; the 3D path is purely opt-in. */
+  const btn3d = document.getElementById("btn-3d");
+  if (btn3d) {
+    _syncHand3dButton();
+    btn3d.addEventListener("click", async () => {
+      if (HAND3D_ACTIVE) {
+        setHand3dFlag(false);
+        disableHand3d();
+      } else {
+        setHand3dFlag(true);
+        await enableHand3d();   // falls back to SVG on failure (button stays "off")
+      }
+    });
+  }
+
+  /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
+     of the flag leaves the SVG renderer in place, unchanged. */
+  if (hand3dRequested()) {
+    enableHand3d();   // async; SVG keeps rendering until/unless it succeeds
+  }
+
   let lastMs = performance.now();
   function frame(now) {
     const dtMs = now - lastMs; lastMs = now;
@@ -1515,6 +1887,12 @@ window.addEventListener("message", (ev) => {
     /* Clock selection:
        - External (synced) mode: parent drives the clock via seek messages.
          We just read `extT` every frame; no internal accumulation, no loop.
+         INVARIANT (sync-drift guard): each `fretwise-hand-seek` carries an
+         ABSOLUTE timestamp (parent's playback.getCurrentTimeSec()), and we never
+         integrate `dt` here — so tNow always equals the parent's clock exactly,
+         with zero accumulated error no matter how long the piece runs.  Do NOT
+         change this to `extT += dt` or any incremental form; that would
+         reintroduce drift over a multi-minute timeline (regression-tested).
        - Standalone mode: internal loop (pre-existing behaviour).  */
     let tNow;
     if (EXT_SYNCED) {
@@ -1527,6 +1905,33 @@ window.addEventListener("message", (ev) => {
       tNow = playT;
     }
 
+    // Staff-only / empty-fingering track: the graceful message is already
+    // drawn by renderNoFingeringState(); skip all hand simulation/drawing so
+    // nothing broken or stale appears, but keep the rAF loop alive so a later
+    // track switch (postMessage) re-enables rendering.
+    if (NO_FINGERING) {
+      // The graceful "no fingering" message lives in the SVG overlay layer, so
+      // it must be visible even if the 3D flag is on.  Reveal the SVG and hide
+      // the 3D canvas for this state; the renderer swaps back when a fingered
+      // track loads.
+      if (HAND3D_ACTIVE) {
+        const m = document.getElementById("scene3d");
+        const sv = document.getElementById("scene");
+        if (m)  m.style.display  = "none";
+        if (sv) sv.style.display = "block";
+      }
+      tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
+      requestAnimationFrame(frame);
+      return;
+    }
+    // Leaving NO_FINGERING with 3D active: restore the 3D canvas / hide SVG.
+    if (HAND3D_ACTIVE) {
+      const m = document.getElementById("scene3d");
+      const sv = document.getElementById("scene");
+      if (m && m.style.display === "none")  m.style.display  = "block";
+      if (sv && sv.style.display !== "none") sv.style.display = "none";
+    }
+
     if (CURRENT_SIM && CURRENT_DATA) {
       const st = sampleState(tNow, CURRENT_DATA.frames);
       /* Only animate the hand when playing; freeze in place on pause so
@@ -1534,7 +1939,22 @@ window.addEventListener("message", (ev) => {
       if (playing) {
         CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
       }
-      drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+      // Renderer selection: when the 3D flag is on AND the renderer is live, the
+      // SAME simulator state drives the 3D rig (via the shared kin snapshot) and
+      // we skip the SVG hand draw.  Otherwise the unchanged SVG path runs.  Both
+      // read the identical `CURRENT_SIM` updated above, so the time-sync (M4) and
+      // kinematics are shared with zero divergence.
+      if (HAND3D_ACTIVE && HAND3D_RENDERER) {
+        try {
+          HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM));
+        } catch (e) {
+          // A render fault must never blank the panel: fall back to SVG.
+          disableHand3d();
+          drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+        }
+      } else {
+        drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+      }
       drawOverlay(st, tNow, CURRENT_CHORD_GROUPS);
 
       tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
