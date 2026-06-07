@@ -2698,6 +2698,30 @@ function _buildHandVizPayload() {
       planted: r.planted_fingers || {},
     });
   }
+  // ── Real fretboard geometry threaded from the source ──────────────────
+  // num_frets follows the music: enough room for the highest fret used,
+  // never fewer than 12 so the neck still looks like a neck on low pieces.
+  let highestFret = 0;
+  for (const r of results) {
+    if (typeof r.fret === 'number' && r.fret > highestFret) highestFret = r.fret;
+  }
+  const numFrets = Math.max(12, highestFret + 2);
+  // tuning: the active track's real open-string MIDI pitches (low→high),
+  // converted to note-name+octave strings the renderer expects. Falls back
+  // to standard 6-string tuning when the track carries none.
+  const activeTrack = (currentTracks || []).find((t) => t.id === currentTrackId);
+  const trackTuning = activeTrack && Array.isArray(activeTrack.tuning) ? activeTrack.tuning : null;
+  const tuning = (trackTuning && trackTuning.length)
+    ? trackTuning.map(_midiToNoteName)
+    : ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+  // scale_length_mm / capo are optional and only present once the backend
+  // exposes them; thread them through when available (forward-compatible).
+  const scaleLengthMm = (renderer.data && typeof renderer.data.scale_length_mm === 'number')
+    ? renderer.data.scale_length_mm
+    : 648;
+  const capo = (renderer.data && typeof renderer.data.capo === 'number' && renderer.data.capo > 0)
+    ? renderer.data.capo
+    : 0;
   return {
     meta: {
       title: (renderer.data.title || 'FretWise'),
@@ -2710,12 +2734,21 @@ function _buildHandVizPayload() {
         : 10,
     },
     fretboard: {
-      num_frets: 15,
-      scale_length_mm: 648,
-      tuning: ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'],
+      num_frets: numFrets,
+      scale_length_mm: scaleLengthMm,
+      tuning,
+      capo,
+      num_strings: tuning.length,
     },
     frames,
   };
+}
+
+/** Convert a MIDI pitch (e.g. 40) to a note name with octave (e.g. "E2"). */
+function _midiToNoteName(midi) {
+  const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const octave = Math.floor(midi / 12) - 1;   // MIDI 60 = C4 (scientific pitch)
+  return NAMES[((midi % 12) + 12) % 12] + octave;
 }
 
 function _postHandVizData() {
