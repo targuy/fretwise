@@ -182,12 +182,22 @@ const SCENE_W = 1440, SCENE_H = 560;
 
 const NUT_X    = 110;
 const SCALE_PX = 1120;
-const NUM_FRETS = 15;
+
+/* ---------- Generalized geometry (mutable; derived from payload) ----------
+   These were once hard-coded constants (15 frets, 6 strings, standard tuning,
+   648 mm scale).  They are now `let` bindings recomputed by configureGeometry()
+   at installData time from the payload's `fretboard` block, so drop tunings,
+   capos, 7/8-string necks and notes above fret 15 all render correctly.  The
+   defaults below reproduce the historical behaviour when a field is absent. */
+let NUM_FRETS    = 15;
+let NUM_STRINGS  = 6;
+let SCALE_LENGTH_MM = 648;
+let CAPO_FRET    = 0;
 
 /* String order (FLIPPED): top = string 1 (high E), bottom = string 6 (low E). */
-const STRING_Y_TOP     = 230;   // string 1 (high E)
-const STRING_Y_BOTTOM  = 350;   // string 6 (low E)
-const STRING_SPACING   = (STRING_Y_BOTTOM - STRING_Y_TOP) / 5;
+const STRING_Y_TOP     = 230;   // string 1 (highest string)
+const STRING_Y_BOTTOM  = 350;   // last string (lowest)
+let   STRING_SPACING   = (STRING_Y_BOTTOM - STRING_Y_TOP) / 5;
 const BOARD_TOP_MARGIN = 24;
 const BOARD_TOP_Y      = STRING_Y_TOP - BOARD_TOP_MARGIN;     // 206
 const BOARD_BOT_Y      = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;  // 374
@@ -264,10 +274,71 @@ const MAX_WRIST_ROT    = 0.61;   // radians ≈ 35°
 const WRIST_ROT_SMOOTH = 0.14;  // damping time-constant (s) for wrist rotation
 
 /* ---------- Chord detection ------------------------------------------------
-   Standard tuning MIDI base per string (s=1..6, s=1 = high E at top). */
-const STRING_MIDI_BASE = [64, 59, 55, 50, 45, 40];
+   Open-string MIDI base per string (index 0 = string 1 = highest string).
+   Mutable: derived from the payload tuning by configureGeometry(); the default
+   is standard 6-string tuning (high E .. low E). */
+let STRING_MIDI_BASE = [64, 59, 55, 50, 45, 40];
 function midiForPosition(string, fret) {
-  return STRING_MIDI_BASE[string - 1] + fret;
+  // Account for a capo: it raises every open string by CAPO_FRET semitones.
+  return STRING_MIDI_BASE[string - 1] + CAPO_FRET + fret;
+}
+
+/* Parse a note-name+octave string (e.g. "E2", "F#3", "Db4") to a MIDI pitch.
+   Returns null when unparseable so the caller can fall back. */
+const _NOTE_TO_PC = {
+  C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6,
+  Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11,
+};
+function noteNameToMidi(name) {
+  if (typeof name === 'number') return name;        // already a MIDI int
+  if (typeof name !== 'string') return null;
+  const m = name.trim().match(/^([A-Ga-g])([#b]?)(-?\d+)$/);
+  if (!m) return null;
+  const letter = m[1].toUpperCase();
+  const pc = _NOTE_TO_PC[letter + m[2]];
+  if (pc === undefined) return null;
+  return pc + (parseInt(m[3], 10) + 1) * 12;        // C4 = MIDI 60
+}
+
+/* ---------- Geometry configuration (called at installData time) -----------
+   Derive the mutable fret/string/tuning/scale/capo geometry from the payload's
+   `fretboard` block.  Every field is optional; absent fields keep the historical
+   defaults so older payloads (and the embedded demo) render unchanged. */
+function configureGeometry(data) {
+  const fb = (data && data.fretboard) || {};
+
+  // Tuning drives both the per-string MIDI base and the string count.  The
+  // payload lists open strings low→high (index 0 = lowest), matching the API
+  // and the fretboard labels (tuning[NUM_STRINGS - s]).  STRING_MIDI_BASE is
+  // indexed high→low (index 0 = string 1 = highest), so reverse it.
+  let midiLowToHigh = null;
+  if (Array.isArray(fb.tuning) && fb.tuning.length >= 2) {
+    const parsed = fb.tuning.map(noteNameToMidi);
+    if (parsed.every((p) => typeof p === 'number' && !Number.isNaN(p))) {
+      midiLowToHigh = parsed;
+    }
+  }
+  if (midiLowToHigh) {
+    NUM_STRINGS = midiLowToHigh.length;
+    STRING_MIDI_BASE = midiLowToHigh.slice().reverse();   // high→low
+  } else {
+    NUM_STRINGS = (typeof fb.num_strings === 'number' && fb.num_strings >= 2)
+      ? fb.num_strings : 6;
+    STRING_MIDI_BASE = [64, 59, 55, 50, 45, 40];
+  }
+
+  NUM_FRETS = (typeof fb.num_frets === 'number' && fb.num_frets >= 1)
+    ? Math.round(fb.num_frets) : 15;
+  SCALE_LENGTH_MM = (typeof fb.scale_length_mm === 'number' && fb.scale_length_mm > 0)
+    ? fb.scale_length_mm : 648;
+  CAPO_FRET = (typeof fb.capo === 'number' && fb.capo > 0)
+    ? Math.round(fb.capo) : 0;
+
+  // String spacing keeps the fixed Y band; divide by (strings - 1) so any
+  // string count fills the same neck height.
+  STRING_SPACING = (NUM_STRINGS > 1)
+    ? (STRING_Y_BOTTOM - STRING_Y_TOP) / (NUM_STRINGS - 1)
+    : 0;
 }
 
 /* Chord quality templates: offsets from root (pitch-class arithmetic). */
@@ -908,28 +979,44 @@ function buildFretboard(layer, data) {
       "font-family": "Helvetica, Arial, sans-serif", "font-size": 11, fill: "#6d7178",
     }, f));
   }
-  const thick = [3.2, 2.6, 2.1, 1.8, 1.5, 1.3];
-  const grad  = ["stringWound","stringWound","stringWound","stringPlain","stringPlain","stringPlain"];
-  for (let s = 6; s >= 1; s--) {
+  // String gauges taper from thick (low/bass) to thin (high/treble).  The
+  // lowest ~half are rendered wound (bronze), the upper half plain (silver).
+  // Indexed by string number s (1 = highest/thinnest .. NUM_STRINGS = lowest).
+  for (let s = NUM_STRINGS; s >= 1; s--) {
     const y = stringY(s);
-    const i = 6 - s;
+    // tFromHigh: 0 at the highest string, 1 at the lowest.
+    const tFromHigh = NUM_STRINGS > 1 ? (s - 1) / (NUM_STRINGS - 1) : 0;
+    const thickness = 1.3 + tFromHigh * (3.2 - 1.3);
+    const wound = s > NUM_STRINGS / 2;   // lower half = wound (bronze)
     layer.appendChild(el("rect", {
-      x: NUT_X - 6, y: y - thick[i] / 2,
-      width: x1 - NUT_X + 6, height: thick[i],
-      fill: "url(#" + grad[i] + ")", rx: 0.8,
+      x: NUT_X - 6, y: y - thickness / 2,
+      width: x1 - NUT_X + 6, height: thickness,
+      fill: "url(#" + (wound ? "stringWound" : "stringPlain") + ")", rx: 0.8,
     }));
   }
-  // tuning is low→high (E2..E4); in the new layout s=1 is at top (high E)
-  // and s=6 at bottom (low E), so label for string s is tuning[6-s].
-  const tuning = (data && data.fretboard && data.fretboard.tuning)
-    || ["E2","A2","D3","G3","B3","E4"];
-  for (let s = 1; s <= 6; s++) {
+  // tuning lists open strings low→high; in this layout s=1 is at top (highest)
+  // and s=NUM_STRINGS at bottom (lowest), so the label for string s comes from
+  // tuning[NUM_STRINGS - s].  Fall back to deriving it from STRING_MIDI_BASE.
+  const tuning = (data && data.fretboard && Array.isArray(data.fretboard.tuning)
+                  && data.fretboard.tuning.length === NUM_STRINGS)
+    ? data.fretboard.tuning
+    : null;
+  for (let s = 1; s <= NUM_STRINGS; s++) {
+    const label = tuning
+      ? tuning[NUM_STRINGS - s]
+      : _midiToNoteLabel(STRING_MIDI_BASE[s - 1] + CAPO_FRET);
     layer.appendChild(el("text", {
       x: NUT_X - 26, y: stringY(s) + 4, "text-anchor": "middle",
       "font-family": "Helvetica, Arial, sans-serif", "font-size": 12,
       "font-weight": 600, fill: "#c6cad1",
-    }, tuning[6 - s]));
+    }, label));
   }
+}
+
+/** MIDI pitch → note-name+octave label (e.g. 40 → "E2"). */
+function _midiToNoteLabel(midi) {
+  const NAMES = ["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"];
+  return NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
 }
 
 /* ---------- Capsule (rounded tapered link) -------------------------------- */
@@ -1273,6 +1360,10 @@ let extT                 = 0;     // last time received from parent
 
 function installData(data) {
   CURRENT_DATA         = data;
+  // Derive fret/string/tuning/scale/capo geometry from the payload BEFORE the
+  // simulator is built — HandSimulator's constructor reads pressX()/stringY(),
+  // which depend on the configured geometry.
+  configureGeometry(data);
   CURRENT_SIM          = new HandSimulator();
   CURRENT_CHORD_GROUPS = (data && data.frames) ? buildChordGroups(data.frames) : [];
   CURRENT_TOTAL        = (data && data.meta && data.meta.max_seconds) || 10;
