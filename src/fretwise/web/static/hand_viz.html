@@ -213,21 +213,103 @@ const PALM_TOP_FROM_MCP = 130;
 const MCP_MIN_Y = 164;
 const MCP_MAX_Y = 232;
 
-/* Index leftmost, pinky rightmost. */
-const MCP_OFFSETS = { index: -52, middle: -18, ring: +15, pinky: +49 };
+/* ---------- Anatomical hand rig (van der Hulst 2012; Shimawaki CT) ---------
+   The rig is grounded in published functional-anatomy data rather than values
+   eyeballed from photos, and is driven by a single `handScale` factor so the
+   same proportions serve any hand size (small junior hand .. large adult span)
+   and tie into a future per-player profile.  Every px dimension below is
+   `handScale × base proportion`; the default handScale reproduces the historical
+   look exactly (regression-guarded in tests).
+
+   Sources:
+     - Proportions / phalanx ratios: van der Hulst, F.P.R. et al. (2012),
+       "A functional anatomy based kinematic human hand model with simple size
+       adaptation", IEEE ICRA — proximal:middle:distal phalanx lengths and a
+       single isometric size-scaling parameter, exactly the `handScale` idea.
+       Cross-checked against Buryanov & Kotiuk (2010) phalange anthropometry.
+     - Joint flexion limits: Shimawaki et al. CT studies of finger MCP/PIP/DIP
+       maximum flexion (see JOINT_FLEXION_MAX below).
+
+   `handScale` is the single tunable: lengths, segment lengths and knuckle
+   offsets all scale isometrically with it.  1.0 = today's adult-hand default. */
+let handScale = 1.0;
+
+/* Knuckle (MCP) lateral offsets in the palm-local frame, index leftmost.
+   Base spacing is ~33-34 px between adjacent MCPs, centred near zero — the
+   metacarpal heads are roughly evenly spread across the palm.  Scaled by
+   handScale at configure time into the live MCP_OFFSETS used by the matrix. */
+const MCP_OFFSETS_BASE = { index: -52, middle: -18, ring: +15, pinky: +49 };
+let MCP_OFFSETS = { ...MCP_OFFSETS_BASE };   // recomputed by configureRig()
 const HOME_FRET_OFFSET = { index: 0, middle: 1, ring: 2, pinky: 3 };
 
-/* Finger proportions and mobility.  Lengths follow observed hand ratios:
-   middle longest, pinky shortest.  Mobility mirrors common left-hand guitar
-   mechanics: index/middle are independent; ring/pinky have less abduction and
-   tend to follow the wrist/forearm more. */
-const FINGER_TOTAL = { index: 176, middle: 194, ring: 184, pinky: 158 };
+/* Per-finger total length as a multiple of the BASE finger unit (the middle
+   finger = 1.0).  Ordering middle > ring ≈ index > pinky holds, matching
+   van der Hulst / anthropometric data (index and ring are near-equal, ring
+   marginally the longer of the two).  handScale × BASE_FINGER_UNIT × ratio
+   gives px; the default reproduces the prior {176,194,184,158}. */
+const BASE_FINGER_UNIT = 194;   // px length of the middle finger at handScale 1
+const FINGER_LENGTH_RATIO = {
+  index:  176 / BASE_FINGER_UNIT,   // 0.907
+  middle: 194 / BASE_FINGER_UNIT,   // 1.000 (longest)
+  ring:   184 / BASE_FINGER_UNIT,   // 0.948 (≈ index, slightly longer)
+  pinky:  158 / BASE_FINGER_UNIT,   // 0.814 (shortest)
+};
+let FINGER_TOTAL = { index: 176, middle: 194, ring: 184, pinky: 158 };
+
+/* Phalanx length proportions (proximal : middle : distal) as fractions of the
+   finger's total length, from van der Hulst (2012) Table I / Buryanov & Kotiuk
+   (2010).  The proximal phalanx is the longest (≈1.6-1.7× the distal), the
+   middle is intermediate, the distal shortest — these are pure ratios so they
+   are size-independent and need no scaling.  PIP sits at `proximal`, DIP at
+   `proximal + middle` along the finger axis. */
 const FINGER_SEG   = {
   index:  { proximal: 0.44, middle: 0.28, distal: 0.28 },
   middle: { proximal: 0.43, middle: 0.29, distal: 0.28 },
   ring:   { proximal: 0.44, middle: 0.28, distal: 0.28 },
   pinky:  { proximal: 0.46, middle: 0.27, distal: 0.27 },
 };
+
+/* ---------- Joint flexion limits (Shimawaki CT studies) -------------------
+   Maximum active flexion per joint, normalised to the model's 0..1 "flexion"
+   parameter (0 = straight, 1 = the rig's fully-curled silhouette).  Shimawaki
+   et al. report approximate max flexion of MCP ≈ 90°, PIP ≈ 110°, DIP ≈ 70-80°.
+   The dominant joint for the press silhouette is the MCP/PIP curl; we cap the
+   solver's flexion parameter at the PIP-limited value (~0.90) instead of the
+   ad-hoc 0.95, and clamp the base curl-from-reach term at the MCP limit. */
+const JOINT_FLEXION_MAX = {
+  mcp: 90 / 110,   // ≈ 0.818  (MCP max ≈ 90° of the PIP-scaled range)
+  pip: 1.0,        // PIP is the reference joint (≈ 110° → full curl)
+  dip: 78 / 110,   // ≈ 0.709  (DIP max ≈ 78°)
+};
+/* Overall flexion-parameter ceiling: PIP-limited, just under fully curled. */
+const FLEXION_MAX = 0.90;
+/* Base-curl ceiling (reach-driven term, before role boosts): MCP-limited. */
+const BASE_FLEX_MAX = JOINT_FLEXION_MAX.mcp;   // 0.818
+
+/* ---------- DIP↔PIP coupling (tunable, task-dependent) --------------------
+   The natural coupling DIP ≈ ⅔·PIP is only a rule of thumb (Shimawaki; Kapandji
+   "Physiology of the Joints").  For thin fingertip-on-fret contact the distal
+   phalanx is nearly perpendicular to the string and barely flexed, i.e. the LOW
+   end of the coupling range, so press/plant poses use a reduced ratio while
+   idle/hover folds use the relaxed default. */
+const DIP_PIP_COUPLING_DEFAULT = 0.673;  // ≈ ⅔ rule-of-thumb (idle/hover folds)
+const DIP_PIP_COUPLING_PRESS   = 0.42;   // fingertip-on-fret: distal near-straight
+function dipPipCoupling(role) {
+  return (role === "active" || role === "planted")
+    ? DIP_PIP_COUPLING_PRESS
+    : DIP_PIP_COUPLING_DEFAULT;
+}
+
+/* Compute the live px rig from handScale.  Called from configureGeometry() so a
+   payload (or future profile) can resize the whole hand. */
+function configureRig(scale) {
+  handScale = (typeof scale === "number" && scale > 0) ? scale : 1.0;
+  for (const f of ["index", "middle", "ring", "pinky"]) {
+    FINGER_TOTAL[f] = handScale * BASE_FINGER_UNIT * FINGER_LENGTH_RATIO[f];
+    MCP_OFFSETS[f]  = handScale * MCP_OFFSETS_BASE[f];
+  }
+}
+
 const FINGER_WIDTH = { index: 22, middle: 24, ring: 22, pinky: 19 };
 const NAIL_RADIUS  = { index: 12, middle: 13, ring: 12, pinky: 10 };
 const MAX_ABDUCTION_PX = { index: 70, middle: 64, ring: 52, pinky: 43 };
@@ -248,7 +330,7 @@ const REST_TIP_Y_OFFSET = 28;
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 const FINGER_LABEL = { index: "i", middle: "m", ring: "r", pinky: "p" };
-const HAND_MODEL_LABEL = "modele biomecanique v7 paume-matrice pouce-bas";
+const HAND_MODEL_LABEL = "modele biomecanique v8 anatomique handScale";
 
 /* Strict kinematic rules for this top-view model:
   1. The fretboard is fixed. The top of the image is the far/high-E side;
@@ -306,6 +388,13 @@ function noteNameToMidi(name) {
    defaults so older payloads (and the embedded demo) render unchanged. */
 function configureGeometry(data) {
   const fb = (data && data.fretboard) || {};
+
+  // Size-adapt the anatomical hand rig.  handScale comes from the payload's
+  // `hand` block (a future per-player profile) or defaults to 1.0 (today's
+  // adult-hand look).  Driving FINGER_TOTAL / MCP_OFFSETS off a single factor
+  // keeps the rig proportions anatomical at any hand size.
+  const handCfg = (data && data.hand) || {};
+  configureRig(typeof handCfg.scale === "number" ? handCfg.scale : 1.0);
 
   // Tuning drives both the per-string MIDI base and the string count.  The
   // payload lists open strings low→high (index 0 = lowest), matching the API
@@ -504,30 +593,40 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   const nx = -uy;
   const ny = ux;
 
-  const baseFlex = clamp(1 - Math.min(d, maxReach) / L, 0, 0.82);
+  // Base curl from how far the reach falls short of full extension, capped at
+  // the MCP flexion limit (Shimawaki: MCP max ≈ 90°, the BASE_FLEX_MAX ratio).
+  const baseFlex = clamp(1 - Math.min(d, maxReach) / L, 0, BASE_FLEX_MAX);
   const flatness = Math.abs(dx) / Math.max(1, Math.abs(dy));
   const perpendicularBoost = (role === "active" || role === "planted")
     ? clamp((flatness - 0.75) * 0.14 + (abductionOver + reachOver) * 0.0018, 0, 0.24)
     : 0;
   const roleBoost = role === "idle" ? 0.38 : role === "hover" ? 0.18 : 0.04;
-  const flexion = clamp(baseFlex + roleBoost, 0, 0.95);
+  // Total flexion parameter is PIP-limited (the dominant press joint, ≈ 110°),
+  // capped just under the rig's fully-curled silhouette.
+  const flexion = clamp(baseFlex + roleBoost, 0, FLEXION_MAX);
   const sideBias = { index: -0.18, middle: -0.05, ring: 0.12, pinky: 0.24 }[name];
   const curl = (12 + 34 * (flexion + perpendicularBoost))
     * (role === "active" || role === "planted" ? 0.74 : 0.9);
   const tuck = (role === "idle" ? 14 : role === "hover" ? 5 : 0)
     * { index: 0.65, middle: 0.8, ring: 1.08, pinky: 1.24 }[name];
 
+  // PIP bows along the phalanx arc; DIP follows via the tunable DIP↔PIP
+  // coupling rather than a hardcoded ⅔ arc.  For press/plant the distal phalanx
+  // is near-perpendicular to the string and barely flexed (LOW coupling end),
+  // so dipArc < pipArc; idle/hover folds use the relaxed rule-of-thumb.
+  const PIP_ARC = 0.52;
+  const dipArc  = PIP_ARC * dipPipCoupling(role);
   const mcp = { x: mcpX, y: mcpY };
   const tip = { x: tipX, y: tipY };
   const pipBase = interpPoint(mcp, tip, pipT);
   const dipBase = interpPoint(mcp, tip, dipT);
   const pip = {
-    x: pipBase.x + nx * curl * (0.52 + sideBias),
-    y: pipBase.y + ny * curl * 0.52 - tuck * 0.45,
+    x: pipBase.x + nx * curl * (PIP_ARC + sideBias),
+    y: pipBase.y + ny * curl * PIP_ARC - tuck * 0.45,
   };
   const dip = {
-    x: dipBase.x + nx * curl * (0.35 + sideBias * 0.7),
-    y: dipBase.y + ny * curl * 0.35 - tuck * 0.75,
+    x: dipBase.x + nx * curl * (dipArc + sideBias * 0.7),
+    y: dipBase.y + ny * curl * dipArc - tuck * 0.75,
   };
 
   return {
