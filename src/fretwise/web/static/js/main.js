@@ -246,6 +246,7 @@ const prefSameFingerPenalty = $('#pref-same-finger-penalty');
 const prefInferLegato = $('#pref-infer-legato');
 const prefHandOverlay = $('#pref-hand-overlay');
 const btnHandViz    = $('#btn-hand-viz');
+const btnRecalc     = $('#btn-recalc');
 const handVizPanel  = $('#hand-viz-panel');
 const handVizFrame  = $('#hand-viz-frame');
 const handVizClose  = $('#hand-viz-close');
@@ -2851,6 +2852,50 @@ function _toggleHandViz() {
 }
 
 if (btnHandViz) btnHandViz.addEventListener('click', _toggleHandViz);
+
+// ── Recalculate fingering (per-track re-solve) ─────────────────────────
+//
+// Re-runs the optimizer for the currently open track + active mode so the
+// user can watch the result update (tab/notation + hand-viz). Reuses the
+// existing solve plumbing: drop the cached payload for this track, then let
+// `selectTrack` re-issue the solve, re-render via `initRenderer`, and emit
+// `fretwise:renderer-ready` (which re-posts the hand-viz payload). Non-guitar
+// / staff-only tracks degrade through the same path: `selectTrack` keeps them
+// in Staff view and the no-fingering hand-viz state is preserved.
+let _recalcRunning = false;
+
+async function _recalculateFingering() {
+  if (_recalcRunning) return;
+  if (currentTrackId == null || currentFile == null) return;
+  _recalcRunning = true;
+  if (btnRecalc) {
+    btnRecalc.disabled = true;
+    btnRecalc.classList.add('is-busy');
+    btnRecalc.setAttribute('aria-busy', 'true');
+  }
+  try {
+    // Invalidate this track's cached solve(s) so selectTrack hits the network
+    // again. We only know the (file, track) pair here, not the mode/prefs key,
+    // so drop every cache entry for this track.
+    const prefix = `${currentFile}#${currentTrackId}#`;
+    for (const key of Array.from(_solveCache.keys())) {
+      if (key.startsWith(prefix)) _solveCache.delete(key);
+    }
+    await selectTrack(currentTrackId, _reviewTrackName);
+  } catch (err) {
+    console.error('Recalculate fingering failed:', err);
+    _setPdfExportStatus(`Recalcul échoué : ${err.message}`, 'warn');
+  } finally {
+    _recalcRunning = false;
+    if (btnRecalc) {
+      btnRecalc.disabled = false;
+      btnRecalc.classList.remove('is-busy');
+      btnRecalc.removeAttribute('aria-busy');
+    }
+  }
+}
+
+if (btnRecalc) btnRecalc.addEventListener('click', _recalculateFingering);
 
 if (handVizClose) {
   handVizClose.addEventListener('click', () => {
