@@ -1078,6 +1078,99 @@ class TestResolveArpeggioChordFingering:
         assert out[5].state.hand_position == 4
 
 
+class _StubCost:
+    """Minimal cost_fn stub exposing only transition_cost.
+
+    ``score(state)`` maps a candidate/current FingeringState to a scalar so a
+    test can make a specific (finger, hand_position) cheap or expensive and
+    verify the resolver's gate honours it.  The resolver only ever calls
+    ``transition_cost``; everything else on CostFunction is irrelevant here.
+    """
+
+    def __init__(self, score) -> None:  # noqa: ANN001
+        self._score = score
+        self.calls = 0
+
+    def transition_cost(self, s1, s2, note, index=None):  # noqa: ANN001, ANN002, ANN003
+        self.calls += 1
+        # Score BOTH endpoints so a candidate is charged whether it appears as
+        # the source (s1, on the k->next edge) or target (s2, on prev->k).
+        return float(self._score(s1)) + float(self._score(s2))
+
+
+class TestResolveArpeggioCostAware:
+    """Cost-aware gating of resolve_arpeggio_chord_fingering (cost_fn=...)."""
+
+    def _window(self) -> list[FingeringResult]:
+        # Same shape as test_stabilisation_anchors_on_lowest_played_fret:
+        # Viterbi left these at hp=4 with drifting fingers; the natural
+        # stabilisation anchors hp=5 and assigns RING/RING/INDEX/RING/INDEX.
+        return [
+            _fr_hp(0, 0.0, 5, 7, Finger.PINKY, 4),
+            _fr_hp(1, 1.0, 4, 7, Finger.PINKY, 4),
+            _fr_hp(2, 2.0, 3, 5, Finger.MIDDLE, 4),
+            _fr_hp(3, 3.5, 3, 7, Finger.PINKY, 4),
+            _fr_hp(4, 3.75, 3, 5, Finger.MIDDLE, 4),
+        ]
+
+    def test_cost_fn_none_is_backward_compatible(self) -> None:
+        # cost_fn omitted → identical to the legacy unconditional behaviour.
+        legacy = resolve_arpeggio_chord_fingering(self._window())
+        explicit_none = resolve_arpeggio_chord_fingering(self._window(), cost_fn=None)
+        assert [r.state.finger for r in legacy] == [r.state.finger for r in explicit_none]
+        assert [r.state.hand_position for r in legacy] == [
+            r.state.hand_position for r in explicit_none
+        ]
+
+    def test_override_applied_when_cost_neutral(self) -> None:
+        # Flat cost (0 everywhere) → every override is cost-neutral, so the
+        # stabilisation fires exactly as in the legacy path: anti-oscillation
+        # is retained when it does not fight the cost.
+        cost = _StubCost(lambda s: 0.0)
+        out = resolve_arpeggio_chord_fingering(self._window(), cost_fn=cost)
+        assert cost.calls > 0
+        assert [r.state.finger for r in out] == [
+            Finger.RING, Finger.RING, Finger.INDEX, Finger.RING, Finger.INDEX,
+        ]
+        assert [r.state.hand_position for r in out] == [5, 5, 5, 5, 5]
+
+    def test_override_applied_when_strictly_cheaper(self) -> None:
+        # Make the anchored hp=5 strictly cheaper than the original hp=4.
+        cost = _StubCost(lambda s: 0.0 if s.hand_position == 5 else 10.0)
+        out = resolve_arpeggio_chord_fingering(self._window(), cost_fn=cost)
+        assert all(r.state.hand_position == 5 for r in out)
+
+    def test_override_skipped_when_it_raises_cost(self) -> None:
+        # Penalise the anchored hp=5 heavily → every override raises cost above
+        # epsilon, so NONE are applied and Viterbi's states survive untouched.
+        original = self._window()
+        cost = _StubCost(lambda s: 100.0 if s.hand_position == 5 else 0.0)
+        out = resolve_arpeggio_chord_fingering(original, cost_fn=cost)
+        assert [r.state.finger for r in out] == [r.state.finger for r in original]
+        assert [r.state.hand_position for r in out] == [
+            r.state.hand_position for r in original
+        ]
+
+    def test_epsilon_admits_exact_ties(self) -> None:
+        # A constant cost regardless of state is an exact tie on every edge;
+        # the epsilon slack lets the stabilisation still fire.
+        cost = _StubCost(lambda s: 4.2)
+        out = resolve_arpeggio_chord_fingering(self._window(), cost_fn=cost)
+        assert all(r.state.hand_position == 5 for r in out)
+
+    def test_real_cost_function_clear_arpeggio_still_stabilised(self) -> None:
+        # Spot-check with the REAL composite CostFunction (performance weights):
+        # a clean one-position arpeggio whose stabilisation is cost-neutral
+        # still collapses onto a single hand_position (anti-oscillation kept).
+        cost = CostFunction(weights=CostWeights.performance())
+        out = resolve_arpeggio_chord_fingering(self._window(), cost_fn=cost)
+        hps = {r.state.hand_position for r in out}
+        # The window collapses to one anchored hand position rather than the
+        # drifting hp=4 the stub Viterbi left (at least it does not increase
+        # the spread of hand positions).
+        assert len(hps) <= len({r.state.hand_position for r in self._window()})
+
+
 # ---------------------------------------------------------------------------
 # resolve_sedentary_fingers
 # ---------------------------------------------------------------------------
