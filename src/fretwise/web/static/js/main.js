@@ -454,7 +454,23 @@ function _renderLibTable() {
   });
 
   _renderAzBar(rows);
+  // After layout settles, push the sticky strip height down to CSS so the
+  // table's sticky <thead> stacks under it without overlap.
+  requestAnimationFrame(_updateStickyOffsets);
 }
+
+// Measure the sticky control strip (.lib-sticky-strip = search/filters +
+// A–Z bar) and expose its height as a CSS variable on #file-selector. The
+// sticky table header reads it via calc() to pin under the strip.
+function _updateStickyOffsets() {
+  const fs = document.getElementById('file-selector');
+  if (!fs || fs.style.display === 'none') return;
+  const strip = document.getElementById('lib-sticky-strip');
+  if (!strip) return;
+  const h = Math.round(strip.getBoundingClientRect().height);
+  if (h > 0) fs.style.setProperty('--lib-sticky-h', `${h}px`);
+}
+window.addEventListener('resize', _updateStickyOffsets);
 
 // The value used by the A–Z bar to bucket a row. Follows the active table sort
 // when it is by 'artist' or 'title'; otherwise falls back to title so the bar
