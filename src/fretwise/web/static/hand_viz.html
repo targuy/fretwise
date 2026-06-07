@@ -651,6 +651,31 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
    *simultaneously* active at time t AND on *adjacent* strings.  Sequential
    re-use of the same finger at the same fret on non-adjacent strings (eg
    index alternating between s6 bass and s1 melody) is NOT a barre. */
+/* Normalise a planted-finger payload entry into {string, fret, strings[]}.
+   Accepted shapes (most specific first):
+     [startString, fret, endString]      — an explicit barre range (inclusive)
+     [string, fret, {strings:[...]}]      — an explicit strings list
+     [string, fret]                       — a single-string plant (v1 shape)
+   The returned `strings` is always a contiguous low→high range; `string` is the
+   first (lowest-numbered) string of that range. */
+function parsePlanted(p) {
+  if (!Array.isArray(p)) return { string: 0, fret: 0, strings: [] };
+  const fret = p[1];
+  let strings;
+  if (p.length >= 3 && p[2] && Array.isArray(p[2].strings)) {
+    strings = p[2].strings.slice();
+  } else if (p.length >= 3 && typeof p[2] === "number") {
+    const lo = Math.min(p[0], p[2]);
+    const hi = Math.max(p[0], p[2]);
+    strings = [];
+    for (let s = lo; s <= hi; s++) strings.push(s);
+  } else {
+    strings = [p[0]];
+  }
+  strings.sort((a, b) => a - b);
+  return { string: strings[0], fret, strings };
+}
+
 function sampleState(t, frames) {
   let handPos = 1;
   let lastFrame = null;
@@ -694,8 +719,14 @@ function sampleState(t, frames) {
   if (lastFrame && lastFrame.planted) {
     for (const fname in lastFrame.planted) {
       if (active[fname]) continue;
+      // A planted finger may hold a single string ([string, fret]) or a barre
+      // laid across a contiguous range of strings.  The range is carried either
+      // as a third element ([startString, fret, endString]) or as an explicit
+      // strings array ([..., {strings:[...]}]).  We normalise to {string, fret,
+      // strings[]} so the renderer treats a planted barre exactly like an active
+      // one (centre-targeted finger, bar pad across the range).
       const p = lastFrame.planted[fname];
-      planted[fname] = { string: p[0], fret: p[1] };
+      planted[fname] = parsePlanted(p);
     }
   }
 
@@ -719,10 +750,16 @@ function sampleState(t, frames) {
     }
   }
   for (const fname in planted) {
-    // Planted is always a single string in v1 (model limitation), but check
-    // if an active note of a DIFFERENT finger is pressing the same fret on
-    // adjacent string — we still keep planted as single-string here.
-    planted[fname].strings = [planted[fname].string];
+    // A planted finger can hold a barre across a contiguous string range (carried
+    // in the payload), mirroring how `active` handles barres.  parsePlanted()
+    // already populated `strings`; fall back to the single anchor string when the
+    // payload only gave a point.  We re-anchor `string` to the range's first
+    // string so downstream centre-targeting sees a consistent low→high order.
+    const pl = planted[fname];
+    if (!Array.isArray(pl.strings) || pl.strings.length === 0) {
+      pl.strings = [pl.string];
+    }
+    pl.string = pl.strings[0];
   }
 
   for (const f of frames) {
@@ -1456,9 +1493,23 @@ let playT                = 0;     // internal clock (standalone mode)
 let playing              = true;
 let EXT_SYNCED           = false; // true = parent drives the clock via `seek`
 let extT                 = 0;     // last time received from parent
+let NO_FINGERING         = false; // true = staff-only / empty track, show message
+
+/* A payload has no playable fingering when it has zero frames or every frame is
+   an open string / fingerless.  Such tracks (vocal, staff-only, a solve that
+   produced no fretted notes) must degrade gracefully rather than render a
+   broken hand or fall through to the embedded demo. */
+function _hasNoFingering(data) {
+  const frames = (data && Array.isArray(data.frames)) ? data.frames : [];
+  if (data && data.meta && data.meta.fingered === false) return true;
+  if (!frames.length) return true;
+  return !frames.some((f) =>
+    f && f.finger && f.finger !== "open" && typeof f.fret === "number" && f.fret > 0);
+}
 
 function installData(data) {
   CURRENT_DATA         = data;
+  NO_FINGERING         = _hasNoFingering(data);
   // Derive fret/string/tuning/scale/capo geometry from the payload BEFORE the
   // simulator is built — HandSimulator's constructor reads pressX()/stringY(),
   // which depend on the configured geometry.
@@ -1470,6 +1521,42 @@ function installData(data) {
   EXT_SYNCED           = !!(data && data.meta && data.meta.synced);
   formatHUD(data);
   buildFretboard(document.getElementById("layer-fretboard"), data);
+  // Clear any hand drawn for a previous (fingered) track and show/hide the
+  // graceful empty-state message.
+  renderNoFingeringState();
+}
+
+/* Show or clear the "no fingering for this track" state.  When active we wipe
+   the hand/shadow/overlay layers (so no stale or broken hand lingers) and draw a
+   centred message; the per-frame loop also early-outs while NO_FINGERING. */
+function renderNoFingeringState() {
+  const layerHand    = document.getElementById("layer-hand");
+  const layerShadow  = document.getElementById("layer-shadow");
+  const layerOverlay = document.getElementById("layer-overlay");
+  if (layerHand)    clearLayer(layerHand);
+  if (layerShadow)  clearLayer(layerShadow);
+  if (layerOverlay) clearLayer(layerOverlay);
+  const logEl = document.getElementById("notelog");
+  if (!NO_FINGERING) {
+    if (logEl) logEl.textContent = "-";
+    return;
+  }
+  if (!layerOverlay) return;
+  const cx = SCENE_W / 2;
+  const cy = SCENE_H / 2;
+  const g = el("g", { id: "no-fingering-msg", "text-anchor": "middle" });
+  g.appendChild(el("text", {
+    x: cx, y: cy - 6,
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-size": 26, "font-weight": 800, fill: "#c6cad1",
+  }, "Aucun doigté pour cette piste"));
+  g.appendChild(el("text", {
+    x: cx, y: cy + 26,
+    "font-family": "Helvetica, Arial, sans-serif",
+    "font-size": 15, "font-weight": 500, fill: "#8d929a",
+  }, "No fingering for this track (vocal / staff only)"));
+  layerOverlay.appendChild(g);
+  if (logEl) logEl.textContent = "Aucun doigté pour cette piste.";
 }
 
 /* postMessage support — the parent FretWise UI pushes fingering data
@@ -1614,6 +1701,12 @@ window.addEventListener("message", (ev) => {
     /* Clock selection:
        - External (synced) mode: parent drives the clock via seek messages.
          We just read `extT` every frame; no internal accumulation, no loop.
+         INVARIANT (sync-drift guard): each `fretwise-hand-seek` carries an
+         ABSOLUTE timestamp (parent's playback.getCurrentTimeSec()), and we never
+         integrate `dt` here — so tNow always equals the parent's clock exactly,
+         with zero accumulated error no matter how long the piece runs.  Do NOT
+         change this to `extT += dt` or any incremental form; that would
+         reintroduce drift over a multi-minute timeline (regression-tested).
        - Standalone mode: internal loop (pre-existing behaviour).  */
     let tNow;
     if (EXT_SYNCED) {
@@ -1624,6 +1717,16 @@ window.addEventListener("message", (ev) => {
         if (playT > CURRENT_TOTAL + 0.8) playT = 0;
       }
       tNow = playT;
+    }
+
+    // Staff-only / empty-fingering track: the graceful message is already
+    // drawn by renderNoFingeringState(); skip all hand simulation/drawing so
+    // nothing broken or stale appears, but keep the rAF loop alive so a later
+    // track switch (postMessage) re-enables rendering.
+    if (NO_FINGERING) {
+      tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
+      requestAnimationFrame(frame);
+      return;
     }
 
     if (CURRENT_SIM && CURRENT_DATA) {
