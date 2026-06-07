@@ -172,26 +172,31 @@
 
 <!-- ═══════════════ FILE SELECTOR (shown initially) ═══════════════ -->
 <div id="file-selector" class="page" style="display:none">
-  <div class="lib-header">
-    <div class="lib-search-bar">
-      <input id="lib-search" type="search" placeholder="Search by title, artist, genre…" autocomplete="off" />
-      <select id="lib-genre-filter">
-        <option value="">All genres</option>
-      </select>
-      <select id="lib-format-filter">
-        <option value="">All formats</option>
-      </select>
-      <div class="lib-meta-wrap">
-        <button type="button" id="lib-meta-btn" class="lib-meta-btn"
-                title="Enrich your catalog with your own LLM: Export list → run the prompt in your LLM → import the JSON"
-                aria-haspopup="true" aria-expanded="false">Metadata &#9662;</button>
+  <!-- Sticky control strip: search/filters + A–Z index ride together at the top
+       of the viewport. Height is measured by JS into --lib-sticky-h so the
+       table's <thead> can stack under it without overlap. -->
+  <div class="lib-sticky-strip" id="lib-sticky-strip">
+    <div class="lib-header">
+      <div class="lib-search-bar">
+        <input id="lib-search" type="search" placeholder="Search by title, artist, genre…" autocomplete="off" />
+        <select id="lib-genre-filter">
+          <option value="">All genres</option>
+        </select>
+        <select id="lib-format-filter">
+          <option value="">All formats</option>
+        </select>
+        <div class="lib-meta-wrap">
+          <button type="button" id="lib-meta-btn" class="lib-meta-btn"
+                  title="Enrich your catalog with your own LLM: Export list → run the prompt in your LLM → import the JSON"
+                  aria-haspopup="true" aria-expanded="false">Metadata &#9662;</button>
+        </div>
       </div>
+      <div class="lib-meta-hint">Enrich metadata with your LLM: Export list &rarr; run the prompt in your LLM &rarr; import the JSON.</div>
+      <span id="lib-meta-status" class="lib-meta-status" aria-live="polite"></span>
+      <input type="file" id="lib-meta-import-input" accept=".json,application/json" style="display:none">
     </div>
-    <div class="lib-meta-hint">Enrich metadata with your LLM: Export list &rarr; run the prompt in your LLM &rarr; import the JSON.</div>
-    <span id="lib-meta-status" class="lib-meta-status" aria-live="polite"></span>
-    <input type="file" id="lib-meta-import-input" accept=".json,application/json" style="display:none">
+    <div class="lib-az-bar" id="lib-az-bar" role="navigation" aria-label="Alphabetical index"></div>
   </div>
-  <div class="lib-az-bar" id="lib-az-bar" role="navigation" aria-label="Alphabetical index"></div>
   <div class="lib-table-wrap">
     <table class="lib-table" id="lib-table">
       <thead>
