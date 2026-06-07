@@ -93,10 +93,15 @@
     <div class="spacer"></div>
     <div class="meta" id="hud-meta"></div>
     <button class="ctrl" id="btn-rewind">Rewind</button>
+    <button class="ctrl" id="btn-3d" title="Bascule rendu 3D (three.js) — expérimental">3D : off</button>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
 
   <div id="scene-wrap">
+    <!-- 3D mount (Milestone 5).  Empty + hidden by default; only populated when
+         the OFF-by-default hand3d feature flag is on AND three.js/WebGL load.
+         The SVG below stays the default, unchanged renderer. -->
+    <div id="scene3d" style="display:none; width:100%;"></div>
     <svg id="scene" viewBox="0 0 1440 560" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="fretWire" x1="0" y1="0" x2="0" y2="1">
@@ -1495,6 +1500,159 @@ let EXT_SYNCED           = false; // true = parent drives the clock via `seek`
 let extT                 = 0;     // last time received from parent
 let NO_FINGERING         = false; // true = staff-only / empty track, show message
 
+/* ---------- Milestone 5: optional 3D renderer (feature flag, OFF by default) -
+   The 3D hand is a strictly additive, opt-in alternative to the SVG renderer
+   above.  EVERYTHING ABOVE THIS LINE is the unchanged 2.5D path; the default
+   experience never touches three.js.  The flag is read from (in priority order):
+     1. URL param  ?hand3d=1      (explicit per-link opt-in / opt-out with =0)
+     2. localStorage "fretwise.hand3d" === "1"
+   Absence of any flag → false → SVG, unchanged.  three.js is only fetched when
+   the flag is on, via a dynamic import() of ./js/hand3d.js (so the default path
+   carries zero extra bytes).  If that import fails or WebGL is unavailable, we
+   fall back to the SVG view — never a blank/broken panel. */
+const HAND3D_STORAGE_KEY = "fretwise.hand3d";
+function hand3dRequested() {
+  try {
+    const params = new URLSearchParams(window.location.search || "");
+    if (params.has("hand3d")) {
+      const v = params.get("hand3d");
+      return v === "" || v === "1" || v === "true";   // ?hand3d, =1, =true → on
+    }
+  } catch (e) { /* no URL (srcdoc/test) → fall through to storage */ }
+  try {
+    if (window.localStorage &&
+        window.localStorage.getItem(HAND3D_STORAGE_KEY) === "1") {
+      return true;
+    }
+  } catch (e) { /* storage blocked → treated as off */ }
+  return false;
+}
+function setHand3dFlag(on) {
+  try {
+    if (window.localStorage) {
+      window.localStorage.setItem(HAND3D_STORAGE_KEY, on ? "1" : "0");
+    }
+  } catch (e) { /* ignore */ }
+}
+
+let HAND3D_ACTIVE   = false;  // true once the 3D renderer is live (SVG hidden)
+let HAND3D_RENDERER = null;   // Hand3DRenderer instance, or null (→ SVG)
+let HAND3D_MODULE   = null;   // cached imported module
+let HAND3D_LOADING  = false;  // guard against concurrent enable() calls
+
+/* Build the per-frame kinematic snapshot the 3D rig consumes.  This is derived
+   ENTIRELY from the SHARED model: the same HandSimulator `sim`, the same
+   solveFinger() IK, and the same geometry helpers the SVG path uses — we do NOT
+   re-solve angles here, we just package the already-solved joints so hand3d.js
+   can re-express them as 3D bones.  Keeping this the single producer guarantees
+   the two renderers never diverge kinematically. */
+function buildKinSnapshot(sim) {
+  const fingers = {};
+  for (const fname of FINGER_ORDER) {
+    const mcp = sim.getMcpPos(fname);
+    const fg  = sim.fingers[fname];
+    const ik  = solveFinger(mcp.x, mcp.y, fg.tipX, fg.tipY, fname, fg.role);
+    fingers[fname] = {
+      ik,
+      role:    fg.role,
+      fret:    fg.fret,
+      strings: fg.strings,
+      width:   fingerPxWidth(fname, fg.fret),
+    };
+  }
+  const idxMcp = sim.getMcpPos("index");
+  const pnkMcp = sim.getMcpPos("pinky");
+  const θ       = sim.wristRot;
+  const nPalmX  = Math.sin(θ);
+  const nPalmY  = -Math.cos(θ);
+  const palmTopX = sim.palmX + nPalmX * PALM_TOP_FROM_MCP;
+  const palmTopY = sim.pivotY + nPalmY * PALM_TOP_FROM_MCP;
+  return {
+    fingers,
+    palm: {
+      mcpL: idxMcp.x - 10,
+      mcpR: pnkMcp.x + 10,
+      topX: palmTopX,
+      topY: palmTopY,
+      botY: sim.pivotY + 12,
+    },
+    forearm: {
+      wristX:   palmTopX + sim.forearmDrift * 0.3,
+      forearmX: palmTopX + sim.forearmDrift,
+      topY:     FOREARM_TOP_Y,
+    },
+    thumb: { x: sim.thumb.x, y: sim.thumb.y, role: sim.thumb.role },
+  };
+}
+
+/* Geometry snapshot for the 3D board — same helpers/constants as the SVG path
+   so the 3D fretboard shares one coordinate space with the hand. */
+function hand3dGeometry() {
+  return {
+    NUT_X,
+    fretX,
+    stringY,
+    stringTop:    STRING_Y_TOP,
+    stringBottom: STRING_Y_BOTTOM,
+    numFrets:     NUM_FRETS,
+    numStrings:   NUM_STRINGS,
+  };
+}
+
+/* Enable the 3D renderer: dynamically import three.js + the rig, create the
+   renderer, and on success hide the SVG and show the 3D canvas.  On ANY failure
+   (import error, WebGL unavailable, construction throw) we stay on SVG and
+   surface a small note — never a broken panel.  Returns true on success. */
+async function enableHand3d() {
+  if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
+  HAND3D_LOADING = true;
+  const mount = document.getElementById("scene3d");
+  const svg   = document.getElementById("scene");
+  try {
+    if (!HAND3D_MODULE) {
+      HAND3D_MODULE = await import("./js/hand3d.js");
+    }
+    const renderer = HAND3D_MODULE.create(mount);
+    if (!renderer) throw new Error("WebGL unavailable or renderer creation failed");
+    HAND3D_RENDERER = renderer;
+    HAND3D_ACTIVE   = true;
+    renderer.setGeometry(hand3dGeometry());
+    if (mount) mount.style.display = "block";
+    if (svg)   svg.style.display   = "none";
+    _syncHand3dButton();
+    return true;
+  } catch (e) {
+    // Fall back to SVG cleanly.
+    HAND3D_RENDERER = null;
+    HAND3D_ACTIVE   = false;
+    if (mount) mount.style.display = "none";
+    if (svg)   svg.style.display   = "block";
+    _syncHand3dButton();
+    return false;
+  } finally {
+    HAND3D_LOADING = false;
+  }
+}
+
+/* Disable the 3D renderer and restore the unchanged SVG view. */
+function disableHand3d() {
+  if (HAND3D_RENDERER) {
+    try { HAND3D_RENDERER.dispose(); } catch (e) { /* ignore */ }
+  }
+  HAND3D_RENDERER = null;
+  HAND3D_ACTIVE   = false;
+  const mount = document.getElementById("scene3d");
+  const svg   = document.getElementById("scene");
+  if (mount) mount.style.display = "none";
+  if (svg)   svg.style.display   = "block";
+  _syncHand3dButton();
+}
+
+function _syncHand3dButton() {
+  const btn = document.getElementById("btn-3d");
+  if (btn) btn.textContent = HAND3D_ACTIVE ? "3D : on" : "3D : off";
+}
+
 /* A payload has no playable fingering when it has zero frames or every frame is
    an open string / fingerless.  Such tracks (vocal, staff-only, a solve that
    produced no fretted notes) must degrade gracefully rather than render a
@@ -1524,6 +1682,12 @@ function installData(data) {
   // Clear any hand drawn for a previous (fingered) track and show/hide the
   // graceful empty-state message.
   renderNoFingeringState();
+  // If the 3D renderer is live, refresh its fretboard for the new track's
+  // geometry (string count / fret span can change between tracks).  The SVG
+  // path is geometry-rebuilt by buildFretboard() above; mirror that for 3D.
+  if (HAND3D_ACTIVE && HAND3D_RENDERER) {
+    try { HAND3D_RENDERER.setGeometry(hand3dGeometry()); } catch (e) { /* keep SVG-safe */ }
+  }
 }
 
 /* Show or clear the "no fingering for this track" state.  When active we wipe
@@ -1693,6 +1857,28 @@ window.addEventListener("message", (ev) => {
   btnPlay.addEventListener("click", () => setPlay(!playing));
   btnRew .addEventListener("click", () => { playT = 0; });
 
+  /* 3D toggle (Milestone 5).  Clicking flips the persisted flag and swaps
+     renderers cleanly.  Default stays SVG; the 3D path is purely opt-in. */
+  const btn3d = document.getElementById("btn-3d");
+  if (btn3d) {
+    _syncHand3dButton();
+    btn3d.addEventListener("click", async () => {
+      if (HAND3D_ACTIVE) {
+        setHand3dFlag(false);
+        disableHand3d();
+      } else {
+        setHand3dFlag(true);
+        await enableHand3d();   // falls back to SVG on failure (button stays "off")
+      }
+    });
+  }
+
+  /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
+     of the flag leaves the SVG renderer in place, unchanged. */
+  if (hand3dRequested()) {
+    enableHand3d();   // async; SVG keeps rendering until/unless it succeeds
+  }
+
   let lastMs = performance.now();
   function frame(now) {
     const dtMs = now - lastMs; lastMs = now;
@@ -1724,9 +1910,26 @@ window.addEventListener("message", (ev) => {
     // nothing broken or stale appears, but keep the rAF loop alive so a later
     // track switch (postMessage) re-enables rendering.
     if (NO_FINGERING) {
+      // The graceful "no fingering" message lives in the SVG overlay layer, so
+      // it must be visible even if the 3D flag is on.  Reveal the SVG and hide
+      // the 3D canvas for this state; the renderer swaps back when a fingered
+      // track loads.
+      if (HAND3D_ACTIVE) {
+        const m = document.getElementById("scene3d");
+        const sv = document.getElementById("scene");
+        if (m)  m.style.display  = "none";
+        if (sv) sv.style.display = "block";
+      }
       tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       requestAnimationFrame(frame);
       return;
+    }
+    // Leaving NO_FINGERING with 3D active: restore the 3D canvas / hide SVG.
+    if (HAND3D_ACTIVE) {
+      const m = document.getElementById("scene3d");
+      const sv = document.getElementById("scene");
+      if (m && m.style.display === "none")  m.style.display  = "block";
+      if (sv && sv.style.display !== "none") sv.style.display = "none";
     }
 
     if (CURRENT_SIM && CURRENT_DATA) {
@@ -1736,7 +1939,22 @@ window.addEventListener("message", (ev) => {
       if (playing) {
         CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
       }
-      drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+      // Renderer selection: when the 3D flag is on AND the renderer is live, the
+      // SAME simulator state drives the 3D rig (via the shared kin snapshot) and
+      // we skip the SVG hand draw.  Otherwise the unchanged SVG path runs.  Both
+      // read the identical `CURRENT_SIM` updated above, so the time-sync (M4) and
+      // kinematics are shared with zero divergence.
+      if (HAND3D_ACTIVE && HAND3D_RENDERER) {
+        try {
+          HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM));
+        } catch (e) {
+          // A render fault must never blank the panel: fall back to SVG.
+          disableHand3d();
+          drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+        }
+      } else {
+        drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
+      }
       drawOverlay(st, tNow, CURRENT_CHORD_GROUPS);
 
       tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
