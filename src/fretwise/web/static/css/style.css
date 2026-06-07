@@ -1126,16 +1126,32 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .page { margin-top: 44px; }
 
 /* ═══════════════ Library Table ═══════════════ */
+
+/* Sticky control strip = .lib-header + .lib-az-bar wrapped together. Pins to
+ * the top under the 44px app header so search, filters AND the A–Z index
+ * never scroll away. Background is OPAQUE light-wood (high-opacity cream
+ * scrim over the maple tile) — the old translucent var(--bg-1) let the row
+ * list bleed through. The maple frame border-image is the same 9-slice used
+ * by the song-info / track-selector plaques. */
+.lib-sticky-strip {
+  position: sticky;
+  top: 44px;
+  z-index: 20;
+  padding: 6px 12px 4px;
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.92), rgba(248, 240, 224, 0.94)),
+    url("/static/img/wood/light.png") repeat;
+  background-size: auto, 256px 256px;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+  box-shadow: 0 6px 12px rgba(20, 12, 4, 0.32);
+}
+
 .lib-header {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 20px 8px;
-  background: var(--bg-1);
-  position: sticky;
-  top: 44px;
-  z-index: 10;
-  border-bottom: 1px solid var(--line-2);
+  padding: 10px 8px 6px;
+  background: transparent;
 }
 
 .lib-search-bar {
@@ -1196,15 +1212,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border-color: var(--signal);
 }
 
-/* A–Z alphabetical index bar. Sits between the search/filter header and the
-   table; clicking a letter jumps to the first matching entry. */
+/* A–Z alphabetical index bar. Sits inside .lib-sticky-strip, so it rides the
+ * same opaque maple background as the search/filter row above it. */
 .lib-az-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 2px;
-  padding: 6px 20px;
-  background: var(--bg-1);
-  border-bottom: 1px solid var(--line-2);
+  padding: 4px 8px 2px;
+  background: transparent;
+  border-top: 1px solid var(--line-2);
 }
 .lib-az-bar:empty { display: none; }
 .lib-az-letter {
@@ -1241,26 +1257,71 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 
 .lib-search-bar select option { background: var(--bg-1); color: var(--fg-0); }
 
+/* ── Fretboard list area ────────────────────────────────────────────────
+ * The row list is meant to look like a guitar fretboard: dark wood
+ * (rosewood/ebony) tile, framed by the dark-frame 9-slice, with metallic
+ * "fret wire" separators between rows and white text for high contrast. We
+ * scope the foreground tokens here so every nested label/badge auto-flips
+ * to white-on-dark without per-cell overrides. */
 .lib-table-wrap {
-  padding: 0 20px 20px;
-  overflow-x: auto;
+  /* Override the light-wood retoning that #file-selector imposes — this
+   * patch is the dark fretboard, not maple. */
+  --fg-0: #ffffff;
+  --fg-1: rgba(255, 255, 255, 0.86);
+  --fg-2: rgba(255, 255, 255, 0.70);
+  --fg-3: rgba(255, 255, 255, 0.52);
+  --line-1: rgba(255, 255, 255, 0.18);
+  --line-2: rgba(255, 255, 255, 0.12);
+  --line-3: rgba(255, 255, 255, 0.07);
+  /* Restore the warm accent against dark wood (the file-selector retoning
+   * had darkened it for legibility on light maple). */
+  --signal: oklch(0.84 0.16 75);
+
+  margin: 12px 12px 20px;
+  padding: 6px 8px 10px;
+  /* No overflow:auto here — that would make this wrap the nearest scroll
+   * container for the sticky <thead>, so the th would only stick to the
+   * wrap (which doesn't scroll) and slide off with page scroll. The page
+   * is the scroll container; thead sticks to the viewport. */
+  overflow: visible;
+  color: var(--fg-0);
+  background:
+    linear-gradient(rgba(18, 10, 4, 0.62), rgba(14, 8, 3, 0.72)),
+    url("/static/img/wood/dark.png") repeat;
+  background-size: auto, 256px 256px;
+  border-image: url("/static/img/wood/dark-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.55);
 }
 
 .lib-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 13px;
+  color: var(--fg-0);
 }
 
-.lib-table th {
+/* Sticky sort-column header. Pins below .lib-sticky-strip — the JS-measured
+ * --lib-sticky-h drives the offset so this never overlaps. The opaque maple
+ * background matches the strip above so the seam reads as one continuous
+ * top bar. */
+.lib-table thead th {
+  position: sticky;
+  top: calc(44px + var(--lib-sticky-h, 110px));
+  z-index: 5;
   text-align: left;
-  padding: 8px 10px;
-  border-bottom: 2px solid var(--line-2);
-  color: var(--fg-2);
-  font-weight: 600;
+  padding: 9px 10px;
+  color: oklch(0.30 0.04 50);
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.94), rgba(244, 232, 210, 0.96)),
+    url("/static/img/wood/light.png") repeat;
+  background-size: auto, 256px 256px;
+  border-bottom: 2px solid rgba(60, 40, 20, 0.40);
+  box-shadow: 0 4px 8px rgba(20, 12, 4, 0.34);
+  font-weight: 700;
   font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
@@ -1269,30 +1330,76 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   user-select: none;
 }
 
-.lib-table th.sortable:hover { color: var(--signal); }
+.lib-table th.sortable:hover { color: oklch(0.42 0.16 50); }
 
-.sort-arrow { opacity: 0.7; }
+.sort-arrow { opacity: 0.75; }
 
+/* Row = a space between two fret wires. Darker stripe on even rows reads
+ * like the alternating shadow you get along a fretboard. */
 .lib-row {
-  border-bottom: 1px solid var(--line-2);
-  transition: background 0.15s;
   cursor: pointer;
+  transition: background 0.15s;
 }
-
-.lib-row:hover { background: var(--bg-2); }
 
 .lib-row td {
   padding: 10px 10px;
   color: var(--fg-0);
   vertical-align: middle;
+  /* Metallic "fret wire" — silver gradient line under each row. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 -1px 0 rgba(220, 220, 230, 0.22),
+    inset 0 -2px 0 rgba(80, 80, 90, 0.18);
+  background: transparent;
+}
+.lib-row:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+.lib-row:hover td {
+  background: rgba(220, 180, 100, 0.10);
+  color: #ffffff;
 }
 
-.lib-cell-title { cursor: pointer; }
+/* Position-marker inlays: subtle pale dots at fret 3 / 5 / 7 / 9, and a
+ * double dot at fret 12 (~24-row octave). Pure ::before pseudo on the
+ * first cell so we don't touch row markup. */
+.lib-row:nth-child(3) .lib-cell-title::before,
+.lib-row:nth-child(5) .lib-cell-title::before,
+.lib-row:nth-child(7) .lib-cell-title::before,
+.lib-row:nth-child(9) .lib-cell-title::before,
+.lib-row:nth-child(15) .lib-cell-title::before,
+.lib-row:nth-child(17) .lib-cell-title::before,
+.lib-row:nth-child(19) .lib-cell-title::before,
+.lib-row:nth-child(21) .lib-cell-title::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 240, 230, 0.85) 0%, rgba(200, 195, 180, 0.5) 60%, rgba(120, 115, 100, 0.2) 100%);
+  box-shadow: 0 0 4px rgba(245, 240, 230, 0.35);
+  vertical-align: middle;
+}
+/* Octave marker: double dot at row 12. */
+.lib-row:nth-child(12) .lib-cell-title::before {
+  content: "● ●";
+  display: inline-block;
+  margin-right: 6px;
+  color: rgba(245, 240, 230, 0.65);
+  font-size: 7px;
+  letter-spacing: 2px;
+  vertical-align: middle;
+  text-shadow: 0 0 3px rgba(245, 240, 230, 0.3);
+}
+
+.lib-cell-title { cursor: pointer; color: #ffffff; }
 .lib-title-text {
-  font-weight: 500;
+  font-weight: 600;
+  color: #ffffff;
   transition: color 0.15s;
 }
-.lib-row:hover .lib-title-text { color: var(--signal); }
+.lib-row:hover .lib-title-text { color: oklch(0.92 0.13 78); }
+
+.lib-cell-artist,
+.lib-cell-year { color: rgba(255, 255, 255, 0.78); }
 
 .lib-badge {
   display: inline-block;
@@ -1303,14 +1410,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-badge-genre {
-  background: oklch(0.82 0.15 75 / 0.15);
-  color: var(--signal);
+  background: oklch(0.84 0.16 75 / 0.22);
+  color: oklch(0.94 0.13 80);
+  border: 1px solid oklch(0.84 0.16 75 / 0.35);
 }
 
 .lib-badge-fmt {
-  background: var(--bg-2);
-  color: var(--fg-2);
-  border: 1px solid var(--line-2);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.80);
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .lib-cell-actions {
