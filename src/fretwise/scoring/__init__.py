@@ -2447,23 +2447,77 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
     return resolved
 
 
-def compute_musical_cost(
+# ---------------------------------------------------------------------------
+# Feature-vector plumbing (internal — unlocks per-feature learning in Part B).
+#
+# Both cost aggregators below build an explicit, fixed-length FEATURE VECTOR
+# (one non-negative component per penalty term) and return the inner product of
+# that vector with a per-feature WEIGHT vector. With the default identity
+# weights (all 1.0) the returned scalar reproduces the historical flat sum
+# *in the same left-to-right addition order*, so it is byte-identical and the
+# existing behaviour / test suite is unchanged. Part B may later attach
+# non-trivial weights to the named indices below.
+#
+# Ordering is load-bearing: the index constants name each slot so Part B can map
+# weights to features by name. Do NOT reorder without updating both the
+# ``*_features`` producer and any weight vector that targets these indices.
+# The hot path (Viterbi O(N·S²)) stays allocation-light: producers return a
+# fixed-size tuple (no per-call dict/dataclass) and the wrappers sum without
+# building intermediate containers.
+# ---------------------------------------------------------------------------
+
+# Musical-cost feature ordering (see compute_musical_cost_features).
+MUSICAL_FEATURE_LEGATO_CROSS_STRING: int = 0
+MUSICAL_FEATURE_SLIDE_CROSS_STRING: int = 1
+MUSICAL_FEATURE_VIBRATO_POSITION: int = 2
+MUSICAL_FEATURE_WIDE_VIBRATO_LOW: int = 3
+MUSICAL_FEATURE_BEND_FEASIBILITY: int = 4
+MUSICAL_FEATURE_HARMONIC_POSITION: int = 5
+MUSICAL_FEATURE_TAPPING_LOW_FRET: int = 6
+MUSICAL_FEATURE_NAMES: tuple[str, ...] = (
+    "legato_cross_string",
+    "slide_cross_string",
+    "vibrato_position",
+    "wide_vibrato_low",
+    "bend_feasibility",
+    "harmonic_position",
+    "tapping_low_fret",
+)
+MUSICAL_FEATURE_COUNT: int = len(MUSICAL_FEATURE_NAMES)
+
+# Mechanical-cost feature ordering (see compute_mechanical_cost_features).
+MECHANICAL_FEATURE_POSITION_SHIFT: int = 0
+MECHANICAL_FEATURE_STRETCH: int = 1
+MECHANICAL_FEATURE_STRING_CHANGE: int = 2
+MECHANICAL_FEATURE_FINGER_DIFFICULTY: int = 3
+MECHANICAL_FEATURE_SAME_FINGER_MOTION: int = 4
+MECHANICAL_FEATURE_SEQUENTIAL_CROSSING: int = 5
+MECHANICAL_FEATURE_NAMES: tuple[str, ...] = (
+    "position_shift",
+    "stretch",
+    "string_change",
+    "finger_difficulty",
+    "same_finger_motion",
+    "sequential_crossing",
+)
+MECHANICAL_FEATURE_COUNT: int = len(MECHANICAL_FEATURE_NAMES)
+
+
+def compute_musical_cost_features(
     s1: FingeringState,
     s2: FingeringState,
     note: NoteEvent,
-) -> float:
-    """Aggregate musical cost C_music(s1, s2).
+) -> tuple[float, float, float, float, float, float, float]:
+    """Return the musical-cost FEATURE VECTOR for the transition s1 -> s2.
 
-    Penalises fingering choices that conflict with the note's articulation.
-    Each sub-component returns a non-negative cost; their sum is the total
-    C_music for the transition.
+    Each component is an independent, non-negative penalty term indexed by the
+    ``MUSICAL_FEATURE_*`` constants (see ``MUSICAL_FEATURE_NAMES``). The scalar
+    cost is the inner product of this vector with a per-feature weight vector;
+    with identity weights the components sum to the historical
+    :func:`compute_musical_cost`.
 
-    Components:
-    1. Legato same-string requirement (hammer-on, pull-off, legato)
-    2. Slide same-string requirement
-    3. Vibrato position quality (open-string penalty, low-fret penalty)
-    4. Bend feasibility (open-string impossible, thick-string difficulty)
-    5. Harmonic position matching (natural harmonics at specific frets)
+    Hot-path note: returns a fixed-size tuple with no intermediate
+    dict/dataclass allocation (runs in the Viterbi O(N·S²) inner loop).
 
     Args:
         s1: Previous (source) fingering state.
@@ -2471,66 +2525,245 @@ def compute_musical_cost(
         note: NoteEvent for s2 (provides articulation context).
 
     Returns:
-        Non-negative musical cost.
+        Seven-component feature tuple (see ``MUSICAL_FEATURE_NAMES``).
     """
-    cost = 0.0
-
-    # --- 1. Legato same-string requirement ---
+    # --- legato_cross_string ---
     # Hammer-on, pull-off, and legato are physically impossible across strings.
+    f_legato = 0.0
     if note.articulation in (
         Articulation.HAMMER_ON,
         Articulation.PULL_OFF,
         Articulation.LEGATO,
-    ):
-        if s1.string_num != s2.string_num:
-            cost += _LEGATO_CROSS_STRING_PENALTY  # impossible across strings
+    ) and s1.string_num != s2.string_num:
+        f_legato = _LEGATO_CROSS_STRING_PENALTY  # impossible across strings
 
-    # --- 2. Slide same-string requirement ---
+    # --- slide_cross_string ---
     # Slides require the finger to glide along a single string.
-    if note.slide_type is not None:
-        if s1.string_num != s2.string_num:
-            cost += _SLIDE_CROSS_STRING_PENALTY  # slide impossible across strings
+    f_slide = 0.0
+    if note.slide_type is not None and s1.string_num != s2.string_num:
+        f_slide = _SLIDE_CROSS_STRING_PENALTY  # slide impossible across strings
 
-    # --- 3. Vibrato position quality ---
+    # --- vibrato_position ---
     # Vibrato is achieved by oscillating the fretting finger. Open strings
     # cannot be vibrated (no fretting finger); very low frets near the nut
     # have less room for finger oscillation.
+    f_vibrato = 0.0
     if note.articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO):
         if s2.fret == 0:
-            cost += _VIBRATO_OPEN_STRING_PENALTY  # open string: vibrato impossible
+            f_vibrato = _VIBRATO_OPEN_STRING_PENALTY  # open string: vibrato impossible
         elif s2.fret <= _VIBRATO_LOW_FRET_MAX:
-            cost += _VIBRATO_LOW_FRET_PENALTY  # low frets: vibrato awkward near the nut
-    # Wide vibrato needs more finger travel; penalise further on low frets.
-    if note.vibrato_wide and 0 < s2.fret <= _WIDE_VIBRATO_FRET_MAX:
-        cost += _WIDE_VIBRATO_LOW_PENALTY
+            f_vibrato = _VIBRATO_LOW_FRET_PENALTY  # low frets: vibrato awkward near the nut
 
-    # --- 4. Bend feasibility ---
+    # --- wide_vibrato_low ---
+    # Wide vibrato needs more finger travel; penalise further on low frets.
+    f_wide_vibrato = 0.0
+    if note.vibrato_wide and 0 < s2.fret <= _WIDE_VIBRATO_FRET_MAX:
+        f_wide_vibrato = _WIDE_VIBRATO_LOW_PENALTY
+
+    # --- bend_feasibility ---
     # Bending requires pushing/pulling the string sideways.  Open strings
     # cannot be bent.  Wound strings (6, 5, 4) are harder to bend,
     # especially for larger bend values.
+    f_bend = 0.0
     if note.bend_value is not None and note.bend_value > 0:
         if s2.fret == 0:
-            cost += _BEND_OPEN_STRING_PENALTY  # open string: bend impossible
-        else:
-            # Wound strings (low E=6, A=5, D=4) require more force.
-            if s2.string_num >= _BEND_HEAVY_WOUND_MIN_STRING:
-                cost += _BEND_HEAVY_WOUND_FACTOR * note.bend_value  # heavy wound
-            elif s2.string_num == 4:
-                cost += _BEND_MEDIUM_WOUND_FACTOR * note.bend_value  # string 4: medium wound
+            f_bend = _BEND_OPEN_STRING_PENALTY  # open string: bend impossible
+        # Wound strings (low E=6, A=5, D=4) require more force.
+        elif s2.string_num >= _BEND_HEAVY_WOUND_MIN_STRING:
+            f_bend = _BEND_HEAVY_WOUND_FACTOR * note.bend_value  # heavy wound
+        elif s2.string_num == 4:
+            f_bend = _BEND_MEDIUM_WOUND_FACTOR * note.bend_value  # string 4: medium wound
 
-    # --- 5. Natural harmonic position matching ---
+    # --- harmonic_position ---
     # Natural harmonics ring at specific fret positions (5, 7, 12, 19).
     # If the source specifies a harmonic_fret, the fingering should match.
-    if note.harmonic_type == "natural" and note.harmonic_fret is not None:
-        if s2.fret != note.harmonic_fret:
-            cost += _HARMONIC_WRONG_FRET_PENALTY  # wrong fret for the harmonic node
+    f_harmonic = 0.0
+    if (
+        note.harmonic_type == "natural"
+        and note.harmonic_fret is not None
+        and s2.fret != note.harmonic_fret
+    ):
+        f_harmonic = _HARMONIC_WRONG_FRET_PENALTY  # wrong fret for the harmonic node
 
-    # --- 6. Muted / tapping modifiers ---
+    # --- tapping_low_fret ---
     # Tapping is easier at higher frets where the action is lower.
+    f_tapping = 0.0
     if note.tapping and s2.fret < _TAPPING_LOW_FRET_MAX:
-        cost += _TAPPING_LOW_FRET_PENALTY  # tapping near the nut is harder
+        f_tapping = _TAPPING_LOW_FRET_PENALTY  # tapping near the nut is harder
 
+    return (
+        f_legato,
+        f_slide,
+        f_vibrato,
+        f_wide_vibrato,
+        f_bend,
+        f_harmonic,
+        f_tapping,
+    )
+
+
+def compute_musical_cost(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    *,
+    feature_weights: Sequence[float] | None = None,
+) -> float:
+    """Aggregate musical cost C_music(s1, s2).
+
+    Penalises fingering choices that conflict with the note's articulation.
+    Thin wrapper over :func:`compute_musical_cost_features`: the scalar is the
+    inner product of the feature vector with ``feature_weights`` (identity by
+    default, reproducing the historical flat sum byte-for-byte).
+
+    Components (see ``MUSICAL_FEATURE_NAMES`` for the index order):
+    1. Legato same-string requirement (hammer-on, pull-off, legato)
+    2. Slide same-string requirement
+    3. Vibrato position quality (open-string penalty, low-fret penalty)
+    4. Wide-vibrato low-fret penalty
+    5. Bend feasibility (open-string impossible, thick-string difficulty)
+    6. Harmonic position matching (natural harmonics at specific frets)
+    7. Tapping low-fret penalty
+
+    Args:
+        s1: Previous (source) fingering state.
+        s2: Next (target) fingering state.
+        note: NoteEvent for s2 (provides articulation context).
+        feature_weights: Optional per-feature weights aligned with the
+            ``MUSICAL_FEATURE_*`` indices. ``None`` means identity weights
+            (all 1.0), i.e. a plain sum of the feature components.
+
+    Returns:
+        Non-negative musical cost.
+
+    Note:
+        The default (identity-weight) path is inlined here rather than routing
+        through :func:`compute_musical_cost_features`, to keep the Viterbi inner
+        loop free of the extra call + tuple allocation. The inlined branch logic
+        is kept byte-identical to the producer; ``test_*`` and the equivalence
+        checks guard against divergence. Only the rare weighted path builds the
+        feature tuple.
+    """
+    if feature_weights is not None:
+        w = feature_weights
+        features = compute_musical_cost_features(s1, s2, note)
+        return (
+            features[MUSICAL_FEATURE_LEGATO_CROSS_STRING]
+            * w[MUSICAL_FEATURE_LEGATO_CROSS_STRING]
+            + features[MUSICAL_FEATURE_SLIDE_CROSS_STRING]
+            * w[MUSICAL_FEATURE_SLIDE_CROSS_STRING]
+            + features[MUSICAL_FEATURE_VIBRATO_POSITION]
+            * w[MUSICAL_FEATURE_VIBRATO_POSITION]
+            + features[MUSICAL_FEATURE_WIDE_VIBRATO_LOW]
+            * w[MUSICAL_FEATURE_WIDE_VIBRATO_LOW]
+            + features[MUSICAL_FEATURE_BEND_FEASIBILITY]
+            * w[MUSICAL_FEATURE_BEND_FEASIBILITY]
+            + features[MUSICAL_FEATURE_HARMONIC_POSITION]
+            * w[MUSICAL_FEATURE_HARMONIC_POSITION]
+            + features[MUSICAL_FEATURE_TAPPING_LOW_FRET]
+            * w[MUSICAL_FEATURE_TAPPING_LOW_FRET]
+        )
+
+    # Identity-weight hot path: inlined flat sum in the historical order.
+    cost = 0.0
+    if note.articulation in (
+        Articulation.HAMMER_ON,
+        Articulation.PULL_OFF,
+        Articulation.LEGATO,
+    ) and s1.string_num != s2.string_num:
+        cost += _LEGATO_CROSS_STRING_PENALTY
+    if note.slide_type is not None and s1.string_num != s2.string_num:
+        cost += _SLIDE_CROSS_STRING_PENALTY
+    if note.articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO):
+        if s2.fret == 0:
+            cost += _VIBRATO_OPEN_STRING_PENALTY
+        elif s2.fret <= _VIBRATO_LOW_FRET_MAX:
+            cost += _VIBRATO_LOW_FRET_PENALTY
+    if note.vibrato_wide and 0 < s2.fret <= _WIDE_VIBRATO_FRET_MAX:
+        cost += _WIDE_VIBRATO_LOW_PENALTY
+    if note.bend_value is not None and note.bend_value > 0:
+        if s2.fret == 0:
+            cost += _BEND_OPEN_STRING_PENALTY
+        elif s2.string_num >= _BEND_HEAVY_WOUND_MIN_STRING:
+            cost += _BEND_HEAVY_WOUND_FACTOR * note.bend_value
+        elif s2.string_num == 4:
+            cost += _BEND_MEDIUM_WOUND_FACTOR * note.bend_value
+    if (
+        note.harmonic_type == "natural"
+        and note.harmonic_fret is not None
+        and s2.fret != note.harmonic_fret
+    ):
+        cost += _HARMONIC_WRONG_FRET_PENALTY
+    if note.tapping and s2.fret < _TAPPING_LOW_FRET_MAX:
+        cost += _TAPPING_LOW_FRET_PENALTY
     return cost
+
+
+def compute_mechanical_cost_features(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    *,
+    rule_preferences: RulePreferences | None = None,
+    segment_anchor_prev: int | None = None,
+    segment_anchor_curr: int | None = None,
+) -> tuple[float, float, float, float, float, float]:
+    """Return the mechanical-cost FEATURE VECTOR for the transition s1 -> s2.
+
+    Each component is an independent, non-negative penalty term indexed by the
+    ``MECHANICAL_FEATURE_*`` constants (see ``MECHANICAL_FEATURE_NAMES``). The
+    scalar cost is the inner product of this vector with a per-feature weight
+    vector; with identity weights the components sum to the historical
+    :func:`compute_mechanical_cost`.
+
+    Special case — same string and same fret (fret != 0):
+    - Same finger: all components zero (finger already placed, no movement).
+    - Different finger: the redundant-swap scalar
+      (``cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY``) is
+      folded into the ``finger_difficulty`` component, all others zero — so the
+      identity inner product reproduces the historical scalar exactly.
+
+    Hot-path note: returns a fixed-size tuple with no intermediate
+    dict/dataclass allocation (runs in the Viterbi O(N·S²) inner loop).
+
+    Args:
+        s1: Previous fingering state.
+        s2: Next fingering state.
+        note: NoteEvent for s2 (tempo and duration context).
+        rule_preferences: Optional rule toggles.
+        segment_anchor_prev: Optional anchor of the segment containing s1.
+            When both anchors are provided, segment-aware shift cost is used.
+        segment_anchor_curr: Optional anchor of the segment containing s2.
+
+    Returns:
+        Six-component feature tuple (see ``MECHANICAL_FEATURE_NAMES``).
+    """
+    if s1.string_num == s2.string_num and s1.fret == s2.fret and s1.fret != 0:
+        if s1.finger == s2.finger:
+            # Finger already in place — re-articulate at zero cost.
+            return (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        # Switching finger on the same fret: wasteful, add stiff penalty.
+        # Folded into the finger_difficulty slot so the identity sum matches.
+        swap = cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY
+        return (0.0, swap, 0.0, 0.0, 0.0, 0.0)
+
+    prefs = rule_preferences or RulePreferences()
+
+    if segment_anchor_prev is not None and segment_anchor_curr is not None:
+        shift_cost = cost_position_shift_segment_aware(
+            s1, s2, note, segment_anchor_prev, segment_anchor_curr,
+        )
+    else:
+        shift_cost = cost_position_shift(s1, s2, note)
+
+    return (
+        shift_cost,
+        cost_stretch(s1, s2),
+        cost_string_change(s1, s2),
+        cost_finger_difficulty(s2),
+        cost_same_finger_motion(s1, s2, note, rule_preferences=prefs),
+        cost_sequential_crossing(s1, s2),
+    )
 
 
 def compute_mechanical_cost(
@@ -2541,10 +2774,15 @@ def compute_mechanical_cost(
     rule_preferences: RulePreferences | None = None,
     segment_anchor_prev: int | None = None,
     segment_anchor_curr: int | None = None,
+    feature_weights: Sequence[float] | None = None,
 ) -> float:
     """Aggregate mechanical cost C_méca(s1, s2).
 
-    Combines components:
+    Thin wrapper over :func:`compute_mechanical_cost_features`: the scalar is the
+    inner product of the feature vector with ``feature_weights`` (identity by
+    default, reproducing the historical flat sum byte-for-byte).
+
+    Combines components (see ``MECHANICAL_FEATURE_NAMES`` for the index order):
     1. Position shift (wrist movement, tempo-weighted) — segment-aware when
        both ``segment_anchor_prev`` and ``segment_anchor_curr`` are provided,
        per-state hp delta otherwise (A' tolerance fallback).
@@ -2566,18 +2804,53 @@ def compute_mechanical_cost(
         segment_anchor_prev: Optional anchor of the segment containing s1.
             When both anchors are provided, segment-aware shift cost is used.
         segment_anchor_curr: Optional anchor of the segment containing s2.
+        feature_weights: Optional per-feature weights aligned with the
+            ``MECHANICAL_FEATURE_*`` indices. ``None`` means identity weights
+            (all 1.0), i.e. a plain sum of the feature components.
 
     Returns:
         Non-negative mechanical cost.
-    """
-    prefs = rule_preferences or RulePreferences()
 
+    Note:
+        The default (identity-weight) path is inlined here rather than routing
+        through :func:`compute_mechanical_cost_features`, to keep the Viterbi
+        inner loop free of the extra call + tuple allocation. The inlined branch
+        logic is kept byte-identical to the producer; ``test_*`` and the
+        equivalence checks guard against divergence. Only the rare weighted path
+        builds the feature tuple.
+    """
+    if feature_weights is not None:
+        w = feature_weights
+        features = compute_mechanical_cost_features(
+            s1,
+            s2,
+            note,
+            rule_preferences=rule_preferences,
+            segment_anchor_prev=segment_anchor_prev,
+            segment_anchor_curr=segment_anchor_curr,
+        )
+        return (
+            features[MECHANICAL_FEATURE_POSITION_SHIFT]
+            * w[MECHANICAL_FEATURE_POSITION_SHIFT]
+            + features[MECHANICAL_FEATURE_STRETCH] * w[MECHANICAL_FEATURE_STRETCH]
+            + features[MECHANICAL_FEATURE_STRING_CHANGE]
+            * w[MECHANICAL_FEATURE_STRING_CHANGE]
+            + features[MECHANICAL_FEATURE_FINGER_DIFFICULTY]
+            * w[MECHANICAL_FEATURE_FINGER_DIFFICULTY]
+            + features[MECHANICAL_FEATURE_SAME_FINGER_MOTION]
+            * w[MECHANICAL_FEATURE_SAME_FINGER_MOTION]
+            + features[MECHANICAL_FEATURE_SEQUENTIAL_CROSSING]
+            * w[MECHANICAL_FEATURE_SEQUENTIAL_CROSSING]
+        )
+
+    # Identity-weight hot path: inlined, byte-identical to the historical sum.
     if s1.string_num == s2.string_num and s1.fret == s2.fret and s1.fret != 0:
         if s1.finger == s2.finger:
             return 0.0  # finger already in place — re-articulate at zero cost
-        else:
-            # Switching finger on the same fret: wasteful, add stiff penalty
-            return cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY
+        # Switching finger on the same fret: wasteful, add stiff penalty.
+        return cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY
+
+    prefs = rule_preferences or RulePreferences()
 
     if segment_anchor_prev is not None and segment_anchor_curr is not None:
         shift_cost = cost_position_shift_segment_aware(
