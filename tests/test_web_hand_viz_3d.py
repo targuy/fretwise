@@ -46,6 +46,9 @@ import textwrap
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
+
+from fretwise.web.app import create_app
 
 
 def _strip_js_comments(src: str) -> str:
@@ -241,6 +244,11 @@ def test_fallback_to_svg_on_failure() -> None:
     assert "HAND3D_ACTIVE   = false" in enable or "HAND3D_ACTIVE = false" in enable
     # The factory returning null is treated as a failure → SVG.
     assert "if (!renderer)" in enable
+    # The catch block emits a single traceable warning so the regression is
+    # visible in DevTools (Step 5 silent-fallback hardening) — without this,
+    # an import or construction error vanishes and the toggle's "off" state
+    # looks identical to "user never enabled 3D".
+    assert "console.warn" in enable
     # The renderer factory gates on WebGL availability.
     h3d = _HAND3D_JS.read_text(encoding="utf-8")
     assert "function webglAvailable()" in h3d
@@ -248,6 +256,36 @@ def test_fallback_to_svg_on_failure() -> None:
     # create() never throws on construction failure — it returns null.
     create = h3d[h3d.index("export function create(container)"):]
     assert "return null;" in create
+
+
+def test_hand3d_js_is_served_with_silent_fallback_guards() -> None:
+    """The 3D rig module is served by the app AND ships the silent-fallback guards.
+
+    Step 5 hardens the OBJ-mesh load path: a network/parse/missing-export failure
+    must NOT propagate — it must console.warn and leave the procedural palm in
+    place.  We pin both that contract here:
+
+      (1) the static route serves ``/static/js/hand3d.js`` with 200, so the
+          dynamic import() in ``hand_viz.html`` can actually reach the module,
+      (2) the served file references ``_loadHandMesh`` (the wrapped loader) and
+          ``console.warn`` (the guard the silent fallback installs).
+
+    Both are textual guards — the real WebGL/import behaviour can't run under
+    pytest, so we prove the wiring is in place by inspecting what the server
+    actually returns to the browser.
+    """
+    client = TestClient(create_app())
+    res = client.get("/static/js/hand3d.js")
+    assert res.status_code == 200
+    # Some servers default to text/plain or application/javascript; both are fine
+    # for a dynamic import().  We just need a non-empty JS body.
+    body = res.text
+    assert len(body) > 1000, "hand3d.js looks suspiciously empty"
+    # The OBJ mesh loader is the function the silent fallback guards.
+    assert "_loadHandMesh" in body
+    # The fallback path emits a single console.warn (mesh load OR enable failure
+    # both go through console.warn so the regression is traceable in DevTools).
+    assert "console.warn" in body
 
 
 # --------------------------------------------------------------------------- #
