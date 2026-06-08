@@ -566,15 +566,36 @@ class Hand3DRenderer {
     }
 
     // Palm slab across the MCP span.
+    //
+    // The palm geometry — whether the procedural rounded slab (makePalmGeometry)
+    // or the cropped OBJ hand_mesh — arrives as a UNIT box centered on the origin
+    // (Step 1+2), so the pose block here must do all the sizing.  We derive every
+    // dimension live from the kin.palm payload (the MCP span shipped by
+    // buildKinSnapshot in hand_viz.html: mcpL/mcpR = index/pinky MCPs in SVG-x,
+    // botY = wrist-side palm edge, topX/topY = back-of-hand point above the MCPs)
+    // so the palm resizes correctly when the hand moves up/down the neck or the
+    // wrist rotates — no hardcoded width/depth magic numbers.
     if (kin.palm) {
       const L = this._toWorld({ x: kin.palm.mcpL, y: kin.palm.botY }, 6);
       const R = this._toWorld({ x: kin.palm.mcpR, y: kin.palm.botY }, 6);
       const T = this._toWorld({ x: kin.palm.topX, y: kin.palm.topY }, 8);
       const cx = (L.x + R.x) / 2;
-      const cz = (L.z + R.z + T.z) / 3;
       const cy = (L.y + R.y + T.y) / 3;
+      const cz = (L.z + R.z + T.z) / 3;
       this.palm.position.set(cx, cy, cz);
-      this.palm.scale.set(Math.abs(R.x - L.x) + 6, 5, Math.abs(T.z - L.z) + 6);
+      // mcpWidthW  = world distance between index and pinky MCPs (palm width).
+      // palmDepthW = wrist-edge → back-of-hand vector length, doubled because the
+      //              unit slab spans both ±0.5 around its center.
+      // palmThickW = back-of-hand thickness; anthropometric ~22% of MCP width.
+      const mcpWidthW  = Math.hypot(R.x - L.x, R.z - L.z);
+      const palmDepthW = Math.hypot(T.x - cx, T.z - cz) * 2;
+      const palmThickW = mcpWidthW * 0.22;
+      this.palm.scale.set(mcpWidthW, palmThickW, palmDepthW);
+      // Track wrist yaw so the slab/mesh follows the wrist rotation around Y:
+      // atan2 with this sign convention keeps the palm's local +X axis aimed
+      // from the index MCP toward the pinky MCP regardless of how the hand
+      // pivots on the neck.
+      this.palm.rotation.y = Math.atan2(L.z - R.z, R.x - L.x);
     }
 
     // Forearm: from off-scene (player side) up to the wrist/palm top.
