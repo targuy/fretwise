@@ -150,6 +150,46 @@ def test_3d_reuses_shared_kinematics_not_a_fork() -> None:
     assert "buildKinSnapshot(CURRENT_SIM)" in html
 
 
+def test_toggle_button_is_wired_to_enable_path() -> None:
+    """The visible "3D : off" HUD button toggles the renderer (not display-only).
+
+    Regression guard for the "button visible but I can't reach 3D mode" symptom:
+    the ``#btn-3d`` control must be bound to a click handler that flips the
+    persisted flag and calls ``enableHand3d`` / ``disableHand3d``.  We also pin
+    that the binding is hoisted to TOP LEVEL — above the ``installData(await
+    loadData())`` boot IIFE — so a throw while installing data can never leave
+    the button dead.
+    """
+    html = _HAND_VIZ.read_text(encoding="utf-8")
+
+    # The HUD button still ships labelled "3D : off" (default OFF on first load).
+    assert 'id="btn-3d"' in html
+    assert "3D : off" in html
+
+    # It is looked up and a click handler is registered that hits the enable
+    # path, the disable path, and persists the flag in both directions.
+    assert 'document.getElementById("btn-3d")' in html
+    assert 'btn3d.addEventListener("click"' in html
+    assert "await enableHand3d();" in html
+    assert "disableHand3d();" in html
+    assert "setHand3dFlag(true);" in html
+    assert "setHand3dFlag(false);" in html
+
+    # Wiring must be hoisted ABOVE the data-load IIFE so it cannot be skipped by
+    # an exception during installData(): the binding's getElementById call must
+    # appear before `installData(await loadData());`.
+    bind_at = html.index('document.getElementById("btn-3d")')
+    boot_at = html.index("installData(await loadData());")
+    assert bind_at < boot_at, (
+        "the #btn-3d toggle must be wired before the async data-load boot so a "
+        "data-install failure can't leave the visible button dead"
+    )
+
+    # Default stays OFF: nothing forces 3D on at load; the only auto-enable path
+    # is still gated behind the OFF-by-default flag helper.
+    assert "if (hand3dRequested()) {" in html
+
+
 def test_fallback_to_svg_on_failure() -> None:
     """Enable path falls back to SVG (never a broken panel) on any failure."""
     html = _HAND_VIZ.read_text(encoding="utf-8")

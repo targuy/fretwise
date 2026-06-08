@@ -1800,6 +1800,40 @@ window.addEventListener("message", (ev) => {
   }
 });
 
+/* 3D toggle (Milestone 5).  Clicking flips the persisted flag and swaps
+   renderers cleanly.  Default stays SVG; the 3D path is purely opt-in.
+
+   This is wired at TOP LEVEL (not inside the async data-load IIFE below) on
+   purpose: the script tag sits at the end of <body>, so #btn-3d already exists,
+   and binding here means the toggle is reachable the instant the page parses —
+   independent of whether loadData()/installData() succeed.  Previously this
+   binding lived after `installData(await loadData())`, so any throw while
+   installing data left the visible "3D : off" button dead (clicks did nothing),
+   which is exactly the "I can't reach 3D mode" symptom.  The boot-time flag
+   honouring is likewise hoisted so a saved/URL opt-in still applies on first
+   paint. */
+(function wireHand3dToggle() {
+  const btn3d = document.getElementById("btn-3d");
+  if (btn3d) {
+    _syncHand3dButton();
+    btn3d.addEventListener("click", async () => {
+      if (HAND3D_ACTIVE) {
+        setHand3dFlag(false);
+        disableHand3d();
+      } else {
+        setHand3dFlag(true);
+        await enableHand3d();   // falls back to SVG on failure (button stays "off")
+      }
+    });
+  }
+
+  /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
+     of the flag leaves the SVG renderer in place, unchanged. */
+  if (hand3dRequested()) {
+    enableHand3d();   // async; SVG keeps rendering until/unless it succeeds
+  }
+})();
+
 (async () => {
   installData(await loadData());
 
@@ -1918,28 +1952,6 @@ window.addEventListener("message", (ev) => {
   setPlay(true);
   btnPlay.addEventListener("click", () => setPlay(!playing));
   btnRew .addEventListener("click", () => { playT = 0; });
-
-  /* 3D toggle (Milestone 5).  Clicking flips the persisted flag and swaps
-     renderers cleanly.  Default stays SVG; the 3D path is purely opt-in. */
-  const btn3d = document.getElementById("btn-3d");
-  if (btn3d) {
-    _syncHand3dButton();
-    btn3d.addEventListener("click", async () => {
-      if (HAND3D_ACTIVE) {
-        setHand3dFlag(false);
-        disableHand3d();
-      } else {
-        setHand3dFlag(true);
-        await enableHand3d();   // falls back to SVG on failure (button stays "off")
-      }
-    });
-  }
-
-  /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
-     of the flag leaves the SVG renderer in place, unchanged. */
-  if (hand3dRequested()) {
-    enableHand3d();   // async; SVG keeps rendering until/unless it succeeds
-  }
 
   let lastMs = performance.now();
   function frame(now) {
