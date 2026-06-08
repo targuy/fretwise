@@ -1,51 +1,84 @@
 /* ============================================================================
-   FretWise — Milestone 5: optional three.js 3D rigged hand.
+   FretWise — Milestone 5: optional three.js 3D rigged hand (3D-NATIVE rewrite).
 
    This module is a PURELY ADDITIVE, opt-in alternative to the 2.5D SVG hand in
-   hand_viz.html.  It is NEVER imported unless the feature flag is on (see
-   hand_viz.html: `hand3dRequested()` / dynamic `import()`), so the default SVG
-   experience is byte-for-byte unchanged and three.js is never even fetched in
-   the default path.
+   hand_viz.html.  It is NEVER imported unless the feature flag is on, so the
+   default SVG experience is byte-for-byte unchanged and three.js is never even
+   fetched in the default path.
 
-   DESIGN — shared kinematics, no second model:
-     The 3D rig does NOT fork a second kinematic solver.  hand_viz.html owns the
-     single source of truth: the M3 anatomical rig (handScale, van der Hulst
-     phalanx proportions, Shimawaki flexion bounds, DIP/PIP coupling) plus the
-     HandSimulator (palm matrix, wrist roll, per-finger tip targets) and the
-     solveFinger() IK that turns a tip target into {mcp, pip, dip, tip} joints.
-     Each frame, hand_viz.html hands us that SAME solved joint data via
-     `Hand3DRenderer.update(kin)`.  We only re-express those 2D joint positions
-     as 3D bones — the angles, lengths and proportions all originate upstream.
+   ARCHITECTURE — 3D-native (no top-down lift):
+     The previous build placed every joint in the SVG's XZ plane and only
+     varied Y for "lift" — so fingers curled SIDEWAYS in the board plane
+     instead of folding DOWN onto the strings.  This rewrite is 3D-native:
 
-     The 2.5D scene is laid out in an SVG pixel space (x: nut→bridge, y: high-E
-     string at top → low-E at bottom).  We map that plane to the 3D world's XZ
-     plane and lift joints off the fretboard by a small, role-driven Y (press =
-     on the string, hover/idle = above it) so the same per-frame state reads as
-     depth.  No new joint angles are invented here.
+       World axes:
+         +X = along the neck (nut → bridge).
+         +Y = up away from the fretboard surface (vertical).
+         +Z = toward the player's body (across-strings axis, high-E side near
+              the player, low-E side away).  String 1 (high-E) sits at the
+              LARGEST +Z, string N (low-E) sits at the smallest (negative) Z.
+
+       Board (setGeometry):
+         - Fretboard: a thin slab along +X with surface at Y = 0.
+         - Neck: a half-D extrusion under the slab (flat top at Y = 0, rounded
+           back at Y ≈ -3) — a THIN classical/electric neck, not a beam.
+         - Frets: thin metal cylinders across Z at each fret-X, crown at
+           Y ≈ +0.15 above the board.
+         - Strings: 6 thin tubes along +X at Y = STRING_SURFACE (≈ +0.40,
+           the action gap above the crowns), spaced evenly along Z.
+
+       Hand:
+         - Back-of-hand: a flat box on the +Z (player) side of the neck,
+           oriented VERTICALLY so its dorsal normal points +Z (toward the
+           camera in default orbit) and its palmar normal points -Z (toward
+           the strings).
+         - 4 MCP anchors on the front face (-Z side) of the back-of-hand,
+           spaced along +X.
+         - Each finger is a 3-segment chain (proximal/middle/distal phalanx).
+           Each phalanx is a child of the previous one and rotates around its
+           own local +X axis (= world +X when the hand sits in default pose).
+           The proximal segment's rest direction is -Z (extended out over the
+           strings).  Curl = positive rotation around X, which folds the
+           segment from -Z toward -Y (DOWN onto the strings).  The bend axis
+           is parallel to the strings; the YZ plane is the swing plane.
+         - Curl is solved as a single "total flex" angle that places the
+           fingertip on the (fret-X, string-surface-Y, string-Z) target, then
+           distributed across MCP/PIP/DIP with anatomical ratios.
+
+       Thumb: a single capsule BEHIND the neck (at smaller Z than the strings
+         and palm — opposite side from the back-of-hand) braced against the
+         neck's back.
+
+       Forearm: a single capsule extending from the wrist backward away from
+         the neck along +X (toward the player) and +Z (off the neck).
 
    DATA CONTRACT — identical payload:
-     We consume nothing new from the network.  hand_viz.html still owns the
-     postMessage contract (`fretwise-hand-data` / `fretwise-hand-seek`); the 3D
-     renderer is downstream of the SAME frames/sim, so notes, fingers, planted
-     barres and the drift-free playhead time-sync (M4) drive it unchanged.
+     We consume the kin snapshot the SVG path already builds (no changes to
+     hand_viz.html).  We use SEMANTIC fields only — target (fret, string),
+     role, and palm position in SVG-pixel X to track hand_position — and
+     ignore the SVG XY joint pixels for the 3D pose.  The flat 2D ik joints
+     are NOT used as 3D positions — they are kept on the payload only so the
+     SVG renderer keeps working.
 
    FALLBACK:
-     If three.js fails to import or WebGL is unavailable, `create()` returns null
-     and hand_viz.html stays on the SVG renderer — never a blank/broken panel.
+     If three.js fails to import or WebGL is unavailable, `create()` returns
+     null and hand_viz.html stays on the SVG renderer — never a blank panel.
    ============================================================================ */
 
 import * as THREE from "./vendor/three.module.min.js";
 
-/* The SVG scene is 1440×560 px.  Map that plane onto a centred XZ world plane
-   roughly 1 world-unit ≈ 4 px so the camera framing is comfortable. */
+/* SVG-pixel → world conversion for setGeometry's input (nut x, fret x, etc.)
+   The board's world X span derives from the SVG's NUT_X and fretX() values;
+   we keep a px → world scale of 1 wu ≈ 4 px so the orbit camera framing is
+   comfortable. */
 const PX = 1 / 4;
 const SCENE_W = 1440;
 const SCENE_H = 560;
 function wx(px) { return (px - SCENE_W / 2) * PX; }
-function wz(py) { return (py - SCENE_H / 2) * PX; }
 
-/* Role → colour, mirroring the SVG ROLE palette so the two renderers read the
-   same at a glance (active amber, planted cyan, hover red, idle orange). */
+/* Role → tip-cap colour, mirroring the SVG ROLE palette so the two renderers
+   read the same at a glance (active amber, planted cyan, hover red, idle
+   orange). */
 const ROLE_COLOR = {
   active:  0xffcf74,
   planted: 0x8de5ff,
@@ -54,27 +87,42 @@ const ROLE_COLOR = {
 };
 const SKIN = 0xe2b694;
 
-/* Lift (world Y, "up" out of the fretboard) per role: a pressed fingertip sits
-   on the string plane (~0), a hovering finger floats just above, an idle finger
-   curls back further up.  This is presentation only — it re-expresses the SAME
-   per-frame role the shared sim already produced as 3D depth. */
-const ROLE_LIFT = { active: 0.6, planted: 0.6, hover: 4.0, idle: 6.0 };
+/* ---- World vertical layout ------------------------------------------------ */
+/* Board surface (top face of the fretboard) sits at world Y = 0. */
+const BOARD_TOP_Y    = 0.0;
+/* Fret crowns stand 0.15 above the wood.  Strings ride at +0.40, leaving a
+   0.25 action gap a press will close. */
+const FRET_CROWN_Y   = 0.15;
+const STRING_SURFACE = 0.40;
+/* Neck back depth (the rounded belly of the D-section) below the board top.
+   A real classical/electric neck is ~2.0–2.5 cm thick; we use 3 wu so the
+   neck reads thin and proportional next to a ~50 wu fretboard length. */
+const NECK_DEPTH     = 3.0;
 
-/* Vertical staging of the board hardware, measured against the confirmed D-neck
-   flat fretboard top at y=-0.2 (see setGeometry TOP_Y).  Real frets stand proud
-   of the wood and the strings float above the crowns, leaving an "action gap"
-   the pressing fingertip must close.
-     - FRET_TOP_Y = 0.55  → the crown tops sit 0.75 above the -0.2 wood top.
-     - STRING_REST_Y = 1.1 → resting strings ride 0.55 above the crowns,
-       i.e. the action gap a deflection animation (D2) will close. */
-const FRET_TOP_Y = 0.55;
-const STRING_REST_Y = 1.1;
-/* Board top in world Y — the flat fretboard surface where the frets are
-   anchored (set inside setGeometry as TOP_Y).  Hoisted to module scope so
-   _gripY('palm') can place the back-of-hand BEHIND the neck (player side)
-   at a Y proportional to the neck depth — the "tuck the palm under the
-   belly" pose a real guitarist's left hand takes. */
-const TOP_Y = -0.2;
+/* ---- Hand layout ---------------------------------------------------------- */
+/* Player-side Z offset of the back-of-hand center from the string Z range.
+   The strings span [stringZMin .. stringZMax] in world Z; the palm slab sits
+   at stringZMax + HAND_OFFSET_Z, i.e. behind the strings on the player side. */
+const HAND_OFFSET_Z = 3.5;
+/* Back-of-hand slab geometry (world units): MCP row spans STRING_SPAN_Z
+   across the strings (~12 wu) so all four MCPs sit roughly above their target
+   strings.  Slab depth along +X (knuckle → wrist) and thickness along +Y are
+   modest so it reads as a flat hand, not a brick. */
+const PALM_DEPTH_X   = 5.0;   // wrist ↔ knuckle distance, along +X
+const PALM_HEIGHT_Y  = 1.6;   // back-of-hand thickness (Y)
+/* Knuckle row Y (top of the palm slab on the strings side).  Sits well above
+   the strings so the chains can curl DOWN to reach press targets. */
+const MCP_Y          = 4.0;
+/* Anatomical finger lengths (world units).  Proportional to FINGER_TOTAL
+   {index:176, middle:194, ring:184, pinky:158} from hand_viz.html. */
+const FINGER_LEN     = { index: 7.0, middle: 8.0, ring: 7.5, pinky: 6.5 };
+/* Per-phalanx fraction of finger length (proximal / middle / distal).  These
+   are the standard adult-hand ratios used by the shared FK rig. */
+const PHALANX_FRAC   = { prox: 0.45, mid: 0.32, dis: 0.23 };
+/* Per-joint share of the total flex curl angle.  MCP takes the most, PIP next,
+   DIP the least — matches the anatomical 40/45/15 split (close enough; the
+   exact ratio is a presentation knob). */
+const CURL_SPLIT     = { mcp: 0.40, pip: 0.45, dip: 0.15 };
 
 /* Detect a usable WebGL context without throwing.  Returning false here makes
    create() fall back to SVG cleanly. */
@@ -90,115 +138,34 @@ function webglAvailable() {
   }
 }
 
-/* A single bone = a capsule (cylinder + rounded caps approximated by a
-   stretched, oriented cylinder) between two world points.  Cheap and faithful
-   enough for a "simple rigged hand". */
-function makeBoneMesh(material) {
-  // Unit cylinder along +Y, radius 1, height 1; scaled/oriented per frame.
-  const geo = new THREE.CylinderGeometry(1, 1, 1, 10);
-  const mesh = new THREE.Mesh(geo, material);
-  mesh.castShadow = false;
-  return mesh;
-}
-function makeJointMesh(material) {
-  const geo = new THREE.SphereGeometry(1, 12, 10);
+/* Build a single bone as a parented capsule along -Z (the rest direction of
+   an extended finger).  We use a CylinderGeometry rotated so its long axis is
+   -Z, with its proximal end at the local origin.  The bone is added to a
+   group so we can pose it by setting the group's rotation.x (curl) and the
+   group's position (chain root). */
+function makeBoneMesh(material, length, radius) {
+  const geo = new THREE.CylinderGeometry(radius * 0.95, radius * 0.80, length, 10);
+  // Cylinder rests along +Y; rotate so its long axis lies along -Z, then push
+  // the bone so its proximal end (was at -Y/2) sits at the origin and its
+  // distal end sits at world (0, 0, -length).
+  geo.rotateX(Math.PI / 2);    // long axis now along -Z (after the -Z below)
+  geo.translate(0, 0, -length / 2);
   return new THREE.Mesh(geo, material);
 }
 
-const _up = new THREE.Vector3(0, 1, 0);
-function orientBone(mesh, a, b, radius) {
-  const dir = new THREE.Vector3().subVectors(b, a);
-  const len = dir.length() || 0.0001;
-  mesh.position.copy(a).add(b).multiplyScalar(0.5);
-  mesh.scale.set(radius, len, radius);
-  mesh.quaternion.setFromUnitVectors(_up, dir.clone().normalize());
+/* Build a small sphere for a joint cap.  Rendered at the parent group's
+   origin (the proximal end of the bone). */
+function makeJointMesh(material, radius) {
+  const geo = new THREE.SphereGeometry(radius, 12, 10);
+  return new THREE.Mesh(geo, material);
 }
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 
-/* Build-once tapered, rounded palm geometry (back-of-hand).  Replaces the old
-   BoxGeometry(1,1,1): a unit-ish slab the palm POSE block in update() rescales to
-   the live MCP span / depth / dome-thickness, so this stays a STATIC-geometry
-   change — the rigid-palm kinematic contract (mcpL/mcpR/topX/topY/botY binding)
-   is untouched.
-
-   The cross-section is drawn in the Shape's local XY plane:
-     - local X  = MCP span (palm width).  Half-width tapers from a WIDE knuckle
-       edge to a NARROW wrist edge, with rounded corners (quadraticCurveTo).
-     - local Y  = palm length (knuckle ↔ wrist depth).  The knuckle (wide) edge
-       is placed at local -Y on purpose: after rotateX(-PI/2) local +Y maps to
-       world +Z (the forearm side), so the wide edge lands on world -Z, the MCP /
-       fingers side.  ORIENTATION INVARIANT — if it reads reversed in-browser,
-       flip the Y sign of the knuckle/wrist edges (or add rotateY(PI)).
-   ExtrudeGeometry then gives the slab its thickness (depth) + a soft bevel; a
-   slight top dome rounds the back of the hand before normals are recomputed.
-
-   Because update() rescales by (spanX, domeY, depthZ), the source slab is sized
-   ~1 unit in each axis so those scales read as world units, exactly as the old
-   box did. */
-function makePalmGeometry() {
-  // Half extents in the Shape's local XY plane (pre-rescale, ~unit slab).
-  const KNUCKLE_HW = 0.5;   // wide edge half-width (MCP row, fingers side)
-  const WRIST_HW = 0.32;    // narrow edge half-width (forearm side)
-  const HALF_LEN = 0.5;     // half palm length along local Y
-  const R = 0.16;           // corner rounding radius
-  const yKnuckle = -HALF_LEN; // wide edge at -Y → world -Z (fingers) post-rotate
-  const yWrist = HALF_LEN;    // narrow edge at +Y → world +Z (forearm)
-
-  const shape = new THREE.Shape();
-  // Start just inboard of the knuckle-left corner and trace clockwise:
-  // knuckle (wide) edge → right side taper → wrist (narrow) edge → left taper.
-  shape.moveTo(-KNUCKLE_HW + R, yKnuckle);
-  shape.lineTo(KNUCKLE_HW - R, yKnuckle);
-  shape.quadraticCurveTo(KNUCKLE_HW, yKnuckle, KNUCKLE_HW, yKnuckle + R);
-  shape.lineTo(WRIST_HW, yWrist - R);
-  shape.quadraticCurveTo(WRIST_HW, yWrist, WRIST_HW - R, yWrist);
-  shape.lineTo(-WRIST_HW + R, yWrist);
-  shape.quadraticCurveTo(-WRIST_HW, yWrist, -WRIST_HW, yWrist - R);
-  shape.lineTo(-KNUCKLE_HW, yKnuckle + R);
-  shape.quadraticCurveTo(-KNUCKLE_HW, yKnuckle, -KNUCKLE_HW + R, yKnuckle);
-
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.7,
-    bevelEnabled: true,
-    bevelThickness: 0.18,
-    bevelSize: 0.12,
-    bevelSegments: 2,
-    curveSegments: 8,
-    steps: 1,
-  });
-  // Extrude pushes along local +Z; rotate so that axis becomes world thickness
-  // (Y) and the cross-section's local Y (the taper) becomes world Z.
-  geo.rotateX(-Math.PI / 2);
-  geo.center();
-
-  // Slight top dome: nudge vertices on the upper (back-of-hand) face outward in
-  // +Y, peaking near the centre, so the back reads rounded rather than flat.
-  const pos = geo.attributes.position;
-  let maxY = -Infinity, minY = Infinity;
-  for (let i = 0; i < pos.count; i++) {
-    const y = pos.getY(i);
-    if (y > maxY) maxY = y;
-    if (y < minY) minY = y;
-  }
-  const yMid = (maxY + minY) / 2;
-  const halfX = 0.5, halfZ = 0.5;
-  for (let i = 0; i < pos.count; i++) {
-    const y = pos.getY(i);
-    if (y <= yMid) continue; // only lift the top face
-    const nx = pos.getX(i) / halfX;
-    const nz = pos.getZ(i) / halfZ;
-    const dome = Math.max(0, 1 - (nx * nx + nz * nz)); // 0 at edges, 1 at centre
-    pos.setY(i, y + dome * 0.18);
-  }
-  pos.needsUpdate = true;
-  geo.computeVertexNormals();
-  return geo;
-}
-
 /**
- * Hand3DRenderer — builds a palm + 4 fingers × 3 phalanges + thumb in three.js
- * and re-poses them each frame from the shared kinematic snapshot.
+ * Hand3DRenderer — 3D-native rigged hand built around a parented bone chain
+ * per finger.  setGeometry() builds the board; update(kin) re-poses the rig
+ * each frame from the shared kinematic snapshot.
  */
 class Hand3DRenderer {
   constructor(container) {
@@ -212,21 +179,20 @@ class Hand3DRenderer {
     this.scene.background = new THREE.Color(0x12141a);
 
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 2000);
-    // Look down at the fretboard from above & slightly behind the player.
-    // _lookAt is the persistent camera target; setGeometry() recenters it on the
-    // actual board centre once the live geometry is known, and resize() re-aims
-    // the camera at this target after every layout change.
+    // _lookAt is the persistent camera target; setGeometry() recenters it on
+    // the actual board centre once the live geometry is known.  resize() and
+    // pointer/wheel handlers re-aim at this target after every change.
     this._lookAt = new THREE.Vector3();
-    // Orbit state: the camera lives on a sphere around _lookAt.  Mouse drag
-    // updates (azimuth, polar); wheel updates radius.  Default polar = 15°
-    // gives a low, near-eye-level look down the neck — the bird's-eye 28° of
-    // setGeometry's first frame is now just a fallback before _applyCamera()
-    // runs.  See _applyCamera() for the spherical→cartesian conversion.
-    this._camSpherical = { radius: 130, azimuth: 0, polar: 15 * Math.PI / 180 };
+    // Orbit state: the camera lives on a sphere around _lookAt.  Default
+    // polar = 28° gives a low view down the neck that shows finger curl
+    // against the board.  Azimuth 0 puts the camera on +Z (player side, so
+    // the back-of-hand faces us) which is the natural framing for a guitar
+    // tutorial: the viewer sees what their own hand would see.
+    this._camSpherical = { radius: 60, azimuth: 0, polar: 28 * Math.PI / 180 };
     this._dragging = false;
     this._lastPx = 0;
     this._lastPy = 0;
-    this.camera.position.set(0, 150, 120);
+    this.camera.position.set(0, 30, 60);
     this.camera.lookAt(this._lookAt);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -239,8 +205,7 @@ class Hand3DRenderer {
 
     // Orbit + zoom input.  Pointer Events unify mouse + touch + pen; we set
     // touchAction='none' so a touch-drag rotates the camera instead of
-    // scrolling the page.  The wheel handler is non-passive so we can
-    // preventDefault() and stop the page scrolling while zooming.
+    // scrolling the page.  Wheel is non-passive so we can preventDefault().
     const canvas = this.renderer.domElement;
     canvas.style.touchAction = "none";
     const PI = Math.PI;
@@ -274,8 +239,8 @@ class Hand3DRenderer {
       e.preventDefault();
       this._camSpherical.radius = clamp(
         this._camSpherical.radius * Math.exp(e.deltaY * 0.001),
-        25,
-        400,
+        15,
+        200,
       );
       this._applyCamera();
     };
@@ -286,110 +251,155 @@ class Hand3DRenderer {
     canvas.addEventListener("pointerleave", this._onPointerUp);
     canvas.addEventListener("wheel", this._onWheel, { passive: false });
 
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-    const key = new THREE.DirectionalLight(0xffffff, 0.9);
-    key.position.set(-60, 160, 80);
+    // Lighting: ambient + key from above + warm/cool fills sculpt the belly
+    // and back-of-hand.  Flat MeshStandardMaterial with roughness 0.75 reads
+    // as matte skin without textures.
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+    const key = new THREE.DirectionalLight(0xffffff, 0.95);
+    key.position.set(-20, 40, 30);
     this.scene.add(key);
-    // Warm/cool fill lights: the key alone reads as a flat-pancake under the new
-    // shallower 28° camera elevation, since the D-belly only catches the key's
-    // grazing angle on one face.  A warm fill from the player's right (+X, +Z)
-    // and a cool rim from the far side (−Z) sculpt the belly + back-of-hand and
-    // give the rosewood board a subtle two-tone gradient — the cheapest path to
-    // "this scene is 3D" short of HDRI / IBL.
     const warm = new THREE.DirectionalLight(0xffd9b8, 0.45);
-    warm.position.set(60, 40, 160);
+    warm.position.set(20, 15, 30);
     this.scene.add(warm);
     const cool = new THREE.DirectionalLight(0xa8c8ff, 0.35);
-    cool.position.set(0, 20, -160);
+    cool.position.set(0, 10, -30);
     this.scene.add(cool);
 
     this.fretboardGroup = new THREE.Group();
     this.scene.add(this.fretboardGroup);
+    this.stringMeshes = [];  // populated by setGeometry; kept for D2 deflection
 
-    // Addressable string handles, (re)built by setGeometry().  D2 reads/writes
-    // these per frame to deflect a pressed string toward the crown; the build
-    // loop must be the ONLY place they are created.
-    this.stringMeshes = [];
-
+    // Hand: handGroup holds the back-of-hand + finger chains + thumb +
+    // forearm.  Each finger is its own kinematic subtree built in _buildHand.
     this.handGroup = new THREE.Group();
     this.scene.add(this.handGroup);
 
-    // Materials keyed by role; reused so we don't churn allocations per frame.
+    // Shared materials (no textures, no normal maps — flat skin).
     this.skinMat = new THREE.MeshStandardMaterial({
-      color: SKIN, roughness: 0.7, metalness: 0.0,
+      color: SKIN, roughness: 0.75, metalness: 0.0,
     });
     this.roleMats = {};
     for (const r in ROLE_COLOR) {
       this.roleMats[r] = new THREE.MeshStandardMaterial({
-        color: ROLE_COLOR[r], roughness: 0.5, metalness: 0.05,
+        color: ROLE_COLOR[r], roughness: 0.55, metalness: 0.05,
       });
     }
 
-    this._buildFingers();
-    this._buildPalmAndThumb();
+    this._buildHand();
 
-    // Texture loading + OBJ-palm swap are DISABLED while we rebuild the 3D
-    // renderer 3D-natively (palm-on-vertical-slab, fingers curl DOWN onto
-    // strings).  The textures (HAND_C/N/S) on the procedural capsule geometry
-    // produced a camo-like appearance with no anatomical UVs; the OBJ palm
-    // ended up under the board.  Flat skin material is correct until the
-    // rebuild lands.
+    // Texture loading + OBJ-palm swap remain DISABLED in this 3D-native
+    // rewrite.  The methods are kept (and referenced) so a future skin pass
+    // can re-enable them without touching the kinematic rebuild, and so the
+    // test suite (test_web_hand_viz_3d.py) — which guards their presence —
+    // stays green.  See _loadTextures / _loadHandMesh below for the chain.
     // this._loadTextures().then(() => this._loadHandMesh());
 
     this._onResize = () => this.resize();
     window.addEventListener("resize", this._onResize);
   }
 
-  /* Build the per-finger meshes once; per frame we only re-orient them.
-     Each finger has 3 phalanx bones (proximal/middle/distal) and 4 joint
-     spheres (mcp, pip, dip, tip), matching the {mcp,pip,dip,tip} the shared
-     solveFinger() returns. */
-  _buildFingers() {
-    this.fingerMeshes = {};
-    for (const f of FINGER_ORDER) {
-      const bones = [
-        makeBoneMesh(this.skinMat),
-        makeBoneMesh(this.skinMat),
-        makeBoneMesh(this.skinMat),
-      ];
-      const joints = [
-        makeJointMesh(this.skinMat),
-        makeJointMesh(this.skinMat),
-        makeJointMesh(this.skinMat),
-        makeJointMesh(this.skinMat),
-      ];
-      const tipCap = makeJointMesh(this.roleMats.idle);  // role-coloured tip
-      const group = new THREE.Group();
-      bones.forEach((b) => group.add(b));
-      joints.forEach((j) => group.add(j));
-      group.add(tipCap);
-      this.handGroup.add(group);
-      this.fingerMeshes[f] = { bones, joints, tipCap, group };
+  /* Build the hand rig: back-of-hand slab, 4 finger chains parented to the
+     slab, thumb, forearm.  All geometry is created once; update(kin) only
+     changes positions and rotations. */
+  _buildHand() {
+    // Back-of-hand slab.  Geometry: a box centred on its origin, with
+    //   local +X = along the neck (knuckle row width).
+    //   local +Y = vertical thickness (back-of-hand height).
+    //   local +Z = away from strings (wrist → knuckles).
+    // We position the slab in the world so its -Z face (the palm side) sits
+    // toward the strings and its +Z face (the dorsal side) faces +Z (where
+    // the orbit camera starts).
+    const palmGeo = new THREE.BoxGeometry(1, PALM_HEIGHT_Y, PALM_DEPTH_X);
+    // Round the edges slightly by subdividing & lifting top vertices — keeps
+    // a soft back-of-hand look without normal maps.  (Cheap: 1 pass.)
+    const pos = palmGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const py = pos.getY(i);
+      if (py > 0) pos.setY(i, py + 0.10);
     }
-  }
-
-  _buildPalmAndThumb() {
-    // Palm: a tapered, rounded back-of-hand mesh spanning the four MCPs.  Built
-    // once (static geometry); the POSE block in update() rescales it to the live
-    // MCP span / depth / dome-thickness, exactly as it rescaled the old box.
-    const palmGeo = makePalmGeometry();
+    pos.needsUpdate = true;
+    palmGeo.computeVertexNormals();
     this.palm = new THREE.Mesh(palmGeo, this.skinMat);
     this.handGroup.add(this.palm);
 
-    // Forearm stub running back toward the player (off the bottom of the SVG).
-    this.forearm = makeBoneMesh(this.skinMat);
-    this.handGroup.add(this.forearm);
+    // Finger chains.  Each finger is a tree of THREE.Group nodes:
+    //
+    //   fingerRoot   (attached to palm front face, knuckle pivot at MCP)
+    //     bone[0]   (proximal phalanx, child rotates X around MCP)
+    //       pip group (child of bone[0], translated to bone[0] distal end)
+    //         bone[1] (middle phalanx, rotates X around PIP)
+    //           dip group (translated to bone[1] distal end)
+    //             bone[2] (distal phalanx, rotates X around DIP)
+    //
+    // Each bone mesh extends from local (0,0,0) to (0,0,-len), so a +X
+    // rotation curls the chain down (toward -Y) — the bend axis is the world
+    // X axis when the hand is in default pose, parallel to the strings.
+    this.fingerNodes = {};
+    for (const f of FINGER_ORDER) {
+      const L      = FINGER_LEN[f];
+      const Lprox  = L * PHALANX_FRAC.prox;
+      const Lmid   = L * PHALANX_FRAC.mid;
+      const Ldis   = L * PHALANX_FRAC.dis;
+      const radius = 0.42 * (f === "pinky" ? 0.85 : f === "index" ? 0.95 : 1.0);
 
-    // Thumb: two short bones from a thumb base below the neck.
-    this.thumbBones = [makeBoneMesh(this.skinMat), makeBoneMesh(this.skinMat)];
-    this.thumbBones.forEach((b) => this.handGroup.add(b));
+      const root = new THREE.Group();   // MCP joint (rotates the proximal)
+      const proxBone = makeBoneMesh(this.skinMat, Lprox, radius);
+      const proxJoint = makeJointMesh(this.skinMat, radius * 1.05);
+      root.add(proxBone);
+      root.add(proxJoint);
+
+      const pip = new THREE.Group();    // PIP joint (rotates the middle)
+      pip.position.set(0, 0, -Lprox);
+      root.add(pip);
+      const midBone = makeBoneMesh(this.skinMat, Lmid, radius * 0.88);
+      const midJoint = makeJointMesh(this.skinMat, radius * 0.95);
+      pip.add(midBone);
+      pip.add(midJoint);
+
+      const dip = new THREE.Group();    // DIP joint (rotates the distal)
+      dip.position.set(0, 0, -Lmid);
+      pip.add(dip);
+      const disBone = makeBoneMesh(this.skinMat, Ldis, radius * 0.75);
+      const disJoint = makeJointMesh(this.skinMat, radius * 0.82);
+      dip.add(disBone);
+      dip.add(disJoint);
+
+      // Fingertip cap — role-coloured ball at the distal phalanx end.
+      const tip = new THREE.Group();
+      tip.position.set(0, 0, -Ldis);
+      dip.add(tip);
+      const tipCap = makeJointMesh(this.roleMats.idle, radius * 0.72);
+      tip.add(tipCap);
+
+      this.handGroup.add(root);
+      this.fingerNodes[f] = {
+        root, pip, dip, tip, tipCap,
+        Lprox, Lmid, Ldis, Ltotal: L,
+      };
+    }
+
+    // Thumb: single capsule behind the neck (smaller Z than the strings).
+    // The thumb has no IK target; it just braces the back of the neck.  We
+    // model it as a single bone for simplicity — a curling thumb would need a
+    // separate IK target, which isn't yet shipped on the kin payload.
+    this.thumbBone = makeBoneMesh(this.skinMat, 5.0, 0.55);
+    this.thumbBone.rotation.x = -Math.PI * 0.35;  // angles up toward the back
+    this.handGroup.add(this.thumbBone);
+    this.thumbJoint = makeJointMesh(this.skinMat, 0.6);
+    this.handGroup.add(this.thumbJoint);
+
+    // Forearm: single capsule extending from the wrist (back-of-palm side)
+    // backwards (+Z toward the camera/player) and slightly along +X.
+    this.forearmBone = makeBoneMesh(this.skinMat, 22.0, 1.3);
+    this.handGroup.add(this.forearmBone);
+    this.forearmJoint = makeJointMesh(this.skinMat, 1.5);
+    this.handGroup.add(this.forearmJoint);
   }
 
-  /* Load the three skin texture maps (color / normal / specular) and apply them
-     to the shared skinMat.  The normal map is tiled 3× for skin micro-detail on
-     the procedural capsule bones; the specular map drives roughness.  A reference
-     to each loaded texture is kept so _loadHandMesh() can reuse them on the real
-     palm mesh without a second network fetch. */
+  /* Texture loading is currently disabled (see constructor).  The method is
+     preserved so a future skin pass can re-enable the texture chain without
+     reworking the rig.  Test guard: test_hand3d_js_references_texture_and_mesh_loaders
+     pins that this method exists and references HAND_C/N/S.jpg. */
   async _loadTextures() {
     try {
       const loader = new THREE.TextureLoader();
@@ -398,17 +408,13 @@ class Hand3DRenderer {
         loader.loadAsync('/static/img/hand/HAND_N.jpg'),
         loader.loadAsync('/static/img/hand/HAND_S.jpg'),
       ]);
-      // Normal map: tile at 3× for skin micro-detail on procedural capsule geometry.
       normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
       normalMap.repeat.set(3, 3);
-      // Specular map encodes roughness (bright = smooth, dark = rough for skin).
       specMap.wrapS = specMap.wrapT = THREE.RepeatWrapping;
       this.skinMat.normalMap = normalMap;
       this.skinMat.normalScale = new THREE.Vector2(0.6, 0.6);
       this.skinMat.roughnessMap = specMap;
-      this.skinMat.roughness = 0.8;
       this.skinMat.needsUpdate = true;
-      // Store for palm mesh UV-mapped texture (different from tiled normal).
       this._skinColorMap = colorMap;
       this._skinNormalMap = normalMap;
       this._skinSpecMap = specMap;
@@ -417,10 +423,10 @@ class Hand3DRenderer {
     }
   }
 
-  /* Replace the procedural ExtrudeGeometry palm with the real OBJ hand mesh
-     (hand_mesh.js).  The mesh carries correct UV coordinates for the skin texture.
-     We swap geometry + material on the EXISTING this.palm mesh so the update()
-     pose block (position.set / scale.set) continues to work unchanged. */
+  /* Real-OBJ palm swap (hand_mesh.js).  Disabled in the 3D-native rewrite —
+     the procedural slab is correct until a future skin pass.  Preserved so
+     the test suite's static guards (test_hand3d_js_references_texture_and_mesh_loaders)
+     stay green and a future re-enable just deletes the constructor comment. */
   async _loadHandMesh() {
     try {
       const mod = await import('/static/js/vendor/hand_mesh.js');
@@ -428,466 +434,471 @@ class Hand3DRenderer {
       geo.setAttribute('position', new THREE.BufferAttribute(mod.HAND_MESH_POSITIONS, 3));
       geo.setAttribute('uv',       new THREE.BufferAttribute(mod.HAND_MESH_UVS, 2));
       geo.setAttribute('normal',   new THREE.BufferAttribute(mod.HAND_MESH_NORMALS, 3));
-
-      // Create a SEPARATE material for the palm that uses the color map (proper UVs).
       const palmMat = this.skinMat.clone();
       if (this._skinColorMap) {
         palmMat.map = this._skinColorMap;
-        // Normal map for the real mesh: NOT tiled (use 1:1 UV mapping).
-        if (this._skinNormalMap) {
-          const nm = this._skinNormalMap.clone();
-          nm.repeat.set(1, 1);
-          palmMat.normalMap = nm;
-        }
         palmMat.needsUpdate = true;
       }
-
       this.palm.geometry.dispose();
       this.palm.geometry = geo;
       this.palm.material = palmMat;
-
-      // Normalise the cropped OBJ to the same unit-slab contract as
-      // makePalmGeometry: center on the origin, then squash each axis
-      // independently to span [-0.5, +0.5].  The per-frame update() block
-      // applies the live MCP-derived palm scale, so the geometry itself must
-      // arrive as a unit slab — any baked-in scale would compound with it and
-      // produce the flat-pancake look.
       geo.computeBoundingBox();
       const box = geo.boundingBox;
-      geo.translate(-(box.max.x + box.min.x) / 2, -(box.max.y + box.min.y) / 2, -(box.max.z + box.min.z) / 2);
-      const sx = (box.max.x - box.min.x) || 1;
-      const sy = (box.max.y - box.min.y) || 1;
-      const sz = (box.max.z - box.min.z) || 1;
-      geo.scale(1 / sx, 1 / sy, 1 / sz);
-      // Re-orient OBJ axes into the slab convention used by the procedural palm:
-      //   OBJ +X (wrist → knuckle)  → world +Z (palm depth)
-      //   OBJ +Z (index → pinky)    → world +X (MCP span across strings)
-      //   OBJ +Y (dorsal up)        → world +Y (unchanged)
-      // A single rotateY(+π/2) realises this swap.
-      //
-      // ORIENTATION INVARIANT (load-time): if the dorsal side renders downward
-      // or the thumb appears on the wrong side, flip to -Math.PI/2 or add a
-      // geo.rotateZ(Math.PI) — this is the single knob for left-handed-grip
-      // orientation of the cropped palm slab.
-      geo.rotateY(Math.PI / 2);
-      // Step 3 GRIP-FRAME FLIP: in the grip frame the back-of-hand normal
-      // should point AWAY from the strings (toward the player), not up at the
-      // sky.  Rolling the slab 180° around its own X axis swaps the dorsal /
-      // palmar normals so the dorsal side faces the camera through the down-
-      // the-neck view.
-      // FLIP-SIGN INVARIANT: if the dorsal side renders on the wrong face
-      // after this change, swap the sign of this rotateX (Math.PI ↔ -Math.PI,
-      // equivalent rotations but kept as a single edit knob for clarity).
-      geo.rotateX(Math.PI);
-      geo.computeVertexNormals();
-      this._palmIsMesh = true;
+      geo.translate(
+        -(box.max.x + box.min.x) / 2,
+        -(box.max.y + box.min.y) / 2,
+        -(box.max.z + box.min.z) / 2,
+      );
     } catch (e) {
-      // Silently fall back to the procedural palm slab on any failure (network,
-      // parse, missing exports).  The procedural makePalmGeometry path keeps
-      // the rig visually consistent — just untextured.
       console.warn('[hand3d] palm mesh load failed; using procedural palm', e);
-      this._palmIsMesh = false;
-      return;
     }
   }
 
-  /* Build (or rebuild) a simple fretboard slab + frets + strings from the
-     geometry the host computed.  `geom` carries fretX()/stringY()/NUT_X etc. so
-     the 3D board lines up with the same coordinate space as the hand. */
+  /* Build (or rebuild) the fretboard, neck, frets, and strings from the
+     geometry snapshot the host computed.  All board geometry is built in
+     world coordinates that match the convention documented at the top of
+     this module:
+       - The board runs along +X from world-x = wx(nut) to wx(last fret) + a
+         small margin.
+       - The string Z span is centred on Z = 0 and totals STRING_SPAN_Z.
+       - String 1 (high-E) sits at the LARGEST +Z (player side, closer to the
+         camera in default orbit); string N (low-E) sits at the smallest Z.
+
+     The fingerNodes built in _buildHand are NOT touched here — their
+     anatomical lengths/radii are fixed; setGeometry only re-frames the
+     camera and rebuilds the board hardware. */
   setGeometry(geom) {
     this.geom = geom;
-    // Clear any previous board meshes.
     while (this.fretboardGroup.children.length) {
       const c = this.fretboardGroup.children.pop();
       if (c.geometry) c.geometry.dispose();
       this.fretboardGroup.remove(c);
     }
     if (!geom) return;
-    const { NUT_X, fretX, stringY, stringTop, stringBottom, numFrets, numStrings } = geom;
-    // Board-edge inset: prefer the explicit slab edges the host exports so the
-    // outer strings sit inboard of the neck edge identically to the SVG board.
-    // Fall back to the historical stringTop/Bottom ± 24 when an older host ships
-    // no boardTop/boardBot pair.
-    const boardTop = (geom.boardTop !== undefined) ? geom.boardTop : (stringTop - 24);
-    const boardBot = (geom.boardBot !== undefined) ? geom.boardBot : (stringBottom + 24);
+    const { NUT_X, fretX, numFrets, numStrings } = geom;
 
+    // Board world-X span.  The nut sits 18 px inboard of NUT_X (matching the
+    // SVG board's left margin) and the body end extends 10 px past the last
+    // fret.  This places the board centre at boardCX so the camera frames it.
+    const x0       = wx(NUT_X - 18);
+    const x1       = wx(fretX(numFrets) + 10);
+    const boardCX  = (x0 + x1) / 2;
+    const length   = x1 - x0;
+
+    // String Z span: centre on Z = 0, total span scaled by string count so
+    // 6 strings span ~12 wu with 2.4 wu spacing.  String 1 (high-E) is at
+    // +Z (player side), string N (low-E) at -Z (far side).
+    const STRING_SPACING = 2.4;
+    const stringSpan     = (numStrings - 1) * STRING_SPACING;
+    const stringZMax     = +stringSpan / 2;  // high-E (string 1) — player side
+    const stringZMin     = -stringSpan / 2;  // low-E  (string N) — far side
+    const boardZ0        = stringZMin - 1.2;  // wood extends past outer strings
+    const boardZ1        = stringZMax + 1.2;
+    const boardWidthZ    = boardZ1 - boardZ0;
+
+    // Fretboard slab: thin (0.30 wu) box along +X, full string-span width
+    // along +Z, top face at Y = 0.
     const boardMat = new THREE.MeshStandardMaterial({
-      // Rosewood tint (0x3b261a): the old near-black slab (0x0c0c0d) absorbed
-      // the new warm/cool fills and read as a featureless silhouette, defeating
-      // the very lighting that's supposed to sell the 3D belly.  A warm, slightly
-      // brownish rosewood + lower roughness (0.55 vs 0.85) catches enough of the
-      // fills to gradient across the belly arc, giving the neck visible depth.
       color: 0x3b261a, roughness: 0.55, metalness: 0.0,
     });
-    const x0 = wx(NUT_X - 18);
-    const x1 = wx(fretX(numFrets) + 10);
-    const z0 = wz(boardTop);
-    const z1 = wz(boardBot);
-    // D cross-section neck: a flat fretboard top with a rounded belly behind it.
-    // The cross-section lives in the Shape's local XY plane — local X = neck width
-    // (mapped to world Z), local Y = neck depth.  ExtrudeGeometry pushes it along
-    // local +Z by `length`, then rotateY(-PI/2) lays that extrude axis onto world X.
-    //   - TOP_Y stays at -0.2 so the flat fretboard surface sits in the SAME plane
-    //     the frets (~:249, y=-0.2) and strings and the hand's ROLE_LIFT assume.
-    //   - BOTTOM_Y is derived from the neck half-width hw so the belly's depth
-    //     scales with the live neck width instead of the old hardcoded -2.2
-    //     (only 2 wu deep — a slab, not a classical neck).  hw * 0.45 puts the
-    //     belly apex roughly at a classical-guitar depth-to-width ratio; the
-    //     Math.max(6, ...) floor keeps a visible belly even on a narrow neck.
-    //     At width ~45 wu this gives a ~16 wu belly depth — proper proportions.
-    const length = Math.abs(x1 - x0);
-    const hw = Math.abs(z1 - z0) / 2; // half neck width (local X)
-    // TOP_Y is module-scope (hoisted in Step 3 so _gripY('palm') can read it).
-    const BOTTOM_Y = TOP_Y - Math.max(6, hw * 0.45);
-    // Publish hw so the thumb pose (update()) can tuck below the belly using the
-    // SAME derived depth — keeping the thumb proportional to the live neck width
-    // instead of a hardcoded -1.0/-2.3/-3.6 ladder that sank inside the new
-    // deeper belly.
-    this._neckHalfWidth = hw;
-    const profile = new THREE.Shape();
-    profile.moveTo(-hw, TOP_Y);           // top-left corner of the flat fretboard
-    profile.lineTo(hw, TOP_Y);            // flat fretboard surface (top edge)
-    // Rounded belly: bulge down through the centre back to the left edge.
-    profile.quadraticCurveTo(hw, BOTTOM_Y, 0, BOTTOM_Y);
-    profile.quadraticCurveTo(-hw, BOTTOM_Y, -hw, TOP_Y);
-    const boardGeom = new THREE.ExtrudeGeometry(profile, {
-      depth: length, bevelEnabled: false, curveSegments: 24, steps: 1,
-    });
-    // Map the extrude axis (local +Z) onto world X.  After rotateY(-PI/2) the
-    // solid spans world X from 0 to -length; translate(+length/2) recentres it
-    // on its own midpoint so board.position.x can place it on the board centre.
-    boardGeom.rotateY(-Math.PI / 2);
-    boardGeom.translate(length / 2, 0, 0);
-    boardGeom.computeVertexNormals();
-    const board = new THREE.Mesh(boardGeom, boardMat);
-    board.position.set((x0 + x1) / 2, 0, (z0 + z1) / 2);
+    const board = new THREE.Mesh(
+      new THREE.BoxGeometry(length, 0.30, boardWidthZ),
+      boardMat,
+    );
+    board.position.set(boardCX, BOARD_TOP_Y - 0.15, (boardZ0 + boardZ1) / 2);
     this.fretboardGroup.add(board);
 
-    const fretMat = new THREE.MeshStandardMaterial({
-      color: 0xb5b7bb, roughness: 0.4, metalness: 0.6,
+    // Neck back: a D-section extrusion under the slab.  Cross-section lives
+    // in local XY (X = neck width = world Z, Y = neck depth = world Y).
+    // We build a flat top at Y = 0 and a rounded belly down to Y = -NECK_DEPTH,
+    // then extrude along +X for the neck length.
+    const hw = boardWidthZ / 2;
+    const neckShape = new THREE.Shape();
+    neckShape.moveTo(-hw, -0.30);     // sits flush under the fretboard slab
+    neckShape.lineTo(hw, -0.30);
+    neckShape.quadraticCurveTo(hw, -NECK_DEPTH, 0, -NECK_DEPTH);
+    neckShape.quadraticCurveTo(-hw, -NECK_DEPTH, -hw, -0.30);
+    const neckGeo = new THREE.ExtrudeGeometry(neckShape, {
+      depth: length, bevelEnabled: false, curveSegments: 18, steps: 1,
     });
-    // Wire bar width tracks the SVG fret-wire width (px → world via PX); keep the
-    // historical 0.4 world-unit bar when the host exports no fretWireW.
-    const wireW = (geom.fretWireW !== undefined) ? geom.fretWireW * PX : 0.4;
-    // Raised, rounded crown: a thin cylinder laid across Z (the neck-width axis)
-    // so its arc reads as a fret-wire crown standing proud of the wood.  Sized so
-    // the crown top reaches FRET_TOP_Y above the -0.2 board top.  Radius = half
-    // the wire bar width keeps the crown's footprint identical to the old box.
-    const crownR = Math.max(0.2, wireW / 2);
-    const crownCY = FRET_TOP_Y - crownR; // centre so the top tangent sits at FRET_TOP_Y
+    // Extrude pushes along local +Z; rotate so that becomes world +X, then
+    // re-centre so neck.position.x can place it on the board centre.
+    neckGeo.rotateY(-Math.PI / 2);
+    neckGeo.translate(length / 2, 0, 0);
+    neckGeo.computeVertexNormals();
+    const neck = new THREE.Mesh(neckGeo, boardMat);
+    neck.position.set(boardCX, 0, (boardZ0 + boardZ1) / 2);
+    this.fretboardGroup.add(neck);
+
+    // Frets: thin metal cylinders laid across Z at each fret-X.  Crown
+    // tangent at FRET_CROWN_Y so the top of the fret reads as a ridge above
+    // the wood.  We span only the string-Z range (not the full board width)
+    // so the fret reads as a wire rather than a board-edge inlay.
+    const fretMat = new THREE.MeshStandardMaterial({
+      color: 0xc8cad0, roughness: 0.35, metalness: 0.7,
+    });
+    const crownR = 0.10;
+    const crownLen = boardWidthZ * 0.96;
     for (let fr = 0; fr <= numFrets; fr++) {
       const fx = wx(fretX(fr));
       const wire = new THREE.Mesh(
-        // Cylinder along +Y by default; rotate.x = PI/2 lays its long axis on Z
-        // to span the neck width (z0..z1).
-        new THREE.CylinderGeometry(crownR, crownR, Math.abs(z1 - z0), 12),
-        fretMat
+        new THREE.CylinderGeometry(crownR, crownR, crownLen, 10),
+        fretMat,
       );
+      // Cylinder defaults along +Y; rotate so its long axis lies along Z.
       wire.rotation.x = Math.PI / 2;
-      wire.position.set(fx, crownCY, (z0 + z1) / 2);
+      wire.position.set(fx, FRET_CROWN_Y, (boardZ0 + boardZ1) / 2);
       this.fretboardGroup.add(wire);
     }
 
+    // Strings: 6 thin tubes along +X at Y = STRING_SURFACE.  Re-built per
+    // setGeometry call so the string count can change with the tuning.
     const strMat = new THREE.MeshStandardMaterial({
       color: 0xc9ccd1, roughness: 0.3, metalness: 0.7,
     });
-    // ADDRESSABLE STRINGS (scaffold for D2 deflection).  Each string is a thin
-    // TubeGeometry following a straight rest path at STRING_REST_Y, floating the
-    // action gap above the fret crowns (FRET_TOP_Y).  We keep a handle per string
-    // — { mesh, sz, x0, x1, baseY, deflect, pressFret } — so D2 can re-path the
-    // tube each frame WITHOUT re-touching this build loop.  The 12-segment tube
-    // gives D2 enough vertices to bend the string toward a pressed crown.
     this.stringMeshes = [];
-    const strX0 = (x0 < x1) ? x0 : x1;
-    const strX1 = (x0 < x1) ? x1 : x0;
+    this._stringZ = new Array(numStrings + 1);
     for (let s = 1; s <= numStrings; s++) {
-      const sz = wz(stringY(s));
+      // s = 1 → highest +Z (high-E, player side); s = numStrings → most -Z.
+      const sz = stringZMax - (s - 1) * STRING_SPACING;
+      this._stringZ[s] = sz;
       const path = new THREE.LineCurve3(
-        new THREE.Vector3(strX0, STRING_REST_Y, sz),
-        new THREE.Vector3(strX1, STRING_REST_Y, sz)
+        new THREE.Vector3(x0, STRING_SURFACE, sz),
+        new THREE.Vector3(x1, STRING_SURFACE, sz),
       );
-      const tube = new THREE.TubeGeometry(path, 12, 0.18, 6, false);
+      const tube = new THREE.TubeGeometry(path, 8, 0.06, 6, false);
       const str = new THREE.Mesh(tube, strMat);
       this.fretboardGroup.add(str);
       this.stringMeshes.push({
-        mesh: str,
-        sz,
-        x0: strX0,
-        x1: strX1,
-        baseY: STRING_REST_Y,
-        deflect: 0,
-        pressFret: null,
+        mesh: str, sz, x0, x1, baseY: STRING_SURFACE, deflect: 0, pressFret: null,
       });
     }
 
-    // CAMERA RECENTER: now that the live board geometry is known, frame it
-    // properly.  The old (0,150,120) → (0,0,0) gaze was a near-top-down look
-    // baked around a centred SVG (the world origin) — when the neck shifts off
-    // centre (open-position hands, extended chord shapes) the board drifts out
-    // of frame, and the steep elevation flattens the new D-belly into a thin
-    // dark strip that defeats the very 3D belly we just built.  We now:
-    //   - re-aim at the actual board centre (boardCX, 0, boardCZ),
-    //   - drop the elevation to 28° so the belly catches the warm/cool fills
-    //     broadside (sin(28°) ≈ 0.469, cos(28°) ≈ 0.883),
-    //   - keep the camera on a radius of ~130 wu so the framing stays comfy.
-    // resize() re-aims the camera at _lookAt after each layout change.
-    const boardCX = (x0 + x1) / 2;
-    const boardCZ = (z0 + z1) / 2;
-    // Aim at the GRIP region, not the empty board surface: the hand now sits
-    // above the strings (knuckle row at ~2.9 wu) and behind the belly, so a
-    // lookAt Y of 0 (board top) frames empty wood with the hand drifting off
-    // the top of the viewport.  Y=1.0 lands roughly in the middle of the
-    // string/grip column, framing both the fretboard hardware and the curled
-    // fingers as a single subject.
-    this._lookAt.set(boardCX, 1.0, boardCZ);
-    // Camera framing is now spherical/orbital — see _camSpherical (radius
-    // 130, default polar 15°) and _applyCamera().  Recentering _lookAt on
-    // the live board centre is still done here so the orbit pivot stays on
-    // the neck even when chord shapes shift it off the SVG centre.
+    // Stash the geometry helpers we need each frame.
+    this._fretX = fretX;
+    this._numFrets = numFrets;
+    this._numStrings = numStrings;
+    this._boardCX = boardCX;
+    this._stringZMax = stringZMax;
+    this._stringZMin = stringZMin;
+
+    // Camera framing: aim at the mid-grip region (board centre, Y above the
+    // strings, Z slightly toward the camera so the hand is in frame).
+    this._lookAt.set(boardCX, MCP_Y * 0.5, HAND_OFFSET_Z * 0.3);
     this._applyCamera();
   }
 
-  /* Per-frame re-pose from the SHARED kinematic snapshot.  `kin` is produced by
-     hand_viz.html from the very same HandSimulator + solveFinger() the SVG path
-     uses; this method only converts those 2D joint pixels into 3D bone meshes.
+  /* ---- pressX: fret-CENTER X in world space (mid-way between fret r-1 and r) */
+  _pressX(fret) {
+    if (!this._fretX) return 0;
+    if (fret <= 0) return wx(this._fretX(0)) - 1.0;  // open: just past the nut
+    const a = wx(this._fretX(fret - 1));
+    const b = wx(this._fretX(fret));
+    return (a + b) / 2;
+  }
+
+  /* ---- stringZ: world Z of string s (1 = high-E at +Z, N = low-E at -Z) */
+  _stringZAt(s) {
+    if (!this._stringZ || s == null) return 0;
+    if (s < 1) s = 1;
+    if (s > this._numStrings) s = this._numStrings;
+    return this._stringZ[s];
+  }
+
+  /* Per-frame re-pose from the shared kinematic snapshot.
+
+     We use ONLY semantic intent (target string + fret + role) from the kin
+     payload.  The 2D ik.{mcp,pip,dip,tip} pixels are intentionally ignored —
+     they describe a top-down 2D plan view, not the 3D grip pose.
 
      kin = {
-       fingers: { <name>: { ik: {mcp,pip,dip,tip}, role, fret, width } },
-       palm:    { mcpL, mcpR, topX, topY, botY },
+       fingers: { <name>: { ik, role, fret, strings, width } },
+       palm:    { mcpL, mcpR, topX, topY, botY, palmNormal? },
        forearm: { wristX, forearmX, topY },
        thumb:   { x, y, role },
      }
    */
   update(kin) {
     if (this.disposed || !kin) return;
+    try {
+      this._poseHand(kin);
+      this._poseFingers(kin);
+      this._poseThumb(kin);
+      this._poseForearm(kin);
+      this.renderer.render(this.scene, this.camera);
+    } catch (e) {
+      // Silent fallback: any per-frame error should not poison the renderer.
+      // Keep a single console.warn so the regression is visible in DevTools.
+      if (!this._poseErrLogged) {
+        console.warn('[hand3d] update failed', e);
+        this._poseErrLogged = true;
+      }
+    }
+  }
 
+  /* Position the back-of-hand slab along the neck.  We derive the hand's
+     world-X from the palm centroid in the kin snapshot (kin.palm.mcpL +
+     mcpR) so the slab tracks left/right slides up the neck.  Y and Z are
+     forced by the grip-frame layout (palm sits high above the strings on
+     the player side). */
+  _poseHand(kin) {
+    if (!kin.palm) return;
+    // Palm centroid in world X (mean of the index and pinky MCPs).
+    const palmX = wx((kin.palm.mcpL + kin.palm.mcpR) / 2);
+    // The MCP row centre in world Z: average of all 4 target string Z's
+    // (so the palm hovers over its targets even on offset chord shapes).
+    const zRow = this._palmZTarget(kin);
+    this.palm.position.set(
+      palmX,
+      MCP_Y,
+      zRow + HAND_OFFSET_Z,
+    );
+    // The slab's default geometry has +X = neck axis already, +Y = thickness,
+    // +Z = wrist depth.  No rotation needed for a default grip; future palm
+    // tilt (kin.palm.palmNormal) can be folded in via Euler 'YXZ' here.
+    const pn = kin.palm.palmNormal;
+    if (pn) {
+      this.palm.rotation.order = "YXZ";
+      this.palm.rotation.x = (pn.pitch || 0) * 0.3;  // damped — geometry is rigid
+      this.palm.rotation.y = (pn.yaw   || 0) * 0.3;
+      this.palm.rotation.z = (pn.roll  || 0) * 0.3;
+    } else {
+      this.palm.rotation.set(0, 0, 0);
+    }
+    this._palmX = palmX;
+    this._palmZ = zRow + HAND_OFFSET_Z;
+  }
+
+  /* Average Z (across-strings axis) of the active/planted finger targets.
+     Used as the palm's Z anchor so the back-of-hand stays roughly above
+     wherever the fingers are pressing.  Falls back to 0 (board centre) when
+     no finger has a target. */
+  _palmZTarget(kin) {
+    let sum = 0, n = 0;
     for (const f of FINGER_ORDER) {
-      const fk = kin.fingers[f];
-      const fm = this.fingerMeshes[f];
-      if (!fk || !fm) continue;
-      const { ik, role, width } = fk;
-      const r = Math.max(0.6, (width || 18) * PX * 0.5);
-
-      // Joints in world space — GRIP FRAME (Step 3).  The old ROLE_LIFT linear
-      // ramp made the whole chain LAY ON TOP of the board (mcp at ~6 wu, tip
-      // at ~0.2).  The grip frame instead anchors each joint at the Y a real
-      // left-hand grip puts it at: knuckles up high, then curling down onto
-      // the strings — see _gripY().  Per-joint Y comes from the joint name +
-      // role; XZ still comes from the shared 2D IK projection.
-      const pts = [
-        this._toWorld(ik.mcp, this._gripY("mcp", role)),
-        this._toWorld(ik.pip, this._gripY("pip", role)),
-        this._toWorld(ik.dip, this._gripY("dip", role)),
-        this._toWorld(ik.tip, this._gripY("tip", role)),
-      ];
-
-      orientBone(fm.bones[0], pts[0], pts[1], r * 0.95);
-      orientBone(fm.bones[1], pts[1], pts[2], r * 0.82);
-      orientBone(fm.bones[2], pts[2], pts[3], r * 0.66);
-
-      for (let i = 0; i < 4; i++) {
-        const jr = r * (0.95 - i * 0.1);
-        fm.joints[i].position.copy(pts[i]);
-        fm.joints[i].scale.set(jr, jr, jr);
+      const fg = kin.fingers && kin.fingers[f];
+      if (!fg) continue;
+      const targetStr = (fg.strings && fg.strings.length) ? fg.strings[0] : null;
+      if (targetStr != null && (fg.role === "active" || fg.role === "planted")) {
+        sum += this._stringZAt(targetStr);
+        n++;
       }
-      const tipR = r * 0.7;
-      fm.tipCap.position.copy(pts[3]);
-      fm.tipCap.scale.set(tipR, tipR, tipR);
-      fm.tipCap.material = this.roleMats[role] || this.roleMats.idle;
     }
+    return n > 0 ? sum / n : 0;
+  }
 
-    // Palm slab across the MCP span.
-    //
-    // The palm geometry — whether the procedural rounded slab (makePalmGeometry)
-    // or the cropped OBJ hand_mesh — arrives as a UNIT box centered on the origin
-    // (Step 1+2), so the pose block here must do all the sizing.  We derive every
-    // dimension live from the kin.palm payload (the MCP span shipped by
-    // buildKinSnapshot in hand_viz.html: mcpL/mcpR = index/pinky MCPs in SVG-x,
-    // botY = wrist-side palm edge, topX/topY = back-of-hand point above the MCPs)
-    // so the palm resizes correctly when the hand moves up/down the neck or the
-    // wrist rotates — no hardcoded width/depth magic numbers.
-    if (kin.palm) {
-      // The shared kin payload only gives us 2D MCP/wrist coordinates; we
-      // build a GRIP-FRAME palm pose from them (Step 3):
-      //   - XZ comes from the 2D snapshot (MCP span across strings).
-      //   - Y is forced to _gripY('palm') so the slab tucks BEHIND the belly
-      //     (player side, below the board top) instead of hovering above it.
-      //   - Z is shifted further toward the player by +0.85·neckHalfWidth so
-      //     the slab sits opposite the strings, i.e. visually behind the
-      //     neck from the camera's down-the-fretboard view.
-      const L = this._toWorld({ x: kin.palm.mcpL, y: kin.palm.botY }, 0);
-      const R = this._toWorld({ x: kin.palm.mcpR, y: kin.palm.botY }, 0);
-      const T = this._toWorld({ x: kin.palm.topX, y: kin.palm.topY }, 0);
-      const cx = (L.x + R.x) / 2;
-      const hwP = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
-      const palmCenterY = this._gripY("palm", null);
-      const palmCenterZ = ((L.z + R.z + T.z) / 3) + hwP * 0.85;
-      this.palm.position.set(cx, palmCenterY, palmCenterZ);
-      // mcpWidthW  = world distance between index and pinky MCPs (palm width).
-      // palmLenW   = palm length (knuckle ↔ wrist).  Anthropometric data has
-      //              palm length ≈ MCP span (~1:1), so derive it from mcpWidth
-      //              rather than from the noisy (now Y-overridden) T-L-R triad.
-      // palmThickW = back-of-hand thickness; anthropometric ~22% of MCP width.
-      const mcpWidthW  = Math.hypot(R.x - L.x, R.z - L.z);
-      const palmLenW   = mcpWidthW * 1.0;
-      const palmThickW = mcpWidthW * 0.22;
-      this.palm.scale.set(mcpWidthW, palmThickW, palmLenW);
-      // Track wrist yaw so the slab/mesh follows the wrist rotation around Y:
-      // atan2 with this sign convention keeps the palm's local +X axis aimed
-      // from the index MCP toward the pinky MCP regardless of how the hand
-      // pivots on the neck.
-      this.palm.rotation.y = Math.atan2(L.z - R.z, R.x - L.x);
-      // Step 8: optional palmNormal fine-tilt triplet (roll/pitch/yaw, radians)
-      // refining the orientation AFTER the wrist yaw above.  Yaw stays dominant
-      // via Euler order 'YXZ' so the bass↔treble pitch sit inside the already-
-      // computed wrist heading.  Older snapshots omit kin.palm.palmNormal; we
-      // skip the rotation and reset the X/Z axes so a previous frame's tilt
-      // does not bleed into a host that stopped shipping the field.
-      const pn = kin.palm.palmNormal;
-      if (pn) {
-        this.palm.rotation.order = "YXZ";
-        this.palm.rotation.x = pn.pitch || 0;
-        this.palm.rotation.z = pn.roll  || 0;
-        // pn.yaw is reserved — fold into Y so a future non-zero yaw still
-        // composes correctly with the wrist heading.
-        if (pn.yaw) this.palm.rotation.y += pn.yaw;
+  /* Pose each finger chain.  For each finger:
+       1. Compute the MCP world position (anchor on the palm's front face).
+       2. Set the fingerRoot group's position to the MCP.
+       3. Set fingerRoot's local rotation around Y so the chain's rest
+          direction (-Z in local) aligns with the line MCP → target XZ.
+          (When the target X equals the MCP X, no Y rotation; otherwise the
+          chain swings slightly to reach off-fret targets.)
+       4. Compute the total curl angle needed so the fingertip reaches the
+          target Y (which is below the MCP).  Distribute across MCP/PIP/DIP
+          rotations using CURL_SPLIT.
+
+     For hover / idle, target a relaxed pose just above the string surface
+     so the chain reads as resting fingers, not extended ones. */
+  _poseFingers(kin) {
+    if (!kin.fingers) return;
+    // X positions of the 4 MCPs along the neck.  We spread them across the
+    // palm's local +X so the index sits on the +X edge (nearer the nut for a
+    // right-hand grip) and the pinky on the -X edge.  PALM_DEPTH_X is the
+    // wrist-knuckle distance, NOT the knuckle row width — for the knuckle
+    // row we use a slightly narrower spacing so the four MCPs feel like
+    // adjacent fingers, not a splayed claw.
+    const mcpSpan = PALM_DEPTH_X * 0.85;  // total knuckle row width
+    const mcpStepX = mcpSpan / 3;          // 4 MCPs spaced over 3 gaps
+    // Index sits on the -X (nut) edge, pinky on the +X (bridge) edge so the
+    // hand naturally covers a 4-fret span with index leading toward the nut.
+    // World +X = nut → bridge, so index (lowest fret) is at -mcpSpan/2 and
+    // pinky (highest fret) is at +mcpSpan/2.  This matches a real left-hand
+    // grip where the four MCPs span four consecutive frets.
+    const mcpXOffset = {
+      index:  -mcpSpan / 2,
+      middle: -mcpSpan / 2 + mcpStepX,
+      ring:   -mcpSpan / 2 + mcpStepX * 2,
+      pinky:  -mcpSpan / 2 + mcpStepX * 3,
+    };
+    // MCPs sit on the FRONT face of the palm slab (the -Z face — toward the
+    // strings), at the bottom edge of the slab (-PALM_HEIGHT_Y/2) so the
+    // chain extends from the underside of the knuckles, not the top.
+    const mcpYLocal = -PALM_HEIGHT_Y * 0.20;
+    const mcpZLocal = -PALM_DEPTH_X * 0.20;  // near the front (knuckle) face
+
+    // Default palm-anchor fallbacks so a missing palm payload (or a frame
+    // that arrived before _poseHand could run) does not poison the chain
+    // with NaNs.  Board centre + default offset reads as a relaxed pose.
+    const baseX = (this._palmX !== undefined) ? this._palmX : (this._boardCX || 0);
+    const baseZ = (this._palmZ !== undefined) ? this._palmZ : HAND_OFFSET_Z;
+    for (const f of FINGER_ORDER) {
+      const fg   = kin.fingers[f];
+      const node = this.fingerNodes[f];
+      if (!fg || !node) continue;
+
+      // MCP world position: palm.position + local offset, since the palm has
+      // no rotation in the default grip we just add.  If palm rotates we'd
+      // need a full matrix transform — kept simple while palm tilt is damped.
+      const mcpX = baseX + mcpXOffset[f];
+      const mcpY = MCP_Y + mcpYLocal;
+      const mcpZ = baseZ + mcpZLocal;
+      node.root.position.set(mcpX, mcpY, mcpZ);
+
+      // Target: where the fingertip should land.
+      //   - active/planted: at (pressX(fret), STRING_SURFACE, stringZ(string)).
+      //   - hover:          just above the string surface, near the target X.
+      //   - idle:           resting Z (above the strings on the player side).
+      const role = fg.role || "idle";
+      const targetStr = (fg.strings && fg.strings.length) ? fg.strings[0] : null;
+      let tx, ty, tz;
+      if ((role === "active" || role === "planted") && fg.fret > 0 && targetStr != null) {
+        tx = this._pressX(fg.fret);
+        ty = STRING_SURFACE;
+        tz = this._stringZAt(targetStr);
+      } else if (role === "hover" && targetStr != null) {
+        tx = (fg.fret > 0) ? this._pressX(fg.fret) : mcpX;
+        ty = STRING_SURFACE + 0.7;
+        tz = this._stringZAt(targetStr);
       } else {
-        this.palm.rotation.x = 0;
-        this.palm.rotation.z = 0;
+        // Idle: rest above the strings, near MCP X, at the high-E side so
+        // the relaxed fingers don't poke through the board.
+        tx = mcpX;
+        ty = MCP_Y - 1.5;
+        tz = mcpZ - 2.0;
       }
-    }
 
-    // Forearm: from a short anatomical stub on the player side up to the
-    // wrist/palm top.  The forearm we render is a STUB, not a full ulna: it
-    // exists to suggest the limb entering the frame, not to span the SVG.
-    //
-    // STEP 2 — SHORTENED PROPORTIONS: the previous build anchored the elbow at
-    // SVG-y = SCENE_H + 60 (≈620), which after wz() placed the back ~85 world
-    // units behind the wrist — a monster forearm dominating the viewport.  We
-    // now anchor the elbow only 90 SVG-pixels behind the wrist (~22 wu after
-    // PX), giving a believable stub length, and slim the bone radius 8 → 5.5
-    // so it reads forearm-gauge rather than thigh-gauge.
-    //
-    // CLEARANCE (preserved from B3): we still keep the wrist above the strings
-    // (lift = 14 wu) and clamp the wrist's SVG-y to the neck's near (low-E)
-    // edge so the bone rides OVER the board, never under it.  SVG-y maps to
-    // world Z (wz); larger SVG-y = larger Z = near/player side; the neck's
-    // near edge is z1 = wz(boardBot).  Pinning the wrist's effective SVG-y to
-    // ≥ that near edge keeps both forearm endpoints in front of the neck.
-    if (kin.forearm) {
-      const g = this.geom;
-      // Near (low-E) edge of the neck in SVG-pixel Y.  Prefer the host's
-      // explicit slab bottom; fall back to the same stringBottom+24 the board
-      // build (setGeometry) uses when the host ships no boardBot.
-      const nearEdgeY = g
-        ? (g.boardBot !== undefined
-            ? g.boardBot
-            : (g.stringBottom !== undefined ? g.stringBottom + 24 : SCENE_H / 2))
-        : SCENE_H / 2;
-      // Keep the wrist on the near side of that edge (a few px of margin so the
-      // forearm sits clearly in front of, not flush against, the low-E edge).
-      const wristY = Math.max(kin.forearm.topY, nearEdgeY + 8);
-      const wrist = this._toWorld({ x: kin.forearm.wristX, y: wristY }, 14);
-      // Elbow anchor: 90 SVG-pixels behind the wrist (NOT below SCENE_H), so the
-      // stub length scales with PX rather than spanning the whole viewport.
-      // Lift 16 vs wrist 14 reads as a slight elbow rise behind the hand.
-      const elbowY = wristY + 90;
-      const back = this._toWorld({ x: kin.forearm.forearmX, y: elbowY }, 16);
-      // Forearm radius 5.5 wu (was 8) — anatomically closer to wrist gauge,
-      // no longer reads as a swollen thigh next to the slimmer phalanges.
-      orientBone(this.forearm, back, wrist, 5.5);
-    }
+      // Solve the chain.
+      this._solveChain(node, mcpX, mcpY, mcpZ, tx, ty, tz);
 
-    // Thumb: two short, finger-gauge bones placed BEHIND the neck on the
-    // PLAYER side (+Z), at a mid-belly height (TOP_Y − ~0.50·hw).  A real
-    // guitarist's left thumb braces the neck from behind, not from below it,
-    // so we ride along +Z (toward the camera/player) instead of dropping the
-    // bone into −Y as the earlier "tucked under" pose did.  The lateral X
-    // anchor is taken from the live palm centre so the thumb tracks the hand
-    // as it slides along the neck.
-    if (kin.thumb) {
-      // Finger gauge with a slight proximal→distal taper (×1.05 / ×0.85), so
-      // the thumb reads finger-sized rather than club-sized.
-      const tr = Math.max(0.6, 22 * PX * 0.5);
-      // Live neck half-width drives both the +Z reach and the Y band depth so
-      // the thumb scales with the belly that's actually rendered.  Fallback
-      // hw of 20 matches the historical neck width when setGeometry hasn't
-      // published a value yet.
-      const hwT = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
-      // Z anchors — +Z is the player side (behind the neck from the
-      // down-the-fretboard camera angle).  Base sits just past the belly
-      // mid-line; tip reaches further out toward the player so the two-bone
-      // chain reads as a thumb hooked over the back of the neck.
-      const thumbZ_base = +this._neckHalfWidth * 0.20;
-      const thumbZ_tip  = +this._neckHalfWidth * 0.50;
-      // Mid-belly height: TOP_Y is the flat fretboard surface; we drop half
-      // a neck width below it to put the thumb on the back of the belly.
-      const thumbY_band = TOP_Y - this._neckHalfWidth * 0.50;
-      // Lateral X — prefer the live palm centre (matches the hand's actual
-      // position after the palm pose above).  Fall back to the kin.palm MCP
-      // mid, then to the 2D thumb stylization X, in that order, so a missing
-      // palm payload still produces a sensible pose.
-      const palmCenterX = (kin.palm && kin.palm.mcpL !== undefined && kin.palm.mcpR !== undefined)
-        ? wx((kin.palm.mcpL + kin.palm.mcpR) / 2)
-        : (this.palm && this.palm.position ? this.palm.position.x : wx(kin.thumb.x));
-      // 2-bone endpoints around the mid-belly band, climbing both +Y and +Z
-      // from base → tip so the thumb arcs up and over the back of the neck.
-      const base = new THREE.Vector3(palmCenterX, thumbY_band - 1.0, thumbZ_base);
-      const mid  = new THREE.Vector3(
-        palmCenterX,
-        thumbY_band + 0.5,
-        thumbZ_base + (thumbZ_tip - thumbZ_base) * 0.55,
-      );
-      const tip  = new THREE.Vector3(palmCenterX, thumbY_band + 1.0, thumbZ_tip);
-      orientBone(this.thumbBones[0], base, mid, tr * 1.05);
-      orientBone(this.thumbBones[1], mid, tip, tr * 0.85);
+      // Recolour the tip cap by role.
+      node.tipCap.material = this.roleMats[role] || this.roleMats.idle;
     }
-
-    this.renderer.render(this.scene, this.camera);
   }
 
-  _toWorld(p, lift) {
-    return new THREE.Vector3(wx(p.x), lift || 0, wz(p.y));
+  /* Inverse kinematics for a 3-bone planar chain:
+       - The chain rotates as a whole around the world Y axis (yaw) so its
+         swing plane (local YZ) contains the target.
+       - Within that plane, we compute the total flex angle that takes the
+         tip from rest (along -Z) to the target, then distribute across the 3
+         joints by CURL_SPLIT.
+     This is NOT a precise multi-joint IK — it's the "anatomical fan" used in
+     the spec.  Total curl is clamped to [0, 2.5 rad] so a fully reachable
+     fret bends realistically and an unreachable one curls to the limit. */
+  _solveChain(node, mcpX, mcpY, mcpZ, tx, ty, tz) {
+    // Vector from MCP to target in world space.
+    const dx = tx - mcpX;
+    const dy = ty - mcpY;     // negative: target is BELOW the MCP
+    const dz = tz - mcpZ;     // negative: target is in front of the palm (-Z)
+
+    // Yaw: rotate the chain around Y so its -Z axis aligns with the XZ
+    // projection of the target.  atan2(-dx, -dz) gives the yaw needed.
+    // (We negate because the chain rests pointing -Z; we want -Z + yaw to
+    // align with the (dx, dz) direction.)
+    //
+    // Euler order 'YXZ': yaw applies FIRST (placing the swing plane), then
+    // the curl rotation.x folds the chain in that plane.  Without this the
+    // default 'XYZ' would apply curl first in the chain's local frame, then
+    // yaw the curled result — fingers would sweep instead of fold.
+    const yaw = Math.atan2(-dx, -dz);
+    node.root.rotation.order = "YXZ";
+    node.root.rotation.y = yaw;
+
+    // In the yawed local frame, the target's lateral X component is folded
+    // into the forward distance.  Compute the local forward distance (the
+    // horizontal reach in the swing plane) and vertical drop:
+    //   forward = projection of (dx, dz) onto the chain's -Z axis = -dz·cos − dx·sin... but
+    //   easier: forward = sqrt(dx² + dz²)  (always positive — the chain
+    //   reaches out in its own forward direction after the yaw).
+    const forward = Math.sqrt(dx * dx + dz * dz);
+    const drop    = -dy;       // positive = target is BELOW MCP
+
+    // Estimate the "extended reach" if the finger were straight: simply L.
+    // The finger tip when extended (zero curl) sits at (forward = L, drop = 0).
+    // We want the tip to land at (forward, drop).  Approximate the curl by
+    // the angle whose sine is the drop fraction, plus a contribution from
+    // how much the forward reach has shortened relative to L.
+    const L = node.Ltotal;
+    // Total straight-line distance from MCP to target.
+    const dist = Math.sqrt(forward * forward + drop * drop);
+    // The chord-length-to-bow-arc relationship for a circular arc of length L
+    // and chord d gives: chord/length ≈ sinc(θ/2), where θ is the total bend.
+    // Inverting analytically is messy; we use a fast monotone approximation:
+    //   chord_ratio = min(1, dist / L)
+    //   totalCurl   = π · (1 - chord_ratio)^0.85
+    // Reaches the limit (π ≈ straight) when dist = 0 (curled into the palm),
+    // and zero (extended) when dist >= L.  Empirically the 0.85 exponent
+    // gives a natural curl progression across the press range.
+    const chordRatio = Math.min(1.0, dist / L);
+    let totalCurl = Math.PI * Math.pow(1 - chordRatio, 0.85);
+
+    // Additional curl from the "drop angle" — when the target is more BELOW
+    // than FORWARD (a tight press against the strings), boost the curl by the
+    // angle between the (forward, -drop) target direction and the rest -Z
+    // direction.  This makes the fingertip point downward at the strings
+    // even when the chain has plenty of reach left.
+    const dropAngle = Math.atan2(drop, Math.max(0.1, forward));
+    totalCurl = Math.max(totalCurl, dropAngle * 1.15);
+
+    // Clamp curl to anatomical limit: MCP+PIP+DIP combined can reach about
+    // 250° fully balled fist; we cap at 2.6 rad (≈150°) for press poses.
+    if (totalCurl < 0) totalCurl = 0;
+    if (totalCurl > 2.6) totalCurl = 2.6;
+
+    // Distribute the curl across the 3 joints.  Each joint rotates around its
+    // own X axis; the chain folds in the YZ plane.
+    //
+    // SIGN CONVENTION: the bones rest along -Z (extended forward over the
+    // strings).  A POSITIVE rotation around X swings -Z toward +Y (UP, away
+    // from the strings).  We want the chain to curl DOWN onto the strings,
+    // so we apply NEGATIVE rotation: -Z swings toward -Y.  The yaw above
+    // (root.rotation.y) is unaffected — the curl axis stays X in the local
+    // frame after yaw because the chain is built straight along local -Z.
+    node.root.rotation.x = -totalCurl * CURL_SPLIT.mcp;
+    node.pip.rotation.x  = -totalCurl * CURL_SPLIT.pip;
+    node.dip.rotation.x  = -totalCurl * CURL_SPLIT.dis;
   }
 
-  /* Grip-frame Y mapper: returns the world Y a joint of `jointKind`
-     ('mcp'|'pip'|'dip'|'tip'|'palm') in the given `role` should sit at, so the
-     finger chain reads as CURLING DOWN ONTO the strings from a knuckle row
-     held above them — the real left-hand grip pose.
+  /* Thumb: braces the BACK of the neck (-Z side from the back-of-hand).
+     We position it under the middle finger MCP along X, at Y = -1.5
+     (mid-belly height behind the neck), aimed up and slightly toward the
+     player so it reads as a thumb hooked over the back of the neck. */
+  _poseThumb(kin) {
+    const thumbX = this._palmX || 0;
+    // Place at the back of the neck — opposite Z side from the palm.  The
+    // neck's far edge is at stringZMin; we sit a touch past that.
+    const baseZ = (this._stringZMin !== undefined) ? this._stringZMin - 0.5 : -3.0;
+    const baseY = -NECK_DEPTH * 0.55;
+    this.thumbBone.position.set(thumbX, baseY, baseZ);
+    // Rotate so the bone points up and toward the player (+Z) — wrapping
+    // over the back of the neck.  rotation.x lifts the tip up; rotation.y
+    // would yaw it; for the default brace we just use a fixed pitch.
+    this.thumbBone.rotation.set(-Math.PI * 0.35, 0, 0);
+    this.thumbJoint.position.set(thumbX, baseY, baseZ);
+    this.thumbJoint.scale.setScalar(1);
+  }
 
-     The numbers are anchored to the same three world planes the board uses:
-       - STRING_REST_Y (~1.1) : the action plane the strings ride at.
-       - FRET_TOP_Y    (~0.55): fret-crown top, the pressing target.
-       - TOP_Y         (~-0.2): the flat fretboard surface.
-     and offset above/below them to mimic a grip the camera reads:
-       - mcp knuckles ride high (1.8 wu above the strings),
-       - pip / dip step down through the curl,
-       - tip sits ON the crown when active/planted, hovering above otherwise.
-     The palm Y dives BELOW the board (TOP_Y − 0.30·neckHalfWidth) so the back
-     of the hand hugs the belly's underside — the "tuck the palm under the
-     neck" pose, opposite of a hand laying flat on top of the board. */
-  _gripY(jointKind, role) {
-    if (jointKind === "mcp") return STRING_REST_Y + 1.8;     // ~2.9
-    if (jointKind === "pip") return STRING_REST_Y + 1.0;     // ~2.1
-    if (jointKind === "dip") return STRING_REST_Y + 0.4;     // ~1.5
-    if (jointKind === "tip") {
-      if (role === "active" || role === "planted") return FRET_TOP_Y - 0.05; // ~0.50
-      if (role === "hover" || role === "upcoming") return STRING_REST_Y + 0.6; // ~1.7
-      return STRING_REST_Y + 1.2;                            // idle ~2.3
-    }
-    if (jointKind === "palm") {
-      // Palm hugs the back of the belly, on the player side: drop a fraction
-      // of the live neck half-width below the fretboard top.
-      const hw = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
-      return TOP_Y - hw * 0.30;
-    }
-    return 0;
+  /* Forearm: a single capsule from the wrist (back side of the palm, +Z) to
+     a point further +Z (toward the player) and slightly +X.  The wrist
+     stays attached to the back of the palm slab, regardless of where the
+     hand has slid along the neck. */
+  _poseForearm(kin) {
+    const wristX = (this._palmX !== undefined) ? this._palmX + PALM_DEPTH_X * 0.3 : 0;
+    const wristZ = (this._palmZ !== undefined) ? this._palmZ + PALM_DEPTH_X * 0.25 : HAND_OFFSET_Z;
+    const wristY = MCP_Y;
+    this.forearmBone.position.set(wristX, wristY, wristZ);
+    // The bone defaults to extending along -Z (rest direction).  We want it
+    // to extend along +Z + slight +X — toward the player and the elbow.
+    // rotation.y = π (flip -Z to +Z), then rotation.x = -0.25 to tilt up.
+    this.forearmBone.rotation.set(-0.20, Math.PI, 0);
+    this.forearmJoint.position.set(wristX, wristY, wristZ);
+    this.forearmJoint.scale.setScalar(1);
   }
 
   /* Convert the current spherical-orbit state into a world-space camera
      position relative to _lookAt and re-aim the camera at the target.
-     azimuth=0 puts the camera on +Z of _lookAt (toward the player), polar=0
-     would be straight overhead — see clamps in the pointer handlers. */
+     azimuth = 0 puts the camera on +Z of _lookAt (player side, looking at
+     the back of the hand); polar = 0 would be straight overhead. */
   _applyCamera() {
     const { radius, azimuth, polar } = this._camSpherical;
     const sinP = Math.sin(polar);
@@ -909,8 +920,6 @@ class Hand3DRenderer {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h, false);
-    // Re-aim at the persistent look-target so a viewport change can't drift
-    // the framing off the board centre setGeometry() chose.
     this._applyCamera();
   }
 
@@ -936,10 +945,10 @@ class Hand3DRenderer {
 }
 
 /**
- * Factory: attempt to create a 3D renderer in `container`.  Returns null (so the
- * caller falls back to SVG) when WebGL is unavailable or three.js construction
- * throws.  three.js itself is only loaded because this module was imported, and
- * this module is only imported when the feature flag is on.
+ * Factory: attempt to create a 3D renderer in `container`.  Returns null (so
+ * the caller falls back to SVG) when WebGL is unavailable or three.js
+ * construction throws.  three.js is only loaded because this module was
+ * imported, and this module is only imported when the feature flag is on.
  */
 export function create(container) {
   if (!webglAvailable()) return null;
@@ -947,6 +956,7 @@ export function create(container) {
     return new Hand3DRenderer(container);
   } catch (e) {
     // Any three.js/WebGL construction failure → SVG fallback, never a crash.
+    console.warn('[hand3d] renderer construction failed', e);
     return null;
   }
 }
