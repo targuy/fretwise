@@ -41,11 +41,6 @@ import * as THREE from "./vendor/three.module.min.js";
 const PX = 1 / 4;
 const SCENE_W = 1440;
 const SCENE_H = 560;
-/* Mid of the string band in SVG-pixel Y, mirroring the 2D board's
-   (STRING_Y_TOP + STRING_Y_BOTTOM) / 2 = (230 + 350) / 2.  Used as the SVG-space
-   anchor the tucked thumb runs *across* (in +Z) behind the neck, so the thumb
-   sits opposite the middle finger regardless of the live hand position. */
-const STRING_MID_Y = 290;
 function wx(px) { return (px - SCENE_W / 2) * PX; }
 function wz(py) { return (py - SCENE_H / 2) * PX; }
 
@@ -781,33 +776,47 @@ class Hand3DRenderer {
       orientBone(this.forearm, back, wrist, 5.5);
     }
 
-    // Thumb: two short, finger-gauge bones TUCKED BEHIND the neck (negative world
-    // Y, i.e. on the far side of the belly) and running mostly across +Z so
-    // the pad opposes the strings the way a real thumb braces the neck.  We anchor
-    // it laterally on the MIDDLE finger's MCP (read straight from the shared
-    // snapshot) and run it across STRING_MID_Y, the mirror of the 2D string-band
-    // mid, so the knuckle sits opposite the middle finger.  NOTE: this 3D thumb X
-    // intentionally diverges from the 2D thumb stylization (kin.thumb.x); the 3D
-    // rig brings it behind/under the neck instead of the SVG's side-on caricature.
+    // Thumb: two short, finger-gauge bones placed BEHIND the neck on the
+    // PLAYER side (+Z), at a mid-belly height (TOP_Y − ~0.50·hw).  A real
+    // guitarist's left thumb braces the neck from behind, not from below it,
+    // so we ride along +Z (toward the camera/player) instead of dropping the
+    // bone into −Y as the earlier "tucked under" pose did.  The lateral X
+    // anchor is taken from the live palm centre so the thumb tracks the hand
+    // as it slides along the neck.
     if (kin.thumb) {
-      const midFk = kin.fingers && kin.fingers.middle;
-      const lateralX = (midFk && midFk.ik && midFk.ik.mcp)
-        ? midFk.ik.mcp.x          // align across from the middle MCP
-        : kin.thumb.x;            // fallback if the middle finger is absent
-      // Finger gauge with a slight proximal→distal taper (×1.05 / ×0.85), so the
-      // tucked thumb reads finger-sized rather than the old 5/4 (~2× finger) club.
+      // Finger gauge with a slight proximal→distal taper (×1.05 / ×0.85), so
+      // the thumb reads finger-sized rather than club-sized.
       const tr = Math.max(0.6, 22 * PX * 0.5);
-      // Behind the slab: world Y descends in proportion to the LIVE neck
-      // half-width (this._neckHalfWidth, published by setGeometry) so the
-      // thumb tracks the belly depth instead of sitting inside the new deeper
-      // belly the way the old -1.0/-2.3/-3.6 hardcoded ladder did.  The ratios
-      // (-0.05 / -0.12 / -0.18 × hw) preserve the old proportional spacing
-      // while letting the thumb breathe with the neck.  Fallback hw of 20
-      // matches the historical neck width when setGeometry hasn't run yet.
+      // Live neck half-width drives both the +Z reach and the Y band depth so
+      // the thumb scales with the belly that's actually rendered.  Fallback
+      // hw of 20 matches the historical neck width when setGeometry hasn't
+      // published a value yet.
       const hwT = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
-      const base = this._toWorld({ x: lateralX, y: STRING_MID_Y - 24 }, -hwT * 0.05);
-      const mid  = this._toWorld({ x: lateralX, y: STRING_MID_Y },      -hwT * 0.12);
-      const tip  = this._toWorld({ x: lateralX, y: STRING_MID_Y + 28 }, -hwT * 0.18);
+      // Z anchors — +Z is the player side (behind the neck from the
+      // down-the-fretboard camera angle).  Base sits just past the belly
+      // mid-line; tip reaches further out toward the player so the two-bone
+      // chain reads as a thumb hooked over the back of the neck.
+      const thumbZ_base = +this._neckHalfWidth * 0.20;
+      const thumbZ_tip  = +this._neckHalfWidth * 0.50;
+      // Mid-belly height: TOP_Y is the flat fretboard surface; we drop half
+      // a neck width below it to put the thumb on the back of the belly.
+      const thumbY_band = TOP_Y - this._neckHalfWidth * 0.50;
+      // Lateral X — prefer the live palm centre (matches the hand's actual
+      // position after the palm pose above).  Fall back to the kin.palm MCP
+      // mid, then to the 2D thumb stylization X, in that order, so a missing
+      // palm payload still produces a sensible pose.
+      const palmCenterX = (kin.palm && kin.palm.mcpL !== undefined && kin.palm.mcpR !== undefined)
+        ? wx((kin.palm.mcpL + kin.palm.mcpR) / 2)
+        : (this.palm && this.palm.position ? this.palm.position.x : wx(kin.thumb.x));
+      // 2-bone endpoints around the mid-belly band, climbing both +Y and +Z
+      // from base → tip so the thumb arcs up and over the back of the neck.
+      const base = new THREE.Vector3(palmCenterX, thumbY_band - 1.0, thumbZ_base);
+      const mid  = new THREE.Vector3(
+        palmCenterX,
+        thumbY_band + 0.5,
+        thumbZ_base + (thumbZ_tip - thumbZ_base) * 0.55,
+      );
+      const tip  = new THREE.Vector3(palmCenterX, thumbY_band + 1.0, thumbZ_tip);
       orientBone(this.thumbBones[0], base, mid, tr * 1.05);
       orientBone(this.thumbBones[1], mid, tip, tr * 0.85);
     }
