@@ -885,6 +885,396 @@ function sampleState(t, frames) {
   return { handPos, active, planted, upcoming, recent, openStrings, openRecent };
 }
 
+// === Pose vocabulary (Phase B) ===========================================
+// The user's architectural insight: fingerings are a *limited* number of
+// moves — single-finger press, full barre, half barre, rest, multi-press —
+// rather than a free IK solve every frame.  Each PoseSpec describes per-finger
+// role + target (string,fret) at a given hand_position; an evaluator then
+// projects each finger using THAT finger's own length (index 176, middle 194,
+// ring 184, pinky 158) so the same "press fret 5" produces different joint
+// postures per finger.
+//
+// Step 6: vocabulary lives behind USE_POSE_PALETTE = false.  No behaviour
+// change: solveTargetHandPose + collectHandTargets remain the sole drivers.
+// Step 7 will flip the flag and route through evaluatePose.
+const USE_POSE_PALETTE = false;
+
+// Strict barre detector — same semantics as the inline check in sampleState's
+// active loop (only ACTIVE-at-instant + contiguous adjacent strings count),
+// re-expressed as a pure function over a sampleState() snapshot.
+//
+// Returns: { isBarre: true, finger, fret, fromString, toString } or null.
+function detectBarre(state) {
+  if (!state || !state.active) return null;
+  for (const f of FINGER_ORDER) {
+    const a = state.active[f];
+    if (!a) continue;
+    const strs = Array.isArray(a.strings) ? a.strings.slice() : [a.string];
+    if (strs.length < 2) continue;
+    strs.sort((p, q) => p - q);
+    // Contiguity guard mirrors extendContiguous in sampleState.
+    let contiguous = true;
+    for (let i = 1; i < strs.length; i++) {
+      if (strs[i] !== strs[i - 1] + 1) { contiguous = false; break; }
+    }
+    if (!contiguous) continue;
+    return {
+      isBarre: true,
+      finger: f,
+      fret: a.fret,
+      fromString: strs[0],
+      toString: strs[strs.length - 1],
+    };
+  }
+  return null;
+}
+
+// Per-finger geometry shorthand.  FINGER_TOTAL is the live (handScale-scaled)
+// length table; we always read through it so a future handScale change still
+// drives different per-finger reach for the same fret target.
+function _fingerLen(name) { return FINGER_TOTAL[name]; }
+
+// Build a per-finger role/target slot.  Default role = idle, no target.
+function _slot(role, targetString, targetFret) {
+  return {
+    role: role || "idle",
+    targetString: (targetString == null) ? null : targetString,
+    targetFret:   (targetFret   == null) ? null : targetFret,
+  };
+}
+
+// Empty per-finger table — every finger starts idle/unassigned.
+function _emptyPerFinger() {
+  const out = {};
+  for (const f of FINGER_ORDER) out[f] = _slot("idle", null, null);
+  return out;
+}
+
+// Sideways splay between MCPs — currently a constant driven by MCP_OFFSETS
+// (the metacarpal spread).  Exposed in the spec so a future pose can widen
+// or narrow it (chord stretch vs. closed grip).
+function _defaultSplay() {
+  return Math.abs(MCP_OFFSETS.pinky - MCP_OFFSETS.index);
+}
+
+// --- Pose factories -------------------------------------------------------
+//
+// Each factory returns a PoseSpec of shape:
+//   {
+//     name, hp, splay, barre|null,
+//     perFinger: { index, middle, ring, pinky: {role, targetString, targetFret} }
+//   }
+
+// Rest posture at a given hand_position.  All fingers hovering above their
+// HOME_FRET_OFFSET fret (no string assignment, role 'idle').
+function restAtPosition(hp) {
+  const pf = _emptyPerFinger();
+  for (const f of FINGER_ORDER) {
+    pf[f] = _slot("idle", null, hp + HOME_FRET_OFFSET[f]);
+  }
+  return {
+    name: "restAtPosition",
+    hp: hp,
+    perFinger: pf,
+    barre: null,
+    splay: _defaultSplay(),
+  };
+}
+
+// Single-finger press at (string, fret).  Other fingers stay in ready arch
+// (role 'hover') at their HOME_FRET_OFFSET fret on no specific string.
+function pressSingle(hp, finger, string, fret) {
+  const pf = _emptyPerFinger();
+  for (const f of FINGER_ORDER) {
+    pf[f] = (f === finger)
+      ? _slot("active", string, fret)
+      : _slot("hover",  null,   hp + HOME_FRET_OFFSET[f]);
+  }
+  return {
+    name: "pressSingle",
+    hp: hp,
+    perFinger: pf,
+    barre: null,
+    splay: _defaultSplay(),
+  };
+}
+
+// Multiple fingers press simultaneously (a chord shape).
+// presses = [{finger, string, fret}, ...]
+function pressMulti(hp, presses) {
+  const pf = _emptyPerFinger();
+  const pressing = new Set();
+  for (const p of presses || []) {
+    if (!p || !p.finger) continue;
+    pf[p.finger] = _slot("active", p.string, p.fret);
+    pressing.add(p.finger);
+  }
+  for (const f of FINGER_ORDER) {
+    if (!pressing.has(f)) {
+      pf[f] = _slot("hover", null, hp + HOME_FRET_OFFSET[f]);
+    }
+  }
+  return {
+    name: "pressMulti",
+    hp: hp,
+    perFinger: pf,
+    barre: null,
+    splay: _defaultSplay(),
+  };
+}
+
+// Full barre across all 6 strings with index at fret F.  Other fingers either
+// rest in ready arch or press if they appear in presses[].
+function barreFull(hp, fret, presses) {
+  const pf = _emptyPerFinger();
+  pf.index = _slot("active", 6, fret);                  // barre anchor on bass
+  const pressing = new Set(["index"]);
+  for (const p of presses || []) {
+    if (!p || !p.finger || p.finger === "index") continue;
+    pf[p.finger] = _slot("active", p.string, p.fret);
+    pressing.add(p.finger);
+  }
+  for (const f of FINGER_ORDER) {
+    if (!pressing.has(f)) {
+      pf[f] = _slot("hover", null, hp + HOME_FRET_OFFSET[f]);
+    }
+  }
+  return {
+    name: "barreFull",
+    hp: hp,
+    perFinger: pf,
+    barre: { finger: "index", fret: fret, fromString: 1, toString: 6 },
+    splay: _defaultSplay(),
+  };
+}
+
+// Partial barre: index across N adjacent strings (fromString..toString,
+// inclusive, with fromString >= toString or <= toString — we sort).
+function barreHalf(hp, fret, fromString, toString, presses) {
+  const pf = _emptyPerFinger();
+  const lo = Math.min(fromString, toString);
+  const hi = Math.max(fromString, toString);
+  pf.index = _slot("active", hi, fret);                 // anchor on bass-side end
+  const pressing = new Set(["index"]);
+  for (const p of presses || []) {
+    if (!p || !p.finger || p.finger === "index") continue;
+    pf[p.finger] = _slot("active", p.string, p.fret);
+    pressing.add(p.finger);
+  }
+  for (const f of FINGER_ORDER) {
+    if (!pressing.has(f)) {
+      pf[f] = _slot("hover", null, hp + HOME_FRET_OFFSET[f]);
+    }
+  }
+  return {
+    name: "barreHalf",
+    hp: hp,
+    perFinger: pf,
+    barre: { finger: "index", fret: fret, fromString: lo, toString: hi },
+    splay: _defaultSplay(),
+  };
+}
+
+// Barre + extra finger presses (common jazz voicings: full barre + 1-3 added
+// notes from the chord shape).  Same shape as barreFull but kept distinct so
+// selectPose can label intent precisely.
+function barrePlus(hp, fret, presses) {
+  const spec = barreFull(hp, fret, presses);
+  spec.name = "barrePlus";
+  return spec;
+}
+
+// --- Selector -------------------------------------------------------------
+//
+// Map the current sampleState() output to one of the factories above.
+// Priority:
+//   1. detectBarre → barrePlus (if extra presses) | barreFull (all 6 strings)
+//                  | barreHalf (partial range)
+//   2. multiple non-zero fretted fingers → pressMulti
+//   3. exactly one non-zero fretted finger → pressSingle
+//   4. nothing pressed → restAtPosition
+function selectPose(state) {
+  if (!state) return restAtPosition(0);
+  const hp = (typeof state.handPos === "number") ? state.handPos : 0;
+  const barre = detectBarre(state);
+
+  // Gather all fretted active|planted fingers (fret > 0).
+  const presses = [];
+  for (const f of FINGER_ORDER) {
+    const a = state.active && state.active[f];
+    const p = state.planted && state.planted[f];
+    const src = a || p;
+    if (!src || src.fret === 0) continue;
+    presses.push({ finger: f, string: src.string, fret: src.fret });
+  }
+
+  if (barre) {
+    // Notes beyond the barre itself = "extras" → barrePlus.
+    const extras = presses.filter(p => p.finger !== barre.finger);
+    const span = barre.toString - barre.fromString + 1;
+    if (extras.length > 0) {
+      return barrePlus(hp, barre.fret, extras);
+    }
+    if (span >= 6) {
+      return barreFull(hp, barre.fret, []);
+    }
+    return barreHalf(hp, barre.fret, barre.fromString, barre.toString, []);
+  }
+
+  if (presses.length >= 2) {
+    return pressMulti(hp, presses);
+  }
+  if (presses.length === 1) {
+    const p = presses[0];
+    return pressSingle(hp, p.finger, p.string, p.fret);
+  }
+  return restAtPosition(hp);
+}
+
+// --- Evaluator ------------------------------------------------------------
+//
+// Turn a PoseSpec into the same shape the OLD solveTargetHandPose +
+// collectHandTargets pair produced ({palm: {x,y,wristRot,...}, perFinger:
+// {f: {mcp, tip, role}}, thumb}) — so downstream IK consumers don't change.
+//
+// Crucially: per-finger projection uses _fingerLen(f) so a longer finger
+// reaches further along the neck for the same target fret.  The OLD path
+// applied a uniform reach budget; this path makes geometry-per-finger
+// explicit at the spec level.
+function evaluatePose(spec) {
+  if (!spec) {
+    return {
+      handPos: 0,
+      pivotX: pressX(0) - MCP_OFFSETS.index,
+      pivotY: MCP_Y,
+      wristRot: 0,
+      forearmBias: 0,
+      palmCup: 0,
+      perFinger: {},
+      thumb: solveThumbAnchor([], 0, 0, false, false),
+    };
+  }
+
+  // Synthesise the "targets" shape that solveTargetHandPose used, but built
+  // from the PoseSpec instead of sampleState — so we can reuse the same
+  // weighted-vote palm placement while the per-finger reach is computed from
+  // _fingerLen(f).  This keeps Step 6 a refactor: no behaviour change yet.
+  const targets = [];
+  for (const f of FINGER_ORDER) {
+    const slot = spec.perFinger[f];
+    if (!slot || slot.role !== "active") continue;
+    if (slot.targetFret == null || slot.targetString == null) continue;
+    const s1 = slot.targetString;
+    // For a barre on this finger, span out to the barre extent.
+    let strings = [s1];
+    if (spec.barre && spec.barre.finger === f) {
+      strings = [];
+      for (let k = spec.barre.fromString; k <= spec.barre.toString; k++) strings.push(k);
+    }
+    const ymin = stringY(strings[0]);
+    const ymax = stringY(strings[strings.length - 1]);
+    targets.push({
+      finger: f,
+      fret: slot.targetFret,
+      string: strings.reduce((acc, s) => acc + s, 0) / strings.length,
+      strings,
+      x: pressX(slot.targetFret),
+      y: (ymin + ymax) / 2,
+      weight: 1.0,
+    });
+  }
+
+  // Palm placement: same weighted-vote algorithm as the old solver, so a
+  // Step-7 flip routing through evaluatePose preserves the equilibrium pose.
+  const fallbackHp = spec.hp;
+  if (!targets.length) {
+    return {
+      handPos: spec.hp,
+      pivotX: pressX(spec.hp) - MCP_OFFSETS.index,
+      pivotY: MCP_Y,
+      wristRot: 0,
+      forearmBias: 0,
+      palmCup: 0,
+      perFinger: {},
+      thumb: solveThumbAnchor([], spec.hp, 0, false, false),
+    };
+  }
+
+  let wSum = 0, hpSum = 0;
+  for (const t of targets) {
+    wSum  += t.weight;
+    hpSum += (t.fret - HOME_FRET_OFFSET[t.finger]) * t.weight;
+  }
+  const handPos = clamp(hpSum / wSum, Math.max(1, fallbackHp - 2.5), fallbackHp + 2.5);
+  const cluster = analyseTargetCluster(targets);
+  const pivotX = pressX(handPos) - MCP_OFFSETS.index;
+  const thumb = solveThumbAnchor(targets, handPos, cluster.bassDemand, cluster.openChord, cluster.barre);
+
+  let pivotY = MCP_MIN_Y;
+  for (const t of targets) {
+    const needed = t.y - DESIRED_REACH_Y[t.finger];
+    const pull = t.weight * (t.string >= 4 ? 1.0 : 0.72);
+    pivotY = Math.max(pivotY, needed * pull + pivotY * (1 - pull));
+  }
+  pivotY = clamp(pivotY, MCP_MIN_Y, MCP_MAX_Y);
+
+  let sinNum = 0, sinDen = 0;
+  for (const t of targets) {
+    const naturalDx = MCP_OFFSETS[t.finger];
+    if (Math.abs(naturalDx) < 1) continue;
+    const idealMcpY = t.y - DESIRED_REACH_Y[t.finger];
+    sinNum += ((idealMcpY - pivotY) / naturalDx) * t.weight;
+    sinDen += t.weight;
+  }
+  const sinTheta = sinDen > 0 ? sinNum / sinDen : 0;
+  const ergonomicRoll = cluster.bassDemand > 3.8 ? 0.12 : cluster.openChord ? 0.06 : 0;
+  const wristRot = clamp(
+    Math.asin(clamp(sinTheta, -Math.sin(MAX_WRIST_ROT), Math.sin(MAX_WRIST_ROT))) + ergonomicRoll,
+    -MAX_WRIST_ROT,
+    MAX_WRIST_ROT
+  );
+
+  const lowStringPull = targets.reduce((acc, t) => acc + (t.y - STRING_Y_TOP) * t.weight, 0) / wSum;
+
+  // Per-finger projection — each finger's MCP is fixed by the palm placement
+  // above; its target tip is at pressX(fret), stringY(string), and the reach
+  // budget is bounded by _fingerLen(f).  We expose the tip directly so the
+  // downstream IK (solveFinger) can run unchanged.
+  const perFinger = {};
+  for (const f of FINGER_ORDER) {
+    const slot = spec.perFinger[f];
+    const mcpDx = MCP_OFFSETS[f];
+    const mcp = {
+      x: pivotX + mcpDx * Math.cos(wristRot),
+      y: pivotY + mcpDx * Math.sin(wristRot),
+    };
+    const role = slot ? slot.role : "idle";
+    let tip;
+    if (slot && slot.role === "active" && slot.targetString != null && slot.targetFret != null) {
+      tip = { x: pressX(slot.targetFret), y: stringY(slot.targetString) };
+    } else if (slot && slot.targetFret != null) {
+      // Hover/idle/planted with a fret hint but no string: park above the home
+      // fret, biased by the finger's length so longer fingers hover further.
+      const L = _fingerLen(f);
+      tip = { x: pressX(slot.targetFret), y: mcp.y + L * 0.30 };
+    } else {
+      tip = { x: mcp.x, y: mcp.y + REST_TIP_Y_OFFSET };
+    }
+    perFinger[f] = { mcp, tip, role };
+  }
+
+  return {
+    handPos,
+    pivotX,
+    pivotY,
+    wristRot,
+    forearmBias: clamp((lowStringPull - 55) * 0.28, -18, 26),
+    palmCup: clamp((cluster.bassDemand - 3.2) * 0.18 + cluster.span * 0.035, 0, 0.34),
+    perFinger,
+    thumb,
+  };
+}
+
 function solveTargetHandPose(s, fallbackHandPos) {
   const targets = collectHandTargets(s);
   if (!targets.length) {
