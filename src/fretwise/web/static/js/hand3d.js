@@ -66,6 +66,7 @@
    ============================================================================ */
 
 import * as THREE from "./vendor/three.module.min.js";
+import { GLTFLoader } from "./vendor/GLTFLoader.js";
 
 /* SVG-pixel → world conversion for setGeometry's input (nut x, fret x, etc.)
    The board's world X span derives from the SVG's NUT_X and fretX() values;
@@ -139,6 +140,81 @@ const PHALANX_FRAC   = { prox: 0.45, mid: 0.32, dis: 0.23 };
    DIP the least — matches the anatomical 40/45/15 split (close enough; the
    exact ratio is a presentation knob). */
 const CURL_SPLIT     = { mcp: 0.40, pip: 0.45, dip: 0.15 };
+
+/* ===========================================================================
+   SKINNED GLB HAND — real rigged mesh that deforms via skin weights.
+
+   The vendored /static/models/rigged_hand.glb carries TWO skinned meshes bound
+   to one Rigify-named armature:  Cube.000 = LEFT (fretting) hand — the one we
+   drive — and Cube.005 = RIGHT hand (hidden).  We load it fire-and-forget in
+   the constructor; on success the procedural rig is hidden and every frame we
+   drive the FINGER BONES with the curl angle the procedural solver already
+   computes (FK, not procedural geometry).  On any failure we silently keep the
+   procedural rig — the panel never goes blank.
+
+   BONE-NAME SANITISATION (IMPORTANT): three.js' GLTFLoader runs every node name
+   through PropertyBinding.sanitizeNodeName, which STRIPS dots and spaces.  So
+   in the loaded scene "finger_index.01.L" becomes "finger_index01L",
+   "hand.L" → "handL", and the meshes "Cube.000"/"Cube.005" → "Cube000"/"Cube005".
+   We therefore look bones/meshes up by BOTH the original dotted name AND its
+   sanitized form (see _sanitizeName / _findBone).  The dotted names are kept in
+   FINGER_BONES below so the source still documents the Blender rig and the test
+   suite's bone-name guards match.
+   =========================================================================== */
+
+/* Per-finger bone chains (proximal/MCP → middle/PIP → distal/DIP), Rigify
+   left-hand naming.  Looked up by sanitized name at runtime (dots stripped). */
+const FINGER_BONES = {
+  index:  ["finger_index.01.L",  "finger_index.02.L",  "finger_index.03.L"],
+  middle: ["finger_middle.01.L", "finger_middle.02.L", "finger_middle.03.L"],
+  ring:   ["finger_ring.01.L",   "finger_ring.02.L",   "finger_ring.03.L"],
+  pinky:  ["finger_pinky.01.L",  "finger_pinky.02.L",  "finger_pinky.03.L"],
+  thumb:  ["thumb.01.L", "thumb.02.L", "thumb.03.L"],
+};
+/* The two skinned meshes (dotted; sanitized at runtime). */
+const LEFT_MESH_NAME  = "Cube.000";   // fretting hand — keep, reskin flat
+const RIGHT_MESH_NAME = "Cube.005";   // other hand — hide
+
+/* ---- EMPIRICAL KNOBS (tune in-browser; first guesses below) --------------- */
+/* In the GLB rest pose each finger bone points along its own LOCAL +Y (verified
+   from the GLB: every child bone sits at +Y in its parent's frame).  A curl is
+   therefore a rotation about an axis PERPENDICULAR to +Y — local X is the
+   natural flex axis (rotates the +Y-pointing bone within the YZ plane).
+   FLEX_SIGN flips the fold direction (toward the palm vs. backward).
+   >>> FLEX_AXIS and FLEX_SIGN are the #1 pair to verify visually: if the
+       fingers bend SIDEWAYS, swap to (0,0,1); if they bend BACKWARD, flip
+       FLEX_SIGN to -1. */
+const FLEX_AXIS = new THREE.Vector3(1, 0, 0);
+const FLEX_SIGN = 1;
+
+/* Global rig placement.  The loaded hand is tiny in world units (measured
+   MCP-row width ≈ 0.063 wu); RIG_SCALE blows it up so the MCP row ≈ a real
+   95 mm.  We compute the exact scale at load from the measured MCP-row width
+   (see _measureRig); RIG_SCALE_FALLBACK is used only if that measurement fails.
+   Derivation: mm(95) / 0.0634 ≈ 648. */
+const RIG_SCALE_FALLBACK = 648;
+const RIG_TARGET_MCP_MM  = 95;   // real knuckle-row width the scale targets
+
+/* Euler (radians) that rotates the WHOLE loaded hand into the classical grip:
+   palm under the neck facing the strings, fingers reaching over from the player
+   side to press.  In the GLB's native frame the fingers point roughly along
+   world -X and the hand lies almost flat, so we yaw it onto the neck and pitch
+   the palm up under the strings.  THESE ARE FIRST GUESSES — RIG_ROT is the
+   single most likely thing to need one round of in-browser tuning. */
+const RIG_ROT = {
+  x: -Math.PI / 2,   // pitch the flat hand up so the palm faces the strings
+  y:  Math.PI / 2,   // yaw so the fingers run across the neck toward the strings
+  z:  0,             // roll — tune if the hand is canted
+};
+/* Hand cradles UNDER the neck (Y < 0); nudge toward +Z (player) if the palm
+   clips into the neck belly.  RIG_POS_X is driven per-frame from hand_position. */
+const RIG_POS_Y = -NECK_DEPTH * 0.5;
+const RIG_POS_Z = 0;
+
+/* Relaxed vs. pressed curl for the skinned fingers.  Idle/hover fingers get a
+   gentle resting curl; active/planted fingers get the full solver curl. */
+const SKIN_IDLE_CURL  = 0.35;   // radians of gentle rest flex (idle/hover)
+const SKIN_THUMB_CURL = 0.45;   // gentle fixed brace curl for the thumb
 
 /* Detect a usable WebGL context without throwing.  Returning false here makes
    create() fall back to SVG cleanly. */
@@ -395,6 +471,23 @@ class Hand3DRenderer {
 
     this._buildHand();
 
+    // Skinned-GLB state.  Defaults assume the load will fail (procedural rig
+    // stays live); _loadSkinnedHand flips _useSkinnedHand=true on success.
+    this._useSkinnedHand = false;
+    this._bones = {};
+    this._boneByName = {};   // sanitized-name → bone (resolves dotted lookups)
+    this._rig = null;
+    this._lastHandPosX = 0;  // world-X the rig is parked at (updated per frame)
+
+    // Load the REAL rigged hand fire-and-forget.  Any failure (missing asset,
+    // parse error, no WebGL image support) is swallowed inside the method, so
+    // the procedural rig built above remains the visible hand.
+    try {
+      this._loadSkinnedHand();
+    } catch (e) {
+      console.warn("[hand3d] skinned GLB kickoff failed; using procedural rig", e);
+    }
+
     // Texture loading + OBJ-palm swap remain DISABLED in this 3D-native
     // rewrite.  The methods are kept (and referenced) so a future skin pass
     // can re-enable them without touching the kinematic rebuild, and so the
@@ -603,6 +696,212 @@ class Hand3DRenderer {
     this.handGroup.add(this.forearmBone);
     this.forearmJoint = makeJointMesh(this.skinMat, mm(38));
     this.handGroup.add(this.forearmJoint);
+  }
+
+  /* ----------------------------------------------------------------------- *
+     SKINNED GLB HAND — load, measure, drive.
+   * ----------------------------------------------------------------------- */
+
+  /* three.js GLTFLoader strips dots/spaces from node names; mirror that here so
+     our dotted FINGER_BONES entries resolve against the sanitized scene. */
+  _sanitizeName(name) {
+    // Matches three.js PropertyBinding reservedRe behaviour closely enough for
+    // our names: drop the characters GLTFLoader removes ( . [ ] ( ) and space ).
+    return String(name).replace(/[\s.[\]()]/g, "");
+  }
+
+  /* Resolve a (possibly dotted) bone name to the loaded bone, trying the exact
+     name first and the sanitized form second. */
+  _findBone(name) {
+    return this._boneByName[name] || this._boneByName[this._sanitizeName(name)] || null;
+  }
+
+  /* Load /static/models/rigged_hand.glb, reskin the left hand flat, hide the
+     right hand + lights, cache bones + their rest quaternions, wrap the scene
+     in a rig group we transform globally, hide the procedural rig.  Any failure
+     leaves _useSkinnedHand=false and the procedural rig live. */
+  async _loadSkinnedHand() {
+    try {
+      const gltf = await new GLTFLoader().loadAsync("/static/models/rigged_hand.glb");
+      const root = gltf.scene;
+
+      const leftS  = this._sanitizeName(LEFT_MESH_NAME);
+      const rightS = this._sanitizeName(RIGHT_MESH_NAME);
+
+      this._bones = {};
+      this._boneByName = {};
+      root.traverse((o) => {
+        if (o.isBone) {
+          this._bones[o.name] = o;
+          this._boneByName[o.name] = o;            // sanitized in the loaded scene
+        }
+        if (o.isMesh || o.isSkinnedMesh) {
+          if (o.name === rightS || o.name === RIGHT_MESH_NAME) {
+            o.visible = false;                       // hide the right hand
+          } else {
+            o.material = this.skinMat;               // flat skin, drop GLB camo maps
+            o.frustumCulled = false;                 // skinned bounds can fool culling
+          }
+        }
+        // Hide the baked Blender lights so they don't fight our 3-point rig.
+        if (o.name === "Point" || o.name === "Hemi") o.visible = false;
+      });
+
+      // Store rest quaternions of every bone so flex is always relative to rest.
+      for (const b of Object.values(this._boneByName)) {
+        b.userData.rest = b.quaternion.clone();
+      }
+
+      // Measure the loaded hand (MCP-row width, wrist position) BEFORE scaling
+      // so we can derive RIG_SCALE and know where the wrist is for the forearm.
+      this._measureRig(root);
+
+      // Wrap in a rig group we transform globally (scale/rotate/translate).
+      this._rig = new THREE.Group();
+      this._rig.add(root);
+      this.handGroup.add(this._rig);
+
+      this._useSkinnedHand = true;
+      this._applyRigTransform();
+      this._hideProceduralHand();
+    } catch (e) {
+      console.warn("[hand3d] skinned GLB load failed; using procedural rig", e);
+      this._useSkinnedHand = false;
+    }
+  }
+
+  /* Measure the loaded (unscaled) hand once: the MCP-row width drives RIG_SCALE
+     (so the hand ends up anatomically sized), and the wrist world-X anchors the
+     procedural forearm.  Robust to missing bones (falls back to constants). */
+  _measureRig(root) {
+    root.updateMatrixWorld(true);
+    const idx = this._findBone("finger_index.01.L");
+    const pky = this._findBone("finger_pinky.01.L");
+    let mcpWidth = 0;
+    if (idx && pky) {
+      const a = new THREE.Vector3(), b = new THREE.Vector3();
+      idx.getWorldPosition(a);
+      pky.getWorldPosition(b);
+      mcpWidth = a.distanceTo(b);
+    }
+    // rigScale so the (scaled) MCP row ≈ RIG_TARGET_MCP_MM in real mm.
+    this._rigScale = (mcpWidth > 1e-6)
+      ? mm(RIG_TARGET_MCP_MM) / mcpWidth
+      : RIG_SCALE_FALLBACK;
+
+    // Wrist (hand.L) world position in the unscaled rig, for forearm anchoring.
+    const wrist = this._findBone("hand.L");
+    this._rigWristLocal = new THREE.Vector3();
+    if (wrist) wrist.getWorldPosition(this._rigWristLocal);
+  }
+
+  /* Hide the procedural finger/palm/thumb meshes once the skinned hand is live.
+     The forearm tube is KEPT (the GLB mesh is hand-only). */
+  _hideProceduralHand() {
+    if (this.palm) this.palm.visible = false;
+    for (const f of FINGER_ORDER) {
+      const node = this.fingerNodes && this.fingerNodes[f];
+      if (!node) continue;
+      node.root.visible = false;     // hides the whole finger subtree
+      if (node.tipCap) node.tipCap.visible = false;
+    }
+    if (this.thumbBone) this.thumbBone.visible = false;
+    if (this.thumbJoint) this.thumbJoint.visible = false;
+    // Forearm (forearmBone/forearmJoint) intentionally stays visible.
+  }
+
+  /* Position/scale/orient the whole loaded hand into the classical grip and
+     slide it along the neck with the current hand_position.  ALL EMPIRICAL —
+     RIG_SCALE (measured), RIG_ROT, RIG_POS_Y/Z are the tunable knobs. */
+  _applyRigTransform() {
+    if (!this._rig) return;
+    const scale = this._rigScale || RIG_SCALE_FALLBACK;
+    this._rig.scale.setScalar(scale);
+    this._rig.rotation.set(RIG_ROT.x, RIG_ROT.y, RIG_ROT.z);
+    // Slide along the neck (X) to the tracked hand position; Y/Z are fixed by
+    // the grip frame.  The loaded scene's own origin offset is absorbed by the
+    // global group transform, so we park the GROUP at the desired world X.
+    this._rig.position.set(this._lastHandPosX, RIG_POS_Y, RIG_POS_Z);
+  }
+
+  /* Flex one bone about FLEX_AXIS by `angle` (radians) RELATIVE to its rest
+     quaternion.  No-op if the bone or its rest pose is missing. */
+  _flexBone(bone, angle) {
+    if (!bone || !bone.userData || !bone.userData.rest) return;
+    bone.quaternion
+      .copy(bone.userData.rest)
+      .multiply(new THREE.Quaternion().setFromAxisAngle(FLEX_AXIS, FLEX_SIGN * angle));
+  }
+
+  /* Per-frame: drive the skinned finger bones from the SAME curl the procedural
+     solver computes.  We reuse _solveChain's totalCurl by calling the shared
+     curl helper (_fingerCurl) and splitting it MCP/PIP/DIP across the 3 bones.
+     The thumb gets a gentle fixed brace curl. */
+  _poseSkinnedFingers(kin) {
+    if (!kin || !kin.fingers) return;
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers[f];
+      const names = FINGER_BONES[f];
+      if (!fg || !names) continue;
+      const curl = this._fingerCurl(f, fg);
+      const b0 = this._findBone(names[0]);
+      const b1 = this._findBone(names[1]);
+      const b2 = this._findBone(names[2]);
+      this._flexBone(b0, curl * CURL_SPLIT.mcp);
+      this._flexBone(b1, curl * CURL_SPLIT.pip);
+      this._flexBone(b2, curl * CURL_SPLIT.dip);
+    }
+    // Thumb: gentle, fixed-ish brace curl (no press target on the fretting
+    // thumb — it cradles the neck back).
+    const tn = FINGER_BONES.thumb;
+    this._flexBone(this._findBone(tn[0]), SKIN_THUMB_CURL * CURL_SPLIT.mcp);
+    this._flexBone(this._findBone(tn[1]), SKIN_THUMB_CURL * CURL_SPLIT.pip);
+    this._flexBone(this._findBone(tn[2]), SKIN_THUMB_CURL * CURL_SPLIT.dip);
+  }
+
+  /* Total curl angle for finger `f`, REUSING the procedural solver's geometry.
+     For active/planted fingers we run the same MCP→target solve _solveChain
+     uses and return its totalCurl; for idle/hover we return a small relaxed
+     curl so the resting fingers read as curled, not splayed. */
+  _fingerCurl(f, fg) {
+    const role = fg.role || "idle";
+    if (role !== "active" && role !== "planted") return SKIN_IDLE_CURL;
+    const targetStr = (fg.strings && fg.strings.length) ? fg.strings[0] : null;
+    if (!(fg.fret > 0) || targetStr == null) return SKIN_IDLE_CURL;
+
+    // Recreate the procedural MCP anchor + target, then reuse the exact curl
+    // formula from _solveChain (kept here as the single source of the angle).
+    const node = this.fingerNodes[f];
+    if (!node) return SKIN_IDLE_CURL;
+    const baseX = (this._palmX !== undefined) ? this._palmX : (this._boardCX || 0);
+    const baseZ = (this._palmZ !== undefined) ? this._palmZ : 0;
+    const mcpSpan = PALM_WIDTH_Z * 0.95;
+    const mcpStepX = mcpSpan / 3;
+    const mcpXOffset = {
+      index: -mcpSpan / 2,
+      middle: -mcpSpan / 2 + mcpStepX,
+      ring: -mcpSpan / 2 + mcpStepX * 2,
+      pinky: -mcpSpan / 2 + mcpStepX * 3,
+    };
+    const mcpX = baseX + (mcpXOffset[f] || 0);
+    const mcpY = -NECK_DEPTH;
+    const mcpZ = baseZ + NECK_DEPTH * 0.60;
+    const tx = this._pressX(fg.fret);
+    const ty = STRING_SURFACE;
+    const tz = this._stringZAt(targetStr);
+
+    const forward = ty - mcpY;
+    const dx = tx - mcpX, dz = tz - mcpZ;
+    const drop = Math.sqrt(dx * dx + dz * dz);
+    const L = node.Ltotal;
+    const dist = Math.sqrt(forward * forward + drop * drop);
+    const chordRatio = Math.min(1.0, dist / L);
+    let totalCurl = Math.PI * Math.pow(1 - chordRatio, 0.85);
+    const dropAngle = Math.atan2(drop, Math.max(0.1, forward));
+    totalCurl = Math.max(totalCurl, dropAngle * 1.15);
+    if (totalCurl < 0) totalCurl = 0;
+    if (totalCurl > 2.6) totalCurl = 2.6;
+    return totalCurl;
   }
 
   /* Texture loading is currently disabled (see constructor).  The method is
@@ -841,10 +1140,24 @@ class Hand3DRenderer {
   update(kin) {
     if (this.disposed || !kin) return;
     try {
-      this._poseHand(kin);
-      this._poseFingers(kin);
-      this._poseThumb(kin);
-      this._poseForearm(kin);
+      if (this._useSkinnedHand) {
+        // SKINNED PATH: the real GLB hand deforms via skin weights.  We still
+        // run _poseHand so _palmX / _palmZ (the per-finger curl solve reads
+        // them) and the along-neck hand position are computed from the same
+        // kin snapshot, then drive the finger bones + slide the rig.
+        this._poseHand(kin);
+        this._lastHandPosX = (this._palmX !== undefined) ? this._palmX : this._lastHandPosX;
+        this._poseSkinnedFingers(kin);
+        this._applyRigTransform();
+        // The forearm tube is procedural (the GLB is hand-only); keep posing it.
+        this._poseForearm(kin);
+      } else {
+        // PROCEDURAL FALLBACK: original purely-procedural rig.
+        this._poseHand(kin);
+        this._poseFingers(kin);
+        this._poseThumb(kin);
+        this._poseForearm(kin);
+      }
       this.renderer.render(this.scene, this.camera);
     } catch (e) {
       // Silent fallback: any per-frame error should not poison the renderer.

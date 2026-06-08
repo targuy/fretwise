@@ -70,6 +70,8 @@ _HAND_MESH_JS = _STATIC_DIR / "js" / "vendor" / "hand_mesh.js"
 _HAND_C_JPG = _STATIC_DIR / "img" / "hand" / "HAND_C.jpg"
 _HAND_N_JPG = _STATIC_DIR / "img" / "hand" / "HAND_N.jpg"
 _HAND_S_JPG = _STATIC_DIR / "img" / "hand" / "HAND_S.jpg"
+_RIGGED_GLB = _STATIC_DIR / "models" / "rigged_hand.glb"
+_GLTF_LOADER_JS = _STATIC_DIR / "js" / "vendor" / "GLTFLoader.js"
 
 
 # --------------------------------------------------------------------------- #
@@ -123,6 +125,54 @@ def test_hand3d_js_references_texture_and_mesh_loaders() -> None:
     # The existing pose contract must be intact: palm.position.set used in update().
     code = _strip_js_comments(h3d)
     assert "this.palm.position.set(" in code, "palm pose (position.set) must remain in update()"
+
+
+def test_skinned_glb_hand_assets_present_and_served() -> None:
+    """The rigged GLB + GLTFLoader ship on disk and are served (200) by the app.
+
+    The real-skinned-hand path (M5 realism rewrite) drives a vendored rigged
+    mesh via FK-mapped finger bones.  Both the GLB and the loader must reach the
+    browser, so we guard them on disk AND over the static route.
+    """
+    assert _RIGGED_GLB.is_file(), "rigged_hand.glb must be vendored under static/models/"
+    # The GLB is a real binary glTF (sanity floor; the vendored asset is ~1.5 MB).
+    assert _RIGGED_GLB.stat().st_size > 500_000, "rigged_hand.glb looks empty/stubbed"
+    assert _RIGGED_GLB.read_bytes()[:4] == b"glTF", "rigged_hand.glb must be binary glTF"
+    assert _GLTF_LOADER_JS.is_file(), "GLTFLoader.js must be vendored under static/js/vendor/"
+
+    client = TestClient(create_app())
+    glb = client.get("/static/models/rigged_hand.glb")
+    assert glb.status_code == 200, "rigged_hand.glb must be served by the app"
+    assert len(glb.content) > 500_000
+    loader = client.get("/static/js/vendor/GLTFLoader.js")
+    assert loader.status_code == 200, "GLTFLoader.js must be served by the app"
+
+
+def test_hand3d_js_drives_skinned_glb_finger_bones() -> None:
+    """hand3d.js loads the GLB via GLTFLoader and references the finger bones.
+
+    Guards the skinned-hand wiring: the module imports/uses GLTFLoader, points at
+    the rigged GLB, and names every Rigify finger bone it drives (index/middle/
+    ring/pinky/thumb proximal joints) so a rename in the rig can't silently break
+    the FK mapping.  The procedural fallback must remain a labelled branch.
+    """
+    h3d = _HAND3D_JS.read_text(encoding="utf-8")
+    # The GLTF loader is imported and used to fetch the rigged hand.
+    assert "GLTFLoader" in h3d
+    assert "rigged_hand.glb" in h3d
+    # Every driven finger proximal bone (the Rigify left-hand names) is present.
+    for bone in (
+        "finger_index.01.L",
+        "finger_middle.01.L",
+        "finger_ring.01.L",
+        "finger_pinky.01.L",
+        "thumb.01.L",
+    ):
+        assert bone in h3d, f"finger bone {bone!r} must be referenced in hand3d.js"
+    # The skinned path and the procedural fallback must both exist (graceful
+    # degradation when the GLB fails to load).
+    assert "_useSkinnedHand" in h3d
+    assert "_poseSkinnedFingers" in h3d
 
 
 def test_flag_helper_exists_and_defaults_off() -> None:
