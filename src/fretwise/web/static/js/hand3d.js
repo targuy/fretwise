@@ -194,13 +194,16 @@ class Hand3DRenderer {
     // pointer/wheel handlers re-aim at this target after every change.
     this._lookAt = new THREE.Vector3();
     // Orbit state: the camera lives on a sphere around _lookAt.  Default
-    // polar = 22° gives a low view down the neck that shows finger curl
-    // against the board.  Azimuth 0 puts the camera on +Z (player side, so
-    // the back-of-hand faces us) which is the natural framing for a guitar
-    // tutorial: the viewer sees what their own hand would see.  Radius 150
-    // accommodates the ~120 wu forearm + ~50 wu hand after the MM_PER_WU
-    // recalibration; the wheel clamp (60..300) bounds runtime zoom.
-    this._camSpherical = { radius: 150, azimuth: 0, polar: 22 * Math.PI / 180 };
+    // polar = 28° (near-overhead, only ~47% of radius in the horizontal
+    // plane) and azimuth = +12° put the camera high above and slightly on
+    // the +Z/+X side of the hand — the actual guitarist's-own-eyes POV,
+    // looking DOWN at their fretting hand from behind/above the shoulder.
+    // Combined with the forward-and-down _lookAt (set in build()), the
+    // forearm and back-of-hand sit in the lower portion of frame while
+    // fingertips and strings occupy the centre.  Radius 160 accommodates
+    // the ~120 wu forearm + ~50 wu hand at this steeper angle; the wheel
+    // clamp (60..300) bounds runtime zoom.
+    this._camSpherical = { radius: 160, azimuth: 12 * Math.PI / 180, polar: 28 * Math.PI / 180 };
     this._dragging = false;
     this._lastPx = 0;
     this._lastPy = 0;
@@ -603,9 +606,13 @@ class Hand3DRenderer {
     this._stringZMax = stringZMax;
     this._stringZMin = stringZMin;
 
-    // Camera framing: aim at the mid-grip region (board centre, Y above the
-    // strings, Z slightly toward the camera so the hand is in frame).
-    this._lookAt.set(boardCX, MCP_Y * 0.5, HAND_OFFSET_Z * 0.3);
+    // Camera framing: aim at the fret-press points just above the strings
+    // and slightly past them into the -Z fretboard half.  This guitarist's-
+    // POV target pulls the camera's gaze down onto the fingertips/strings
+    // rather than onto the back of the hand, and rotates the camera-to-
+    // target ray so the forearm (at z≈+24, y≈+22) sits behind/below it
+    // instead of occluding the fingers.
+    this._lookAt.set(boardCX, STRING_SURFACE + mm(3), -HAND_OFFSET_Z * 0.15);
     this._applyCamera();
   }
 
