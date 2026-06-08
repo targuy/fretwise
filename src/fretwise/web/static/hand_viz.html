@@ -1901,9 +1901,12 @@ window.addEventListener("message", (ev) => {
     const alpha = fadeIn * fadeOut;
     const scale = 1 + 0.4 * Math.max(0, 1 - elapsed / ZOOM_DUR);
 
-    // Centre the label above the hand (palm top ≈ y=50; keep label in y 0–46).
+    // Centre the label above the hand. cy is the baseline of line 1; it must
+    // clear the top edge (y=0) even at the 1.4x intro zoom — the cap-height plus
+    // the 10px halo reach ~48px above the baseline when scaled, so keep cy >= ~50
+    // or the chord name gets cropped at the top of the panel.
     const cx = (NUT_X + fretX(NUM_FRETS)) / 2;
-    const cy = 24;   // baseline of first line — keeps both lines above the palm
+    const cy = 52;   // baseline of line 1 — clears the top edge incl. the zoom pop
 
     const frName = chordNameFrench(cg.chordName);
 
