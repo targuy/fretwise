@@ -216,6 +216,15 @@ class Hand3DRenderer {
     // actual board centre once the live geometry is known, and resize() re-aims
     // the camera at this target after every layout change.
     this._lookAt = new THREE.Vector3();
+    // Orbit state: the camera lives on a sphere around _lookAt.  Mouse drag
+    // updates (azimuth, polar); wheel updates radius.  Default polar = 15°
+    // gives a low, near-eye-level look down the neck — the bird's-eye 28° of
+    // setGeometry's first frame is now just a fallback before _applyCamera()
+    // runs.  See _applyCamera() for the spherical→cartesian conversion.
+    this._camSpherical = { radius: 130, azimuth: 0, polar: 15 * Math.PI / 180 };
+    this._dragging = false;
+    this._lastPx = 0;
+    this._lastPy = 0;
     this.camera.position.set(0, 150, 120);
     this.camera.lookAt(this._lookAt);
 
@@ -226,6 +235,55 @@ class Hand3DRenderer {
     this.renderer.domElement.style.height = "auto";
     this.renderer.domElement.style.display = "block";
     container.appendChild(this.renderer.domElement);
+
+    // Orbit + zoom input.  Pointer Events unify mouse + touch + pen; we set
+    // touchAction='none' so a touch-drag rotates the camera instead of
+    // scrolling the page.  The wheel handler is non-passive so we can
+    // preventDefault() and stop the page scrolling while zooming.
+    const canvas = this.renderer.domElement;
+    canvas.style.touchAction = "none";
+    const PI = Math.PI;
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    this._onPointerDown = (e) => {
+      if (e.button !== undefined && e.button !== 0) return;
+      this._dragging = true;
+      this._lastPx = e.clientX;
+      this._lastPy = e.clientY;
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* best-effort */ }
+    };
+    this._onPointerMove = (e) => {
+      if (!this._dragging) return;
+      const dx = e.clientX - this._lastPx;
+      const dy = e.clientY - this._lastPy;
+      this._camSpherical.azimuth -= dx * 0.005;
+      this._camSpherical.polar = clamp(
+        this._camSpherical.polar - dy * 0.005,
+        5 * PI / 180,
+        85 * PI / 180,
+      );
+      this._lastPx = e.clientX;
+      this._lastPy = e.clientY;
+      this._applyCamera();
+    };
+    this._onPointerUp = (e) => {
+      this._dragging = false;
+      try { canvas.releasePointerCapture(e.pointerId); } catch (_) { /* best-effort */ }
+    };
+    this._onWheel = (e) => {
+      e.preventDefault();
+      this._camSpherical.radius = clamp(
+        this._camSpherical.radius * Math.exp(e.deltaY * 0.001),
+        25,
+        400,
+      );
+      this._applyCamera();
+    };
+    canvas.addEventListener("pointerdown", this._onPointerDown);
+    canvas.addEventListener("pointermove", this._onPointerMove);
+    canvas.addEventListener("pointerup", this._onPointerUp);
+    canvas.addEventListener("pointercancel", this._onPointerUp);
+    canvas.addEventListener("pointerleave", this._onPointerUp);
+    canvas.addEventListener("wheel", this._onWheel, { passive: false });
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.65));
     const key = new THREE.DirectionalLight(0xffffff, 0.9);
@@ -561,15 +619,12 @@ class Hand3DRenderer {
     // resize() re-aims the camera at _lookAt after each layout change.
     const boardCX = (x0 + x1) / 2;
     const boardCZ = (z0 + z1) / 2;
-    const camR = 130;
-    const camElev = 28 * Math.PI / 180;
     this._lookAt.set(boardCX, 0, boardCZ);
-    this.camera.position.set(
-      boardCX,
-      camR * Math.sin(camElev),
-      boardCZ + camR * Math.cos(camElev),
-    );
-    this.camera.lookAt(this._lookAt);
+    // Camera framing is now spherical/orbital — see _camSpherical (radius
+    // 130, default polar 15°) and _applyCamera().  Recentering _lookAt on
+    // the live board centre is still done here so the orbit pivot stays on
+    // the neck even when chord shapes shift it off the SVG centre.
+    this._applyCamera();
   }
 
   /* Per-frame re-pose from the SHARED kinematic snapshot.  `kin` is produced by
@@ -724,6 +779,24 @@ class Hand3DRenderer {
     return new THREE.Vector3(wx(p.x), lift || 0, wz(p.y));
   }
 
+  /* Convert the current spherical-orbit state into a world-space camera
+     position relative to _lookAt and re-aim the camera at the target.
+     azimuth=0 puts the camera on +Z of _lookAt (toward the player), polar=0
+     would be straight overhead — see clamps in the pointer handlers. */
+  _applyCamera() {
+    const { radius, azimuth, polar } = this._camSpherical;
+    const sinP = Math.sin(polar);
+    const cosP = Math.cos(polar);
+    const sinA = Math.sin(azimuth);
+    const cosA = Math.cos(azimuth);
+    this.camera.position.set(
+      this._lookAt.x + radius * sinP * sinA,
+      this._lookAt.y + radius * cosP,
+      this._lookAt.z + radius * sinP * cosA,
+    );
+    this.camera.lookAt(this._lookAt);
+  }
+
   resize() {
     if (this.disposed) return;
     const w = this.container.clientWidth || SCENE_W;
@@ -733,13 +806,22 @@ class Hand3DRenderer {
     this.renderer.setSize(w, h, false);
     // Re-aim at the persistent look-target so a viewport change can't drift
     // the framing off the board centre setGeometry() chose.
-    this.camera.lookAt(this._lookAt);
+    this._applyCamera();
   }
 
   dispose() {
     this.disposed = true;
     window.removeEventListener("resize", this._onResize);
     try {
+      const canvas = this.renderer.domElement;
+      if (canvas) {
+        canvas.removeEventListener("pointerdown", this._onPointerDown);
+        canvas.removeEventListener("pointermove", this._onPointerMove);
+        canvas.removeEventListener("pointerup", this._onPointerUp);
+        canvas.removeEventListener("pointercancel", this._onPointerUp);
+        canvas.removeEventListener("pointerleave", this._onPointerUp);
+        canvas.removeEventListener("wheel", this._onWheel);
+      }
       this.renderer.dispose();
       if (this.renderer.domElement && this.renderer.domElement.parentNode) {
         this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);
