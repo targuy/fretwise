@@ -564,13 +564,22 @@ function fingerPxWidth(name, fret) {
   return Math.max(14, Math.min(36, fw * k));
 }
 
-/* ---------- Finger kinematics (curved projected phalanges) ----------------
+/* ---------- Finger kinematics (rigid phalanx chain, forward kinematics) ----
    This is intentionally not a full 3D anatomical solver.  It is a constrained
-   2.5D model tuned to guitar photographs:
-     - abduction and reach overages increase curl/strain, but never move endpoints;
-     - projected reach shrinks as the finger curls down to the string;
-     - PIP and DIP bow along a phalanx arc, with stronger curvature for folded
-       and hovering fingers than for a clean press. */
+   2.5D model tuned to guitar photographs, but the joints are now placed by
+   FORWARD KINEMATICS — walking tip-ward from the MCP and rotating each rigid
+   phalanx about its proximal joint — instead of laterally bowing control
+   points.  That keeps the three phalanges straight (rigid links) and expresses
+   curl as honest segment rotation:
+       pip = mcp + R(θ_mcp)               · proxVec
+       dip = pip + R(θ_mcp + θ_pip)       · midVec
+       tip stays at the IK target (the fret-contact point) so the nail / note
+           burst / barre pad keep landing exactly on the string; the distal
+           phalanx is the rigid link dip → tip.
+   The θ angles are DERIVED from the same flexion / curl / DIP-PIP-coupling
+   terms used before (preserving the M3 Shimawaki caps and dipPipCoupling as the
+   angle source) — they are merely re-expressed from a lateral bow into a
+   rotation, so flexion bounds and coupling behaviour are unchanged. */
 function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   const L = FINGER_TOTAL[name];
   let dx = tipX - mcpX, dy = tipY - mcpY;
@@ -610,29 +619,65 @@ function solveFinger(mcpX, mcpY, tipX, tipY, name, role) {
   // capped just under the rig's fully-curled silhouette.
   const flexion = clamp(baseFlex + roleBoost, 0, FLEXION_MAX);
   const sideBias = { index: -0.18, middle: -0.05, ring: 0.12, pinky: 0.24 }[name];
-  const curl = (12 + 34 * (flexion + perpendicularBoost))
+  // The old code converted (flexion + perpendicularBoost) into a px "bow"
+  // amount; we reuse the SAME scalar but interpret it as a total flexion angle
+  // (radians) distributed across the MCP/PIP/DIP joints.  curlMag ∈ [0,1]ish.
+  const curlMag = (flexion + perpendicularBoost)
     * (role === "active" || role === "planted" ? 0.74 : 0.9);
+  // Folded/hover "tuck" used to pull joints upward in px; re-express it as a
+  // small extra rotation so a folded finger curls back toward the palm.
   const tuck = (role === "idle" ? 14 : role === "hover" ? 5 : 0)
     * { index: 0.65, middle: 0.8, ring: 1.08, pinky: 1.24 }[name];
+  const tuckAngle = tuck * 0.014;   // px → rad scale, matched to prior feel
 
-  // PIP bows along the phalanx arc; DIP follows via the tunable DIP↔PIP
-  // coupling rather than a hardcoded ⅔ arc.  For press/plant the distal phalanx
-  // is near-perpendicular to the string and barely flexed (LOW coupling end),
-  // so dipArc < pipArc; idle/hover folds use the relaxed rule-of-thumb.
-  const PIP_ARC = 0.52;
-  const dipArc  = PIP_ARC * dipPipCoupling(role);
+  // Per-joint flexion angles (radians).  The total curl is shared so the PIP is
+  // the dominant joint (press silhouette), the MCP contributes the base bend,
+  // and the DIP follows the tunable DIP↔PIP coupling (lower for a press, near
+  // the ⅔ rule for idle/hover folds).  Capped per joint by the Shimawaki
+  // JOINT_FLEXION_MAX ratios re-expressed as radians (PIP ≈ 110° is the unit).
+  const PIP_FULL = 110 * Math.PI / 180;   // PIP reference range (the "1.0" joint)
+  const coupling = dipPipCoupling(role);
+  const θ_pip = clamp(curlMag * 0.62 * PIP_FULL + tuckAngle * 0.55,
+                      0, JOINT_FLEXION_MAX.pip * PIP_FULL);
+  const θ_mcp = clamp(curlMag * 0.40 * PIP_FULL + tuckAngle * 0.45,
+                      0, JOINT_FLEXION_MAX.mcp * PIP_FULL);
+  const θ_dip = clamp(θ_pip * coupling, 0, JOINT_FLEXION_MAX.dip * PIP_FULL);
+
+  // Lateral splay: the proximal phalanx fans slightly off the MCP→tip axis per
+  // finger (the old `sideBias`).  Applied as a small constant rotation of the
+  // whole chain about the MCP so fingers don't all stack parallel.
+  const splay = sideBias * 0.20;   // rad
+
+  // Phalanx lengths from the (clamped) reach so the chain still spans toward the
+  // tip; the distal phalanx is the rigid link dip → tip, drawn afterwards.
+  const proxLen = d * pipT;
+  const midLen  = d * (dipT - pipT);
+
+  // The bend folds the finger toward the palm-perpendicular `(nx,ny)` direction
+  // — the same direction the old control points bowed along.  We rotate the
+  // base axis `(ux,uy)` by cumulative joint angles to walk the chain tip-ward.
+  // `rot(v, a)` rotates a unit-axis-aligned step into world space.
+  function step(len, ang) {
+    const a = ang;
+    const cs = Math.cos(a), sn = Math.sin(a);
+    // Rotate the base direction (ux,uy) toward the normal (nx,ny) by `a`:
+    //   dir = cos(a)·u + sin(a)·n
+    return {
+      x: (ux * cs + nx * sn) * len,
+      y: (uy * cs + ny * sn) * len,
+    };
+  }
+
   const mcp = { x: mcpX, y: mcpY };
   const tip = { x: tipX, y: tipY };
-  const pipBase = interpPoint(mcp, tip, pipT);
-  const dipBase = interpPoint(mcp, tip, dipT);
-  const pip = {
-    x: pipBase.x + nx * curl * (PIP_ARC + sideBias),
-    y: pipBase.y + ny * curl * PIP_ARC - tuck * 0.45,
-  };
-  const dip = {
-    x: dipBase.x + nx * curl * (dipArc + sideBias * 0.7),
-    y: dipBase.y + ny * curl * dipArc - tuck * 0.75,
-  };
+  // Walk: MCP → PIP rotated by (splay + θ_mcp); PIP → DIP rotated by
+  // (splay + θ_mcp + θ_pip).  Cumulative rotations = true forward kinematics.
+  const aMcp = splay + θ_mcp;
+  const aPip = splay + θ_mcp + θ_pip;
+  const sProx = step(proxLen, aMcp);
+  const pip = { x: mcp.x + sProx.x, y: mcp.y + sProx.y };
+  const sMid = step(midLen, aPip);
+  const dip = { x: pip.x + sMid.x, y: pip.y + sMid.y };
 
   return {
     mcp,
@@ -1181,46 +1226,32 @@ function capsule(a, b, wA, wB, fillRef, strokeCol) {
 }
 
 function fingerShape(ik, w, fillRef) {
-  /* Build a smooth continuous finger silhouette from MCP root to fingertip.
-     The base is flared (wider than the finger proper) and its root point is
-     pushed back INTO the palm by extending past the MCP in the direction
-     away from the finger body (pip→mcp continued), ensuring no visual gap. */
-  // Direction FROM pip TOWARD mcp and continuing past (= toward the palm above).
-  const rdx = ik.mcp.x - ik.pip.x;
-  const rdy = ik.mcp.y - ik.pip.y; // will be negative (upward) since pip is below mcp
-  const rlen = Math.hypot(rdx, rdy) || 0.001;
-  const root = {
-    x: ik.mcp.x + rdx / rlen * 24,   // 24px upward into palm
-    y: ik.mcp.y + rdy / rlen * 24,
-  };
-  const pts = [
-    root,                              // palm anchor — hidden under palm shape
-    ik.mcp,
-    ik.pip,
-    ik.dip,
-    ik.tip,
-  ];
-  const widths = [w * 1.80, w * 1.15, w * 0.98, w * 0.84, w * 0.60];
-  const left = [], right = [];
-  for (let i = 0; i < pts.length; i++) {
-    const prev = pts[Math.max(0, i - 1)];
-    const next = pts[Math.min(pts.length - 1, i + 1)];
-    const dx = next.x - prev.x, dy = next.y - prev.y;
-    const len = Math.hypot(dx, dy) || 0.001;
-    const nx = -dy / len, ny = dx / len;
-    left.push({ x: pts[i].x + nx * widths[i] / 2, y: pts[i].y + ny * widths[i] / 2 });
-    right.push({ x: pts[i].x - nx * widths[i] / 2, y: pts[i].y - ny * widths[i] / 2 });
+  /* Articulated finger: THREE rigid tapered links (proximal mcp→pip, middle
+     pip→dip, distal dip→tip) drawn as straight capsules, joined by small filled
+     knuckle pivots at the MCP/PIP/DIP joints.  No more single rubber-hose
+     Bézier through the control points, and no per-finger root "spike": the
+     palm is drawn BEFORE the fingers (see drawHand) and overlaps the proximal
+     link at the MCP, so the root tucks under the shared palm edge naturally. */
+  const g = el("g", {});
+  // Per-segment width taper: knuckle end slightly wider than the joint above it,
+  // tapering toward the fingertip.  Widths are at the proximal/distal ends of
+  // each link so adjacent capsules meet flush at the shared joint width.
+  const wMcp = w * 1.06;
+  const wPip = w * 0.96;
+  const wDip = w * 0.84;
+  const wTip = w * 0.60;
+  // Proximal phalanx (MCP → PIP), middle (PIP → DIP), distal (DIP → tip).
+  g.appendChild(capsule(ik.mcp, ik.pip, wMcp, wPip, fillRef));
+  g.appendChild(capsule(ik.pip, ik.dip, wPip, wDip, fillRef));
+  g.appendChild(capsule(ik.dip, ik.tip, wDip, wTip, fillRef));
+  // Filled knuckle pivots so the rigid links read as hinged joints, not gaps.
+  for (const [pt, r] of [[ik.mcp, wMcp / 2], [ik.pip, wPip / 2], [ik.dip, wDip / 2]]) {
+    g.appendChild(el("circle", {
+      cx: pt.x.toFixed(2), cy: pt.y.toFixed(2), r: r.toFixed(2),
+      fill: fillRef, stroke: "none",
+    }));
   }
-  /* Smooth cubic bezier contour: left side root→tip, round tip cap, right side tip→root. */
-  const tipR = widths[4] / 2;
-  const d = `M${left[0].x},${left[0].y}
-             C${left[1].x},${left[1].y} ${left[2].x},${left[2].y} ${left[3].x},${left[3].y}
-             L${left[4].x},${left[4].y}
-             A${tipR},${tipR} 0 0 1 ${right[4].x},${right[4].y}
-             L${right[3].x},${right[3].y}
-             C${right[2].x},${right[2].y} ${right[1].x},${right[1].y} ${right[0].x},${right[0].y}
-             Z`;
-  return el("path", { d, fill: fillRef, stroke: "none" });
+  return g;
 }
 
 function drawThumb(layer, thumb) {
@@ -1248,7 +1279,13 @@ function drawHand(layer, shadowLayer, sim, t) {
   const θ       = sim.wristRot;
   const cup     = sim.palmCup || 0;
 
-  /* Palm perpendicular (CW rotation in SVG: sin,−cos direction → toward top of screen). */
+  /* Palm frame, all from the SAME (pivotX, pivotY, θ) transform:
+       tangent  (cosθ, sinθ)  — runs ALONG the MCP knuckle row
+       normal   (sinθ, −cosθ) — points up away from the fingers, into the palm
+     This is the exact frame getMcpPos() uses, so the palm tilts WITH wristRot
+     instead of being pinned to a flat horizontal bottom edge. */
+  const tPalmX = Math.cos(θ);
+  const tPalmY = Math.sin(θ);
   const nPalmX = Math.sin(θ);
   const nPalmY = -Math.cos(θ);
 
@@ -1262,9 +1299,11 @@ function drawHand(layer, shadowLayer, sim, t) {
   const wristX = palmTopX + sim.forearmDrift * 0.3;
   const forearmX = palmTopX + sim.forearmDrift;
 
-  const palmHalfW = (idxMcp.x > pnkMcp.x ? idxMcp.x - pnkMcp.x : pnkMcp.x - idxMcp.x) / 2 + 12 - cup * 8;
-  const palmMcpL  = idxMcp.x - 10;
-  const palmMcpR  = pnkMcp.x + 10;
+  /* Half-width measured along the knuckle TANGENT between index & pinky MCPs
+     (their separation is the metacarpal spread), plus an overhang margin so the
+     palm laps over the outer finger roots. */
+  const mcpSpan = Math.hypot(pnkMcp.x - idxMcp.x, pnkMcp.y - idxMcp.y);
+  const palmHalfW = mcpSpan / 2 + 12 - cup * 8;
 
   /* Forearm — long taper from the bottom of scene toward the neck.
      Stops just below the board; the wrist is conceptually hidden behind it. */
@@ -1302,16 +1341,39 @@ function drawHand(layer, shadowLayer, sim, t) {
     const _fg  = sim.fingers[_fn];
     _preIK[_fn] = solveFinger(_mcp.x, _mcp.y, _fg.tipX, _fg.tipY, _fn, _fg.role);
   }
-  const palmBotY = pivotY + 12;   // bottom follows the pivot — MCPs are structural, not sliding
-
-  /* Palm (ABOVE the neck): tilted quadrilateral following the wrist pivot.
-     The bottom edge extends past the MCP pivot line so finger bases emerge
-     from within the palm rather than floating above it. */
+  /* Palm (ABOVE the neck): a quad whose BOTTOM EDGE runs along the real MCP
+     knuckle row.  Both bottom corners sit on the rotated knuckle line (so the
+     edge tilts with wristRot), pushed a few px PAST index/pinky along the
+     tangent (overhang) and a small step DOWN the palm normal so the knuckles
+     tuck just under the edge — the fingers, drawn after this, then emerge from
+     within the palm with no floating spike.  The pivot is the knuckle-row
+     midpoint, keeping the bottom edge bound to the same frame as the top. */
+  const knuckleMidX = (idxMcp.x + pnkMcp.x) / 2;
+  const knuckleMidY = (idxMcp.y + pnkMcp.y) / 2;
+  const overhang = 12;                 // px past the outer MCP along the row
+  const belowKnuckles = 8;             // px past the knuckle line toward the fingers
+  // Bottom corners: knuckle-row midpoint ± (halfW+overhang) along the tangent,
+  // stepped a little PAST the knuckles toward the fingers (along −normal) so the
+  // edge laps over the finger roots and the MCPs sit inside the palm body.
+  const blX = knuckleMidX - tPalmX * (palmHalfW + overhang) - nPalmX * belowKnuckles;
+  const blY = knuckleMidY - tPalmY * (palmHalfW + overhang) - nPalmY * belowKnuckles;
+  const brX = knuckleMidX + tPalmX * (palmHalfW + overhang) - nPalmX * belowKnuckles;
+  const brY = knuckleMidY + tPalmY * (palmHalfW + overhang) - nPalmY * belowKnuckles;
+  // Upper side guides + rounded top, all from the same (center/top, normal,
+  // tangent) frame so the silhouette is one coherent transform.
+  const ulX = palmCX - tPalmX * (palmHalfW + 10);
+  const ulY = palmCY - tPalmY * (palmHalfW + 10);
+  const urX = palmCX + tPalmX * (palmHalfW + 10);
+  const urY = palmCY + tPalmY * (palmHalfW + 10);
+  const topLX = palmTopX - tPalmX * (palmHalfW - 8) + nPalmX * 0;
+  const topLY = palmTopY - tPalmY * (palmHalfW - 8) + nPalmY * 0;
+  const topRX = palmTopX + tPalmX * (palmHalfW - 8);
+  const topRY = palmTopY + tPalmY * (palmHalfW - 8);
   layer.appendChild(el("path", {
-    d: `M${palmMcpL},${palmBotY}
-        Q${palmCX - palmHalfW - 10},${palmCY} ${palmTopX - palmHalfW + 8},${palmTopY + 18}
-        Q${palmTopX},${palmTopY} ${palmTopX + palmHalfW - 8},${palmTopY + 18}
-        Q${palmCX + palmHalfW + 10},${palmCY} ${palmMcpR},${palmBotY}
+    d: `M${blX.toFixed(2)},${blY.toFixed(2)}
+        Q${ulX.toFixed(2)},${ulY.toFixed(2)} ${topLX.toFixed(2)},${topLY.toFixed(2)}
+        Q${palmTopX.toFixed(2)},${palmTopY.toFixed(2)} ${topRX.toFixed(2)},${topRY.toFixed(2)}
+        Q${urX.toFixed(2)},${urY.toFixed(2)} ${brX.toFixed(2)},${brY.toFixed(2)}
         Z`,
     fill: "url(#skinGrad)", stroke: "rgba(170,120,95,0.55)", "stroke-width": 1.5,
   }));
