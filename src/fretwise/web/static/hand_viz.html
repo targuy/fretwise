@@ -1711,7 +1711,13 @@ async function enableHand3d() {
     _syncHand3dButton();
     return true;
   } catch (e) {
-    // Fall back to SVG cleanly.
+    // Silent fall back to SVG: log a single warning so the regression is
+    // traceable in DevTools, then revert HAND3D_ACTIVE so the toggle button
+    // ('3D : off') reflects the state and the SVG path resumes rendering.
+    // The import() above is what most commonly fails (network, parse, missing
+    // hand3d.js); we treat any throw (renderer null, setGeometry, WebGL) the
+    // same so the panel is never left blank.
+    console.warn("[hand3d] enable failed; reverting to SVG hand", e);
     HAND3D_RENDERER = null;
     HAND3D_ACTIVE   = false;
     if (mount) mount.style.display = "none";
