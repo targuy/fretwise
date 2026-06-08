@@ -328,9 +328,13 @@ class Hand3DRenderer {
     this._buildFingers();
     this._buildPalmAndThumb();
 
-    // Fire-and-forget: load skin textures, then swap in the real hand mesh.
-    // Both steps degrade gracefully (procedural fallback on any failure).
-    this._loadTextures().then(() => this._loadHandMesh());
+    // Texture loading + OBJ-palm swap are DISABLED while we rebuild the 3D
+    // renderer 3D-natively (palm-on-vertical-slab, fingers curl DOWN onto
+    // strings).  The textures (HAND_C/N/S) on the procedural capsule geometry
+    // produced a camo-like appearance with no anatomical UVs; the OBJ palm
+    // ended up under the board.  Flat skin material is correct until the
+    // rebuild lands.
+    // this._loadTextures().then(() => this._loadHandMesh());
 
     this._onResize = () => this.resize();
     window.addEventListener("resize", this._onResize);
