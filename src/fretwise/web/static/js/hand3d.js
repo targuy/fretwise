@@ -41,6 +41,11 @@ import * as THREE from "./vendor/three.module.min.js";
 const PX = 1 / 4;
 const SCENE_W = 1440;
 const SCENE_H = 560;
+/* Mid of the string band in SVG-pixel Y, mirroring the 2D board's
+   (STRING_Y_TOP + STRING_Y_BOTTOM) / 2 = (230 + 350) / 2.  Used as the SVG-space
+   anchor the tucked thumb runs *across* (in +Z) behind the neck, so the thumb
+   sits opposite the middle finger regardless of the live hand position. */
+const STRING_MID_Y = 290;
 function wx(px) { return (px - SCENE_W / 2) * PX; }
 function wz(py) { return (py - SCENE_H / 2) * PX; }
 
@@ -478,13 +483,30 @@ class Hand3DRenderer {
       orientBone(this.forearm, back, wrist, 9);
     }
 
-    // Thumb: two short bones angling up from below the neck toward the index.
+    // Thumb: two short, finger-gauge bones TUCKED BEHIND the neck (negative world
+    // Y, i.e. on the far side of the -2.2 belly) and running mostly across +Z so
+    // the pad opposes the strings the way a real thumb braces the neck.  We anchor
+    // it laterally on the MIDDLE finger's MCP (read straight from the shared
+    // snapshot) and run it across STRING_MID_Y, the mirror of the 2D string-band
+    // mid, so the knuckle sits opposite the middle finger.  NOTE: this 3D thumb X
+    // intentionally diverges from the 2D thumb stylization (kin.thumb.x); the 3D
+    // rig brings it behind/under the neck instead of the SVG's side-on caricature.
     if (kin.thumb) {
-      const base = this._toWorld({ x: kin.thumb.x, y: kin.thumb.y }, 1.5);
-      const mid = this._toWorld({ x: kin.thumb.x + 6, y: kin.thumb.y - 14 }, 3);
-      const tip = this._toWorld({ x: kin.thumb.x + 10, y: kin.thumb.y - 28 }, 4);
-      orientBone(this.thumbBones[0], base, mid, 5);
-      orientBone(this.thumbBones[1], mid, tip, 4);
+      const midFk = kin.fingers && kin.fingers.middle;
+      const lateralX = (midFk && midFk.ik && midFk.ik.mcp)
+        ? midFk.ik.mcp.x          // align across from the middle MCP
+        : kin.thumb.x;            // fallback if the middle finger is absent
+      // Finger gauge with a slight proximal→distal taper (×1.05 / ×0.85), so the
+      // tucked thumb reads finger-sized rather than the old 5/4 (~2× finger) club.
+      const tr = Math.max(0.6, 22 * PX * 0.5);
+      // Behind the slab: world Y descends -1.0 → -3.6 (the `lift` arg of
+      // _toWorld IS world Y); SVG-y runs across the string band in +Z, with the
+      // knuckle landing on STRING_MID_Y opposite the middle finger.
+      const base = this._toWorld({ x: lateralX, y: STRING_MID_Y - 24 }, -1.0);
+      const mid  = this._toWorld({ x: lateralX, y: STRING_MID_Y },      -2.3);
+      const tip  = this._toWorld({ x: lateralX, y: STRING_MID_Y + 28 }, -3.6);
+      orientBone(this.thumbBones[0], base, mid, tr * 1.05);
+      orientBone(this.thumbBones[1], mid, tip, tr * 0.85);
     }
 
     this.renderer.render(this.scene, this.camera);
