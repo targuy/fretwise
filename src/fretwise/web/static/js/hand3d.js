@@ -76,6 +76,14 @@ const SCENE_W = 1440;
 const SCENE_H = 560;
 function wx(px) { return (px - SCENE_W / 2) * PX; }
 
+/* Single source of truth for real-world scale.  Derived from hand_viz.html:
+     NUT_X=110 svg_px, SCALE_PX=1120 svg_px, SCALE_LENGTH_MM=648,
+     PX = 1/4 wu per svg_px  =>  mm_per_wu = (648/1120) * 4 = 2.3143.
+   Every hand/forearm/thumb constant below is sized from real millimetres via
+   mm(...) so the rig stays anatomical no matter what camera framing we pick. */
+const MM_PER_WU = 2.3143;
+const mm = (v) => v / MM_PER_WU;
+
 /* Role → tip-cap colour, mirroring the SVG ROLE palette so the two renderers
    read the same at a glance (active amber, planted cyan, hover red, idle
    orange). */
@@ -90,32 +98,34 @@ const SKIN = 0xe2b694;
 /* ---- World vertical layout ------------------------------------------------ */
 /* Board surface (top face of the fretboard) sits at world Y = 0. */
 const BOARD_TOP_Y    = 0.0;
-/* Fret crowns stand 0.15 above the wood.  Strings ride at +0.40, leaving a
-   0.25 action gap a press will close. */
-const FRET_CROWN_Y   = 0.15;
-const STRING_SURFACE = 0.40;
+/* Fret crowns stand mm(1.3) above the wood.  Strings ride at mm(3.0), leaving
+   a 1.7 mm action gap a press will close. */
+const FRET_CROWN_Y   = mm(1.3);
+const STRING_SURFACE = mm(3.0);
 /* Neck back depth (the rounded belly of the D-section) below the board top.
-   A real classical/electric neck is ~2.0–2.5 cm thick; we use 3 wu so the
-   neck reads thin and proportional next to a ~50 wu fretboard length. */
-const NECK_DEPTH     = 3.0;
+   A real electric neck is ~22 mm thick at the back of the D-section. */
+const NECK_DEPTH     = mm(22);
 
 /* ---- Hand layout ---------------------------------------------------------- */
 /* Player-side Z offset of the back-of-hand center from the string Z range.
    The strings span [stringZMin .. stringZMax] in world Z; the palm slab sits
-   at stringZMax + HAND_OFFSET_Z, i.e. behind the strings on the player side. */
-const HAND_OFFSET_Z = 3.5;
-/* Back-of-hand slab geometry (world units): MCP row spans STRING_SPAN_Z
-   across the strings (~12 wu) so all four MCPs sit roughly above their target
-   strings.  Slab depth along +X (knuckle → wrist) and thickness along +Y are
-   modest so it reads as a flat hand, not a brick. */
-const PALM_DEPTH_X   = 5.0;   // wrist ↔ knuckle distance, along +X
-const PALM_HEIGHT_Y  = 1.6;   // back-of-hand thickness (Y)
+   at stringZMax + HAND_OFFSET_Z, i.e. behind the strings on the player side.
+   30 mm puts the back-of-hand a comfortable hand's-width behind the strings. */
+const HAND_OFFSET_Z = mm(30);
+/* Back-of-hand slab geometry (real mm).  PALM_DEPTH_X is the wrist→MCP depth
+   (100 mm in an adult hand), PALM_HEIGHT_Y is the dorsal slab thickness
+   (~30 mm), and PALM_WIDTH_Z is the cross-neck knuckle-row width (~85 mm).
+   The three were previously conflated via PALM_DEPTH_X — see Edit 4 below. */
+const PALM_DEPTH_X   = mm(100);  // wrist ↔ knuckle distance, along +X
+const PALM_HEIGHT_Y  = mm(30);   // back-of-hand thickness (Y)
+const PALM_WIDTH_Z   = mm(85);   // knuckle-row span (index ↔ pinky), along Z
 /* Knuckle row Y (top of the palm slab on the strings side).  Sits well above
-   the strings so the chains can curl DOWN to reach press targets. */
-const MCP_Y          = 4.0;
-/* Anatomical finger lengths (world units).  Proportional to FINGER_TOTAL
-   {index:176, middle:194, ring:184, pinky:158} from hand_viz.html. */
-const FINGER_LEN     = { index: 7.0, middle: 8.0, ring: 7.5, pinky: 6.5 };
+   the strings so the chains can curl DOWN to reach press targets.  50 mm
+   above the board is the natural MCP height in a grip pose. */
+const MCP_Y          = mm(50);
+/* Anatomical finger lengths in real millimetres.  Adult-male averages from
+   the biomechanics references: index 75, middle 85, ring 78, pinky 60. */
+const FINGER_LEN     = { index: mm(75), middle: mm(85), ring: mm(78), pinky: mm(60) };
 /* Per-phalanx fraction of finger length (proximal / middle / distal).  These
    are the standard adult-hand ratios used by the shared FK rig. */
 const PHALANX_FRAC   = { prox: 0.45, mid: 0.32, dis: 0.23 };
@@ -184,15 +194,17 @@ class Hand3DRenderer {
     // pointer/wheel handlers re-aim at this target after every change.
     this._lookAt = new THREE.Vector3();
     // Orbit state: the camera lives on a sphere around _lookAt.  Default
-    // polar = 28° gives a low view down the neck that shows finger curl
+    // polar = 22° gives a low view down the neck that shows finger curl
     // against the board.  Azimuth 0 puts the camera on +Z (player side, so
     // the back-of-hand faces us) which is the natural framing for a guitar
-    // tutorial: the viewer sees what their own hand would see.
-    this._camSpherical = { radius: 60, azimuth: 0, polar: 28 * Math.PI / 180 };
+    // tutorial: the viewer sees what their own hand would see.  Radius 150
+    // accommodates the ~120 wu forearm + ~50 wu hand after the MM_PER_WU
+    // recalibration; the wheel clamp (60..300) bounds runtime zoom.
+    this._camSpherical = { radius: 150, azimuth: 0, polar: 22 * Math.PI / 180 };
     this._dragging = false;
     this._lastPx = 0;
     this._lastPy = 0;
-    this.camera.position.set(0, 30, 60);
+    this.camera.position.set(0, 60, 150);
     this.camera.lookAt(this._lookAt);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -239,8 +251,8 @@ class Hand3DRenderer {
       e.preventDefault();
       this._camSpherical.radius = clamp(
         this._camSpherical.radius * Math.exp(e.deltaY * 0.001),
-        15,
-        200,
+        60,
+        300,
       );
       this._applyCamera();
     };
@@ -303,13 +315,20 @@ class Hand3DRenderer {
      changes positions and rotations. */
   _buildHand() {
     // Back-of-hand slab.  Geometry: a box centred on its origin, with
-    //   local +X = along the neck (knuckle row width).
+    //   local +X = along the neck (knuckle row width  = PALM_WIDTH_Z).
     //   local +Y = vertical thickness (back-of-hand height).
-    //   local +Z = away from strings (wrist → knuckles).
+    //   local +Z = away from strings (wrist → knuckles = PALM_DEPTH_X).
     // We position the slab in the world so its -Z face (the palm side) sits
     // toward the strings and its +Z face (the dorsal side) faces +Z (where
     // the orbit camera starts).
-    const palmGeo = new THREE.BoxGeometry(1, PALM_HEIGHT_Y, PALM_DEPTH_X);
+    //
+    // NOTE: world X = along-neck direction in this rig (no rotation applied
+    // to the palm slab), so the cross-neck knuckle-row width (PALM_WIDTH_Z)
+    // is plumbed into the geometry's X dimension and the wrist→MCP depth
+    // (PALM_DEPTH_X) into the Z dimension.  The constant NAMES match the
+    // anatomical axes (X=cross-neck width, Z=wrist→MCP); the geometry's
+    // argument order is dictated by THREE's BoxGeometry(X, Y, Z) signature.
+    const palmGeo = new THREE.BoxGeometry(PALM_WIDTH_Z, PALM_HEIGHT_Y, PALM_DEPTH_X);
     // Round the edges slightly by subdividing & lifting top vertices — keeps
     // a soft back-of-hand look without normal maps.  (Cheap: 1 pass.)
     const pos = palmGeo.attributes.position;
@@ -340,7 +359,7 @@ class Hand3DRenderer {
       const Lprox  = L * PHALANX_FRAC.prox;
       const Lmid   = L * PHALANX_FRAC.mid;
       const Ldis   = L * PHALANX_FRAC.dis;
-      const radius = 0.42 * (f === "pinky" ? 0.85 : f === "index" ? 0.95 : 1.0);
+      const radius = mm(8) * (f === "pinky" ? 0.85 : f === "index" ? 0.95 : 1.0);
 
       const root = new THREE.Group();   // MCP joint (rotates the proximal)
       const proxBone = makeBoneMesh(this.skinMat, Lprox, radius);
@@ -382,17 +401,17 @@ class Hand3DRenderer {
     // The thumb has no IK target; it just braces the back of the neck.  We
     // model it as a single bone for simplicity — a curling thumb would need a
     // separate IK target, which isn't yet shipped on the kin payload.
-    this.thumbBone = makeBoneMesh(this.skinMat, 5.0, 0.55);
+    this.thumbBone = makeBoneMesh(this.skinMat, mm(60), mm(11));
     this.thumbBone.rotation.x = -Math.PI * 0.35;  // angles up toward the back
     this.handGroup.add(this.thumbBone);
-    this.thumbJoint = makeJointMesh(this.skinMat, 0.6);
+    this.thumbJoint = makeJointMesh(this.skinMat, mm(12));
     this.handGroup.add(this.thumbJoint);
 
     // Forearm: single capsule extending from the wrist (back-of-palm side)
     // backwards (+Z toward the camera/player) and slightly along +X.
-    this.forearmBone = makeBoneMesh(this.skinMat, 22.0, 1.3);
+    this.forearmBone = makeBoneMesh(this.skinMat, mm(280), mm(35));
     this.handGroup.add(this.forearmBone);
-    this.forearmJoint = makeJointMesh(this.skinMat, 1.5);
+    this.forearmJoint = makeJointMesh(this.skinMat, mm(38));
     this.handGroup.add(this.forearmJoint);
   }
 
@@ -486,9 +505,11 @@ class Hand3DRenderer {
     const length   = x1 - x0;
 
     // String Z span: centre on Z = 0, total span scaled by string count so
-    // 6 strings span ~12 wu with 2.4 wu spacing.  String 1 (high-E) is at
-    // +Z (player side), string N (low-E) at -Z (far side).
-    const STRING_SPACING = 2.4;
+    // 6 strings span ~22.7 wu with mm(10.5) spacing — 10.5 mm is the typical
+    // electric-guitar bridge spacing, putting the 6-string span comfortably
+    // between a 43 mm nut and a 53 mm 12th-fret width.  String 1 (high-E) is
+    // at +Z (player side), string N (low-E) at -Z (far side).
+    const STRING_SPACING = mm(10.5);
     const stringSpan     = (numStrings - 1) * STRING_SPACING;
     const stringZMax     = +stringSpan / 2;  // high-E (string 1) — player side
     const stringZMin     = -stringSpan / 2;  // low-E  (string N) — far side
@@ -708,7 +729,7 @@ class Hand3DRenderer {
     // wrist-knuckle distance, NOT the knuckle row width — for the knuckle
     // row we use a slightly narrower spacing so the four MCPs feel like
     // adjacent fingers, not a splayed claw.
-    const mcpSpan = PALM_DEPTH_X * 0.85;  // total knuckle row width
+    const mcpSpan = PALM_WIDTH_Z * 0.95;  // total knuckle row width (≈80 mm)
     const mcpStepX = mcpSpan / 3;          // 4 MCPs spaced over 3 gaps
     // Index sits on the -X (nut) edge, pinky on the +X (bridge) edge so the
     // hand naturally covers a 4-fret span with index leading toward the nut.
