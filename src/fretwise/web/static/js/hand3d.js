@@ -253,6 +253,10 @@ class Hand3DRenderer {
     this._buildFingers();
     this._buildPalmAndThumb();
 
+    // Fire-and-forget: load skin textures, then swap in the real hand mesh.
+    // Both steps degrade gracefully (procedural fallback on any failure).
+    this._loadTextures().then(() => this._loadHandMesh());
+
     this._onResize = () => this.resize();
     window.addEventListener("resize", this._onResize);
   }
@@ -300,6 +304,87 @@ class Hand3DRenderer {
     // Thumb: two short bones from a thumb base below the neck.
     this.thumbBones = [makeBoneMesh(this.skinMat), makeBoneMesh(this.skinMat)];
     this.thumbBones.forEach((b) => this.handGroup.add(b));
+  }
+
+  /* Load the three skin texture maps (color / normal / specular) and apply them
+     to the shared skinMat.  The normal map is tiled 3× for skin micro-detail on
+     the procedural capsule bones; the specular map drives roughness.  A reference
+     to each loaded texture is kept so _loadHandMesh() can reuse them on the real
+     palm mesh without a second network fetch. */
+  async _loadTextures() {
+    try {
+      const loader = new THREE.TextureLoader();
+      const [colorMap, normalMap, specMap] = await Promise.all([
+        loader.loadAsync('/static/img/hand/HAND_C.jpg'),
+        loader.loadAsync('/static/img/hand/HAND_N.jpg'),
+        loader.loadAsync('/static/img/hand/HAND_S.jpg'),
+      ]);
+      // Normal map: tile at 3× for skin micro-detail on procedural capsule geometry.
+      normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
+      normalMap.repeat.set(3, 3);
+      // Specular map encodes roughness (bright = smooth, dark = rough for skin).
+      specMap.wrapS = specMap.wrapT = THREE.RepeatWrapping;
+      this.skinMat.normalMap = normalMap;
+      this.skinMat.normalScale = new THREE.Vector2(0.6, 0.6);
+      this.skinMat.roughnessMap = specMap;
+      this.skinMat.roughness = 0.8;
+      this.skinMat.needsUpdate = true;
+      // Store for palm mesh UV-mapped texture (different from tiled normal).
+      this._skinColorMap = colorMap;
+      this._skinNormalMap = normalMap;
+      this._skinSpecMap = specMap;
+    } catch (e) {
+      console.warn('hand3d: skin texture load failed, keeping flat material:', e);
+    }
+  }
+
+  /* Replace the procedural ExtrudeGeometry palm with the real OBJ hand mesh
+     (hand_mesh.js).  The mesh carries correct UV coordinates for the skin texture.
+     We swap geometry + material on the EXISTING this.palm mesh so the update()
+     pose block (position.set / scale.set) continues to work unchanged. */
+  async _loadHandMesh() {
+    try {
+      const mod = await import('/static/js/vendor/hand_mesh.js');
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(mod.HAND_MESH_POSITIONS, 3));
+      geo.setAttribute('uv',       new THREE.BufferAttribute(mod.HAND_MESH_UVS, 2));
+      geo.setAttribute('normal',   new THREE.BufferAttribute(mod.HAND_MESH_NORMALS, 3));
+
+      // Create a SEPARATE material for the palm that uses the color map (proper UVs).
+      const palmMat = this.skinMat.clone();
+      if (this._skinColorMap) {
+        palmMat.map = this._skinColorMap;
+        // Normal map for the real mesh: NOT tiled (use 1:1 UV mapping).
+        if (this._skinNormalMap) {
+          const nm = this._skinNormalMap.clone();
+          nm.repeat.set(1, 1);
+          palmMat.normalMap = nm;
+        }
+        palmMat.needsUpdate = true;
+      }
+
+      this.palm.geometry.dispose();
+      this.palm.geometry = geo;
+      this.palm.material = palmMat;
+
+      // Scale + center: OBJ coordinates are in Blender units (~0.8–1.8 range).
+      // Center the geometry, then scale to match our world units.
+      geo.computeBoundingBox();
+      const box = geo.boundingBox;
+      const cx = (box.max.x + box.min.x) / 2;
+      const cy = (box.max.y + box.min.y) / 2;
+      const cz = (box.max.z + box.min.z) / 2;
+      geo.translate(-cx, -cy, -cz);
+      // The palm in world units spans roughly the knuckle-row width (~1.4–2.0 wu).
+      const objSpan = box.max.z - box.min.z;  // Z = across-strings direction
+      const targetSpan = 1.8;                  // approximate world-unit palm depth
+      const scale = targetSpan / (objSpan || 1);
+      geo.scale(scale, scale, scale);
+      geo.computeVertexNormals();
+    } catch (e) {
+      // Silently keep the procedural palm if load fails.
+      console.warn('hand3d: hand_mesh.js load failed, keeping procedural palm:', e);
+    }
   }
 
   /* Build (or rebuild) a simple fretboard slab + frets + strings from the

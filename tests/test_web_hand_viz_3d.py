@@ -63,6 +63,10 @@ _STATIC_DIR = Path(__file__).parents[1] / "src" / "fretwise" / "web" / "static"
 _HAND_VIZ = _STATIC_DIR / "hand_viz.html"
 _HAND3D_JS = _STATIC_DIR / "js" / "hand3d.js"
 _THREE_JS = _STATIC_DIR / "js" / "vendor" / "three.module.min.js"
+_HAND_MESH_JS = _STATIC_DIR / "js" / "vendor" / "hand_mesh.js"
+_HAND_C_JPG = _STATIC_DIR / "img" / "hand" / "HAND_C.jpg"
+_HAND_N_JPG = _STATIC_DIR / "img" / "hand" / "HAND_N.jpg"
+_HAND_S_JPG = _STATIC_DIR / "img" / "hand" / "HAND_S.jpg"
 
 
 # --------------------------------------------------------------------------- #
@@ -79,6 +83,43 @@ def test_3d_assets_present() -> None:
     # The rig imports three.js as an ES module from the vendored path.
     h3d = _HAND3D_JS.read_text(encoding="utf-8")
     assert 'from "./vendor/three.module.min.js"' in h3d
+
+
+def test_skin_texture_assets_present() -> None:
+    """The three skin-texture maps and the OBJ hand-mesh module are on disk."""
+    assert _HAND_C_JPG.is_file(), "HAND_C.jpg (color/diffuse) must exist"
+    assert _HAND_N_JPG.is_file(), "HAND_N.jpg (normal map) must exist"
+    assert _HAND_S_JPG.is_file(), "HAND_S.jpg (specular map) must exist"
+    # Each texture file must be a non-trivial JPEG (floor: 50 KB).
+    for path in (_HAND_C_JPG, _HAND_N_JPG, _HAND_S_JPG):
+        assert path.stat().st_size > 50_000, f"{path.name} looks empty"
+    # hand_mesh.js must exist and export the three Float32Arrays.
+    assert _HAND_MESH_JS.is_file(), "hand_mesh.js must be vendored under static/js/vendor/"
+    assert _HAND_MESH_JS.stat().st_size > 0, "hand_mesh.js must be non-empty"
+    mesh_src = _HAND_MESH_JS.read_text(encoding="utf-8")
+    assert "export const HAND_MESH_POSITIONS" in mesh_src
+    assert "export const HAND_MESH_UVS" in mesh_src
+    assert "export const HAND_MESH_NORMALS" in mesh_src
+
+
+def test_hand3d_js_references_texture_and_mesh_loaders() -> None:
+    """hand3d.js contains the ``_loadTextures`` and ``_loadHandMesh`` methods."""
+    h3d = _HAND3D_JS.read_text(encoding="utf-8")
+    assert "_loadTextures" in h3d, "_loadTextures method must exist in hand3d.js"
+    assert "_loadHandMesh" in h3d, "_loadHandMesh method must exist in hand3d.js"
+    # The texture paths must be referenced.
+    assert "HAND_C.jpg" in h3d
+    assert "HAND_N.jpg" in h3d
+    assert "HAND_S.jpg" in h3d
+    # The hand mesh module path must be referenced.
+    assert "hand_mesh.js" in h3d
+    # The two methods must be wired together in the constructor chain.
+    assert "_loadTextures().then" in h3d
+    # Both methods must degrade gracefully (console.warn fallback).
+    assert "_loadHandMesh" in h3d
+    # The existing pose contract must be intact: palm.position.set used in update().
+    code = _strip_js_comments(h3d)
+    assert "this.palm.position.set(" in code, "palm pose (position.set) must remain in update()"
 
 
 def test_flag_helper_exists_and_defaults_off() -> None:
