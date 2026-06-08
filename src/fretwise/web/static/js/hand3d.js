@@ -110,6 +110,86 @@ function orientBone(mesh, a, b, radius) {
 
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 
+/* Build-once tapered, rounded palm geometry (back-of-hand).  Replaces the old
+   BoxGeometry(1,1,1): a unit-ish slab the palm POSE block in update() rescales to
+   the live MCP span / depth / dome-thickness, so this stays a STATIC-geometry
+   change — the rigid-palm kinematic contract (mcpL/mcpR/topX/topY/botY binding)
+   is untouched.
+
+   The cross-section is drawn in the Shape's local XY plane:
+     - local X  = MCP span (palm width).  Half-width tapers from a WIDE knuckle
+       edge to a NARROW wrist edge, with rounded corners (quadraticCurveTo).
+     - local Y  = palm length (knuckle ↔ wrist depth).  The knuckle (wide) edge
+       is placed at local -Y on purpose: after rotateX(-PI/2) local +Y maps to
+       world +Z (the forearm side), so the wide edge lands on world -Z, the MCP /
+       fingers side.  ORIENTATION INVARIANT — if it reads reversed in-browser,
+       flip the Y sign of the knuckle/wrist edges (or add rotateY(PI)).
+   ExtrudeGeometry then gives the slab its thickness (depth) + a soft bevel; a
+   slight top dome rounds the back of the hand before normals are recomputed.
+
+   Because update() rescales by (spanX, domeY, depthZ), the source slab is sized
+   ~1 unit in each axis so those scales read as world units, exactly as the old
+   box did. */
+function makePalmGeometry() {
+  // Half extents in the Shape's local XY plane (pre-rescale, ~unit slab).
+  const KNUCKLE_HW = 0.5;   // wide edge half-width (MCP row, fingers side)
+  const WRIST_HW = 0.32;    // narrow edge half-width (forearm side)
+  const HALF_LEN = 0.5;     // half palm length along local Y
+  const R = 0.16;           // corner rounding radius
+  const yKnuckle = -HALF_LEN; // wide edge at -Y → world -Z (fingers) post-rotate
+  const yWrist = HALF_LEN;    // narrow edge at +Y → world +Z (forearm)
+
+  const shape = new THREE.Shape();
+  // Start just inboard of the knuckle-left corner and trace clockwise:
+  // knuckle (wide) edge → right side taper → wrist (narrow) edge → left taper.
+  shape.moveTo(-KNUCKLE_HW + R, yKnuckle);
+  shape.lineTo(KNUCKLE_HW - R, yKnuckle);
+  shape.quadraticCurveTo(KNUCKLE_HW, yKnuckle, KNUCKLE_HW, yKnuckle + R);
+  shape.lineTo(WRIST_HW, yWrist - R);
+  shape.quadraticCurveTo(WRIST_HW, yWrist, WRIST_HW - R, yWrist);
+  shape.lineTo(-WRIST_HW + R, yWrist);
+  shape.quadraticCurveTo(-WRIST_HW, yWrist, -WRIST_HW, yWrist - R);
+  shape.lineTo(-KNUCKLE_HW, yKnuckle + R);
+  shape.quadraticCurveTo(-KNUCKLE_HW, yKnuckle, -KNUCKLE_HW + R, yKnuckle);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: 0.7,
+    bevelEnabled: true,
+    bevelThickness: 0.18,
+    bevelSize: 0.12,
+    bevelSegments: 2,
+    curveSegments: 8,
+    steps: 1,
+  });
+  // Extrude pushes along local +Z; rotate so that axis becomes world thickness
+  // (Y) and the cross-section's local Y (the taper) becomes world Z.
+  geo.rotateX(-Math.PI / 2);
+  geo.center();
+
+  // Slight top dome: nudge vertices on the upper (back-of-hand) face outward in
+  // +Y, peaking near the centre, so the back reads rounded rather than flat.
+  const pos = geo.attributes.position;
+  let maxY = -Infinity, minY = Infinity;
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    if (y > maxY) maxY = y;
+    if (y < minY) minY = y;
+  }
+  const yMid = (maxY + minY) / 2;
+  const halfX = 0.5, halfZ = 0.5;
+  for (let i = 0; i < pos.count; i++) {
+    const y = pos.getY(i);
+    if (y <= yMid) continue; // only lift the top face
+    const nx = pos.getX(i) / halfX;
+    const nz = pos.getZ(i) / halfZ;
+    const dome = Math.max(0, 1 - (nx * nx + nz * nz)); // 0 at edges, 1 at centre
+    pos.setY(i, y + dome * 0.18);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
 /**
  * Hand3DRenderer — builds a palm + 4 fingers × 3 phalanges + thumb in three.js
  * and re-poses them each frame from the shared kinematic snapshot.
@@ -201,8 +281,10 @@ class Hand3DRenderer {
   }
 
   _buildPalmAndThumb() {
-    // Palm: a flattened rounded box spanning the four MCPs.
-    const palmGeo = new THREE.BoxGeometry(1, 1, 1);
+    // Palm: a tapered, rounded back-of-hand mesh spanning the four MCPs.  Built
+    // once (static geometry); the POSE block in update() rescales it to the live
+    // MCP span / depth / dome-thickness, exactly as it rescaled the old box.
+    const palmGeo = makePalmGeometry();
     this.palm = new THREE.Mesh(palmGeo, this.skinMat);
     this.handGroup.add(this.palm);
 
