@@ -107,11 +107,12 @@ const STRING_SURFACE = mm(3.0);
 const NECK_DEPTH     = mm(22);
 
 /* ---- Hand layout ---------------------------------------------------------- */
-/* Player-side Z offset of the back-of-hand center from the string Z range.
-   The strings span [stringZMin .. stringZMax] in world Z; the palm slab sits
-   at stringZMax + HAND_OFFSET_Z, i.e. behind the strings on the player side.
-   30 mm puts the back-of-hand a comfortable hand's-width behind the strings. */
-const HAND_OFFSET_Z = mm(30);
+/* Classical grip frame: the palm cradles the BACK of the neck (Y < 0), with
+   its centroid centered on the neck along Z (no player-side offset).  The
+   +Z drift previously baked in here is now recreated by the MCP anchor on
+   the slab's +Z edge — see _poseFingers.  Kept as a named constant (= 0) so
+   any external reference still resolves cleanly. */
+const HAND_OFFSET_Z = mm(0);
 /* Back-of-hand slab geometry (real mm).  PALM_DEPTH_X is the wrist→MCP depth
    (100 mm in an adult hand), PALM_HEIGHT_Y is the dorsal slab thickness
    (~30 mm), and PALM_WIDTH_Z is the cross-neck knuckle-row width (~85 mm).
@@ -119,10 +120,15 @@ const HAND_OFFSET_Z = mm(30);
 const PALM_DEPTH_X   = mm(100);  // wrist ↔ knuckle distance, along +X
 const PALM_HEIGHT_Y  = mm(30);   // back-of-hand thickness (Y)
 const PALM_WIDTH_Z   = mm(85);   // knuckle-row span (index ↔ pinky), along Z
-/* Knuckle row Y (top of the palm slab on the strings side).  Sits well above
-   the strings so the chains can curl DOWN to reach press targets.  50 mm
-   above the board is the natural MCP height in a grip pose. */
-const MCP_Y          = mm(50);
+/* Palm centroid Y in the classical grip frame.  The palm sits BELOW the
+   neck (Y < 0); its top face (post-flip) brushes the neck back at
+   Y = -NECK_DEPTH so the fingers can wrap up and over the +Z (player) edge
+   of the neck onto the strings.  This is the centroid, so palm.top is at
+   palm.y + PALM_HEIGHT_Y/2 = -NECK_DEPTH.
+   Symbol kept as MCP_Y for backward compatibility with existing references
+   in _poseHand, _poseFingers, _poseForearm; semantically it is now
+   "palm centre Y", not "MCP top-of-slab Y". */
+const MCP_Y          = -NECK_DEPTH - PALM_HEIGHT_Y * 0.5;
 /* Anatomical finger lengths in real millimetres.  Adult-male averages from
    the biomechanics references: index 75, middle 85, ring 78, pinky 60. */
 const FINGER_LEN     = { index: mm(75), middle: mm(85), ring: mm(78), pinky: mm(60) };
@@ -793,7 +799,12 @@ class Hand3DRenderer {
     // rather than onto the back of the hand, and rotates the camera-to-
     // target ray so the forearm (at z≈+24, y≈+22) sits behind/below it
     // instead of occluding the fingers.
-    this._lookAt.set(boardCX, STRING_SURFACE + mm(3), -HAND_OFFSET_Z * 0.15);
+    // Centre gaze on the string surface, biased slightly to the far (low-E)
+    // side so the wrap-around fingertips and forearm both stay in frame.
+    // mm(5) bias is preserved from the pre-grip-rework expression; the old
+    // HAND_OFFSET_Z * 0.15 is now 0 (HAND_OFFSET_Z = 0 in the new frame),
+    // so we use a direct literal here.
+    this._lookAt.set(boardCX, STRING_SURFACE + mm(3), -mm(5));
     this._applyCamera();
   }
 
@@ -857,25 +868,28 @@ class Hand3DRenderer {
     // The MCP row centre in world Z: average of all 4 target string Z's
     // (so the palm hovers over its targets even on offset chord shapes).
     const zRow = this._palmZTarget(kin);
+    // Classical grip frame: palm cradles the BACK of the neck.  The centroid
+    // sits BELOW the neck back (Y = MCP_Y = -NECK_DEPTH - PALM_HEIGHT_Y/2),
+    // and its centerline tracks the active strings in Z (no player-side
+    // offset — that offset is now built into the MCP anchor on the slab's
+    // +Z edge).  After the rotation flip below, the slab's previously
+    // dorsal +Y face faces down toward the player, and the previously
+    // palmar -Y face faces up to brush the neck back at Y = -NECK_DEPTH.
     this.palm.position.set(
       palmX,
       MCP_Y,
-      zRow + HAND_OFFSET_Z,
+      zRow,
     );
-    // The slab's default geometry has +X = neck axis already, +Y = thickness,
-    // +Z = wrist depth.  No rotation needed for a default grip; future palm
-    // tilt (kin.palm.palmNormal) can be folded in via Euler 'YXZ' here.
+    // FLIP the slab 180° around X so its palmar normal points +Y (up to the
+    // strings).  Any incoming palmNormal tilt is added as a damped delta on
+    // top of the base flip via Euler order 'YXZ'.
     const pn = kin.palm.palmNormal;
-    if (pn) {
-      this.palm.rotation.order = "YXZ";
-      this.palm.rotation.x = (pn.pitch || 0) * 0.3;  // damped — geometry is rigid
-      this.palm.rotation.y = (pn.yaw   || 0) * 0.3;
-      this.palm.rotation.z = (pn.roll  || 0) * 0.3;
-    } else {
-      this.palm.rotation.set(0, 0, 0);
-    }
+    this.palm.rotation.order = "YXZ";
+    this.palm.rotation.x = Math.PI + (pn ? (pn.pitch || 0) * 0.3 : 0);
+    this.palm.rotation.y = pn ? (pn.yaw  || 0) * 0.3 : 0;
+    this.palm.rotation.z = pn ? (pn.roll || 0) * 0.3 : 0;
     this._palmX = palmX;
-    this._palmZ = zRow + HAND_OFFSET_Z;
+    this._palmZ = zRow;
   }
 
   /* Average Z (across-strings axis) of the active/planted finger targets.
@@ -930,34 +944,42 @@ class Hand3DRenderer {
       ring:   -mcpSpan / 2 + mcpStepX * 2,
       pinky:  -mcpSpan / 2 + mcpStepX * 3,
     };
-    // MCPs sit on the FRONT face of the palm slab (the -Z face — toward the
-    // strings), at the bottom edge of the slab (-PALM_HEIGHT_Y/2) so the
-    // chain extends from the underside of the knuckles, not the top.
-    const mcpYLocal = -PALM_HEIGHT_Y * 0.20;
-    const mcpZLocal = -PALM_DEPTH_X * 0.20;  // near the front (knuckle) face
+    // Classical grip: the palm is FLIPPED so its (now-)top face sits at
+    // Y = -NECK_DEPTH (brushing the neck back), and the MCPs anchor on that
+    // top face along its +Z (player) edge so the proximal phalanges can
+    // launch UP and OVER the +Z edge of the neck onto the strings.
+    //
+    // The +Z edge offset is sized so the MCPs sit just past the player-side
+    // edge of the strings (i.e. on the player side of the neck's belly).
+    // PALM_DEPTH_X is the wrist→knuckle slab dimension (~43 wu); using a
+    // fraction that large would place MCPs far past all strings.  Instead
+    // we size off NECK_DEPTH so the MCP edge is comfortably within reach
+    // of the index finger (L ≈ 32 wu) for a typical 4-fret span.
+    const PALM_TOP_Y = -NECK_DEPTH;                       // = palm.y + PALM_HEIGHT_Y/2
+    const mcpEdgeZ   = NECK_DEPTH * 0.60;                 // ~5.7 wu past palm-Z centre
 
     // Default palm-anchor fallbacks so a missing palm payload (or a frame
     // that arrived before _poseHand could run) does not poison the chain
-    // with NaNs.  Board centre + default offset reads as a relaxed pose.
+    // with NaNs.  Board centre at Z=0 reads as a centred relaxed pose.
     const baseX = (this._palmX !== undefined) ? this._palmX : (this._boardCX || 0);
-    const baseZ = (this._palmZ !== undefined) ? this._palmZ : HAND_OFFSET_Z;
+    const baseZ = (this._palmZ !== undefined) ? this._palmZ : 0;
     for (const f of FINGER_ORDER) {
       const fg   = kin.fingers[f];
       const node = this.fingerNodes[f];
       if (!fg || !node) continue;
 
-      // MCP world position: palm.position + local offset, since the palm has
-      // no rotation in the default grip we just add.  If palm rotates we'd
-      // need a full matrix transform — kept simple while palm tilt is damped.
+      // MCP world position: on the inverted palm's top face, on its +Z
+      // (player) edge, with each finger spread along the neck axis (X).
       const mcpX = baseX + mcpXOffset[f];
-      const mcpY = MCP_Y + mcpYLocal;
-      const mcpZ = baseZ + mcpZLocal;
+      const mcpY = PALM_TOP_Y;
+      const mcpZ = baseZ + mcpEdgeZ;
       node.root.position.set(mcpX, mcpY, mcpZ);
 
       // Target: where the fingertip should land.
       //   - active/planted: at (pressX(fret), STRING_SURFACE, stringZ(string)).
       //   - hover:          just above the string surface, near the target X.
-      //   - idle:           resting Z (above the strings on the player side).
+      //   - idle:           a relaxed pose just above the string surface,
+      //                     slightly behind the MCP in Z.
       const role = fg.role || "idle";
       const targetStr = (fg.strings && fg.strings.length) ? fg.strings[0] : null;
       let tx, ty, tz;
@@ -970,11 +992,12 @@ class Hand3DRenderer {
         ty = STRING_SURFACE + 0.7;
         tz = this._stringZAt(targetStr);
       } else {
-        // Idle: rest above the strings, near MCP X, at the high-E side so
-        // the relaxed fingers don't poke through the board.
+        // Idle: rest just above the string surface, slightly behind the MCP
+        // in Z (toward the neck back) so the relaxed chain still wraps
+        // rather than splaying upward off the neck.
         tx = mcpX;
-        ty = MCP_Y - 1.5;
-        tz = mcpZ - 2.0;
+        ty = STRING_SURFACE + 0.5;
+        tz = mcpZ - 0.5;
       }
 
       // Solve the chain.
@@ -996,76 +1019,63 @@ class Hand3DRenderer {
      fret bends realistically and an unreachable one curls to the limit. */
   _solveChain(node, mcpX, mcpY, mcpZ, tx, ty, tz) {
     // Vector from MCP to target in world space.
+    // In the classical grip frame:
+    //   mcpY = -NECK_DEPTH ≈ -9.5 wu (top of the inverted palm)
+    //   target Y for an active press = STRING_SURFACE ≈ +1.3 wu
+    //   dy ≈ +10.8 wu  (target is ABOVE the MCP — fingers wrap UP-and-OVER)
     const dx = tx - mcpX;
-    const dy = ty - mcpY;     // negative: target is BELOW the MCP
-    const dz = tz - mcpZ;     // negative: target is in front of the palm (-Z)
+    const dy = ty - mcpY;     // positive: target is ABOVE the MCP (toward strings)
+    const dz = tz - mcpZ;     // negative: target is on the -Z side of the +Z edge
 
-    // Yaw: rotate the chain around Y so its -Z axis aligns with the XZ
-    // projection of the target.  atan2(-dx, -dz) gives the yaw needed.
-    // (We negate because the chain rests pointing -Z; we want -Z + yaw to
-    // align with the (dx, dz) direction.)
-    //
-    // Euler order 'YXZ': yaw applies FIRST (placing the swing plane), then
-    // the curl rotation.x folds the chain in that plane.  Without this the
-    // default 'XYZ' would apply curl first in the chain's local frame, then
-    // yaw the curled result — fingers would sweep instead of fold.
+    // Yaw: rotate the chain around Y so the (XZ projection of the) target
+    // lands in the chain's swing plane.  We keep the same atan2 formula as
+    // before: after the LIFT below the chain's rest direction is +Y, but the
+    // swing pivot (X-axis bend) still operates against the XZ projection.
     const yaw = Math.atan2(-dx, -dz);
     node.root.rotation.order = "YXZ";
     node.root.rotation.y = yaw;
 
-    // In the yawed local frame, the target's lateral X component is folded
-    // into the forward distance.  Compute the local forward distance (the
-    // horizontal reach in the swing plane) and vertical drop:
-    //   forward = projection of (dx, dz) onto the chain's -Z axis = -dz·cos − dx·sin... but
-    //   easier: forward = sqrt(dx² + dz²)  (always positive — the chain
-    //   reaches out in its own forward direction after the yaw).
-    const forward = Math.sqrt(dx * dx + dz * dz);
-    const drop    = -dy;       // positive = target is BELOW MCP
+    // After the LIFT baseline (+π/2 on root.rotation.x, applied below), the
+    // chain's rest direction becomes +Y — the proximal phalanx points UP from
+    // the MCP, perfectly positioned to wrap over the +Z edge of the neck.
+    //
+    // In this lifted frame, the analogues of "forward" and "drop" become:
+    //   forward = dy             ← up-distance from MCP to target
+    //                              (corresponds to the chain extending +Y when
+    //                              straight; equivalent to old "forward = -dz")
+    //   drop    = sqrt(dx²+dz²)  ← horizontal distance the fingertip must
+    //                              fold across to reach the target (the
+    //                              chord in the swing plane)
+    const forward = dy;
+    const drop    = Math.sqrt(dx * dx + dz * dz);
 
-    // Estimate the "extended reach" if the finger were straight: simply L.
-    // The finger tip when extended (zero curl) sits at (forward = L, drop = 0).
-    // We want the tip to land at (forward, drop).  Approximate the curl by
-    // the angle whose sine is the drop fraction, plus a contribution from
-    // how much the forward reach has shortened relative to L.
     const L = node.Ltotal;
-    // Total straight-line distance from MCP to target.
     const dist = Math.sqrt(forward * forward + drop * drop);
-    // The chord-length-to-bow-arc relationship for a circular arc of length L
-    // and chord d gives: chord/length ≈ sinc(θ/2), where θ is the total bend.
-    // Inverting analytically is messy; we use a fast monotone approximation:
-    //   chord_ratio = min(1, dist / L)
-    //   totalCurl   = π · (1 - chord_ratio)^0.85
-    // Reaches the limit (π ≈ straight) when dist = 0 (curled into the palm),
-    // and zero (extended) when dist >= L.  Empirically the 0.85 exponent
-    // gives a natural curl progression across the press range.
     const chordRatio = Math.min(1.0, dist / L);
     let totalCurl = Math.PI * Math.pow(1 - chordRatio, 0.85);
 
-    // Additional curl from the "drop angle" — when the target is more BELOW
-    // than FORWARD (a tight press against the strings), boost the curl by the
-    // angle between the (forward, -drop) target direction and the rest -Z
-    // direction.  This makes the fingertip point downward at the strings
-    // even when the chain has plenty of reach left.
+    // Additional curl from the "drop angle" — when the target sits more to
+    // the side (large XZ chord) than straight up, boost the curl so the
+    // fingertip folds down to the strings even when the chain still has
+    // plenty of straight-up reach.
     const dropAngle = Math.atan2(drop, Math.max(0.1, forward));
     totalCurl = Math.max(totalCurl, dropAngle * 1.15);
 
-    // Clamp curl to anatomical limit: MCP+PIP+DIP combined can reach about
-    // 250° fully balled fist; we cap at 2.6 rad (≈150°) for press poses.
     if (totalCurl < 0) totalCurl = 0;
     if (totalCurl > 2.6) totalCurl = 2.6;
 
-    // Distribute the curl across the 3 joints.  Each joint rotates around its
-    // own X axis; the chain folds in the YZ plane.
-    //
-    // SIGN CONVENTION: the bones rest along -Z (extended forward over the
-    // strings).  A POSITIVE rotation around X swings -Z toward +Y (UP, away
-    // from the strings).  We want the chain to curl DOWN onto the strings,
-    // so we apply NEGATIVE rotation: -Z swings toward -Y.  The yaw above
-    // (root.rotation.y) is unaffected — the curl axis stays X in the local
-    // frame after yaw because the chain is built straight along local -Z.
-    node.root.rotation.x = -totalCurl * CURL_SPLIT.mcp;
-    node.pip.rotation.x  = -totalCurl * CURL_SPLIT.pip;
-    node.dip.rotation.x  = -totalCurl * CURL_SPLIT.dis;
+    // SIGN CONVENTION (post-LIFT):
+    //   Bones rest along local -Z.  Adding LIFT = +π/2 to root.rotation.x
+    //   tips the chain's rest direction from -Z to +Y (straight up out of
+    //   the inverted palm).  Folding FORWARD from +Y back toward -Z (where
+    //   the strings live) is then a NEGATIVE delta on rotation.x — exactly
+    //   the same sign as before, but now subtracted from the LIFT baseline
+    //   on the root (PIP/DIP still rotate around 0 since they inherit the
+    //   root's lift through the kinematic chain).
+    const LIFT = Math.PI / 2;
+    node.root.rotation.x = LIFT - totalCurl * CURL_SPLIT.mcp;
+    node.pip.rotation.x  =      - totalCurl * CURL_SPLIT.pip;
+    node.dip.rotation.x  =      - totalCurl * CURL_SPLIT.dis;
   }
 
   /* Thumb: braces the BACK of the neck (-Z side from the back-of-hand).
@@ -1074,15 +1084,18 @@ class Hand3DRenderer {
      player so it reads as a thumb hooked over the back of the neck. */
   _poseThumb(kin) {
     const thumbX = this._palmX || 0;
-    // Place at the back of the neck — opposite Z side from the palm.  The
-    // neck's far edge is at stringZMin; we sit a touch past that.
-    const baseZ = (this._stringZMin !== undefined) ? this._stringZMin - 0.5 : -3.0;
-    const baseY = -NECK_DEPTH * 0.55;
+    // Classical grip: the thumb base sits on the palm's -Z edge (the side
+    // AWAY from the player, against the back of the neck), with the tip
+    // pointing UP and slightly +Z so the pad meets the neck back at the
+    // apex of its arc.  Y is mid-neck-back so the pad lands on
+    // -NECK_DEPTH * 0.6, comfortably bracing the D-section.
+    const baseZ = (this._palmZ || 0) - PALM_DEPTH_X * 0.35;   // -Z edge of palm
+    const baseY = -NECK_DEPTH * 0.60;                          // mid back-of-neck
     this.thumbBone.position.set(thumbX, baseY, baseZ);
-    // Rotate so the bone points up and toward the player (+Z) — wrapping
-    // over the back of the neck.  rotation.x lifts the tip up; rotation.y
-    // would yaw it; for the default brace we just use a fixed pitch.
-    this.thumbBone.rotation.set(-Math.PI * 0.35, 0, 0);
+    // Bone rest direction is local -Z.  rotation.x = -π/2 would point it
+    // pure +Y; -0.55π pitches the tip slightly past vertical toward +Z so
+    // the thumb pad arcs OVER the back of the neck and meets it from -Z.
+    this.thumbBone.rotation.set(-Math.PI * 0.55, 0, 0);
     this.thumbJoint.position.set(thumbX, baseY, baseZ);
     this.thumbJoint.scale.setScalar(1);
   }
@@ -1092,14 +1105,19 @@ class Hand3DRenderer {
      stays attached to the back of the palm slab, regardless of where the
      hand has slid along the neck. */
   _poseForearm(kin) {
-    const wristX = (this._palmX !== undefined) ? this._palmX + PALM_DEPTH_X * 0.3 : 0;
-    const wristZ = (this._palmZ !== undefined) ? this._palmZ + PALM_DEPTH_X * 0.25 : HAND_OFFSET_Z;
-    const wristY = MCP_Y;
+    // Classical grip: the wrist sits on the WRIST edge of the palm (-X end,
+    // since index = -mcpSpan/2 places the wrist-side at -X), UNDER the
+    // neck (Y = palm centre = MCP_Y), and biased to the +Z (player) side
+    // of the palm so the forearm exits toward the player's body.
+    const wristX = (this._palmX !== undefined) ? this._palmX - PALM_DEPTH_X * 0.30 : 0;
+    const wristY = MCP_Y;                                              // palm centre Y
+    const wristZ = (this._palmZ !== undefined) ? this._palmZ + PALM_DEPTH_X * 0.25 : 0;
     this.forearmBone.position.set(wristX, wristY, wristZ);
-    // The bone defaults to extending along -Z (rest direction).  We want it
-    // to extend along +Z + slight +X — toward the player and the elbow.
-    // rotation.y = π (flip -Z to +Z), then rotation.x = -0.25 to tilt up.
-    this.forearmBone.rotation.set(-0.20, Math.PI, 0);
+    // Bone rest direction is local -Z.  rotation.y = π flips -Z → +Z so the
+    // forearm exits toward the player; rotation.x = +π·0.25 pitches the bone
+    // DOWN (away from the neck, toward the player's lap) by 45° — the
+    // realistic rise of the forearm from the seated guitarist's body.
+    this.forearmBone.rotation.set(+Math.PI * 0.25, Math.PI, 0);
     this.forearmJoint.position.set(wristX, wristY, wristZ);
     this.forearmJoint.scale.setScalar(1);
   }
