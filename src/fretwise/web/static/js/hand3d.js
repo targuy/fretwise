@@ -367,23 +367,39 @@ class Hand3DRenderer {
       this.palm.geometry = geo;
       this.palm.material = palmMat;
 
-      // Scale + center: OBJ coordinates are in Blender units (~0.8–1.8 range).
-      // Center the geometry, then scale to match our world units.
+      // Normalise the cropped OBJ to the same unit-slab contract as
+      // makePalmGeometry: center on the origin, then squash each axis
+      // independently to span [-0.5, +0.5].  The per-frame update() block
+      // applies the live MCP-derived palm scale, so the geometry itself must
+      // arrive as a unit slab — any baked-in scale would compound with it and
+      // produce the flat-pancake look.
       geo.computeBoundingBox();
       const box = geo.boundingBox;
-      const cx = (box.max.x + box.min.x) / 2;
-      const cy = (box.max.y + box.min.y) / 2;
-      const cz = (box.max.z + box.min.z) / 2;
-      geo.translate(-cx, -cy, -cz);
-      // The palm in world units spans roughly the knuckle-row width (~1.4–2.0 wu).
-      const objSpan = box.max.z - box.min.z;  // Z = across-strings direction
-      const targetSpan = 1.8;                  // approximate world-unit palm depth
-      const scale = targetSpan / (objSpan || 1);
-      geo.scale(scale, scale, scale);
+      geo.translate(-(box.max.x + box.min.x) / 2, -(box.max.y + box.min.y) / 2, -(box.max.z + box.min.z) / 2);
+      const sx = (box.max.x - box.min.x) || 1;
+      const sy = (box.max.y - box.min.y) || 1;
+      const sz = (box.max.z - box.min.z) || 1;
+      geo.scale(1 / sx, 1 / sy, 1 / sz);
+      // Re-orient OBJ axes into the slab convention used by the procedural palm:
+      //   OBJ +X (wrist → knuckle)  → world +Z (palm depth)
+      //   OBJ +Z (index → pinky)    → world +X (MCP span across strings)
+      //   OBJ +Y (dorsal up)        → world +Y (unchanged)
+      // A single rotateY(+π/2) realises this swap.
+      //
+      // ORIENTATION INVARIANT (load-time): if the dorsal side renders downward
+      // or the thumb appears on the wrong side, flip to -Math.PI/2 or add a
+      // geo.rotateZ(Math.PI) — this is the single knob for left-handed-grip
+      // orientation of the cropped palm slab.
+      geo.rotateY(Math.PI / 2);
       geo.computeVertexNormals();
+      this._palmIsMesh = true;
     } catch (e) {
-      // Silently keep the procedural palm if load fails.
-      console.warn('hand3d: hand_mesh.js load failed, keeping procedural palm:', e);
+      // Silently fall back to the procedural palm slab on any failure (network,
+      // parse, missing exports).  The procedural makePalmGeometry path keeps
+      // the rig visually consistent — just untextured.
+      console.warn('[hand3d] palm mesh load failed; using procedural palm', e);
+      this._palmIsMesh = false;
+      return;
     }
   }
 
