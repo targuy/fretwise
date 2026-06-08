@@ -33,11 +33,44 @@
     button.ctrl:hover { background: #363a41; }
     button.ctrl.primary { background: var(--accent); color: #1a1a1a; border-color: var(--accent); }
     #scene-wrap {
+      position: relative;        /* anchor for the #chord-flash overlay */
       background: linear-gradient(180deg, #1a1c20 0%, #0f1013 100%);
       border-radius: 10px; padding: 10px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.45), inset 0 0 0 1px #2a2c31;
     }
     svg#scene { width: 100%; height: auto; display: block; }
+    /* Chord-name flash — HTML/CSS overlay shared by the 2D (SVG) and 3D
+       (canvas) renderers.  Painted above both siblings; opacity + scale are
+       driven per-frame from JS (updateChordFlash). Pointer-events disabled so
+       it never intercepts clicks meant for the scene. */
+    #chord-flash {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%) scale(1);
+      transform-origin: top center;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 5;
+      line-height: 1.05;
+      will-change: opacity, transform;
+    }
+    #chord-flash .cf-en {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: clamp(22px, 2.9vw, 40px); font-weight: 800;
+      color: #f4a03a;
+      text-shadow:
+        0 0 5px rgba(20,12,0,0.55), 0 0 5px rgba(20,12,0,0.55),
+        0 2px 6px rgba(0,0,0,0.6);
+    }
+    #chord-flash .cf-fr {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: clamp(15px, 1.9vw, 26px); font-weight: 700;
+      color: #f4c070;
+      text-shadow:
+        0 0 4px rgba(20,12,0,0.55), 0 0 4px rgba(20,12,0,0.55),
+        0 2px 5px rgba(0,0,0,0.6);
+    }
     #timeline {
       margin-top: 14px; height: 10px; background: #1f2126;
       border-radius: 5px; overflow: hidden; position: relative;
@@ -146,6 +179,13 @@
       <g id="layer-hand"></g>
       <g id="layer-overlay"></g>
     </svg>
+    <!-- Chord-name flash: HTML overlay sibling of #scene (SVG) and #scene3d
+         (canvas), so it stays visible across the 2D↔3D toggle.  Content +
+         opacity + scale are driven each frame by updateChordFlash(). -->
+    <div id="chord-flash" aria-hidden="true">
+      <div class="cf-en"></div>
+      <div class="cf-fr"></div>
+    </div>
   </div>
 
   <div id="timeline"><div class="fill" id="timeline-fill"></div></div>
@@ -1795,6 +1835,10 @@ function renderNoFingeringState() {
   if (layerHand)    clearLayer(layerHand);
   if (layerShadow)  clearLayer(layerShadow);
   if (layerOverlay) clearLayer(layerOverlay);
+  // The chord-name flash is an HTML overlay (not in layerOverlay); hide it here
+  // so no stale label lingers over the "no fingering" message.
+  const flash = document.getElementById("chord-flash");
+  if (flash) flash.style.opacity = "0";
   const logEl = document.getElementById("notelog");
   if (!NO_FINGERING) {
     if (logEl) logEl.textContent = "-";
@@ -1884,8 +1928,10 @@ window.addEventListener("message", (ev) => {
   const logEl        = document.getElementById("notelog");
   const btnPlay      = document.getElementById("btn-play");
   const btnRew       = document.getElementById("btn-rewind");
+  const chordFlash   = document.getElementById("chord-flash");
 
-  /* Overlay: open-string rings + chord name flash. */
+  /* Overlay: open-string pulse rings only.  (The chord-name flash moved to the
+     #chord-flash HTML overlay — see updateChordFlash below.) */
   function drawOverlay(state, tNow, chordGroups) {
     clearLayer(layerOverlay);
 
@@ -1912,20 +1958,36 @@ window.addEventListener("message", (ev) => {
       }));
     }
 
-    // ── Chord name flash ─────────────────────────────────────────────────
-    if (!chordGroups || !chordGroups.length) return;
+    // Chord-name flash is no longer drawn here (SVG) — it moved to the
+    // #chord-flash HTML overlay (updateChordFlash) so it stays visible in the
+    // 3D renderer too.  drawOverlay now owns only the open-string rings.
+  }
+
+  /* Chord-name flash — HTML/CSS overlay shared by the 2D (SVG) and 3D (canvas)
+     renderers.  Drives opacity + transform:scale() on #chord-flash each frame.
+     textContent is memoised on `_flashKey` so the DOM text is rewritten only
+     when the displayed chord changes, not every frame.  The group-select +
+     timing + chordNameFrench() logic is the same as the former SVG block. */
+  /* querySelector is guarded with ?. so the node DOM stub used by the test
+     harness (which returns a bare stub from getElementById) does not throw —
+     in the browser these always resolve to the real <span> children. */
+  const _flashEn  = chordFlash && chordFlash.querySelector ? chordFlash.querySelector(".cf-en") : null;
+  const _flashFr  = chordFlash && chordFlash.querySelector ? chordFlash.querySelector(".cf-fr") : null;
+  let   _flashKey = null;
+  function updateChordFlash(tNow, chordGroups) {
+    if (!chordGroups || !chordGroups.length) { hideChordFlash(); return; }
     let cg = null;
     for (let k = chordGroups.length - 1; k >= 0; k--) {
       if (chordGroups[k].startSec <= tNow) { cg = chordGroups[k]; break; }
     }
-    if (!cg || !cg.chordName) return;
+    if (!cg || !cg.chordName) { hideChordFlash(); return; }
 
     const SHOW_DUR = 2.2;          // total display window (seconds)
     const FADE_IN  = 0.12;         // fade-in duration
     const ZOOM_DUR = 0.22;         // zoom-back duration (1.4 → 1.0)
     const HOLD_END = 1.8;          // start of fade-out
     const elapsed  = tNow - cg.startSec;
-    if (elapsed < 0 || elapsed > SHOW_DUR) return;
+    if (elapsed < 0 || elapsed > SHOW_DUR) { hideChordFlash(); return; }
 
     const fadeIn  = Math.min(1, elapsed / FADE_IN);
     const fadeOut = elapsed > HOLD_END
@@ -1934,51 +1996,18 @@ window.addEventListener("message", (ev) => {
     const alpha = fadeIn * fadeOut;
     const scale = 1 + 0.4 * Math.max(0, 1 - elapsed / ZOOM_DUR);
 
-    // Centre the label above the hand. cy is the baseline of line 1; it must
-    // clear the top edge (y=0) even at the 1.4x intro zoom — the cap-height plus
-    // the 10px halo reach ~48px above the baseline when scaled, so keep cy >= ~50
-    // or the chord name gets cropped at the top of the panel.
-    const cx = (NUT_X + fretX(NUM_FRETS)) / 2;
-    const cy = 52;   // baseline of line 1 — clears the top edge incl. the zoom pop
-
-    const frName = chordNameFrench(cg.chordName);
-
-    const g = el("g", {
-      transform: `translate(${cx},${cy}) scale(${scale.toFixed(3)})`,
-      opacity: alpha.toFixed(3),
-    });
-    // ── Anglo name (line 1) ─────────────────────────────────────────────
-    // Dark halo for contrast against any background.
-    g.appendChild(el("text", {
-      x: 0, y: 0, "text-anchor": "middle",
-      "font-family": "Helvetica, Arial, sans-serif",
-      "font-size": 40, "font-weight": 800,
-      fill: "rgba(20,12,0,0.55)",
-      stroke: "rgba(20,12,0,0.55)", "stroke-width": "10",
-      "stroke-linejoin": "round",
-    }, cg.chordName));
-    g.appendChild(el("text", {
-      x: 0, y: 0, "text-anchor": "middle",
-      "font-family": "Helvetica, Arial, sans-serif",
-      "font-size": 40, "font-weight": 800,
-      fill: "#f4a03a",
-    }, cg.chordName));
-    // ── French name (line 2) ────────────────────────────────────────────
-    g.appendChild(el("text", {
-      x: 0, y: 27, "text-anchor": "middle",
-      "font-family": "Helvetica, Arial, sans-serif",
-      "font-size": 26, "font-weight": 700,
-      fill: "rgba(20,12,0,0.55)",
-      stroke: "rgba(20,12,0,0.55)", "stroke-width": "7",
-      "stroke-linejoin": "round",
-    }, frName));
-    g.appendChild(el("text", {
-      x: 0, y: 27, "text-anchor": "middle",
-      "font-family": "Helvetica, Arial, sans-serif",
-      "font-size": 26, "font-weight": 700,
-      fill: "#f4c070",
-    }, frName));
-    layerOverlay.appendChild(g);
+    // Memoise text: rewrite the DOM only when the chord actually changes.
+    if (cg.chordName !== _flashKey) {
+      _flashKey = cg.chordName;
+      _flashEn.textContent = cg.chordName;
+      _flashFr.textContent = chordNameFrench(cg.chordName);
+    }
+    chordFlash.style.opacity   = alpha.toFixed(3);
+    chordFlash.style.transform =
+      `translateX(-50%) scale(${scale.toFixed(3)})`;
+  }
+  function hideChordFlash() {
+    if (chordFlash.style.opacity !== "0") chordFlash.style.opacity = "0";
   }
 
   function setPlay(p) {
@@ -2030,6 +2059,7 @@ window.addEventListener("message", (ev) => {
         if (m)  m.style.display  = "none";
         if (sv) sv.style.display = "block";
       }
+      hideChordFlash();   // no stale chord label over the "no fingering" message
       tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       requestAnimationFrame(frame);
       return;
@@ -2066,6 +2096,8 @@ window.addEventListener("message", (ev) => {
         drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
       }
       drawOverlay(st, tNow, CURRENT_CHORD_GROUPS);
+      // Chord-name flash: HTML overlay, visible in both SVG (2D) and 3D modes.
+      updateChordFlash(tNow, CURRENT_CHORD_GROUPS);
 
       tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       const actParts = [], pltParts = [], hoverParts = [];
