@@ -477,10 +477,37 @@ class Hand3DRenderer {
     }
 
     // Forearm: from off-scene (player side) up to the wrist/palm top.
+    //
+    // CLEARANCE (B3): the old pose dropped the wrist to world Y=8 with a fat
+    // radius-9 bone, so the underside (8 − 9 = −1) sank below the raised string
+    // plane (STRING_REST_Y = 1.1) and the fret crowns (0.55) — the thick bone
+    // visibly clipped UNDER / through the neck.  We now:
+    //   1. Raise the wrist to Y≈14 and the elbow/back to Y≈18 so the underside
+    //      (14 − 8 = 6) stays well above STRING_REST_Y; the whole bone rides
+    //      over the strings rather than under the wood.
+    //   2. Slim the radius 9 → 8 so the bone is less of a slab.
+    //   3. Clamp the wrist to sit IN FRONT of the neck's near (low-E) edge in
+    //      world Z.  SVG-y maps to world Z (wz), and larger SVG-y = larger Z =
+    //      the near/player side; the neck's near edge is z1 = wz(boardBot)
+    //      (the most-positive neck Z).  Pinning the wrist's effective SVG-y to
+    //      ≥ that near edge keeps both forearm endpoints on the near side, so
+    //      the bone never crosses under the neck width.
     if (kin.forearm) {
-      const wrist = this._toWorld({ x: kin.forearm.wristX, y: kin.forearm.topY }, 8);
-      const back = this._toWorld({ x: kin.forearm.forearmX, y: SCENE_H + 60 }, 14);
-      orientBone(this.forearm, back, wrist, 9);
+      const g = this.geom;
+      // Near (low-E) edge of the neck in SVG-pixel Y.  Prefer the host's
+      // explicit slab bottom; fall back to the same stringBottom+24 the board
+      // build (setGeometry) uses when the host ships no boardBot.
+      const nearEdgeY = g
+        ? (g.boardBot !== undefined
+            ? g.boardBot
+            : (g.stringBottom !== undefined ? g.stringBottom + 24 : SCENE_H / 2))
+        : SCENE_H / 2;
+      // Keep the wrist on the near side of that edge (a few px of margin so the
+      // forearm sits clearly in front of, not flush against, the low-E edge).
+      const wristY = Math.max(kin.forearm.topY, nearEdgeY + 8);
+      const wrist = this._toWorld({ x: kin.forearm.wristX, y: wristY }, 14);
+      const back = this._toWorld({ x: kin.forearm.forearmX, y: SCENE_H + 60 }, 18);
+      orientBone(this.forearm, back, wrist, 8);
     }
 
     // Thumb: two short, finger-gauge bones TUCKED BEHIND the neck (negative world
