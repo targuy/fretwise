@@ -71,6 +71,9 @@ _HAND_C_JPG = _STATIC_DIR / "img" / "hand" / "HAND_C.jpg"
 _HAND_N_JPG = _STATIC_DIR / "img" / "hand" / "HAND_N.jpg"
 _HAND_S_JPG = _STATIC_DIR / "img" / "hand" / "HAND_S.jpg"
 _RIGGED_GLB = _STATIC_DIR / "models" / "rigged_hand.glb"
+# The runtime loads the SCALE-BAKED variant (scale + bones + inverse-bind
+# matrices pre-multiplied offline so no fragile runtime node-scale is needed).
+_RIGGED_GLB_BAKED = _STATIC_DIR / "models" / "rigged_hand_baked.glb"
 _GLTF_LOADER_JS = _STATIC_DIR / "js" / "vendor" / "GLTFLoader.js"
 
 
@@ -138,12 +141,19 @@ def test_skinned_glb_hand_assets_present_and_served() -> None:
     # The GLB is a real binary glTF (sanity floor; the vendored asset is ~1.5 MB).
     assert _RIGGED_GLB.stat().st_size > 500_000, "rigged_hand.glb looks empty/stubbed"
     assert _RIGGED_GLB.read_bytes()[:4] == b"glTF", "rigged_hand.glb must be binary glTF"
+    # The scale-baked variant is the artifact the runtime actually loads.
+    assert _RIGGED_GLB_BAKED.is_file(), "rigged_hand_baked.glb must be vendored (runtime model)"
+    assert _RIGGED_GLB_BAKED.stat().st_size > 500_000, "rigged_hand_baked.glb looks empty/stubbed"
+    assert _RIGGED_GLB_BAKED.read_bytes()[:4] == b"glTF", "rigged_hand_baked.glb must be binary glTF"
     assert _GLTF_LOADER_JS.is_file(), "GLTFLoader.js must be vendored under static/js/vendor/"
 
     client = TestClient(create_app())
     glb = client.get("/static/models/rigged_hand.glb")
     assert glb.status_code == 200, "rigged_hand.glb must be served by the app"
     assert len(glb.content) > 500_000
+    baked = client.get("/static/models/rigged_hand_baked.glb")
+    assert baked.status_code == 200, "rigged_hand_baked.glb must be served by the app"
+    assert len(baked.content) > 500_000
     loader = client.get("/static/js/vendor/GLTFLoader.js")
     assert loader.status_code == 200, "GLTFLoader.js must be served by the app"
 
@@ -157,9 +167,11 @@ def test_hand3d_js_drives_skinned_glb_finger_bones() -> None:
     the FK mapping.  The procedural fallback must remain a labelled branch.
     """
     h3d = _HAND3D_JS.read_text(encoding="utf-8")
-    # The GLTF loader is imported and used to fetch the rigged hand.
+    # The GLTF loader is imported and used to fetch the rigged hand.  The runtime
+    # loads the scale-baked variant; assert that exact path so a rename can't
+    # silently fall back to the procedural rig.
     assert "GLTFLoader" in h3d
-    assert "rigged_hand.glb" in h3d
+    assert "rigged_hand_baked.glb" in h3d
     # Every driven finger proximal bone (the Rigify left-hand names) is present.
     for bone in (
         "finger_index.01.L",
