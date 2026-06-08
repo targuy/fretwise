@@ -415,7 +415,18 @@ const HAND_MODEL_LABEL = "modele biomecanique v8 anatomique handScale";
     cup        = small vertical rounding of the palm silhouette only
 */
 const MAX_WRIST_ROT    = 0.61;   // radians ≈ 35°
-const WRIST_ROT_SMOOTH = 0.14;  // damping time-constant (s) for wrist rotation
+// Step 9: WRIST_ROT_SMOOTH retired — pose-change transitions are now handled
+// by the pose-level lerp (POSE_LERP_DURATION below).  Sub-pose drift (while a
+// single pose is held) still uses a per-axis exp decay, but inlined with a
+// smaller time constant since it only absorbs tiny jitter, not pose changes.
+const WRIST_ROT_DRIFT_TAU = 0.06; // s — sub-pose drift only; pose changes ease via poseLerp
+// Step 9: pose-level easing.  When selectPose() (or the chord-snap override)
+// returns a pose whose signature differs from the previous frame's, the palm
+// scalars ease together over POSE_LERP_DURATION instead of each axis decaying
+// independently.  This eliminates the per-axis flicker that used to appear at
+// chord changes (some axes settling 50 ms before others) and gives the whole
+// hand a single coordinated ~150 ms move.
+const POSE_LERP_DURATION = 0.15; // s — easeOutCubic from source pose to target
 
 /* ---------- Chord detection ------------------------------------------------
    Open-string MIDI base per string (index 0 = string 1 = highest string).
@@ -1432,6 +1443,33 @@ function collectHandTargets(s) {
   return targets;
 }
 
+// Step 9: compact, comparable signature for a PoseSpec.  Two specs collapse to
+// the same string IFF they would drive the SAME palm posture and the SAME
+// per-finger categorical assignment (string, fret, role).  hp is rounded to
+// 0.5 fret so micro-jitter in the target hand position does not retrigger a
+// pose lerp (those small drifts ARE what the per-axis exp decay still handles).
+function _poseSignature(spec) {
+  if (!spec) return "rest|0";
+  const name = spec.name || "?";
+  const hp = (typeof spec.hp === "number") ? Math.round(spec.hp * 2) / 2 : 0;
+  const parts = [name, hp.toFixed(1)];
+  if (spec.barre) {
+    parts.push("B" + spec.barre.finger + ":" + spec.barre.fret +
+               "/" + spec.barre.fromString + "-" + spec.barre.toString);
+  }
+  if (spec.perFinger) {
+    for (const f of FINGER_ORDER) {
+      const slot = spec.perFinger[f];
+      if (!slot) continue;
+      const role = slot.role || "idle";
+      const str = (slot.targetString == null) ? "_" : String(slot.targetString);
+      const fr  = (slot.targetFret   == null) ? "_" : String(slot.targetFret);
+      parts.push(f[0] + ":" + role[0] + ":" + str + ":" + fr);
+    }
+  }
+  return parts.join("|");
+}
+
 /* ---------- Hand simulator ------------------------------------------------ */
 class HandSimulator {
   constructor() {
@@ -1446,6 +1484,17 @@ class HandSimulator {
     // GRIP frame.  SVG ignores this; the 3D rig reads it through
     // buildKinSnapshot to refine palm orientation beyond the wrist yaw.
     this.palmNormal = _palmNormalDefault();
+    // Step 9: pose-level easing state.  poseSignature tracks the LAST pose we
+    // saw; when selectPose() (or the chord-snap override) returns a different
+    // signature, we start a pose lerp instead of letting each scalar settle on
+    // its own exp-decay timeline (which used to produce visible flicker at
+    // chord boundaries).  pendingChordSnap defers the cgChanged-triggered
+    // categorical finger snap until the lerp completes, per the "hold source
+    // until t==1" rule.  Both are null at startup so the first frame snaps
+    // straight to the rest pose without an artificial 150 ms slide in.
+    this.poseSignature = null;
+    this.poseLerp = null;
+    this.pendingChordSnapCgId = null;
     this.chordGroupId = -1;
     this.fingers = {};
     for (const f of FINGER_ORDER) {
@@ -1540,34 +1589,145 @@ class HandSimulator {
     // shape drives palm placement at the pre-warp instant (not just the one
     // note that happens to be active at t).  Once smoothed, subsequent frames
     // fall back to the live state and selectPose tracks normal play.
-    let pose;
+    let targetSpec, pose;
     if (cgChanged && cg) {
-      pose = evaluatePose(this._poseForChord(cg), this.smoothHandPos);
+      targetSpec = this._poseForChord(cg);
     } else {
-      pose = solveTargetHandPose(s, this.smoothHandPos);
+      targetSpec = selectPose(s);
     }
+    pose = evaluatePose(targetSpec, this.smoothHandPos);
     const targetPalm = pose.pivotX;
-    const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
-    const smoothK = hpDelta <= 2 ? Math.min(1, dt / 0.055) : Math.min(1, dt / 0.11);
-    this.palmX         += (targetPalm          - this.palmX)     * smoothK;
-    this.smoothHandPos += (pose.handPos         - this.smoothHandPos) * smoothK;
-    this.pivotY        += (pose.pivotY          - this.pivotY)    * Math.min(1, dt / 0.10);
-    this.wristRot      += (pose.wristRot        - this.wristRot)  * Math.min(1, dt / WRIST_ROT_SMOOTH);
-    this.palmCup       += ((pose.palmCup || 0)   - this.palmCup)   * Math.min(1, dt / 0.16);
-    this.thumb.x       += (pose.thumb.x         - this.thumb.x)   * Math.min(1, dt / THUMB_SMOOTH);
-    this.thumb.y       += (pose.thumb.y         - this.thumb.y)   * Math.min(1, dt / THUMB_SMOOTH);
-    this.thumb.angle   += (pose.thumb.angle     - this.thumb.angle) * Math.min(1, dt / THUMB_SMOOTH);
-    this.thumb.role     = pose.thumb.role;
-    // Step 8: smooth the palm fine-tilt triplet on the same time-constant
-    // family as palmCup (silhouette refinement, not a primary kinematic).
-    if (pose.palmNormal) {
-      const kN = Math.min(1, dt / 0.16);
-      this.palmNormal.roll  += ((pose.palmNormal.roll  || 0) - this.palmNormal.roll)  * kN;
-      this.palmNormal.pitch += ((pose.palmNormal.pitch || 0) - this.palmNormal.pitch) * kN;
-      this.palmNormal.yaw   += ((pose.palmNormal.yaw   || 0) - this.palmNormal.yaw)   * kN;
+    const targetForearmDrift = clamp(
+      (this.palmX - targetPalm) * 0.18 + pose.forearmBias, -34, 42
+    );
+
+    // ---- Step 9: pose-level easing -----------------------------------------
+    // Detect pose change via a compact signature (name + per-finger
+    // categorical assignment + rounded hand position).  When the signature
+    // shifts, snapshot the CURRENT smoothed scalars as the lerp source and
+    // the new pose's scalars as the destination, then ease them together
+    // over POSE_LERP_DURATION (easeOutCubic).  This replaces the previous
+    // per-axis exp decay AT pose boundaries: every axis settles on the SAME
+    // timeline, eliminating the visible "wrist rotates faster than pivot"
+    // flicker that used to appear at chord changes.
+    //
+    // Categorical finger placement (the cgChanged chord-snap) is HELD during
+    // the lerp window and applied at t == 1, so fingers carry over the source
+    // pose until the palm has finished settling — matching the spec's "hold
+    // source values during lerp, snap to target at t == 1" rule.
+    //
+    // Sub-pose drift (signature unchanged) still goes through the per-axis
+    // exp decay below.  Tiny jitter in pose.wristRot / pose.pivotY while a
+    // single pose is held is what those time constants are for, and they keep
+    // the steady-state behaviour visually identical to pre-Step-9.
+    const newSig = _poseSignature(targetSpec);
+    if (this.poseSignature !== null && newSig !== this.poseSignature) {
+      this.poseLerp = {
+        t0: t,
+        duration: POSE_LERP_DURATION,
+        from: {
+          palmX:         this.palmX,
+          smoothHandPos: this.smoothHandPos,
+          pivotY:        this.pivotY,
+          wristRot:      this.wristRot,
+          palmCup:       this.palmCup,
+          forearmDrift:  this.forearmDrift,
+          thumbX:        this.thumb.x,
+          thumbY:        this.thumb.y,
+          thumbAngle:    this.thumb.angle,
+          palmNormal: {
+            roll:  this.palmNormal.roll,
+            pitch: this.palmNormal.pitch,
+            yaw:   this.palmNormal.yaw,
+          },
+        },
+        to: {
+          palmX:         targetPalm,
+          smoothHandPos: pose.handPos,
+          pivotY:        pose.pivotY,
+          wristRot:      pose.wristRot,
+          palmCup:       pose.palmCup || 0,
+          forearmDrift:  targetForearmDrift,
+          thumbX:        pose.thumb.x,
+          thumbY:        pose.thumb.y,
+          thumbAngle:    pose.thumb.angle,
+          palmNormal: {
+            roll:  pose.palmNormal ? (pose.palmNormal.roll  || 0) : 0,
+            pitch: pose.palmNormal ? (pose.palmNormal.pitch || 0) : 0,
+            yaw:   pose.palmNormal ? (pose.palmNormal.yaw   || 0) : 0,
+          },
+        },
+      };
+      // If the pose change happened to coincide with a chord boundary, defer
+      // that chord's finger-snap until the pose lerp completes.  Suppress the
+      // immediate cgChanged-snap below by clearing the cgChanged flag locally.
+      if (cgChanged) this.pendingChordSnapCgId = cgId;
     }
-    const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + pose.forearmBias, -34, 42);
-    this.forearmDrift  += (targetForearmDrift   - this.forearmDrift) * Math.min(1, dt / 0.18);
+    this.poseSignature = newSig;
+
+    let lerpJustCompleted = false;
+    if (this.poseLerp) {
+      const lerp = this.poseLerp;
+      const raw = (t - lerp.t0) / lerp.duration;
+      const tt = Math.max(0, Math.min(1, raw));
+      const e = 1 - Math.pow(1 - tt, 3);   // easeOutCubic
+      const lf = lerp.from, lt = lerp.to;
+      this.palmX         = lf.palmX         + (lt.palmX         - lf.palmX)         * e;
+      this.smoothHandPos = lf.smoothHandPos + (lt.smoothHandPos - lf.smoothHandPos) * e;
+      this.pivotY        = lf.pivotY        + (lt.pivotY        - lf.pivotY)        * e;
+      this.wristRot      = lf.wristRot      + (lt.wristRot      - lf.wristRot)      * e;
+      this.palmCup       = lf.palmCup       + (lt.palmCup       - lf.palmCup)       * e;
+      this.forearmDrift  = lf.forearmDrift  + (lt.forearmDrift  - lf.forearmDrift)  * e;
+      this.thumb.x       = lf.thumbX        + (lt.thumbX        - lf.thumbX)        * e;
+      this.thumb.y       = lf.thumbY        + (lt.thumbY        - lf.thumbY)        * e;
+      this.thumb.angle   = lf.thumbAngle    + (lt.thumbAngle    - lf.thumbAngle)    * e;
+      this.palmNormal.roll  = lf.palmNormal.roll  + (lt.palmNormal.roll  - lf.palmNormal.roll)  * e;
+      this.palmNormal.pitch = lf.palmNormal.pitch + (lt.palmNormal.pitch - lf.palmNormal.pitch) * e;
+      this.palmNormal.yaw   = lf.palmNormal.yaw   + (lt.palmNormal.yaw   - lf.palmNormal.yaw)   * e;
+      this.thumb.role = pose.thumb.role;     // role is categorical → snap immediately
+      if (tt >= 1) {
+        this.poseLerp = null;
+        lerpJustCompleted = true;
+      }
+    } else {
+      // Sub-pose drift — keep per-axis exp decay (small jitter while a single
+      // pose is held).  Same time constants as pre-Step-9 except WRIST_ROT_SMOOTH
+      // has been replaced by WRIST_ROT_DRIFT_TAU (inlined; tighter, since pose
+      // changes now go through the lerp instead).
+      const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
+      const smoothK = hpDelta <= 2 ? Math.min(1, dt / 0.055) : Math.min(1, dt / 0.11);
+      this.palmX         += (targetPalm        - this.palmX)         * smoothK;
+      this.smoothHandPos += (pose.handPos      - this.smoothHandPos) * smoothK;
+      this.pivotY        += (pose.pivotY       - this.pivotY)        * Math.min(1, dt / 0.10);
+      this.wristRot      += (pose.wristRot     - this.wristRot)      * Math.min(1, dt / WRIST_ROT_DRIFT_TAU);
+      this.palmCup       += ((pose.palmCup || 0) - this.palmCup)     * Math.min(1, dt / 0.16);
+      this.thumb.x       += (pose.thumb.x      - this.thumb.x)       * Math.min(1, dt / THUMB_SMOOTH);
+      this.thumb.y       += (pose.thumb.y      - this.thumb.y)       * Math.min(1, dt / THUMB_SMOOTH);
+      this.thumb.angle   += (pose.thumb.angle  - this.thumb.angle)   * Math.min(1, dt / THUMB_SMOOTH);
+      this.thumb.role     = pose.thumb.role;
+      if (pose.palmNormal) {
+        const kN = Math.min(1, dt / 0.16);
+        this.palmNormal.roll  += ((pose.palmNormal.roll  || 0) - this.palmNormal.roll)  * kN;
+        this.palmNormal.pitch += ((pose.palmNormal.pitch || 0) - this.palmNormal.pitch) * kN;
+        this.palmNormal.yaw   += ((pose.palmNormal.yaw   || 0) - this.palmNormal.yaw)   * kN;
+      }
+      this.forearmDrift  += (targetForearmDrift - this.forearmDrift) * Math.min(1, dt / 0.18);
+    }
+
+    // Effective cgChanged for the finger-snap loop below: fire on the lerp-end
+    // frame for a deferred chord change, OR on a normal cgChanged frame when
+    // no lerp suppressed it.  This is the categorical "snap to target at t==1"
+    // step of the pose lerp.
+    let snapChordCgId = null;
+    if (lerpJustCompleted && this.pendingChordSnapCgId !== null) {
+      snapChordCgId = this.pendingChordSnapCgId;
+      this.pendingChordSnapCgId = null;
+    } else if (cgChanged && !this.poseLerp && this.pendingChordSnapCgId === null) {
+      snapChordCgId = cgId;
+    }
+    const snapChordCg = (snapChordCgId !== null && snapChordCgId >= 0)
+      ? chordGroups[snapChordCgId] : null;
+    const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
 
     for (const f of FINGER_ORDER) {
       const fg   = this.fingers[f];
@@ -1579,9 +1739,11 @@ class HandSimulator {
 
       // Chord snap: when entering a new chord group, immediately place every
       // fretted finger to its chord-shape position.  The guitarist holds the
-      // full chord before picking individual strings.
-      if (cgChanged && cg && cg.fingerTargets[f]) {
-        const tgt = cg.fingerTargets[f];
+      // full chord before picking individual strings.  Step 9: this snap is
+      // deferred to the end of the pose lerp window (snapChordCg replaces the
+      // raw cgChanged/cg pair).
+      if (snapChordCg && snapChordCg.fingerTargets[f]) {
+        const tgt = snapChordCg.fingerTargets[f];
         const snapActive = s.active[f];
         const snapPlanted = s.planted[f];
         const snapUpcoming = s.upcoming[f];
