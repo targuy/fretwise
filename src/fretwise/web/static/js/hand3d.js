@@ -227,11 +227,34 @@ class Hand3DRenderer {
     const x1 = wx(fretX(numFrets) + 10);
     const z0 = wz(boardTop);
     const z1 = wz(boardBot);
-    const board = new THREE.Mesh(
-      new THREE.BoxGeometry(Math.abs(x1 - x0), 2, Math.abs(z1 - z0)),
-      boardMat
-    );
-    board.position.set((x0 + x1) / 2, -1.2, (z0 + z1) / 2);
+    // D cross-section neck: a flat fretboard top with a rounded belly behind it.
+    // The cross-section lives in the Shape's local XY plane — local X = neck width
+    // (mapped to world Z), local Y = neck depth.  ExtrudeGeometry pushes it along
+    // local +Z by `length`, then rotateY(-PI/2) lays that extrude axis onto world X.
+    //   - TOP_Y stays at -0.2 so the flat fretboard surface sits in the SAME plane
+    //     the frets (~:249, y=-0.2) and strings and the hand's ROLE_LIFT assume.
+    //   - BOTTOM_Y = -2.2 preserves the old slab's 2-unit thickness for the belly.
+    const length = Math.abs(x1 - x0);
+    const hw = Math.abs(z1 - z0) / 2; // half neck width (local X)
+    const TOP_Y = -0.2;
+    const BOTTOM_Y = -2.2;
+    const profile = new THREE.Shape();
+    profile.moveTo(-hw, TOP_Y);           // top-left corner of the flat fretboard
+    profile.lineTo(hw, TOP_Y);            // flat fretboard surface (top edge)
+    // Rounded belly: bulge down through the centre back to the left edge.
+    profile.quadraticCurveTo(hw, BOTTOM_Y, 0, BOTTOM_Y);
+    profile.quadraticCurveTo(-hw, BOTTOM_Y, -hw, TOP_Y);
+    const boardGeom = new THREE.ExtrudeGeometry(profile, {
+      depth: length, bevelEnabled: false, curveSegments: 24, steps: 1,
+    });
+    // Map the extrude axis (local +Z) onto world X.  After rotateY(-PI/2) the
+    // solid spans world X from 0 to -length; translate(+length/2) recentres it
+    // on its own midpoint so board.position.x can place it on the board centre.
+    boardGeom.rotateY(-Math.PI / 2);
+    boardGeom.translate(length / 2, 0, 0);
+    boardGeom.computeVertexNormals();
+    const board = new THREE.Mesh(boardGeom, boardMat);
+    board.position.set((x0 + x1) / 2, 0, (z0 + z1) / 2);
     this.fretboardGroup.add(board);
 
     const fretMat = new THREE.MeshStandardMaterial({
