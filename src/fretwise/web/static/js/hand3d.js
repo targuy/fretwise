@@ -707,22 +707,23 @@ class Hand3DRenderer {
       this.palm.rotation.y = Math.atan2(L.z - R.z, R.x - L.x);
     }
 
-    // Forearm: from off-scene (player side) up to the wrist/palm top.
+    // Forearm: from a short anatomical stub on the player side up to the
+    // wrist/palm top.  The forearm we render is a STUB, not a full ulna: it
+    // exists to suggest the limb entering the frame, not to span the SVG.
     //
-    // CLEARANCE (B3): the old pose dropped the wrist to world Y=8 with a fat
-    // radius-9 bone, so the underside (8 − 9 = −1) sank below the raised string
-    // plane (STRING_REST_Y = 1.1) and the fret crowns (0.55) — the thick bone
-    // visibly clipped UNDER / through the neck.  We now:
-    //   1. Raise the wrist to Y≈14 and the elbow/back to Y≈18 so the underside
-    //      (14 − 8 = 6) stays well above STRING_REST_Y; the whole bone rides
-    //      over the strings rather than under the wood.
-    //   2. Slim the radius 9 → 8 so the bone is less of a slab.
-    //   3. Clamp the wrist to sit IN FRONT of the neck's near (low-E) edge in
-    //      world Z.  SVG-y maps to world Z (wz), and larger SVG-y = larger Z =
-    //      the near/player side; the neck's near edge is z1 = wz(boardBot)
-    //      (the most-positive neck Z).  Pinning the wrist's effective SVG-y to
-    //      ≥ that near edge keeps both forearm endpoints on the near side, so
-    //      the bone never crosses under the neck width.
+    // STEP 2 — SHORTENED PROPORTIONS: the previous build anchored the elbow at
+    // SVG-y = SCENE_H + 60 (≈620), which after wz() placed the back ~85 world
+    // units behind the wrist — a monster forearm dominating the viewport.  We
+    // now anchor the elbow only 90 SVG-pixels behind the wrist (~22 wu after
+    // PX), giving a believable stub length, and slim the bone radius 8 → 5.5
+    // so it reads forearm-gauge rather than thigh-gauge.
+    //
+    // CLEARANCE (preserved from B3): we still keep the wrist above the strings
+    // (lift = 14 wu) and clamp the wrist's SVG-y to the neck's near (low-E)
+    // edge so the bone rides OVER the board, never under it.  SVG-y maps to
+    // world Z (wz); larger SVG-y = larger Z = near/player side; the neck's
+    // near edge is z1 = wz(boardBot).  Pinning the wrist's effective SVG-y to
+    // ≥ that near edge keeps both forearm endpoints in front of the neck.
     if (kin.forearm) {
       const g = this.geom;
       // Near (low-E) edge of the neck in SVG-pixel Y.  Prefer the host's
@@ -737,8 +738,14 @@ class Hand3DRenderer {
       // forearm sits clearly in front of, not flush against, the low-E edge).
       const wristY = Math.max(kin.forearm.topY, nearEdgeY + 8);
       const wrist = this._toWorld({ x: kin.forearm.wristX, y: wristY }, 14);
-      const back = this._toWorld({ x: kin.forearm.forearmX, y: SCENE_H + 60 }, 18);
-      orientBone(this.forearm, back, wrist, 8);
+      // Elbow anchor: 90 SVG-pixels behind the wrist (NOT below SCENE_H), so the
+      // stub length scales with PX rather than spanning the whole viewport.
+      // Lift 16 vs wrist 14 reads as a slight elbow rise behind the hand.
+      const elbowY = wristY + 90;
+      const back = this._toWorld({ x: kin.forearm.forearmX, y: elbowY }, 16);
+      // Forearm radius 5.5 wu (was 8) — anatomically closer to wrist gauge,
+      // no longer reads as a swollen thigh next to the slimmer phalanges.
+      orientBone(this.forearm, back, wrist, 5.5);
     }
 
     // Thumb: two short, finger-gauge bones TUCKED BEHIND the neck (negative world
