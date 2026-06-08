@@ -212,8 +212,12 @@ class Hand3DRenderer {
 
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 2000);
     // Look down at the fretboard from above & slightly behind the player.
+    // _lookAt is the persistent camera target; setGeometry() recenters it on the
+    // actual board centre once the live geometry is known, and resize() re-aims
+    // the camera at this target after every layout change.
+    this._lookAt = new THREE.Vector3();
     this.camera.position.set(0, 150, 120);
-    this.camera.lookAt(0, 0, 0);
+    this.camera.lookAt(this._lookAt);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -227,6 +231,18 @@ class Hand3DRenderer {
     const key = new THREE.DirectionalLight(0xffffff, 0.9);
     key.position.set(-60, 160, 80);
     this.scene.add(key);
+    // Warm/cool fill lights: the key alone reads as a flat-pancake under the new
+    // shallower 28° camera elevation, since the D-belly only catches the key's
+    // grazing angle on one face.  A warm fill from the player's right (+X, +Z)
+    // and a cool rim from the far side (−Z) sculpt the belly + back-of-hand and
+    // give the rosewood board a subtle two-tone gradient — the cheapest path to
+    // "this scene is 3D" short of HDRI / IBL.
+    const warm = new THREE.DirectionalLight(0xffd9b8, 0.45);
+    warm.position.set(60, 40, 160);
+    this.scene.add(warm);
+    const cool = new THREE.DirectionalLight(0xa8c8ff, 0.35);
+    cool.position.set(0, 20, -160);
+    this.scene.add(cool);
 
     this.fretboardGroup = new THREE.Group();
     this.scene.add(this.fretboardGroup);
@@ -424,7 +440,12 @@ class Hand3DRenderer {
     const boardBot = (geom.boardBot !== undefined) ? geom.boardBot : (stringBottom + 24);
 
     const boardMat = new THREE.MeshStandardMaterial({
-      color: 0x0c0c0d, roughness: 0.85, metalness: 0.0,
+      // Rosewood tint (0x3b261a): the old near-black slab (0x0c0c0d) absorbed
+      // the new warm/cool fills and read as a featureless silhouette, defeating
+      // the very lighting that's supposed to sell the 3D belly.  A warm, slightly
+      // brownish rosewood + lower roughness (0.55 vs 0.85) catches enough of the
+      // fills to gradient across the belly arc, giving the neck visible depth.
+      color: 0x3b261a, roughness: 0.55, metalness: 0.0,
     });
     const x0 = wx(NUT_X - 18);
     const x1 = wx(fretX(numFrets) + 10);
@@ -436,11 +457,21 @@ class Hand3DRenderer {
     // local +Z by `length`, then rotateY(-PI/2) lays that extrude axis onto world X.
     //   - TOP_Y stays at -0.2 so the flat fretboard surface sits in the SAME plane
     //     the frets (~:249, y=-0.2) and strings and the hand's ROLE_LIFT assume.
-    //   - BOTTOM_Y = -2.2 preserves the old slab's 2-unit thickness for the belly.
+    //   - BOTTOM_Y is derived from the neck half-width hw so the belly's depth
+    //     scales with the live neck width instead of the old hardcoded -2.2
+    //     (only 2 wu deep — a slab, not a classical neck).  hw * 0.45 puts the
+    //     belly apex roughly at a classical-guitar depth-to-width ratio; the
+    //     Math.max(6, ...) floor keeps a visible belly even on a narrow neck.
+    //     At width ~45 wu this gives a ~16 wu belly depth — proper proportions.
     const length = Math.abs(x1 - x0);
     const hw = Math.abs(z1 - z0) / 2; // half neck width (local X)
     const TOP_Y = -0.2;
-    const BOTTOM_Y = -2.2;
+    const BOTTOM_Y = TOP_Y - Math.max(6, hw * 0.45);
+    // Publish hw so the thumb pose (update()) can tuck below the belly using the
+    // SAME derived depth — keeping the thumb proportional to the live neck width
+    // instead of a hardcoded -1.0/-2.3/-3.6 ladder that sank inside the new
+    // deeper belly.
+    this._neckHalfWidth = hw;
     const profile = new THREE.Shape();
     profile.moveTo(-hw, TOP_Y);           // top-left corner of the flat fretboard
     profile.lineTo(hw, TOP_Y);            // flat fretboard surface (top edge)
@@ -516,6 +547,29 @@ class Hand3DRenderer {
         pressFret: null,
       });
     }
+
+    // CAMERA RECENTER: now that the live board geometry is known, frame it
+    // properly.  The old (0,150,120) → (0,0,0) gaze was a near-top-down look
+    // baked around a centred SVG (the world origin) — when the neck shifts off
+    // centre (open-position hands, extended chord shapes) the board drifts out
+    // of frame, and the steep elevation flattens the new D-belly into a thin
+    // dark strip that defeats the very 3D belly we just built.  We now:
+    //   - re-aim at the actual board centre (boardCX, 0, boardCZ),
+    //   - drop the elevation to 28° so the belly catches the warm/cool fills
+    //     broadside (sin(28°) ≈ 0.469, cos(28°) ≈ 0.883),
+    //   - keep the camera on a radius of ~130 wu so the framing stays comfy.
+    // resize() re-aims the camera at _lookAt after each layout change.
+    const boardCX = (x0 + x1) / 2;
+    const boardCZ = (z0 + z1) / 2;
+    const camR = 130;
+    const camElev = 28 * Math.PI / 180;
+    this._lookAt.set(boardCX, 0, boardCZ);
+    this.camera.position.set(
+      boardCX,
+      camR * Math.sin(camElev),
+      boardCZ + camR * Math.cos(camElev),
+    );
+    this.camera.lookAt(this._lookAt);
   }
 
   /* Per-frame re-pose from the SHARED kinematic snapshot.  `kin` is produced by
@@ -633,7 +687,7 @@ class Hand3DRenderer {
     }
 
     // Thumb: two short, finger-gauge bones TUCKED BEHIND the neck (negative world
-    // Y, i.e. on the far side of the -2.2 belly) and running mostly across +Z so
+    // Y, i.e. on the far side of the belly) and running mostly across +Z so
     // the pad opposes the strings the way a real thumb braces the neck.  We anchor
     // it laterally on the MIDDLE finger's MCP (read straight from the shared
     // snapshot) and run it across STRING_MID_Y, the mirror of the 2D string-band
@@ -648,12 +702,17 @@ class Hand3DRenderer {
       // Finger gauge with a slight proximal→distal taper (×1.05 / ×0.85), so the
       // tucked thumb reads finger-sized rather than the old 5/4 (~2× finger) club.
       const tr = Math.max(0.6, 22 * PX * 0.5);
-      // Behind the slab: world Y descends -1.0 → -3.6 (the `lift` arg of
-      // _toWorld IS world Y); SVG-y runs across the string band in +Z, with the
-      // knuckle landing on STRING_MID_Y opposite the middle finger.
-      const base = this._toWorld({ x: lateralX, y: STRING_MID_Y - 24 }, -1.0);
-      const mid  = this._toWorld({ x: lateralX, y: STRING_MID_Y },      -2.3);
-      const tip  = this._toWorld({ x: lateralX, y: STRING_MID_Y + 28 }, -3.6);
+      // Behind the slab: world Y descends in proportion to the LIVE neck
+      // half-width (this._neckHalfWidth, published by setGeometry) so the
+      // thumb tracks the belly depth instead of sitting inside the new deeper
+      // belly the way the old -1.0/-2.3/-3.6 hardcoded ladder did.  The ratios
+      // (-0.05 / -0.12 / -0.18 × hw) preserve the old proportional spacing
+      // while letting the thumb breathe with the neck.  Fallback hw of 20
+      // matches the historical neck width when setGeometry hasn't run yet.
+      const hwT = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
+      const base = this._toWorld({ x: lateralX, y: STRING_MID_Y - 24 }, -hwT * 0.05);
+      const mid  = this._toWorld({ x: lateralX, y: STRING_MID_Y },      -hwT * 0.12);
+      const tip  = this._toWorld({ x: lateralX, y: STRING_MID_Y + 28 }, -hwT * 0.18);
       orientBone(this.thumbBones[0], base, mid, tr * 1.05);
       orientBone(this.thumbBones[1], mid, tip, tr * 0.85);
     }
@@ -672,6 +731,9 @@ class Hand3DRenderer {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h, false);
+    // Re-aim at the persistent look-target so a viewport change can't drift
+    // the framing off the board centre setGeometry() chose.
+    this.camera.lookAt(this._lookAt);
   }
 
   dispose() {
