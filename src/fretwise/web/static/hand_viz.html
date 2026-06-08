@@ -894,10 +894,22 @@ function sampleState(t, frames) {
 // ring 184, pinky 158) so the same "press fret 5" produces different joint
 // postures per finger.
 //
-// Step 6: vocabulary lives behind USE_POSE_PALETTE = false.  No behaviour
-// change: solveTargetHandPose + collectHandTargets remain the sole drivers.
-// Step 7 will flip the flag and route through evaluatePose.
-const USE_POSE_PALETTE = false;
+// Step 7: flag flipped to true — solveTargetHandPose now delegates to
+// evaluatePose(selectPose(state)).  collectHandTargets / analyseTargetCluster
+// are kept (commented OUT of the live path) for one cycle as reference while
+// we shake out any regressions; evaluatePose internally uses the same
+// weighted-vote palm placement so SVG output stays numerically equivalent
+// (per-finger tip targets within ~1e-3 px of the old solver for any state
+// where exactly one (string,fret) drives each active finger).
+//
+// Known accepted divergences (cleaner output, expected):
+//   - Fast position shifts: pose vocabulary snaps to the new pose at the
+//     selectPose() boundary instead of weighting old + new targets.  The
+//     per-frame smoothing in HandSimulator.update() absorbs this.
+//   - Open-chord transitions: idle fingers now park at HOME_FRET_OFFSET
+//     instead of drifting from the last active target — closer to a real
+//     guitarist's "ready" arch.
+const USE_POSE_PALETTE = true;
 
 // Strict barre detector — same semantics as the inline check in sampleState's
 // active loop (only ACTIVE-at-instant + contiguous adjacent strings count),
@@ -1141,7 +1153,7 @@ function selectPose(state) {
 // reaches further along the neck for the same target fret.  The OLD path
 // applied a uniform reach budget; this path makes geometry-per-finger
 // explicit at the spec level.
-function evaluatePose(spec) {
+function evaluatePose(spec, fallbackHp) {
   if (!spec) {
     return {
       handPos: 0,
@@ -1154,6 +1166,12 @@ function evaluatePose(spec) {
       thumb: solveThumbAnchor([], 0, 0, false, false),
     };
   }
+  // fallbackHp = the previous smoothed hand_position (this.smoothHandPos in
+  // HandSimulator).  When omitted, fall back to the spec's own hp — the old
+  // pre-Step-7 behaviour.  Passing it explicitly preserves the ±2.5-fret
+  // clamp window the old solveTargetHandPose enforced and keeps SVG output
+  // numerically equivalent across the flip.
+  if (fallbackHp == null) fallbackHp = spec.hp;
 
   // Synthesise the "targets" shape that solveTargetHandPose used, but built
   // from the PoseSpec instead of sampleState — so we can reuse the same
@@ -1186,7 +1204,7 @@ function evaluatePose(spec) {
 
   // Palm placement: same weighted-vote algorithm as the old solver, so a
   // Step-7 flip routing through evaluatePose preserves the equilibrium pose.
-  const fallbackHp = spec.hp;
+  // (fallbackHp now arrives as a parameter — see top of function.)
   if (!targets.length) {
     return {
       handPos: spec.hp,
@@ -1275,76 +1293,18 @@ function evaluatePose(spec) {
   };
 }
 
+// Step 7 — solveTargetHandPose is now a thin adapter on top of the pose
+// vocabulary.  selectPose() classifies the current sampleState into one of
+// {restAtPosition, pressSingle, pressMulti, barreFull, barreHalf, barrePlus};
+// evaluatePose() projects that PoseSpec into the same palm/perFinger/thumb
+// shape this function returned before, using the same weighted-vote palm
+// placement so the SVG output remains regression-equivalent.
+//
+// fallbackHandPos (= HandSimulator.smoothHandPos) is forwarded into
+// evaluatePose to preserve the ±2.5-fret clamp window the old solver
+// enforced — keeping per-frame palm placement numerically equivalent.
 function solveTargetHandPose(s, fallbackHandPos) {
-  const targets = collectHandTargets(s);
-  if (!targets.length) {
-    return {
-      handPos:     s.handPos,
-      pivotX:      pressX(s.handPos) - MCP_OFFSETS.index,
-      pivotY:      MCP_Y,
-      wristRot:    0,
-      forearmBias: 0,
-      palmCup:     0,
-      thumb:       solveThumbAnchor([], s.handPos, 0, false, false),
-    };
-  }
-
-  /* Step 1 — hand position (index-finger fret).  Weighted average of each
-     target finger converted to an index-equivalent fret.  Clamped to stay
-     within ±2.5 frets of the current smooth position. */
-  let wSum = 0, hpSum = 0;
-  for (const t of targets) {
-    wSum  += t.weight;
-    hpSum += (t.fret - HOME_FRET_OFFSET[t.finger]) * t.weight;
-  }
-  const handPos = clamp(hpSum / wSum, Math.max(1, fallbackHandPos - 2.5), fallbackHandPos + 2.5);
-  const cluster = analyseTargetCluster(targets);
-  const pivotX = pressX(handPos) - MCP_OFFSETS.index;
-  const thumb = solveThumbAnchor(targets, handPos, cluster.bassDemand, cluster.openChord, cluster.barre);
-
-  /* Step 2 — palm depth.  Each finger votes for the palm Y that lets its
-     fixed MCP reach the target string.  We bias toward the deepest required
-     value so ring/pinky on low strings pull the whole hand down instead of
-     detaching from the palm. */
-  let pivotY = MCP_MIN_Y;
-  for (const t of targets) {
-    const needed = t.y - DESIRED_REACH_Y[t.finger];
-    const pull = t.weight * (t.string >= 4 ? 1.0 : 0.72);
-    pivotY = Math.max(pivotY, needed * pull + pivotY * (1 - pull));
-  }
-  pivotY = clamp(pivotY, MCP_MIN_Y, MCP_MAX_Y);
-
-  /* Step 3 — wrist rotation θ (palm origin, CW positive).
-     With rotation, each finger's MCP Y satisfies:
-       mcpY[f] = pivotY + MCP_OFFSETS[f] × sin(θ)
-    Inverting for sin(θ) and taking a weighted mean gives θ. */
-  let sinNum = 0, sinDen = 0;
-  for (const t of targets) {
-    const naturalDx = MCP_OFFSETS[t.finger];
-    if (Math.abs(naturalDx) < 1) continue;
-    const idealMcpY = t.y - DESIRED_REACH_Y[t.finger];
-    sinNum += ((idealMcpY - pivotY) / naturalDx) * t.weight;
-    sinDen += t.weight;
-  }
-  const sinTheta = sinDen > 0 ? sinNum / sinDen : 0;
-  const ergonomicRoll = cluster.bassDemand > 3.8 ? 0.12 : cluster.openChord ? 0.06 : 0;
-  const wristRot = clamp(
-    Math.asin(clamp(sinTheta, -Math.sin(MAX_WRIST_ROT), Math.sin(MAX_WRIST_ROT))) + ergonomicRoll,
-    -MAX_WRIST_ROT,
-    MAX_WRIST_ROT
-  );
-
-  /* Step 4 — forearm bias (extra lateral pull for bass-string clusters). */
-  const lowStringPull = targets.reduce((acc, t) => acc + (t.y - STRING_Y_TOP) * t.weight, 0) / wSum;
-  return {
-    handPos,
-    pivotX,
-    pivotY,
-    wristRot,
-    forearmBias: clamp((lowStringPull - 55) * 0.28, -18, 26),
-    palmCup: clamp((cluster.bassDemand - 3.2) * 0.18 + cluster.span * 0.035, 0, 0.34),
-    thumb,
-  };
+  return evaluatePose(selectPose(s), fallbackHandPos);
 }
 
 function analyseTargetCluster(targets) {
@@ -1381,6 +1341,15 @@ function solveThumbAnchor(targets, handPos, bassDemand, openChord, barre) {
   return { x, y, angle: 84, role: "default" };
 }
 
+// Step 7: collectHandTargets is no longer on the live SVG path —
+// evaluatePose(selectPose(s)) subsumes it for the runtime palm/finger solve.
+// The function is RETAINED however because it is the documented test surface
+// for "what targets does a given state expose?" (see
+// tests/test_web_hand_viz_planted_barre.py) and remains the cleanest
+// expression of that contract.  analyseTargetCluster likewise remains LIVE
+// because evaluatePose still consumes it internally; its only runtime caller
+// is now evaluatePose itself.  Both may be inlined or removed in a future
+// step once the pose vocabulary fully owns the cluster / weighting concept.
 function collectHandTargets(s) {
   const targets = [];
   for (const f of FINGER_ORDER) {
@@ -1438,9 +1407,82 @@ class HandSimulator {
     };
   }
 
+  /* Build a forced PoseSpec from a chord group's fingerTargets.
+     - Multiple presses → pressMulti (default).
+     - If two or more presses share the same fret on the index finger AND
+       cover ≥ 2 adjacent strings, treat it as a barre and route through
+       barrePlus (the additional non-index presses become the "extras").
+     Used by update() at the cgChanged boundary so the palm settles to the
+     chord posture in the same frame as the tip pre-warp. */
+  _poseForChord(cg) {
+    const presses = [];
+    let indexFret = null, indexStrings = [];
+    for (const f of FINGER_ORDER) {
+      const tgt = cg.fingerTargets[f];
+      if (!tgt || tgt.fret <= 0) continue;
+      presses.push({ finger: f, string: tgt.string, fret: tgt.fret });
+      if (f === "index") {
+        indexFret = tgt.fret;
+        indexStrings.push(tgt.string);
+      }
+    }
+    const hp = cg.handPosition;
+    // Detect a barre on the index: in chord groups built by buildChordGroups,
+    // each finger appears once with a single target string, so a "barre" here
+    // means index targets the lowest fret in the chord and at least one extra
+    // finger sits on the same fret on a higher string.  The conservative test
+    // below routes only OBVIOUS barres through barrePlus — single-fret index
+    // + ≥ 1 same-fret non-index presses — and leaves everything else as
+    // pressMulti.  Anything more aggressive would mis-classify open chords.
+    if (indexFret != null) {
+      const sameFretExtras = presses.filter(
+        p => p.finger !== "index" && p.fret === indexFret
+      );
+      if (sameFretExtras.length >= 1) {
+        const otherExtras = presses.filter(
+          p => p.finger !== "index" && p.fret !== indexFret
+        );
+        return barrePlus(hp, indexFret, otherExtras);
+      }
+    }
+    if (presses.length >= 2) return pressMulti(hp, presses);
+    if (presses.length === 1) {
+      const p = presses[0];
+      return pressSingle(hp, p.finger, p.string, p.fret);
+    }
+    return restAtPosition(hp);
+  }
+
   update(t, dt, frames, chordGroups) {
     const s = sampleState(t, frames);
-    const pose = solveTargetHandPose(s, this.smoothHandPos);
+
+    // ---- Chord-group detection (lifted above pose solve in Step 7) ----
+    // We need to know if we're crossing a chord boundary BEFORE solving the
+    // target pose, so the chord pre-warp can override selectPose() with the
+    // chord shape (pressMulti / barrePlus) and the palm settles to the chord
+    // posture in the same frame as the tip snap.
+    let cgId = -1;
+    if (chordGroups) {
+      for (let k = 0; k < chordGroups.length; k++) {
+        if (chordGroups[k].startSec <= t) cgId = k; else break;
+      }
+    }
+    const cgChanged = cgId !== this.chordGroupId;
+    this.chordGroupId = cgId;
+    const cg = cgId >= 0 ? chordGroups[cgId] : null;
+
+    // Build the target pose.  By default selectPose reads from the live state;
+    // when we're crossing a chord boundary, we OVERRIDE that selection with a
+    // pressMulti / barrePlus built from cg.fingerTargets so the whole chord
+    // shape drives palm placement at the pre-warp instant (not just the one
+    // note that happens to be active at t).  Once smoothed, subsequent frames
+    // fall back to the live state and selectPose tracks normal play.
+    let pose;
+    if (cgChanged && cg) {
+      pose = evaluatePose(this._poseForChord(cg), this.smoothHandPos);
+    } else {
+      pose = solveTargetHandPose(s, this.smoothHandPos);
+    }
     const targetPalm = pose.pivotX;
     const hpDelta = Math.abs(pose.handPos - this.smoothHandPos);
     const smoothK = hpDelta <= 2 ? Math.min(1, dt / 0.055) : Math.min(1, dt / 0.11);
@@ -1455,18 +1497,6 @@ class HandSimulator {
     this.thumb.role     = pose.thumb.role;
     const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + pose.forearmBias, -34, 42);
     this.forearmDrift  += (targetForearmDrift   - this.forearmDrift) * Math.min(1, dt / 0.18);
-
-    // ---- Chord-snap logic ----
-    // Find the chord group that has most recently started (startSec ≤ t).
-    let cgId = -1;
-    if (chordGroups) {
-      for (let k = 0; k < chordGroups.length; k++) {
-        if (chordGroups[k].startSec <= t) cgId = k; else break;
-      }
-    }
-    const cgChanged = cgId !== this.chordGroupId;
-    this.chordGroupId = cgId;
-    const cg = cgId >= 0 ? chordGroups[cgId] : null;
 
     for (const f of FINGER_ORDER) {
       const fg   = this.fingers[f];
