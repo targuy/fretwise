@@ -733,6 +733,24 @@ class Hand3DRenderer {
       // from the index MCP toward the pinky MCP regardless of how the hand
       // pivots on the neck.
       this.palm.rotation.y = Math.atan2(L.z - R.z, R.x - L.x);
+      // Step 8: optional palmNormal fine-tilt triplet (roll/pitch/yaw, radians)
+      // refining the orientation AFTER the wrist yaw above.  Yaw stays dominant
+      // via Euler order 'YXZ' so the bass↔treble pitch sit inside the already-
+      // computed wrist heading.  Older snapshots omit kin.palm.palmNormal; we
+      // skip the rotation and reset the X/Z axes so a previous frame's tilt
+      // does not bleed into a host that stopped shipping the field.
+      const pn = kin.palm.palmNormal;
+      if (pn) {
+        this.palm.rotation.order = "YXZ";
+        this.palm.rotation.x = pn.pitch || 0;
+        this.palm.rotation.z = pn.roll  || 0;
+        // pn.yaw is reserved — fold into Y so a future non-zero yaw still
+        // composes correctly with the wrist heading.
+        if (pn.yaw) this.palm.rotation.y += pn.yaw;
+      } else {
+        this.palm.rotation.x = 0;
+        this.palm.rotation.z = 0;
+      }
     }
 
     // Forearm: from a short anatomical stub on the player side up to the

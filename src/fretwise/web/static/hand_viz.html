@@ -969,6 +969,52 @@ function _defaultSplay() {
   return Math.abs(MCP_OFFSETS.pinky - MCP_OFFSETS.index);
 }
 
+// --- palmNormal (Step 8) --------------------------------------------------
+//
+// Each PoseSpec carries a small triplet describing the palm's fine-tilt
+// orientation in the GRIP frame:
+//   roll  → rotation around the forearm axis (cup/uncup, barre rolls hand flatter)
+//   pitch → tilt forward/back (rest leans slightly forward; bass-side single
+//           presses tilt the palm back toward the player, treble-side tilts
+//           the palm onto the strings)
+//   yaw   → in-plane rotation around the palm normal (kept 0 here — wrist yaw
+//           is owned by the SVG-derived atan2 in hand3d.js; palmNormal.yaw is
+//           reserved for future use).
+//
+// SVG ignores palmNormal entirely; hand3d.js applies it after the wrist yaw
+// using Euler order 'YXZ' (yaw dominant).  When the field is absent (older
+// snapshots / fallback), hand3d.js skips the extra rotation.
+function _palmNormalDefault() { return { roll: 0, pitch: 0, yaw: 0 }; }
+
+function _palmNormalRest()    { return { roll: 0, pitch: 0.20, yaw: 0 }; }
+
+function _palmNormalBarreFull() { return { roll: 0.05, pitch: -0.05, yaw: 0 }; }
+
+function _palmNormalBarreHalf() { return { roll: 0.03, pitch: -0.02, yaw: 0 }; }
+
+// Press single: pitch interpolated by string number (s=6 bass → -0.10,
+// s=1 treble → +0.15).  Linear ramp over [1..6] keeps neighbours close.
+function _palmNormalPressSingle(string) {
+  const s = (typeof string === "number") ? clamp(string, 1, 6) : 3.5;
+  // s=6 → -0.10, s=1 → +0.15.  Slope = (0.15 - (-0.10)) / (1 - 6) = -0.05.
+  const pitch = 0.15 + (s - 1) * (-0.05);
+  return { roll: 0, pitch, yaw: 0 };
+}
+
+// Press multi: average pitch across the per-finger presses, using each
+// press's string to pick the same bass↔treble ramp; roll/yaw stay 0.
+function _palmNormalPressMulti(presses) {
+  if (!presses || !presses.length) return _palmNormalDefault();
+  let sum = 0, n = 0;
+  for (const p of presses) {
+    if (!p || typeof p.string !== "number") continue;
+    sum += _palmNormalPressSingle(p.string).pitch;
+    n++;
+  }
+  if (n === 0) return _palmNormalDefault();
+  return { roll: 0, pitch: sum / n, yaw: 0 };
+}
+
 // --- Pose factories -------------------------------------------------------
 //
 // Each factory returns a PoseSpec of shape:
@@ -990,6 +1036,7 @@ function restAtPosition(hp) {
     perFinger: pf,
     barre: null,
     splay: _defaultSplay(),
+    palmNormal: _palmNormalRest(),
   };
 }
 
@@ -1008,6 +1055,7 @@ function pressSingle(hp, finger, string, fret) {
     perFinger: pf,
     barre: null,
     splay: _defaultSplay(),
+    palmNormal: _palmNormalPressSingle(string),
   };
 }
 
@@ -1032,6 +1080,7 @@ function pressMulti(hp, presses) {
     perFinger: pf,
     barre: null,
     splay: _defaultSplay(),
+    palmNormal: _palmNormalPressMulti(presses),
   };
 }
 
@@ -1057,6 +1106,7 @@ function barreFull(hp, fret, presses) {
     perFinger: pf,
     barre: { finger: "index", fret: fret, fromString: 1, toString: 6 },
     splay: _defaultSplay(),
+    palmNormal: _palmNormalBarreFull(),
   };
 }
 
@@ -1084,6 +1134,7 @@ function barreHalf(hp, fret, fromString, toString, presses) {
     perFinger: pf,
     barre: { finger: "index", fret: fret, fromString: lo, toString: hi },
     splay: _defaultSplay(),
+    palmNormal: _palmNormalBarreHalf(),
   };
 }
 
@@ -1164,8 +1215,14 @@ function evaluatePose(spec, fallbackHp) {
       palmCup: 0,
       perFinger: {},
       thumb: solveThumbAnchor([], 0, 0, false, false),
+      palmNormal: _palmNormalDefault(),
     };
   }
+  // Step 8: per-pose fine-tilt triplet — pulled from the spec (or default
+  // zero-triplet for hand-rolled specs that don't set it).  Passed through
+  // every return branch so downstream consumers (buildKinSnapshot → hand3d.js)
+  // always see a value.  SVG ignores this field.
+  const palmNormal = (spec && spec.palmNormal) ? spec.palmNormal : _palmNormalDefault();
   // fallbackHp = the previous smoothed hand_position (this.smoothHandPos in
   // HandSimulator).  When omitted, fall back to the spec's own hp — the old
   // pre-Step-7 behaviour.  Passing it explicitly preserves the ±2.5-fret
@@ -1215,6 +1272,7 @@ function evaluatePose(spec, fallbackHp) {
       palmCup: 0,
       perFinger: {},
       thumb: solveThumbAnchor([], spec.hp, 0, false, false),
+      palmNormal,
     };
   }
 
@@ -1290,6 +1348,7 @@ function evaluatePose(spec, fallbackHp) {
     palmCup: clamp((cluster.bassDemand - 3.2) * 0.18 + cluster.span * 0.035, 0, 0.34),
     perFinger,
     thumb,
+    palmNormal,
   };
 }
 
@@ -1383,6 +1442,10 @@ class HandSimulator {
     this.palmCup   = 0;        // silhouette deformation only, MCP anchors stay fixed
     this.forearmDrift = 0;     // px; forearm lateral sway
     this.thumb = solveThumbAnchor([], 3, 0, false, false);
+    // Step 8: smoothed palm fine-tilt triplet (roll/pitch/yaw, radians) in the
+    // GRIP frame.  SVG ignores this; the 3D rig reads it through
+    // buildKinSnapshot to refine palm orientation beyond the wrist yaw.
+    this.palmNormal = _palmNormalDefault();
     this.chordGroupId = -1;
     this.fingers = {};
     for (const f of FINGER_ORDER) {
@@ -1495,6 +1558,14 @@ class HandSimulator {
     this.thumb.y       += (pose.thumb.y         - this.thumb.y)   * Math.min(1, dt / THUMB_SMOOTH);
     this.thumb.angle   += (pose.thumb.angle     - this.thumb.angle) * Math.min(1, dt / THUMB_SMOOTH);
     this.thumb.role     = pose.thumb.role;
+    // Step 8: smooth the palm fine-tilt triplet on the same time-constant
+    // family as palmCup (silhouette refinement, not a primary kinematic).
+    if (pose.palmNormal) {
+      const kN = Math.min(1, dt / 0.16);
+      this.palmNormal.roll  += ((pose.palmNormal.roll  || 0) - this.palmNormal.roll)  * kN;
+      this.palmNormal.pitch += ((pose.palmNormal.pitch || 0) - this.palmNormal.pitch) * kN;
+      this.palmNormal.yaw   += ((pose.palmNormal.yaw   || 0) - this.palmNormal.yaw)   * kN;
+    }
     const targetForearmDrift = clamp((this.palmX - targetPalm) * 0.18 + pose.forearmBias, -34, 42);
     this.forearmDrift  += (targetForearmDrift   - this.forearmDrift) * Math.min(1, dt / 0.18);
 
@@ -2118,6 +2189,14 @@ function buildKinSnapshot(sim) {
       topX: palmTopX,
       topY: palmTopY,
       botY: sim.pivotY + 12,
+      // Step 8: per-pose fine-tilt triplet (radians) in the GRIP frame.
+      // The 3D rig (hand3d.js) applies this AFTER the wrist yaw via Euler
+      // order 'YXZ' so the yaw stays dominant.  The 2D SVG renderer ignores
+      // this field — adding it does not change SVG output.  Older snapshots
+      // (no simulator) simply omit it and hand3d.js skips the rotation.
+      palmNormal: sim.palmNormal
+        ? { roll: sim.palmNormal.roll, pitch: sim.palmNormal.pitch, yaw: sim.palmNormal.yaw }
+        : undefined,
     },
     forearm: {
       wristX:   palmTopX + sim.forearmDrift * 0.3,
