@@ -208,6 +208,23 @@ const BOARD_TOP_Y      = STRING_Y_TOP - BOARD_TOP_MARGIN;     // 206
 const BOARD_BOT_Y      = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;  // 374
 const FOREARM_TOP_Y    = BOARD_BOT_Y + 8;                     // 382 — forearm emerges below here
 
+/* ---------- Fretboard edge / wire geometry (2D↔3D shared) ------------------
+   On a real neck the outer (1st & 6th) strings do NOT run along the very edge
+   of the fingerboard — they sit a few mm inboard so the player's finger never
+   slips off the side.  We model this with a board-edge inset: the drawn slab
+   extends BOARD_EDGE_INSET px BEYOND the existing BOARD_TOP_MARGIN on each long
+   side, so the two outer strings visibly sit inset from the neck edge.  This is
+   purely a *visual board* lever — it does NOT touch BOARD_TOP_Y / BOARD_BOT_Y
+   (which anchor the forearm, thumb rest and chord-flash substrate) nor the
+   string Y band (which the finger rig is tuned to).  Exported to the 3D side so
+   the neck slab and the SVG board share one source of truth.
+   STRING_NUT_OVERHANG is how far the strings poke past the nut toward the
+   headstock (was a bare `6`); trimmed so the outer strings read as inset there
+   too.  FRET_WIRE_W is the fret-wire bar width (was a bare `3.6`). */
+const BOARD_EDGE_INSET    = 7;     // px the board slab widens past each outer string margin
+const STRING_NUT_OVERHANG = 4;     // px strings extend past the nut (was 6)
+const FRET_WIRE_W         = 4.2;   // px fret-wire bar width (was 3.6)
+
 /* ---------- Hand geometry (top view: palm above, thumb below) ------------- */
 const PALM_TOP_Y  = 50;          // rest top of palm
 const PALM_Y      = 118;         // rest palm centre
@@ -1123,8 +1140,11 @@ function clearLayer(layer) { while (layer.firstChild) layer.removeChild(layer.fi
 function buildFretboard(layer, data) {
   clearLayer(layer);
   const x0 = NUT_X - 18, x1 = fretX(NUM_FRETS) + 10;
-  const boardTop = BOARD_TOP_Y;
-  const boardBot = STRING_Y_BOTTOM + BOARD_TOP_MARGIN;
+  // Slab edges sit BOARD_EDGE_INSET beyond the existing margin so the outer
+  // (top/bottom) strings read as inset from the neck edge.  BOARD_TOP_Y /
+  // BOARD_BOT_Y themselves are left untouched (forearm / thumb / chord-flash).
+  const boardTop = BOARD_TOP_Y - BOARD_EDGE_INSET;
+  const boardBot = STRING_Y_BOTTOM + BOARD_TOP_MARGIN + BOARD_EDGE_INSET;
 
   layer.appendChild(el("rect", {
     x: x0 - 6, y: boardTop - 6, width: (x1 - x0) + 12, height: (boardBot - boardTop) + 12,
@@ -1154,7 +1174,8 @@ function buildFretboard(layer, data) {
   }));
   for (let f = 1; f <= NUM_FRETS; f++) {
     layer.appendChild(el("rect", {
-      x: fretX(f) - 1.8, y: boardTop - 2, width: 3.6, height: (boardBot - boardTop) + 4,
+      x: fretX(f) - FRET_WIRE_W / 2, y: boardTop - 2, width: FRET_WIRE_W,
+      height: (boardBot - boardTop) + 4,
       fill: "url(#fretWire)", rx: 1.2,
     }));
   }
@@ -1175,8 +1196,8 @@ function buildFretboard(layer, data) {
     const thickness = 1.3 + tFromHigh * (3.2 - 1.3);
     const wound = s > NUM_STRINGS / 2;   // lower half = wound (bronze)
     layer.appendChild(el("rect", {
-      x: NUT_X - 6, y: y - thickness / 2,
-      width: x1 - NUT_X + 6, height: thickness,
+      x: NUT_X - STRING_NUT_OVERHANG, y: y - thickness / 2,
+      width: x1 - NUT_X + STRING_NUT_OVERHANG, height: thickness,
       fill: "url(#" + (wound ? "stringWound" : "stringPlain") + ")", rx: 0.8,
     }));
   }
@@ -1656,6 +1677,12 @@ function hand3dGeometry() {
     stringY,
     stringTop:    STRING_Y_TOP,
     stringBottom: STRING_Y_BOTTOM,
+    // Board-edge slab Y range (outer strings sit BOARD_EDGE_INSET inboard of
+    // these edges).  Shipped as a pair so the 3D neck slab matches the SVG
+    // board; hand3d.js falls back to stringTop/Bottom ± 24 if absent.
+    boardTop:     BOARD_TOP_Y - BOARD_EDGE_INSET,
+    boardBot:     STRING_Y_BOTTOM + BOARD_TOP_MARGIN + BOARD_EDGE_INSET,
+    fretWireW:    FRET_WIRE_W,
     numFrets:     NUM_FRETS,
     numStrings:   NUM_STRINGS,
   };

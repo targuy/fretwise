@@ -213,14 +213,20 @@ class Hand3DRenderer {
     }
     if (!geom) return;
     const { NUT_X, fretX, stringY, stringTop, stringBottom, numFrets, numStrings } = geom;
+    // Board-edge inset: prefer the explicit slab edges the host exports so the
+    // outer strings sit inboard of the neck edge identically to the SVG board.
+    // Fall back to the historical stringTop/Bottom ± 24 when an older host ships
+    // no boardTop/boardBot pair.
+    const boardTop = (geom.boardTop !== undefined) ? geom.boardTop : (stringTop - 24);
+    const boardBot = (geom.boardBot !== undefined) ? geom.boardBot : (stringBottom + 24);
 
     const boardMat = new THREE.MeshStandardMaterial({
       color: 0x0c0c0d, roughness: 0.85, metalness: 0.0,
     });
     const x0 = wx(NUT_X - 18);
     const x1 = wx(fretX(numFrets) + 10);
-    const z0 = wz(stringTop - 24);
-    const z1 = wz(stringBottom + 24);
+    const z0 = wz(boardTop);
+    const z1 = wz(boardBot);
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(Math.abs(x1 - x0), 2, Math.abs(z1 - z0)),
       boardMat
@@ -231,10 +237,13 @@ class Hand3DRenderer {
     const fretMat = new THREE.MeshStandardMaterial({
       color: 0xb5b7bb, roughness: 0.4, metalness: 0.6,
     });
+    // Wire bar width tracks the SVG fret-wire width (px → world via PX); keep the
+    // historical 0.4 world-unit bar when the host exports no fretWireW.
+    const wireW = (geom.fretWireW !== undefined) ? geom.fretWireW * PX : 0.4;
     for (let fr = 0; fr <= numFrets; fr++) {
       const fx = wx(fretX(fr));
       const wire = new THREE.Mesh(
-        new THREE.BoxGeometry(0.4, 1.2, Math.abs(z1 - z0)),
+        new THREE.BoxGeometry(wireW, 1.2, Math.abs(z1 - z0)),
         fretMat
       );
       wire.position.set(fx, -0.2, (z0 + z1) / 2);
