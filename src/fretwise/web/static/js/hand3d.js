@@ -263,6 +263,42 @@ function makeJointMesh(material, radius) {
   return new THREE.Mesh(geo, material);
 }
 
+/* Build a THREE.Mesh from one entry of vendor/hand_segments.js HAND_SEGMENTS.
+ *
+ * Each entry exposes:
+ *   positions: Float32Array (xyz triples) in OBJ space, translated so the
+ *              segment's anatomical pivot sits at the origin (0,0,0).
+ *   normals  : Float32Array (xyz triples), per-vertex normals.
+ *   uvs      : Float32Array (uv pairs).
+ *   pivot    : { x, y, z } in original OBJ space (informational; the geometry
+ *              has already been translated so the pivot is at the origin).
+ *
+ * Orientation: the source OBJ has +X = wrist → fingertip.  Our FK chain rests
+ * along local -Z (proximal at origin, distal at -Z·length).  A -90° rotation
+ * about Y maps OBJ +X to local -Z; we apply it once at construction.
+ *
+ * Scale: OBJ units are converted to world units via the master mm→wu scale.
+ * One OBJ unit equals HAND_SEGMENT_MM_SCALE millimetres, and one world unit
+ * equals MM_PER_WU millimetres, so the OBJ→world factor is the quotient. */
+function makeSegmentMesh(seg, material, objToWuScale) {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(seg.positions, 3));
+  if (seg.normals && seg.normals.length === seg.positions.length) {
+    geo.setAttribute("normal", new THREE.BufferAttribute(seg.normals, 3));
+  } else {
+    geo.computeVertexNormals();
+  }
+  if (seg.uvs && seg.uvs.length === (seg.positions.length / 3) * 2) {
+    geo.setAttribute("uv", new THREE.BufferAttribute(seg.uvs, 2));
+  }
+  // Re-orient OBJ +X onto local -Z so the mesh extends along the bone's
+  // rest direction.  Then scale to world units once and for all so per-frame
+  // pose code can ignore the OBJ unit system entirely.
+  geo.rotateY(-Math.PI / 2);
+  geo.scale(objToWuScale, objToWuScale, objToWuScale);
+  return new THREE.Mesh(geo, material);
+}
+
 const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
 
 /**
@@ -402,6 +438,13 @@ class Hand3DRenderer {
     // stays green.  See _loadTextures / _loadHandMesh below for the chain.
     // this._loadTextures().then(() => this._loadHandMesh());
 
+    // Fire-and-forget: try to swap the procedural tubes for the segmented OBJ
+    // meshes (palm + 14 phalanges + 2 thumb segments) shipped in
+    // vendor/hand_segments.js.  On any failure (network, parse, missing
+    // export) we log once and leave the procedural fallback rig intact —
+    // never a broken panel.
+    this._loadSegmentedMeshes();
+
     this._onResize = () => this.resize();
     window.addEventListener("resize", this._onResize);
   }
@@ -476,6 +519,10 @@ class Hand3DRenderer {
     })();
     this.palm = new THREE.Mesh(palmGeo, this.skinMat);
     this.handGroup.add(this.palm);
+    // Track that this palm mesh is the procedural fallback (vs. a segmented
+    // OBJ swap).  _loadSegmentedMeshes uses this to decide whether to swap
+    // the geometry in place or leave it alone.
+    this._palmIsProcedural = true;
 
     // Finger chains.  Each finger is a tree of THREE.Group nodes:
     //
@@ -527,9 +574,14 @@ class Hand3DRenderer {
       tip.add(tipCap);
 
       this.handGroup.add(root);
+      // Track the procedural meshes per joint so _loadSegmentedMeshes can
+      // detach them when the real OBJ phalanx geometry takes over.  The IK
+      // groups (root/pip/dip) and the tip cap are NOT replaced — only the
+      // skinned bone/joint geometry inside them.
       this.fingerNodes[f] = {
         root, pip, dip, tip, tipCap,
         Lprox, Lmid, Ldis, Ltotal: L,
+        proceduralMeshes: [proxBone, proxJoint, midBone, midJoint, disBone, disJoint],
       };
     }
 
@@ -569,6 +621,9 @@ class Hand3DRenderer {
     this.handGroup.add(this.thumbBone);
     this.thumbJoint = makeJointMesh(this.skinMat, mm(12));
     this.handGroup.add(this.thumbJoint);
+    // Marker so _loadSegmentedMeshes knows the procedural thumb tube is still
+    // in place and should be swapped for the real OBJ proximal+distal pair.
+    this._thumbIsProcedural = true;
 
     // Forearm: single tapered tube from the wrist (back-of-palm side)
     // backwards (-Z in local frame; flipped to +Z by _poseForearm).  Length
@@ -660,6 +715,163 @@ class Hand3DRenderer {
       );
     } catch (e) {
       console.warn('[hand3d] palm mesh load failed; using procedural palm', e);
+    }
+  }
+
+  /* Swap the procedural palm + thumb + per-finger phalanx tubes for the
+     segmented OBJ meshes shipped in vendor/hand_segments.js.  Each finger
+     keeps its 3-group kinematic chain (root → pip → dip → tip); only the
+     skinned bone/joint meshes inside those groups change.
+
+     SCALE: every segment was authored in the original OBJ coordinate frame,
+     where 1 unit equals HAND_SEGMENT_MM_SCALE millimetres.  We divide by
+     MM_PER_WU to land in world units that match the rest of the rig.
+
+     ORIENTATION: the OBJ has +X = wrist → fingertip; our bone chain rests
+     along local -Z.  makeSegmentMesh applies the -90° Y rotation that maps
+     OBJ +X onto local -Z before the scale.
+
+     PER-PHALANX OFFSETS: the OBJ stores each segment translated so its OWN
+     pivot is at the origin.  When parented under the proximal mesh (for the
+     MIDDLE and DISTAL phalanges of every finger), we need to offset the
+     child mesh by the inter-pivot delta in OBJ space, then apply the same
+     -90° Y rotation and uniform scale.  We compute that delta from the
+     pivot coords carried alongside each segment.
+
+     SILENT FALLBACK: any failure (network, parse, missing export) is caught
+     and logged once; the procedural rig built by _buildHand stays in place
+     so the panel never goes blank. */
+  async _loadSegmentedMeshes() {
+    try {
+      const mod = await import('/static/js/vendor/hand_segments.js');
+      const SEGMENTS = mod.HAND_SEGMENTS;
+      const OBJ_MM   = mod.HAND_SEGMENT_MM_SCALE;
+      if (!SEGMENTS || !OBJ_MM) {
+        throw new Error('hand_segments.js missing HAND_SEGMENTS / HAND_SEGMENT_MM_SCALE');
+      }
+      const objToWu = OBJ_MM / MM_PER_WU;
+
+      // Helper: translate from OBJ space to local bone space.  OBJ +X is the
+      // wrist→fingertip axis; our bones rest along local -Z.  An OBJ delta
+      // (dx_obj, dy_obj, dz_obj) maps to local (-dz_obj, dy_obj, -dx_obj)
+      // under the -90° Y rotation.  Then we scale by objToWu.
+      const objDeltaToLocal = (dxObj, dyObj, dzObj) => ({
+        x: -dzObj * objToWu,
+        y:  dyObj * objToWu,
+        z: -dxObj * objToWu,
+      });
+
+      // --- Palm ---------------------------------------------------------
+      const palmSeg = SEGMENTS.palm;
+      if (palmSeg && palmSeg.positions && palmSeg.positions.length) {
+        const palmMesh = makeSegmentMesh(palmSeg, this.skinMat, objToWu);
+        // Preserve the procedural palm's transform so _poseHand keeps working
+        // (centre at MCP_Y, flipped 180° around X by _poseHand each frame).
+        palmMesh.position.copy(this.palm.position);
+        palmMesh.rotation.copy(this.palm.rotation);
+        palmMesh.scale.copy(this.palm.scale);
+        this.handGroup.remove(this.palm);
+        this.palm.geometry.dispose();
+        this.palm = palmMesh;
+        this.handGroup.add(this.palm);
+        this._palmIsProcedural = false;
+      }
+
+      // --- Fingers ------------------------------------------------------
+      // Replace each finger's procedural bones with three segmented meshes
+      // (proximal / middle / distal) parented to root / pip / dip.  We do
+      // NOT touch the THREE.Group hierarchy — only the bones inside it —
+      // so _poseFingers/_solveChain rotates the same root/pip/dip nodes.
+      for (const f of FINGER_ORDER) {
+        const node = this.fingerNodes[f];
+        const segGroup = SEGMENTS[f];
+        if (!node || !segGroup) continue;
+        const proxSeg = segGroup.proximal;
+        const midSeg  = segGroup.middle;
+        const disSeg  = segGroup.distal;
+        if (!proxSeg || !midSeg || !disSeg) continue;
+
+        // Detach the procedural bone + joint meshes for this finger.
+        for (const m of node.proceduralMeshes) {
+          if (m.parent) m.parent.remove(m);
+          if (m.geometry) m.geometry.dispose();
+        }
+        node.proceduralMeshes = [];
+
+        // Proximal phalanx: child of root, mesh local origin at MCP (pivot).
+        const proxMesh = makeSegmentMesh(proxSeg, this.skinMat, objToWu);
+        node.root.add(proxMesh);
+
+        // Middle phalanx: child of pip.  pip is already translated to the end
+        // of the procedural proximal phalanx along local -Z (Lprox).  The
+        // segmented PIP pivot sits at OBJ (midSeg.pivot.x, ...), so we offset
+        // the middle mesh by the OBJ-space delta from the segmented PIP pivot
+        // to where pip's local origin actually lives.  pip's origin is
+        // (0,0,-Lprox) in root space = the END of the proximal MESH; for
+        // the segmented data, that end is roughly at the PIP pivot already,
+        // so the residual offset is small and is the difference between
+        // (mid pivot - prox pivot in OBJ) and the local Lprox we used.
+        // Practical approach: place midMesh at the segmented PIP pivot
+        // relative to the proximal pivot, expressed in pip's local frame
+        // (which is rotated/translated by the root + pip chain).  Since pip's
+        // origin = (0,0,-Lprox) in root-local space, and root-local -Z = OBJ
+        // -X direction (length), the OBJ delta (midPivot - proxPivot) maps
+        // to local (-dx_obj * objToWu) along Z.  Anything orthogonal becomes
+        // the finger's curve.
+        const midOff = objDeltaToLocal(
+          midSeg.pivot.x - proxSeg.pivot.x,
+          midSeg.pivot.y - proxSeg.pivot.y,
+          midSeg.pivot.z - proxSeg.pivot.z,
+        );
+        // pip already accounts for the procedural Lprox along -Z; add the
+        // residual delta between the segmented PIP pivot and that point.
+        const midMesh = makeSegmentMesh(midSeg, this.skinMat, objToWu);
+        midMesh.position.set(midOff.x, midOff.y, midOff.z + node.Lprox);
+        node.pip.add(midMesh);
+
+        // Distal phalanx: child of dip.  Same logic with the DIP pivot.
+        const disOff = objDeltaToLocal(
+          disSeg.pivot.x - midSeg.pivot.x,
+          disSeg.pivot.y - midSeg.pivot.y,
+          disSeg.pivot.z - midSeg.pivot.z,
+        );
+        const disMesh = makeSegmentMesh(disSeg, this.skinMat, objToWu);
+        disMesh.position.set(disOff.x, disOff.y, disOff.z + node.Lmid);
+        node.dip.add(disMesh);
+      }
+
+      // --- Thumb --------------------------------------------------------
+      // Replace the procedural single-tube thumb with the proximal + distal
+      // segmented pair.  We keep this.thumbBone as a Group (so _poseThumb's
+      // position/rotation set still drives the thumb), and parent the two
+      // meshes under it with proper inter-pivot offsets.
+      const thumbProx = SEGMENTS.thumb && SEGMENTS.thumb.proximal;
+      const thumbDis  = SEGMENTS.thumb && SEGMENTS.thumb.distal;
+      if (thumbProx && thumbDis) {
+        const thumbGroup = new THREE.Group();
+        thumbGroup.position.copy(this.thumbBone.position);
+        thumbGroup.rotation.copy(this.thumbBone.rotation);
+        thumbGroup.scale.copy(this.thumbBone.scale);
+        const thumbProxMesh = makeSegmentMesh(thumbProx, this.skinMat, objToWu);
+        thumbGroup.add(thumbProxMesh);
+        const thumbDisOff = objDeltaToLocal(
+          thumbDis.pivot.x - thumbProx.pivot.x,
+          thumbDis.pivot.y - thumbProx.pivot.y,
+          thumbDis.pivot.z - thumbProx.pivot.z,
+        );
+        const thumbDisMesh = makeSegmentMesh(thumbDis, this.skinMat, objToWu);
+        thumbDisMesh.position.set(thumbDisOff.x, thumbDisOff.y, thumbDisOff.z);
+        thumbGroup.add(thumbDisMesh);
+        this.handGroup.remove(this.thumbBone);
+        if (this.thumbBone.geometry) this.thumbBone.geometry.dispose();
+        this.thumbBone = thumbGroup;
+        this.handGroup.add(this.thumbBone);
+        this._thumbIsProcedural = false;
+      }
+    } catch (e) {
+      // Silent fallback: leave the procedural rig in place.  One traceable
+      // console.warn keeps the regression visible in DevTools.
+      console.warn('[hand3d] segmented mesh load failed; using procedural rig', e);
     }
   }
 
