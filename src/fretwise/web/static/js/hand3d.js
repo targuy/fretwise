@@ -74,6 +74,12 @@ const ROLE_LIFT = { active: 0.6, planted: 0.6, hover: 4.0, idle: 6.0 };
        i.e. the action gap a deflection animation (D2) will close. */
 const FRET_TOP_Y = 0.55;
 const STRING_REST_Y = 1.1;
+/* Board top in world Y — the flat fretboard surface where the frets are
+   anchored (set inside setGeometry as TOP_Y).  Hoisted to module scope so
+   _gripY('palm') can place the back-of-hand BEHIND the neck (player side)
+   at a Y proportional to the neck depth — the "tuck the palm under the
+   belly" pose a real guitarist's left hand takes. */
+const TOP_Y = -0.2;
 
 /* Detect a usable WebGL context without throwing.  Returning false here makes
    create() fall back to SVG cleanly. */
@@ -465,6 +471,15 @@ class Hand3DRenderer {
       // geo.rotateZ(Math.PI) — this is the single knob for left-handed-grip
       // orientation of the cropped palm slab.
       geo.rotateY(Math.PI / 2);
+      // Step 3 GRIP-FRAME FLIP: in the grip frame the back-of-hand normal
+      // should point AWAY from the strings (toward the player), not up at the
+      // sky.  Rolling the slab 180° around its own X axis swaps the dorsal /
+      // palmar normals so the dorsal side faces the camera through the down-
+      // the-neck view.
+      // FLIP-SIGN INVARIANT: if the dorsal side renders on the wrong face
+      // after this change, swap the sign of this rotateX (Math.PI ↔ -Math.PI,
+      // equivalent rotations but kept as a single edit knob for clarity).
+      geo.rotateX(Math.PI);
       geo.computeVertexNormals();
       this._palmIsMesh = true;
     } catch (e) {
@@ -523,7 +538,7 @@ class Hand3DRenderer {
     //     At width ~45 wu this gives a ~16 wu belly depth — proper proportions.
     const length = Math.abs(x1 - x0);
     const hw = Math.abs(z1 - z0) / 2; // half neck width (local X)
-    const TOP_Y = -0.2;
+    // TOP_Y is module-scope (hoisted in Step 3 so _gripY('palm') can read it).
     const BOTTOM_Y = TOP_Y - Math.max(6, hw * 0.45);
     // Publish hw so the thumb pose (update()) can tuck below the belly using the
     // SAME derived depth — keeping the thumb proportional to the live neck width
@@ -619,7 +634,13 @@ class Hand3DRenderer {
     // resize() re-aims the camera at _lookAt after each layout change.
     const boardCX = (x0 + x1) / 2;
     const boardCZ = (z0 + z1) / 2;
-    this._lookAt.set(boardCX, 0, boardCZ);
+    // Aim at the GRIP region, not the empty board surface: the hand now sits
+    // above the strings (knuckle row at ~2.9 wu) and behind the belly, so a
+    // lookAt Y of 0 (board top) frames empty wood with the hand drifting off
+    // the top of the viewport.  Y=1.0 lands roughly in the middle of the
+    // string/grip column, framing both the fretboard hardware and the curled
+    // fingers as a single subject.
+    this._lookAt.set(boardCX, 1.0, boardCZ);
     // Camera framing is now spherical/orbital — see _camSpherical (radius
     // 130, default polar 15°) and _applyCamera().  Recentering _lookAt on
     // the live board centre is still done here so the orbit pivot stays on
@@ -646,17 +667,19 @@ class Hand3DRenderer {
       const fm = this.fingerMeshes[f];
       if (!fk || !fm) continue;
       const { ik, role, width } = fk;
-      const lift = ROLE_LIFT[role] !== undefined ? ROLE_LIFT[role] : ROLE_LIFT.idle;
       const r = Math.max(0.6, (width || 18) * PX * 0.5);
 
-      // Joints in world space.  The proximal phalanx lifts most (knuckle up),
-      // the fingertip drops to the string plane when pressing — a small linear
-      // ramp along the chain reads as a finger curling down onto the board.
+      // Joints in world space — GRIP FRAME (Step 3).  The old ROLE_LIFT linear
+      // ramp made the whole chain LAY ON TOP of the board (mcp at ~6 wu, tip
+      // at ~0.2).  The grip frame instead anchors each joint at the Y a real
+      // left-hand grip puts it at: knuckles up high, then curling down onto
+      // the strings — see _gripY().  Per-joint Y comes from the joint name +
+      // role; XZ still comes from the shared 2D IK projection.
       const pts = [
-        this._toWorld(ik.mcp, lift),
-        this._toWorld(ik.pip, lift * 0.7),
-        this._toWorld(ik.dip, lift * 0.4),
-        this._toWorld(ik.tip, role === "active" || role === "planted" ? 0.2 : lift * 0.8),
+        this._toWorld(ik.mcp, this._gripY("mcp", role)),
+        this._toWorld(ik.pip, this._gripY("pip", role)),
+        this._toWorld(ik.dip, this._gripY("dip", role)),
+        this._toWorld(ik.tip, this._gripY("tip", role)),
       ];
 
       orientBone(fm.bones[0], pts[0], pts[1], r * 0.95);
@@ -685,21 +708,31 @@ class Hand3DRenderer {
     // so the palm resizes correctly when the hand moves up/down the neck or the
     // wrist rotates — no hardcoded width/depth magic numbers.
     if (kin.palm) {
-      const L = this._toWorld({ x: kin.palm.mcpL, y: kin.palm.botY }, 6);
-      const R = this._toWorld({ x: kin.palm.mcpR, y: kin.palm.botY }, 6);
-      const T = this._toWorld({ x: kin.palm.topX, y: kin.palm.topY }, 8);
+      // The shared kin payload only gives us 2D MCP/wrist coordinates; we
+      // build a GRIP-FRAME palm pose from them (Step 3):
+      //   - XZ comes from the 2D snapshot (MCP span across strings).
+      //   - Y is forced to _gripY('palm') so the slab tucks BEHIND the belly
+      //     (player side, below the board top) instead of hovering above it.
+      //   - Z is shifted further toward the player by +0.85·neckHalfWidth so
+      //     the slab sits opposite the strings, i.e. visually behind the
+      //     neck from the camera's down-the-fretboard view.
+      const L = this._toWorld({ x: kin.palm.mcpL, y: kin.palm.botY }, 0);
+      const R = this._toWorld({ x: kin.palm.mcpR, y: kin.palm.botY }, 0);
+      const T = this._toWorld({ x: kin.palm.topX, y: kin.palm.topY }, 0);
       const cx = (L.x + R.x) / 2;
-      const cy = (L.y + R.y + T.y) / 3;
-      const cz = (L.z + R.z + T.z) / 3;
-      this.palm.position.set(cx, cy, cz);
+      const hwP = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
+      const palmCenterY = this._gripY("palm", null);
+      const palmCenterZ = ((L.z + R.z + T.z) / 3) + hwP * 0.85;
+      this.palm.position.set(cx, palmCenterY, palmCenterZ);
       // mcpWidthW  = world distance between index and pinky MCPs (palm width).
-      // palmDepthW = wrist-edge → back-of-hand vector length, doubled because the
-      //              unit slab spans both ±0.5 around its center.
+      // palmLenW   = palm length (knuckle ↔ wrist).  Anthropometric data has
+      //              palm length ≈ MCP span (~1:1), so derive it from mcpWidth
+      //              rather than from the noisy (now Y-overridden) T-L-R triad.
       // palmThickW = back-of-hand thickness; anthropometric ~22% of MCP width.
       const mcpWidthW  = Math.hypot(R.x - L.x, R.z - L.z);
-      const palmDepthW = Math.hypot(T.x - cx, T.z - cz) * 2;
+      const palmLenW   = mcpWidthW * 1.0;
       const palmThickW = mcpWidthW * 0.22;
-      this.palm.scale.set(mcpWidthW, palmThickW, palmDepthW);
+      this.palm.scale.set(mcpWidthW, palmThickW, palmLenW);
       // Track wrist yaw so the slab/mesh follows the wrist rotation around Y:
       // atan2 with this sign convention keeps the palm's local +X axis aimed
       // from the index MCP toward the pinky MCP regardless of how the hand
@@ -784,6 +817,40 @@ class Hand3DRenderer {
 
   _toWorld(p, lift) {
     return new THREE.Vector3(wx(p.x), lift || 0, wz(p.y));
+  }
+
+  /* Grip-frame Y mapper: returns the world Y a joint of `jointKind`
+     ('mcp'|'pip'|'dip'|'tip'|'palm') in the given `role` should sit at, so the
+     finger chain reads as CURLING DOWN ONTO the strings from a knuckle row
+     held above them — the real left-hand grip pose.
+
+     The numbers are anchored to the same three world planes the board uses:
+       - STRING_REST_Y (~1.1) : the action plane the strings ride at.
+       - FRET_TOP_Y    (~0.55): fret-crown top, the pressing target.
+       - TOP_Y         (~-0.2): the flat fretboard surface.
+     and offset above/below them to mimic a grip the camera reads:
+       - mcp knuckles ride high (1.8 wu above the strings),
+       - pip / dip step down through the curl,
+       - tip sits ON the crown when active/planted, hovering above otherwise.
+     The palm Y dives BELOW the board (TOP_Y − 0.30·neckHalfWidth) so the back
+     of the hand hugs the belly's underside — the "tuck the palm under the
+     neck" pose, opposite of a hand laying flat on top of the board. */
+  _gripY(jointKind, role) {
+    if (jointKind === "mcp") return STRING_REST_Y + 1.8;     // ~2.9
+    if (jointKind === "pip") return STRING_REST_Y + 1.0;     // ~2.1
+    if (jointKind === "dip") return STRING_REST_Y + 0.4;     // ~1.5
+    if (jointKind === "tip") {
+      if (role === "active" || role === "planted") return FRET_TOP_Y - 0.05; // ~0.50
+      if (role === "hover" || role === "upcoming") return STRING_REST_Y + 0.6; // ~1.7
+      return STRING_REST_Y + 1.2;                            // idle ~2.3
+    }
+    if (jointKind === "palm") {
+      // Palm hugs the back of the belly, on the player side: drop a fraction
+      // of the live neck half-width below the fretboard top.
+      const hw = (this._neckHalfWidth !== undefined) ? this._neckHalfWidth : 20;
+      return TOP_Y - hw * 0.30;
+    }
+    return 0;
   }
 
   /* Convert the current spherical-orbit state into a world-space camera
