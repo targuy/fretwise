@@ -187,13 +187,13 @@ const RIGHT_MESH_NAME = "Cube.005";   // other hand — hide
 const FLEX_AXIS = new THREE.Vector3(1, 0, 0);
 const FLEX_SIGN = 1;
 
-/* Global rig placement.  The loaded hand is tiny in world units (measured
-   MCP-row width ≈ 0.063 wu); RIG_SCALE blows it up so the MCP row ≈ a real
-   95 mm.  We compute the exact scale at load from the measured MCP-row width
-   (see _measureRig); RIG_SCALE_FALLBACK is used only if that measurement fails.
-   Derivation: mm(95) / 0.0634 ≈ 648. */
-const RIG_SCALE_FALLBACK = 648;
-const RIG_TARGET_MCP_MM  = 95;   // real knuckle-row width the scale targets
+/* Global rig placement.  Scale is BAKED into rigged_hand_baked.glb offline
+   (geometry + bone translations + inverse-bind matrices all pre-multiplied by
+   ~648 = mm(95) / 0.0634, so the MCP row lands at a real ~95 mm).  At runtime
+   the rig therefore uses scale 1 — applying a node scale after GLTFLoader binds
+   would fling skinned vertices off-screen by scale².  RIG_TARGET_MCP_MM is the
+   knuckle-row width the offline bake targeted (kept for the diagnostic check). */
+const RIG_TARGET_MCP_MM  = 95;   // real knuckle-row width the bake targets
 
 /* Euler (radians) that rotates the WHOLE loaded hand into the classical grip:
    palm under the neck facing the strings, fingers reaching over from the player
@@ -201,15 +201,25 @@ const RIG_TARGET_MCP_MM  = 95;   // real knuckle-row width the scale targets
    world -X and the hand lies almost flat, so we yaw it onto the neck and pitch
    the palm up under the strings.  THESE ARE FIRST GUESSES — RIG_ROT is the
    single most likely thing to need one round of in-browser tuning. */
+/* Calibrated on the BAKED rig (scale baked in, self-anchored centroid) against
+   the default orbit camera: yaw +90° puts the back of the hand toward the
+   player, the four fingers reaching over the board so the X-axis curl folds
+   the tips DOWN onto the strings, and the wrist/forearm dropping to the player
+   side below.  (RIG_ROT is consumed by _applyRigTransform; the anchor cancels
+   the orientation-dependent mirror offset automatically.) */
 const RIG_ROT = {
-  x: -Math.PI / 2,   // pitch the flat hand up so the palm faces the strings
-  y:  Math.PI / 2,   // yaw so the fingers run across the neck toward the strings
+  x: 0,              // flat; finger curl supplies the press, not a global pitch
+  y:  Math.PI / 2,   // yaw: back of hand to player, fingers over the board
   z:  0,             // roll — tune if the hand is canted
 };
-/* Hand cradles UNDER the neck (Y < 0); nudge toward +Z (player) if the palm
-   clips into the neck belly.  RIG_POS_X is driven per-frame from hand_position. */
-const RIG_POS_Y = -NECK_DEPTH * 0.5;
-const RIG_POS_Z = 0;
+/* Grip anchor = desired WORLD position of the rendered hand CENTROID.  Y just
+   below the board so the palm cradles under the neck; Z toward the player so
+   the fingers fold over the near edge onto the strings.  X tracks hand_position. */
+const RIG_POS_Y = -6;
+const RIG_POS_Z = 8;
+
+/* Reusable zero vector (uncalibrated render offset fallback). */
+const ZERO_VEC = new THREE.Vector3();
 
 /* Relaxed vs. pressed curl for the skinned fingers.  Idle/hover fingers get a
    gentle resting curl; active/planted fingers get the full solver curl. */
@@ -716,13 +726,21 @@ class Hand3DRenderer {
     return this._boneByName[name] || this._boneByName[this._sanitizeName(name)] || null;
   }
 
-  /* Load /static/models/rigged_hand.glb, reskin the left hand flat, hide the
-     right hand + lights, cache bones + their rest quaternions, wrap the scene
-     in a rig group we transform globally, hide the procedural rig.  Any failure
-     leaves _useSkinnedHand=false and the procedural rig live. */
+  /* Load /static/models/rigged_hand_baked.glb (scale baked into geometry +
+     bones + inverse-bind matrices offline), reskin the left hand flat, hide the
+     right hand + lights, cache bones + their rest quaternions, recenter the
+     wrist at the rig pivot, wrap the scene in a rig group we transform globally,
+     self-calibrate the grip anchor, hide the procedural rig.  Any failure leaves
+     _useSkinnedHand=false and the procedural rig live. */
   async _loadSkinnedHand() {
     try {
-      const gltf = await new GLTFLoader().loadAsync("/static/models/rigged_hand.glb");
+      // BAKED model: scale (~647×) is baked into geometry + bone translations +
+      // inverse-bind-matrices offline (scripts/bake_hand_scale.cjs), so the loaded
+      // hand is already at world size and NO runtime node-scale is needed.
+      // Runtime applies rotation + translation only — both bind-safe for a
+      // SkinnedMesh (uniform/non-uniform SCALE after bind is what blew vertices
+      // off-screen by scale²; rotation/translation never does).
+      const gltf = await new GLTFLoader().loadAsync("/static/models/rigged_hand_baked.glb");
       const root = gltf.scene;
 
       const leftS  = this._sanitizeName(LEFT_MESH_NAME);
@@ -756,23 +774,51 @@ class Hand3DRenderer {
       // so we can derive RIG_SCALE and know where the wrist is for the forearm.
       this._measureRig(root);
 
-      // Wrap in a rig group we transform globally (scale/rotate/translate).
+      // Recenter the loaded scene so the WRIST sits at the rig-group origin.
+      // The baked GLB places the hand ~1100 wu from its own origin; without
+      // this, RIG_ROT (rotation about the group origin) swings the hand far
+      // off-screen.  Translating the inner scene is bind-safe (only SCALE
+      // after bind breaks skinning), so the wrist becomes a clean rotation
+      // pivot and RIG_POS then parks the wrist at the board.
+      if (this._rigWristLocal) root.position.copy(this._rigWristLocal).multiplyScalar(-1);
+
+      // Wrap in a rig group we transform globally (rotate/translate; scale=1).
       this._rig = new THREE.Group();
       this._rig.add(root);
       this.handGroup.add(this._rig);
 
       this._useSkinnedHand = true;
+      this._rigRenderOffset = new THREE.Vector3();   // zero until calibrated
       this._applyRigTransform();
       this._hideProceduralHand();
+
+      // Self-calibrating anchor: the baked + rotated skinned mesh renders at a
+      // constant orientation/mirror-dependent offset from where the rig group
+      // sits (the mesh's negative-scale + inverse-bind interaction).  Measure
+      // the rendered skin centroid once and store the offset so _applyRigTransform
+      // can compensate and land the centroid exactly on the grip target.
+      const c0 = this._skinCentroid();
+      if (c0) {
+        this._rigRenderOffset.copy(c0).sub(this._rigTarget());
+        this._applyRigTransform();
+      }
+
+      // Dev knob: ?noforearm=1 hides the procedural forearm so the skinned hand
+      // can be inspected in isolation.  Off by default (no URL param → no-op).
+      if (new URLSearchParams(window.location.search || "").has("noforearm")) {
+        if (this.forearmBone) this.forearmBone.visible = false;
+        if (this.forearmJoint) this.forearmJoint.visible = false;
+      }
     } catch (e) {
       console.warn("[hand3d] skinned GLB load failed; using procedural rig", e);
       this._useSkinnedHand = false;
     }
   }
 
-  /* Measure the loaded (unscaled) hand once: the MCP-row width drives RIG_SCALE
-     (so the hand ends up anatomically sized), and the wrist world-X anchors the
-     procedural forearm.  Robust to missing bones (falls back to constants). */
+  /* Measure the loaded (already scale-baked) hand once: rigScale is fixed at 1
+     (no runtime node-scale — it would break skinning), mcpWidth is kept for
+     diagnostics, and the wrist world position anchors both the recenter pivot
+     and the procedural forearm.  Robust to missing bones. */
   _measureRig(root) {
     root.updateMatrixWorld(true);
     const idx = this._findBone("finger_index.01.L");
@@ -784,12 +830,13 @@ class Hand3DRenderer {
       pky.getWorldPosition(b);
       mcpWidth = a.distanceTo(b);
     }
-    // rigScale so the (scaled) MCP row ≈ RIG_TARGET_MCP_MM in real mm.
-    this._rigScale = (mcpWidth > 1e-6)
-      ? mm(RIG_TARGET_MCP_MM) / mcpWidth
-      : RIG_SCALE_FALLBACK;
+    // The GLB is BAKED to world scale, so no runtime node-scale: rigScale = 1.
+    // mcpWidth is kept only for diagnostics (should already ≈ mm(RIG_TARGET_MCP_MM)).
+    this._rigScale = 1.0;
+    this._rigMcpWidth = mcpWidth;   // diagnostics: expect ≈ mm(95) ≈ 41 wu
 
-    // Wrist (hand.L) world position in the unscaled rig, for forearm anchoring.
+    // Wrist (hand.L) world position in the baked (world-scale) rig, for forearm
+    // anchoring — already in world units since scale is baked in.
     const wrist = this._findBone("hand.L");
     this._rigWristLocal = new THREE.Vector3();
     if (wrist) wrist.getWorldPosition(this._rigWristLocal);
@@ -810,27 +857,126 @@ class Hand3DRenderer {
     // Forearm (forearmBone/forearmJoint) intentionally stays visible.
   }
 
-  /* Position/scale/orient the whole loaded hand into the classical grip and
-     slide it along the neck with the current hand_position.  ALL EMPIRICAL —
-     RIG_SCALE (measured), RIG_ROT, RIG_POS_Y/Z are the tunable knobs. */
+  /* Orient + place the whole loaded hand into the classical grip and slide it
+     along the neck with the current hand_position.  Scale is baked (always 1);
+     RIG_ROT and the RIG_POS_Y/Z grip-anchor centroid are the tunable knobs, and
+     the measured render offset cancels the mirror skew.  ALL EMPIRICAL. */
   _applyRigTransform() {
     if (!this._rig) return;
-    const scale = this._rigScale || RIG_SCALE_FALLBACK;
-    this._rig.scale.setScalar(scale);
-    this._rig.rotation.set(RIG_ROT.x, RIG_ROT.y, RIG_ROT.z);
-    // Slide along the neck (X) to the tracked hand position; Y/Z are fixed by
-    // the grip frame.  The loaded scene's own origin offset is absorbed by the
-    // global group transform, so we park the GROUP at the desired world X.
-    this._rig.position.set(this._lastHandPosX, RIG_POS_Y, RIG_POS_Z);
+    this._rig.scale.setScalar(this._rigScale || 1);   // baked GLB → scale 1
+    const ov = this._rigOverrides();
+    const rot = ov.rot || RIG_ROT;
+    this._rig.rotation.set(rot.x, rot.y, rot.z);
+    // Position so the rendered skin centroid lands on the grip target; the
+    // measured render offset cancels the constant orientation/mirror skew.
+    const t = this._rigTarget();
+    const f = this._rigRenderOffset || ZERO_VEC;
+    this._rig.position.set(t.x - f.x, t.y - f.y, t.z - f.z);
+  }
+
+  /* Desired WORLD position of the rendered hand centroid (the grip anchor).
+     X tracks the live hand position along the neck; Y/Z fix the grip frame.
+     ?rigpos=X,Y,Z overrides all three for calibration. */
+  _rigTarget() {
+    const ov = this._rigOverrides();
+    if (ov.pos) return new THREE.Vector3(ov.pos.x, ov.pos.y, ov.pos.z);
+    const x = Number.isFinite(this._lastHandPosX) ? this._lastHandPosX : 0;
+    return new THREE.Vector3(x, RIG_POS_Y, RIG_POS_Z);
+  }
+
+  /* World-space centroid of the SkinnedMesh as actually rendered (CPU skinning
+     via getVertexPosition, sampled).  Matches the GPU render when called inside
+     the renderer's own context.  Returns null if no skinned mesh is live. */
+  _skinCentroid() {
+    if (!this._rig) return null;
+    let sm = null;
+    this._rig.traverse((o) => { if (o.isSkinnedMesh && o.visible) sm = o; });
+    if (!sm) return null;
+    this._rig.updateMatrixWorld(true);
+    sm.skeleton.update();
+    const pos = sm.geometry.attributes.position;
+    const t = new THREE.Vector3();
+    const box = new THREE.Box3();
+    const step = Math.max(1, Math.floor(pos.count / 300));
+    for (let i = 0; i < pos.count; i += step) {
+      sm.getVertexPosition(i, t);
+      sm.localToWorld(t);
+      box.expandByPoint(t);
+    }
+    return box.getCenter(new THREE.Vector3());
+  }
+
+  /* TEMP calibration helper: parse RIG_ROT (deg) / RIG_POS (wu) from the URL.
+     Remove together with the rest of the bake-calibration scaffolding. */
+  _rigOverrides() {
+    if (this.__ovCache !== undefined) return this.__ovCache;
+    let out = {};
+    try {
+      const q = new URLSearchParams(window.location.search || "");
+      const D = Math.PI / 180;
+      if (q.has("rigrot")) {
+        const [x, y, z] = q.get("rigrot").split(",").map(Number);
+        out.rot = { x: (x || 0) * D, y: (y || 0) * D, z: (z || 0) * D };
+      }
+      if (q.has("rigpos")) {
+        const [x, y, z] = q.get("rigpos").split(",").map(Number);
+        out.pos = { x: x || 0, y: y || 0, z: z || 0 };
+      }
+    } catch (e) { /* no-op */ }
+    this.__ovCache = out;
+    return out;
   }
 
   /* Flex one bone about FLEX_AXIS by `angle` (radians) RELATIVE to its rest
      quaternion.  No-op if the bone or its rest pose is missing. */
   _flexBone(bone, angle) {
     if (!bone || !bone.userData || !bone.userData.rest) return;
+    const ax = this._flexAxisOverride() || FLEX_AXIS;
+    const sg = this._flexSignOverride();
     bone.quaternion
       .copy(bone.userData.rest)
-      .multiply(new THREE.Quaternion().setFromAxisAngle(FLEX_AXIS, FLEX_SIGN * angle));
+      .multiply(new THREE.Quaternion().setFromAxisAngle(ax, sg * angle));
+  }
+
+  /* TEMP: ?flexaxis=x|y|z overrides the per-bone fold axis for calibration. */
+  _flexAxisOverride() {
+    if (this.__flexAxis !== undefined) return this.__flexAxis;
+    let v = null;
+    try {
+      const a = new URLSearchParams(window.location.search || "").get("flexaxis");
+      if (a === "x") v = new THREE.Vector3(1, 0, 0);
+      else if (a === "y") v = new THREE.Vector3(0, 1, 0);
+      else if (a === "z") v = new THREE.Vector3(0, 0, 1);
+    } catch (e) { /* no-op */ }
+    this.__flexAxis = v;
+    return v;
+  }
+
+  /* TEMP: ?flexsign=-1 flips fold direction. */
+  _flexSignOverride() {
+    if (this.__flexSign !== undefined) return this.__flexSign;
+    let s = FLEX_SIGN;
+    try {
+      const v = new URLSearchParams(window.location.search || "").get("flexsign");
+      if (v === "-1") s = -1; else if (v === "1") s = 1;
+    } catch (e) { /* no-op */ }
+    this.__flexSign = s;
+    return s;
+  }
+
+  /* TEMP: ?testcurl=DEG → uniform curl split across MCP/PIP/DIP (radians). */
+  _testCurl() {
+    if (this.__testCurl !== undefined) return this.__testCurl;
+    let out = null;
+    try {
+      const v = new URLSearchParams(window.location.search || "").get("testcurl");
+      if (v != null && v !== "") {
+        const rad = (Number(v) || 0) * Math.PI / 180;
+        out = { mcp: rad * CURL_SPLIT.mcp, pip: rad * CURL_SPLIT.pip, dip: rad * CURL_SPLIT.dip };
+      }
+    } catch (e) { /* no-op */ }
+    this.__testCurl = out;
+    return out;
   }
 
   /* Per-frame: drive the skinned finger bones from the SAME curl the procedural
@@ -838,6 +984,20 @@ class Hand3DRenderer {
      curl helper (_fingerCurl) and splitting it MCP/PIP/DIP across the 3 bones.
      The thumb gets a gentle fixed brace curl. */
   _poseSkinnedFingers(kin) {
+    // TEMP: ?testcurl=DEG forces a uniform curl on every finger phalanx so the
+    // flex axis/sign can be verified independent of solver data.  ?flexaxis=x|z
+    // and ?flexsign=-1 let me re-aim the fold without recompiling.
+    const tc = this._testCurl();
+    if (tc) {
+      for (const f of FINGER_ORDER) {
+        const names = FINGER_BONES[f];
+        if (!names) continue;
+        this._flexBone(this._findBone(names[0]), tc.mcp);
+        this._flexBone(this._findBone(names[1]), tc.pip);
+        this._flexBone(this._findBone(names[2]), tc.dip);
+      }
+      return;
+    }
     if (!kin || !kin.fingers) return;
     for (const f of FINGER_ORDER) {
       const fg = kin.fingers[f];
@@ -1440,6 +1600,7 @@ class Hand3DRenderer {
      azimuth = 0 puts the camera on +Z of _lookAt (player side, looking at
      the back of the hand); polar = 0 would be straight overhead. */
   _applyCamera() {
+    this._applyCamOverride();   // TEMP: ?cam=radius,azDeg,polDeg
     const { radius, azimuth, polar } = this._camSpherical;
     const sinP = Math.sin(polar);
     const cosP = Math.cos(polar);
@@ -1451,6 +1612,22 @@ class Hand3DRenderer {
       this._lookAt.z + radius * sinP * cosA,
     );
     this.camera.lookAt(this._lookAt);
+  }
+
+  /* TEMP: ?cam=radius,azimuthDeg,polarDeg overrides the orbit for calibration. */
+  _applyCamOverride() {
+    if (this.__camDone) return;
+    try {
+      const v = new URLSearchParams(window.location.search || "").get("cam");
+      if (v) {
+        const [r, a, p] = v.split(",").map(Number);
+        const D = Math.PI / 180;
+        if (Number.isFinite(r)) this._camSpherical.radius = r;
+        if (Number.isFinite(a)) this._camSpherical.azimuth = a * D;
+        if (Number.isFinite(p)) this._camSpherical.polar = p * D;
+      }
+    } catch (e) { /* no-op */ }
+    this.__camDone = true;
   }
 
   resize() {
