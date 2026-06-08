@@ -60,6 +60,16 @@ const SKIN = 0xe2b694;
    per-frame role the shared sim already produced as 3D depth. */
 const ROLE_LIFT = { active: 0.6, planted: 0.6, hover: 4.0, idle: 6.0 };
 
+/* Vertical staging of the board hardware, measured against the confirmed D-neck
+   flat fretboard top at y=-0.2 (see setGeometry TOP_Y).  Real frets stand proud
+   of the wood and the strings float above the crowns, leaving an "action gap"
+   the pressing fingertip must close.
+     - FRET_TOP_Y = 0.55  → the crown tops sit 0.75 above the -0.2 wood top.
+     - STRING_REST_Y = 1.1 → resting strings ride 0.55 above the crowns,
+       i.e. the action gap a deflection animation (D2) will close. */
+const FRET_TOP_Y = 0.55;
+const STRING_REST_Y = 1.1;
+
 /* Detect a usable WebGL context without throwing.  Returning false here makes
    create() fall back to SVG cleanly. */
 function webglAvailable() {
@@ -135,6 +145,11 @@ class Hand3DRenderer {
 
     this.fretboardGroup = new THREE.Group();
     this.scene.add(this.fretboardGroup);
+
+    // Addressable string handles, (re)built by setGeometry().  D2 reads/writes
+    // these per frame to deflect a pressed string toward the crown; the build
+    // loop must be the ONLY place they are created.
+    this.stringMeshes = [];
 
     this.handGroup = new THREE.Group();
     this.scene.add(this.handGroup);
@@ -263,28 +278,55 @@ class Hand3DRenderer {
     // Wire bar width tracks the SVG fret-wire width (px → world via PX); keep the
     // historical 0.4 world-unit bar when the host exports no fretWireW.
     const wireW = (geom.fretWireW !== undefined) ? geom.fretWireW * PX : 0.4;
+    // Raised, rounded crown: a thin cylinder laid across Z (the neck-width axis)
+    // so its arc reads as a fret-wire crown standing proud of the wood.  Sized so
+    // the crown top reaches FRET_TOP_Y above the -0.2 board top.  Radius = half
+    // the wire bar width keeps the crown's footprint identical to the old box.
+    const crownR = Math.max(0.2, wireW / 2);
+    const crownCY = FRET_TOP_Y - crownR; // centre so the top tangent sits at FRET_TOP_Y
     for (let fr = 0; fr <= numFrets; fr++) {
       const fx = wx(fretX(fr));
       const wire = new THREE.Mesh(
-        new THREE.BoxGeometry(wireW, 1.2, Math.abs(z1 - z0)),
+        // Cylinder along +Y by default; rotate.x = PI/2 lays its long axis on Z
+        // to span the neck width (z0..z1).
+        new THREE.CylinderGeometry(crownR, crownR, Math.abs(z1 - z0), 12),
         fretMat
       );
-      wire.position.set(fx, -0.2, (z0 + z1) / 2);
+      wire.rotation.x = Math.PI / 2;
+      wire.position.set(fx, crownCY, (z0 + z1) / 2);
       this.fretboardGroup.add(wire);
     }
 
     const strMat = new THREE.MeshStandardMaterial({
       color: 0xc9ccd1, roughness: 0.3, metalness: 0.7,
     });
+    // ADDRESSABLE STRINGS (scaffold for D2 deflection).  Each string is a thin
+    // TubeGeometry following a straight rest path at STRING_REST_Y, floating the
+    // action gap above the fret crowns (FRET_TOP_Y).  We keep a handle per string
+    // — { mesh, sz, x0, x1, baseY, deflect, pressFret } — so D2 can re-path the
+    // tube each frame WITHOUT re-touching this build loop.  The 12-segment tube
+    // gives D2 enough vertices to bend the string toward a pressed crown.
+    this.stringMeshes = [];
+    const strX0 = (x0 < x1) ? x0 : x1;
+    const strX1 = (x0 < x1) ? x1 : x0;
     for (let s = 1; s <= numStrings; s++) {
       const sz = wz(stringY(s));
-      const str = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.18, 0.18, Math.abs(x1 - x0), 6),
-        strMat
+      const path = new THREE.LineCurve3(
+        new THREE.Vector3(strX0, STRING_REST_Y, sz),
+        new THREE.Vector3(strX1, STRING_REST_Y, sz)
       );
-      str.rotation.z = Math.PI / 2;
-      str.position.set((x0 + x1) / 2, 0.3, sz);
+      const tube = new THREE.TubeGeometry(path, 12, 0.18, 6, false);
+      const str = new THREE.Mesh(tube, strMat);
       this.fretboardGroup.add(str);
+      this.stringMeshes.push({
+        mesh: str,
+        sz,
+        x0: strX0,
+        x1: strX1,
+        baseY: STRING_REST_Y,
+        deflect: 0,
+        pressFret: null,
+      });
     }
   }
 
