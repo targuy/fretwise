@@ -148,25 +148,112 @@ function webglAvailable() {
   }
 }
 
-/* Build a single bone as a parented capsule along -Z (the rest direction of
-   an extended finger).  We use a CylinderGeometry rotated so its long axis is
-   -Z, with its proximal end at the local origin.  The bone is added to a
-   group so we can pose it by setting the group's rotation.x (curl) and the
-   group's position (chain root). */
+/* Build a tapered tube along a Catmull-Rom curve in local space.
+ *   curve         : THREE.Curve<Vector3>   (parameterised t in [0,1])
+ *   radiusFn(t)   : returns the tube radius at parameter t
+ *   tubularSegs   : segments along the curve   (typical 24)
+ *   radialSegs    : segments around the tube   (typical 14)
+ *
+ * Implementation: start from THREE.TubeGeometry (uniform radius = 1),
+ * then walk its position buffer and rescale each ring's offset from the
+ * curve centreline by radiusFn(ring_t). The Frenet frames TubeGeometry
+ * computes give us clean radial directions for free, so we only need to
+ * scale; no manual frame construction.
+ *
+ * This is the shared primitive used by every organic body-part builder
+ * below (phalanges, thumb, forearm) — replacing the previous primitive
+ * CylinderGeometry/SphereGeometry/BoxGeometry path with one parametric
+ * tube whose r(t) profile encodes the anatomical bulges and tapers. */
+function makeTaperedTube(curve, radiusFn, tubularSegs = 24, radialSegs = 14) {
+  const geo = new THREE.TubeGeometry(curve, tubularSegs, 1.0, radialSegs, false);
+  const pos = geo.attributes.position;
+  // TubeGeometry emits (tubularSegs+1) rings of (radialSegs+1) vertices.
+  const ringsT = tubularSegs + 1;
+  const ringN  = radialSegs + 1;
+  for (let i = 0; i < ringsT; i++) {
+    const t = i / tubularSegs;
+    const centre = curve.getPointAt(t);
+    const r = radiusFn(t);
+    for (let j = 0; j < ringN; j++) {
+      const idx = i * ringN + j;
+      const dx = pos.getX(idx) - centre.x;
+      const dy = pos.getY(idx) - centre.y;
+      const dz = pos.getZ(idx) - centre.z;
+      pos.setXYZ(idx, centre.x + dx * r, centre.y + dy * r, centre.z + dz * r);
+    }
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/* Build a single bone as a tapered organic tube along -Z (the rest
+   direction of an extended finger), with a slight palmar bow, a midshaft
+   swell, and a sharp proximal knuckle flare.  The proximal end sits at the
+   local origin and the distal end at (0,0,-length), so the chain wiring
+   in _buildHand (pip.position.set(0,0,-Lprox), etc.) is unchanged.
+
+   Radius profile (matches the reference scan's ~2:1 base-to-tip taper):
+     r(t) = baseR · (1 − 0.45·t)            ← linear taper
+                  · (1 + 0.12·sin(π·t))     ← midshaft fleshy swell
+                  · (1 + 0.25·e^(−18·t))    ← sharp knuckle flare at base
+
+   The exp(-18t) term places the proximal knuckle bulge entirely in the
+   first ~10% of the bone, so each bone ENDS WITH its own knuckle flare —
+   no separate sphere joint cap is needed for anatomical reading. */
 function makeBoneMesh(material, length, radius) {
-  const geo = new THREE.CylinderGeometry(radius * 0.95, radius * 0.80, length, 10);
-  // Cylinder rests along +Y; rotate so its long axis lies along -Z, then push
-  // the bone so its proximal end (was at -Y/2) sits at the origin and its
-  // distal end sits at world (0, 0, -length).
-  geo.rotateX(Math.PI / 2);    // long axis now along -Z (after the -Z below)
-  geo.translate(0, 0, -length / 2);
+  // 4-point spline along -Z with a small palmar bow (+Y at midshaft).
+  // The bow reads as the natural finger curvature when the finger is
+  // straight; when curled by the rig it disappears into the rotation.
+  const bow = length * 0.06;
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0,            0),
+    new THREE.Vector3(0, bow * 0.5,   -length * 0.33),
+    new THREE.Vector3(0, bow,         -length * 0.66),
+    new THREE.Vector3(0, 0,           -length),
+  ], false, "catmullrom", 0.5);
+
+  // r(t): taper from base (t=0) to tip (t=1) with a small midshaft swell
+  // (sin lobe), and a slight knuckle flare at the proximal end (t≈0).
+  // baseR = radius * 1.05 ; tipR ≈ baseR * 0.55  → matches scan's ~2:1.
+  const baseR = radius * 1.05;
+  const radiusFn = (t) => {
+    const taper  = 1.0 - 0.45 * t;                 // 1.00 → 0.55
+    const swell  = 1.0 + 0.12 * Math.sin(t * Math.PI);  // midshaft bulge
+    const knuck  = 1.0 + 0.25 * Math.exp(-t * 18); // sharp flare near base
+    return baseR * taper * swell * knuck;
+  };
+
+  const geo = makeTaperedTube(curve, radiusFn, 24, 14);
   return new THREE.Mesh(geo, material);
 }
 
-/* Build a small sphere for a joint cap.  Rendered at the parent group's
-   origin (the proximal end of the bone). */
+/* Build a joint cap as a lathed oblate bead (NOT a sphere) — a half-profile
+   lathed around Y produces a squashed knuckle dome (~1.0 × radius wide,
+   ~0.55 × radius tall) that reads as a knuckle bulge rather than a
+   billiard ball.  The bone-end flare from makeBoneMesh already sells the
+   knuckle on its own; this lathe bead sits inside that flare and provides
+   the rotational symmetry that hides the seam between two consecutive
+   bone tubes when the chain bends. */
 function makeJointMesh(material, radius) {
-  const geo = new THREE.SphereGeometry(radius, 12, 10);
+  // Half-profile of a flattened oblate dome, lathed about the Y axis.
+  // Control points trace a quarter-ellipse from equator (x=r, y=0) up to
+  // the pole (x=0, y=0.55r); we then mirror to the lower hemisphere so the
+  // bulge is symmetric top/bottom (a true bead, not a half-dome).
+  const pts = [];
+  const N = 8;
+  for (let i = 0; i <= N; i++) {
+    const a = (i / N) * Math.PI * 0.5;          // 0 → π/2
+    const x = Math.cos(a) * radius;             // equatorial radius
+    const y = Math.sin(a) * radius * 0.55;      // squashed height
+    pts.push(new THREE.Vector2(x, y));
+  }
+  // Mirror to the lower hemisphere so the bulge is symmetric top/bottom.
+  for (let i = N - 1; i >= 0; i--) {
+    pts.push(new THREE.Vector2(pts[i].x, -pts[i].y));
+  }
+  const geo = new THREE.LatheGeometry(pts, 18);
+  geo.computeVertexNormals();
   return new THREE.Mesh(geo, material);
 }
 
@@ -331,16 +418,56 @@ class Hand3DRenderer {
     // (PALM_DEPTH_X) into the Z dimension.  The constant NAMES match the
     // anatomical axes (X=cross-neck width, Z=wrist→MCP); the geometry's
     // argument order is dictated by THREE's BoxGeometry(X, Y, Z) signature.
-    const palmGeo = new THREE.BoxGeometry(PALM_WIDTH_Z, PALM_HEIGHT_Y, PALM_DEPTH_X);
-    // Round the edges slightly by subdividing & lifting top vertices — keeps
-    // a soft back-of-hand look without normal maps.  (Cheap: 1 pass.)
-    const pos = palmGeo.attributes.position;
-    for (let i = 0; i < pos.count; i++) {
-      const py = pos.getY(i);
-      if (py > 0) pos.setY(i, py + 0.10);
-    }
-    pos.needsUpdate = true;
-    palmGeo.computeVertexNormals();
+    // Palm: ExtrudeGeometry of a rounded-wedge Shape (NOT a Box).  The
+    // silhouette is wider on the MCP side (knuckle row) and narrower at the
+    // wrist — a 15% wedge per the reference scan — with bevelled top/bottom
+    // edges giving a soft fleshy back-of-hand without textures.
+    //
+    // Shape is drawn in the local X-Z plane (X = cross-neck width =
+    // PALM_WIDTH_Z, Z = wrist→MCP depth = PALM_DEPTH_X).  +Z is the MCP
+    // side (wider); -Z is the wrist side (narrower).  We then extrude
+    // along the depth axis to give the slab its PALM_HEIGHT_Y thickness,
+    // rotate the extrusion axis to local +Y, and recentre on the origin so
+    // the slab's overall span and centring match the previous Box (the MCP
+    // anchoring code in _poseFingers reads from PALM_* constants, not from
+    // the mesh — so the rounded wedge is a drop-in).
+    const palmGeo = (() => {
+      const halfW_mcp   = PALM_WIDTH_Z * 0.50;          // MCP-row half-width
+      const halfW_wrist = PALM_WIDTH_Z * 0.42;          // wrist half-width (~15% narrower)
+      const halfD       = PALM_DEPTH_X * 0.50;          // wrist↔MCP half-depth
+      const r           = Math.min(halfW_mcp, halfD) * 0.35;  // corner radius
+
+      const shape = new THREE.Shape();
+      // MCP side (+Z), top-right rounded corner
+      shape.moveTo( halfW_mcp - r,  halfD);
+      shape.quadraticCurveTo( halfW_mcp,  halfD,  halfW_mcp,  halfD - r);
+      // Right side, MCP → wrist (inward taper from halfW_mcp to halfW_wrist)
+      shape.lineTo( halfW_wrist,    -halfD + r);
+      shape.quadraticCurveTo( halfW_wrist, -halfD,  halfW_wrist - r, -halfD);
+      // Wrist side (-Z), bottom-left rounded corner
+      shape.lineTo(-halfW_wrist + r, -halfD);
+      shape.quadraticCurveTo(-halfW_wrist, -halfD, -halfW_wrist, -halfD + r);
+      // Left side, wrist → MCP
+      shape.lineTo(-halfW_mcp,       halfD - r);
+      shape.quadraticCurveTo(-halfW_mcp,  halfD, -halfW_mcp + r,  halfD);
+      shape.lineTo( halfW_mcp - r,   halfD);
+
+      const geo = new THREE.ExtrudeGeometry(shape, {
+        depth: PALM_HEIGHT_Y,                // extruded along +Z (then rotated)
+        bevelEnabled: true,
+        bevelThickness: PALM_HEIGHT_Y * 0.25,
+        bevelSize:      PALM_HEIGHT_Y * 0.20,
+        bevelSegments: 4,
+        curveSegments: 12,
+      });
+      // ExtrudeGeometry builds along +Z by default; rotate so its extrusion
+      // axis becomes +Y, then recentre on the origin (the extrusion runs
+      // from Z=0 to Z=depth before the rotation).
+      geo.rotateX(-Math.PI / 2);
+      geo.translate(0, -PALM_HEIGHT_Y / 2, 0);
+      geo.computeVertexNormals();
+      return geo;
+    })();
     this.palm = new THREE.Mesh(palmGeo, this.skinMat);
     this.handGroup.add(this.palm);
 
@@ -400,19 +527,73 @@ class Hand3DRenderer {
       };
     }
 
-    // Thumb: single capsule behind the neck (smaller Z than the strings).
-    // The thumb has no IK target; it just braces the back of the neck.  We
-    // model it as a single bone for simplicity — a curling thumb would need a
-    // separate IK target, which isn't yet shipped on the kin payload.
-    this.thumbBone = makeBoneMesh(this.skinMat, mm(60), mm(11));
+    // Thumb: single tapered tube behind the neck (smaller Z than the
+    // strings).  Length and base radius unchanged (mm(60) × mm(11)) so the
+    // _poseThumb wiring keeps working.  The tube has a stronger palmar
+    // bow than a finger phalanx (~15% of length, vs. 6% on a phalanx)
+    // because this single bone represents both the proximal AND distal
+    // anatomical phalanges; the taper is also gentler (the thumb stays
+    // thick to the tip).  The fixed -Math.PI * 0.35 X rotation is set
+    // after the mesh is added, matching the prior code.
+    this.thumbBone = (() => {
+      const L = mm(60);
+      const baseR = mm(11);
+      // Stronger bow (~15% of length) because the thumb represents proximal +
+      // distal phalanges as one bone.  Curve is in the local +Y plane so it
+      // bows toward the palm when the bone is rotated -0.35 rad about X.
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0,             0),
+        new THREE.Vector3(0, L * 0.10,     -L * 0.30),
+        new THREE.Vector3(0, L * 0.15,     -L * 0.65),
+        new THREE.Vector3(0, L * 0.05,     -L),
+      ], false, "catmullrom", 0.5);
+
+      // Less-aggressive taper than a finger (thumb stays thick to the tip):
+      // baseR → ~0.70 × baseR with a midshaft swell.
+      const radiusFn = (t) => {
+        const taper = 1.0 - 0.30 * t;
+        const swell = 1.0 + 0.10 * Math.sin(t * Math.PI);
+        return baseR * taper * swell;
+      };
+
+      const geo = makeTaperedTube(curve, radiusFn, 20, 14);
+      return new THREE.Mesh(geo, this.skinMat);
+    })();
     this.thumbBone.rotation.x = -Math.PI * 0.35;  // angles up toward the back
     this.handGroup.add(this.thumbBone);
     this.thumbJoint = makeJointMesh(this.skinMat, mm(12));
     this.handGroup.add(this.thumbJoint);
 
-    // Forearm: single capsule extending from the wrist (back-of-palm side)
-    // backwards (+Z toward the camera/player) and slightly along +X.
-    this.forearmBone = makeBoneMesh(this.skinMat, mm(280), mm(35));
+    // Forearm: single tapered tube from the wrist (back-of-palm side)
+    // backwards (-Z in local frame; flipped to +Z by _poseForearm).  Length
+    // unchanged at mm(280); the radius now tapers from mm(35) at the wrist
+    // (t=0) to mm(50) at the elbow (t=1) — the elbow has more meat — with a
+    // small gaussian brachioradialis bulge near t≈0.85 for the natural
+    // upper-forearm thickening.  A very subtle (~3% of L) palmar bow keeps
+    // the silhouette from looking like a pipe without making it a banana.
+    this.forearmBone = (() => {
+      const L      = mm(280);
+      const rWrist = mm(35);
+      const rElbow = mm(50);
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0,            0),
+        new THREE.Vector3(0, L * 0.02,    -L * 0.33),
+        new THREE.Vector3(0, L * 0.03,    -L * 0.66),
+        new THREE.Vector3(0, 0,           -L),
+      ], false, "catmullrom", 0.5);
+
+      // Linear interp wrist→elbow, plus a small lobe near the elbow end
+      // (t≈0.85) for the brachioradialis bulk that thickens the upper
+      // forearm.  The gaussian width (1/6) gives a soft, rounded swell.
+      const radiusFn = (t) => {
+        const linear = rWrist * (1 - t) + rElbow * t;
+        const bulge  = 1.0 + 0.08 * Math.exp(-(((t - 0.85) * 6) ** 2));
+        return linear * bulge;
+      };
+
+      const geo = makeTaperedTube(curve, radiusFn, 32, 16);
+      return new THREE.Mesh(geo, this.skinMat);
+    })();
     this.handGroup.add(this.forearmBone);
     this.forearmJoint = makeJointMesh(this.skinMat, mm(38));
     this.handGroup.add(this.forearmJoint);
