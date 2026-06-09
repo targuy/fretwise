@@ -1537,8 +1537,10 @@ class Hand3DRenderer {
 
     // Fretboard slab: thin (0.30 wu) box along +X, full string-span width
     // along +Z, top face at Y = 0.
+    // Maple fretboard (ref: candy-apple Strat with a maple board) — light,
+    // lightly-lacquered tan wood.
     const boardMat = new THREE.MeshStandardMaterial({
-      color: 0x3b261a, roughness: 0.55, metalness: 0.0,
+      color: 0xd8b483, roughness: 0.45, metalness: 0.0,
     });
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(length, 0.30, boardWidthZ),
@@ -1588,6 +1590,62 @@ class Hand3DRenderer {
       wire.rotation.x = Math.PI / 2;
       wire.position.set(fx, FRET_CROWN_Y, (boardZ0 + boardZ1) / 2);
       this.fretboardGroup.add(wire);
+    }
+
+    // Position-marker inlays (read the fret number from these): single black
+    // dots centred at frets 3·5·7·9·15·17·19·21, a double dot at 12 (and 24).
+    // Each dot sits in the CENTRE of its fret space, flush on the board top.
+    const dotMat = new THREE.MeshStandardMaterial({ color: 0x161109, roughness: 0.4, metalness: 0.05 });
+    const SINGLE_DOTS = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
+    const DOUBLE_DOTS = new Set([12, 24]);
+    const dotR = boardWidthZ * 0.052;
+    const dotY = BOARD_TOP_Y + 0.03;          // flush on top, below the strings
+    const zMid = (boardZ0 + boardZ1) / 2;
+    const dotOff = boardWidthZ * 0.22;        // double-dot Z spread
+    const dotGeo = new THREE.CylinderGeometry(dotR, dotR, 0.05, 18);
+    for (let fr = 2; fr <= numFrets; fr++) {
+      const dbl = DOUBLE_DOTS.has(fr), sgl = SINGLE_DOTS.has(fr);
+      if (!dbl && !sgl) continue;
+      const cx = (wx(fretX(fr - 1)) + wx(fretX(fr))) / 2;
+      const zs = dbl ? [zMid - dotOff, zMid + dotOff] : [zMid];
+      for (const z of zs) {
+        const dot = new THREE.Mesh(dotGeo, dotMat);
+        dot.position.set(cx, dotY, z);
+        this.fretboardGroup.add(dot);
+      }
+    }
+
+    // Headstock (la tête) at the NUT end (-X), a rounded maple paddle tilted
+    // slightly back, with the Fender-style 6-in-line tuners.
+    const headLen = boardWidthZ * 1.9;
+    const headHW = boardWidthZ * 0.62;        // headstock half-width (a touch wider than the neck)
+    const hs = new THREE.Shape();             // 2D (a=along -X length, b=across Z)
+    hs.moveTo(0, -hw);                         // at the nut, neck width
+    hs.lineTo(0, hw);
+    hs.lineTo(-headLen * 0.18, headHW);
+    hs.quadraticCurveTo(-headLen * 0.62, headHW * 1.04, -headLen, headHW * 0.34);
+    hs.quadraticCurveTo(-headLen * 1.06, 0, -headLen * 0.86, -headHW * 0.5);
+    hs.quadraticCurveTo(-headLen * 0.5, -headHW * 0.96, -headLen * 0.16, -hw * 1.04);
+    hs.closePath();
+    const hsGeo = new THREE.ExtrudeGeometry(hs, { depth: 0.5, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.12, bevelSegments: 2, curveSegments: 16 });
+    hsGeo.rotateX(-Math.PI / 2);              // shape's Y (Z-across) → world Z; extrude → world Y
+    hsGeo.translate(0, -0.25, 0);
+    const head = new THREE.Mesh(hsGeo, boardMat);
+    head.position.set(x0, BOARD_TOP_Y, zMid);
+    head.rotation.z = -0.14;                   // slight backward tilt of the headstock
+    this.fretboardGroup.add(head);
+    // 6 tuners (machine heads) in-line along the +Z edge.
+    const tunerMat = new THREE.MeshStandardMaterial({ color: 0xd0d3d9, roughness: 0.28, metalness: 0.85 });
+    const pegGeo = new THREE.CylinderGeometry(boardWidthZ * 0.05, boardWidthZ * 0.05, 1.4, 12);
+    const btnGeo = new THREE.BoxGeometry(boardWidthZ * 0.16, 0.7, boardWidthZ * 0.07);
+    for (let i = 0; i < 6; i++) {
+      const tx = x0 - headLen * 0.20 - i * (headLen * 0.62 / 5);
+      const peg = new THREE.Mesh(pegGeo, tunerMat);
+      peg.position.set(tx, BOARD_TOP_Y + 0.5, zMid + headHW * 0.62);
+      this.fretboardGroup.add(peg);
+      const btn = new THREE.Mesh(btnGeo, tunerMat);
+      btn.position.set(tx, BOARD_TOP_Y + 0.5, zMid + headHW * 0.92);
+      this.fretboardGroup.add(btn);
     }
 
     // Strings: 6 thin tubes along +X at Y = STRING_SURFACE.  Re-built per
