@@ -1,0 +1,93 @@
+{
+  "kind": "validation_golden_set",
+  "name": "golden_set_v1",
+  "version": "1.0.0",
+  "schema_version": "fretwise-ml-v2",
+  "file": "golden_set_v1.jsonl",
+  "format": "JSONL — one case per line",
+  "prediction_target": "expected",
+  "training_allowed": false,
+  "purpose": "Golden set for FretWise / GuitarDataSet phrase-window model validation. Each line encodes a short musical passage with the human-validated correct fingering, anchor, and (where applicable) barre group annotations. Models MUST NOT train on this file; use only at evaluation time.",
+  "case_count": 13,
+  "categories_covered": [
+    "django_intro_rriri",
+    "django_m16_no_short_clamp",
+    "heart_wide_barre",
+    "apache_m7_index_anchor",
+    "open_chord_basic",
+    "power_chord_shape",
+    "position_shift_fast",
+    "legato_same_string"
+  ],
+  "field_specification": {
+    "case_id": "string — unique identifier, snake_case, references the spec category if applicable",
+    "schema_version": "string — must equal 'fretwise-ml-v2'",
+    "dataset_version": "string — origin marker, e.g. 'gds-v0.4'",
+    "source_file": "string — path relative to bulk data root, or 'synthetic/<name>' for crafted cases",
+    "source_type": "enum — gp | musicxml | midi | chord_library | manual | synthetic",
+    "measure_range": "[int, int] — inclusive measure bounds in the source file (1-based)",
+    "voice": "int — voice/track index, 0 by default",
+    "style": "enum — jazz | rock | blues | classical | folk | metal | pop | surf_rock | any | unknown",
+    "tempo": "float (optional) — BPM at the location",
+    "tuning": "[int, int, int, int, int, int] — open-string MIDI from string 1 (high E) to string 6 (low E). Standard = [64, 59, 55, 50, 45, 40].",
+    "string_convention": "string — 'FretWise 1=high_e' (1-based, 1=high_e..6=low_E)",
+    "annotator": "enum — manual_review | human | mutopia | uci_chords | jguitar | caged | fretwise_silver",
+    "confidence": "float in [0, 1] — annotator confidence; values <1.0 mean 'verify against partition before training v2 fine-tune'",
+    "rationale": "string — short prose explaining WHY this fingering is correct (musical / biomechanical reasoning)",
+    "expected": "list of expected notes — see expected_note_fields below. The MODEL_TARGET key.",
+    "negative_alternatives": "(optional) list of incorrect alternatives the model must avoid",
+    "forbidden_patterns": "(optional) list of explicit anti-patterns (e.g. short_non_contiguous_barre)",
+    "barres": "(optional) list of barre group descriptors when the case includes a barre",
+    "constraints": "(optional) list of named biomechanical constraints",
+    "notes_on_anchor": "(optional) string — additional context for anchor choice"
+  },
+  "expected_note_fields": {
+    "order": "int — position in the window (0-based)",
+    "string_num": "int 1-6 — FretWise convention, 1=high_e",
+    "fret": "int 0-22 — 0 means open string",
+    "finger": "enum — open | index | middle | ring | pinky",
+    "anchor": "(optional) int — fret of the position anchor; null for pure open chords",
+    "hand_position": "(optional) int — fret of the virtual index; null when finger=open and no fretted note constrains the hand",
+    "is_chord_member": "(optional) bool — true for simultaneous chord notes",
+    "chord_id": "(optional) string — groups simultaneous chord members",
+    "techniques": "(optional) list of strings — hammer_on, pull_off, slide, bend, vibrato, let_ring, staccato, palm_mute",
+    "duration": "(optional) float — beats; defaults to 1.0",
+    "pitch": "(optional) int — MIDI pitch",
+    "barre_group_id": "(optional) string — references a barre in `barres[]`"
+  },
+  "negative_alternatives_field": {
+    "reason": "string — why this alternative is wrong",
+    "fingers": "list of strings — the wrong finger sequence",
+    "anchor": "(optional) int — wrong anchor that produces this sequence"
+  },
+  "barres_field": {
+    "group_id": "string — unique within case",
+    "finger": "enum — index | middle | ring | pinky (typically index)",
+    "fret": "int — fret across which the barre lies",
+    "strings": "list of ints — strings covered by the barre (1-based)",
+    "type": "enum — full_barre | half_barre | wide_barre | partial_barre"
+  },
+  "training_directives": {
+    "must_not_train_on": "golden_set_v1.jsonl",
+    "must_evaluate_on": "golden_set_v1.jsonl after each model version",
+    "report_filename_convention": "<model_name>_v<version>_golden_report.json",
+    "minimum_metrics_to_report": [
+      "per_note_finger_accuracy",
+      "exact_window_match_rate",
+      "anchor_accuracy",
+      "pinky_false_positive_rate",
+      "biomechanical_fatal_count",
+      "biomechanical_high_count"
+    ]
+  },
+  "expansion_policy": {
+    "open_for_additions": true,
+    "version_bump_required_when": [
+      "adding a new case category not in `categories_covered`",
+      "changing the FretWise string convention",
+      "changing any `expected` field semantics",
+      "removing or merging existing cases (BREAKING)"
+    ],
+    "next_target_size": "50+ cases (v2 will add cases from genuine FretWise audits)"
+  }
+}
