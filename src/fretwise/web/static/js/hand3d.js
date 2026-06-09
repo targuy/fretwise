@@ -318,12 +318,16 @@ function makeBoneMesh(material, length, radius) {
   // r(t): taper from base (t=0) to tip (t=1) with a small midshaft swell
   // (sin lobe), and a slight knuckle flare at the proximal end (t≈0).
   // baseR = radius * 1.05 ; tipR ≈ baseR * 0.55  → matches scan's ~2:1.
+  // Photos: fingers taper only gently (base→tip ≈ 1.00→0.72), with a soft pad
+  // swell near the tip and a knuckle flare at the base.
   const baseR = radius * 1.05;
   const radiusFn = (t) => {
-    const taper  = 1.0 - 0.45 * t;                 // 1.00 → 0.55
-    const swell  = 1.0 + 0.12 * Math.sin(t * Math.PI);  // midshaft bulge
-    const knuck  = 1.0 + 0.25 * Math.exp(-t * 18); // sharp flare near base
-    return baseR * taper * swell * knuck;
+    const taper  = 1.0 - 0.28 * t;                 // 1.00 → 0.72 (gentler)
+    const swell  = 1.0 + 0.10 * Math.sin(t * Math.PI);  // midshaft bulge
+    const pu     = (t - 0.94) * 12;
+    const pad    = 1.0 + 0.14 * Math.exp(-(pu * pu)); // fingertip pad swell
+    const knuck  = 1.0 + 0.22 * Math.exp(-t * 16); // flare near base
+    return baseR * taper * swell * knuck * pad;
   };
 
   const geo = makeTaperedTube(curve, radiusFn, 24, 14);
@@ -396,20 +400,23 @@ const WRIST_FLEX_DEFAULT = 0.25;
 const WRIST_DEV_DEFAULT  = -0.10;
 const MCP_POINT_MAX = 45 * DEG;   // proximal-phalanx "point toward fret" cap (all fingers)
 const MCP_ABD_HALF = { index: MCP_POINT_MAX, middle: MCP_POINT_MAX, ring: MCP_POINT_MAX, pinky: MCP_POINT_MAX };
-const WRIST_COMP_TRIES = 12;      // R11: max wrist-compensation iterations (each re-folds all fingers)
+const WRIST_COMP_TRIES = 18;      // R11: max wrist-compensation iterations (each re-folds all fingers)
 const PHALANX_FRAC_PER = {
   index:  [0.506, 0.292, 0.201], middle: [0.512, 0.302, 0.186],
   ring:   [0.503, 0.307, 0.190], pinky:  [0.508, 0.289, 0.203], thumb: [0.557, 0.443],
 };
-const FINGER_RADIUS = { index: mm(8) * 0.95, middle: mm(8), ring: mm(8), pinky: mm(8) * 0.85, thumb: mm(11) };
+/* Segment base radii (from the reference-hand photos: fingers are substantial,
+   ~19-20 mm across at the base; the thumb is markedly thicker). */
+const FINGER_RADIUS = { index: mm(9.5), middle: mm(10), ring: mm(9.5), pinky: mm(8.5), thumb: mm(14) };
 const clampN = (v, a, b) => Math.min(Math.max(v, a), b);
 /* Placement of the hand vs the neck (tunable via ?mcpnodey / ?mcpy / ?mcpedge).
    The MCP knuckles MUST launch OUTSIDE the neck (Z beyond the +hw player edge)
    so the fingers arch OVER the top rather than impaling the belly at rest. */
-const MCP_NODE_Y     = -10;   // Main.node world Y (palm/back-of-hand below the neck)
-const MCP_LAUNCH_Y   = 2.5;   // MCP-anchor world Y (knuckles ABOVE the board, clear of the neck)
+const MCP_LAUNCH_Y   = 2.5;   // MCP-anchor (knuckle) world Y — ABOVE the board, clear of the neck
+const MCP_NODE_Y     = -16;   // Main.node = WRIST world Y (below + player-side of the knuckles)
+const WRIST_BACK     = 18;    // wrist sits this far +Z (player side) of the knuckle row
 const MCP_EDGE_MARGIN = 2.0;  // fallback: MCP this far beyond the +Z neck edge when no active target
-const MCP_REACH      = 11;    // MCP-anchor +Z offset from the player-most string (reach sweet-spot)
+const MCP_REACH      = 11;    // knuckle +Z offset from the player-most string (reach sweet-spot)
 const ROOT_BASE      = 135 * Math.PI / 180;  // finger root pitch baseline (folds down onto strings)
 
 /* (makeBoneMesh — the organic tapered phalanx bone — is defined above and reused.) */
@@ -460,7 +467,7 @@ class Doigt {
     this.phalanges = [];
     for (let i = 0; i < fracs.length; i++) {
       const L = totalLength * fracs[i];
-      const rr = radius * (i === 0 ? 1.0 : i === 1 ? 0.86 : 0.74);
+      const rr = radius * (i === 0 ? 1.0 : i === 1 ? 0.92 : 0.84);
       const lim = i === 0 ? flexLimits.mcp : (i === 1 ? (flexLimits.pip || flexLimits.ip) : flexLimits.dip);
       this.phalanges.push(new Phalange(materials.skin, { length: L, radius: rr, flexMax: lim[1], name: ["prox", "mid", "dis"][i] }));
     }
@@ -556,8 +563,10 @@ class Main {
     this.anchors = {};
     const mcpSpan = PALM_WIDTH_Z * 0.95, step = mcpSpan / 3, edgeZ = NECK_DEPTH * 0.60, topY = PALM_HEIGHT_Y * 0.5;
     const off = { index: -mcpSpan / 2, middle: -mcpSpan / 2 + step, ring: -mcpSpan / 2 + 2 * step, pinky: -mcpSpan / 2 + 3 * step };
-    for (const f of FINGER_ORDER) { const a = new THREE.Object3D(); a.position.set(off[f], topY, edgeZ); this.palm.add(a); this.anchors[f] = a; }
-    const ta = new THREE.Object3D(); ta.position.set(0, -PALM_HEIGHT_Y * 0.2, -PALM_DEPTH_X * 0.35); this.palm.add(ta); this.anchors.thumb = ta;
+    // Anchors live in the WRIST (palmAnchor) frame, NOT under the palm mesh, so
+    // bridgePalm can freely tilt/scale the palm without moving the finger bases.
+    for (const f of FINGER_ORDER) { const a = new THREE.Object3D(); a.position.set(off[f], topY, edgeZ); this.poignet.palmAnchor.add(a); this.anchors[f] = a; }
+    const ta = new THREE.Object3D(); ta.position.set(0, -PALM_HEIGHT_Y * 0.2, -PALM_DEPTH_X * 0.35); this.poignet.palmAnchor.add(ta); this.anchors.thumb = ta;
     this.doigts = { index: new Index(materials), middle: new Majeur(materials), ring: new Annulaire(materials), pinky: new PetitDoigt(materials), thumb: new Pouce(materials) };
     for (const f of FINGER_ORDER) this.doigts[f].attachTo(this.anchors[f]);
     this.doigts.thumb.attachTo(this.anchors.thumb);
@@ -567,6 +576,15 @@ class Main {
   doigt(name) { return this.doigts[name]; }
   anchorWorld(name, out = new THREE.Vector3()) { return this.anchors[name].getWorldPosition(out); }
   setPlacement(x, y, z) { this.node.position.set(x, y, z); }
+  /* Shape the back-of-hand slab to span wrist(node origin) → knuckle row at
+     local (0, ky, kz), tilting + scaling its depth so it physically connects
+     the wrist to the finger bases (no floating slab). */
+  bridgePalm(ky, kz) {
+    const len = Math.hypot(ky, kz) || 1;
+    this.palm.position.set(0, ky / 2, kz / 2);
+    this.palm.rotation.set(Math.atan2(-ky, kz), 0, 0);
+    this.palm.scale.z = len / PALM_DEPTH_X;
+  }
 }
 
 /* Per-frame controller: places the wrist along the neck, the thumb under it,
@@ -580,23 +598,24 @@ class AnimationMain {
     // other fingers then fall on +1/+2/+3 frets via the anchor spread.
     const x = (fretIndex > 0 ? r._pressX(fretIndex) : (r._boardCX || 0)) + m.mcpSpan / 2;
     const nodeY = r._tuneNum("mcpnodey", MCP_NODE_Y);
-    // Knuckle-row Z: just player-side (+Z) of the player-most active string, so
-    // every pressed string is within the finger's fold reach.  Default to the
-    // neck player edge when no active target.
-    const z = (knuckleZ != null) ? knuckleZ
-      : ((r._neckHW || 12.5) + r._tuneNum("mcpedge", MCP_EDGE_MARGIN));
-    m.setPlacement(x, nodeY, z);
+    const back = r._tuneNum("wristback", WRIST_BACK);
+    const reach = r._tuneNum("mcpreach", MCP_REACH);
+    // Knuckle-row Z = player-side (+Z) of the player-most active string + reach.
+    const kZ = ((knuckleZ != null) ? knuckleZ
+      : ((r._neckHW || 12.5) + r._tuneNum("mcpedge", MCP_EDGE_MARGIN))) + reach;
+    // The WRIST (node) sits BEHIND (+Z, player) and BELOW the knuckles, so the
+    // palm bridges wrist→knuckles like a real back-of-hand; the forearm exits
+    // toward the player from there.
+    m.setPlacement(x, nodeY, kZ + back);
     m.poignet.setFlex(WRIST_FLEX_DEFAULT); m.poignet.setDeviation(WRIST_DEV_DEFAULT);
-    // MCP anchors launch from the +Z player edge (OUTSIDE the neck), above the
-    // board, splayed along the neck; CCD then folds each finger DOWN onto its
-    // string.  Anchor Z is relative to the (Z-tracked) node so the launch-to-
-    // target geometry is consistent across chords.
+    // MCP anchors (knuckles): up and -Z (toward the neck) of the wrist node, so
+    // the fingers arch DOWN over the strings; CCD then folds each onto its string.
     const launchY = r._tuneNum("mcpy", MCP_LAUNCH_Y) - nodeY;
-    const launchZ = r._tuneNum("mcpreach", MCP_REACH);   // anchor +Z of the node (≈ reach sweet-spot)
     const span = m.mcpSpan, step = span / 3;
     const offX = { index: -span / 2, middle: -span / 2 + step, ring: -span / 2 + 2 * step, pinky: -span / 2 + 3 * step };
     const baseX = r._tuneNum("rootbase", ROOT_BASE);   // finger root pitch baseline
-    for (const f of FINGER_ORDER) { const a = m.anchors[f]; if (a) a.position.set(offX[f], launchY, launchZ); m.doigt(f)._baseX = baseX; }
+    for (const f of FINGER_ORDER) { const a = m.anchors[f]; if (a) a.position.set(offX[f], launchY, -back); m.doigt(f)._baseX = baseX; }
+    m.bridgePalm(launchY, -back);   // shape the back-of-hand to span wrist→knuckles
     m.node.updateMatrixWorld(true);
   }
   animation_pouce(main) {
@@ -1769,10 +1788,10 @@ class Hand3DRenderer {
       const str = (fg && fg.strings && fg.strings.length) ? fg.strings[0] : null;
       const d = m.doigt(f);
       if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
-        // R9 no-cross: this finger's target X may not fall below the previous
-        // active finger's (index lowest); clamp the press-X up if it would cross.
-        const targetX = Math.max(this._pressX(fg.fret), prevX + 1e-3);
-        const res = a._placeFinger(m, f, fg.fret, str, targetX);
+        // R9 no-cross is preserved by fret-ordered targets + the 45° point cap;
+        // each finger aims at its real fret X (no target shift, so the wrist-comp
+        // gap metric and the fold agree).
+        const res = a._placeFinger(m, f, fg.fret, str);
         if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
         prevX = Math.max(prevX, d.tipWorld().x);
       } else {
@@ -1800,14 +1819,15 @@ class Hand3DRenderer {
       }
     }
     const gap = () => targets.reduce((s, t) => s + m.doigt(t.f).tipWorld().distanceTo(t.T), 0);
-    const save = { flex: p.flex, dev: p.deviation, rot: p.rotation, x: m.node.position.x };
-    const restore = () => { p.setFlex(save.flex); p.setDeviation(save.dev); p.setRotation(save.rot); m.node.position.x = save.x; m.node.updateMatrixWorld(true); };
+    const save = { flex: p.flex, dev: p.deviation, rot: p.rotation, x: m.node.position.x, z: m.node.position.z };
+    const restore = () => { p.setFlex(save.flex); p.setDeviation(save.dev); p.setRotation(save.rot); m.node.position.x = save.x; m.node.position.z = save.z; m.node.updateMatrixWorld(true); };
     const STEP = 5 * DEG, SLIDE = 1.5;
     const moves = [
       () => p.setFlex(p.flex + STEP), () => p.setFlex(p.flex - STEP),
       () => p.setDeviation(p.deviation + STEP), () => p.setDeviation(p.deviation - STEP),
       () => p.setRotation(p.rotation + STEP), () => p.setRotation(p.rotation - STEP),
       () => { m.node.position.x += SLIDE; }, () => { m.node.position.x -= SLIDE; },
+      () => { m.node.position.z += SLIDE; }, () => { m.node.position.z -= SLIDE; },
     ];
     let bestMove = null, bestGap = gap();
     for (const mv of moves) {
