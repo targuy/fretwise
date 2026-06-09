@@ -27,8 +27,21 @@ This module has **no production effect** until callers in
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Any, Sequence
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Any
+
+from fretwise.ml.phrase_window import (
+    LearnedPhraseWindowFingerer,
+    NotePrediction,
+    PhraseNote,
+    SlotPrediction,
+    WindowPrediction,
+    build_window_feature_vector,
+    candidate_anchors,
+    note_from_fretwise,
+    phrase_window_feature_names,
+)
 
 __all__ = [
     "PlayerContext",
@@ -42,6 +55,16 @@ __all__ = [
     "extract_chord_features",
     "extract_transition_features",
     "validate_assignment",
+    # Phrase-window fingering (GuitarDataSet phrase_window_v1, shadow-only)
+    "LearnedPhraseWindowFingerer",
+    "PhraseNote",
+    "SlotPrediction",
+    "WindowPrediction",
+    "NotePrediction",
+    "phrase_window_feature_names",
+    "candidate_anchors",
+    "build_window_feature_vector",
+    "note_from_fretwise",
 ]
 
 
@@ -501,11 +524,13 @@ class FixedChordFingerClassifier(ChordFingerClassifier):
 
 
 # ---------------------------------------------------------------------------
-# Phase 3 — Learned transition cost (GuitarDataSet v2 ONNX)
+# Phase 3 — Learned transition cost (GuitarDataSet v3 ONNX)
 # ---------------------------------------------------------------------------
 
 # Feature order matches GuitarDataSet's training set exactly.
-# See data/models/transition_cost_v2_spec.json (26 features).
+# See data/models/transition_cost_v3_spec.json (26 features). v3 unifies the
+# string convention to 0 = high E (v2's mixed ClassClef/GAPS convention was a
+# bug; v2 is retired — GuitarDataSet-023).
 # Convention note: model uses 0-indexed strings (0 = high E, 5 = low E),
 # FW uses 1-indexed (1 = high E, 6 = low E). Conversion happens at the
 # PlayerCostModel boundary; extract_transition_features expects model-side
@@ -549,8 +574,8 @@ def extract_transition_features(
 ) -> dict[str, float]:
     """Build the 26-feature dict for a single transition (prev → curr).
 
-    Aligned with ``data/models/transition_cost_v2_spec.json`` and verified
-    bit-for-bit against ``transition_cost_v2_calibration.json`` (3 cases).
+    Aligned with ``data/models/transition_cost_v3_spec.json`` and verified
+    bit-for-bit against ``transition_cost_v3_calibration.json`` (3 cases).
 
     All inputs use the **model's 0-indexed string convention**:
     ``string=0`` is high E, ``string=5`` is low E. Callers operating in
@@ -629,11 +654,11 @@ def extract_transition_features(
 
 
 class LearnedPlayerCost(PlayerCostModel):
-    """ONNX-backed transition cost (GuitarDataSet Phase 3 v2).
+    """ONNX-backed transition cost (GuitarDataSet Phase 3 v3).
 
     Loads the XGBoost-derived ONNX model and returns Viterbi-compatible
     additive cost ``-log(p[curr_finger])`` for each transition. Emission
-    cost is 0.0 — the v2 model is transition-only (no per-note emission).
+    cost is 0.0 — the v3 model is transition-only (no per-note emission).
 
     The 26 model features do not depend on tempo, articulation, techniques,
     chord membership, or any other ``PlayerContext`` field (spec v3
@@ -641,7 +666,7 @@ class LearnedPlayerCost(PlayerCostModel):
     accepted but ignored.
 
     Args:
-        model_path: Path to the .onnx file (data/models/transition_cost_v2.onnx).
+        model_path: Path to the .onnx file (data/models/transition_cost_v3.onnx).
         spec_path: Optional path to the spec JSON; validated at load time
             for feature-name drift.
 

@@ -16,7 +16,10 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from fretwise.ml import LearnedPhraseWindowFingerer
 
 import click
 
@@ -133,6 +136,103 @@ def _load_player_cost_model() -> object | None:
         )
     except (ImportError, FileNotFoundError, AssertionError):
         return None
+
+
+def _load_phrase_window_fingerer() -> LearnedPhraseWindowFingerer | None:
+    """Load the optional phrase-window fingerer (GuitarDataSet phrase_window_v1).
+
+    Shadow-only model — used to compare ML-predicted melodic fingers against
+    the rule-based pipeline in verbose mode. Never applied to user output (see
+    ``fretwise.ml.phrase_window`` and FW-015). Returns None silently when the
+    bundle or onnxruntime are unavailable.
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    manifest_path = model_dir / "phrase_window_fingering_v1_manifest.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPhraseWindowFingerer
+        return LearnedPhraseWindowFingerer.from_model_dir(model_dir)
+    except (ImportError, FileNotFoundError, AssertionError, KeyError):
+        return None
+
+
+_LEGATO_ARTICULATIONS = frozenset({"legato", "hammer_on", "pull_off", "slide"})
+
+
+def _print_phrase_window_shadow_summary(
+    results: list[FingeringResult],
+    model: LearnedPhraseWindowFingerer | None,
+) -> None:
+    """Print rule-only vs phrase_window_v1 (ML shadow) agreement to stderr.
+
+    GO-shadow contract (FW-015): the prediction is logged for comparison and
+    **never** applied to ``results``. Compares the rule-assigned finger against
+    the ML argmax on monophonic (non-chord) notes, per voice. Never raises.
+    """
+    if model is None:
+        return
+    try:
+        from fretwise.ml import PhraseNote
+
+        # Group by voice; flag chord onsets (≥2 notes sharing a rounded onset).
+        by_voice: dict[int, list[FingeringResult]] = {}
+        for r in results:
+            v = r.note_event.voice_hint or 0
+            by_voice.setdefault(v, []).append(r)
+
+        agree = 0
+        total = 0
+        rule_pinky = 0
+        ml_pinky = 0
+        for voice_results in by_voice.values():
+            voice_results.sort(key=lambda r: r.note_event.onset)
+            onset_counts: dict[float, int] = {}
+            for r in voice_results:
+                onset_counts[round(r.note_event.onset, 6)] = (
+                    onset_counts.get(round(r.note_event.onset, 6), 0) + 1
+                )
+            melodic = [
+                r for r in voice_results
+                if onset_counts[round(r.note_event.onset, 6)] == 1
+            ]
+            if len(melodic) < 3:
+                continue  # model degrades below 3 notes (spec)
+            notes = [
+                PhraseNote(
+                    string=r.state.string_num - 1,
+                    fret=r.state.fret,
+                    pitch=r.note_event.pitch,
+                    onset=r.note_event.onset,
+                    duration=r.note_event.duration,
+                    is_chord_member=False,
+                    has_legato=str(r.note_event.articulation) in _LEGATO_ARTICULATIONS,
+                )
+                for r in melodic
+            ]
+            predictions = model.predict_sequence(notes)
+            for r, pred in zip(melodic, predictions):
+                rule_finger = r.state.finger.value
+                total += 1
+                if rule_finger == pred.finger:
+                    agree += 1
+                if rule_finger == "pinky":
+                    rule_pinky += 1
+                if pred.finger == "pinky":
+                    ml_pinky += 1
+
+        if total == 0:
+            click.echo("Phrase-window shadow: no monophonic windows to compare.", err=True)
+            return
+        click.echo(
+            f"Phrase-window shadow (ML, not applied): "
+            f"agreement={agree}/{total} ({100.0 * agree / total:.1f}%)  "
+            f"|  pinky rule={rule_pinky} ml={ml_pinky}",
+            err=True,
+        )
+    except Exception as exc:  # shadow logging must never break the solve
+        click.echo(f"Phrase-window shadow failed: {exc}", err=True)
 
 
 def _guarded_pipeline_result(
@@ -500,6 +600,7 @@ def solve(
             err=True,
         )
         _print_audit_summary(events, results, adapter, player_cost_model)
+        _print_phrase_window_shadow_summary(results, _load_phrase_window_fingerer())
 
     # --- resolve output format -----------------------------------------------
     if output is None and fmt is None:
