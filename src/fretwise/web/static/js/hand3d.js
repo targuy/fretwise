@@ -387,10 +387,16 @@ const FLEX_LIMITS = {
   pinky:  { mcp: [0, 95 * DEG], pip: [0, 110 * DEG], dip: [0, 80 * DEG] },
   thumb:  { mcp: [0, 55 * DEG], ip:  [0, 80 * DEG] },
 };
-const WRIST_LIMITS = { flexX: [-70 * DEG, 80 * DEG], devZ: [-30 * DEG, 20 * DEG] };
+/* R10 — EXACT wrist amplitudes (3 DOF) + finger lateral cap.
+   Wrist: fore-aft flex/ext ±90° (180° total); lateral deviation -10..+60°;
+   rotation (pronation/supination) ±150°.  Fingers CANNOT rotate — the only
+   lateral freedom is the proximal phalanx "pointing" toward a fret, 45° max. */
+const WRIST_LIMITS = { flexX: [-90 * DEG, 90 * DEG], devZ: [-10 * DEG, 60 * DEG], rotY: [-150 * DEG, 150 * DEG] };
 const WRIST_FLEX_DEFAULT = 0.25;
 const WRIST_DEV_DEFAULT  = -0.10;
-const MCP_ABD_HALF = { index: 20 * DEG, middle: 15 * DEG, ring: 15 * DEG, pinky: 30 * DEG };
+const MCP_POINT_MAX = 45 * DEG;   // proximal-phalanx "point toward fret" cap (all fingers)
+const MCP_ABD_HALF = { index: MCP_POINT_MAX, middle: MCP_POINT_MAX, ring: MCP_POINT_MAX, pinky: MCP_POINT_MAX };
+const WRIST_COMP_TRIES = 12;      // R11: max wrist-compensation iterations (each re-folds all fingers)
 const PHALANX_FRAC_PER = {
   index:  [0.506, 0.292, 0.201], middle: [0.512, 0.302, 0.186],
   ring:   [0.503, 0.307, 0.190], pinky:  [0.508, 0.289, 0.203], thumb: [0.557, 0.443],
@@ -531,12 +537,13 @@ class Pouce      extends Doigt { constructor(m) { super(m, { name: "thumb", tota
 class Poignet {
   constructor(material) {
     this.node = new THREE.Group(); this.node.rotation.order = "ZXY";
-    this.flex = 0; this.deviation = 0;
+    this.flex = 0; this.deviation = 0; this.rotation = 0;
     this.palmAnchor = new THREE.Object3D(); this.node.add(this.palmAnchor);
     this.render = new THREE.Group(); this.render.add(makeJointMesh(material, mm(20))); this.node.add(this.render);
   }
   setFlex(t) { this.flex = clampN(t, WRIST_LIMITS.flexX[0], WRIST_LIMITS.flexX[1]); this.node.rotation.x = this.flex; }
   setDeviation(t) { this.deviation = clampN(t, WRIST_LIMITS.devZ[0], WRIST_LIMITS.devZ[1]); this.node.rotation.z = this.deviation; }
+  setRotation(t) { this.rotation = clampN(t, WRIST_LIMITS.rotY[0], WRIST_LIMITS.rotY[1]); this.node.rotation.y = this.rotation; }
   attachTo(parent) { parent.add(this.node); }
 }
 
@@ -601,11 +608,14 @@ class AnimationMain {
     const dist = () => { const p = thumb.tipWorld(); return Math.abs(p.y - this.r._bellyY(p.z)); };
     thumb.fold({ contact, collide, dist });
   }
-  _placeFinger(main, name, fret, corde) {
+  _placeFinger(main, name, fret, corde, targetX) {
     const r = this.r, d = main.doigt(name);
-    const T = new THREE.Vector3(r._pressX(fret), STRING_SURFACE, r._stringZAt(corde));
+    // targetX (R9 no-cross clamp) overrides the raw fret X when provided.
+    const tx = (targetX != null) ? targetX : r._pressX(fret);
+    const T = new THREE.Vector3(tx, STRING_SURFACE, r._stringZAt(corde));
     main.node.updateMatrixWorld(true);
     const mcp = d.mcpWorld();
+    // R10: the proximal phalanx "points" toward the fret, capped at 45° (no roll).
     const yawRaw = Math.atan2(-(T.x - mcp.x), -(T.z - mcp.z));
     d.setYaw(clampN(yawRaw, -MCP_ABD_HALF[name], MCP_ABD_HALF[name]));
     const collide = () => r._segmentsHitNeck(d.segments());
@@ -1731,22 +1741,85 @@ class Hand3DRenderer {
     // knuckle sits at its reach sweet-spot above that string.
     a.placement_poignet(idxFret, maxZ);
     a.animation_pouce(m);
+    // R11: fold all fingers; if any can't reach (even with its 45° point), move
+    // the WRIST one step (within R10 limits) and RE-FOLD EVERY finger — the
+    // wrist is the outer loop, the fingers fully depend on it.
+    let unreachable = this._foldAllFingers(kin);
+    let tries = 0;
+    while (unreachable.length && tries < WRIST_COMP_TRIES) {
+      if (!this._nudgeWrist(kin, unreachable)) break;       // no in-limit step helps
+      unreachable = this._foldAllFingers(kin);
+      tries++;
+    }
+    this._lastUnreachable = unreachable;
+    this._wristTries = tries;
+    this._poseForearm(kin);                                // legacy forearm tube = the arm
+  }
+
+  /* Fold every finger to its target string (R9: index->pinky, each kept from
+     crossing the previous via its target X).  Returns the unreachable list. */
+  _foldAllFingers(kin) {
+    const m = this.main, a = this.anim;
+    m.node.updateMatrixWorld(true);
     const unreachable = [];
+    let prevX = -Infinity;
     for (const f of FINGER_ORDER) {
       const fg = kin.fingers && kin.fingers[f];
       const role = (fg && fg.role) || "idle";
       const str = (fg && fg.strings && fg.strings.length) ? fg.strings[0] : null;
       const d = m.doigt(f);
       if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
-        const res = a._placeFinger(m, f, fg.fret, str);
+        // R9 no-cross: this finger's target X may not fall below the previous
+        // active finger's (index lowest); clamp the press-X up if it would cross.
+        const targetX = Math.max(this._pressX(fg.fret), prevX + 1e-3);
+        const res = a._placeFinger(m, f, fg.fret, str, targetX);
         if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
+        prevX = Math.max(prevX, d.tipWorld().x);
       } else {
         d.setYaw(0); d.relax();
       }
       d.setRole(role);
     }
-    this._lastUnreachable = unreachable;
-    this._poseForearm(kin);                                // legacy forearm tube = the arm
+    return unreachable;
+  }
+
+  /* R11 wrist compensation: try one bounded step on each wrist DOF (flex, dev,
+     rotation) + an along-neck slide; keep the one that most reduces the total
+     unreachable-fingertip gap (re-folding to measure), within R10 limits.
+     Returns false when no in-limit step improves (wrist limits / local min). */
+  _nudgeWrist(kin, unreachable) {
+    if (!unreachable.length) return false;
+    const m = this.main, p = m.poignet;
+    // Balance ALL active fingers (not only the unreachable ones) so moving the
+    // wrist to help one finger never sacrifices a finger that already reached.
+    const targets = [];
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers && kin.fingers[f];
+      if (fg && (fg.role === "active" || fg.role === "planted") && fg.fret > 0 && fg.strings && fg.strings.length) {
+        targets.push({ f, T: new THREE.Vector3(this._pressX(fg.fret), STRING_SURFACE, this._stringZAt(fg.strings[0])) });
+      }
+    }
+    const gap = () => targets.reduce((s, t) => s + m.doigt(t.f).tipWorld().distanceTo(t.T), 0);
+    const save = { flex: p.flex, dev: p.deviation, rot: p.rotation, x: m.node.position.x };
+    const restore = () => { p.setFlex(save.flex); p.setDeviation(save.dev); p.setRotation(save.rot); m.node.position.x = save.x; m.node.updateMatrixWorld(true); };
+    const STEP = 5 * DEG, SLIDE = 1.5;
+    const moves = [
+      () => p.setFlex(p.flex + STEP), () => p.setFlex(p.flex - STEP),
+      () => p.setDeviation(p.deviation + STEP), () => p.setDeviation(p.deviation - STEP),
+      () => p.setRotation(p.rotation + STEP), () => p.setRotation(p.rotation - STEP),
+      () => { m.node.position.x += SLIDE; }, () => { m.node.position.x -= SLIDE; },
+    ];
+    let bestMove = null, bestGap = gap();
+    for (const mv of moves) {
+      restore(); mv(); m.node.updateMatrixWorld(true);
+      this._foldAllFingers(kin);
+      const g = gap();
+      if (g < bestGap - 1e-3) { bestGap = g; bestMove = mv; }
+    }
+    restore();
+    if (!bestMove) return false;
+    bestMove(); m.node.updateMatrixWorld(true);
+    return true;
   }
 
   /* Position the back-of-hand slab along the neck.  We derive the hand's
