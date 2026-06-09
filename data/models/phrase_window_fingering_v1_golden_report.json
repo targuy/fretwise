@@ -1,0 +1,545 @@
+{
+  "schema_version": "fretwise-ml-v2",
+  "model_name": "phrase_window_fingering_v1",
+  "cases": [
+    {
+      "case_id": "django_intro_rriri",
+      "ground_truth_anchor": 5,
+      "predicted_anchor": 5,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "pinky",
+        "pinky",
+        "index",
+        "pinky",
+        "index"
+      ],
+      "ground_truth_fingers": [
+        "ring",
+        "ring",
+        "index",
+        "ring",
+        "index"
+      ],
+      "per_note_accuracy": 0.4,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 2.7e-05,
+          "mean_slot_nll_at_gt": 1.4003,
+          "composite_score": -0.28
+        },
+        {
+          "candidate_anchor": 5,
+          "anchor_probability": 0.966189,
+          "mean_slot_nll_at_gt": 1.374,
+          "composite_score": 0.6914
+        },
+        {
+          "candidate_anchor": 7,
+          "anchor_probability": 0.049308,
+          "mean_slot_nll_at_gt": 1.4866,
+          "composite_score": -0.248
+        }
+      ],
+      "rationale": "Position fixed at anchor 5; ring naturally covers fret 7 while index plays fret 5 \u2014 no hand shift across the pattern."
+    },
+    {
+      "case_id": "django_m16_no_short_clamp",
+      "ground_truth_anchor": 6,
+      "predicted_anchor": 6,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "middle",
+        "index",
+        "pinky"
+      ],
+      "ground_truth_fingers": [
+        "index",
+        "middle",
+        "index",
+        "ring"
+      ],
+      "per_note_accuracy": 0.75,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 3,
+          "anchor_probability": 3e-05,
+          "mean_slot_nll_at_gt": 0.6745,
+          "composite_score": -0.1349
+        },
+        {
+          "candidate_anchor": 6,
+          "anchor_probability": 0.970059,
+          "mean_slot_nll_at_gt": 0.6657,
+          "composite_score": 0.8369
+        },
+        {
+          "candidate_anchor": 8,
+          "anchor_probability": 0.008113,
+          "mean_slot_nll_at_gt": 0.7284,
+          "composite_score": -0.1376
+        }
+      ],
+      "rationale": "Non-contiguous strings on fret 6 must NOT be played as a partial barre with the index; use distinct fingers (index on first 6, middle on second 6 if needed) and ring/pinky for the higher frets."
+    },
+    {
+      "case_id": "heart_wide_barre",
+      "ground_truth_anchor": 5,
+      "predicted_anchor": 5,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "pinky",
+        "pinky",
+        "ring",
+        "index"
+      ],
+      "ground_truth_fingers": [
+        "index",
+        "ring",
+        "ring",
+        "ring",
+        "index"
+      ],
+      "per_note_accuracy": 0.6,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 1.7e-05,
+          "mean_slot_nll_at_gt": 1.2403,
+          "composite_score": -0.248
+        },
+        {
+          "candidate_anchor": 5,
+          "anchor_probability": 0.957995,
+          "mean_slot_nll_at_gt": 1.2725,
+          "composite_score": 0.7035
+        },
+        {
+          "candidate_anchor": 7,
+          "anchor_probability": 0.042826,
+          "mean_slot_nll_at_gt": 1.3023,
+          "composite_score": -0.2176
+        }
+      ],
+      "rationale": "Strings 1 and 5 share fret 5 with strings 2/3/4 on fret 7 \u2014 this IS a true wide barre: index covers all fret-5 instances; ring or pinky covers fret 7 across the inner strings."
+    },
+    {
+      "case_id": "apache_m7_index_anchor",
+      "ground_truth_anchor": 2,
+      "predicted_anchor": 2,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "middle",
+        "middle",
+        "pinky",
+        "middle"
+      ],
+      "ground_truth_fingers": [
+        "index",
+        "index",
+        "index",
+        "ring",
+        "index"
+      ],
+      "per_note_accuracy": 0.2,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 2e-06,
+          "mean_slot_nll_at_gt": 0.856,
+          "composite_score": -0.1712
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.998477,
+          "mean_slot_nll_at_gt": 0.8721,
+          "composite_score": 0.8241
+        },
+        {
+          "candidate_anchor": 3,
+          "anchor_probability": 1e-06,
+          "mean_slot_nll_at_gt": 0.8793,
+          "composite_score": -0.1759
+        },
+        {
+          "candidate_anchor": 4,
+          "anchor_probability": 0.002535,
+          "mean_slot_nll_at_gt": 0.8904,
+          "composite_score": -0.1755
+        }
+      ],
+      "rationale": "Index anchors position 2 (fret 2) and stays there; ring naturally covers fret 4 (offset +2 from anchor). The pattern 2-2-2-4-2 in voice 0 should use index for every fret-2 note and ring for fret 4, never pinky."
+    },
+    {
+      "case_id": "open_chord_basic_C",
+      "ground_truth_anchor": 1,
+      "predicted_anchor": 1,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "open",
+        "middle",
+        "open",
+        "middle",
+        "ring"
+      ],
+      "ground_truth_fingers": [
+        "open",
+        "index",
+        "open",
+        "middle",
+        "ring"
+      ],
+      "per_note_accuracy": 0.8,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 0.984646,
+          "mean_slot_nll_at_gt": 0.3705,
+          "composite_score": 0.9105
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.004161,
+          "mean_slot_nll_at_gt": 0.3611,
+          "composite_score": -0.0681
+        },
+        {
+          "candidate_anchor": 3,
+          "anchor_probability": 0.001312,
+          "mean_slot_nll_at_gt": 0.3506,
+          "composite_score": -0.0688
+        }
+      ],
+      "rationale": "Classic open C major: ring on 5th-string fret 3, middle on 4th-string fret 2, index on 2nd-string fret 1, plus open strings 1 and 3."
+    },
+    {
+      "case_id": "open_chord_basic_E",
+      "ground_truth_anchor": 1,
+      "predicted_anchor": 1,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "open",
+        "open",
+        "index",
+        "middle",
+        "middle"
+      ],
+      "ground_truth_fingers": [
+        "open",
+        "open",
+        "index",
+        "ring",
+        "middle"
+      ],
+      "per_note_accuracy": 0.8,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 0.980038,
+          "mean_slot_nll_at_gt": 0.6361,
+          "composite_score": 0.8528
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.008229,
+          "mean_slot_nll_at_gt": 0.6628,
+          "composite_score": -0.1243
+        }
+      ],
+      "rationale": "Classic open E major: middle on 5th-string fret 2, ring on 4th-string fret 2, index on 3rd-string fret 1."
+    },
+    {
+      "case_id": "open_chord_basic_G",
+      "ground_truth_anchor": 2,
+      "predicted_anchor": 2,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "ring",
+        "open",
+        "open",
+        "open",
+        "middle"
+      ],
+      "ground_truth_fingers": [
+        "pinky",
+        "open",
+        "open",
+        "open",
+        "index"
+      ],
+      "per_note_accuracy": 0.6,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 6e-06,
+          "mean_slot_nll_at_gt": 0.6512,
+          "composite_score": -0.1302
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.934376,
+          "mean_slot_nll_at_gt": 0.6452,
+          "composite_score": 0.8053
+        },
+        {
+          "candidate_anchor": 3,
+          "anchor_probability": 0.028262,
+          "mean_slot_nll_at_gt": 0.6765,
+          "composite_score": -0.107
+        }
+      ],
+      "rationale": "Classic open G major: pinky on 1st-string fret 3 (or ring), index on 5th-string fret 2, middle on 6th-string fret 3."
+    },
+    {
+      "case_id": "open_chord_basic_A",
+      "ground_truth_anchor": 2,
+      "predicted_anchor": 2,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "open",
+        "middle",
+        "middle",
+        "middle",
+        "open"
+      ],
+      "ground_truth_fingers": [
+        "open",
+        "ring",
+        "middle",
+        "index",
+        "open"
+      ],
+      "per_note_accuracy": 0.6,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 0.000495,
+          "mean_slot_nll_at_gt": 1.0753,
+          "composite_score": -0.2146
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.999701,
+          "mean_slot_nll_at_gt": 1.0742,
+          "composite_score": 0.7849
+        }
+      ],
+      "rationale": "Classic open A major: index/middle/ring fingerings on strings 2/3/4 fret 2."
+    },
+    {
+      "case_id": "open_chord_basic_D",
+      "ground_truth_anchor": 2,
+      "predicted_anchor": 2,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "middle",
+        "middle",
+        "open"
+      ],
+      "ground_truth_fingers": [
+        "middle",
+        "ring",
+        "index",
+        "open"
+      ],
+      "per_note_accuracy": 0.25,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 1.1e-05,
+          "mean_slot_nll_at_gt": 1.672,
+          "composite_score": -0.3344
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.993244,
+          "mean_slot_nll_at_gt": 1.6841,
+          "composite_score": 0.6564
+        },
+        {
+          "candidate_anchor": 3,
+          "anchor_probability": 0.006326,
+          "mean_slot_nll_at_gt": 1.7111,
+          "composite_score": -0.3359
+        }
+      ],
+      "rationale": "Classic open D major: index on 3rd-string fret 2, middle on 1st-string fret 2, ring on 2nd-string fret 3."
+    },
+    {
+      "case_id": "power_chord_shape_A5_fret5",
+      "ground_truth_anchor": 5,
+      "predicted_anchor": 5,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "pinky",
+        "index"
+      ],
+      "ground_truth_fingers": [
+        "pinky",
+        "ring",
+        "index"
+      ],
+      "per_note_accuracy": 0.333,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 3.1e-05,
+          "mean_slot_nll_at_gt": 1.4942,
+          "composite_score": -0.2988
+        },
+        {
+          "candidate_anchor": 5,
+          "anchor_probability": 0.947105,
+          "mean_slot_nll_at_gt": 1.448,
+          "composite_score": 0.6575
+        },
+        {
+          "candidate_anchor": 7,
+          "anchor_probability": 0.116251,
+          "mean_slot_nll_at_gt": 1.5731,
+          "composite_score": -0.1984
+        }
+      ],
+      "rationale": "Standard 6th-string-root power chord: index on root (str 6, fret 5), ring on fifth (str 5, fret 7), pinky on octave (str 4, fret 7). The pinky-on-octave is permitted here BECAUSE the index already anchors the position."
+    },
+    {
+      "case_id": "power_chord_shape_E5_open",
+      "ground_truth_anchor": 1,
+      "predicted_anchor": 2,
+      "anchor_match": false,
+      "predicted_fingers": [
+        "index",
+        "index",
+        "open"
+      ],
+      "ground_truth_fingers": [
+        "pinky",
+        "ring",
+        "open"
+      ],
+      "per_note_accuracy": 0.333,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 0.000916,
+          "mean_slot_nll_at_gt": 3.33,
+          "composite_score": -0.6651
+        },
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 0.999471,
+          "mean_slot_nll_at_gt": 3.3347,
+          "composite_score": 0.3325
+        }
+      ],
+      "rationale": "Open E5 power chord: low E open root, ring on A2 (str 5, fret 2), pinky on D2 (str 4, fret 2). Index is free \u2014 this is the only acceptable case where ring/pinky are used without an index fret because the root is open."
+    },
+    {
+      "case_id": "position_shift_fast_run",
+      "ground_truth_anchor": 5,
+      "predicted_anchor": 7,
+      "anchor_match": false,
+      "predicted_fingers": [
+        "pinky",
+        "pinky",
+        "middle",
+        "middle",
+        "open"
+      ],
+      "ground_truth_fingers": [
+        "ring",
+        "index",
+        "ring",
+        "index",
+        "open"
+      ],
+      "per_note_accuracy": 0.2,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 1,
+          "anchor_probability": 2.5e-05,
+          "mean_slot_nll_at_gt": 1.951,
+          "composite_score": -0.3902
+        },
+        {
+          "candidate_anchor": 4,
+          "anchor_probability": 3e-06,
+          "mean_slot_nll_at_gt": 1.9317,
+          "composite_score": -0.3863
+        },
+        {
+          "candidate_anchor": 7,
+          "anchor_probability": 0.017336,
+          "mean_slot_nll_at_gt": 1.8848,
+          "composite_score": -0.3596
+        }
+      ],
+      "rationale": "A descending fast scale run on string 1: frets 7-5-3-2-0 should stay in anchor 2 (index on fret 2) and use ring->index->index->index->open rather than shifting the hand for every note."
+    },
+    {
+      "case_id": "legato_same_string_hammer",
+      "ground_truth_anchor": 5,
+      "predicted_anchor": 5,
+      "anchor_match": true,
+      "predicted_fingers": [
+        "index",
+        "pinky",
+        "pinky"
+      ],
+      "ground_truth_fingers": [
+        "index",
+        "ring",
+        "pinky"
+      ],
+      "per_note_accuracy": 0.667,
+      "exact_window_match": false,
+      "all_anchor_scores": [
+        {
+          "candidate_anchor": 2,
+          "anchor_probability": 8.8e-05,
+          "mean_slot_nll_at_gt": 0.8561,
+          "composite_score": -0.1711
+        },
+        {
+          "candidate_anchor": 5,
+          "anchor_probability": 0.945391,
+          "mean_slot_nll_at_gt": 0.8773,
+          "composite_score": 0.7699
+        },
+        {
+          "candidate_anchor": 8,
+          "anchor_probability": 0.031046,
+          "mean_slot_nll_at_gt": 0.8097,
+          "composite_score": -0.1309
+        }
+      ],
+      "rationale": "Hammer-on requires two distinct fretting fingers on the same string with the hammer-target finger landing while the source finger stays anchored."
+    }
+  ],
+  "summary": {
+    "n_cases": 13,
+    "n_evaluated": 13,
+    "per_note_accuracy": 0.5088,
+    "exact_window_match_rate": 0.0,
+    "anchor_accuracy": 0.8462,
+    "pinky_false_positive_rate": 0.2075
+  }
+}
