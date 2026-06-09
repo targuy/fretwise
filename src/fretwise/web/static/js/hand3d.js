@@ -366,6 +366,259 @@ const FINGER_ORDER = ["index", "middle", "ring", "pinky"];
  * per finger.  setGeometry() builds the board; update(kin) re-poses the rig
  * each frame from the shared kinematic snapshot.
  */
+/* ============================================================================
+ * ARTICULATED FK RIG — replaces the rigid skinned mesh.
+ * A flat single mesh cannot form a clamp ("you cannot draw a clamp with a
+ * straight line").  The hand is built from real hinged segments folded until
+ * each fingertip contacts its target string, with hard collision against the
+ * D-neck.  Joint limits, lengths and the fold algorithm are derived in
+ * memory/hand-fingering-kinematics.md.  FK is automatic via THREE Object3D
+ * parenting; the local-frame convention matches the old _solveChain: each bone
+ * runs (0,0,0)->(0,0,-L); +X rotation folds -Z toward -Y (down onto strings).
+ * ========================================================================== */
+const DEG = Math.PI / 180;
+const LIFT = Math.PI / 2;          // finger-root baseline: rest dir (-Z) -> +Y (up)
+const FOLD_STEP = 1.0 * DEG;       // per-joint scan resolution
+const CONTACT_EPS = 0.40;          // wu: distal tip within target = contact
+const CCD_PASSES = 6;              // max iterated coordinate-descent passes
+const NECK_SAMPLES = 8;            // interior samples per phalanx segment (collision)
+const FLEX_LIMITS = {
+  finger: { mcp: [0, 90 * DEG], pip: [0, 110 * DEG], dip: [0, 80 * DEG] },
+  pinky:  { mcp: [0, 95 * DEG], pip: [0, 110 * DEG], dip: [0, 80 * DEG] },
+  thumb:  { mcp: [0, 55 * DEG], ip:  [0, 80 * DEG] },
+};
+const WRIST_LIMITS = { flexX: [-70 * DEG, 80 * DEG], devZ: [-30 * DEG, 20 * DEG] };
+const WRIST_FLEX_DEFAULT = 0.25;
+const WRIST_DEV_DEFAULT  = -0.10;
+const MCP_ABD_HALF = { index: 20 * DEG, middle: 15 * DEG, ring: 15 * DEG, pinky: 30 * DEG };
+const PHALANX_FRAC_PER = {
+  index:  [0.506, 0.292, 0.201], middle: [0.512, 0.302, 0.186],
+  ring:   [0.503, 0.307, 0.190], pinky:  [0.508, 0.289, 0.203], thumb: [0.557, 0.443],
+};
+const FINGER_RADIUS = { index: mm(8) * 0.95, middle: mm(8), ring: mm(8), pinky: mm(8) * 0.85, thumb: mm(11) };
+const clampN = (v, a, b) => Math.min(Math.max(v, a), b);
+/* Placement of the hand vs the neck (tunable via ?mcpnodey / ?mcpy / ?mcpedge).
+   The MCP knuckles MUST launch OUTSIDE the neck (Z beyond the +hw player edge)
+   so the fingers arch OVER the top rather than impaling the belly at rest. */
+const MCP_NODE_Y     = -10;   // Main.node world Y (palm/back-of-hand below the neck)
+const MCP_LAUNCH_Y   = 2.5;   // MCP-anchor world Y (knuckles ABOVE the board, clear of the neck)
+const MCP_EDGE_MARGIN = 2.0;  // fallback: MCP this far beyond the +Z neck edge when no active target
+const MCP_REACH      = 11;    // MCP-anchor +Z offset from the player-most string (reach sweet-spot)
+const ROOT_BASE      = 135 * Math.PI / 180;  // finger root pitch baseline (folds down onto strings)
+
+/* (makeBoneMesh — the organic tapered phalanx bone — is defined above and reused.) */
+
+/* Rounded back-of-hand wedge (local X = cross-neck, Z = wrist<->MCP depth, Y = thickness). */
+function makePalmSlab(material) {
+  const halfW_mcp = PALM_WIDTH_Z * 0.50, halfW_wrist = PALM_WIDTH_Z * 0.42;
+  const halfD = PALM_DEPTH_X * 0.50, r = Math.min(halfW_mcp, halfD) * 0.35;
+  const s = new THREE.Shape();
+  s.moveTo(halfW_mcp - r, halfD); s.quadraticCurveTo(halfW_mcp, halfD, halfW_mcp, halfD - r);
+  s.lineTo(halfW_wrist, -halfD + r); s.quadraticCurveTo(halfW_wrist, -halfD, halfW_wrist - r, -halfD);
+  s.lineTo(-halfW_wrist + r, -halfD); s.quadraticCurveTo(-halfW_wrist, -halfD, -halfW_wrist, -halfD + r);
+  s.lineTo(-halfW_mcp, halfD - r); s.quadraticCurveTo(-halfW_mcp, halfD, -halfW_mcp + r, halfD);
+  s.lineTo(halfW_mcp - r, halfD);
+  const geo = new THREE.ExtrudeGeometry(s, { depth: PALM_HEIGHT_Y, bevelEnabled: true,
+    bevelThickness: PALM_HEIGHT_Y * 0.25, bevelSize: PALM_HEIGHT_Y * 0.20, bevelSegments: 4, curveSegments: 12 });
+  geo.rotateX(-Math.PI / 2); geo.translate(0, -PALM_HEIGHT_Y / 2, 0); geo.computeVertexNormals();
+  return new THREE.Mesh(geo, material);
+}
+
+/* One hinged segment.  node = hinge pivot; distalAnchor = child mount point. */
+class Phalange {
+  constructor(material, { length, radius, flexMax, name = "" }) {
+    this.length = length; this.flexMax = flexMax; this.angle = 0; this.name = name;
+    this.node = new THREE.Group();
+    this.render = new THREE.Group();
+    this.render.add(makeBoneMesh(material, length, radius));
+    this.render.add(makeJointMesh(material, radius * 1.02));
+    this.node.add(this.render);
+    this.distalAnchor = new THREE.Object3D();
+    this.distalAnchor.position.set(0, 0, -length);
+    this.node.add(this.distalAnchor);
+  }
+  tipWorld(out = new THREE.Vector3()) { return this.distalAnchor.getWorldPosition(out); }
+  baseWorld(out = new THREE.Vector3()) { return this.node.getWorldPosition(out); }
+  attachTo(anchor) { anchor.add(this.node); }
+}
+
+/* A finger/thumb: an ordered Phalange chain.  The MCP base pivot (this.node)
+   carries the LIFT baseline + the set-once yaw splay; PIP/DIP hinge on their
+   own nodes.  fold() is the fold-until-contact core. */
+class Doigt {
+  constructor(materials, { name, totalLength, fracs, radius, flexLimits, role = "idle" }) {
+    this.name = name; this.role = role; this.flexLimits = flexLimits;
+    this.jointNames = fracs.length === 3 ? ["mcp", "pip", "dip"] : ["mcp", "ip"];
+    this._baseX = LIFT; this._yaw = 0; this._baseZ = 0;
+    this.node = new THREE.Group(); this.node.rotation.order = "YXZ";
+    this.phalanges = [];
+    for (let i = 0; i < fracs.length; i++) {
+      const L = totalLength * fracs[i];
+      const rr = radius * (i === 0 ? 1.0 : i === 1 ? 0.86 : 0.74);
+      const lim = i === 0 ? flexLimits.mcp : (i === 1 ? (flexLimits.pip || flexLimits.ip) : flexLimits.dip);
+      this.phalanges.push(new Phalange(materials.skin, { length: L, radius: rr, flexMax: lim[1], name: ["prox", "mid", "dis"][i] }));
+    }
+    this.phalanges[0].attachTo(this.node);
+    for (let i = 1; i < this.phalanges.length; i++) this.phalanges[i].attachTo(this.phalanges[i - 1].distalAnchor);
+    this.tip = this.phalanges[this.phalanges.length - 1].distalAnchor;
+    this._roleMats = materials.roleMats;
+    this.tipCap = makeJointMesh(materials.roleMats[role] || materials.roleMats.idle, radius * 0.72);
+    this.tip.add(this.tipCap);
+    this.theta = this.jointNames.length === 3 ? { mcp: 0, pip: 0, dip: 0 } : { mcp: 0, ip: 0 };
+  }
+  attachTo(palmAnchor) { palmAnchor.add(this.node); this.anchor = palmAnchor; }
+  setRole(role) { this.role = role; this.tipCap.material = this._roleMats[role] || this._roleMats.idle; }
+  setYaw(y) { this._yaw = y; }
+  setBase(x, z) { this._baseX = x; this._baseZ = z; }
+  applyThetas(t) {
+    this.theta = t;
+    this.node.rotation.set(this._baseX - (t.mcp || 0), this._yaw, this._baseZ);
+    this.phalanges[0].angle = t.mcp || 0;
+    if (this.phalanges.length === 3) {
+      this.phalanges[1].node.rotation.x = -(t.pip || 0); this.phalanges[1].angle = t.pip || 0;
+      this.phalanges[2].node.rotation.x = -(t.dip || 0); this.phalanges[2].angle = t.dip || 0;
+    } else {
+      this.phalanges[1].node.rotation.x = -(t.ip || 0); this.phalanges[1].angle = t.ip || 0;
+    }
+  }
+  resetFlex() { this.applyThetas(this.jointNames.length === 3 ? { mcp: 0, pip: 0, dip: 0 } : { mcp: 0, ip: 0 }); }
+  relax(curl) { this.applyThetas(curl || (this.jointNames.length === 3 ? { mcp: 0.30, pip: 0.45, dip: 0.20 } : { mcp: 0.35, ip: 0.30 })); }
+  tipWorld(out = new THREE.Vector3()) { return this.tip.getWorldPosition(out); }
+  mcpWorld(out = new THREE.Vector3()) { return this.node.getWorldPosition(out); }
+  segments() { return this.phalanges.map((p) => [p.baseWorld(), p.tipWorld()]); }
+  _update() { this.node.updateMatrixWorld(true); }
+  _maxOf(j) { const L = this.flexLimits; return (L[j] || L.ip)[1]; }
+  /* THE CORE (CCD fold-to-contact): iterate the joints closest-to-hand-first
+     (MCP -> PIP -> DIP), each pass setting every joint to the collision-free
+     flex angle that brings the FINGERTIP closest to the target.  Repeats until
+     the tip converges (rule 9) or contacts (CONTACT_EPS).  Colliding angles are
+     never set, so no phalanx ever traverses the neck (rule 7). */
+  fold({ contact, collide, dist }) {
+    const three = this.jointNames.length === 3;
+    const theta = three ? { mcp: 0, pip: 0, dip: 0 } : { mcp: 0, ip: 0 };
+    this.applyThetas(theta); this._update();
+    if (contact()) return "CONTACT";
+    for (let pass = 0; pass < CCD_PASSES; pass++) {
+      let improved = false;
+      for (const j of this.jointNames) {
+        const max = this._maxOf(j);
+        const cur = theta[j];
+        this.applyThetas(theta); this._update();
+        let bestA = cur, bestD = dist();
+        const test = Object.assign({}, theta);
+        for (let a = 0; a <= max + 1e-9; a += FOLD_STEP) {
+          test[j] = a; this.applyThetas(test); this._update();
+          if (collide()) continue;                       // never set a neck-traversing pose
+          const d = dist();
+          if (d < bestD - 1e-4) { bestD = d; bestA = a; }
+        }
+        if (Math.abs(bestA - cur) > 1e-4) { theta[j] = bestA; improved = true; }
+        this.applyThetas(theta); this._update();
+        if (contact()) return "CONTACT";
+      }
+      if (!improved) break;
+    }
+    return contact() ? "CONTACT" : "UNREACHABLE";
+  }
+}
+class Index      extends Doigt { constructor(m) { super(m, { name: "index", totalLength: FINGER_LEN.index, fracs: PHALANX_FRAC_PER.index, radius: FINGER_RADIUS.index, flexLimits: FLEX_LIMITS.finger }); } }
+class Majeur     extends Doigt { constructor(m) { super(m, { name: "middle", totalLength: FINGER_LEN.middle, fracs: PHALANX_FRAC_PER.middle, radius: FINGER_RADIUS.middle, flexLimits: FLEX_LIMITS.finger }); } }
+class Annulaire  extends Doigt { constructor(m) { super(m, { name: "ring", totalLength: FINGER_LEN.ring, fracs: PHALANX_FRAC_PER.ring, radius: FINGER_RADIUS.ring, flexLimits: FLEX_LIMITS.finger }); } }
+class PetitDoigt extends Doigt { constructor(m) { super(m, { name: "pinky", totalLength: FINGER_LEN.pinky, fracs: PHALANX_FRAC_PER.pinky, radius: FINGER_RADIUS.pinky, flexLimits: FLEX_LIMITS.pinky }); } }
+class Pouce      extends Doigt { constructor(m) { super(m, { name: "thumb", totalLength: mm(60), fracs: PHALANX_FRAC_PER.thumb, radius: FINGER_RADIUS.thumb, flexLimits: FLEX_LIMITS.thumb }); } }
+
+/* Wrist — 2 placement DOF (flex/ext about X, deviation about Z). */
+class Poignet {
+  constructor(material) {
+    this.node = new THREE.Group(); this.node.rotation.order = "ZXY";
+    this.flex = 0; this.deviation = 0;
+    this.palmAnchor = new THREE.Object3D(); this.node.add(this.palmAnchor);
+    this.render = new THREE.Group(); this.render.add(makeJointMesh(material, mm(20))); this.node.add(this.render);
+  }
+  setFlex(t) { this.flex = clampN(t, WRIST_LIMITS.flexX[0], WRIST_LIMITS.flexX[1]); this.node.rotation.x = this.flex; }
+  setDeviation(t) { this.deviation = clampN(t, WRIST_LIMITS.devZ[0], WRIST_LIMITS.devZ[1]); this.node.rotation.z = this.deviation; }
+  attachTo(parent) { parent.add(this.node); }
+}
+
+/* Hand — owns 1 Poignet + palm + 5 Doigt mounted on per-finger MCP anchors. */
+class Main {
+  constructor(materials) {
+    this.node = new THREE.Group();
+    this.poignet = new Poignet(materials.skin); this.poignet.attachTo(this.node);
+    this.palm = makePalmSlab(materials.skin); this.poignet.palmAnchor.add(this.palm);
+    this.anchors = {};
+    const mcpSpan = PALM_WIDTH_Z * 0.95, step = mcpSpan / 3, edgeZ = NECK_DEPTH * 0.60, topY = PALM_HEIGHT_Y * 0.5;
+    const off = { index: -mcpSpan / 2, middle: -mcpSpan / 2 + step, ring: -mcpSpan / 2 + 2 * step, pinky: -mcpSpan / 2 + 3 * step };
+    for (const f of FINGER_ORDER) { const a = new THREE.Object3D(); a.position.set(off[f], topY, edgeZ); this.palm.add(a); this.anchors[f] = a; }
+    const ta = new THREE.Object3D(); ta.position.set(0, -PALM_HEIGHT_Y * 0.2, -PALM_DEPTH_X * 0.35); this.palm.add(ta); this.anchors.thumb = ta;
+    this.doigts = { index: new Index(materials), middle: new Majeur(materials), ring: new Annulaire(materials), pinky: new PetitDoigt(materials), thumb: new Pouce(materials) };
+    for (const f of FINGER_ORDER) this.doigts[f].attachTo(this.anchors[f]);
+    this.doigts.thumb.attachTo(this.anchors.thumb);
+    this.mcpSpan = mcpSpan;
+  }
+  attachTo(handGroup) { handGroup.add(this.node); }
+  doigt(name) { return this.doigts[name]; }
+  anchorWorld(name, out = new THREE.Vector3()) { return this.anchors[name].getWorldPosition(out); }
+  setPlacement(x, y, z) { this.node.position.set(x, y, z); }
+}
+
+/* Per-frame controller: places the wrist along the neck, the thumb under it,
+   and folds each active finger to its target string.  Owns no geometry. */
+class AnimationMain {
+  constructor(renderer, main) { this.r = renderer; this.main = main; }
+  placement_poignet(fretIndex, knuckleZ) {
+    const r = this.r, m = this.main;
+    // Place the hand so the INDEX MCP sits AT fretIndex (spec): index anchor is
+    // at -mcpSpan/2 from the node, so node.x = pressX(fret) + mcpSpan/2.  The
+    // other fingers then fall on +1/+2/+3 frets via the anchor spread.
+    const x = (fretIndex > 0 ? r._pressX(fretIndex) : (r._boardCX || 0)) + m.mcpSpan / 2;
+    const nodeY = r._tuneNum("mcpnodey", MCP_NODE_Y);
+    // Knuckle-row Z: just player-side (+Z) of the player-most active string, so
+    // every pressed string is within the finger's fold reach.  Default to the
+    // neck player edge when no active target.
+    const z = (knuckleZ != null) ? knuckleZ
+      : ((r._neckHW || 12.5) + r._tuneNum("mcpedge", MCP_EDGE_MARGIN));
+    m.setPlacement(x, nodeY, z);
+    m.poignet.setFlex(WRIST_FLEX_DEFAULT); m.poignet.setDeviation(WRIST_DEV_DEFAULT);
+    // MCP anchors launch from the +Z player edge (OUTSIDE the neck), above the
+    // board, splayed along the neck; CCD then folds each finger DOWN onto its
+    // string.  Anchor Z is relative to the (Z-tracked) node so the launch-to-
+    // target geometry is consistent across chords.
+    const launchY = r._tuneNum("mcpy", MCP_LAUNCH_Y) - nodeY;
+    const launchZ = r._tuneNum("mcpreach", MCP_REACH);   // anchor +Z of the node (≈ reach sweet-spot)
+    const span = m.mcpSpan, step = span / 3;
+    const offX = { index: -span / 2, middle: -span / 2 + step, ring: -span / 2 + 2 * step, pinky: -span / 2 + 3 * step };
+    const baseX = r._tuneNum("rootbase", ROOT_BASE);   // finger root pitch baseline
+    for (const f of FINGER_ORDER) { const a = m.anchors[f]; if (a) a.position.set(offX[f], launchY, launchZ); m.doigt(f)._baseX = baseX; }
+    m.node.updateMatrixWorld(true);
+  }
+  animation_pouce(main) {
+    const thumb = main.doigt("thumb");
+    thumb.setBase(THUMB_BASE_X, 0); thumb.setYaw(THUMB_YAW);
+    main.node.updateMatrixWorld(true);
+    const collide = () => this.r._segmentsHitNeck(thumb.segments());
+    const contact = () => this.r._thumbOnBelly(thumb.tipWorld());
+    const dist = () => { const p = thumb.tipWorld(); return Math.abs(p.y - this.r._bellyY(p.z)); };
+    thumb.fold({ contact, collide, dist });
+  }
+  _placeFinger(main, name, fret, corde) {
+    const r = this.r, d = main.doigt(name);
+    const T = new THREE.Vector3(r._pressX(fret), STRING_SURFACE, r._stringZAt(corde));
+    main.node.updateMatrixWorld(true);
+    const mcp = d.mcpWorld();
+    const yawRaw = Math.atan2(-(T.x - mcp.x), -(T.z - mcp.z));
+    d.setYaw(clampN(yawRaw, -MCP_ABD_HALF[name], MCP_ABD_HALF[name]));
+    const collide = () => r._segmentsHitNeck(d.segments());
+    const dist = () => d.tipWorld().distanceTo(T);
+    const contact = () => dist() <= CONTACT_EPS;
+    return d.fold({ contact, collide, dist });
+  }
+}
+/* Thumb base placement (tuned in-browser): pitch the CMC so the thumb points
+   up-and-under the neck belly, yaw it toward the back. */
+const THUMB_BASE_X = -0.6;   // rotation.x baseline (negative = tip up toward belly)
+const THUMB_YAW = 0.5;       // rotation.y swing under the neck
+
 class Hand3DRenderer {
   constructor(container) {
     this.container = container;
@@ -493,23 +746,40 @@ class Hand3DRenderer {
       });
     }
 
-    this._buildHand();
+    this._buildHand();      // legacy procedural rig (A/B fallback; ?rig=legacy)
 
-    // Skinned-GLB state.  Defaults assume the load will fail (procedural rig
-    // stays live); _loadSkinnedHand flips _useSkinnedHand=true on success.
+    // Skinned-GLB state (A/B fallback; ?rig=skinned).
     this._useSkinnedHand = false;
     this._bones = {};
     this._boneByName = {};   // sanitized-name → bone (resolves dotted lookups)
     this._rig = null;
     this._lastHandPosX = 0;  // world-X the rig is parked at (updated per frame)
 
-    // Load the REAL rigged hand fire-and-forget.  Any failure (missing asset,
-    // parse error, no WebGL image support) is swallowed inside the method, so
-    // the procedural rig built above remains the visible hand.
-    try {
-      this._loadSkinnedHand();
-    } catch (e) {
-      console.warn("[hand3d] skinned GLB kickoff failed; using procedural rig", e);
+    /* ARTICULATED FK RIG — the real fretting hand (default).  A genuinely
+       hinged hand that folds each finger until it contacts its string; the
+       legacy procedural rig and the skinned GLB are kept only as A/B fallbacks
+       selectable with ?rig=legacy / ?rig=skinned. */
+    this._rigMode = (() => {
+      try { return new URLSearchParams(window.location.search || "").get("rig") || "articulated"; }
+      catch (e) { return "articulated"; }
+    })();
+    this.main = new Main({ skin: this.skinMat, roleMats: this.roleMats });
+    this.main.attachTo(this.handGroup);
+    this.anim = new AnimationMain(this, this.main);
+
+    if (this._rigMode === "articulated") {
+      // Hide the legacy hand (keep its forearm tube as the arm) and show Main.
+      if (this.palm) this.palm.visible = false;
+      for (const f of FINGER_ORDER) { const n = this.fingerNodes && this.fingerNodes[f]; if (n) { n.root.visible = false; if (n.tipCap) n.tipCap.visible = false; } }
+      if (this.thumbBone) this.thumbBone.visible = false;
+      if (this.thumbJoint) this.thumbJoint.visible = false;
+      this.main.node.visible = true;
+    } else {
+      this.main.node.visible = false;
+      if (this._rigMode === "skinned") {
+        try { this._loadSkinnedHand(); }
+        catch (e) { console.warn("[hand3d] skinned GLB kickoff failed; using procedural rig", e); }
+      }
     }
 
     // Texture loading + OBJ-palm swap remain DISABLED in this 3D-native
@@ -1317,6 +1587,12 @@ class Hand3DRenderer {
     this._boardCX = boardCX;
     this._stringZMax = stringZMax;
     this._stringZMin = stringZMin;
+    // Neck collision solid (for the articulated-rig fold collision-clamp):
+    //   flat top Y in [-0.30, 0] over Z in [-hw, hw]; rounded belly to -NECK_DEPTH.
+    this._neckHW = hw;
+    this._neckX0 = x0;
+    this._neckX1 = x1;
+    this._neckTopY = -0.30;
 
     // Camera framing: aim at the fret-press points just above the strings
     // and slightly past them into the -Z fretboard half.  This guitarist's-
@@ -1350,6 +1626,40 @@ class Hand3DRenderer {
     return this._stringZ[s];
   }
 
+  /* ---- Neck D-solid collision (articulated-rig fold-clamp, rule 7) -------- *
+     Belly = lower envelope of two quad Beziers from (±hw,-0.30) to (0,-DEPTH). */
+  _bellyY(z) {
+    const hw = this._neckHW || 12.5, depth = NECK_DEPTH, topY = this._neckTopY || -0.30;
+    const az = Math.abs(z);
+    if (az >= hw) return topY;
+    const t = Math.sqrt(Math.max(0, 1 - az / hw));        // invert z(t)=hw*(1-t^2)
+    return (1 - t) * (1 - t) * topY + (2 * (1 - t) * t + t * t) * (-depth);
+  }
+  _insideNeck(p) {
+    if (this._neckHW == null) return false;
+    if (p.x < this._neckX0 || p.x > this._neckX1) return false;
+    if (Math.abs(p.z) > this._neckHW) return false;
+    return p.y >= this._bellyY(p.z) && p.y <= 0.0;
+  }
+  _segmentHitsNeck(a, b) {
+    const t = new THREE.Vector3();
+    for (let i = 1; i < NECK_SAMPLES; i++) {
+      t.lerpVectors(a, b, i / NECK_SAMPLES);
+      if (this._insideNeck(t)) return true;
+    }
+    return false;
+  }
+  _segmentsHitNeck(segs) {
+    for (const [a, b] of segs) if (this._segmentHitsNeck(a, b)) return true;
+    return false;
+  }
+  /* Thumb contact: pad touches the neck belly underneath (not a string). */
+  _thumbOnBelly(p) {
+    return this._neckHW != null && Math.abs(p.z) <= this._neckHW &&
+      p.x >= this._neckX0 && p.x <= this._neckX1 &&
+      Math.abs(p.y - this._bellyY(p.z)) <= CONTACT_EPS;
+  }
+
   /* Per-frame re-pose from the shared kinematic snapshot.
 
      We use ONLY semantic intent (target string + fret + role) from the kin
@@ -1367,6 +1677,11 @@ class Hand3DRenderer {
     if (this.disposed || !kin) return;
     this._lastKin = kin;   // dev hook: the grip verifier reads active fingers/targets
     try {
+      if (this._rigMode === "articulated") {
+        this._updateArticulated(kin);
+        this.renderer.render(this.scene, this.camera);
+        return;
+      }
       if (this._useSkinnedHand) {
         // SKINNED PATH: the real GLB hand deforms via skin weights.  We still
         // run _poseHand so _palmX / _palmZ (the per-finger curl solve reads
@@ -1394,6 +1709,44 @@ class Hand3DRenderer {
         this._poseErrLogged = true;
       }
     }
+  }
+
+  /* Articulated-rig per-frame pose: place the wrist along the neck, brace the
+     thumb under it, then FOLD each active finger to its target string (or relax
+     idle fingers).  Tracks any finger the cost solver asked for that the rig
+     could not reach within its joint limits (rule 9). */
+  _updateArticulated(kin) {
+    const m = this.main, a = this.anim;
+    this._poseHand(kin);                                   // sets _palmX / _palmZ
+    this._lastHandPosX = (this._palmX !== undefined) ? this._palmX : this._lastHandPosX;
+    // index "position" fret = lowest active fret (the hand's neck position)
+    let idxFret = 0, maxZ = null;
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers && kin.fingers[f];
+      if (!fg || fg.fret <= 0 || !(fg.role === "active" || fg.role === "planted")) continue;
+      if (idxFret === 0 || fg.fret < idxFret) idxFret = fg.fret;
+      if (fg.strings && fg.strings.length) { const z = this._stringZAt(fg.strings[0]); if (maxZ === null || z > maxZ) maxZ = z; }
+    }
+    // Node Z = the player-most active string; the anchor adds MCP_REACH so the
+    // knuckle sits at its reach sweet-spot above that string.
+    a.placement_poignet(idxFret, maxZ);
+    a.animation_pouce(m);
+    const unreachable = [];
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers && kin.fingers[f];
+      const role = (fg && fg.role) || "idle";
+      const str = (fg && fg.strings && fg.strings.length) ? fg.strings[0] : null;
+      const d = m.doigt(f);
+      if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
+        const res = a._placeFinger(m, f, fg.fret, str);
+        if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
+      } else {
+        d.setYaw(0); d.relax();
+      }
+      d.setRole(role);
+    }
+    this._lastUnreachable = unreachable;
+    this._poseForearm(kin);                                // legacy forearm tube = the arm
   }
 
   /* Position the back-of-hand slab along the neck.  We derive the hand's
