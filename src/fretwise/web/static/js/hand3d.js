@@ -1749,15 +1749,20 @@ class Hand3DRenderer {
     this._poseHand(kin);                                   // sets _palmX / _palmZ
     this._lastHandPosX = (this._palmX !== undefined) ? this._palmX : this._lastHandPosX;
     // index "position" fret = lowest active fret (the hand's neck position)
+    // Position the hand over ANY fretted finger (active OR ready/hover) so it
+    // tracks the upcoming notes even between presses; fall back to the last
+    // position / a default so the startup pose is sensible, never collapsed.
     let idxFret = 0, maxZ = null;
     for (const f of FINGER_ORDER) {
       const fg = kin.fingers && kin.fingers[f];
-      if (!fg || fg.fret <= 0 || !(fg.role === "active" || fg.role === "planted")) continue;
+      if (!fg || !(fg.fret > 0)) continue;
       if (idxFret === 0 || fg.fret < idxFret) idxFret = fg.fret;
       if (fg.strings && fg.strings.length) { const z = this._stringZAt(fg.strings[0]); if (maxZ === null || z > maxZ) maxZ = z; }
     }
-    // Node Z = the player-most active string; the anchor adds MCP_REACH so the
-    // knuckle sits at its reach sweet-spot above that string.
+    if (idxFret === 0) idxFret = this._lastIdxFret || 2; else this._lastIdxFret = idxFret;
+    if (maxZ === null) maxZ = this._stringZAt(2);
+    // Node Z = player-most string; the anchor adds MCP_REACH so the knuckle
+    // sits at its reach sweet-spot above that string.
     a.placement_poignet(idxFret, maxZ);
     a.animation_pouce(m);
     // R11: fold all fingers; if any can't reach (even with its 45° point), move
@@ -1795,7 +1800,8 @@ class Hand3DRenderer {
         if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
         prevX = Math.max(prevX, d.tipWorld().x);
       } else {
-        d.setYaw(0); d.relax();
+        // Idle/hover: a gentle, natural resting curve (not a tight claw).
+        d.setYaw(0); d.relax({ mcp: 0.18, pip: 0.26, dip: 0.12 });
       }
       d.setRole(role);
     }
@@ -2091,13 +2097,19 @@ class Hand3DRenderer {
      stays attached to the back of the palm slab, regardless of where the
      hand has slid along the neck. */
   _poseForearm(kin) {
-    // Classical grip: the wrist sits on the WRIST edge of the palm (-X end,
-    // since index = -mcpSpan/2 places the wrist-side at -X), UNDER the
-    // neck (Y = palm centre = MCP_Y), and biased to the +Z (player) side
-    // of the palm so the forearm exits toward the player's body.
-    const wristX = (this._palmX !== undefined) ? this._palmX - PALM_DEPTH_X * 0.30 : 0;
-    const wristY = MCP_Y;                                              // palm centre Y
-    const wristZ = (this._palmZ !== undefined) ? this._palmZ + PALM_DEPTH_X * 0.25 : 0;
+    let wristX, wristY, wristZ;
+    if (this._rigMode === "articulated" && this.main) {
+      // Anchor the forearm tube to the ACTUAL articulated wrist (Main.node), so
+      // it connects to the hand instead of floating at the procedural palm.
+      const w = new THREE.Vector3();
+      this.main.node.getWorldPosition(w);
+      wristX = w.x; wristY = w.y; wristZ = w.z;
+    } else {
+      // Classical grip (legacy path): wrist on the -X palm edge, biased +Z.
+      wristX = (this._palmX !== undefined) ? this._palmX - PALM_DEPTH_X * 0.30 : 0;
+      wristY = MCP_Y;
+      wristZ = (this._palmZ !== undefined) ? this._palmZ + PALM_DEPTH_X * 0.25 : 0;
+    }
     this.forearmBone.position.set(wristX, wristY, wristZ);
     // Bone rest direction is local -Z.  rotation.y = π flips -Z → +Z so the
     // forearm exits toward the player; rotation.x = +π·0.25 pitches the bone
