@@ -50,11 +50,28 @@
     }
   },
   "golden_set_v1_metrics": {
+    "_comment": "rev2: CANONICAL numbers under the spec inference protocol (sliding window stride=1 + overlap-averaging + model-selected anchor, alpha=1.0). Cross-verified: GDS ran FretWise's eval_phrase_window_golden.py and reproduced these exactly. Supersedes the rev1 single-window/no-overlap/alpha=0.2 numbers (per_note 0.5088), which were a non-canonical harness artifact — NOT a model difference (anchor_accuracy matched all along).",
     "n_cases": 13,
     "n_evaluated": 13,
-    "per_note_accuracy": 0.5088,
-    "exact_window_match_rate": 0.0,
-    "anchor_accuracy": 0.8462,
-    "pinky_false_positive_rate": 0.2075
+    "per_note_accuracy": 0.6780,
+    "exact_window_match_rate": 0.1538,
+    "anchor_accuracy": 0.8571,
+    "pinky_false_positive_rate": 0.1455,
+    "counts": {
+      "per_note": "40/59",
+      "exact_window": "2/13",
+      "anchor": "42/49",
+      "pinky_false_positive": "8/55"
+    }
+  },
+  "eval_protocol": {
+    "status": "CANONICAL — both sides agree (GDS-025)",
+    "windowing": "Slide a window of 5 notes (stride=1) across the phrase; non-chord notes only.",
+    "anchor": "Model-SELECTED per window (not GT-imposed): argmax of anchor_prob - alpha*mean(slot_NLL), alpha=1.0.",
+    "decoding": "Average overlapping per-note softmaxes (spec step 6) before argmax — phrase-level smoothing.",
+    "chord_notes": "Treated SEQUENTIALLY (onset=order). Confirmed identical on both sides — NOT a source of divergence.",
+    "scoring_scope": "ALL notes of each golden case (not just the first window).",
+    "reference_impl": "fretwise/scripts/eval_phrase_window_golden.py (LearnedPhraseWindowFingerer.predict_sequence); GDS golden harness updated to match in scripts/eval_phrase_window_v1.py.",
+    "rev1_note": "The deprecated rev1 GDS harness scored only the first <=5 notes of each case, no overlap-averaging, alpha=0.2."
   }
 }
