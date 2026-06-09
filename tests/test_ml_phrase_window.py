@@ -116,16 +116,24 @@ def test_all_calibration_features_match(calibration: dict) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_candidate_anchors_from_min_fret() -> None:
-    # Django intro 7-7-5-7-5 on one string → min fret 5 → [5,4,3,2].
+def test_candidate_anchors_union_then_median_reduction() -> None:
+    # GDS-024 worked example: Django 7-7-5-7-5 → fretted {5,7} →
+    # union {2,3,4,5,6,7} (6 > 4) → reduced to {lowest, highest, median=sorted[3]}.
     notes = [PhraseNote(1, f, 60, i, 1.0) for i, f in enumerate([7, 7, 5, 7, 5])]
-    assert candidate_anchors(notes) == [5, 4, 3, 2]
+    assert candidate_anchors(notes) == [2, 5, 7]
 
 
-def test_candidate_anchors_clip_at_one() -> None:
-    # Min fret 2 → candidates 2,1 (0 and -1 clipped out).
-    notes = [PhraseNote(2, 2, 50, 0, 0.5), PhraseNote(2, 4, 54, 1, 0.5)]
-    assert candidate_anchors(notes) == [2, 1]
+def test_candidate_anchors_union_no_reduction_at_four() -> None:
+    # GDS-024 worked example: Apache {2,2,2,4,2} → union {1,2,3,4} (exactly 4,
+    # no reduction). This is why anchor 4 is a valid candidate.
+    notes = [PhraseNote(2, f, 50, i, 0.5) for i, f in enumerate([2, 2, 2, 4, 2])]
+    assert candidate_anchors(notes) == [1, 2, 3, 4]
+
+
+def test_candidate_anchors_clip_to_valid_range() -> None:
+    # Single low fretted note 2 → {2,1} (0 and -1 clipped out), ≤4 so no reduction.
+    notes = [PhraseNote(2, 2, 50, 0, 0.5), PhraseNote(2, 2, 50, 1, 0.5)]
+    assert candidate_anchors(notes) == [1, 2]
 
 
 def test_candidate_anchors_all_open_defaults_to_one() -> None:
@@ -180,12 +188,16 @@ def _load_model():
     return LearnedPhraseWindowFingerer.from_model_dir(MODELS)
 
 
-def test_bundle_reproduces_full_case_outputs(calibration: dict) -> None:
-    """Fully-pinned cases must match recorded model_output bit-for-bit."""
+def test_bundle_reproduces_recorded_outputs(calibration: dict) -> None:
+    """Cases with a recorded model_output must match it bit-for-bit.
+
+    Witness cases (synthetic, ``model_output: null``) exist only to pin
+    features and are skipped here.
+    """
     model = _load_model()
-    full_cases = [ex for ex in calibration["examples"] if "expected_features" in ex]
-    assert full_cases, "expected at least one fully-pinned calibration case"
-    for ex in full_cases:
+    scored = [ex for ex in calibration["examples"] if ex.get("model_output") is not None]
+    assert scored, "expected at least one case with a recorded model_output"
+    for ex in scored:
         notes = _to_notes(ex["input_notes"])
         fv = build_window_feature_vector(notes, ex["candidate_anchor"])
         slot_probs, anchor_probs = model._run_bundle([fv])
@@ -197,13 +209,23 @@ def test_bundle_reproduces_full_case_outputs(calibration: dict) -> None:
 
 
 def test_anchor_selection_picks_ground_truth(calibration: dict) -> None:
-    """predict_window selects the calibration's ground-truth anchor."""
+    """predict_window selects the correct anchor for the GT-anchor cases.
+
+    Restricted to cases whose pinned anchor is the correct one
+    (``expected_targets.anchor_correct``) and that carry a model_output —
+    i.e. django/apache_2, not the deliberately-wrong or witness cases.
+    """
     model = _load_model()
-    for ex in calibration["examples"]:
-        if "expected_features" not in ex:
-            continue  # only full melodic cases carry a clean GT anchor
+    gt_cases = [
+        ex for ex in calibration["examples"]
+        if ex.get("model_output") is not None
+        and ex.get("expected_targets", {}).get("anchor_correct") is True
+    ]
+    assert gt_cases, "expected at least one correct-anchor case"
+    for ex in gt_cases:
         notes = _to_notes(ex["input_notes"])
         prediction = model.predict_window(notes)
+        assert ex["candidate_anchor"] in [a for a, _ in prediction.candidate_scores], ex["case_id"]
         assert prediction.anchor == ex["candidate_anchor"], ex["case_id"]
         assert len(prediction.slots) == len(notes)
 

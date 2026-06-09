@@ -1,7 +1,12 @@
 {
   "model_name": "phrase_window_fingering_v1",
   "model_version": "1.0.0",
-  "status": "trained-baseline",
+  "status": "released-baseline",
+  "status_note": "This IS the shipped, trained v1 (1,495,179 training rows; see training_dataset_artifacts). 'baseline' denotes the 5-head XGBoost architecture, NOT a scaffold or placeholder. Renamed from 'trained-baseline' for clarity (FW-023 question #50).",
+  "spec_revision": 2,
+  "spec_changelog": [
+    "rev2 (2026-06-09): DOC-ONLY. Model ONNX bytes, feature code, and feature VALUES are unchanged. (1) Added explicit has(k) formulas for the 5 win_* heuristic features + a feature_formula_reference block — clarifies what build_window_feature_vector already computes. (2) Completed candidate_anchor_generation: union over ALL fretted notes + the {lowest,highest,median} reduction rule (answers FW-023 #49). (3) status 'trained-baseline' -> 'released-baseline' (FW-023 #50)."
+  ],
   "training_date": "2026-05-21",
   "schema_version": "fretwise-ml-v2",
   "fretwise_commit_reference": "refactor/p0-notation-fixes@621dcf8 (FW head at delivery time)",
@@ -86,11 +91,19 @@
     "win_contains_open": "1 if any note has fret==0.",
     "win_contains_chord": "1 if any note has is_chord_member==true.",
     "win_candidate_anchor": "The candidate anchor fret being scored for this row.",
-    "win_index_anchor_required": "Heuristic: 1 if any note sits on the natural index fret (anchor+0).",
-    "win_ring_natural_for_anchor_plus_2": "1 if any note sits on anchor+2 (ring's natural fret).",
-    "win_pinky_natural_for_anchor_plus_3": "1 if any note sits on anchor+3.",
-    "win_pinky_used_without_lower_anchor": "1 if pinky fret present but index/middle frets absent (PRIOR — model can override).",
-    "win_would_shift_hand_if_no_pinky": "1 if removing the pinky fret would force a hand shift."
+    "win_index_anchor_required": "has(0). 1 if any fretted note sits exactly on the anchor fret (anchor+0). NOTE: this is presence-of-a-note-AT-the-anchor, NOT win_min_fret==anchor.",
+    "win_ring_natural_for_anchor_plus_2": "has(2). 1 if any fretted note sits exactly on anchor+2. NOTE: exact presence, NOT max_fret>=anchor+2, and unrelated to win_contains_chord.",
+    "win_pinky_natural_for_anchor_plus_3": "has(3). 1 if any fretted note sits exactly on anchor+3. NOTE: exact presence, NOT max_fret>=anchor+3.",
+    "win_pinky_used_without_lower_anchor": "has(3) and not has(0) and not has(1). 1 if a note sits on anchor+3 while no note sits on the anchor or anchor+1 fret (PRIOR — model can override).",
+    "win_would_shift_hand_if_no_pinky": "has(3) and not has(2) and not has(1) and not has(0). 1 if a note sits on anchor+3 and nothing sits on anchor, anchor+1, or anchor+2 (no lower fret anchors the hand, so dropping the pinky note would force a shift)."
+  },
+  "feature_formula_reference": {
+    "note": "DOC-ONLY clarification added in spec_revision 2; these formulas describe what build_window_feature_vector already computes (unchanged since v1 training). has(k) := any fretted note in the window has fret == candidate_anchor + k.",
+    "win_index_anchor_required": "has(0)",
+    "win_ring_natural_for_anchor_plus_2": "has(2)",
+    "win_pinky_natural_for_anchor_plus_3": "has(3)",
+    "win_pinky_used_without_lower_anchor": "has(3) and not has(0) and not has(1)",
+    "win_would_shift_hand_if_no_pinky": "has(3) and not has(2) and not has(1) and not has(0)"
   },
   "feature_ranges": {
     "fret": {"min": -1, "max": 22, "note": "-1 means PAD"},
@@ -129,9 +142,12 @@
     "step_6": "For overlapping windows (stride < window_size), average the per-note probabilities across windows before argmax — this gives smoothed phrase-level decisions."
   },
   "candidate_anchor_generation": {
-    "rule": "For every fretted note in the window, candidate ∈ {fret-0, fret-1, fret-2, fret-3} intersected with [1, 22], deduplicated.",
+    "rule": "For EVERY fretted note in the window, candidate ∈ {fret-0, fret-1, fret-2, fret-3} intersected with [1, 22], deduplicated. This is the union over ALL fretted notes — NOT the {min, min-1, min-2, min-3} subset of the lowest note only.",
+    "reduction_when_over_max": "If the deduped union has more than max_candidates entries, keep exactly {lowest, highest, median} where median = sorted_candidates[n // 2]. (This is the only reason the union can exceed max_candidates yet the protocol still says 'up to 4'.)",
     "all_open_default": 1,
-    "max_candidates": 4
+    "max_candidates": 4,
+    "reference_impl": "src/features/phrase_window_features.py :: candidate_anchors",
+    "worked_example": "Window with fretted frets {7,5} -> union {2,3,4,5,6,7} (6>4) -> reduced to {2,5,7}. Window with {2,2,2,4,2} -> {1,2,3,4} (exactly 4, no reduction) — which is why anchor 4 is a valid candidate and the 'apache_4_wrong' calibration case exists."
   },
   "training_sources": {
     "primary": ["classclef_sequential_fingering.json", "gaps_sequential_fingering.json"],

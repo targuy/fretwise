@@ -160,31 +160,42 @@ def phrase_window_feature_names(window_size: int = WINDOW_SIZE) -> tuple[str, ..
 def candidate_anchors(
     notes: Sequence[PhraseNote], max_candidates: int = 4,
 ) -> list[int]:
-    """Generate candidate anchor frets for a window (spec step 2).
+    """Generate candidate anchor frets for a window (spec step 2, rev2).
 
-    The anchor is the fret under the index finger, so it cannot lie above the
-    lowest fretted note. Candidates are therefore the lowest fretted note's
-    fret and the three frets below it (the index..pinky span), clipped to
-    ``[1, 22]`` — at most ``max_candidates`` values, highest first.
+    For **every** fretted note in the window, the candidate set includes
+    ``{fret, fret-1, fret-2, fret-3} ∩ [1, 22]`` (the index..pinky span that
+    could place that note). The union over all fretted notes is deduplicated;
+    if it exceeds ``max_candidates`` entries, it is reduced to exactly
+    ``{lowest, highest, median}`` where ``median = sorted[n // 2]``.
 
     All-open windows default to anchor 1 (``all_open_default`` in the spec).
 
+    Per GDS-024 (#52) — this is the union over all notes, **not** the
+    ``{min..min-3}`` subset of the lowest note. Example: frets ``{7, 5}`` →
+    union ``{2,3,4,5,6,7}`` → reduced to ``{2, 5, 7}``; frets ``{2,2,2,4,2}`` →
+    ``{1, 2, 3, 4}`` (exactly 4, no reduction).
+
     Args:
         notes: Real (non-padding) notes of the window.
-        max_candidates: Cap on the number of anchors (4 for v1).
+        max_candidates: Reduction threshold (4 for v1).
 
     Returns:
-        Distinct candidate anchor frets, ordered from highest to lowest.
+        Distinct candidate anchor frets, ascending.
     """
-    fretted = [n.fret for n in notes if n.fret > 0]
+    fretted = {n.fret for n in notes if n.fret > 0}
     if not fretted:
         return [_MIN_ANCHOR]
-    lowest = min(fretted)
-    cands = [
-        c for c in (lowest - offset for offset in range(max_candidates))
-        if _MIN_ANCHOR <= c <= _MAX_ANCHOR
-    ]
-    return cands
+    cands: set[int] = set()
+    for fret in fretted:
+        for offset in range(4):
+            candidate = fret - offset
+            if _MIN_ANCHOR <= candidate <= _MAX_ANCHOR:
+                cands.add(candidate)
+    ordered = sorted(cands)
+    if len(ordered) > max_candidates:
+        median = ordered[len(ordered) // 2]
+        ordered = sorted({ordered[0], ordered[-1], median})
+    return ordered
 
 
 def build_window_feature_vector(
@@ -201,14 +212,11 @@ def build_window_feature_vector(
     ``PAD_VALUE`` in every per-note feature. Window-level features are computed
     from the real notes only.
 
-    Note on three heuristic window features that the calibration only pins on
-    its zero-valued examples (``win_pinky_used_without_lower_anchor`` and
-    ``win_would_shift_hand_if_no_pinky`` are 0 in all four cases; the chord
-    branch of ``win_ring_natural_for_anchor_plus_2`` is exercised only by the
-    open-E example): the formulas below reproduce every calibration value
-    exactly. Their behaviour on windows outside the calibration set is a
-    best-effort reading of the spec prose and is flagged in the FW→GDS reply;
-    it affects shadow diagnostics only, never user output.
+    The five anchor/finger window features use the authoritative ``has(k)``
+    definitions from the GDS reference extractor (calibration rev2 / GDS-024),
+    where ``has(k)`` means a fretted note sits exactly on fret ``anchor+k``.
+    Validated against all seven rev2 calibration cases (incl. three synthetic
+    witnesses that pin the pinky/index features at non-zero values).
 
     Args:
         notes: Real notes of the window, already ordered (melodic: by onset;
@@ -258,9 +266,14 @@ def build_window_feature_vector(
                 features[prefix + key] = PAD_VALUE
 
     anchor = float(candidate_anchor)
-    has_index_fret = candidate_anchor in frets_present
-    has_lower = (candidate_anchor - 1) in frets_present
-    has_pinky_fret = (candidate_anchor + 3) in frets_present
+    # has(k): a fretted note sits exactly on fret anchor+k. anchor+k is always
+    # >= 1 (anchor >= 1, k >= 0), so open strings (fret 0) never satisfy it and
+    # ``frets_present`` is safe to query directly. These are the authoritative
+    # definitions from the GDS reference extractor (calibration rev2 / GDS-024).
+    has0 = candidate_anchor in frets_present
+    has1 = (candidate_anchor + 1) in frets_present
+    has2 = (candidate_anchor + 2) in frets_present
+    has3 = (candidate_anchor + 3) in frets_present
 
     features["win_num_notes"] = float(len(notes))
     features["win_min_fret"] = win_min
@@ -271,25 +284,20 @@ def build_window_feature_vector(
     features["win_contains_open"] = 1.0 if any(n.fret == 0 for n in notes) else 0.0
     features["win_contains_chord"] = 1.0 if contains_chord else 0.0
     features["win_candidate_anchor"] = anchor
-    # Index anchors only when the lowest fretted note sits exactly on it (no
-    # fretted note below the anchor).
-    features["win_index_anchor_required"] = 1.0 if win_min == anchor else 0.0
-    # Ring is "natural" when the window reaches its fret (anchor+2) or the
-    # window is a chord (chords almost always recruit the ring finger).
-    features["win_ring_natural_for_anchor_plus_2"] = (
-        1.0 if (win_max >= anchor + 2 or contains_chord) else 0.0
-    )
-    # Pinky is "natural" when the window reaches its fret (anchor+3).
-    features["win_pinky_natural_for_anchor_plus_3"] = (
-        1.0 if win_max >= anchor + 3 else 0.0
-    )
-    # Prior: pinky fret used while the index/middle frets are absent.
+    # Index's natural fret (anchor+0) carries a note.
+    features["win_index_anchor_required"] = 1.0 if has0 else 0.0
+    # Ring's natural fret (anchor+2) carries a note.
+    features["win_ring_natural_for_anchor_plus_2"] = 1.0 if has2 else 0.0
+    # Pinky's natural fret (anchor+3) carries a note.
+    features["win_pinky_natural_for_anchor_plus_3"] = 1.0 if has3 else 0.0
+    # Pinky fret used while neither the anchor nor anchor+1 carry a note.
     features["win_pinky_used_without_lower_anchor"] = (
-        1.0 if (has_pinky_fret and not has_index_fret and not has_lower) else 0.0
+        1.0 if (has3 and not has0 and not has1) else 0.0
     )
-    # Removing the pinky fret would collapse a ≥3-fret stretch anchored here.
+    # Pinky note present with no lower fret (anchor, +1, +2) to anchor the hand,
+    # so dropping the pinky note would force a position shift.
     features["win_would_shift_hand_if_no_pinky"] = (
-        1.0 if (has_pinky_fret and (win_max - win_min) >= 3 and win_min == anchor) else 0.0
+        1.0 if (has3 and not has2 and not has1 and not has0) else 0.0
     )
     return features
 
