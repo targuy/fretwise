@@ -88,11 +88,14 @@ const mm = (v) => v / MM_PER_WU;
 /* Role → tip-cap colour, mirroring the SVG ROLE palette so the two renderers
    read the same at a glance (active amber, planted cyan, hover red, idle
    orange). */
+/* Finger role colours (user scheme): RED = currently played, BLUE = held in
+   place because soon used (sédentaire/planted), GREEN = hovering over the frets
+   without a current purpose (ready/idle). */
 const ROLE_COLOR = {
-  active:  0xffcf74,
-  planted: 0x8de5ff,
-  hover:   0xff8d80,
-  idle:    0xff9b3d,
+  active:  0xe53935,  // red — pressing now
+  planted: 0x2f7fe0,  // blue — staying down, soon used
+  hover:   0x3fbf48,  // green — hovering, ready
+  idle:    0x3fbf48,  // green — hovering, no purpose
 };
 const SKIN = 0xe2b694;
 
@@ -418,6 +421,8 @@ const WRIST_BACK     = 18;    // wrist sits this far +Z (player side) of the knu
 const MCP_EDGE_MARGIN = 2.0;  // fallback: MCP this far beyond the +Z neck edge when no active target
 const MCP_REACH      = 11;    // knuckle +Z offset from the player-most string (reach sweet-spot)
 const ROOT_BASE      = 135 * Math.PI / 180;  // finger root pitch baseline (folds down onto strings)
+const HOVER_GAP      = 5;     // wu: ready/hover fingers fold to this far above their string
+const IDLE_CURL      = { mcp: 0.9, pip: 1.0, dip: 0.5 };  // median resting curl for targetless idle fingers
 
 /* (makeBoneMesh — the organic tapered phalanx bone — is defined above and reused.) */
 
@@ -627,11 +632,10 @@ class AnimationMain {
     const dist = () => { const p = thumb.tipWorld(); return Math.abs(p.y - this.r._bellyY(p.z)); };
     thumb.fold({ contact, collide, dist });
   }
-  _placeFinger(main, name, fret, corde, targetX) {
+  _placeFinger(main, name, fret, corde, yLift = 0) {
     const r = this.r, d = main.doigt(name);
-    // targetX (R9 no-cross clamp) overrides the raw fret X when provided.
-    const tx = (targetX != null) ? targetX : r._pressX(fret);
-    const T = new THREE.Vector3(tx, STRING_SURFACE, r._stringZAt(corde));
+    // yLift > 0 → fold to HOVER this far above the string (not pressing).
+    const T = new THREE.Vector3(r._pressX(fret), STRING_SURFACE + yLift, r._stringZAt(corde));
     main.node.updateMatrixWorld(true);
     const mcp = d.mcpWorld();
     // R10: the proximal phalanx "points" toward the fret, capped at 45° (no roll).
@@ -661,7 +665,7 @@ class Hand3DRenderer {
     const h = container.clientHeight || SCENE_H;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x12141a);
+    this.scene.background = new THREE.Color(0xe9ebf0);   // light studio background
 
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 2000);
     // _lookAt is the persistent camera target; setGeometry() recenters it on
@@ -741,19 +745,19 @@ class Hand3DRenderer {
     canvas.addEventListener("pointerleave", this._onPointerUp);
     canvas.addEventListener("wheel", this._onWheel, { passive: false });
 
-    // Lighting: ambient + key from above + warm/cool fills sculpt the belly
-    // and back-of-hand.  Flat MeshStandardMaterial with roughness 0.75 reads
-    // as matte skin without textures.
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const key = new THREE.DirectionalLight(0xffffff, 0.95);
-    key.position.set(-20, 40, 30);
-    this.scene.add(key);
-    const warm = new THREE.DirectionalLight(0xffd9b8, 0.45);
-    warm.position.set(20, 15, 30);
-    this.scene.add(warm);
-    const cool = new THREE.DirectionalLight(0xa8c8ff, 0.35);
-    cool.position.set(0, 10, -30);
-    this.scene.add(cool);
+    // Light studio: a soft sky/ground hemisphere fill + three SPOTLIGHTS from
+    // above aimed at the hand, sculpting the fingers against the light backdrop.
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xc4c8d2, 0.65));
+    this._lightTarget = new THREE.Object3D();
+    this.scene.add(this._lightTarget);
+    const spot = (color, intensity, x, y, z) => {
+      const s = new THREE.SpotLight(color, intensity, 0, Math.PI / 4.4, 0.45, 0);
+      s.position.set(x, y, z); s.target = this._lightTarget;
+      this.scene.add(s); return s;
+    };
+    spot(0xffffff, 2.4, -60, 130, 95);   // key, high player-left
+    spot(0xfff1e2, 1.4, 90, 80, 115);    // warm rim, player-right
+    spot(0xe6efff, 1.0, -10, 60, -95);   // cool back fill
 
     this.fretboardGroup = new THREE.Group();
     this.scene.add(this.fretboardGroup);
@@ -1635,6 +1639,7 @@ class Hand3DRenderer {
     // HAND_OFFSET_Z * 0.15 is now 0 (HAND_OFFSET_Z = 0 in the new frame),
     // so we use a direct literal here.
     this._lookAt.set(boardCX, STRING_SURFACE + mm(3), -mm(5));
+    if (this._lightTarget) this._lightTarget.position.copy(this._lookAt);
     this._applyCamera();
   }
 
@@ -1793,15 +1798,18 @@ class Hand3DRenderer {
       const str = (fg && fg.strings && fg.strings.length) ? fg.strings[0] : null;
       const d = m.doigt(f);
       if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
-        // R9 no-cross is preserved by fret-ordered targets + the 45° point cap;
-        // each finger aims at its real fret X (no target shift, so the wrist-comp
-        // gap metric and the fold agree).
+        // Pressing (RED) or held-down/soon-used (BLUE): fold to contact.  R9
+        // no-cross is preserved by fret-ordered targets + the 45° point cap.
         const res = a._placeFinger(m, f, fg.fret, str);
         if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
         prevX = Math.max(prevX, d.tipWorld().x);
+      } else if (fg && fg.fret > 0 && str != null) {
+        // Ready/hover (GREEN): fold to HOVER just above its string — a natural
+        // median curl, not a finger sticking up or a tight claw.
+        a._placeFinger(m, f, fg.fret, str, HOVER_GAP);
       } else {
-        // Idle/hover: a gentle, natural resting curve (not a tight claw).
-        d.setYaw(0); d.relax({ mcp: 0.18, pip: 0.26, dip: 0.12 });
+        // Idle (GREEN), no target: a median resting curl over the board.
+        d.setYaw(0); d.relax(IDLE_CURL);
       }
       d.setRole(role);
     }
