@@ -208,15 +208,17 @@ const RIG_TARGET_MCP_MM  = 95;   // real knuckle-row width the bake targets
    side below.  (RIG_ROT is consumed by _applyRigTransform; the anchor cancels
    the orientation-dependent mirror offset automatically.) */
 const RIG_ROT = {
-  x: 0,              // flat; finger curl supplies the press, not a global pitch
-  y:  Math.PI / 2,   // yaw: back of hand to player, fingers over the board
+  x: -Math.PI / 2,   // pitch -90deg: wrist/palm rise from behind-below, the back
+                     //   of the hand arches OVER the neck, fingers curl DOWN over
+                     //   the front edge onto the strings (the classical "pince").
+  y:  Math.PI / 2,   // yaw: back of hand to player, knuckle row along the neck
   z:  0,             // roll — tune if the hand is canted
 };
-/* Grip anchor = desired WORLD position of the rendered hand CENTROID.  Y just
-   below the board so the palm cradles under the neck; Z toward the player so
-   the fingers fold over the near edge onto the strings.  X tracks hand_position. */
-const RIG_POS_Y = -6;
-const RIG_POS_Z = 8;
+/* Grip anchor = desired WORLD position of the rendered hand CENTROID.  Y below
+   the board so the palm/wrist cradle under+behind the neck; Z just behind the
+   centerline so the hand clamps the D-section.  X tracks hand_position. */
+const RIG_POS_Y = -7;
+const RIG_POS_Z = -2;
 
 /* Reusable zero vector (uncalibrated render offset fallback). */
 const ZERO_VEC = new THREE.Vector3();
@@ -225,6 +227,14 @@ const ZERO_VEC = new THREE.Vector3();
    gentle resting curl; active/planted fingers get the full solver curl. */
 const SKIN_IDLE_CURL  = 0.35;   // radians of gentle rest flex (idle/hover)
 const SKIN_THUMB_CURL = 0.45;   // gentle fixed brace curl for the thumb
+
+/* Thumb brace (classical grip): swing the CMC root so the thumb crosses to the
+   FAR (-Z) back-of-neck at mid-belly, with an opposition roll + distal flex.
+   Axis/sign are mirror-dependent — calibrated by ?thumbswing/thumbaxis/etc. */
+const THUMB_SWING_DEG  = 55;    // abduction angle carrying the thumb behind
+const THUMB_SWING_AXIS = "y";   // abduction axis (local)
+const THUMB_ROLL_DEG   = 30;    // opposition roll (local X)
+const THUMB_FLEX_DEG   = 40;    // distal brace flex
 
 /* Detect a usable WebGL context without throwing.  Returning false here makes
    create() fall back to SVG cleanly. */
@@ -360,6 +370,10 @@ class Hand3DRenderer {
   constructor(container) {
     this.container = container;
     this.disposed = false;
+    // Dev hook: expose the live renderer so the grip-rule verifier probe and
+    // in-browser tuning (rigrot/rigpos/testcurl URL params) can read bones,
+    // the fretboard group, and geometry helpers.  Harmless when unused.
+    try { window.__hand3d = this; } catch (e) { /* no window (SSR/test) */ }
 
     const w = container.clientWidth || SCENE_W;
     const h = container.clientHeight || SCENE_H;
@@ -854,7 +868,12 @@ class Hand3DRenderer {
     }
     if (this.thumbBone) this.thumbBone.visible = false;
     if (this.thumbJoint) this.thumbJoint.visible = false;
-    // Forearm (forearmBone/forearmJoint) intentionally stays visible.
+    // The baked GLB carries its OWN wrist + forearm stub, so the procedural
+    // forearm tube is redundant — and, anchored to the procedural _palmX/_palmZ
+    // rather than the mirrored GLB wrist, it floats away from the hand (R2).
+    // Hide it on the skinned path; the GLB arm is the connected forearm.
+    if (this.forearmBone) this.forearmBone.visible = false;
+    if (this.forearmJoint) this.forearmJoint.visible = false;
   }
 
   /* Orient + place the whole loaded hand into the classical grip and slide it
@@ -925,6 +944,25 @@ class Hand3DRenderer {
     } catch (e) { /* no-op */ }
     this.__ovCache = out;
     return out;
+  }
+
+  /* Dev tuning knobs: read a numeric/string URL param once (cached), else the
+     default.  Used to bracket mirror-dependent thumb angles in-browser. */
+  _tuneNum(name, dflt) {
+    this.__tune = this.__tune || {};
+    if (name in this.__tune) return this.__tune[name];
+    let v = dflt;
+    try { const q = new URLSearchParams(window.location.search || "").get(name); if (q != null && q !== "" && Number.isFinite(Number(q))) v = Number(q); } catch (e) { /* */ }
+    this.__tune[name] = v;
+    return v;
+  }
+  _tuneStr(name, dflt) {
+    this.__tuneS = this.__tuneS || {};
+    if (name in this.__tuneS) return this.__tuneS[name];
+    let v = dflt;
+    try { const q = new URLSearchParams(window.location.search || "").get(name); if (q) v = q; } catch (e) { /* */ }
+    this.__tuneS[name] = v;
+    return v;
   }
 
   /* Flex one bone about FLEX_AXIS by `angle` (radians) RELATIVE to its rest
@@ -1011,12 +1049,40 @@ class Hand3DRenderer {
       this._flexBone(b1, curl * CURL_SPLIT.pip);
       this._flexBone(b2, curl * CURL_SPLIT.dip);
     }
-    // Thumb: gentle, fixed-ish brace curl (no press target on the fretting
-    // thumb — it cradles the neck back).
-    const tn = FINGER_BONES.thumb;
-    this._flexBone(this._findBone(tn[0]), SKIN_THUMB_CURL * CURL_SPLIT.mcp);
-    this._flexBone(this._findBone(tn[1]), SKIN_THUMB_CURL * CURL_SPLIT.pip);
-    this._flexBone(this._findBone(tn[2]), SKIN_THUMB_CURL * CURL_SPLIT.dip);
+    // Thumb: swung BEHIND/under the neck to brace it (its own poser).
+    this._poseSkinnedThumb(kin);
+  }
+
+  /* Pose the thumb into the classical brace: swing the CMC root (thumb.01.L) so
+     the thumb crosses from the player side to the FAR (-Z) back-of-neck and sits
+     at mid-belly height, with a moderate distal flex so the pad braces the neck.
+     The swing axis/sign are mirror-dependent, so they are tunable:
+       ?thumbswing=DEG  (abduction angle, default THUMB_SWING_DEG)
+       ?thumbaxis=x|y|z (abduction axis, default 'y')
+       ?thumbroll=DEG   (opposition roll about local X)
+       ?thumbflex=DEG   (distal brace flex) */
+  _poseSkinnedThumb(kin) {
+    const root = this._findBone(FINGER_BONES.thumb[0]);
+    const mid  = this._findBone(FINGER_BONES.thumb[1]);
+    const tip  = this._findBone(FINGER_BONES.thumb[2]);
+    if (!root) return;
+    const q = this._tuneNum("thumbswing", THUMB_SWING_DEG) * Math.PI / 180;
+    const roll = this._tuneNum("thumbroll", THUMB_ROLL_DEG) * Math.PI / 180;
+    const flex = this._tuneNum("thumbflex", THUMB_FLEX_DEG) * Math.PI / 180;
+    const axName = this._tuneStr("thumbaxis", THUMB_SWING_AXIS);
+    const ax = axName === "x" ? new THREE.Vector3(1, 0, 0)
+      : axName === "z" ? new THREE.Vector3(0, 0, 1)
+        : new THREE.Vector3(0, 1, 0);
+    // compose swing (abduction across to the neck back) + roll (opposition) on
+    // the CMC root, relative to rest.
+    if (root.userData && root.userData.rest) {
+      root.quaternion.copy(root.userData.rest)
+        .multiply(new THREE.Quaternion().setFromAxisAngle(ax, q))
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), roll));
+    }
+    // distal phalanges brace (curl about FLEX_AXIS) so the pad meets the wood.
+    this._flexBone(mid, flex * 0.6);
+    this._flexBone(tip, flex * 0.4);
   }
 
   /* Total curl angle for finger `f`, REUSING the procedural solver's geometry.
@@ -1299,6 +1365,7 @@ class Hand3DRenderer {
    */
   update(kin) {
     if (this.disposed || !kin) return;
+    this._lastKin = kin;   // dev hook: the grip verifier reads active fingers/targets
     try {
       if (this._useSkinnedHand) {
         // SKINNED PATH: the real GLB hand deforms via skin weights.  We still
