@@ -1615,38 +1615,13 @@ class Hand3DRenderer {
       }
     }
 
-    // Headstock (la tête) at the NUT end (-X), a rounded maple paddle tilted
-    // slightly back, with the Fender-style 6-in-line tuners.
-    const headLen = boardWidthZ * 1.9;
-    const headHW = boardWidthZ * 0.62;        // headstock half-width (a touch wider than the neck)
-    const hs = new THREE.Shape();             // 2D (a=along -X length, b=across Z)
-    hs.moveTo(0, -hw);                         // at the nut, neck width
-    hs.lineTo(0, hw);
-    hs.lineTo(-headLen * 0.18, headHW);
-    hs.quadraticCurveTo(-headLen * 0.62, headHW * 1.04, -headLen, headHW * 0.34);
-    hs.quadraticCurveTo(-headLen * 1.06, 0, -headLen * 0.86, -headHW * 0.5);
-    hs.quadraticCurveTo(-headLen * 0.5, -headHW * 0.96, -headLen * 0.16, -hw * 1.04);
-    hs.closePath();
-    const hsGeo = new THREE.ExtrudeGeometry(hs, { depth: 0.5, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.12, bevelSegments: 2, curveSegments: 16 });
-    hsGeo.rotateX(-Math.PI / 2);              // shape's Y (Z-across) → world Z; extrude → world Y
-    hsGeo.translate(0, -0.25, 0);
-    const head = new THREE.Mesh(hsGeo, boardMat);
-    head.position.set(x0, BOARD_TOP_Y, zMid);
-    head.rotation.z = -0.14;                   // slight backward tilt of the headstock
-    this.fretboardGroup.add(head);
-    // 6 tuners (machine heads) in-line along the +Z edge.
-    const tunerMat = new THREE.MeshStandardMaterial({ color: 0xd0d3d9, roughness: 0.28, metalness: 0.85 });
-    const pegGeo = new THREE.CylinderGeometry(boardWidthZ * 0.05, boardWidthZ * 0.05, 1.4, 12);
-    const btnGeo = new THREE.BoxGeometry(boardWidthZ * 0.16, 0.7, boardWidthZ * 0.07);
-    for (let i = 0; i < 6; i++) {
-      const tx = x0 - headLen * 0.20 - i * (headLen * 0.62 / 5);
-      const peg = new THREE.Mesh(pegGeo, tunerMat);
-      peg.position.set(tx, BOARD_TOP_Y + 0.5, zMid + headHW * 0.62);
-      this.fretboardGroup.add(peg);
-      const btn = new THREE.Mesh(btnGeo, tunerMat);
-      btn.position.set(tx, BOARD_TOP_Y + 0.5, zMid + headHW * 0.92);
-      this.fretboardGroup.add(btn);
-    }
+    // Full Stratocaster: body (sunburst) + pickguard + pickups + tremolo +
+    // knobs/switch/jack + the accurate 6-in-line headstock with tuners.
+    this._buildStrat({
+      xNut: wx(fretX(0)),
+      bridgeX: wx(NUT_X + 1120),     // 25.5" scale point (same px→wu mapping as the frets)
+      x1, boardWidthZ, hw, boardMat,
+    });
 
     // Strings: 6 thin tubes along +X at Y = STRING_SURFACE.  Re-built per
     // setGeometry call so the string count can change with the tuning.
@@ -1699,6 +1674,166 @@ class Hand3DRenderer {
     this._lookAt.set(boardCX, STRING_SURFACE + mm(3), -mm(5));
     if (this._lightTarget) this._lightTarget.position.copy(this._lookAt);
     this._applyCamera();
+  }
+
+  /* 3-tone sunburst as a CanvasTexture (radial amber→orange→dark). */
+  _makeSunburst() {
+    const S = 512;
+    const c = (typeof document !== "undefined") ? document.createElement("canvas") : null;
+    if (!c) return null;
+    c.width = c.height = S;
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#0a0503"; ctx.fillRect(0, 0, S, S);
+    const g = ctx.createRadialGradient(S / 2, S / 2, S * 0.04, S / 2, S / 2, S * 0.52);
+    g.addColorStop(0.00, "#e8b252"); g.addColorStop(0.22, "#d99a3f");
+    g.addColorStop(0.42, "#c2702a"); g.addColorStop(0.60, "#a8401a");
+    g.addColorStop(0.78, "#5e1d0c"); g.addColorStop(0.90, "#1c0d06");
+    g.addColorStop(1.00, "#0a0503");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+    const tex = new THREE.CanvasTexture(c);
+    if ("colorSpace" in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    try { tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy(); } catch (e) { /* */ }
+    return tex;
+  }
+
+  /* Build a full Fender Stratocaster (body + hardware + headstock) from the
+     reference photos, parented to fretboardGroup so it rebuilds with the board.
+     All coords are WORLD wu; see memory/the strat blueprint. */
+  _buildStrat(ctx) {
+    const { xNut, bridgeX, x1, boardWidthZ, hw, boardMat } = ctx;
+    const G = this.fretboardGroup;
+    const add = (geo, mat, x, y, z, rx, ry, rz) => {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x || 0, y || 0, z || 0);
+      if (rx) m.rotation.x = rx; if (ry) m.rotation.y = ry; if (rz) m.rotation.z = rz;
+      G.add(m); return m;
+    };
+    const halfStr = 2.5 * mm(10.5);
+    const zStr = (i) => halfStr - i * mm(10.5);     // i=0 high-E(+Z) … 5 low-E(-Z)
+    // ---- materials ----
+    const chrome = new THREE.MeshStandardMaterial({ color: 0xd8dbe0, roughness: 0.18, metalness: 0.92 });
+    const cream = new THREE.MeshStandardMaterial({ color: 0xe7dcc0, roughness: 0.4, metalness: 0.0 });
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2c, roughness: 0.5, metalness: 0.55 });
+    const knobMat = new THREE.MeshStandardMaterial({ color: 0xeae3d2, roughness: 0.35, metalness: 0.0 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1c, roughness: 0.5, metalness: 0.6 });
+    const guardMat = new THREE.MeshStandardMaterial({ color: 0xf4f1e8, roughness: 0.3, metalness: 0.0 });
+    const boneMat = new THREE.MeshStandardMaterial({ color: 0xede6d3, roughness: 0.55, metalness: 0.0 });
+
+    // ===== STEP 1 — BODY + SUNBURST =====
+    const s = new THREE.Shape();
+    s.moveTo(12.27, 27.0);
+    s.bezierCurveTo(6.0, 40.0, -2.0, 50.0, -3.9, 53.9);
+    s.bezierCurveTo(-6.5, 58.5, -2.0, 62.0, 6.0, 60.0);
+    s.bezierCurveTo(20.0, 56.0, 30.0, 47.0, 44.0, 47.0);
+    s.bezierCurveTo(70.0, 47.0, 90.0, 50.0, 97.8, 56.0);
+    s.bezierCurveTo(118.0, 62.0, 135.0, 66.4, 149.2, 66.0);
+    s.bezierCurveTo(175.0, 65.0, 196.0, 50.0, 202.4, 18.0);
+    s.bezierCurveTo(205.0, 4.0, 205.0, -4.0, 202.4, -18.0);
+    s.bezierCurveTo(196.0, -52.0, 175.0, -68.0, 149.2, -69.1);
+    s.bezierCurveTo(132.0, -69.8, 112.0, -66.0, 97.8, -58.0);
+    s.bezierCurveTo(80.0, -49.0, 66.0, -45.6, 60.0, -45.6);
+    s.bezierCurveTo(50.0, -45.6, 48.0, -55.0, 44.6, -60.0);
+    s.bezierCurveTo(38.0, -70.5, 20.0, -72.0, 6.0, -70.5);
+    s.bezierCurveTo(-8.0, -69.0, -10.0, -60.0, -2.0, -55.0);
+    s.bezierCurveTo(4.0, -51.0, 10.0, -45.0, 12.27, -27.0);
+    s.lineTo(12.27, 27.0);
+    const T = mm(45);
+    const bodyGeo = new THREE.ExtrudeGeometry(s, { depth: T, bevelEnabled: true, bevelThickness: 1.7, bevelSize: 1.7, bevelSegments: 3, curveSegments: 24 });
+    // rotateX(+π/2): shapeX→worldX, shapeY→worldZ (NOT flipped), extrude→world -Y (body hangs below)
+    bodyGeo.rotateX(Math.PI / 2);
+    bodyGeo.computeBoundingBox();
+    bodyGeo.translate(0, -0.30 - bodyGeo.boundingBox.max.y, 0);   // top face → just below the board slab
+    // planar UV (u along X, v across Z) so a circular burst → ellipse on the body
+    bodyGeo.computeBoundingBox();
+    const bb = bodyGeo.boundingBox, xR = bb.max.x - bb.min.x, zR = bb.max.z - bb.min.z;
+    const bp = bodyGeo.attributes.position, buv = new Float32Array(bp.count * 2);
+    for (let i = 0; i < bp.count; i++) { buv[i * 2] = (bp.getX(i) - bb.min.x) / xR; buv[i * 2 + 1] = (bp.getZ(i) - bb.min.z) / zR; }
+    bodyGeo.setAttribute("uv", new THREE.BufferAttribute(buv, 2));
+    const burst = this._makeSunburst();
+    const topMat = new THREE.MeshStandardMaterial({ map: burst, color: 0xffffff, roughness: 0.18, metalness: 0.0 });
+    const sideMat = new THREE.MeshStandardMaterial({ color: 0x140a05, roughness: 0.22, metalness: 0.0 });
+    const body = new THREE.Mesh(bodyGeo, [topMat, sideMat]);   // cap=burst, walls=dark
+    G.add(body);
+
+    // ===== STEP 3 — PICKGUARD =====
+    const pg = new THREE.Shape();
+    pg.moveTo(8.8, -10.0); pg.lineTo(8.8, 14.0);
+    pg.quadraticCurveTo(12.0, 22.0, 22.0, 24.5);
+    pg.quadraticCurveTo(50.0, 30.2, 80.0, 30.2);
+    pg.quadraticCurveTo(108.0, 30.0, 116.0, 27.0);
+    pg.quadraticCurveTo(120.0, 24.0, 122.3, 14.0);
+    pg.lineTo(122.3, -2.0);
+    pg.quadraticCurveTo(121.0, -12.0, 110.0, -14.5);
+    pg.quadraticCurveTo(85.0, -19.4, 55.0, -19.0);
+    pg.quadraticCurveTo(30.0, -18.5, 16.0, -15.0);
+    pg.quadraticCurveTo(11.0, -13.0, 8.8, -10.0);
+    const pgGeo = new THREE.ExtrudeGeometry(pg, { depth: mm(2.5), bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 1, curveSegments: 16 });
+    pgGeo.rotateX(Math.PI / 2);
+    pgGeo.computeBoundingBox(); pgGeo.translate(0, -0.15 - pgGeo.boundingBox.max.y, 0);   // top → -0.15 (just above body)
+    G.add(new THREE.Mesh(pgGeo, guardMat));
+
+    // ===== STEP 4 — PICKUPS =====
+    const bobGeo = new THREE.BoxGeometry(mm(18), mm(12), mm(70));
+    const poleGeo = new THREE.CylinderGeometry(mm(2.5), mm(2.5), mm(6), 12);
+    const mkPickup = (px, slantY) => {
+      const grp = new THREE.Group(); grp.position.set(px, 0, 0); if (slantY) grp.rotation.y = slantY;
+      const bob = new THREE.Mesh(bobGeo, cream); bob.position.set(0, -2.16, 0); grp.add(bob);
+      for (let i = 0; i < 6; i++) { const p = new THREE.Mesh(poleGeo, poleMat); p.position.set(0, -0.9, zStr(i)); grp.add(p); }
+      G.add(grp);
+    };
+    mkPickup(46.70, 0); mkPickup(85.59, 0); mkPickup(110.22, THREE.MathUtils.degToRad(10));
+
+    // ===== STEP 5 — TREMOLO + ARM =====
+    add(new THREE.BoxGeometry(mm(80), mm(3), mm(85)), chrome, 118.86, -0.6, 0);
+    const saddleGeo = new THREE.BoxGeometry(mm(18), mm(7), mm(10.5));
+    for (let i = 0; i < 6; i++) add(saddleGeo, chrome, bridgeX - mm(3) - i * mm(2), -0.2, zStr(i));
+    const ferGeo = new THREE.CylinderGeometry(mm(2), mm(2), mm(4), 10);
+    for (let i = 0; i < 6; i++) add(ferGeo, darkMat, 102.0, 0.05, zStr(i));
+    const armGrp = new THREE.Group(); armGrp.position.set(128.9, 3.0, 14.0); G.add(armGrp);
+    armGrp.add(new THREE.Mesh(new THREE.CylinderGeometry(mm(3), mm(3), mm(20), 10), chrome));
+    const armRod = new THREE.Mesh(new THREE.CylinderGeometry(mm(2.6), mm(2.6), mm(150), 10), chrome);
+    armRod.rotation.z = -1.35; armRod.position.set(-26, -22, 0); armGrp.add(armRod);
+    add(new THREE.SphereGeometry(mm(5), 12, 10), new THREE.MeshStandardMaterial({ color: 0xf2efe6, roughness: 0.4 }), 128.9 - 52, 3.0 - 44, 14.0);
+
+    // ===== STEP 6 — KNOBS + SWITCH + JACK =====
+    const knobGeo = new THREE.CylinderGeometry(mm(9), mm(10.5), mm(17), 24);
+    add(knobGeo, knobMat, 62.69, 3.5, 17.28);
+    add(knobGeo, knobMat, 75.65, 3.5, 25.06);
+    add(knobGeo, knobMat, 90.77, 3.5, 31.11);
+    add(new THREE.BoxGeometry(mm(20), mm(5), mm(6)), knobMat, 48.86, 1.2, 22.47, 0, THREE.MathUtils.degToRad(-20), THREE.MathUtils.degToRad(15));
+    const jack = add(new THREE.CylinderGeometry(1, 1, mm(2), 32), chrome, 140.46, -0.6, 30.25);
+    jack.scale.set(10.8, 1, 6.05);
+    add(new THREE.CylinderGeometry(mm(5), mm(5), mm(8), 16), darkMat, 140.46, -0.4, 30.25);
+
+    // ===== STEP 7 — HEADSTOCK =====
+    const HL = mm(180);
+    const headGrp = new THREE.Group();
+    headGrp.position.set(xNut, BOARD_TOP_Y, 0);
+    headGrp.rotation.z = THREE.MathUtils.degToRad(-7);
+    G.add(headGrp);
+    const hs = new THREE.Shape();
+    hs.moveTo(0, -hw);
+    hs.lineTo(-HL * 0.06, -hw * 1.02);
+    hs.lineTo(-HL * 0.62, -hw * 1.06);
+    hs.quadraticCurveTo(-HL * 0.80, -hw * 1.04, -HL * 0.90, -hw * 0.55);
+    hs.quadraticCurveTo(-HL * 1.00, -hw * 0.10, -HL * 0.985, hw * 0.55);
+    hs.quadraticCurveTo(-HL * 0.965, hw * 1.05, -HL * 0.84, hw * 1.18);
+    hs.quadraticCurveTo(-HL * 0.55, hw * 1.48, -HL * 0.30, hw * 1.20);
+    hs.quadraticCurveTo(-HL * 0.12, hw * 1.00, -HL * 0.02, hw * 0.92);
+    hs.lineTo(0, hw); hs.closePath();
+    const hsGeo = new THREE.ExtrudeGeometry(hs, { depth: mm(12), bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.16, bevelSegments: 2, curveSegments: 24 });
+    hsGeo.rotateX(Math.PI / 2);
+    hsGeo.computeBoundingBox(); hsGeo.translate(0, -hsGeo.boundingBox.max.y, 0);   // face → local Y 0
+    headGrp.add(new THREE.Mesh(hsGeo, boardMat));
+    headGrp.add((() => { const m = new THREE.Mesh(new THREE.BoxGeometry(mm(3), mm(4.5), boardWidthZ), boneMat); m.position.set(0, mm(4.5) / 2 - 0.30, 0); return m; })());
+    const POST_Z = -hw * 0.78, postGeo = new THREE.CylinderGeometry(mm(3), mm(3) * 0.9, mm(11), 16), btnGeo = new THREE.BoxGeometry(mm(7), mm(3), mm(16));
+    for (let i = 0; i < 6; i++) {
+      const u = mm(28) + i * mm(26);
+      const post = new THREE.Mesh(postGeo, chrome); post.position.set(-u, mm(11) / 2, POST_Z); headGrp.add(post);
+      const btn = new THREE.Mesh(btnGeo, chrome); btn.position.set(-u, -mm(4), POST_Z - mm(11)); headGrp.add(btn);
+    }
+    const treeDisc = new THREE.Mesh(new THREE.CylinderGeometry(mm(5), mm(5), mm(1.5), 16), chrome);
+    treeDisc.rotation.x = Math.PI / 2; treeDisc.position.set(-mm(34), mm(2.5), hw * 0.45); headGrp.add(treeDisc);
   }
 
   /* ---- pressX: fret-CENTER X in world space (mid-way between fret r-1 and r) */
@@ -2191,18 +2326,19 @@ class Hand3DRenderer {
      azimuth = 0 puts the camera on +Z of _lookAt (player side, looking at
      the back of the hand); polar = 0 would be straight overhead. */
   _applyCamera() {
-    this._applyCamOverride();   // TEMP: ?cam=radius,azDeg,polDeg
+    this._applyCamOverride();   // TEMP: ?cam=radius,azDeg,polDeg ?lookat=x,y,z
     const { radius, azimuth, polar } = this._camSpherical;
+    const tgt = this._lookAtOverride || this._lookAt;
     const sinP = Math.sin(polar);
     const cosP = Math.cos(polar);
     const sinA = Math.sin(azimuth);
     const cosA = Math.cos(azimuth);
     this.camera.position.set(
-      this._lookAt.x + radius * sinP * sinA,
-      this._lookAt.y + radius * cosP,
-      this._lookAt.z + radius * sinP * cosA,
+      tgt.x + radius * sinP * sinA,
+      tgt.y + radius * cosP,
+      tgt.z + radius * sinP * cosA,
     );
-    this.camera.lookAt(this._lookAt);
+    this.camera.lookAt(tgt);
   }
 
   /* TEMP: ?cam=radius,azimuthDeg,polarDeg overrides the orbit for calibration. */
@@ -2217,6 +2353,8 @@ class Hand3DRenderer {
         if (Number.isFinite(a)) this._camSpherical.azimuth = a * D;
         if (Number.isFinite(p)) this._camSpherical.polar = p * D;
       }
+      const la = new URLSearchParams(window.location.search || "").get("lookat");
+      if (la) { const [x, y, z] = la.split(",").map(Number); if (Number.isFinite(x)) this._lookAtOverride = new THREE.Vector3(x, y || 0, z || 0); }
     } catch (e) { /* no-op */ }
     this.__camDone = true;
   }
