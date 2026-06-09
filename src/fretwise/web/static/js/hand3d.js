@@ -426,10 +426,14 @@ const IDLE_CURL      = { mcp: 0.9, pip: 1.0, dip: 0.5 };  // median resting curl
 
 /* (makeBoneMesh — the organic tapered phalanx bone — is defined above and reused.) */
 
-/* Rounded back-of-hand wedge (local X = cross-neck, Z = wrist<->MCP depth, Y = thickness). */
+/* Organic back-of-hand: a rounded wedge with a DOMED back (not a flat slab) plus
+   the thenar (thumb-base) and hypothenar (pinky-side) muscle pads, so the palm
+   reads as a hand and not a block.  Local X = cross-neck (index −X … pinky +X),
+   Z = wrist(−Z) ↔ MCP(+Z) depth, Y = thickness. */
 function makePalmSlab(material) {
-  const halfW_mcp = PALM_WIDTH_Z * 0.50, halfW_wrist = PALM_WIDTH_Z * 0.42;
-  const halfD = PALM_DEPTH_X * 0.50, r = Math.min(halfW_mcp, halfD) * 0.35;
+  const grp = new THREE.Group();
+  const halfW_mcp = PALM_WIDTH_Z * 0.50, halfW_wrist = PALM_WIDTH_Z * 0.40;
+  const halfD = PALM_DEPTH_X * 0.50, r = Math.min(halfW_mcp, halfD) * 0.42;
   const s = new THREE.Shape();
   s.moveTo(halfW_mcp - r, halfD); s.quadraticCurveTo(halfW_mcp, halfD, halfW_mcp, halfD - r);
   s.lineTo(halfW_wrist, -halfD + r); s.quadraticCurveTo(halfW_wrist, -halfD, halfW_wrist - r, -halfD);
@@ -437,9 +441,31 @@ function makePalmSlab(material) {
   s.lineTo(-halfW_mcp, halfD - r); s.quadraticCurveTo(-halfW_mcp, halfD, -halfW_mcp + r, halfD);
   s.lineTo(halfW_mcp - r, halfD);
   const geo = new THREE.ExtrudeGeometry(s, { depth: PALM_HEIGHT_Y, bevelEnabled: true,
-    bevelThickness: PALM_HEIGHT_Y * 0.25, bevelSize: PALM_HEIGHT_Y * 0.20, bevelSegments: 4, curveSegments: 12 });
-  geo.rotateX(-Math.PI / 2); geo.translate(0, -PALM_HEIGHT_Y / 2, 0); geo.computeVertexNormals();
-  return new THREE.Mesh(geo, material);
+    bevelThickness: PALM_HEIGHT_Y * 0.42, bevelSize: PALM_HEIGHT_Y * 0.34, bevelSegments: 5, curveSegments: 16 });
+  geo.rotateX(-Math.PI / 2); geo.translate(0, -PALM_HEIGHT_Y / 2, 0);
+  // Dome the back (top, +Y) face: lift the central vertices so the back of the
+  // hand curves instead of reading as a flat lid.
+  const topY = PALM_HEIGHT_Y / 2, pos = geo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    if (pos.getY(i) > topY - 0.05) {
+      const nx = pos.getX(i) / halfW_mcp, nz = pos.getZ(i) / halfD;
+      const dome = Math.max(0, 1 - 0.85 * (nx * nx + nz * nz));
+      pos.setY(i, pos.getY(i) + PALM_HEIGHT_Y * 0.40 * dome);
+    }
+  }
+  geo.computeVertexNormals();
+  grp.add(new THREE.Mesh(geo, material));
+  // thenar eminence (thumb-base muscle) — radial/index (−X) side, toward the wrist
+  const thenar = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 14), material);
+  thenar.scale.set(PALM_WIDTH_Z * 0.26, PALM_HEIGHT_Y * 0.92, PALM_DEPTH_X * 0.44);
+  thenar.position.set(-PALM_WIDTH_Z * 0.28, -PALM_HEIGHT_Y * 0.05, -PALM_DEPTH_X * 0.08);
+  grp.add(thenar);
+  // hypothenar pad — ulnar/pinky (+X) side, toward the wrist (smaller)
+  const hypo = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), material);
+  hypo.scale.set(PALM_WIDTH_Z * 0.19, PALM_HEIGHT_Y * 0.66, PALM_DEPTH_X * 0.40);
+  hypo.position.set(PALM_WIDTH_Z * 0.33, -PALM_HEIGHT_Y * 0.05, -PALM_DEPTH_X * 0.14);
+  grp.add(hypo);
+  return grp;
 }
 
 /* One hinged segment.  node = hinge pivot; distalAnchor = child mount point. */
@@ -624,13 +650,19 @@ class AnimationMain {
     m.node.updateMatrixWorld(true);
   }
   animation_pouce(main) {
-    const thumb = main.doigt("thumb");
-    thumb.setBase(THUMB_BASE_X, 0); thumb.setYaw(THUMB_YAW);
-    main.node.updateMatrixWorld(true);
-    const collide = () => this.r._segmentsHitNeck(thumb.segments());
-    const contact = () => this.r._thumbOnBelly(thumb.tipWorld());
-    const dist = () => { const p = thumb.tipWorld(); return Math.abs(p.y - this.r._bellyY(p.z)); };
-    thumb.fold({ contact, collide, dist });
+    const r = this.r, thumb = main.doigt("thumb");
+    // Anchor the thumb at the THENAR (radial/index side, toward the wrist) so it
+    // opposes the fingers and braces the neck back; all tunable for fitting.
+    if (main.anchors.thumb) main.anchors.thumb.position.set(
+      r._tuneNum("thumbx", THUMB_ANCHOR.x),
+      r._tuneNum("thumby", THUMB_ANCHOR.y),
+      r._tuneNum("thumbz", THUMB_ANCHOR.z));
+    thumb.setBase(r._tuneNum("thumbbase", THUMB_BASE_X), r._tuneNum("thumbroll", THUMB_ROLL));
+    thumb.setYaw(r._tuneNum("thumbyaw", THUMB_YAW));
+    // A fixed MEDIAN brace (the thumb supports the neck back, it does not press a
+    // string) — a full fold-to-contact made it dangle past the neck.
+    thumb.applyThetas({ mcp: r._tuneNum("thumbmcp", THUMB_MCP), ip: r._tuneNum("thumbip", THUMB_IP) });
+    if (r.skinMat) thumb.tipCap.material = r.skinMat;   // thumb tip = skin, not a role colour
   }
   _placeFinger(main, name, fret, corde, yLift = 0) {
     const r = this.r, d = main.doigt(name);
@@ -649,8 +681,17 @@ class AnimationMain {
 }
 /* Thumb base placement (tuned in-browser): pitch the CMC so the thumb points
    up-and-under the neck belly, yaw it toward the back. */
-const THUMB_BASE_X = -0.6;   // rotation.x baseline (negative = tip up toward belly)
-const THUMB_YAW = 0.5;       // rotation.y swing under the neck
+/* Thumb placement (thenar anchor + base orientation), tuned in-browser via
+   ?thumbx/thumby/thumbz/thumbbase/thumbyaw/thumbroll. */
+const THUMB_ANCHOR = { x: -PALM_WIDTH_Z * 0.30, y: -PALM_HEIGHT_Y * 0.10, z: -PALM_DEPTH_X * 0.12 };
+const THUMB_BASE_X = -0.5;   // rotation.x baseline (tip up toward the neck)
+const THUMB_YAW = 0.55;      // rotation.y swing toward the neck back
+const THUMB_ROLL = 0.0;      // rotation.z opposition roll
+const THUMB_MCP = 0.5;       // median brace flex (MCP)
+const THUMB_IP = 0.55;       // median brace flex (IP)
+/* Rest splay (MCP abduction) so idle fingers FAN naturally instead of staying
+   parallel (radians; index toward -X/index side … pinky toward +X). */
+const REST_SPLAY = { index: -0.14, middle: -0.05, ring: 0.05, pinky: 0.15 };
 
 class Hand3DRenderer {
   constructor(container) {
@@ -2001,8 +2042,8 @@ class Hand3DRenderer {
         // median curl, not a finger sticking up or a tight claw.
         a._placeFinger(m, f, fg.fret, str, HOVER_GAP);
       } else {
-        // Idle (GREEN), no target: a median resting curl over the board.
-        d.setYaw(0); d.relax(IDLE_CURL);
+        // Idle (GREEN), no target: a median resting curl + a slight natural fan.
+        d.setYaw(REST_SPLAY[f] || 0); d.relax(IDLE_CURL);
       }
       d.setRole(role);
     }
