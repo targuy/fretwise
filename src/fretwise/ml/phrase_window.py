@@ -407,11 +407,21 @@ class LearnedPhraseWindowFingerer:
         )
 
     @classmethod
-    def from_model_dir(cls, model_dir: str | Path) -> LearnedPhraseWindowFingerer:
-        """Construct from a directory holding the manifest + spec + heads."""
+    def from_model_dir(
+        cls, model_dir: str | Path, version: str = "v1"
+    ) -> LearnedPhraseWindowFingerer:
+        """Construct from a directory holding the manifest + spec + heads.
+
+        Args:
+            model_dir: Directory containing the bundle files.
+            version: Bundle version tag selecting
+                ``phrase_window_fingering_{version}_manifest.json`` (and the
+                matching spec). The v1 and v2 bundles share the same 74-dim
+                feature contract and inference protocol.
+        """
         model_dir = Path(model_dir)
-        manifest = model_dir / "phrase_window_fingering_v1_manifest.json"
-        spec = model_dir / "phrase_window_fingering_v1_spec.json"
+        manifest = model_dir / f"phrase_window_fingering_{version}_manifest.json"
+        spec = model_dir / f"phrase_window_fingering_{version}_spec.json"
         return cls(str(manifest), str(spec) if spec.exists() else None)
 
     def _run_bundle(

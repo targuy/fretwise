@@ -1,19 +1,20 @@
-"""Re-baseline the phrase_window_v1 shadow model on golden_set_v1.
+"""Re-baseline a phrase_window shadow bundle on golden_set_v1.
 
 Evaluation harness (NOT training) for the shadow fingering model. Loads the
 human-validated golden cases, runs the bundle with FretWise's corrected
 feature extractor, and reports per-note accuracy, exact-window-match rate,
 pinky false-positive rate, and anchor accuracy — the same metrics
-GuitarDataSet reports in ``phrase_window_fingering_v1_metrics.json``, so the
-numbers are directly comparable.
+GuitarDataSet reports in ``phrase_window_fingering_{version}_metrics.json``,
+so the numbers are directly comparable.
 
 Usage:
-    pixi run python scripts/eval_phrase_window_golden.py
+    pixi run python scripts/eval_phrase_window_golden.py [--version v2]
 
 Discipline: golden_set_v1 is ``training_allowed: false`` — eval only.
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 from typing import Any
@@ -48,9 +49,18 @@ def _case_notes(case: dict[str, Any]) -> list[PhraseNote]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--version",
+        default="v1",
+        help="phrase_window bundle version to evaluate (default: v1)",
+    )
+    args = parser.parse_args()
+    version: str = args.version
+
     if not GOLDEN.exists():
         raise SystemExit(f"Golden set missing: {GOLDEN}")
-    model = LearnedPhraseWindowFingerer.from_model_dir(MODELS)
+    model = LearnedPhraseWindowFingerer.from_model_dir(MODELS, version=version)
 
     total = correct = 0
     exact_cases = 0
@@ -91,7 +101,10 @@ def main() -> None:
     def pct(num: int, den: int) -> float:
         return num / den if den else 0.0
 
-    print(f"golden_set_v1 re-baseline (corrected features) — {n_cases} cases")
+    print(
+        f"golden_set_v1 re-baseline of phrase_window_{version} "
+        f"(corrected features) — {n_cases} cases"
+    )
     print(f"  per_note_accuracy        : {pct(correct, total):.4f}  ({correct}/{total})")
     print(f"  exact_window_match_rate  : {pct(exact_cases, n_cases):.4f}  "
           f"({exact_cases}/{n_cases})")

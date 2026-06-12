@@ -1,13 +1,16 @@
-"""Parity tests for the phrase_window_v1 fingering bundle (shadow model).
+"""Parity tests for the phrase_window fingering bundles (shadow models).
+
+Both delivered bundles (v1 and v2) are exercised — they share the same 74-dim
+feature contract and inference protocol; only the slot heads differ (GDS-026).
 
 Two layers:
 
   1. Feature parity (no ONNX runtime) — ``build_window_feature_vector`` must
-     reproduce every ``expected_features`` value in the calibration JSON to
+     reproduce every ``expected_features`` value in each calibration JSON to
      1e-6. This is the binding contract from GuitarDataSet (FW-015).
   2. Inference parity (skipped when onnxruntime or the bundle is absent) —
      the loaded six-head bundle reproduces the recorded ``model_output`` of
-     the two fully-pinned calibration cases, and selects the ground-truth
+     the fully-pinned calibration cases, and selects the ground-truth
      anchor among the real candidates.
 
 The two ``expected_features_partial`` cases pin only a subset of features;
@@ -34,19 +37,23 @@ from fretwise.ml.phrase_window import _PER_NOTE_KEYS, PAD_VALUE, WINDOW_SIZE
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODELS = REPO_ROOT / "data" / "models"
-CALIB_PATH = MODELS / "phrase_window_fingering_v1_calibration.json"
-SPEC_PATH = MODELS / "phrase_window_fingering_v1_spec.json"
-MANIFEST_PATH = MODELS / "phrase_window_fingering_v1_manifest.json"
+VERSIONS = ("v1", "v2")
 
 ATOL_FEATURE = 1e-6
 ATOL_ONNX = 1e-4
 
 
+@pytest.fixture(scope="module", params=VERSIONS)
+def version(request: pytest.FixtureRequest) -> str:
+    return str(request.param)
+
+
 @pytest.fixture(scope="module")
-def calibration() -> dict:
-    if not CALIB_PATH.exists():
-        pytest.skip(f"Calibration file missing: {CALIB_PATH}")
-    return json.loads(CALIB_PATH.read_text(encoding="utf-8"))
+def calibration(version: str) -> dict:
+    path = MODELS / f"phrase_window_fingering_{version}_calibration.json"
+    if not path.exists():
+        pytest.skip(f"Calibration file missing: {path}")
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _to_notes(raw: list[dict]) -> list[PhraseNote]:
@@ -78,10 +85,11 @@ def test_feature_names_count_is_74() -> None:
     assert len(names) == WINDOW_SIZE * len(_PER_NOTE_KEYS) + 14
 
 
-def test_feature_names_match_spec_layout() -> None:
-    if not SPEC_PATH.exists():
-        pytest.skip(f"Spec missing: {SPEC_PATH}")
-    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
+def test_feature_names_match_spec_layout(version: str) -> None:
+    spec_path = MODELS / f"phrase_window_fingering_{version}_spec.json"
+    if not spec_path.exists():
+        pytest.skip(f"Spec missing: {spec_path}")
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
     layout = spec["feature_layout"]
     expected: list[str] = []
     for slot in range(spec["window_size"]):
@@ -179,22 +187,23 @@ def test_note_from_fretwise_subtracts_one() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _load_model():
+def _load_model(version: str):
     pytest.importorskip("onnxruntime")
-    if not MANIFEST_PATH.exists():
-        pytest.skip(f"Bundle manifest missing: {MANIFEST_PATH}")
+    manifest = MODELS / f"phrase_window_fingering_{version}_manifest.json"
+    if not manifest.exists():
+        pytest.skip(f"Bundle manifest missing: {manifest}")
     from fretwise.ml import LearnedPhraseWindowFingerer
 
-    return LearnedPhraseWindowFingerer.from_model_dir(MODELS)
+    return LearnedPhraseWindowFingerer.from_model_dir(MODELS, version=version)
 
 
-def test_bundle_reproduces_recorded_outputs(calibration: dict) -> None:
+def test_bundle_reproduces_recorded_outputs(calibration: dict, version: str) -> None:
     """Cases with a recorded model_output must match it bit-for-bit.
 
     Witness cases (synthetic, ``model_output: null``) exist only to pin
     features and are skipped here.
     """
-    model = _load_model()
+    model = _load_model(version)
     scored = [ex for ex in calibration["examples"] if ex.get("model_output") is not None]
     assert scored, "expected at least one case with a recorded model_output"
     for ex in scored:
@@ -208,14 +217,14 @@ def test_bundle_reproduces_recorded_outputs(calibration: dict) -> None:
                 assert abs(got - exp) <= ATOL_ONNX, f"{ex['case_id']} slot{slot}"
 
 
-def test_anchor_selection_picks_ground_truth(calibration: dict) -> None:
+def test_anchor_selection_picks_ground_truth(calibration: dict, version: str) -> None:
     """predict_window selects the correct anchor for the GT-anchor cases.
 
     Restricted to cases whose pinned anchor is the correct one
     (``expected_targets.anchor_correct``) and that carry a model_output —
     i.e. django/apache_2, not the deliberately-wrong or witness cases.
     """
-    model = _load_model()
+    model = _load_model(version)
     gt_cases = [
         ex for ex in calibration["examples"]
         if ex.get("model_output") is not None
@@ -230,8 +239,10 @@ def test_anchor_selection_picks_ground_truth(calibration: dict) -> None:
         assert len(prediction.slots) == len(notes)
 
 
-def test_predict_sequence_covers_every_note_and_is_pure(calibration: dict) -> None:
-    model = _load_model()
+def test_predict_sequence_covers_every_note_and_is_pure(
+    calibration: dict, version: str
+) -> None:
+    model = _load_model(version)
     notes = _to_notes(calibration["examples"][0]["input_notes"]) * 2  # 10 notes
     before = copy.deepcopy(notes)
     predictions = model.predict_sequence(notes, stride=1)
@@ -241,9 +252,9 @@ def test_predict_sequence_covers_every_note_and_is_pure(calibration: dict) -> No
     assert notes == before  # input not mutated (shadow model is read-only)
 
 
-def test_open_chord_slots_decode_open_strings(calibration: dict) -> None:
+def test_open_chord_slots_decode_open_strings(calibration: dict, version: str) -> None:
     """The open-E case decodes its two open strings as 'open'."""
-    model = _load_model()
+    model = _load_model(version)
     ex = next(e for e in calibration["examples"] if e["case_id"] == "open_chord_E_anchor_1")
     notes = _to_notes(ex["input_notes"])
     fv = build_window_feature_vector(notes, ex["candidate_anchor"])
