@@ -1,0 +1,84 @@
+{
+  "model_name": "phrase_window_fingering_v2",
+  "model_version": "2.0.0",
+  "generated_by": "scripts/generate_phrase_window_v2_artifacts.py",
+  "eval_protocol": {
+    "status": "CANONICAL",
+    "definition": "FretWise spec-inference path: sliding window stride=1 (+ tail window), overlap-averaged slot softmax, model-selected anchor (score = anchor_prob - alpha * mean slot NLL, alpha=1.0), all notes scored. Identical to fretwise/scripts/eval_phrase_window_golden.py (GDS-025 #55); reproduced here by scripts/eval_phrase_window_canonical.py, which reproduces the v1 canonical numbers bit-exactly (0.6780/0.1538/0.1455/0.8571)."
+  },
+  "golden_canonical": {
+    "v2_raw": {
+      "per_note_accuracy": 0.7627118644067796,
+      "exact_window_match_rate": 0.38461538461538464,
+      "pinky_false_positive_rate": 0.03636363636363636,
+      "anchor_accuracy": 0.8571428571428571,
+      "n_notes": 59,
+      "n_correct": 45,
+      "n_non_pinky": 55,
+      "n_pinky_fp": 2,
+      "n_anchor": 49,
+      "n_anchor_correct": 42
+    },
+    "v2_pinky_demotion": {
+      "per_note_accuracy": 0.7796610169491526,
+      "exact_window_match_rate": 0.46153846153846156,
+      "pinky_false_positive_rate": 0.01818181818181818,
+      "anchor_accuracy": 0.8571428571428571,
+      "n_notes": 59,
+      "n_correct": 46,
+      "n_non_pinky": 55,
+      "n_pinky_fp": 1,
+      "n_anchor": 49,
+      "n_anchor_correct": 42
+    },
+    "v1_raw_reference": {
+      "per_note_accuracy": 0.678,
+      "pinky_false_positive_rate": 0.1455,
+      "anchor_accuracy": 0.8571,
+      "exact_window_match_rate": 0.1538
+    },
+    "acceptance_criterion_fw025_59": {
+      "pinky_fpr_max": 0.05,
+      "per_note_min": 0.678,
+      "v2_raw_passes": true
+    }
+  },
+  "validation_metrics_train_split": {
+    "tag": "final",
+    "w_pinky": 0.3,
+    "w_ring_a2": 1.0,
+    "rounds": 400,
+    "final": true,
+    "val_per_note_accuracy": 0.6525876483099025,
+    "val_exact_window_match": 0.20184191869875198,
+    "val_pinky_fpr": 0.026555012125517054,
+    "val_pinky_fnr": 0.5379825727192629,
+    "per_slot": {
+      "slot_0": {
+        "accuracy": 0.6312316911676186,
+        "pinky_fpr": 0.03123295026456859,
+        "pinky_fnr": 0.5678767585984081
+      },
+      "slot_1": {
+        "accuracy": 0.6637495151085488,
+        "pinky_fpr": 0.0231784498384257,
+        "pinky_fnr": 0.5183504486320039
+      },
+      "slot_2": {
+        "accuracy": 0.6701266737115263,
+        "pinky_fpr": 0.022824283689904263,
+        "pinky_fnr": 0.5110252767418457
+      },
+      "slot_3": {
+        "accuracy": 0.665137307882663,
+        "pinky_fpr": 0.024533478742556434,
+        "pinky_fnr": 0.5145812488964746
+      },
+      "slot_4": {
+        "accuracy": 0.6326930536791557,
+        "pinky_fpr": 0.031013988736342167,
+        "pinky_fnr": 0.5779071481208549
+      }
+    }
+  }
+}

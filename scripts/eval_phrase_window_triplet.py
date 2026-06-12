@@ -1,4 +1,4 @@
-"""Rule-only vs phrase_window_v1 triplet on golden_set_v1 (GDS-024 #58 / FW-015 §2).
+"""Rule-only vs phrase_window triplet on golden_set_v1 (GDS-024 #58 / FW-015 §2).
 
 Answers "does the ML model beat the rules?" by scoring three fingering sources
 against the human-validated golden fingers, all under the CANONICAL eval
@@ -6,20 +6,21 @@ protocol (GDS-025):
 
   - ``rule_only``      : FretWise's deterministic pipeline (gamma=0, no ML),
                          with each note pinned to its golden string+fret.
-  - ``v1_raw``         : phrase_window_v1 argmax via predict_sequence
+  - ``{v}_raw``        : phrase_window argmax via predict_sequence
                          (sliding window + overlap-averaging).
-  - ``v1_pinky_demotion``: v1_raw with the documented pinky->ring fallback
+  - ``{v}_pinky_demotion``: raw with the documented pinky->ring fallback
                          (golden_set_v1_raw_vs_pinky_demotion_report.json).
 
 Reports per-note accuracy and pinky false-positive rate for each.
 
 Usage:
-    pixi run python scripts/eval_phrase_window_triplet.py
+    pixi run python scripts/eval_phrase_window_triplet.py [--version v2]
 
 Discipline: golden_set_v1 is ``training_allowed: false`` — eval only.
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 from typing import Any
@@ -117,12 +118,23 @@ def _metrics(pred: list[str], truth: list[str]) -> tuple[int, int, int, int]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--version",
+        default="v1",
+        help="phrase_window bundle version to evaluate (default: v1)",
+    )
+    args = parser.parse_args()
+    version: str = args.version
+
     if not GOLDEN.exists():
         raise SystemExit(f"Golden set missing: {GOLDEN}")
-    model = LearnedPhraseWindowFingerer.from_model_dir(MODELS)
+    model = LearnedPhraseWindowFingerer.from_model_dir(MODELS, version=version)
 
+    raw_key = f"{version}_raw"
+    dem_key = f"{version}_pinky_demotion"
     agg = {
-        k: [0, 0, 0, 0] for k in ("rule_only", "v1_raw", "v1_pinky_demotion")
+        k: [0, 0, 0, 0] for k in ("rule_only", raw_key, dem_key)
     }  # [correct, total, pinky_fp, non_pinky]
 
     for line in GOLDEN.read_text(encoding="utf-8").splitlines():
@@ -136,10 +148,10 @@ def main() -> None:
 
         rule = _rule_only_fingers(case)
         preds = model.predict_sequence(_phrase_notes(case))
-        v1_raw = [p.finger for p in preds]
+        raw = [p.finger for p in preds]
         has_legato = "legato" in case["case_id"]
-        v1_dem = _demote(
-            v1_raw,
+        dem = _demote(
+            raw,
             [p.probabilities for p in preds],
             [p.anchor for p in preds],
             frets,
@@ -147,7 +159,7 @@ def main() -> None:
         )
 
         for key, pred in (
-            ("rule_only", rule), ("v1_raw", v1_raw), ("v1_pinky_demotion", v1_dem),
+            ("rule_only", rule), (raw_key, raw), (dem_key, dem),
         ):
             # rule_only may differ in length only if the pipeline dropped a note
             # (shouldn't happen for pinned positions); guard by truncating.
@@ -158,9 +170,12 @@ def main() -> None:
             agg[key][2] += fp
             agg[key][3] += npk
 
-    print("phrase_window_v1 triplet on golden_set_v1 (canonical protocol, 13 cases)")
+    print(
+        f"phrase_window_{version} triplet on golden_set_v1 "
+        "(canonical protocol, 13 cases)"
+    )
     print(f"  {'source':20s} {'per_note_acc':>14s}  {'pinky_FPR':>12s}")
-    for key in ("rule_only", "v1_raw", "v1_pinky_demotion"):
+    for key in ("rule_only", raw_key, dem_key):
         c, t, fp, npk = agg[key]
         acc = c / t if t else 0.0
         fpr = fp / npk if npk else 0.0
