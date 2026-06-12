@@ -1,4 +1,4 @@
-"""Phrase-window fingering predictor (GuitarDataSet ``phrase_window_v1``).
+"""Phrase-window fingering predictor (GuitarDataSet ``phrase_window`` bundles).
 
 Successor to the note-by-note ``finger_classifier`` for **melodic** (non-chord)
 fingering.  Instead of predicting one finger from a single isolated note, this
@@ -6,19 +6,24 @@ model decodes a sliding window of ``WINDOW_SIZE`` notes under a *candidate
 anchor* (the fret covered by the index finger), using a bundle of six ONNX
 heads: one finger classifier per window slot plus one binary anchor head.
 
-Integration status — **shadow / dry-run only** (FretWise FW-015 decision):
-predictions are computed and logged for comparison against the rule-based
-pipeline, but are **never** applied to user output.  Golden per-note accuracy
-(~0.51) and pinky over-use (~20 % FPR) are below the rule baseline, so the
-model is not eligible for default activation.  See
-``data/models/phrase_window_fingering_v1_metrics.json``.
+Integration status — **v2 ACTIVE in production** (GDS-026 #63 GO decision):
+``resolve_phrase_window_fingers`` applies the v2 melodic finger predictions
+(with the pinky→ring demotion belt, :func:`apply_pinky_demotion`) to pipeline
+output.  v2 passed the production gate #59 on golden_set_v1 under the
+canonical protocol: pinky_FPR 3.64 % ≤ 5 % (1.82 % with demotion) and
+per_note_accuracy 0.7627 ≥ 0.678 — see
+``data/models/phrase_window_fingering_v2_metrics.json``.  The deterministic
+biomechanical guard (``fretwise.biomechanics``) stays in place downstream as
+the unchanged fallback contract.  v1 (shadow-only era, FW-015) remains loadable
+for A/B via ``from_model_dir(..., version="v1")``.
 
-Contract source of truth:
-  - ``data/models/phrase_window_fingering_v1_spec.json`` (feature layout,
+Contract source of truth (identical layout for v1 and v2):
+  - ``data/models/phrase_window_fingering_v2_spec.json`` (feature layout,
     inference protocol, candidate-anchor rule).
-  - ``data/models/phrase_window_fingering_v1_calibration.json`` (binding:
+  - ``data/models/phrase_window_fingering_v2_calibration.json`` (binding:
     ``build_window_feature_vector`` reproduces every ``expected_features`` to
-    1e-6, validated in ``tests/test_ml_phrase_window.py``).
+    1e-6 and the six heads reproduce every recorded ``model_output`` to 1e-4,
+    validated in ``tests/test_ml_phrase_window.py``).
 
 String convention: this module is **internal 0-based** (``0 = high e``,
 ``5 = low E``), the same convention as ``transition_cost_v3``.  Callers holding
@@ -32,7 +37,10 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from fretwise.models import FingeringResult
 
 __all__ = [
     "WINDOW_SIZE",
@@ -48,6 +56,8 @@ __all__ = [
     "build_window_feature_vector",
     "note_from_fretwise",
     "LearnedPhraseWindowFingerer",
+    "apply_pinky_demotion",
+    "resolve_phrase_window_fingers",
 ]
 
 WINDOW_SIZE = 5
@@ -633,3 +643,149 @@ def _first_prob_tensor(outputs: list[Any], width: int) -> Any:
     raise ValueError(
         f"No [N, {width}] float probability tensor found in ONNX outputs."
     )
+
+
+# ---------------------------------------------------------------------------
+# Production application (GDS-026 #63 GO decision)
+# ---------------------------------------------------------------------------
+
+# Articulations counted as legato for the demotion belt's "no legato in the
+# window" condition (mirrors the shadow-era CLI convention).
+LEGATO_ARTICULATIONS = frozenset({"legato", "hammer_on", "pull_off", "slide"})
+
+# The model degrades below 3 notes (spec) — shorter melodic lines stay rule-only.
+_MIN_MELODIC_NOTES = 3
+
+
+def apply_pinky_demotion(
+    predictions: Sequence[NotePrediction],
+    notes: Sequence[PhraseNote],
+) -> list[str]:
+    """Apply the documented pinky→ring demotion belt to raw predictions.
+
+    Rule (``golden_set_v1_raw_vs_pinky_demotion_report.json``): demote a raw
+    ``pinky`` prediction to ``ring`` when ring is in the top-2 of the averaged
+    softmax, the note sits on ``anchor + 2`` (ring's natural fret),
+    ``ring_prob >= 0.5 * pinky_prob``, there is no legato in the note's
+    sliding-window neighbourhood, and it is not the position-0 open-string
+    root.  Measured on golden_set_v1 (canonical protocol) it lowers v2's
+    pinky_FPR from 3.64 % to 1.82 % and never demotes a true pinky.
+
+    Args:
+        predictions: Per-note predictions from ``predict_sequence``.
+        notes: The PhraseNotes that produced them (same order/length).
+
+    Returns:
+        One finger name per note (demoted where the rule fires).
+    """
+    ring_i = PHRASE_FINGER_TO_INDEX["ring"]
+    pinky_i = PHRASE_FINGER_TO_INDEX["pinky"]
+    out = [p.finger for p in predictions]
+    for i, (pred, note) in enumerate(zip(predictions, notes)):
+        if pred.finger != "pinky":
+            continue
+        # "No legato in the window": note i is covered by sliding windows
+        # spanning notes i-(W-1) .. i+(W-1).
+        lo = max(0, i - (WINDOW_SIZE - 1))
+        hi = min(len(notes), i + WINDOW_SIZE)
+        if any(n.has_legato for n in notes[lo:hi]):
+            continue
+        probs = pred.probabilities
+        top2 = sorted(range(len(probs)), key=lambda c: probs[c], reverse=True)[:2]
+        if (
+            ring_i in top2
+            and note.fret == pred.anchor + 2
+            and probs[ring_i] >= 0.5 * probs[pinky_i]
+            and not (i == 0 and note.fret == 0)
+        ):
+            out[i] = "ring"
+    return out
+
+
+def resolve_phrase_window_fingers(
+    results: list[FingeringResult],
+    model: LearnedPhraseWindowFingerer,
+    *,
+    stats_out: dict[str, int] | None = None,
+) -> list[FingeringResult]:
+    """Apply phrase_window melodic finger predictions to pipeline output.
+
+    Production resolver (GDS-026 #63): per voice, monophonic (non-chord)
+    notes form one melodic sequence; the model predicts their fingers via
+    ``predict_sequence`` and the pinky demotion belt
+    (:func:`apply_pinky_demotion`) filters the result before it overrides
+    ``state.finger`` in place.  String, fret and hand_position always stay
+    rule-chosen — only the finger label changes, so the downstream
+    biomechanical guard contract is untouched.
+
+    Safety rules (deterministic):
+      - chord onsets (≥2 results sharing a rounded onset in a voice) are
+        never touched — chords stay with the chord resolvers;
+      - melodic sequences shorter than 3 notes stay rule-only (model
+        degrades below 3 notes, per spec);
+      - open strings (fret 0) always keep ``Finger.OPEN``;
+      - an ``open`` prediction on a fretted note is ignored.
+
+    Args:
+        results: Merged pipeline results (any order; not reordered).
+        model: A loaded :class:`LearnedPhraseWindowFingerer`.
+        stats_out: Optional dict that receives ``phrase_window_applied``
+            (fingers changed) and ``phrase_window_demoted`` (pinky→ring belt
+            firings) counters.
+
+    Returns:
+        The same list with melodic fingers rewritten in place.
+    """
+    from fretwise.models import Finger
+
+    finger_by_name = {f.value: f for f in Finger}
+    applied = 0
+    demoted = 0
+
+    by_voice: dict[int, list[Any]] = {}
+    for r in results:
+        v = r.note_event.voice_hint or 0
+        by_voice.setdefault(v, []).append(r)
+
+    for voice_results in by_voice.values():
+        voice_results.sort(key=lambda r: r.note_event.onset)
+        onset_counts: dict[float, int] = {}
+        for r in voice_results:
+            key = round(r.note_event.onset, 6)
+            onset_counts[key] = onset_counts.get(key, 0) + 1
+        melodic = [
+            r for r in voice_results
+            if onset_counts[round(r.note_event.onset, 6)] == 1
+        ]
+        if len(melodic) < _MIN_MELODIC_NOTES:
+            continue
+        notes = [
+            PhraseNote(
+                string=r.state.string_num - 1,
+                fret=r.state.fret,
+                pitch=r.note_event.pitch,
+                onset=r.note_event.onset,
+                duration=r.note_event.duration,
+                is_chord_member=False,
+                has_legato=str(r.note_event.articulation) in LEGATO_ARTICULATIONS,
+            )
+            for r in melodic
+        ]
+        predictions = model.predict_sequence(notes)
+        fingers = apply_pinky_demotion(predictions, notes)
+        demoted += sum(
+            1 for p, f in zip(predictions, fingers) if p.finger != f
+        )
+        for r, finger in zip(melodic, fingers):
+            if r.state.fret == 0:
+                continue  # open strings stay OPEN
+            if finger == "open":
+                continue  # incompatible with a fretted note — keep the rule
+            if r.state.finger.value != finger:
+                r.state.finger = finger_by_name[finger]
+                applied += 1
+
+    if stats_out is not None:
+        stats_out["phrase_window_applied"] = applied
+        stats_out["phrase_window_demoted"] = demoted
+    return results

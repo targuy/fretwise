@@ -139,100 +139,46 @@ def _load_player_cost_model() -> object | None:
 
 
 def _load_phrase_window_fingerer() -> LearnedPhraseWindowFingerer | None:
-    """Load the optional phrase-window fingerer (GuitarDataSet phrase_window_v1).
+    """Load the production phrase-window fingerer (GuitarDataSet phrase_window_v2).
 
-    Shadow-only model — used to compare ML-predicted melodic fingers against
-    the rule-based pipeline in verbose mode. Never applied to user output (see
-    ``fretwise.ml.phrase_window`` and FW-015). Returns None silently when the
-    bundle or onnxruntime are unavailable.
+    Production model (GDS-026 #63 GO): melodic fingers from the pipeline are
+    overridden by the v2 predictions with the pinky demotion belt (see
+    ``fretwise.ml.phrase_window.resolve_phrase_window_fingers``). Returns None
+    silently when the bundle or onnxruntime are unavailable — the pipeline
+    then stays rule-only.
     """
     from pathlib import Path
     model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
-    manifest_path = model_dir / "phrase_window_fingering_v1_manifest.json"
+    manifest_path = model_dir / "phrase_window_fingering_v2_manifest.json"
     if not manifest_path.exists():
         return None
     try:
         from fretwise.ml import LearnedPhraseWindowFingerer
-        return LearnedPhraseWindowFingerer.from_model_dir(model_dir)
+        return LearnedPhraseWindowFingerer.from_model_dir(model_dir, version="v2")
     except (ImportError, FileNotFoundError, AssertionError, KeyError):
         return None
 
 
-_LEGATO_ARTICULATIONS = frozenset({"legato", "hammer_on", "pull_off", "slide"})
+def _print_phrase_window_applied_summary(stats: dict[str, int]) -> None:
+    """Print the phrase_window v2 production-application counters to stderr.
 
-
-def _print_phrase_window_shadow_summary(
-    results: list[FingeringResult],
-    model: LearnedPhraseWindowFingerer | None,
-) -> None:
-    """Print rule-only vs phrase_window_v1 (ML shadow) agreement to stderr.
-
-    GO-shadow contract (FW-015): the prediction is logged for comparison and
-    **never** applied to ``results``. Compares the rule-assigned finger against
-    the ML argmax on monophonic (non-chord) notes, per voice. Never raises.
+    GO-prod contract (GDS-026 #63): melodic fingers are overridden in the
+    pipeline itself; this just surfaces how many notes the model changed and
+    how often the pinky demotion belt fired.
     """
-    if model is None:
-        return
-    try:
-        from fretwise.ml import PhraseNote
-
-        # Group by voice; flag chord onsets (≥2 notes sharing a rounded onset).
-        by_voice: dict[int, list[FingeringResult]] = {}
-        for r in results:
-            v = r.note_event.voice_hint or 0
-            by_voice.setdefault(v, []).append(r)
-
-        agree = 0
-        total = 0
-        rule_pinky = 0
-        ml_pinky = 0
-        for voice_results in by_voice.values():
-            voice_results.sort(key=lambda r: r.note_event.onset)
-            onset_counts: dict[float, int] = {}
-            for r in voice_results:
-                onset_counts[round(r.note_event.onset, 6)] = (
-                    onset_counts.get(round(r.note_event.onset, 6), 0) + 1
-                )
-            melodic = [
-                r for r in voice_results
-                if onset_counts[round(r.note_event.onset, 6)] == 1
-            ]
-            if len(melodic) < 3:
-                continue  # model degrades below 3 notes (spec)
-            notes = [
-                PhraseNote(
-                    string=r.state.string_num - 1,
-                    fret=r.state.fret,
-                    pitch=r.note_event.pitch,
-                    onset=r.note_event.onset,
-                    duration=r.note_event.duration,
-                    is_chord_member=False,
-                    has_legato=str(r.note_event.articulation) in _LEGATO_ARTICULATIONS,
-                )
-                for r in melodic
-            ]
-            predictions = model.predict_sequence(notes)
-            for r, pred in zip(melodic, predictions):
-                rule_finger = r.state.finger.value
-                total += 1
-                if rule_finger == pred.finger:
-                    agree += 1
-                if rule_finger == "pinky":
-                    rule_pinky += 1
-                if pred.finger == "pinky":
-                    ml_pinky += 1
-
-        if total == 0:
-            click.echo("Phrase-window shadow: no monophonic windows to compare.", err=True)
-            return
+    if "phrase_window_applied" not in stats:
         click.echo(
-            f"Phrase-window shadow (ML, not applied): "
-            f"agreement={agree}/{total} ({100.0 * agree / total:.1f}%)  "
-            f"|  pinky rule={rule_pinky} ml={ml_pinky}",
+            "Phrase-window ML: inactive (bundle or onnxruntime unavailable) "
+            "— rule-only fingering.",
             err=True,
         )
-    except Exception as exc:  # shadow logging must never break the solve
-        click.echo(f"Phrase-window shadow failed: {exc}", err=True)
+        return
+    click.echo(
+        f"Phrase-window ML (v2, applied): "
+        f"{stats['phrase_window_applied']} melodic finger(s) overridden  "
+        f"|  pinky demotions={stats['phrase_window_demoted']}",
+        err=True,
+    )
 
 
 def _guarded_pipeline_result(
@@ -250,6 +196,7 @@ def _guarded_pipeline_result(
         optimizer,
         pattern_matcher=matcher,
         chord_finger_classifier=_load_chord_finger_classifier(),
+        phrase_window_fingerer=_load_phrase_window_fingerer(),
     )
     return payload, player_cost_model
 
@@ -600,7 +547,7 @@ def solve(
             err=True,
         )
         _print_audit_summary(events, results, adapter, player_cost_model)
-        _print_phrase_window_shadow_summary(results, _load_phrase_window_fingerer())
+        _print_phrase_window_applied_summary(stats)
 
     # --- resolve output format -----------------------------------------------
     if output is None and fmt is None:
