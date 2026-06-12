@@ -1823,6 +1823,8 @@ _CHORD_FINGER_CLASSIFIER: object | None = None
 _CHORD_FINGER_CLASSIFIER_LOADED: bool = False
 _PLAYER_COST_MODEL: object | None = None
 _PLAYER_COST_MODEL_LOADED: bool = False
+_PHRASE_WINDOW_FINGERER: object | None = None
+_PHRASE_WINDOW_FINGERER_LOADED: bool = False
 
 # In-memory LRU cache for /api/solve responses. Keyed by (file, mtime, params)
 # so it auto-invalidates when the source file is edited. Bounded entry count
@@ -1979,6 +1981,32 @@ def _get_player_cost_model() -> object | None:
     return _PLAYER_COST_MODEL
 
 
+def _get_phrase_window_fingerer() -> object | None:
+    """Lazy-load the production phrase_window_v2 melodic fingerer (GDS-026 #63).
+
+    Same defensive pattern as ``_get_chord_finger_classifier``: loaded once
+    per process, returns None when the bundle or ``onnxruntime`` are
+    unavailable so the web app keeps serving rule-only fingerings.
+    """
+    global _PHRASE_WINDOW_FINGERER, _PHRASE_WINDOW_FINGERER_LOADED
+    if _PHRASE_WINDOW_FINGERER_LOADED:
+        return _PHRASE_WINDOW_FINGERER
+    _PHRASE_WINDOW_FINGERER_LOADED = True
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    manifest_path = model_dir / "phrase_window_fingering_v2_manifest.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPhraseWindowFingerer
+        _PHRASE_WINDOW_FINGERER = LearnedPhraseWindowFingerer.from_model_dir(
+            model_dir, version="v2",
+        )
+    except (ImportError, FileNotFoundError, AssertionError, KeyError):
+        _PHRASE_WINDOW_FINGERER = None
+    return _PHRASE_WINDOW_FINGERER
+
+
 def _biased_generator_and_cost(
     rule_preferences: RulePreferences | None,
     feedback: object | None,
@@ -2018,6 +2046,7 @@ def _run_legacy_pipeline(
     return run_pipeline(
         events, generator, optimizer, pattern_matcher=matcher,
         chord_finger_classifier=_get_chord_finger_classifier(),
+        phrase_window_fingerer=_get_phrase_window_fingerer(),
     )
 
 
@@ -2031,6 +2060,7 @@ def _run_legacy_pipeline_with_guard(
     return run_pipeline_with_guard_report(
         events, generator, optimizer, pattern_matcher=matcher,
         chord_finger_classifier=_get_chord_finger_classifier(),
+        phrase_window_fingerer=_get_phrase_window_fingerer(),
     )
 
 
@@ -2140,6 +2170,7 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
             events, StateGenerator(), ViterbiOptimizer(cost_fn),
             pattern_matcher=PatternMatcher(),
             chord_finger_classifier=_get_chord_finger_classifier(),
+            phrase_window_fingerer=_get_phrase_window_fingerer(),
         )
         if payload.biomechanical_report.fatal_count:
             return {

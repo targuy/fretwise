@@ -118,6 +118,7 @@ def run_pipeline(
     optimizer: ViterbiOptimizer,
     pattern_matcher: PatternMatcher | None = None,
     chord_finger_classifier: object | None = None,
+    phrase_window_fingerer: object | None = None,
 ) -> tuple[list[FingeringResult], dict[str, int]]:
     """Run generate → pattern-match → Viterbi → post-process with per-voice separation.
 
@@ -130,12 +131,18 @@ def run_pipeline(
         generator: StateGenerator instance.
         optimizer: ViterbiOptimizer instance.
         pattern_matcher: Optional PatternMatcher to reorder states before Viterbi.
+        chord_finger_classifier: Optional learned chord-finger model.
+        phrase_window_fingerer: Optional ``LearnedPhraseWindowFingerer``; when
+            given, melodic (non-chord) fingers are overridden by the
+            phrase_window predictions with the pinky demotion belt
+            (GDS-026 #63 production activation). Positions stay rule-chosen.
 
     Returns:
         Tuple of:
         - ``results``: FingeringResult list sorted by (onset, voice).
         - ``stats``: dict with keys ``parsed``, ``valid_states``, ``viterbi``,
-          ``dropped``.
+          ``dropped`` (plus ``phrase_window_applied`` / ``phrase_window_demoted``
+          when the fingerer is active).
     """
     voices = split_by_voice(events)
     all_results: list[FingeringResult] = []
@@ -233,6 +240,21 @@ def run_pipeline(
     all_results = resolve_pinky_run_to_index(all_results)
     all_results = _resolve_final_chord_guards(all_results)
 
+    # phrase_window production pass (GDS-026 #63) — overrides melodic
+    # (non-chord) fingers with the ML prediction + pinky demotion belt.
+    # Runs after every rule resolver so chords and positions are final, and
+    # BEFORE sedentary annotation so the hand model sees the applied fingers.
+    pw_stats: dict[str, int] = {}
+    if phrase_window_fingerer is not None:
+        from fretwise.ml.phrase_window import (
+            LearnedPhraseWindowFingerer,
+            resolve_phrase_window_fingers,
+        )
+        if isinstance(phrase_window_fingerer, LearnedPhraseWindowFingerer):
+            all_results = resolve_phrase_window_fingers(
+                all_results, phrase_window_fingerer, stats_out=pw_stats,
+            )
+
     # Sedentary/planted fingers — read-only w.r.t. FingeringState.  Runs on the
     # merged, fully-resolved list so every active finger decision is final and
     # all voices share one consistent hand model.  See
@@ -244,6 +266,7 @@ def run_pipeline(
         "valid_states": total_valid,
         "viterbi": len(all_results),
         "dropped": total_dropped,
+        **pw_stats,
     }
     return all_results, stats
 
@@ -254,6 +277,7 @@ def run_pipeline_with_guard_report(
     optimizer: ViterbiOptimizer,
     pattern_matcher: PatternMatcher | None = None,
     chord_finger_classifier: object | None = None,
+    phrase_window_fingerer: object | None = None,
 ) -> PipelineResult:
     """Run the legacy pipeline and validate final biomechanical invariants.
 
@@ -266,6 +290,7 @@ def run_pipeline_with_guard_report(
         optimizer,
         pattern_matcher=pattern_matcher,
         chord_finger_classifier=chord_finger_classifier,
+        phrase_window_fingerer=phrase_window_fingerer,
     )
     return PipelineResult(
         results=results,

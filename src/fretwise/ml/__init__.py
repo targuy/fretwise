@@ -37,10 +37,12 @@ from fretwise.ml.phrase_window import (
     PhraseNote,
     SlotPrediction,
     WindowPrediction,
+    apply_pinky_demotion,
     build_window_feature_vector,
     candidate_anchors,
     note_from_fretwise,
     phrase_window_feature_names,
+    resolve_phrase_window_fingers,
 )
 
 __all__ = [
@@ -55,7 +57,7 @@ __all__ = [
     "extract_chord_features",
     "extract_transition_features",
     "validate_assignment",
-    # Phrase-window fingering (GuitarDataSet phrase_window_v1, shadow-only)
+    # Phrase-window fingering (GuitarDataSet phrase_window v2, production)
     "LearnedPhraseWindowFingerer",
     "PhraseNote",
     "SlotPrediction",
@@ -65,6 +67,8 @@ __all__ = [
     "candidate_anchors",
     "build_window_feature_vector",
     "note_from_fretwise",
+    "apply_pinky_demotion",
+    "resolve_phrase_window_fingers",
 ]
 
 

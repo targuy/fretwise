@@ -27,13 +27,17 @@ from pathlib import Path
 import pytest
 
 from fretwise.ml import (
+    NotePrediction,
     PhraseNote,
+    apply_pinky_demotion,
     build_window_feature_vector,
     candidate_anchors,
     note_from_fretwise,
     phrase_window_feature_names,
+    resolve_phrase_window_fingers,
 )
 from fretwise.ml.phrase_window import _PER_NOTE_KEYS, PAD_VALUE, WINDOW_SIZE
+from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODELS = REPO_ROOT / "data" / "models"
@@ -263,3 +267,138 @@ def test_open_chord_slots_decode_open_strings(calibration: dict, version: str) -
     for slot in (0, 1):
         best = max(range(5), key=lambda c: slot_probs[0][slot][c])
         assert best == 0  # index 0 == "open"
+
+
+# ---------------------------------------------------------------------------
+# Production application: pinky demotion belt + melodic resolver (GDS-026 #63)
+# ---------------------------------------------------------------------------
+
+
+def _pred(finger: str, probs: tuple[float, ...], anchor: int) -> NotePrediction:
+    return NotePrediction(
+        finger=finger, probabilities=probs, anchor=anchor, entropy=0.0, n_windows=1,
+    )
+
+
+def _pw_note(fret: int, *, onset: float, has_legato: bool = False) -> PhraseNote:
+    return PhraseNote(
+        string=1, fret=fret, pitch=59 + fret, onset=onset, duration=1.0,
+        has_legato=has_legato,
+    )
+
+
+_PINKY_RING_TOP2 = (0.01, 0.02, 0.02, 0.45, 0.50)  # pinky argmax, ring 2nd
+
+
+def test_demotion_fires_on_anchor_plus_2_ring_top2() -> None:
+    notes = [_pw_note(f, onset=float(i)) for i, f in enumerate([5, 6, 7])]
+    preds = [
+        _pred("index", (0.1, 0.6, 0.1, 0.1, 0.1), 5),
+        _pred("middle", (0.1, 0.1, 0.6, 0.1, 0.1), 5),
+        _pred("pinky", _PINKY_RING_TOP2, 5),  # fret 7 == anchor 5 + 2
+    ]
+    assert apply_pinky_demotion(preds, notes) == ["index", "middle", "ring"]
+
+
+def test_demotion_skipped_when_fret_not_anchor_plus_2() -> None:
+    notes = [_pw_note(f, onset=float(i)) for i, f in enumerate([5, 6, 8])]
+    preds = [
+        _pred("index", (0.1, 0.6, 0.1, 0.1, 0.1), 5),
+        _pred("middle", (0.1, 0.1, 0.6, 0.1, 0.1), 5),
+        _pred("pinky", _PINKY_RING_TOP2, 5),  # fret 8 == anchor+3 -> natural pinky
+    ]
+    assert apply_pinky_demotion(preds, notes)[2] == "pinky"
+
+
+def test_demotion_skipped_with_legato_in_window() -> None:
+    notes = [
+        _pw_note(5, onset=0.0, has_legato=True),
+        _pw_note(6, onset=1.0),
+        _pw_note(7, onset=2.0),
+    ]
+    preds = [
+        _pred("index", (0.1, 0.6, 0.1, 0.1, 0.1), 5),
+        _pred("middle", (0.1, 0.1, 0.6, 0.1, 0.1), 5),
+        _pred("pinky", _PINKY_RING_TOP2, 5),
+    ]
+    assert apply_pinky_demotion(preds, notes)[2] == "pinky"
+
+
+def test_demotion_skipped_when_ring_below_half_pinky() -> None:
+    notes = [_pw_note(f, onset=float(i)) for i, f in enumerate([5, 6, 7])]
+    preds = [
+        _pred("index", (0.1, 0.6, 0.1, 0.1, 0.1), 5),
+        _pred("middle", (0.1, 0.1, 0.6, 0.1, 0.1), 5),
+        _pred("pinky", (0.02, 0.05, 0.08, 0.25, 0.60), 5),  # ring < 0.5*pinky
+    ]
+    assert apply_pinky_demotion(preds, notes)[2] == "pinky"
+
+
+class _StubFingerer:
+    """Duck-typed stand-in returning fixed fingers for resolver tests."""
+
+    def __init__(self, fingers: list[str]) -> None:
+        self._fingers = fingers
+
+    def predict_sequence(self, notes, stride: int = 1):
+        uniform = (0.2, 0.2, 0.2, 0.2, 0.2)
+        return [_pred(f, uniform, 1) for f in self._fingers[: len(notes)]]
+
+
+def _result(
+    i: int, fret: int, finger: Finger, *, onset: float | None = None,
+) -> FingeringResult:
+    event = NoteEvent(
+        pitch=59 + fret, onset=float(i) if onset is None else onset,
+        duration=1.0, tempo=120.0,
+    )
+    state = FingeringState(
+        string_num=2, fret=fret, finger=finger, hand_position=max(1, fret - 1),
+    )
+    return FingeringResult(note_id=i, note_event=event, state=state, cost=0.0)
+
+
+def test_resolver_overrides_melodic_fingers_and_counts() -> None:
+    results = [
+        _result(0, 5, Finger.INDEX),
+        _result(1, 6, Finger.INDEX),
+        _result(2, 7, Finger.RING),
+    ]
+    stats: dict[str, int] = {}
+    resolve_phrase_window_fingers(
+        results, _StubFingerer(["index", "middle", "pinky"]),  # type: ignore[arg-type]
+        stats_out=stats,
+    )
+    assert [r.state.finger for r in results] == [
+        Finger.INDEX, Finger.MIDDLE, Finger.PINKY,
+    ]
+    assert stats["phrase_window_applied"] == 2
+
+
+def test_resolver_keeps_open_strings_and_rejects_open_on_fretted() -> None:
+    results = [
+        _result(0, 0, Finger.OPEN),
+        _result(1, 6, Finger.MIDDLE),
+        _result(2, 7, Finger.RING),
+    ]
+    resolve_phrase_window_fingers(
+        results, _StubFingerer(["pinky", "open", "index"]),  # type: ignore[arg-type]
+    )
+    assert results[0].state.finger is Finger.OPEN   # fret 0 untouched
+    assert results[1].state.finger is Finger.MIDDLE  # "open" on fretted ignored
+    assert results[2].state.finger is Finger.INDEX
+
+
+def test_resolver_skips_chord_onsets_and_short_runs() -> None:
+    # Two notes share onset 0.0 (chord) -> only 2 melodic notes remain (< 3).
+    results = [
+        _result(0, 5, Finger.INDEX, onset=0.0),
+        _result(1, 7, Finger.RING, onset=0.0),
+        _result(2, 6, Finger.MIDDLE, onset=1.0),
+        _result(3, 8, Finger.PINKY, onset=2.0),
+    ]
+    before = [r.state.finger for r in results]
+    resolve_phrase_window_fingers(
+        results, _StubFingerer(["pinky", "pinky", "pinky", "pinky"]),  # type: ignore[arg-type]
+    )
+    assert [r.state.finger for r in results] == before
