@@ -168,29 +168,32 @@ def run_pipeline(
 
         # B integration: compute per-voice segment anchors and activate
         # segment-aware shift cost if the cost function supports it.
+        # Use the optimizer's public API (set_segment_anchors / clear_segment_anchors)
+        # so the pipeline never reaches into M5 internals.
         valid_events_list = list(valid_events)
-        cost_fn = getattr(optimizer, "_cost_fn", None)
         segment_activated = False
-        if isinstance(cost_fn, CostFunction):
+        if isinstance(optimizer.cost_fn, CostFunction):
             segments = segment_into_positions(valid_events_list)
             if segments:
                 anchors = _anchors_from_segments(segments, len(valid_events_list))
-                cost_fn.set_segment_anchors(anchors)
+                optimizer.set_segment_anchors(anchors)
                 segment_activated = True
 
         try:
             results = optimizer.solve(valid_events_list, valid_states_list)
         finally:
-            if segment_activated and isinstance(cost_fn, CostFunction):
-                cost_fn.clear_segment_anchors()
+            if segment_activated:
+                optimizer.clear_segment_anchors()
         # Cost-aware arpeggio stabilisation: pass the same CostFunction used by
         # this voice's Viterbi run so the resolver only overrides finger/
         # hand_position when it is cost-neutral-or-better under the active
         # weights/profile (segment anchors are cleared above, so the resolver
         # sees the A' per-state shift cost — the same view a post-Viterbi edit
-        # is judged against). cost_fn may be None for non-CostFunction
-        # optimizers, in which case the resolver keeps its legacy behaviour.
-        arpeggio_cost_fn = cost_fn if isinstance(cost_fn, CostFunction) else None
+        # is judged against). Returns None for non-CostFunction optimizers,
+        # in which case the resolver keeps its legacy behaviour.
+        arpeggio_cost_fn = (
+            optimizer.cost_fn if isinstance(optimizer.cost_fn, CostFunction) else None
+        )
         results = resolve_arpeggio_chord_fingering(results, cost_fn=arpeggio_cost_fn)
         results = resolve_finger_continuity(results)
         results = resolve_chord_conflicts(results)
