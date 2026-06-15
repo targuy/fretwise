@@ -10,6 +10,16 @@
 
 import { fetchAlternatives, fetchReview, postReviewChoice } from './api.js';
 
+/** Escape user/server-controlled text before injecting into innerHTML. */
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const SEVERITIES = {
   impossible: { label: 'Impossible', cls: 'sev-impossible' },
   suspect: { label: 'Suspect', cls: 'sev-suspect' },
@@ -130,11 +140,11 @@ export async function refresh() {
   try {
     report = await fetchReview(ctx.getFile(), ctx.getTrackId());
   } catch (e) {
-    listEl.innerHTML = `<p class="review-empty">Erreur : ${e.message}</p>`;
+    listEl.innerHTML = `<p class="review-empty">Erreur : ${esc(e.message)}</p>`;
     return;
   }
   if (report && report.available === false) {
-    listEl.innerHTML = `<p class="review-empty">${report.reason || 'Indisponible.'}</p>`;
+    listEl.innerHTML = `<p class="review-empty">${esc(report.reason || 'Indisponible.')}</p>`;
     _setBadge(0);
     return;
   }
@@ -160,10 +170,10 @@ function _renderList() {
     const sev = SEVERITIES[it.severity] || { label: it.severity, cls: '' };
     row.innerHTML = `
       <div class="review-item-head">
-        <span class="review-sev ${sev.cls}">${sev.label}</span>
+        <span class="review-sev ${sev.cls}">${esc(sev.label)}</span>
         <span class="review-measure">Mesure ${it.measure_index}</span>
       </div>
-      <div class="review-reason">${(it.reasons[0] || '').replace(/</g, '&lt;')}</div>
+      <div class="review-reason">${esc(it.reasons[0] || '')}</div>
     `;
     row.addEventListener('click', () => {
       if (ctx.focusMeasure) ctx.focusMeasure(it.measure_index);
@@ -394,9 +404,9 @@ function _altCard(item, alt, current) {
   const warn = alt.playable ? '' : '<span class="review-alt-warn">⚠ injouable</span>';
   card.innerHTML = `
     <div class="review-alt-head">
-      <span class="review-alt-label">${alt.label}</span>
+      <span class="review-alt-label">${esc(alt.label)}</span>
       ${warn}
-      <span class="review-alt-cost">coût ${alt.cost}</span>
+      <span class="review-alt-cost">coût ${esc(String(alt.cost))}</span>
     </div>
   `;
   card.appendChild(_tabRow(alt.fingerings));

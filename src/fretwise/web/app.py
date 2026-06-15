@@ -1187,7 +1187,7 @@ def _register_routes(app: FastAPI) -> None:
         # matches the freshly-written file (when the embed succeeded).
         section_markers = dict(getattr(adapter, "section_markers", {}) or {})
         audit = _safe_audit(events, payload.results, section_markers)
-        _write_fingering_sidecar(filepath, payload.results, audit=audit, track_id=track_id)
+        sidecar_ok = _write_fingering_sidecar(filepath, payload.results, audit=audit, track_id=track_id)
 
         return {
             "saved": out_name,
@@ -1202,6 +1202,10 @@ def _register_routes(app: FastAPI) -> None:
             # offending passages are flagged in the audit / "Doigtés à revoir".
             "gp_embed_skipped": gp_embed_error is not None,
             "gp_embed_error": gp_embed_error,
+            # False when the sidecar could not be written (disk full, read-only
+            # path, etc.).  The GP file itself may still be saved, but /api/solve
+            # will re-run Viterbi on next open instead of using the cache.
+            "sidecar_saved": sidecar_ok,
         }
 
     @app.get("/api/export/musicxml/{filename}")
@@ -2777,6 +2781,7 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
         total_annotated = 0
         total_fatal = 0
         merged_mapping: dict = {}
+        sidecar_ok = True
 
         for track_id, _track_name in guitar_tracks:
             try:
@@ -2807,7 +2812,8 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
 
             section_markers = dict(getattr(adapter, "section_markers", {}) or {})
             audit = _safe_audit(events, results, section_markers)
-            _write_fingering_sidecar(p, results, audit=audit, track_id=track_id)
+            if not _write_fingering_sidecar(p, results, audit=audit, track_id=track_id):
+                sidecar_ok = False
 
         if not total_annotated:
             return {"file": p.name, "status": "error", "error": "no fingering results"}
@@ -2828,6 +2834,7 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
             "annotated": total_annotated, "out": p.name,
             "elapsed_s": elapsed_s,
             "fatal": total_fatal,
+            "sidecar_saved": sidecar_ok,
         }
     except Exception as exc:  # noqa: BLE001 — never break the pool
         return {"file": p.name, "status": "error", "error": str(exc)}
@@ -3201,8 +3208,12 @@ def _write_fingering_sidecar(
     results: list[FingeringResult],
     audit: dict[str, Any] | None = None,
     track_id: int | None = None,
-) -> None:
+) -> bool:
     """Write both sidecar files next to *filepath* (best-effort, never raises).
+
+    Returns ``True`` when both files were written successfully, ``False`` on any
+    I/O error (disk full, read-only path, etc.).  Callers should surface this to
+    the API response so the UI can warn the user when the cache is stale.
 
     The optional ``audit`` (a serialized AuditReport) is stored alongside the
     results so /api/solve can serve a real audit banner without re-running the
@@ -3254,7 +3265,8 @@ def _write_fingering_sidecar(
             _json.dumps(data, ensure_ascii=False), encoding="utf-8"
         )
     except Exception:  # noqa: BLE001
-        pass
+        return False
+    return True
 
 
 def _staff_only_results(events: list[NoteEvent]) -> list[FingeringResult]:
