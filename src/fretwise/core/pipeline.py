@@ -40,6 +40,7 @@ def run_core_pipeline_from_raw(
     decision_policy: DecisionPolicy | None = None,
     representation_mode: RepresentationMode = RepresentationMode.TAB,
     track_kind: str = "guitar",
+    page_width: float | None = None,
 ) -> CorePipelineResult:
     """Execute the minimal core chain from raw input to SVG output.
 
@@ -50,6 +51,9 @@ def run_core_pipeline_from_raw(
         track_kind: Instrument family ("guitar"|"bass"|"drums"|"vocal"|
             "other").  Drives the staff clef and the written-pitch octave
             convention.  Defaults to ``"guitar"`` (legacy behaviour).
+        page_width: Optional client viewport width in pixels.  When provided
+            the layout engine uses it to determine how many measures fit per
+            row, so the note size stays fixed rather than stretching to fill.
     """
     normalized_score = normalize_raw_score(raw_score)
     completed_score = complete_normalized_score(normalized_score)
@@ -59,6 +63,7 @@ def run_core_pipeline_from_raw(
     render_scene = canonical_to_render_scene(
         canonical_score,
         mode=representation_mode.value,
+        page_width=page_width,
     )
     conformance_issues = check_scene_conformance(
         render_scene,

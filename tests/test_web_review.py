@@ -44,6 +44,13 @@ def test_alternatives_endpoint_responds(client: TestClient) -> None:
     body = res.json()
     assert body["measure_index"] == 1
     assert isinstance(body["alternatives"], list)
+    # Tempo + tuning are returned so the frontend can build a hand-viz payload.
+    assert isinstance(body["tempo"], (int, float))
+    assert isinstance(body["tuning"], list) and len(body["tuning"]) == 6
+    # Proposed (non-current) alternatives are all playable.
+    for alt in body["alternatives"]:
+        if not alt["is_current"]:
+            assert alt["playable"] is True
 
 
 def test_choice_persists_sidecar_and_corpus(client: TestClient, tmp_path: Path) -> None:

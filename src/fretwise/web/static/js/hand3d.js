@@ -1947,6 +1947,7 @@ class Hand3DRenderer {
     try {
       if (this._rigMode === "articulated") {
         this._updateArticulated(kin);
+        this._applyCamera();
         this.renderer.render(this.scene, this.camera);
         return;
       }
@@ -1968,6 +1969,7 @@ class Hand3DRenderer {
         this._poseThumb(kin);
         this._poseForearm(kin);
       }
+      this._applyCamera();
       this.renderer.render(this.scene, this.camera);
     } catch (e) {
       // Silent fallback: any per-frame error should not poison the renderer.
@@ -2368,6 +2370,11 @@ class Hand3DRenderer {
      the back of the hand); polar = 0 would be straight overhead. */
   _applyCamera() {
     this._applyCamOverride();   // TEMP: ?cam=radius,azDeg,polDeg ?lookat=x,y,z
+    // Keep the orbit pivot centred on the hand's current X (palm sliding along
+    // the neck) so zoom and rotation always orbit the hand, not the board centre.
+    if (this._palmX !== undefined && !this._lookAtOverride) {
+      this._lookAt.x = this._palmX;
+    }
     const { radius, azimuth, polar } = this._camSpherical;
     const tgt = this._lookAtOverride || this._lookAt;
     const sinP = Math.sin(polar);

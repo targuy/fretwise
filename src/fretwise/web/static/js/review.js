@@ -31,6 +31,14 @@ let badgeEl = null;
 let report = null;
 const activeFilters = new Set(['impossible', 'suspect', 'high_cost']);
 
+// Hand-visualisation embed for the current measure's alternatives. Tempo +
+// tuning come from the /alternatives response; a single shared iframe (the same
+// hand_viz.html used by the floating panel) is fed the fingerings of whichever
+// option the user picks, in standalone (self-looping) mode.
+let _vizTempo = 120;
+let _vizTuning = [40, 45, 50, 55, 59, 64];
+let _vizFrame = null;
+
 /**
  * Initialize the review panel.
  * @param {{getFile:Function,getTrackId:Function,isGuitar:Function,reload:Function,focusMeasure:Function}} context
@@ -188,15 +196,33 @@ async function _openAlternatives(item, row) {
   const others = data.alternatives.filter((a) => !a.is_current);
   const current = data.alternatives.find((a) => a.is_current) || null;
 
+  // Tempo + tuning for the hand-viz payloads.
+  _vizTempo = typeof data.tempo === 'number' ? data.tempo : 120;
+  _vizTuning = Array.isArray(data.tuning) && data.tuning.length
+    ? data.tuning : [40, 45, 50, 55, 59, 64];
+  _vizFrame = null;  // a fresh iframe is created for this box below
+
   // Legend so the compact notation reads clearly.
   box.appendChild(_legend());
+
+  // Shared hand visualisation — the compact tab is hard to read, so each option
+  // (current + alternatives) can be shown on a 3D fretting hand right here.
+  const vizWrap = document.createElement('div');
+  vizWrap.className = 'review-handviz';
+  _ensureVizFrame(vizWrap);
+  box.appendChild(vizWrap);
 
   if (current) {
     const head = document.createElement('div');
     head.className = 'review-cur-head';
-    head.textContent = 'Doigté actuel';
+    head.innerHTML = '<span>Doigté actuel</span>';
+    const curBtn = _vizButton(current.fingerings);
+    head.appendChild(curBtn);
     box.appendChild(head);
     box.appendChild(_tabRow(current.fingerings));
+    // Default the hand viz to the current fingering so the panel is immediately
+    // readable — even when there are no alternatives (early-returns below).
+    curBtn.click();
   }
 
   if (!others.length) {
@@ -216,6 +242,12 @@ async function _openAlternatives(item, row) {
   box.appendChild(head);
   for (const alt of others) {
     box.appendChild(_altCard(item, alt, current));
+  }
+
+  // No current fingering (rare) → default the viz to the first alternative.
+  if (!current) {
+    const firstViz = box.querySelector('.review-viz-btn');
+    if (firstViz) firstViz.click();
   }
 }
 
@@ -246,6 +278,116 @@ function _tabRow(fingerings) {
   return wrap;
 }
 
+/** Convert a MIDI pitch (e.g. 40) to a note name with octave (e.g. "E2"). */
+function _midiToNoteName(midi) {
+  const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const octave = Math.floor(midi / 12) - 1;
+  return NAMES[((midi % 12) + 12) % 12] + octave;
+}
+
+/**
+ * Build a standalone (self-looping) hand_viz payload from a fingering set.
+ * Onsets are normalised so the measure starts ~0.3 s in, and each note is held
+ * long enough to read the pose. Mirrors main.js's _buildHandVizPayload shape.
+ */
+function _buildAltHandPayload(fingerings) {
+  const tempo = _vizTempo || 120;
+  const tuning = (_vizTuning && _vizTuning.length) ? _vizTuning : [40, 45, 50, 55, 59, 64];
+  const sorted = fingerings.slice()
+    .sort((a, b) => (a.onset - b.onset) || (a.string - b.string));
+  const minOnset = sorted.length ? Math.min(...sorted.map((f) => f.onset || 0)) : 0;
+  const lead = 0.3;
+  let maxFret = 0;
+  const frames = sorted.map((f) => {
+    let finger = String(f.finger || 'open');
+    if (finger.startsWith('Finger.')) finger = finger.slice(7).toLowerCase();
+    if (typeof f.fret === 'number' && f.fret > maxFret) maxFret = f.fret;
+    return {
+      note_id: f.note_id,
+      onset_sec: ((f.onset || 0) - minOnset) * 60 / tempo + lead,
+      duration_sec: 0.7,
+      string: f.string,
+      fret: f.fret,
+      finger,
+      hand_position: f.hand_position,
+      pitch: f.pitch,
+      voice: f.voice_hint || 0,
+      planted: {},
+    };
+  });
+  const lastSec = frames.length ? frames[frames.length - 1].onset_sec : 0;
+  return {
+    meta: {
+      title: 'Doigté', artist: '', track: '', tempo,
+      synced: false,                       // self-loop in standalone mode
+      max_seconds: lastSec + 1.2,
+    },
+    fretboard: {
+      num_frets: Math.max(12, maxFret + 2),
+      scale_length_mm: 648,
+      tuning: tuning.map(_midiToNoteName),
+      capo: 0,
+      num_strings: tuning.length,
+    },
+    frames,
+  };
+}
+
+/** Create (once per alternatives box) the shared embedded hand-viz iframe. */
+function _ensureVizFrame(container) {
+  if (_vizFrame && _vizFrame.isConnected) return _vizFrame;
+  const frame = document.createElement('iframe');
+  frame.className = 'review-handviz-frame';
+  frame.title = 'Visualisation de la main';
+  frame._ready = false;
+  frame._pending = null;
+  frame.addEventListener('load', () => {
+    frame._ready = true;
+    if (frame._pending && frame.contentWindow) {
+      frame.contentWindow.postMessage(
+        { type: 'fretwise-hand-data', payload: frame._pending }, '*');
+      frame._pending = null;
+    }
+  });
+  // Cache-bust so a fresh standalone instance loads each open.
+  frame.src = `/static/hand_viz.html?embed=1&v=${Date.now()}`;
+  _vizFrame = frame;
+  container.appendChild(frame);
+  return frame;
+}
+
+/** Feed the given fingerings to the shared hand-viz iframe. */
+function _showHand(fingerings) {
+  if (!_vizFrame || !_vizFrame.isConnected) return;
+  const payload = _buildAltHandPayload(fingerings);
+  if (_vizFrame._ready && _vizFrame.contentWindow) {
+    _vizFrame.contentWindow.postMessage(
+      { type: 'fretwise-hand-data', payload }, '*');
+  } else {
+    _vizFrame._pending = payload;   // posted on iframe load
+  }
+}
+
+/** A "Voir la main" button that loads *fingerings* into the shared viz. */
+function _vizButton(fingerings) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'review-viz-btn';
+  b.innerHTML =
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.7" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/>' +
+    '<path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/>' +
+    '<path d="M6 14v1a6 6 0 0012 0v-2"/></svg> Voir la main';
+  b.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    panel.querySelectorAll('.review-viz-btn.is-viz-active')
+      .forEach((x) => x.classList.remove('is-viz-active'));
+    b.classList.add('is-viz-active');
+    _showHand(fingerings);
+  });
+  return b;
+}
+
 function _altCard(item, alt, current) {
   const card = document.createElement('div');
   card.className = 'review-alt';
@@ -260,6 +402,9 @@ function _altCard(item, alt, current) {
   card.appendChild(_tabRow(alt.fingerings));
   const diff = _diffLine(current, alt);
   if (diff) card.appendChild(diff);
+  const actions = document.createElement('div');
+  actions.className = 'review-alt-actions';
+  actions.appendChild(_vizButton(alt.fingerings));
   const pick = document.createElement('button');
   pick.className = 'review-alt-pick';
   pick.textContent = 'Choisir ce doigté';
@@ -267,7 +412,8 @@ function _altCard(item, alt, current) {
     ev.stopPropagation();
     _choose(item, alt, pick);
   });
-  card.appendChild(pick);
+  actions.appendChild(pick);
+  card.appendChild(actions);
   // Selecting (not committing) scrolls the score to the measure to locate it.
   card.addEventListener('click', () => {
     if (ctx.focusMeasure) ctx.focusMeasure(item.measure_index);

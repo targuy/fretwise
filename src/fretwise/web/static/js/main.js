@@ -5,11 +5,12 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateSoundfont, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
-import { getMaskedMeasures, renderAuditBanner, resetAuditBanner } from './audit.js';
+import { activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
+import { task as notifyTask, toast as notifyToast } from './notify.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
 import { applyLeatherIcons } from './icons.js';
 import { initReview, resetReview } from './review.js';
@@ -40,26 +41,50 @@ const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes respo
 const _solveCache = new Map();
 // key: primaryTrackId → Set<secondaryTrackId> — tracks explicitly muted by the user
 const _mutedSecondaryTracks = new Map();
+// Files discovered (via solve) to have chord diagrams embedded — used for the
+// library chord badge. Progressive: only populated after a solve has been seen.
+const _chordFilesSet = new Set();
 
-/** Stable cache key for a solve request (file, track, mode, rule prefs). */
-function _solveCacheKey(file, trackId, mode, prefs) {
+// Calibrated baseline zoom per view — these are the "zero" reference points baked
+// in from user calibration. The slider always shows offset from this baseline.
+const _ZOOM_BASE = {
+  [MODES.STANDARD]:           20,   // Staff  : +20 %
+  [MODES.STANDARD_TABLATURE]: 40,   // Mixed  : +40 %
+  [MODES.TABLATURE]:          -5,   // Tab    :  -5 %
+};
+// User slider offset relative to each view's baseline (-50 to +50).
+const _viewZoom = {};
+
+/** Stable cache key for a solve request (file, track, mode, rule prefs, svgWidth). */
+function _solveCacheKey(file, trackId, mode, prefs, svgWidth) {
   const p = prefs || {};
   const prefsKey = `${p.sameFingerPenalty !== false ? 1 : 0}`
     + `:${p.inferImplicitLegato !== false ? 1 : 0}`;
-  return `${file}#${trackId}#${mode}#${prefsKey}`;
+  const wKey = svgWidth ? `@${svgWidth}` : '';
+  return `${file}#${trackId}#${mode}#${prefsKey}${wKey}`;
+}
+
+/**
+ * Return the SVG render width to request for staff/mixed views: nearest-50px
+ * bucket of (innerWidth minus #core-svg-view horizontal padding).  Returns
+ * undefined for the pure-tab mode (no SVG rendered, width irrelevant).
+ */
+function _svgRenderWidth(mode) {
+  if (mode === MODES.TABLATURE) return undefined;
+  const factor = 1 + ((_ZOOM_BASE[mode] + (_viewZoom[mode] ?? 0)) / 100);
+  return Math.round((window.innerWidth - 48) / factor / 50) * 50;
 }
 
 /**
  * Solve with a client-side cache. The first call for a (file, track, mode,
- * prefs) tuple hits the network; subsequent calls return the cached payload
- * synchronously-fast (still a Promise for a uniform API). The server keeps its
- * own LRU cache, but reusing the parsed JS object also skips re-deserialising
- * a multi-thousand-note payload on every tab switch.
+ * prefs, svgWidth) tuple hits the network; subsequent calls return the cached
+ * payload synchronously-fast. The server keeps its own LRU cache, but reusing
+ * the parsed JS object also skips re-deserialising a large payload on every tab switch.
  */
-async function _cachedSolve(file, trackId, mode, prefs) {
-  const key = _solveCacheKey(file, trackId, mode, prefs);
+async function _cachedSolve(file, trackId, mode, prefs, svgWidth) {
+  const key = _solveCacheKey(file, trackId, mode, prefs, svgWidth);
   if (_solveCache.has(key)) return _solveCache.get(key);
-  const data = await fetchSolve(file, trackId, mode, prefs);
+  const data = await fetchSolve(file, trackId, mode, prefs, svgWidth);
   _solveCache.set(key, data);
   return data;
 }
@@ -212,6 +237,8 @@ const selRepresentationMode = $('#representation-mode-select');
 const uploadInput    = $('#upload-input');
 const uploadStatus   = $('#upload-status');
 const rngVolume     = $('#rng-volume');
+const rngZoom       = $('#rng-zoom');
+const zoomLabel     = $('#zoom-label');
 const songTitle     = $('#song-title');
 const songArtist    = $('#song-artist');
 const trackBadge    = $('#meta-instrument');
@@ -236,6 +263,7 @@ const headerMetaTempo  = $('#header-meta-tempo');
 const btnHeaderBack    = $('#btn-header-back');
 const btnHeaderPdf     = $('#btn-header-pdf');
 const btnHeaderGp      = $('#btn-header-gp');
+const btnHeaderSave    = $('#btn-header-save');
 const btnHeaderMusicXml = $('#btn-header-musicxml');
 
 // Header
@@ -245,8 +273,10 @@ const legendClose   = $('#legend-close');
 const prefSameFingerPenalty = $('#pref-same-finger-penalty');
 const prefInferLegato = $('#pref-infer-legato');
 const prefHandOverlay = $('#pref-hand-overlay');
-const btnHandViz    = $('#btn-hand-viz');
-const btnRecalc     = $('#btn-recalc');
+const btnHandViz           = $('#btn-hand-viz');
+const btnInsertFingerings  = $('#btn-insert-fingerings');
+const btnRig               = $('#btn-rig');
+const rigPanel             = $('#rig-panel');
 const handVizPanel  = $('#hand-viz-panel');
 const handVizFrame  = $('#hand-viz-frame');
 const handVizClose  = $('#hand-viz-close');
@@ -289,6 +319,20 @@ let _libSort = { col: 'title', dir: 1 };
 let _libSearch = '';
 let _libGenreFilter = '';
 let _libFormatFilter = '';
+// Multi-select state for batch fingering calculation
+let _selectedFiles = new Set();
+// Pagination: rows per page adapts to viewport height at load time.
+// Header=44px, sticky strip≈90px, toolbar≈52px, row≈44px.
+function _computeLibPageSize() {
+  const strip = document.getElementById('lib-sticky-strip');
+  const stripH = strip ? strip.offsetHeight : 90;
+  const available = window.innerHeight - 44 - stripH - 52;
+  return Math.max(5, Math.floor(available / 44));
+}
+let LIB_PAGE_SIZE = 15; // updated after DOMContentLoaded via _initLibPageSize()
+function _initLibPageSize() { LIB_PAGE_SIZE = _computeLibPageSize(); }
+let _libPage = 0;
+let _libRows = [];   // the full filtered+sorted set (page is a slice of this)
 
 async function loadFiles() {
   showPage('files');
@@ -393,13 +437,24 @@ function _renderLibTable() {
       empty.textContent = _emptyLibraryMessage();
     }
     tbody.innerHTML = '';
+    _libRows = [];
     _renderAzBar([]);
+    _renderPager(0);
     return;
   }
   if (empty) empty.style.display = 'none';
 
+  // Paginate: keep the whole filtered+sorted set in _libRows (so the A–Z bar and
+  // letter-jump can address rows on other pages) and render only the current
+  // page slice of LIB_PAGE_SIZE rows.
+  _libRows = rows;
+  const pageCount = Math.max(1, Math.ceil(rows.length / LIB_PAGE_SIZE));
+  if (_libPage > pageCount - 1) _libPage = pageCount - 1;
+  if (_libPage < 0) _libPage = 0;
+  const pageRows = rows.slice(_libPage * LIB_PAGE_SIZE, _libPage * LIB_PAGE_SIZE + LIB_PAGE_SIZE);
+
   tbody.innerHTML = '';
-  for (const f of rows) {
+  for (const f of pageRows) {
     const tr = document.createElement('tr');
     tr.className = 'lib-row';
     tr.dataset.file = f.name;
@@ -411,17 +466,55 @@ function _renderLibTable() {
     const year = f.meta?.year || '—';
     const format = f.format || '?';
 
+    const isGpFile = f.name.endsWith('.gp');
+    const hasFingering = isGpFile && f.has_fingering;
+    const isCurrent = hasFingering && f.fingering_is_current;
+    const isChecked = _selectedFiles.has(f.name);
+    // Distinctive hand icon marks partitions that carry saved fingerings:
+    // green = up to date, amber (with ⚠) = made by an older algorithm version.
+    const handIcon = '<svg class="lib-finger-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M6 14v1a6 6 0 0012 0v-2"/></svg>';
+    const fingerBadge = !isGpFile || !hasFingering ? '' :
+      isCurrent
+        ? `<span class="lib-finger-mark is-ok" title="Doigtés enregistrés, à jour (algo v${FINGERING_ALGO_VERSION || '?'})" aria-label="Doigtés à jour">${handIcon}</span>`
+        : `<span class="lib-finger-mark is-old" title="Doigtés enregistrés avec une version antérieure de l'algorithme — recalculer recommandé" aria-label="Doigtés obsolètes">${handIcon}<span class="lib-finger-warn">⚠</span></span>`;
+    // Chord diagram badge — shown when a previous solve revealed embedded chords
+    const chordIcon = '<svg class="lib-chord-ic" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="1" x2="3" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="1" x2="6.5" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="10" y1="1" x2="10" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="3.5" x2="12" y2="3.5" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="10.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="1.2"/><circle cx="3" cy="7" r="1.6" fill="currentColor"/><circle cx="6.5" cy="3.5" r="1.6" fill="currentColor"/><circle cx="10" cy="10.5" r="1.6" fill="currentColor"/></svg>';
+    const chordBadge = _chordFilesSet.has(f.name)
+      ? `<span class="lib-chord-mark" title="Contient des diagrammes d'accords" aria-label="Accords">${chordIcon}</span>`
+      : '';
+
     tr.innerHTML = `
-      <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span></td>
+      <td class="lib-cell-check"><input type="checkbox" class="lib-row-check" data-file="${_esc(f.name)}" ${isChecked ? 'checked' : ''} aria-label="Sélectionner ${_esc(title)}"></td>
+      <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span>${fingerBadge}${chordBadge}</td>
       <td class="lib-cell-artist">${_esc(artist)}</td>
       <td class="lib-cell-genre"><span class="lib-badge lib-badge-genre">${_esc(genre)}</span></td>
       <td class="lib-cell-year">${_esc(String(year))}</td>
       <td class="lib-cell-format"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
       <td class="lib-cell-actions">
         <button class="lib-btn-info" title="Song info" data-file="${_esc(f.name)}">ℹ</button>
+        ${f.has_rig ? `<button class="lib-btn-rig" title="Voir rig GP-180" data-file="${_esc(f.name)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/><circle cx="18" cy="13" r="1.5" fill="currentColor"/></svg></button>` : ''}
         <button class="lib-btn-dl" title="Download ${_esc(f.name)}" data-file="${_esc(f.name)}">⬇</button>
       </td>
     `;
+
+    const _rigBtn = tr.querySelector('.lib-btn-rig');
+    if (_rigBtn) {
+      _rigBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (rigPanel) {
+          rigPanel.style.display = 'flex';
+          if (btnRig) btnRig.classList.add('tb-btn-active');
+          await _loadRig(f.name);
+        }
+      });
+    }
+
+    tr.querySelector('.lib-row-check').addEventListener('change', (e) => {
+      e.stopPropagation();
+      if (e.target.checked) _selectedFiles.add(f.name);
+      else _selectedFiles.delete(f.name);
+      _updateSelectionBar();
+    });
 
     tr.querySelector('.lib-cell-title').addEventListener('click', () => selectFile(f.name));
 
@@ -455,10 +548,172 @@ function _renderLibTable() {
   });
 
   _renderAzBar(rows);
+  _renderPager(pageCount);
   // After layout settles, push the sticky strip height down to CSS so the
   // table's sticky <thead> stacks under it without overlap.
   requestAnimationFrame(_updateStickyOffsets);
 }
+
+/**
+ * Render the page navigation into the search bar. The filtered+sorted set lives
+ * in `_libRows`; we only ever render a 15-row slice (LIB_PAGE_SIZE), so without
+ * this control the user could never reach songs past the first page.
+ */
+function _renderPager(pageCount) {
+  const pager = document.getElementById('lib-pager');
+  if (!pager) return;
+  if (!pageCount || pageCount <= 1) {
+    pager.innerHTML = '';
+    pager.style.display = 'none';
+    return;
+  }
+  pager.style.display = '';
+  const cur = _libPage + 1; // 1-based for display
+  pager.innerHTML = `
+    <button class="lib-pager-btn" id="lib-pager-first" ${_libPage <= 0 ? 'disabled' : ''} title="Première page" aria-label="Première page">«</button>
+    <button class="lib-pager-btn" id="lib-pager-prev" ${_libPage <= 0 ? 'disabled' : ''} title="Page précédente" aria-label="Page précédente">‹</button>
+    <span class="lib-pager-info">${cur} / ${pageCount}</span>
+    <button class="lib-pager-btn" id="lib-pager-next" ${_libPage >= pageCount - 1 ? 'disabled' : ''} title="Page suivante" aria-label="Page suivante">›</button>
+    <button class="lib-pager-btn" id="lib-pager-last" ${_libPage >= pageCount - 1 ? 'disabled' : ''} title="Dernière page" aria-label="Dernière page">»</button>
+  `;
+  const go = (p) => {
+    const clamped = Math.max(0, Math.min(pageCount - 1, p));
+    if (clamped === _libPage) return;
+    _libPage = clamped;
+    _renderLibTable();
+    // Scroll the page back to the top of the file-selector (sticky elements
+    // are already "in view" per the browser so scrollIntoView is a no-op on them).
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  pager.querySelector('#lib-pager-first')?.addEventListener('click', () => go(0));
+  pager.querySelector('#lib-pager-prev')?.addEventListener('click', () => go(_libPage - 1));
+  pager.querySelector('#lib-pager-next')?.addEventListener('click', () => go(_libPage + 1));
+  pager.querySelector('#lib-pager-last')?.addEventListener('click', () => go(pageCount - 1));
+}
+
+// ── Library multi-select + batch fingering calculation ───────────────────────
+
+// Algo version must match FINGERING_ALGO_VERSION in app.py (bumped on pipeline changes).
+const FINGERING_ALGO_VERSION = '2.0';
+
+function _updateSelectionBar() {
+  const bar = $('#lib-selection-bar');
+  const countEl = $('#lib-selection-count');
+  const checkAll = $('#lib-check-all');
+  const n = _selectedFiles.size;
+  if (bar) bar.style.display = n > 0 ? '' : 'none';
+  if (countEl) countEl.textContent = `${n} fichier${n > 1 ? 's' : ''} sélectionné${n > 1 ? 's' : ''}`;
+  if (checkAll) {
+    const visibleGpFiles = _allFiles.filter(f => f.name.endsWith('.gp'));
+    checkAll.indeterminate = n > 0 && n < visibleGpFiles.length;
+    checkAll.checked = n > 0 && n >= visibleGpFiles.length;
+  }
+}
+
+function _clearSelection() {
+  _selectedFiles.clear();
+  document.querySelectorAll('.lib-row-check').forEach(cb => { cb.checked = false; });
+  _updateSelectionBar();
+}
+
+async function _calcFingeringsForSelected() {
+  const files = [..._selectedFiles];
+  if (!files.length) return;
+  const statusEl = $('#lib-calc-status');
+  const btn = $('#lib-btn-calc-fingerings');
+  if (btn) btn.disabled = true;
+  const total = files.length;
+  let ok = 0, err = 0, done = 0;
+  const _t = notifyTask('Calcul des doigtés (lot)…', { progress: 0 });
+  // Single PARALLEL batch over the selection: the server fans the work across a
+  // process pool and streams one JSON line per file, so the whole selection is
+  // computed concurrently instead of one-blocking-await-per-file on the client
+  // (which froze the UI for minutes). No library cleanup runs here — that pass
+  // de-duplicated by (title, artist) and could trash freshly-computed files.
+  try {
+    const res = await fetch('/api/library/refresh-fingerings?force=true', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files }),
+    });
+    if (!res.ok || !res.body) {
+      const e = await res.json().catch(() => ({ detail: 'Échec du calcul' }));
+      throw new Error(e.detail || 'Échec du calcul');
+    }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    for (;;) {
+      const { value, done: streamDone } = await reader.read();
+      if (streamDone) break;
+      buf += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buf.indexOf('\n')) >= 0) {
+        const line = buf.slice(0, nl).trim();
+        buf = buf.slice(nl + 1);
+        if (!line) continue;
+        let msg;
+        try { msg = JSON.parse(line); } catch { continue; }
+        if (msg.event === 'start') {
+          if (statusEl) statusEl.textContent = `0/${msg.to_process ?? total} — calcul en cours…`;
+        } else if (msg.event === 'done') {
+          ok = msg.ok ?? ok;
+          err = msg.errors ?? err;
+        } else if (msg.event === 'cancelled') {
+          ok = msg.ok ?? ok;
+          err = msg.errors ?? err;
+        } else if (msg.status) {
+          done++;
+          if (msg.status === 'error') err++;
+          else if (msg.status === 'ok') ok = Math.max(ok, done - err);
+          if (statusEl) statusEl.textContent = `${done}/${total} — ${msg.file || ''}`;
+          _t.progress(done / total);
+          _t.message(`Calcul des doigtés… ${done}/${total} — ${msg.file || ''}`);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Batch fingering failed:', e);
+    _t.error(`Échec du calcul : ${e.message}`);
+    if (statusEl) statusEl.textContent = `Échec : ${e.message}`;
+    if (btn) btn.disabled = false;
+    return;
+  }
+  _t.done(err
+    ? `${ok} calculé(s), ${err} erreur(s)`
+    : `${ok} fichier${ok > 1 ? 's' : ''} calculé${ok > 1 ? 's' : ''}`);
+  if (statusEl) {
+    statusEl.textContent = err
+      ? `✓ ${ok} calculé(s) — ${err} erreur(s)`
+      : `✓ ${ok} fichier${ok > 1 ? 's' : ''} calculé${ok > 1 ? 's' : ''}`;
+    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 6000);
+  }
+  if (btn) btn.disabled = false;
+  _clearSelection();
+  // Reload the file list so fingering badges update.
+  await loadFiles();
+}
+
+const _libCheckAll = $('#lib-check-all');
+if (_libCheckAll) {
+  _libCheckAll.addEventListener('change', () => {
+    const gpFiles = _allFiles.filter(f => f.name.endsWith('.gp'));
+    if (_libCheckAll.checked) gpFiles.forEach(f => _selectedFiles.add(f.name));
+    else _selectedFiles.clear();
+    document.querySelectorAll('.lib-row-check').forEach(cb => {
+      cb.checked = _libCheckAll.checked;
+    });
+    _updateSelectionBar();
+  });
+}
+
+const _libBtnCalc = $('#lib-btn-calc-fingerings');
+if (_libBtnCalc) _libBtnCalc.addEventListener('click', _calcFingeringsForSelected);
+
+const _libBtnCancel = $('#lib-btn-cancel-selection');
+if (_libBtnCancel) _libBtnCancel.addEventListener('click', _clearSelection);
+
+// ── Sticky strip height ───────────────────────────────────────────────────────
 
 // Measure the sticky control strip (.lib-sticky-strip = search/filters +
 // A–Z bar) and expose its height as a CSS variable on #file-selector. The
@@ -517,7 +772,16 @@ function _renderAzBar(rows) {
 }
 
 // Scroll the table to the first row whose nav key falls in the given bucket.
+// Pagination-aware: the target row may live on another page, so jump there
+// first (the A–Z bar addresses the whole filtered set, not just the page).
 function _scrollToLetter(letter) {
+  const idx = _libRows.findIndex((f) => _libNavBucket(_libNavKey(f)) === letter);
+  if (idx < 0) return;
+  const targetPage = Math.floor(idx / LIB_PAGE_SIZE);
+  if (targetPage !== _libPage) {
+    _libPage = targetPage;
+    _renderLibTable();
+  }
   const tbody = $('#lib-table-body');
   if (!tbody) return;
   for (const tr of tbody.querySelectorAll('tr.lib-row')) {
@@ -617,6 +881,10 @@ async function selectFile(filename) {
   _solveCache.clear();
   _mutedSecondaryTracks.clear();
   resetReview();
+  // Show the rig button only when this song has a GP-180 rig.
+  const _fInfo = _allFiles.find((f) => f.name === filename);
+  if (btnRig) btnRig.style.display = _fInfo?.has_rig ? '' : 'none';
+  if (rigPanel && rigPanel.style.display !== 'none') _loadRig(filename);
 
   try {
     const tracks = await fetchTracks(filename);
@@ -680,11 +948,12 @@ function _prefetchAllTrackModes(filename, tracks) {
     const modes = isGuitarKind(t.kind) ? _PREFETCH_MODES : [MODES.STANDARD];
     for (const mode of modes) {
       if (myToken !== _prefetchAbortToken) return;
-      const key = _solveCacheKey(filename, t.id, mode, prefs);
+      const svgW = _svgRenderWidth(mode);
+      const key = _solveCacheKey(filename, t.id, mode, prefs, svgW);
       if (_solveCache.has(key)) continue;  // already warm — skip the round-trip
       // Warm BOTH the server LRU and our client-side object cache so the next
       // interactive switch to this (track, mode) renders without any network.
-      fetchSolve(filename, t.id, mode, prefs)
+      fetchSolve(filename, t.id, mode, prefs, svgW)
         .then((data) => { _solveCache.set(key, data); })
         .catch(() => { /* silent — interactive solve will retry */ });
     }
@@ -701,9 +970,12 @@ function populateTrackSwitcher(_trackId) {
 // after the user has clicked another tab is discarded instead of overwriting
 // the newer view. Also doubles as a re-entrancy / rapid-click guard.
 let _selectTrackToken = 0;
+let _solveInFlight = false;        // a selectTrack() solve is currently running
+let _autoPlayAfterSolve = false;   // play was requested before fingerings existed
 
 async function selectTrack(trackId, trackName) {
   const myToken = ++_selectTrackToken;
+  _solveInFlight = true;
   currentTrackId = trackId;
   _reviewTrackName = trackName;  // remembered so the review panel can re-solve
   // Resolve the track kind from the loaded list and lock the UI before any
@@ -769,6 +1041,7 @@ async function selectTrack(trackId, trackName) {
       trackId,
       representationMode,
       getRulePreferences(),
+      _svgRenderWidth(representationMode),
     );
     // A newer selectTrack started while we were awaiting — drop this stale
     // result so it cannot clobber the view the user is now looking at.
@@ -786,9 +1059,26 @@ async function selectTrack(trackId, trackName) {
       _applyTrackKindLock();
     }
     initRenderer(data);
+    // Record chord-diagram availability for this file and update the library badge.
+    if (data?.chord_diagrams?.length && currentFile && !_chordFilesSet.has(currentFile)) {
+      _chordFilesSet.add(currentFile);
+      const row = document.querySelector(`.lib-row[data-file="${CSS.escape(currentFile)}"]`);
+      if (row) {
+        const cell = row.querySelector('.lib-cell-title');
+        if (cell && !cell.querySelector('.lib-chord-mark')) {
+          const chordIcon = '<svg class="lib-chord-ic" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="1" x2="3" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="1" x2="6.5" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="10" y1="1" x2="10" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="3.5" x2="12" y2="3.5" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="10.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="1.2"/><circle cx="3" cy="7" r="1.6" fill="currentColor"/><circle cx="6.5" cy="3.5" r="1.6" fill="currentColor"/><circle cx="10" cy="10.5" r="1.6" fill="currentColor"/></svg>';
+          const badge = document.createElement('span');
+          badge.className = 'lib-chord-mark';
+          badge.title = 'Contient des diagrammes d\'accords';
+          badge.innerHTML = chordIcon;
+          cell.appendChild(badge);
+        }
+      }
+    }
     renderAuditBanner(data?.audit, {
       onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
     });
+    _gateReviewButton(data?.audit);
     // Restore playback position from the previous track on the new one.
     // Clamp to the new track's measure count to handle tracks of different
     // lengths. Resume playback if it was playing before the switch.
@@ -808,9 +1098,24 @@ async function selectTrack(trackId, trackName) {
         updatePlayButton(true);
         startCursorLoop();
       }
+      // Focus the restored measure so opening a tab lands on where you were
+      // (or the start), not at the top — and tracks the playhead if it's moving.
+      _focusCurrentMeasure(clamped);
+    }
+    // The user pressed play before fingerings existed: the solve was launched on
+    // their behalf, so start playback now that the track has playable measures.
+    if (_autoPlayAfterSolve && playback) {
+      _autoPlayAfterSolve = false;
+      if (playback.totalMeasures > 0 && !playback.isPlaying) {
+        _setFollowPlayhead(true);
+        playback.play();
+        updatePlayButton(true);
+        startCursorLoop();
+      }
     }
   } catch (err) {
     if (myToken !== _selectTrackToken) return;
+    _autoPlayAfterSolve = false;
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
     ctx.fillText(`Error: ${err.message}`, 200, 50);
@@ -819,6 +1124,7 @@ async function selectTrack(trackId, trackName) {
     // (stale) solve must not re-enable the tabs while a newer one is still
     // in flight.
     if (myToken === _selectTrackToken) {
+      _solveInFlight = false;
       _setSongLoading(false);
       _setTabsBusy(false);
     }
@@ -833,10 +1139,15 @@ async function selectTrack(trackId, trackName) {
 // banner element is created lazily so no index.html change is required beyond
 // the (separately added) markup.
 
-function _setSongLoading(on) {
-  const banner = document.getElementById('song-loading-banner');
-  if (!banner) return;
-  banner.style.display = on ? 'flex' : 'none';
+let _songTask = null;
+function _setSongLoading(on, message) {
+  if (on) {
+    if (!_songTask) _songTask = notifyTask(message || 'Calcul des doigtés…');
+    else if (message) _songTask.message(message);
+  } else if (_songTask) {
+    _songTask.done();
+    _songTask = null;
+  }
 }
 
 function _setTabsBusy(busy) {
@@ -870,22 +1181,56 @@ async function exportGP() {
     btnHeaderGp.setAttribute('aria-label', 'Export…');
   }
   _setPdfExportStatus('Export GP…', 'neutral');
+  const _t = notifyTask('Export Guitar Pro…');
   try {
     const { blob, filename, annotatedNotes } = await fetchExportGp(
       currentFile, currentTrackId,
     );
     _downloadBlob(blob, filename);
+    _t.done(`Export GP terminé (${annotatedNotes} doigtés)`);
     _setPdfExportStatus(
       `Export GP OK (${annotatedNotes} doigtés écrits)`, 'ok',
     );
   } catch (err) {
     // The backend returns a self-contained, user-facing message (incl. the
     // biomechanical-guard block), so show it verbatim without a prefix.
+    _t.error(err.message || 'Export GP échoué');
     _setPdfExportStatus(err.message || 'Export GP échoué', 'error');
   } finally {
     if (btnHeaderGp) {
       btnHeaderGp.disabled = false;
       btnHeaderGp.setAttribute('aria-label', originalLabel);
+    }
+  }
+}
+
+async function saveGP() {
+  if (!currentFile) return;
+  if (!currentFile.toLowerCase().endsWith('.gp')) {
+    _setPdfExportStatus(
+      'Sauvegarde GP réservée aux fichiers GP 7/8 (.gp)', 'warn',
+    );
+    return;
+  }
+  if (btnHeaderSave) {
+    btnHeaderSave.disabled = true;
+    btnHeaderSave.setAttribute('aria-label', 'Sauvegarde…');
+  }
+  _setPdfExportStatus('Sauvegarde des doigtés…', 'neutral');
+  const _t = notifyTask('Sauvegarde des doigtés…');
+  try {
+    const { saved, annotated_notes } = await fetchSaveGp(currentFile, currentTrackId);
+    _t.done(`Doigtés sauvegardés (${annotated_notes} notes)`);
+    _setPdfExportStatus(
+      `Doigtés sauvegardés → ${saved} (${annotated_notes} notes)`, 'ok',
+    );
+  } catch (err) {
+    _t.error(err.message || 'Sauvegarde GP échouée');
+    _setPdfExportStatus(err.message || 'Sauvegarde GP échouée', 'error');
+  } finally {
+    if (btnHeaderSave) {
+      btnHeaderSave.disabled = false;
+      btnHeaderSave.setAttribute('aria-label', 'Sauver les doigtés');
     }
   }
 }
@@ -900,17 +1245,21 @@ async function exportMusicXML(scope = 'current') {
   }
   const scopeLabel = isAll ? 'all tracks' : 'current track';
   _setPdfExportStatus(`Export MusicXML (${scopeLabel})…`, 'neutral');
+  const _t = notifyTask(`Export MusicXML (${scopeLabel})…`);
   try {
     const { blob, filename, noteCount } = isAll
       ? await fetchExportMusicXmlAll(currentFile, currentTrackId)
       : await fetchExportMusicXml(currentFile, currentTrackId);
     _downloadBlob(blob, filename);
+    _t.done(`Export MusicXML terminé (${noteCount} notes)`);
     _setPdfExportStatus(`Export MusicXML OK — ${scopeLabel} (${noteCount} notes)`, 'ok');
   } catch (err) {
     // Be defensive: a backend without scope support may 404 the "all" request.
     if (isAll && /\b404\b|not found|unsupported|scope/i.test(err.message || '')) {
+      _t.error('Export multi-pistes indisponible sur ce serveur');
       _setPdfExportStatus('All-tracks export not available on this server', 'warn');
     } else {
+      _t.error(`Export MusicXML échoué : ${err.message}`);
       _setPdfExportStatus(`Export MusicXML failed: ${err.message}`, 'error');
     }
   } finally {
@@ -978,6 +1327,7 @@ async function exportPDF() {
     btnExportPdf.textContent = 'Export…';
   }
   _setPdfExportStatus('Exporting…', 'neutral');
+  const _t = notifyTask('Export PDF…');
 
   try {
     const representationMode = getSelectedRepresentationMode();
@@ -988,14 +1338,18 @@ async function exportPDF() {
     );
     _downloadBlob(blob, filename);
     if (conformanceIssues > 0) {
+      _t.done(`Export PDF terminé (${conformanceIssues} avertissement(s))`);
       _setPdfExportStatus(`${conformanceIssues} conformance issue(s)`, 'warn');
     } else {
+      _t.done('Export PDF terminé');
       _setPdfExportStatus('Export OK', 'ok');
     }
   } catch (err) {
     console.warn('API PDF export failed, falling back to local canvas export:', err);
+    _t.message('Export PDF (rendu local)…');
     _setPdfExportStatus('API failed, using local fallback', 'warn');
     exportPDFLegacyCanvas();
+    _t.done('Export PDF terminé (local)');
   } finally {
     if (btnExportPdf) {
       btnExportPdf.disabled = false;
@@ -1115,7 +1469,7 @@ function _applyTrackKindLock() {
 
   // Fingering button + fretboard / hand-overlay panel make no sense without
   // fingering data. Hide them entirely for non-guitar tracks.
-  const fingeringControls = [btnFingering, btnHandViz];
+  const fingeringControls = [btnFingering, btnHandViz, btnInsertFingerings];
   for (const el of fingeringControls) {
     if (el) el.style.display = guitar ? '' : 'none';
   }
@@ -1155,6 +1509,7 @@ function applyRepresentationModeView(data) {
     coreSvgView.style.display = showCore ? 'block' : 'none';
     coreSvgView.innerHTML = showCore && data?.core_svg ? data.core_svg : '';
     if (showCore) {
+      _lastSvgWidth = _svgRenderWidth(representationMode);
       _applyResponsiveCoreSvg();
       _syncCoreSvgFingering();
       _syncCoreSvgAnnotations();
@@ -1654,6 +2009,8 @@ function initRenderer(data) {
   if (!_isCurrentTrackGuitar() || data.fingered === false) {
     renderer.showFingering = false;
   }
+  // Update "Insérer les doigtés" button appearance based on sidecar status.
+  _updateInsertFingeringsBtn(data);
   renderer.render();
   // Notify the floating hand-viz panel that fresh fingering data is ready.
   window.dispatchEvent(new CustomEvent('fretwise:renderer-ready'));
@@ -1666,9 +2023,9 @@ function initRenderer(data) {
 
   // Populate chord strip from chord diagrams
   _chordDataMap = {};
-  const bar   = $('#chord-bar');
+  const chordToggle = $('#chord-bar-toggle');
   const strip = $('#chord-strip');
-  if (bar && strip) {
+  if (strip) {
     if (data.chord_diagrams?.length) {
       strip.innerHTML = '';
       for (const cd of data.chord_diagrams) {
@@ -1683,9 +2040,11 @@ function initRenderer(data) {
         });
         strip.appendChild(el);
       }
-      bar.style.display = '';
+      if (chordToggle) chordToggle.style.display = '';   // chords available → show the toggle
     } else {
-      bar.style.display = 'none';
+      strip.innerHTML = '';
+      if (chordToggle) chordToggle.style.display = 'none';
+      _setChordsOpen(false);                              // no chords → keep the score full-height
     }
   }
 
@@ -1722,6 +2081,27 @@ function initRenderer(data) {
     const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
     const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
     if (panelVisible || popupVisible) _postHandVizTime();
+  };
+  // Surface soundfont loading so a big bank (StrixGuitarPack 186 MB, East_West
+  // 426 MB) doesn't look like a freeze. Must be wired BEFORE enableAudio() so the
+  // synchronous 'loading' event from _initSynth() is caught. On 'ready'/'error',
+  // start any playback the user requested while the instrument was still loading.
+  playback.onSynthStatusChange = (status) => {
+    if (status === 'loading') {
+      if (_synthTask) _synthTask.close();
+      _synthTask = notifyTask("Chargement de l'instrument…");
+    } else if (_synthTask) {
+      if (status === 'error') _synthTask.error('Instrument indisponible — son de repli');
+      else _synthTask.done();
+      _synthTask = null;
+    }
+  };
+  playback.onSynthProgress = (frac, loadedMB, totalMB) => {
+    if (!_synthTask) return;
+    _synthTask.progress(frac);
+    if (frac != null && totalMB) {
+      _synthTask.message(`Chargement de l'instrument… ${loadedMB} / ${totalMB} Mo`);
+    }
   };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
   playback.enableAudio();
@@ -1812,6 +2192,12 @@ function initRenderer(data) {
           _setFollowPlayhead(false);
         }
         playback.goToMeasure(m);
+        // Click-to-seek: bring the chosen measure into view and flash it as the
+        // selection. goToMeasure()'s highlight() only auto-scrolls while
+        // follow-playhead is on, so without this an explicit click would leave
+        // the selected measure off-screen (and a re-render can park the scroll
+        // at the top — the "jumps to the beginning, no selection" bug).
+        _svgDriver.scrollToMeasure(m);
       }
     };
   } else {
@@ -2231,6 +2617,52 @@ if (btnDownloadGp) {
   });
 }
 
+/**
+ * Playback needs solved notes (the fingering pass produces the playable score).
+ * If the user hits play on a track that has nothing to play yet, compute the
+ * fingerings first (showing the calc feedback) and auto-start when ready, rather
+ * than silently doing nothing. Returns true when it took over the play request.
+ */
+function _ensureSolvedThenPlay() {
+  if (!playback || playback.isPlaying || playback.totalMeasures > 0) return false;
+  if (currentTrackId == null) return false;
+  _autoPlayAfterSolve = true;
+  notifyToast('Calcul des doigtés avant la lecture…', { spinner: true, duration: 2600 });
+  // If a solve is already running it will honour _autoPlayAfterSolve on finish;
+  // otherwise kick one off for the current track.
+  if (!_solveInFlight) selectTrack(currentTrackId, _reviewTrackName || '');
+  return true;
+}
+
+/**
+ * Bring a measure into view and highlight it — used when opening a tab so the
+ * user lands on the measure they were at (or the playhead if it's moving),
+ * instead of at the top of the score. Works in both the SVG and canvas views.
+ */
+function _focusCurrentMeasure(measure) {
+  if (!playback || !playback.renderer) return;
+  const m = measure ?? playback.renderer.cursorMeasure ?? 0;
+  if (playback.usesSvgCursor && _svgDriver) {
+    _svgDriver.highlight(m, playback.loopStart, playback.loopEnd);
+    _svgDriver.scrollToMeasure(m);
+  } else {
+    _setFollowPlayhead(true);
+    try { playback._scrollCursorIntoView(); } catch (_) { /* geometry not ready */ }
+  }
+}
+
+/**
+ * Open/close the in-score chord strip. Adds .chords-open to #tab-container, which
+ * grows the chord host at the top of the score and offsets the staves (SVG +
+ * cursor overlay) down by the same height — so the chords sit inside the score.
+ */
+function _setChordsOpen(open) {
+  const cont = $('#tab-container');
+  const toggle = $('#chord-bar-toggle');
+  if (cont) cont.classList.toggle('chords-open', !!open);
+  if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 if (btnPlay) {
   btnPlay.addEventListener('click', () => {
     if (!playback) return;
@@ -2240,6 +2672,7 @@ if (btnPlay) {
     // play (B1.3). enableAudio() also (re)kicks the synth load if needed.
     playback.resumeAudioContext();
     if (!playback.audioEnabled) playback.enableAudio();
+    if (_ensureSolvedThenPlay()) return;  // nothing solved yet → compute first
     if (!playback.isPlaying) {
       _setFollowPlayhead(true);  // resume following when starting play
     }
@@ -2319,6 +2752,16 @@ if (rngVolume) {
   });
 }
 
+const rngTrackVolume = $('#rng-track-volume');
+if (rngTrackVolume) {
+  rngTrackVolume.value = '80';
+  // Volume of the currently-open track (MIDI channel 0) so it can be balanced
+  // against the backing tracks instead of always playing loudest.
+  rngTrackVolume.addEventListener('input', () => {
+    if (playback) playback.setChannelVolume(0, parseInt(rngTrackVolume.value, 10) / 100);
+  });
+}
+
 if (btnExportPdf) {
   btnExportPdf.addEventListener('click', exportPDF);
 }
@@ -2357,6 +2800,10 @@ if (btnHeaderGp) {
   btnHeaderGp.addEventListener('click', exportGP);
 }
 
+if (btnHeaderSave) {
+  btnHeaderSave.addEventListener('click', saveGP);
+}
+
 if (btnHeaderMusicXml) {
   // Default click = current track (unchanged). Shift/Alt-click or right-click
   // opens a small menu to choose current vs all tracks.
@@ -2374,179 +2821,246 @@ if (btnHeaderMusicXml) {
   });
 }
 
-const btnRefreshFingerings = $('#set-refresh-fingerings');
-const btnRefreshResume = $('#set-refresh-resume');
-const btnRefreshForceSave = $('#set-refresh-force-save');
-const btnRefreshStop = $('#set-refresh-stop');
-const refreshWorkers = $('#set-refresh-workers');
-const refreshWorkersValue = $('#set-refresh-workers-value');
-const refreshFingeringsStatus = $('#set-refresh-fingerings-status');
-const refreshProgressWrap = $('#set-refresh-progress-wrap');
-const refreshProgress = $('#set-refresh-progress');
-const refreshEta = $('#set-refresh-eta');
+// ── "Insérer les doigtés" — viewer toolbar button ─────────────────────────────
 
-function _setRefreshRunning(running) {
-  if (btnRefreshFingerings) btnRefreshFingerings.disabled = running;
-  if (btnRefreshResume) btnRefreshResume.disabled = running;
-  if (btnRefreshForceSave) btnRefreshForceSave.disabled = running;
-  if (btnRefreshStop) { btnRefreshStop.style.display = running ? '' : 'none'; btnRefreshStop.disabled = false; }
-  if (refreshWorkers) refreshWorkers.disabled = running;
-  if (refreshProgressWrap) refreshProgressWrap.style.display = running ? '' : 'none';
-}
-
-function _refreshWorkerCount() {
-  const raw = Number.parseInt(refreshWorkers?.value || '4', 10);
-  return Math.max(1, Math.min(8, Number.isFinite(raw) ? raw : 4));
-}
-
-function _syncRefreshWorkersLabel() {
-  const count = _refreshWorkerCount();
-  if (refreshWorkers) refreshWorkers.value = String(count);
-  if (refreshWorkersValue) refreshWorkersValue.textContent = String(count);
-}
-
-if (refreshWorkers) {
-  _syncRefreshWorkersLabel();
-  refreshWorkers.addEventListener('input', _syncRefreshWorkersLabel);
-}
-
-if (btnRefreshStop) {
-  btnRefreshStop.addEventListener('click', async () => {
-    btnRefreshStop.disabled = true;
-    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Annulation en cours…';
-    try { await fetch('/api/library/refresh-fingerings', { method: 'DELETE' }); } catch (_) {}
-  });
-}
-
-async function _runRefreshFingerings({ confirmRun = true, forceOverride = null, confirmMessage = null } = {}) {
-  if (confirmRun) {
-    const ok = window.confirm(
-      confirmMessage || (
-        'Cette opération complète les fichiers <nom>_fingered.gp manquants ou périmés '
-        + 'dans le dossier de partitions. Les originaux restent intacts. '
-        + 'Sur de gros corpus ça peut prendre plusieurs minutes. Continuer ?'
-      )
-    );
-    if (!ok) return;
+/**
+ * Update the insert-fingerings button appearance based on the solve response.
+ * - No sidecar: button is highlighted (needs action)
+ * - Sidecar current: button is normal (already done)
+ * - Sidecar outdated: button shows warning
+ */
+function _updateInsertFingeringsBtn(data) {
+  if (!btnInsertFingerings) return;
+  const hasSaved = data?.has_saved_fingering;
+  const isCurrent = data?.fingering_is_current;
+  btnInsertFingerings.classList.toggle('is-needed', !hasSaved);
+  btnInsertFingerings.classList.toggle('is-outdated', hasSaved && !isCurrent);
+  if (!hasSaved) {
+    btnInsertFingerings.title = 'Aucun doigté enregistré — cliquer pour calculer et sauvegarder';
+  } else if (!isCurrent) {
+    btnInsertFingerings.title = `Doigtés créés avec une version antérieure de l'algorithme (${data.fingering_algo_version || '?'}) — cliquer pour recalculer`;
+  } else {
+    btnInsertFingerings.title = 'Doigtés à jour — cliquer pour recalculer';
   }
-  _setRefreshRunning(true);
-  if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = 'Démarrage…';
-  if (refreshProgress) { refreshProgress.value = 0; refreshProgress.max = 100; }
-  if (refreshEta) refreshEta.textContent = '';
+}
+
+/**
+ * Show the "Doigtés à revoir" entry point only when there is actually something
+ * to review. A clean audit with no biomechanical violations means "rien à
+ * revoir" — surfacing the review panel in that case is just noise (bug #4).
+ */
+function _gateReviewButton(audit) {
+  const btn = document.getElementById('btn-review');
+  if (!btn) return;
+  const hasAudit = !!(audit && audit.available !== false && audit.overall);
+  const biomechViolations = (audit && audit.biomechanical_report
+    && Array.isArray(audit.biomechanical_report.violations))
+    ? audit.biomechanical_report.violations.length : 0;
+  const worthReviewing = hasAudit && (audit.overall !== 'clean' || biomechViolations > 0);
+  btn.style.display = worthReviewing ? '' : 'none';
+  // If we are hiding the entry point, make sure a stale panel isn't left open.
+  if (!worthReviewing) {
+    const panel = document.getElementById('review-panel');
+    if (panel) panel.style.display = 'none';
+  }
+}
+
+let _insertRunning = false;
+
+async function _insertFingerings() {
+  if (_insertRunning) return;
+  if (currentTrackId == null || currentFile == null) return;
+  if (!currentFile.endsWith('.gp')) {
+    _setPdfExportStatus('Insertion de doigtés uniquement disponible pour les fichiers .gp', 'warn');
+    return;
+  }
+  _insertRunning = true;
+  if (btnInsertFingerings) {
+    btnInsertFingerings.disabled = true;
+    btnInsertFingerings.classList.add('is-busy');
+    btnInsertFingerings.setAttribute('aria-busy', 'true');
+  }
+  const file = currentFile;
+  const primaryTrack = currentTrackId;
   try {
-    const forceChecked = forceOverride ?? ($('#set-refresh-force')?.checked ?? false);
-    const params = new URLSearchParams({ workers: String(_refreshWorkerCount()) });
-    if (forceChecked) params.set('force', 'true');
-    const refreshUrl = `/api/library/refresh-fingerings?${params.toString()}`;
-    const res = await fetch(refreshUrl, { method: 'POST' });
-    if (!res.ok || !res.body) {
-      throw new Error(`HTTP ${res.status}`);
+    await fetchSaveGp(file, primaryTrack);
+    // Invalidate client-side solve cache so the reload reads the fresh sidecar.
+    const prefix = `${file}#${primaryTrack}#`;
+    for (const key of Array.from(_solveCache.keys())) {
+      if (key.startsWith(prefix)) _solveCache.delete(key);
     }
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buf = '';
-    let okCount = 0;
-    let errCount = 0;
-    let totalFiles = 0;
-    let toProcess = 0;
-    let preSkipped = 0;
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buf += decoder.decode(value, { stream: true });
-      let nl;
-      while ((nl = buf.indexOf('\n')) !== -1) {
-        const line = buf.slice(0, nl).trim();
-        buf = buf.slice(nl + 1);
-        if (!line) continue;
-        let msg;
-        try { msg = JSON.parse(line); } catch (_) { continue; }
-        if (msg.event === 'start') {
-          totalFiles = msg.total_files || 0;
-          toProcess = msg.to_process || 0;
-          preSkipped = msg.pre_skipped || 0;
-          const progressMax = totalFiles || toProcess || 1;
-          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = preSkipped; }
-          const preSkipTxt = preSkipped > 0 ? `, ${preSkipped} déjà à jour` : '';
-          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-            `${preSkipped} / ${progressMax} traités${preSkipTxt} — ${toProcess} à faire (${msg.workers} workers)`;
-        } else if (msg.event === 'done') {
-          const preSkip = msg.pre_skipped ?? preSkipped;
-          const doneTotal = preSkip + (msg.ok || 0) + (msg.errors || 0) + (msg.skipped || 0);
-          const progressMax = totalFiles || doneTotal || 1;
-          const preSkipTxt = preSkip > 0 ? `, ${preSkip} déjà à jour` : '';
-          const avgTxt = msg.avg_s ? ` — ${msg.avg_s}s/fichier` : '';
-          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-            `Terminé : ${doneTotal} / ${progressMax} — ${msg.ok} OK, ${msg.errors} erreurs, ${msg.skipped} ignorés${preSkipTxt}${avgTxt}.`;
-          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = progressMax; }
-          if (refreshEta) refreshEta.textContent = '';
-        } else if (msg.event === 'cancelled') {
-          const doneTotal = preSkipped + (msg.ok || 0) + (msg.errors || 0) + (msg.skipped || 0);
-          const progressMax = totalFiles || doneTotal || 1;
-          if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = doneTotal; }
-          if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-            `Annulé — ${doneTotal} / ${progressMax} traités (${msg.ok} OK, ${msg.errors} erreurs, ${preSkipped} déjà à jour). Cliquez sur Reprise pour continuer.`;
-          if (refreshEta) refreshEta.textContent = '';
-          if (btnRefreshResume) btnRefreshResume.style.display = '';
-        } else if (msg.status) {
-          if (msg.status === 'ok') okCount++;
-          if (msg.status === 'error') errCount++;
-          // Pool results have "done"; pre-skipped lines don't.
-          if (msg.done != null) {
-            const doneTotal = preSkipped + msg.done;
-            const progressMax = totalFiles || toProcess || 1;
-            if (refreshProgress) { refreshProgress.max = progressMax; refreshProgress.value = doneTotal; }
-            const pct = progressMax > 0 ? ` (${Math.round((doneTotal / progressMax) * 100)}%)` : '';
-            if (refreshFingeringsStatus) refreshFingeringsStatus.textContent =
-              `${doneTotal} / ${progressMax}${pct}  (${okCount} OK, ${errCount} err, ${preSkipped} déjà à jour) — ${msg.file}`;
-            if (refreshEta) {
-              if (msg.eta_s != null) {
-                const m = Math.floor(msg.eta_s / 60);
-                const s = msg.eta_s % 60;
-                const etaTxt = m > 0 ? `${m}m ${s}s` : `${s}s`;
-                const avgTxt = msg.avg_s ? `${msg.avg_s}s/fichier · ` : '';
-                refreshEta.textContent = `${avgTxt}ETA : ${etaTxt}`;
-              } else if (msg.avg_s) {
-                refreshEta.textContent = `${msg.avg_s}s/fichier`;
-              }
-            }
-          }
+    // Reflect the new fingering in the in-memory library immediately so the
+    // list badge is up to date no matter how the user navigates back (bug #1).
+    const fEntry = _allFiles.find((f) => f.name === file);
+    if (fEntry) { fEntry.has_fingering = true; fEntry.fingering_is_current = true; }
+    await selectTrack(primaryTrack, _reviewTrackName);   // current tab shown ASAP
+    // Bug #3: now compute the OTHER guitar tracks asynchronously in the
+    // background, so the user reads the current tab while the rest fill in and
+    // become instant to switch to. Sequential (one save at a time) to avoid
+    // racing the per-track sidecar; non-blocking (no await here).
+    _computeOtherGuitarTracks(file, primaryTrack);
+  } catch (err) {
+    console.error('Insert fingerings failed:', err);
+    _setPdfExportStatus(`Erreur : ${err.message}`, 'warn');
+  } finally {
+    _insertRunning = false;
+    if (btnInsertFingerings) {
+      btnInsertFingerings.disabled = false;
+      btnInsertFingerings.classList.remove('is-busy');
+      btnInsertFingerings.removeAttribute('aria-busy');
+    }
+  }
+}
+
+let _bgComputeRunning = false;
+
+/**
+ * Bug #3 — after the current guitar track is computed and shown, fingere the
+ * OTHER guitar tracks of the same song in the background (sequentially, to avoid
+ * racing the per-track sidecar). Each completed track becomes instant to switch
+ * to. Aborts if the user navigates to a different file.
+ */
+async function _computeOtherGuitarTracks(file, primaryTrack) {
+  if (_bgComputeRunning) return;
+  const others = (currentTracks || [])
+    .filter((t) => isGuitarKind(t.kind) && t.id !== primaryTrack)
+    .map((t) => t.id);
+  if (!others.length) return;
+  _bgComputeRunning = true;
+  let done = 0;
+  try {
+    for (const tid of others) {
+      if (currentFile !== file) break;   // user moved on — stop
+      _setPdfExportStatus(`Doigtés des autres pistes guitare… ${done}/${others.length}`, 'neutral');
+      try {
+        await fetchSaveGp(file, tid);
+        const prefix = `${file}#${tid}#`;
+        for (const key of Array.from(_solveCache.keys())) {
+          if (key.startsWith(prefix)) _solveCache.delete(key);
         }
+        done++;
+      } catch (e) {
+        console.error(`Background fingering failed for track ${tid}:`, e);
       }
     }
-  } catch (err) {
-    if (refreshFingeringsStatus) refreshFingeringsStatus.textContent = `Erreur : ${err.message}`;
+    if (done) {
+      _setPdfExportStatus(`Doigtés calculés pour ${done + 1} pistes guitare`, 'ok');
+    }
   } finally {
-    _setRefreshRunning(false);
+    _bgComputeRunning = false;
   }
 }
 
-if (btnRefreshFingerings) {
-  btnRefreshFingerings.addEventListener('click', () => {
-    if (btnRefreshResume) btnRefreshResume.style.display = 'none';
-    _runRefreshFingerings({ confirmRun: true });
-  });
+if (btnInsertFingerings) btnInsertFingerings.addEventListener('click', _insertFingerings);
+
+// ── Rig GP-180 floating panel ──────────────────────────────────────────
+
+function _toggleRig() {
+  if (!rigPanel) return;
+  const visible = rigPanel.style.display !== 'none';
+  if (visible) {
+    rigPanel.style.display = 'none';
+    if (btnRig) btnRig.classList.remove('tb-btn-active');
+  } else {
+    rigPanel.style.display = 'flex';
+    if (btnRig) btnRig.classList.add('tb-btn-active');
+    if (currentFile) _loadRig(currentFile);
+  }
 }
 
-if (btnRefreshForceSave) {
-  btnRefreshForceSave.addEventListener('click', () => {
-    if (btnRefreshResume) btnRefreshResume.style.display = 'none';
-    _runRefreshFingerings({
-      confirmRun: true,
-      forceOverride: true,
-      confirmMessage:
-        'Cette opération recalculera TOUS les fichiers .gp du dossier de partitions '
-        + 'et remplacera leurs fichiers <nom>_fingered.gp. Les originaux .gp restent intacts. Continuer ?',
+async function _loadRig(filename) {
+  const data = await fetchRig(filename);
+  if (data) _renderRig(data);
+}
+
+function _renderRig(data) {
+  const title = document.getElementById('rig-panel-title');
+  if (title) title.textContent = `Rig GP-180 — ${data.artist || '?'} · ${data.song || '?'}`;
+
+  const meta = document.getElementById('rig-meta');
+  if (meta) {
+    const grade = (data.fiabilite || 'D').toUpperCase();
+    const gradeClass = grade === 'A' ? 'grade-a' : grade === 'B' ? 'grade-b' : grade === 'C' ? 'grade-c' : '';
+    meta.innerHTML = [
+      ['Accordage', data.accordage],
+      ['Capo', data.capo],
+      ['Guitare originale', data.guitare_originale],
+      ['Fiabilité', `<span class="rig-fiabilite-badge ${gradeClass}">${_esc(grade)}</span>`],
+    ].map(([lbl, val]) => `
+      <div class="rig-meta-item">
+        <span class="rig-meta-label">${_esc(lbl)}</span>
+        <span class="rig-meta-value">${val != null ? (lbl === 'Fiabilité' ? val : _esc(String(val))) : '—'}</span>
+      </div>`).join('');
+  }
+
+  const chain = document.getElementById('rig-chain');
+  if (chain && data.chain && data.reglages) {
+    chain.innerHTML = '';
+    data.chain.forEach((effect, i) => {
+      if (i > 0) {
+        const arrow = document.createElement('span');
+        arrow.className = 'rig-chain-arrow';
+        arrow.textContent = '›';
+        chain.appendChild(arrow);
+      }
+      const reg = data.reglages[effect] || {};
+      const active = reg.active !== false && reg.preset != null;
+      const block = document.createElement('div');
+      block.className = `rig-block ${active ? 'active' : 'inactive'}`;
+      const imgHtml = (active && reg.image)
+        ? `<img class="rig-block-img" src="/api/rig-image/${encodeURIComponent(reg.image)}" alt="${_esc(reg.preset || '')}" loading="lazy">` : '';
+      const presetHtml = (active && reg.preset)
+        ? `<span class="rig-block-preset">${_esc(reg.preset)}</span>` : '';
+      const paramsHtml = (active && reg.params)
+        ? `<span class="rig-block-params">${_esc(reg.params)}</span>` : '';
+      block.innerHTML = `
+        <span class="rig-block-name">${_esc(effect)}</span>
+        ${imgHtml}${presetHtml}${paramsHtml}
+      `;
+      chain.appendChild(block);
     });
-  });
+  }
+
+  const notesWrap = document.getElementById('rig-notes-wrap');
+  const notesEl = document.getElementById('rig-notes');
+  const limitesEl = document.getElementById('rig-limites');
+  const hasNotes = !!(data.notes || data.limites);
+  if (notesWrap) notesWrap.style.display = hasNotes ? '' : 'none';
+  if (notesEl) notesEl.textContent = data.notes || '';
+  if (limitesEl) limitesEl.textContent = data.limites || '';
 }
 
-if (btnRefreshResume) {
-  btnRefreshResume.addEventListener('click', () => {
-    btnRefreshResume.style.display = 'none';
-    _runRefreshFingerings({ confirmRun: false, forceOverride: false });
+if (btnRig) btnRig.addEventListener('click', _toggleRig);
+{
+  const rigClose = document.getElementById('rig-close');
+  if (rigClose) rigClose.addEventListener('click', () => {
+    if (rigPanel) rigPanel.style.display = 'none';
+    if (btnRig) btnRig.classList.remove('tb-btn-active');
   });
+  // Drag support for the rig panel (same pattern as the hand-viz panel).
+  const rigDrag = document.getElementById('rig-drag');
+  if (rigDrag && rigPanel) {
+    let _rigDrag = null;
+    rigDrag.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.floating-panel-btn')) return;
+      const rect = rigPanel.getBoundingClientRect();
+      _rigDrag = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!_rigDrag) return;
+      const rect = rigPanel.getBoundingClientRect();
+      const x = Math.max(12 - rect.width, Math.min(window.innerWidth - 48, e.clientX - _rigDrag.dx));
+      const y = Math.max(4, Math.min(window.innerHeight - 48, e.clientY - _rigDrag.dy));
+      rigPanel.style.left = x + 'px';
+      rigPanel.style.top = y + 'px';
+      rigPanel.style.right = 'auto';
+      rigPanel.style.bottom = 'auto';
+    });
+    window.addEventListener('mouseup', () => { _rigDrag = null; });
+  }
 }
+
 
 if (btnHeaderPdf) {
   btnHeaderPdf.addEventListener('click', exportPDF);
@@ -2615,6 +3129,8 @@ function _syncViewSegPills() {
   document.querySelectorAll('.view-seg-btn').forEach(btn => {
     btn.classList.toggle('view-seg-active', btn.dataset.mode === active);
   });
+  _syncZoomControl(active);
+  _applyZoomForMode(active);
 }
 
 document.querySelectorAll('.view-seg-btn').forEach(btn => {
@@ -2853,49 +3369,6 @@ function _toggleHandViz() {
 
 if (btnHandViz) btnHandViz.addEventListener('click', _toggleHandViz);
 
-// ── Recalculate fingering (per-track re-solve) ─────────────────────────
-//
-// Re-runs the optimizer for the currently open track + active mode so the
-// user can watch the result update (tab/notation + hand-viz). Reuses the
-// existing solve plumbing: drop the cached payload for this track, then let
-// `selectTrack` re-issue the solve, re-render via `initRenderer`, and emit
-// `fretwise:renderer-ready` (which re-posts the hand-viz payload). Non-guitar
-// / staff-only tracks degrade through the same path: `selectTrack` keeps them
-// in Staff view and the no-fingering hand-viz state is preserved.
-let _recalcRunning = false;
-
-async function _recalculateFingering() {
-  if (_recalcRunning) return;
-  if (currentTrackId == null || currentFile == null) return;
-  _recalcRunning = true;
-  if (btnRecalc) {
-    btnRecalc.disabled = true;
-    btnRecalc.classList.add('is-busy');
-    btnRecalc.setAttribute('aria-busy', 'true');
-  }
-  try {
-    // Invalidate this track's cached solve(s) so selectTrack hits the network
-    // again. We only know the (file, track) pair here, not the mode/prefs key,
-    // so drop every cache entry for this track.
-    const prefix = `${currentFile}#${currentTrackId}#`;
-    for (const key of Array.from(_solveCache.keys())) {
-      if (key.startsWith(prefix)) _solveCache.delete(key);
-    }
-    await selectTrack(currentTrackId, _reviewTrackName);
-  } catch (err) {
-    console.error('Recalculate fingering failed:', err);
-    _setPdfExportStatus(`Recalcul échoué : ${err.message}`, 'warn');
-  } finally {
-    _recalcRunning = false;
-    if (btnRecalc) {
-      btnRecalc.disabled = false;
-      btnRecalc.classList.remove('is-busy');
-      btnRecalc.removeAttribute('aria-busy');
-    }
-  }
-}
-
-if (btnRecalc) btnRecalc.addEventListener('click', _recalculateFingering);
 
 if (handVizClose) {
   handVizClose.addEventListener('click', () => {
@@ -2948,12 +3421,19 @@ if (uploadInput) {
     const file = uploadInput.files[0];
     if (!file) return;
     if (uploadStatus) { uploadStatus.textContent = `Uploading ${file.name}…`; uploadStatus.style.color = '#888'; }
+    const _t = notifyTask(`Import de ${file.name}…`, { progress: 0 });
     try {
-      await uploadFile(file);
+      await uploadFile(file, (frac, loaded, total) => {
+        _t.progress(frac);
+        _t.message(`Import de ${file.name}… ${_fmtMB(loaded)} / ${_fmtMB(total)} Mo`);
+      });
+      _t.message('Analyse du morceau…'); _t.progress(null);
       if (uploadStatus) { uploadStatus.textContent = `✓ ${file.name} added`; uploadStatus.style.color = '#4caf50'; }
       uploadInput.value = '';
       await loadFiles();
+      _t.done(`${file.name} ajouté`);
     } catch (err) {
+      _t.error(err.message || 'Import échoué');
       if (uploadStatus) { uploadStatus.textContent = `✗ ${err.message}`; uploadStatus.style.color = '#ff5555'; }
     }
   });
@@ -3124,8 +3604,10 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault();
       playback.resumeAudioContext();
       if (!playback.audioEnabled) playback.enableAudio();
+      if (_ensureSolvedThenPlay()) break;  // nothing solved yet → compute first
       playback.toggle();
       updatePlayButton(playback.isPlaying);
+      if (playback.isPlaying) startCursorLoop();
       break;
     case 'ArrowLeft':
       e.preventDefault();
@@ -3150,9 +3632,73 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// ── Per-view zoom (magnify slider) ───────────────────────────────────
+
+function _zoomLabelText(pct) {
+  return pct === 0 ? '0%' : (pct > 0 ? `+${pct}%` : `${pct}%`);
+}
+
+/** Apply canvas CSS zoom for tab mode; clear it for SVG modes. */
+function _applyZoomForMode(mode) {
+  const factor = 1 + ((_ZOOM_BASE[mode] + (_viewZoom[mode] ?? 0)) / 100);
+  const cssVal = factor === 1 ? '' : String(factor);
+  if (mode === MODES.TABLATURE) {
+    if (tabCanvas) tabCanvas.style.zoom = cssVal;
+    if (cursorCanvas) cursorCanvas.style.zoom = cssVal;
+  } else {
+    // SVG zoom is handled by _svgRenderWidth + CSS width:100% on the <svg> tag
+    if (tabCanvas) tabCanvas.style.zoom = '';
+    if (cursorCanvas) cursorCanvas.style.zoom = '';
+  }
+}
+
+/** Update the zoom slider and label to reflect the current mode's stored zoom. */
+function _syncZoomControl(mode) {
+  const pct = _viewZoom[mode] ?? 0;
+  if (rngZoom) rngZoom.value = String(pct);
+  if (zoomLabel) zoomLabel.textContent = _zoomLabelText(pct);
+}
+
+/** Called when the zoom slider moves. */
+function _onZoomInput() {
+  const pct = parseInt(rngZoom.value, 10);
+  const mode = getSelectedRepresentationMode();
+  _viewZoom[mode] = pct;
+  if (zoomLabel) zoomLabel.textContent = _zoomLabelText(pct);
+  _applyZoomForMode(mode);
+  if (mode !== MODES.TABLATURE) {
+    // Force SVG re-fetch with the new (zoom-adjusted) page width.
+    _lastSvgWidth = null;
+    _refreshSvgView();
+  }
+}
+
+rngZoom?.addEventListener('input', _onZoomInput);
+
 // ── resize handling ─────────────────────────────────────────────────
 
 let resizeTimer;
+let _lastSvgWidth = null;  // tracks the width bucket used for the current SVG render
+
+/** Re-fetch and repaint the SVG when the viewport width bucket changed. */
+async function _refreshSvgView() {
+  if (!currentFile || !currentTrackId) return;
+  const mode = getSelectedRepresentationMode();
+  if (mode === MODES.TABLATURE) return;
+  const newWidth = _svgRenderWidth(mode);
+  if (newWidth === _lastSvgWidth) return;
+  _lastSvgWidth = newWidth;
+  try {
+    const data = await _cachedSolve(currentFile, currentTrackId, mode, getRulePreferences(), newWidth);
+    if (!coreSvgView || coreSvgView.style.display === 'none') return;
+    coreSvgView.innerHTML = data?.core_svg || '';
+    _applyResponsiveCoreSvg();
+    _syncCoreSvgFingering();
+    _syncCoreSvgAnnotations();
+    _syncCoreSvgHandOverlay();
+  } catch { /* silent — current SVG stays visible */ }
+}
+
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
@@ -3161,6 +3707,7 @@ window.addEventListener('resize', () => {
       renderer.render();
     }
     _updateTrackTabsChevrons();
+    _refreshSvgView();
   }, 200);
 });
 
@@ -3335,8 +3882,11 @@ document.addEventListener('click', (e) => {
 
 // Chord bar collapse/expand toggle
 document.addEventListener('DOMContentLoaded', () => {
+  _initLibPageSize();
+
   $('#chord-bar-toggle')?.addEventListener('click', () => {
-    $('#chord-bar')?.classList.toggle('collapsed');
+    const cont = $('#tab-container');
+    _setChordsOpen(!cont?.classList.contains('chords-open'));
   });
 });
 
@@ -3345,11 +3895,21 @@ document.addEventListener('DOMContentLoaded', () => {
 let _cursorRaf = null;
 let _autoScrollTarget = null;
 
+// ── Instrument (soundfont) loading feedback (via notify.js) ────────
+let _synthTask = null;  // active notify task while a soundfont downloads/parses
+const _fmtMB = (bytes) => (bytes / 1048576).toFixed(1);  // bytes → "12.3" (MB)
+
 function startCursorLoop() {
   if (_cursorRaf) cancelAnimationFrame(_cursorRaf);
   function loop() {
-    _drawCursorOverlay();
-    _tickSvgCursor();
+    // A draw error (overlay geometry, auto-scroll, SVG driver) must never kill
+    // this loop and freeze the red playhead. Guard + log, then keep ticking.
+    try {
+      _drawCursorOverlay();
+      _tickSvgCursor();
+    } catch (err) {
+      console.warn('[FretWise] cursor overlay error (continuing):', err);
+    }
     if (playback?.isPlaying) {
       _cursorRaf = requestAnimationFrame(loop);
     } else {
@@ -3453,18 +4013,19 @@ document.querySelectorAll('#lib-table th.sortable').forEach(th => {
     const col = th.dataset.col;
     if (_libSort.col === col) _libSort.dir *= -1;
     else { _libSort.col = col; _libSort.dir = 1; }
+    _libPage = 0;   // a new sort order invalidates the current page
     _renderLibTable();
   });
 });
 
 const libSearch = $('#lib-search');
-if (libSearch) libSearch.addEventListener('input', () => { _libSearch = libSearch.value; _renderLibTable(); });
+if (libSearch) libSearch.addEventListener('input', () => { _libSearch = libSearch.value; _libPage = 0; _renderLibTable(); });
 
 const libGenreFilter = $('#lib-genre-filter');
-if (libGenreFilter) libGenreFilter.addEventListener('change', () => { _libGenreFilter = libGenreFilter.value; _renderLibTable(); });
+if (libGenreFilter) libGenreFilter.addEventListener('change', () => { _libGenreFilter = libGenreFilter.value; _libPage = 0; _renderLibTable(); });
 
 const libFormatFilter = $('#lib-format-filter');
-if (libFormatFilter) libFormatFilter.addEventListener('change', () => { _libFormatFilter = libFormatFilter.value; _renderLibTable(); });
+if (libFormatFilter) libFormatFilter.addEventListener('change', () => { _libFormatFilter = libFormatFilter.value; _libPage = 0; _renderLibTable(); });
 
 const songInfoClose = $('#song-info-close');
 if (songInfoClose) songInfoClose.addEventListener('click', () => $('#song-info-panel')?.classList.remove('open'));
@@ -3698,12 +4259,18 @@ async function initSettingsPage() {
         const file = e.target.files[0];
         if (!file) return;
         if (sfUploadStatus) sfUploadStatus.textContent = 'Uploading…';
+        const _t = notifyTask(`Envoi du soundfont ${file.name}…`, { progress: 0 });
         try {
-          await uploadSoundfont(file);
+          await uploadSoundfont(file, (frac, loaded, total) => {
+            _t.progress(frac);
+            _t.message(`Envoi du soundfont… ${_fmtMB(loaded)} / ${_fmtMB(total)} Mo`);
+          });
+          _t.done('Soundfont ajouté');
           if (sfUploadStatus) sfUploadStatus.textContent = '✓ Uploaded!';
           setTimeout(() => { if (sfUploadStatus) sfUploadStatus.textContent = ''; }, 3000);
           await _loadSoundfontsPanel();
         } catch (err) {
+          _t.error(err.message || 'Envoi échoué');
           if (sfUploadStatus) sfUploadStatus.textContent = '✗ ' + err.message;
         }
         e.target.value = '';

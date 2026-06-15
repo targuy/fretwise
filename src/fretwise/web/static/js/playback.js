@@ -26,6 +26,8 @@ export class PlaybackEngine {
     this._audioCtx = null;
     this._masterGain = null;
     this._volume = 0.7;        // master volume 0..1
+    this._primaryVolume = 0.8; // current/open-track volume (CC7 on ch 0); balances
+                               // it against the 0.8 backing tracks instead of dominating
     this._lastScheduledMeasure = -1;
     this._spessa = null;          // SpessaSynth Synthetizer (shared, all MIDI channels)
     this._synth = null;           // 'spessa' sentinel | soundfont-player Player | null (osc)
@@ -51,6 +53,7 @@ export class PlaybackEngine {
     this.onStop = null;
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
     this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
+    this.onSynthProgress = null;     // (frac|null, loadedMB, totalMB) → void, during SF download
     this.onTimeChange = null;     // (seconds) → void, called on every tick
 
     // Audio resilience: browsers suspend/interrupt the AudioContext (tab
@@ -212,6 +215,24 @@ export class PlaybackEngine {
    */
   static _buildMeasures(results, bpm) {
     if (!results || !results.length) return [];
+    // Prefer the parser's 1-based measure_index — the SAME grouping the primary
+    // renderer uses (_groupMeasures) — so secondary tracks stay measure-aligned
+    // with the primary even under pickup bars / variable meter. Index m maps to
+    // slot (m-1), matching a primary that starts at measure 1. Fall back to
+    // onset/bpm bucketing only when measure_index is absent.
+    if (results.some((n) => n.measure_index != null)) {
+      const byM = new Map();
+      let maxM = 1;
+      for (const n of results) {
+        const mi = n.measure_index ?? 1;
+        if (!byM.has(mi)) byM.set(mi, []);
+        byM.get(mi).push(n);
+        if (mi > maxM) maxM = mi;
+      }
+      const measures = [];
+      for (let m = 1; m <= maxM; m++) measures.push(byM.get(m) ?? []);
+      return measures;
+    }
     const measures = [];
     let bucket = [];
     let start = 0;
@@ -279,7 +300,7 @@ export class PlaybackEngine {
     if (ch._loading || ch.synth) return;
 
     if (this._spessa) {
-      this._spessa.programChange(ch.midiChannel, ch.midiProgram);
+      this._spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
       ch.synth = 'spessa';
       console.log(`[FretWise] secondary "${ch.trackName}" → GM ${ch.midiProgram} (ch ${ch.midiChannel})`);
       if (this.isPlaying && this._lastScheduledMeasure >= 0) {
@@ -287,6 +308,14 @@ export class PlaybackEngine {
       }
       return;
     }
+
+    // Defer to SpessaSynth: until the shared synth has resolved (loading, or not
+    // started yet), do NOT spin up a heavy per-channel MusyngKite MP3 fallback
+    // (multi-MB main-thread decode × N tracks = the UI freeze that stalls the
+    // playhead on multi-track songs). _initSynth() binds every secondary channel
+    // to the shared synth on success; only a definitive SpessaSynth failure
+    // (this._spessaFailed) drops us to the MusyngKite path below.
+    if (!this._spessaFailed) return;
 
     ch._loading = true;
     try {
@@ -367,7 +396,7 @@ export class PlaybackEngine {
     if (!Number.isInteger(program) || program < 0 || program > 127) return;
     this._midiProgram = program;
     if (this._spessa) {
-      this._spessa.programChange(0, program);
+      this._spessa.programChange(0, this._resolveProgram(program));
       return;
     }
     // Soundfont fallback: map GM program to nearest MusyngKite instrument
@@ -378,6 +407,27 @@ export class PlaybackEngine {
                : program === 30 ? 'distortion_guitar'
                : 'electric_guitar_clean';
     this.setInstrument(inst);
+  }
+
+  /**
+   * Map a desired GM program onto a program the loaded SpessaSynth soundfont
+   * actually contains. GM soundfonts return `desired` unchanged; non-GM banks
+   * (single-instrument packs, game/arcade soundfonts) that lack it would
+   * otherwise make SpessaSynth fall back to preset 0 (frequently DRUMS), so
+   * guitar tabs sound like percussion. Preference: exact program → a
+   * guitar-named preset → the first available preset.
+   * @param {number} desired GM program (0-127)
+   * @returns {number} a program present in the soundfont (or `desired` if unknown)
+   */
+  _resolveProgram(desired) {
+    const presets = this._spessaPresets;
+    if (!presets || !presets.length) return desired;  // not loaded yet: trust caller
+    const bank0 = presets.filter((p) => (p.bank ?? 0) === 0);
+    const pool = bank0.length ? bank0 : presets;
+    if (pool.some((p) => p.program === desired)) return desired;
+    const guitar = pool.find((p) => /guitar|gtr/i.test(p.presetName || p.name || ''));
+    if (guitar) return guitar.program;
+    return pool[0].program;
   }
 
   /**
@@ -445,6 +495,25 @@ export class PlaybackEngine {
       );
     }
   }
+
+  /**
+   * Set a MIDI channel's volume via CC7 (Main Volume), 0..1. Applies live, incl.
+   * to sustaining notes. Channel 0 is the primary (currently-open) track — the UI
+   * exposes this next to the master volume so the open track can be balanced
+   * against the backing tracks instead of always dominating.
+   * @param {number} channel MIDI channel (0 = primary)
+   * @param {number} vol 0..1
+   */
+  setChannelVolume(channel, vol) {
+    const v = Math.max(0, Math.min(1, vol));
+    if (channel === 0) this._primaryVolume = v;
+    if (this._spessa) {
+      try { this._spessa.controllerChange(channel, 7, Math.round(v * 127)); } catch (_) { /* pre-init */ }
+    }
+  }
+
+  /** Volume of the primary (open) track, 0..1. */
+  get primaryVolume() { return this._primaryVolume; }
 
   /** Start or resume playback from current cursor */
   play() {
@@ -623,6 +692,19 @@ export class PlaybackEngine {
   _tick() {
     if (!this.isPlaying) return;
 
+    // A render, callback (cursor overlay, hand-viz, scroll) or audio-scheduling
+    // error must NEVER kill the animation loop and freeze the playhead. Run the
+    // body guarded, log anything that throws, and always reschedule while
+    // playing so the cursor keeps advancing regardless of audio health.
+    try {
+      this._tickBody();
+    } catch (err) {
+      console.warn('[FretWise] playback tick error (continuing):', err);
+    }
+    if (this.isPlaying) this._raf = requestAnimationFrame(() => this._tick());
+  }
+
+  _tickBody() {
     const elapsed = (performance.now() - this._startTime) / 1000;
     const measureOffset = Math.floor(elapsed / this.secondsPerMeasure);
     let targetMeasure = this._startMeasure + measureOffset;
@@ -669,8 +751,6 @@ export class PlaybackEngine {
     // Fire per-tick time callback (sub-measure resolution) for external
     // consumers like the floating hand-visualization panel.
     if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
-
-    this._raf = requestAnimationFrame(() => this._tick());
   }
 
   _scrollCursorIntoView() {
@@ -757,27 +837,64 @@ export class PlaybackEngine {
       console.log('[FretWise] SpessaSynth: fetching SF2 soundfont…');
       const resp = await fetch('/api/soundfont');
       if (!resp.ok) throw new Error(`SF2 fetch: HTTP ${resp.status}`);
-      const sf2Buffer = await resp.arrayBuffer();
+      const sf2Buffer = await this._fetchWithProgress(resp);
 
       const dest = this._masterGain || this._audioCtx.destination;
       const spessa = new Synthetizer(dest, sf2Buffer);
 
-      // Set GM program for primary and any already-registered secondary channels
-      spessa.programChange(0, this._midiProgram);
-      for (const ch of this._secondaryChannels) {
-        spessa.programChange(ch.midiChannel, ch.midiProgram);
-        ch.synth = 'spessa';
-      }
+      // Wait for the worklet to finish parsing the soundfont, then snapshot its
+      // preset list. We need it to map GM programs onto presets the soundfont
+      // actually provides: a non-GM bank (a single-instrument guitar pack, a
+      // game/arcade soundfont, …) usually lacks GM program 25, and SpessaSynth
+      // then silently falls back to preset 0 — which is often DRUMS, so guitar
+      // tabs play as percussion. _resolveProgram() avoids that.
+      // Wait for the worklet to ACTUALLY finish parsing before marking ready.
+      // Big banks (StrixGuitarPack 186 MB, East_West 426 MB) take many seconds —
+      // a fixed 4 s cap would mark the synth "ready" mid-parse, so notes would hit
+      // a half-built synth (silence) and presetList would still be empty. Resolve
+      // as soon as isReady fires; scale the *safety* cap with file size so a huge
+      // bank gets the time it needs (~0.5 ms/KB ⇒ ~95 s for 186 MB), capped at 3 min.
+      const readyCapMs = Math.min(180000, Math.max(8000, (sf2Buffer.byteLength / 1024) * 0.5));
+      try {
+        await Promise.race([
+          spessa.isReady,
+          new Promise((r) => setTimeout(r, readyCapMs)),
+        ]);
+      } catch (_) { /* isReady rejected — proceed with whatever presets exist */ }
+      this._spessaPresets = Array.isArray(spessa.presetList) ? spessa.presetList.slice() : [];
 
       this._spessa = spessa;
       this._synth = 'spessa';
-      console.log(`[FretWise] SpessaSynth ready — GM program ${this._midiProgram}`);
+
+      // Set the (resolved) GM program for primary and any registered secondary channels
+      const primaryProg = this._resolveProgram(this._midiProgram);
+      spessa.programChange(0, primaryProg);
+      // Balance the open track against the backing tracks (CC7 on channel 0).
+      try { spessa.controllerChange(0, 7, Math.round(this._primaryVolume * 127)); } catch (_) { /* */ }
+      for (const ch of this._secondaryChannels) {
+        spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
+        ch.synth = 'spessa';
+      }
+
+      console.log(`[FretWise] SpessaSynth ready — ${this._spessaPresets.length} presets; `
+        + `GM ${this._midiProgram}`
+        + (primaryProg !== this._midiProgram ? ` → ${primaryProg} (mapped; ${this._midiProgram} absent)` : ''));
       if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
       console.warn('[FretWise] SpessaSynth unavailable, falling back to MusyngKite:', err.message);
       await this._initSynthFallback();
     } finally {
       this._synthLoading = false;
+      // Secondary channels deferred their load while SpessaSynth was resolving
+      // (see _loadChannelInstrument). If SpessaSynth ultimately failed, open the
+      // MusyngKite fallback gate and bind them now; on success _initSynth has
+      // already bound them to the shared synth above.
+      if (!this._spessa) {
+        this._spessaFailed = true;
+        for (const ch of this._secondaryChannels) {
+          if (!ch.synth) this._loadChannelInstrument(ch).catch(() => {});
+        }
+      }
     }
   }
 
@@ -825,12 +942,54 @@ export class PlaybackEngine {
     return { pp: 32, p: 48, mp: 64, mf: 80, f: 96, ff: 112 }[dynamic] ?? 80;
   }
 
+  /**
+   * Read a fetch Response to an ArrayBuffer while reporting download progress via
+   * onSynthProgress(frac, loadedMB, totalMB). Falls back to a plain read (with an
+   * indeterminate progress signal) when the body isn't streamable or the size is
+   * unknown. Used so the soundfont download shows a real progress bar.
+   * @param {Response} resp
+   * @returns {Promise<ArrayBuffer>}
+   */
+  async _fetchWithProgress(resp) {
+    const total = Number(resp.headers.get('Content-Length')) || 0;
+    if (!resp.body || !total) {
+      this.onSynthProgress?.(null);
+      return resp.arrayBuffer();
+    }
+    const MB = 1048576;
+    const reader = resp.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      this.onSynthProgress?.(loaded / total, (loaded / MB).toFixed(1), (total / MB).toFixed(1));
+    }
+    const out = new Uint8Array(loaded);
+    let off = 0;
+    for (const c of chunks) { out.set(c, off); off += c.length; }
+    return out.buffer;
+  }
+
   /** Schedule all notes in a measure to play at correct times.
    *  Dispatches to SpessaSynth (SF2) when loaded, oscillator otherwise.
    *  @param {number} measureIdx
    *  @param {number} [offsetSec=0] — extra delay (seconds) before first note
    */
   _scheduleMeasureNotes(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
+    // Audio dispatch must never throw into play()/_tick() and freeze the
+    // playhead. Swallow + log here; the warning names the real failure (e.g.
+    // a synth/worklet API mismatch) so it can be fixed without losing the cursor.
+    try {
+      this._scheduleMeasureNotesImpl(measureIdx, offsetSec, skipBeforeMeasureSec);
+    } catch (err) {
+      console.warn('[FretWise] note scheduling failed (playhead continues):', err);
+    }
+  }
+
+  _scheduleMeasureNotesImpl(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
     if (!this._audioCtx || !this.audioEnabled) return;
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
@@ -847,8 +1006,11 @@ export class PlaybackEngine {
         const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
         const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
         const velocity = this._dynamicToVelocity(note.dynamic);
-        this._spessa.noteOn(0, note.pitch, velocity, false, when);
-        this._spessa.noteOff(0, note.pitch, when + duration);
+        // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
+        // (debug, startTime) pair. Passing a boolean makes the lib do
+        // `'time' in false` and throw on every note → total silence.
+        this._spessa.noteOn(0, note.pitch, velocity, { time: when });
+        this._spessa.noteOff(0, note.pitch, false, { time: when + duration });
       }
     } else if (this._synth) {
       // soundfont-player fallback
@@ -864,8 +1026,14 @@ export class PlaybackEngine {
         const gain = this._dynamicToVelocity(note.dynamic) / 127;
         this._synth.play(note.pitch, when, { duration, gain });
       }
+    } else if (this._synthLoading) {
+      // SpessaSynth (SF2) is still loading: stay silent for this measure instead
+      // of playing the harsh oscillator. The real instrument takes over within a
+      // few seconds — and only on the first page-load, since later songs reuse
+      // the already-loaded synth. Brief silence beats a few bars of bad tone.
     } else {
-      console.log(`[FretWise] measure ${measureIdx}: oscillator fallback (synth=${this._synth}, loading=${this._synthLoading})`);
+      // Synth definitively unavailable (SpessaSynth + MusyngKite both failed):
+      // last-resort oscillator so playback is never completely silent.
       this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
     }
 
@@ -896,8 +1064,8 @@ export class PlaybackEngine {
         const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
         const duration = Math.max(0.08, note.duration * chSpb - 0.025);
         const velocity = Math.min(127, Math.round(this._dynamicToVelocity(note.dynamic) * ch.gain));
-        this._spessa.noteOn(ch.midiChannel, note.pitch, velocity, false, when);
-        this._spessa.noteOff(ch.midiChannel, note.pitch, when + duration);
+        this._spessa.noteOn(ch.midiChannel, note.pitch, velocity, { time: when });
+        this._spessa.noteOff(ch.midiChannel, note.pitch, false, { time: when + duration });
       }
       return;
     }

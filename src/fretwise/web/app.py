@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
+import json as _json
 import os
 import re
 import threading
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi import Body, FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
@@ -27,6 +29,7 @@ from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.notation_mode import is_valid_mode as _is_valid_notation_mode
 from fretwise.export.gp_writer import (
+    GPIF_CONTENT_NAME,
     fingerings_by_source_id,
     write_gp_with_fingerings,
 )
@@ -64,6 +67,13 @@ from fretwise.storage import (
     safe_score_name,
 )
 from fretwise.storage.local import LocalStorageBackend
+from fretwise.rig import (
+    build_rig_index,
+    find_rig,
+    find_rigs_dir,
+    parse_rig,
+    partition_has_rig,
+)
 
 from . import settings as _settings
 from .songs_index import (
@@ -154,6 +164,11 @@ def create_app(
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
+        elif path.startswith("/api/"):
+            # API responses are live state (e.g. /api/files fingering badges that
+            # change after a save). Never let the browser serve a stale cached
+            # body — otherwise the library icon does not refresh on return.
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
     cfg = _settings.load()
@@ -247,22 +262,129 @@ def _register_routes(app: FastAPI) -> None:
         """
         storage: StorageBackend = _current_storage(app)
         songs = _load_catalog(app)
+        # Scan the rigs directory ONCE into an in-memory fingerprint set for O(1)
+        # per-file has-rig checks (a per-file find_rig() would rescan the whole
+        # rigs dir for every score without an exact match — slow on big libraries).
+        rig_index = build_rig_index(find_rigs_dir(app.state.fixtures_dir))
 
         try:
             objects = storage.list_scores()
         except StorageError as exc:
             raise HTTPException(502, f"Storage error: {exc}")
 
+        local_root: Path | None = storage.local_root
         files = []
         for obj in objects:
             info: dict[str, Any] = {
                 "name": obj.name,
                 "stem": obj.stem,
                 "format": obj.format,
+                "has_rig": partition_has_rig(obj.name, rig_index),
             }
             info = enrich_file_info(info, songs)
+            # Fingering sidecar status (local storage + .gp files only; skip
+            # _fingered.gp variants — those are outputs, not source files).
+            has_fingering = False
+            fingering_is_current = False
+            if (
+                local_root is not None
+                and obj.name.endswith(".gp")
+                and not obj.stem.endswith("_fingered")
+            ):
+                src = local_root / obj.name
+                meta = _read_fingering_meta(src)
+                if meta is not None:
+                    has_fingering = True
+                    fingering_is_current = _fingering_meta_is_current(meta, src)
+                elif _gp_has_embedded_fingering(src):
+                    # Fingerings embedded in the file but no sidecar — present,
+                    # but version unknown (flagged not-current so the UI shows
+                    # the "obsolète/à vérifier" marker).
+                    has_fingering = True
+                    fingering_is_current = False
+            info["has_fingering"] = has_fingering
+            info["fingering_is_current"] = fingering_is_current
             files.append(info)
         return JSONResponse(files)
+
+    @app.get("/api/files/stream")
+    async def stream_files() -> StreamingResponse:
+        """Stream score files as NDJSON (one JSON object per line) as they are scanned.
+
+        Allows the client to populate the library progressively without waiting for
+        the full directory scan to complete.
+        """
+        storage: StorageBackend = _current_storage(app)
+        songs = _load_catalog(app)
+        rig_index = build_rig_index(find_rigs_dir(app.state.fixtures_dir))
+
+        try:
+            objects = list(storage.list_scores())
+        except StorageError as exc:
+            async def _err() -> Any:
+                yield _json.dumps({"error": str(exc)}) + "\n"
+            return StreamingResponse(_err(), media_type="application/x-ndjson")
+
+        local_root: Path | None = storage.local_root
+
+        async def _generate() -> Any:
+            for obj in objects:
+                info: dict[str, Any] = {
+                    "name": obj.name,
+                    "stem": obj.stem,
+                    "format": obj.format,
+                    "has_rig": partition_has_rig(obj.name, rig_index),
+                }
+                info = enrich_file_info(info, songs)
+                has_fingering = False
+                fingering_is_current = False
+                if (
+                    local_root is not None
+                    and obj.name.endswith(".gp")
+                    and not obj.stem.endswith("_fingered")
+                ):
+                    src = local_root / obj.name
+                    meta = _read_fingering_meta(src)
+                    if meta is not None:
+                        has_fingering = True
+                        fingering_is_current = _fingering_meta_is_current(meta, src)
+                    elif _gp_has_embedded_fingering(src):
+                        has_fingering = True
+                        fingering_is_current = False
+                info["has_fingering"] = has_fingering
+                info["fingering_is_current"] = fingering_is_current
+                yield _json.dumps(info) + "\n"
+                await asyncio.sleep(0)  # yield control between files
+
+        return StreamingResponse(_generate(), media_type="application/x-ndjson")
+
+    @app.get("/api/rig/{filename}")
+    async def get_rig(filename: str) -> JSONResponse:
+        """Return parsed Valeton GP-180 rig data for a score file (404 if none)."""
+        rigs_dir = find_rigs_dir(app.state.fixtures_dir)
+        if not rigs_dir:
+            raise HTTPException(404, "No rigs directory found")
+        rig_path = find_rig(filename, rigs_dir)
+        if not rig_path:
+            raise HTTPException(404, f"No rig found for {filename!r}")
+        content = rig_path.read_text(encoding="utf-8")
+        return JSONResponse(parse_rig(content))
+
+    @app.get("/api/rig-image/{image_name}")
+    async def get_rig_image(image_name: str) -> Response:
+        """Serve a pedal image from data/pedals/."""
+        if "/" in image_name or "\\" in image_name or ".." in image_name:
+            raise HTTPException(400, "Invalid image name")
+        project_root = Path(__file__).resolve().parents[3]
+        pedals_dir = project_root / "data" / "pedals"
+        if not pedals_dir.is_dir():
+            pedals_dir = app.state.fixtures_dir.parent / "data" / "pedals"
+        img_path = pedals_dir / image_name
+        if not img_path.is_file():
+            raise HTTPException(404, f"Image {image_name!r} not found")
+        content = img_path.read_bytes()
+        media_type = "image/jpeg" if image_name.lower().endswith(".jpg") else "image/png"
+        return Response(content=content, media_type=media_type)
 
     @app.get("/api/tracks/{filename}")
     async def list_tracks(filename: str) -> list[dict[str, Any]]:
@@ -380,79 +502,55 @@ def _register_routes(app: FastAPI) -> None:
         representation_mode: str = Query("standard_tablature"),
         same_finger_motion_penalty: bool = Query(True),
         infer_implicit_legato: bool = Query(True),
+        svg_width: int | None = Query(None, ge=400, le=5000),
     ) -> dict[str, Any]:
-        """Run the full pipeline and return results as JSON.
+        """Render a track and return saved fingerings (no on-demand Viterbi).
+
+        Fingerings are served from the sidecar written by POST /api/save/gp.
+        When no sidecar exists (or it is stale), the track renders without
+        finger annotations and the response carries ``has_saved_fingering: false``
+        so the frontend can highlight the "Insert fingerings" button.
+
+        To compute fingerings call POST /api/save/gp/{filename} first — that
+        runs the full Viterbi + phrase-window pipeline and writes the sidecar.
 
         Sync def so FastAPI runs each request in its thread pool — concurrent
-        solve requests (e.g. the frontend prefetch fanning out N tracks ×
-        M modes) actually execute in parallel instead of serialising on the
-        single asyncio event loop.
+        solve requests (e.g. the frontend prefetch fanning out N tracks × M
+        modes) actually execute in parallel instead of serialising on the event
+        loop thread.
         """
         filepath = _resolve_file(app, filename)
         cache_key = _solve_cache_key(
             filepath, track_id, representation_mode,
             same_finger_motion_penalty, infer_implicit_legato,
+            svg_width,
         )
         cached = _solve_cache_get(cache_key)
         if cached is not None:
             return cached
         view_mode = _parse_representation_mode(representation_mode)
 
-        # Step 1 — legacy pipeline + adapter metadata + audit. This is the
-        # expensive piece (~2s on AC/DC) and it's *mode-independent*, so we
-        # cache it by (file, track, prefs) only. Subsequent view changes on
-        # the same file/track hit this cache and only re-run the core/SVG
-        # render (~90ms).
-        base_key = _legacy_cache_key(
-            filepath, track_id,
-            same_finger_motion_penalty, infer_implicit_legato,
-        )
+        # Step 1 — parse (adapter + events + metadata). Cached by (file, mtime,
+        # track) since it's mode- and prefs-independent. The old Viterbi step
+        # that lived here has moved to POST /api/save/gp.
+        base_key = _legacy_cache_key(filepath, track_id)
         base = _legacy_cache_get(base_key)
         if base is None:
             adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
             if not events:
                 raise HTTPException(404, "No notes found in file")
-            # Classify the instrument: only guitar tracks run the fingering
-            # optimizer (Viterbi). Vocals/bass/drums/other are served staff-only.
             kind = _track_kind(adapter, filepath, track_id)
             fingered = kind == KIND_GUITAR
-            section_markers: dict[int, str] = dict(
-                getattr(adapter, "section_markers", {}) or {}
-            )
-            if fingered:
-                rule_preferences = RulePreferences(
-                    same_finger_motion_penalty=same_finger_motion_penalty,
-                    infer_implicit_legato=infer_implicit_legato,
-                )
-                # Only thread feedback when some exists, so the call signature
-                # stays backward-compatible with test stubs (and is a no-op for
-                # the common, no-feedback case).
-                _fb = _song_feedback(app, filepath)
-                _fb_kw = {"feedback": _fb} if _fb else {}
-                results, stats = _run_legacy_pipeline(
-                    events, rule_preferences=rule_preferences, **_fb_kw,
-                )
-                serialized_results = [_serialize_result(r) for r in results]
-                audit = _safe_audit(events, results, section_markers)
-            else:
-                # Staff-only: skip Viterbi entirely. Emit un-fingered notes so
-                # the frontend can still render standard notation / play audio.
-                results = []
-                stats = {"parsed": len(events), "fingered": 0}
-                serialized_results = [
-                    _serialize_staff_note(ev, i + 1) for i, ev in enumerate(events)
-                ]
-                audit = {}
             base = {
                 "adapter": adapter,
                 "events": events,
-                "results": results,
-                "stats": stats,
                 "kind": kind,
                 "fingered": fingered,
                 "track_name": getattr(adapter, "track_name", "") or "",
                 "midi_program": getattr(adapter, "midi_program", -1),
-                "section_markers": section_markers,
+                "section_markers": dict(
+                    getattr(adapter, "section_markers", {}) or {}
+                ),
                 "chord_diagrams": [
                     _serialize_chord_diagram(cd)
                     for cd in list(getattr(adapter, "chord_diagrams", []) or [])
@@ -464,23 +562,134 @@ def _register_routes(app: FastAPI) -> None:
                 "beats_per_measure": float(
                     getattr(adapter, "beats_per_measure", 4.0)
                 ),
-                "serialized_results": serialized_results,
-                "audit": audit,
             }
             _legacy_cache_put(base_key, base)
 
-        # Step 2 — mode-dependent core/SVG render. Cheap (~90ms) so we run
-        # it every time the per-mode response cache misses. Non-guitar tracks
-        # have no tablature, so force a standard (staff-only) render regardless
-        # of the requested view mode.
-        render_mode = view_mode if base["fingered"] else RepresentationMode.STANDARD
-        core_result = _run_core_pipeline_for_events(
-            filepath, base["adapter"], base["events"],
-            representation_mode=render_mode,
-            track_kind=base.get("kind", "guitar"),
-        )
+        # Step 2 — load fingerings from sidecar (or return empty for guitar
+        # tracks that have not been fingered yet, and staff-only for others).
+        has_saved_fingering = False
+        fingering_is_current = False
+        fingering_algo_version: str | None = None
+        meta: dict[str, Any] | None = None
+        if base["fingered"] and filepath.suffix.lower() == ".gp":
+            meta = _read_fingering_meta(filepath)
+            if meta is not None:
+                has_saved_fingering = True
+                fingering_is_current = _fingering_meta_is_current(meta, filepath)
+                fingering_algo_version = meta.get("algo_version")
 
-        # Parse artist/title from filename (cheap, redo each time).
+        audit: dict[str, Any] = {}
+        if base["fingered"] and fingering_is_current:
+            # Happy path: serve pre-computed fingerings + audit from sidecar.
+            # Per-track (bug #3): a multi-guitar song caches one entry per track
+            # under data["tracks"][str(track_id)]. Prefer the exact track entry;
+            # else serve the top-level "primary" (the most-recently-saved track,
+            # recorded in meta["track_id"], OR a legacy single-track sidecar with
+            # no track_id); else this track simply has not been fingered yet.
+            import json as _json
+            data_path = _fingering_data_path(filepath)
+            try:
+                data = _json.loads(data_path.read_text(encoding="utf-8"))
+                tracks = data.get("tracks") if isinstance(data.get("tracks"), dict) else {}
+                tkey = str(track_id) if track_id is not None else None
+                primary_tid = meta.get("track_id") if meta else None
+                if tkey is not None and tkey in tracks:
+                    serialized_results = tracks[tkey].get("results", [])
+                    audit = tracks[tkey].get("audit") or {}
+                elif primary_tid == track_id or (
+                    # Sidecar written before per-track support (primary_tid=None)
+                    # is only served for the default single-track case (no
+                    # explicit track requested, or track 0/None).
+                    primary_tid is None and (track_id is None or track_id == 0)
+                ):
+                    serialized_results = data.get("results", [])
+                    audit = data.get("audit") or {}
+                else:
+                    # Another track was fingered, not this one.
+                    serialized_results = []
+                    has_saved_fingering = False
+            except Exception:
+                serialized_results = []
+                has_saved_fingering = False
+                fingering_is_current = False
+            stats: dict[str, Any] = {
+                "parsed": len(base["events"]),
+                "fingered": len(serialized_results),
+                "from_sidecar": True,
+            }
+        elif base["fingered"]:
+            # No current sidecar. Fall back to fingerings embedded in the GP
+            # file itself (LeftFingering) so a partition that already carries
+            # fingers shows them on open. Embedded data has no algo version, so
+            # it's flagged not-current (the UI invites a recompute to verify).
+            embedded = (
+                _read_embedded_gp_fingerings(filepath)
+                if filepath.suffix.lower() == ".gp"
+                else {}
+            )
+            if embedded:
+                emb_results = _embedded_results_from_events(
+                    base["events"], embedded,
+                )
+                serialized_results = [_serialize_result(r) for r in emb_results]
+                has_saved_fingering = True
+                fingering_is_current = False
+                if fingering_algo_version is None:
+                    fingering_algo_version = "embedded"
+                stats = {
+                    "parsed": len(base["events"]),
+                    "fingered": len(embedded),
+                    "from_embedded": True,
+                }
+            else:
+                # Guitar track with no fingers anywhere — tablature only.
+                serialized_results = []
+                stats = {"parsed": len(base["events"]), "fingered": 0}
+            audit = {}
+        else:
+            # Non-guitar track (vocals/bass/drums): staff-only, no fingerings.
+            serialized_results = [
+                _serialize_staff_note(ev, i + 1)
+                for i, ev in enumerate(base["events"])
+            ]
+            stats = {"parsed": len(base["events"]), "fingered": 0}
+            audit = {}
+
+        # Step 3 — mode-dependent core/SVG render. Cheap (~90ms). Guitar tracks
+        # always render as tablature (regardless of sidecar presence); non-guitar
+        # tracks are forced to standard notation.
+        render_mode = view_mode if base["fingered"] else RepresentationMode.STANDARD
+        # The notation/SVG render can raise on a malformed/edge-case passage
+        # (e.g. an impossible chord voicing hitting a glyph registry KeyError).
+        # Never let that blank the WHOLE tab — degrade to no-SVG so the canvas
+        # tab (which renders from `results`) still shows, and surface the error.
+        core_svg = ""
+        core_conformance = 0
+        measure_regions: list[Any] = []
+        render_error: str | None = None
+        _page_width: float | None = float(svg_width) if isinstance(svg_width, int) else None
+        try:
+            core_result = _run_core_pipeline_for_events(
+                filepath, base["adapter"], base["events"],
+                representation_mode=render_mode,
+                track_kind=base.get("kind", "guitar"),
+                page_width=_page_width,
+            )
+            core_svg = core_result.svg
+            core_conformance = len(core_result.conformance_issues)
+            measure_regions = _extract_measure_regions(
+                getattr(core_result, "render_scene", None),
+                getattr(core_result, "canonical_score", None),
+                mode=render_mode.value,
+                page_width=_page_width,
+            )
+        except Exception as exc:  # noqa: BLE001 — degrade, never abort the tab
+            import logging as _logging
+            _logging.getLogger("fretwise.web").exception(
+                "core render failed for %s (track %s)", filepath.name, track_id
+            )
+            render_error = str(exc)
+
         auto_title, auto_artist = _infer_title_artist(filepath)
 
         payload: dict[str, Any] = {
@@ -488,11 +697,14 @@ def _register_routes(app: FastAPI) -> None:
             "artist": auto_artist,
             "track_name": base["track_name"],
             "midi_program": base["midi_program"],
-            # Track classification + whether the fingering optimizer ran.
-            # Frontend contract: when fingered is False, every entry in
-            # "results" has null string/fret/finger and the SVG is staff-only.
             "kind": base["kind"],
+            # fingered: True = guitar track that should show tablature + finger UI.
+            # has_saved_fingering: True = a sidecar exists and was loaded.
+            # fingering_is_current: True = algo_version matches + source unchanged.
             "fingered": base["fingered"],
+            "has_saved_fingering": has_saved_fingering,
+            "fingering_is_current": fingering_is_current,
+            "fingering_algo_version": fingering_algo_version,
             "mode": "performance",
             "representation_mode": render_mode.value,
             "tempo": base["tempo"],
@@ -500,16 +712,13 @@ def _register_routes(app: FastAPI) -> None:
             "section_markers": base["section_markers"],
             "chord_diagrams": base["chord_diagrams"],
             "chord_markers": base["chord_markers"],
-            "core_svg": core_result.svg,
-            "core_conformance_issues": len(core_result.conformance_issues),
-            "measure_regions": _extract_measure_regions(
-                getattr(core_result, "render_scene", None),
-                getattr(core_result, "canonical_score", None),
-                mode=render_mode.value,
-            ),
-            "stats": base["stats"],
-            "results": base["serialized_results"],
-            "audit": base["audit"],
+            "core_svg": core_svg,
+            "core_conformance_issues": core_conformance,
+            "measure_regions": measure_regions,
+            "stats": stats,
+            "results": serialized_results,
+            "audit": audit,
+            "render_error": render_error,
         }
         _solve_cache_put(cache_key, payload)
         return payload
@@ -577,17 +786,23 @@ def _register_routes(app: FastAPI) -> None:
                 "exists and is newer than the source."
             ),
         ),
+        body: dict[str, Any] | None = Body(None),
     ) -> Response:
-        """Recompute fingerings for every GP 7/8 file in the fixtures dir.
+        """Recompute fingerings for the selected (or every) GP 7/8 file.
 
-        Multiprocessing pool — each worker carries its own parser + ONNX
-        session, so on a multi-core machine the wall-clock is roughly
-        ``serial_time / min(workers, cpu_count)`` minus a one-shot worker
-        warm-up (~1 s per worker).
+        Thread pool — the workers run *in this process* and share the already
+        loaded ONNX sessions (no per-worker warm-up). This deliberately replaces
+        the old ``ProcessPoolExecutor``: on Windows, spawning worker processes
+        from inside the running server re-imported the entry point and hung the
+        whole request (the UI froze on "calcul en cours" and never returned).
+        onnxruntime inference is thread-safe and each task builds its own
+        StateGenerator/ViterbiOptimizer, so concurrent tasks are safe; the GIL
+        serialises the pure-Python Viterbi step but ML/IO overlap, and progress
+        streams continuously so the UI never blocks.
 
         Skip-on-resume — when ``force=false`` (the default), a source file
-        whose ``<stem>_fingered.gp`` already exists *and* is newer than the
-        source is skipped. Pass ``?force=true`` to re-process everything.
+        whose sidecar is already current is skipped. Pass ``?force=true`` to
+        re-process everything.
 
         Streams one JSON line per processed file via text/plain so the
         frontend can show live progress without a separate polling loop.
@@ -595,7 +810,7 @@ def _register_routes(app: FastAPI) -> None:
         _require_admin(app)
         import json as _json
         import os as _os
-        from concurrent.futures import ProcessPoolExecutor, as_completed
+        from concurrent.futures import ThreadPoolExecutor, as_completed
 
         from fastapi.responses import StreamingResponse
 
@@ -616,21 +831,43 @@ def _register_routes(app: FastAPI) -> None:
             raise HTTPException(409, "A refresh batch is already running")
 
         fixtures_dir: Path = storage.local_root
-        all_files = sorted(fixtures_dir.glob("*.gp"))
-        sources = [f for f in all_files if not f.stem.endswith("_fingered")]
 
-        # Skip files already fingered (unless force=true).
+        # Optional explicit selection (from the library multi-select). When a
+        # ``files`` list is given, process ONLY those (validated + resolved under
+        # the library root) instead of globbing the whole directory — so the
+        # checkbox batch targets exactly what the user picked.
+        selected = body.get("files") if isinstance(body, dict) else None
+        if selected:
+            seen: set[Path] = set()
+            sources: list[Path] = []
+            for name in selected:
+                if not isinstance(name, str):
+                    continue
+                try:
+                    p = _resolve_file(app, name)
+                except HTTPException:
+                    continue  # skip names that don't resolve under the library
+                if (
+                    p.suffix.lower() == ".gp"
+                    and not p.stem.endswith("_fingered")
+                    and p not in seen
+                ):
+                    seen.add(p)
+                    sources.append(p)
+            sources.sort()
+        else:
+            all_files = sorted(fixtures_dir.glob("*.gp"))
+            sources = [f for f in all_files if not f.stem.endswith("_fingered")]
+
+        # Skip files whose sidecar is already current (unless force=true).
         to_process: list[Path] = []
         pre_skipped: list[Path] = []
         for f in sources:
-            out_path = f.with_name(f"{f.stem}_fingered{f.suffix}")
-            if not force and out_path.exists():
-                try:
-                    if out_path.stat().st_mtime >= f.stat().st_mtime:
-                        pre_skipped.append(f)
-                        continue
-                except OSError:
-                    pass
+            if not force:
+                meta = _read_fingering_meta(f)
+                if meta is not None and _fingering_meta_is_current(meta, f):
+                    pre_skipped.append(f)
+                    continue
             to_process.append(f)
 
         n_workers = workers if workers is not None else min(_os.cpu_count() or 4, 4)
@@ -654,7 +891,13 @@ def _register_routes(app: FastAPI) -> None:
             elapsed_times: list[float] = []
             try:
                 if to_process:
-                    with ProcessPoolExecutor(max_workers=n_workers) as pool:
+                    # Warm the shared ONNX singletons once in this thread before
+                    # fanning out, so worker threads hit a populated cache (no
+                    # first-call load race, no per-task warm-up).
+                    _get_player_cost_model()
+                    _get_chord_finger_classifier()
+                    _get_phrase_window_fingerer()
+                    with ThreadPoolExecutor(max_workers=n_workers) as pool:
                         futures = {
                             pool.submit(_process_single_gp, str(f)): f
                             for f in to_process
@@ -706,6 +949,113 @@ def _register_routes(app: FastAPI) -> None:
                 app.state._batch_running = False
 
         return StreamingResponse(_emit(), media_type="text/plain")
+
+    @app.post("/api/library/cleanup")
+    def cleanup_library() -> dict[str, Any]:
+        """Normalise the library after a fingering batch.
+
+        Two passes, both moving losers to a ``.trash`` subfolder (recoverable):
+
+        1. **Rename** any legacy ``<stem>_fingered.gp`` to ``<stem>.gp`` (the
+           in-place save model no longer creates these). The fingered copy wins
+           on collision: the plain-named file it would overwrite is trashed
+           first. Sidecars travel with their file.
+        2. **De-duplicate** files that resolve to the same (title, artist): keep
+           one canonical member, trashing the rest — preferring to trash members
+           whose filename contains ``_`` (e.g. ``Artist_Title`` vs the cleaner
+           ``Artist - Title``).
+
+        Returns a report listing every rename and trashed file. Local storage
+        only; admin-guarded.
+        """
+        _require_admin(app)
+        storage: StorageBackend = _current_storage(app)
+        root: Path | None = storage.local_root
+        if root is None:
+            raise HTTPException(
+                400,
+                "Library cleanup is only supported on local storage "
+                f"(active backend: {storage.name}).",
+            )
+
+        trash = root / ".trash"
+        renamed: list[dict[str, str]] = []
+        trashed: list[str] = []
+        errors: list[str] = []
+
+        def _sidecars(p: Path) -> list[Path]:
+            return [_fingering_meta_path(p), _fingering_data_path(p)]
+
+        def _to_trash(p: Path) -> None:
+            """Move *p* (and its sidecars) into .trash, de-clobbering by suffix."""
+            try:
+                trash.mkdir(exist_ok=True)
+                for src in [p, *_sidecars(p)]:
+                    if not src.exists():
+                        continue
+                    dest = trash / src.name
+                    n = 1
+                    while dest.exists():
+                        dest = trash / f"{src.stem}.{n}{src.suffix}"
+                        n += 1
+                    src.rename(dest)
+                trashed.append(p.name)
+            except OSError as exc:
+                errors.append(f"trash {p.name}: {exc}")
+
+        def _rename(src: Path, dst: Path) -> None:
+            """Rename *src* → *dst* and carry its sidecars along."""
+            try:
+                src.rename(dst)
+                for src_side, dst_side in (
+                    (_fingering_meta_path(src), _fingering_meta_path(dst)),
+                    (_fingering_data_path(src), _fingering_data_path(dst)),
+                ):
+                    if src_side.exists():
+                        src_side.rename(dst_side)
+                renamed.append({"from": src.name, "to": dst.name})
+            except OSError as exc:
+                errors.append(f"rename {src.name}: {exc}")
+
+        # Pass 1 — strip "_fingered" suffix (fingered copy wins on collision).
+        for f in sorted(root.glob("*_fingered.gp")):
+            target = f.with_name(f"{f.stem[: -len('_fingered')]}{f.suffix}")
+            if target.exists():
+                _to_trash(target)          # plain-named loser → trash
+            _rename(f, target)
+
+        # Pass 2 — de-duplicate by (title, artist). Prefer the member without
+        # an underscore in its name; trash the rest.
+        groups: dict[tuple[str, str], list[Path]] = {}
+        for f in sorted(root.glob("*.gp")):
+            if f.stem.endswith("_fingered"):
+                continue
+            title, artist = _infer_title_artist(f)
+            groups.setdefault(
+                (title.strip().lower(), (artist or "").strip().lower()), []
+            ).append(f)
+
+        for members in groups.values():
+            if len(members) < 2:
+                continue
+            # Keep the best-named member: no underscore preferred, then shortest.
+            keeper = sorted(
+                members, key=lambda p: ("_" in p.stem, len(p.name), p.name)
+            )[0]
+            for m in members:
+                if m != keeper:
+                    _to_trash(m)
+
+        # Any rename/trash invalidates cached parses keyed by path+mtime.
+        _solve_cache_clear()  # clears both the solve and the legacy parse cache
+
+        return {
+            "renamed": renamed,
+            "trashed": trashed,
+            "errors": errors,
+            "renamed_count": len(renamed),
+            "trashed_count": len(trashed),
+        }
 
     @app.get("/api/export/gp/{filename}")
     def export_gp(
@@ -768,6 +1118,88 @@ def _register_routes(app: FastAPI) -> None:
                 "X-Fretwise-Biomechanical-High": str(guard["high"]),
             },
         )
+
+    @app.post("/api/save/gp/{filename}")
+    def save_gp(
+        filename: str,
+        track_id: int | None = Query(None),
+    ) -> dict[str, object]:
+        """Compute LH fingerings and write ``{stem}_fingered.gp`` into the storage backend.
+
+        Identical pipeline to the GP export but the result is saved server-side
+        instead of returned as a download.  Works with both local and cloud
+        storage backends (uses ``storage.write_bytes``).
+        """
+        filepath = _resolve_file(app, filename)
+        if filepath.suffix.lower() != ".gp":
+            raise HTTPException(
+                400, "Save GP only supports Guitar Pro 7/8 (.gp) files",
+            )
+
+        adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
+        if not events:
+            raise HTTPException(404, "No notes found in file")
+
+        payload = _run_legacy_pipeline_with_guard(events)
+        if not payload.results:
+            raise HTTPException(500, "Pipeline returned no fingering results")
+
+        guard = _guard_summary(payload)
+        # We DON'T hard-block (409) when the computed fingering contains
+        # biomechanically impossible positions. The whole point of the optimizer
+        # is to still produce a best-effort path; rejecting the entire save left
+        # the user with no tab at all. Instead we save fingerings for the whole
+        # track and flag the impossible passages in the audit (persisted to the
+        # sidecar) and the "Doigtés à revoir" panel — so the rest of the tab
+        # renders with fingering and the bad measures are surfaced, not hidden.
+
+        mapping = fingerings_by_source_id(payload.results)
+        out_name = filepath.name
+        storage: StorageBackend = _current_storage(app)
+        # Write the fingerings back into the original file (in place) — no
+        # "_fingered" suffix, no duplicate. write_gp_with_fingerings has already
+        # read the source fully into memory, so overwriting it here is safe and
+        # idempotent (LeftFingering injection strips any prior annotation first).
+        #
+        # Bug #6: an impossible position can make the GP-file embedding raise
+        # ValueError. We must NOT abort the whole save in that case — that left
+        # the user with no sidecar, so the viewer rendered no fingering at all
+        # ("the doigtés action blocks the tab"). Instead we skip only the in-file
+        # GP annotation, still persist the sidecar (the viewer renders fingering
+        # from it), and let the audit + "Doigtés à revoir" surface the unplayable
+        # passage. The audit below flags it FIRST (biomechanical FATAL → "bad").
+        gp_embed_error: str | None = None
+        try:
+            gp_bytes = write_gp_with_fingerings(filepath, mapping)
+            storage.write_bytes(out_name, gp_bytes)
+        except ValueError as exc:
+            gp_embed_error = str(exc)
+        except StorageError as exc:
+            raise HTTPException(502, f"Storage error: {exc}")
+
+        # Compute the audit on the freshly-computed results — it flags the
+        # impossible passages (biomechanical FATAL → verdict "bad") FIRST — and
+        # persist it in the sidecar so /api/solve serves a real audit banner
+        # without re-running Viterbi. Done after the overwrite so source_mtime
+        # matches the freshly-written file (when the embed succeeded).
+        section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+        audit = _safe_audit(events, payload.results, section_markers)
+        _write_fingering_sidecar(filepath, payload.results, audit=audit, track_id=track_id)
+
+        return {
+            "saved": out_name,
+            "annotated_notes": len(mapping),
+            "biomechanical_high": guard["high"],
+            "biomechanical_fatal": guard["fatal"],
+            "fatal_measures": guard["fatal_measures"],
+            "fatal_measure_count": guard["fatal_measure_count"],
+            "algo_version": FINGERING_ALGO_VERSION,
+            # When true, the fingering is saved in the sidecar (viewer + audit +
+            # review all work) but could not be embedded into the .gp file; the
+            # offending passages are flagged in the audit / "Doigtés à revoir".
+            "gp_embed_skipped": gp_embed_error is not None,
+            "gp_embed_error": gp_embed_error,
+        }
 
     @app.get("/api/export/musicxml/{filename}")
     def export_musicxml(
@@ -949,18 +1381,80 @@ def _register_routes(app: FastAPI) -> None:
         )
 
     @app.get("/api/soundfont")
-    async def get_soundfont() -> Response:
-        """Stream the bundled SF2 soundfont file for in-browser synthesis."""
-        # Project root is 4 levels up from this file (src/fretwise/web/app.py)
-        sf2_path = (
-            Path(__file__).parents[3] / "data" / "sounds" / "Shan SGM-Pro 11.SF2"
-        )
-        if not sf2_path.exists():
-            raise HTTPException(404, "Soundfont file not found")
-        return Response(
-            content=sf2_path.read_bytes(),
+    async def get_soundfont(name: str | None = None) -> Response:
+        """Stream a soundfont for in-browser (SpessaSynth) synthesis.
+
+        Resolution order:
+          1. explicit ``?name=`` (confined to the soundfonts dir) — content is
+             identified by the URL, so it is cached immutably for a year;
+          2. the configured ``active_soundfont`` (the one the Settings UI sets);
+          3. the first soundfont found in the soundfonts directory.
+
+        Streamed via ``FileResponse`` (sendfile + HTTP Range + auto ETag/304)
+        rather than ``read_bytes()`` — a 400+ MB SF2/SF3 must never be read whole
+        into server memory per request. The default (active) response is marked
+        ``no-cache`` so the browser revalidates and picks up a soundfont change;
+        the cheap conditional 304 keeps that fast.
+        """
+        cfg = _settings.load()
+        sf_dir = Path(cfg.get("soundfonts_dir", "data/sounds"))
+        if not sf_dir.is_absolute():
+            sf_dir = Path(__file__).parents[3] / sf_dir
+
+        sf_path: Path | None = None
+        cache_control = "no-cache"
+
+        if name:
+            candidate = sf_dir / Path(name).name  # strip any directory component
+            try:
+                candidate.resolve().relative_to(sf_dir.resolve())
+            except ValueError:
+                raise HTTPException(403, "Path traversal not allowed")
+            if not candidate.exists():
+                raise HTTPException(404, f"Soundfont not found: {name}")
+            sf_path = candidate
+            # URL pins the content → safe to cache forever.
+            cache_control = "public, max-age=31536000, immutable"
+
+        if sf_path is None:
+            active = cfg.get("active_soundfont", "")
+            if active:
+                active_path = Path(active)
+                if not active_path.is_absolute():
+                    active_path = sf_dir / active_path.name
+                if active_path.exists():
+                    sf_path = active_path
+
+        if sf_path is None and sf_dir.exists():
+            sf_path = next(
+                (p for p in sorted(sf_dir.iterdir())
+                 if p.suffix.lower() in {".sf2", ".sf3", ".dls"}),
+                None,
+            )
+
+        if sf_path is None or not sf_path.exists():
+            raise HTTPException(404, "No soundfont available")
+
+        # Caching: when the caller did not pin a specific ?name=, redirect to the
+        # versioned, immutable URL of the resolved active soundfont. The browser
+        # then caches the (large) bytes for a year and re-downloads ONLY when the
+        # active soundfont — or its on-disk mtime — changes (the ``v`` query bumps
+        # the cache key). The redirect itself is ``no-store`` so switching the
+        # active soundfont in Settings is picked up on the very next load.
+        if not name:
+            from urllib.parse import quote
+
+            from fastapi.responses import RedirectResponse
+            version = int(sf_path.stat().st_mtime)
+            target = f"/api/soundfont?name={quote(sf_path.name)}&v={version}"
+            return RedirectResponse(
+                target, status_code=307, headers={"Cache-Control": "no-store"}
+            )
+
+        return FileResponse(
+            sf_path,
             media_type="application/octet-stream",
-            headers={"Cache-Control": "public, max-age=86400"},
+            headers={"Cache-Control": cache_control},
         )
 
     @app.get("/api/soundfont/instruments")
@@ -1385,7 +1879,7 @@ def _register_routes(app: FastAPI) -> None:
         filename: str, track_id: int | None = Query(None)
     ) -> dict[str, Any]:
         """List impossible / suspect / high-cost fingerings, ranked by severity."""
-        from fretwise.review import flag_fingerings
+        from fretwise.review import Severity, flag_fingerings
 
         filepath = _resolve_file(app, filename)
         adapter, events = _load_adapter_and_events(filepath, track_id=track_id)
@@ -1401,13 +1895,32 @@ def _register_routes(app: FastAPI) -> None:
         report = flag_fingerings(
             payload.results, biomech_report=payload.biomechanical_report,
         )
+        items = report.items
+        counts = report.counts
+        # When the whole-piece audit is "clean", a long list of HIGH_COST notes
+        # contradicts the "all OK" banner and is just noise. Suppress cost-only
+        # items in that case; always keep IMPOSSIBLE / SUSPECT (biomechanical)
+        # items, which are real playability problems regardless of the verdict.
+        try:
+            section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+            audit_report = audit_score(
+                events, payload.results,
+                section_markers=section_markers or None,
+                ml_cost_model=_get_player_cost_model(),
+            )
+            if audit_report.overall == "clean":
+                items = [it for it in items if it.severity != Severity.HIGH_COST]
+                from collections import Counter as _Counter
+                counts = dict(_Counter(str(it.severity) for it in items))
+        except Exception:  # noqa: BLE001 — gating is best-effort, never fatal
+            pass
         return {
             "available": True,
             "filename": filename,
             "track_id": track_id,
-            "counts": report.counts,
+            "counts": counts,
             "truncated": report.truncated,
-            "items": [_serialize_review_item(it) for it in report.items],
+            "items": [_serialize_review_item(it) for it in items],
         }
 
     @app.get("/api/review/{filename}/alternatives")
@@ -1433,11 +1946,28 @@ def _register_routes(app: FastAPI) -> None:
             chord_finger_classifier=_get_chord_finger_classifier(),
         )
         requested = int(_fw_config().review.alternatives.count)
+        # Tempo + open-string tuning let the frontend build a hand-visualisation
+        # payload for each fingering (the compact tab notation alone is hard to
+        # read). Tuning is derived from the source hints (handles dropped/capo'd
+        # tunings), falling back to standard 6-string.
+        tuning = [40, 45, 50, 55, 59, 64]
+        seen_strings: dict[int, int] = {}
+        for e in events:
+            if (
+                e.string_hint is not None and e.fret_hint is not None
+                and 1 <= e.string_hint <= len(tuning)
+                and e.string_hint not in seen_strings
+            ):
+                seen_strings[e.string_hint] = e.pitch - e.fret_hint
+        for s, open_pitch in seen_strings.items():
+            tuning[s - 1] = open_pitch
         return {
             "filename": filename,
             "measure_index": measure_index,
             "requested": requested,
             "incomplete": len(alts) < requested,
+            "tempo": events[0].tempo if events else 120.0,
+            "tuning": tuning,
             "alternatives": [_serialize_alternative(a) for a in alts],
         }
 
@@ -1826,10 +2356,21 @@ _PLAYER_COST_MODEL_LOADED: bool = False
 _PHRASE_WINDOW_FINGERER: object | None = None
 _PHRASE_WINDOW_FINGERER_LOADED: bool = False
 
+# Current fingering algorithm version — bump this when the pipeline changes
+# significantly enough that existing saved fingerings should be recalculated.
+# "2.0" = phrase_window_v2 + pinky demotion belt (GDS-026, activated 2026-06-12).
+FINGERING_ALGO_VERSION = "2.0"
+
 # In-memory LRU cache for /api/solve responses. Keyed by (file, mtime, params)
 # so it auto-invalidates when the source file is edited. Bounded entry count
 # keeps total memory predictable (each response ~ 200-500 KB SVG + results).
 from collections import OrderedDict as _OrderedDict  # noqa: E402
+
+# Guards both LRU caches. /api/solve is a sync def, so concurrent requests (the
+# frontend prefetch fans out many at once) run on different thread-pool threads
+# and mutate these OrderedDicts in parallel — without a lock, a move_to_end /
+# popitem race raises "OrderedDict mutated during iteration" or KeyError.
+_CACHE_LOCK = threading.Lock()
 
 _SOLVE_CACHE: _OrderedDict[tuple, dict[str, Any]] = _OrderedDict()
 # 128 entries ≈ 64–128 MB max (4 modes × ~32 tracks). Bumped from 32 so that
@@ -1854,75 +2395,86 @@ def _solve_cache_key(
     representation_mode: str,
     same_finger_motion_penalty: bool,
     infer_implicit_legato: bool,
+    svg_width: int | None = None,
 ) -> tuple:
     try:
         mtime = filepath.stat().st_mtime_ns
     except OSError:
         mtime = 0
+    # Include the metadata sidecar mtime so the cache auto-invalidates when
+    # the user inserts fingerings (writes a new _fingering.json next to the source).
+    try:
+        sidecar_mtime = _fingering_meta_path(filepath).stat().st_mtime_ns
+    except OSError:
+        sidecar_mtime = 0
     return (
         str(filepath),
         mtime,
+        sidecar_mtime,
         track_id,
         representation_mode,
         bool(same_finger_motion_penalty),
         bool(infer_implicit_legato),
+        svg_width,  # None = use default page_width from config
     )
 
 
 def _solve_cache_get(key: tuple) -> dict[str, Any] | None:
-    payload = _SOLVE_CACHE.get(key)
-    if payload is None:
-        return None
-    _SOLVE_CACHE.move_to_end(key)  # LRU touch
-    return payload
+    with _CACHE_LOCK:
+        payload = _SOLVE_CACHE.get(key)
+        if payload is None:
+            return None
+        _SOLVE_CACHE.move_to_end(key)  # LRU touch
+        return payload
 
 
 def _solve_cache_put(key: tuple, payload: dict[str, Any]) -> None:
-    _SOLVE_CACHE[key] = payload
-    _SOLVE_CACHE.move_to_end(key)
-    while len(_SOLVE_CACHE) > _SOLVE_CACHE_MAX:
-        _SOLVE_CACHE.popitem(last=False)
+    with _CACHE_LOCK:
+        _SOLVE_CACHE[key] = payload
+        _SOLVE_CACHE.move_to_end(key)
+        while len(_SOLVE_CACHE) > _SOLVE_CACHE_MAX:
+            _SOLVE_CACHE.popitem(last=False)
 
 
 def _solve_cache_clear() -> None:
     """Public-by-convention helper used by tests."""
-    _SOLVE_CACHE.clear()
-    _LEGACY_CACHE.clear()
+    with _CACHE_LOCK:
+        _SOLVE_CACHE.clear()
+        _LEGACY_CACHE.clear()
 
 
 def _legacy_cache_key(
     filepath: Path,
     track_id: int | None,
-    same_finger_motion_penalty: bool,
-    infer_implicit_legato: bool,
 ) -> tuple:
-    """Cache key for the legacy pipeline output (mode-independent)."""
+    """Cache key for the parse-only (adapter + events + metadata) layer.
+
+    Prefs (same_finger_motion_penalty, infer_implicit_legato) are omitted here
+    because /api/solve no longer runs Viterbi — fingerings come from the sidecar.
+    Prefs still affect export endpoints that call _run_legacy_pipeline directly.
+    """
     try:
         mtime = filepath.stat().st_mtime_ns
     except OSError:
         mtime = 0
-    return (
-        str(filepath),
-        mtime,
-        track_id,
-        bool(same_finger_motion_penalty),
-        bool(infer_implicit_legato),
-    )
+    return (str(filepath), mtime, track_id)
 
 
 def _legacy_cache_get(key: tuple) -> dict[str, Any] | None:
-    entry = _LEGACY_CACHE.get(key)
-    if entry is None:
-        return None
-    _LEGACY_CACHE.move_to_end(key)
-    return entry
+    with _CACHE_LOCK:
+        entry = _LEGACY_CACHE.get(key)
+        if entry is None:
+            return None
+        _LEGACY_CACHE.move_to_end(key)
+        return entry
 
 
 def _legacy_cache_put(key: tuple, entry: dict[str, Any]) -> None:
-    _LEGACY_CACHE[key] = entry
-    _LEGACY_CACHE.move_to_end(key)
-    while len(_LEGACY_CACHE) > _LEGACY_CACHE_MAX:
-        _LEGACY_CACHE.popitem(last=False)
+    with _CACHE_LOCK:
+        _LEGACY_CACHE[key] = entry
+        _LEGACY_CACHE.move_to_end(key)
+        while len(_LEGACY_CACHE) > _LEGACY_CACHE_MAX:
+            _LEGACY_CACHE.popitem(last=False)
 
 
 def _get_chord_finger_classifier() -> object | None:
@@ -2135,13 +2687,23 @@ def _infer_source_format(path: Path) -> str:
 
 
 def _process_single_gp(path_str: str) -> dict[str, Any]:
-    """Worker — full pipeline for one GP file, returns a JSON-safe status dict.
+    """Worker — full fingering pipeline for one GP file (ThreadPoolExecutor target).
 
-    Runs in a separate process (ProcessPoolExecutor target), so it must be
-    self-contained: import everything it needs locally and never touch
-    module-level FastAPI state. Each worker pays a one-shot warm-up
-    (parser + ONNX session) on its first call, then amortises across
-    every subsequent file it handles.
+    Runs in a worker THREAD inside the server process, so it shares the
+    already-loaded ONNX singletons (no per-worker warm-up) and is immune to the
+    Windows process-spawn hang the old ProcessPoolExecutor hit. It builds its own
+    fresh StateGenerator/ViterbiOptimizer per call (no shared mutable state) and
+    only *reads* the model singletons (onnxruntime inference is thread-safe), so
+    concurrent calls are safe.
+
+    Computes ALL guitar tracks in the file and saves per-track sidecars so that
+    the viewer shows the correct fingering for every guitar track (not just the
+    first one). The GP embed merges all tracks' mappings in a single write.
+
+    Bug #6/#7: a file with biomechanically impossible positions is NOT rejected.
+    The sidecar (plus an audit that flags the bad passage) is still written, so
+    the file renders with fingering in the viewer and the issue surfaces in the
+    audit / "Doigtés à revoir" instead of the file silently failing to compute.
     """
     from pathlib import Path as _P
 
@@ -2157,38 +2719,79 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
         from fretwise.scoring import CostFunction, CostWeights
 
         adapter = get_adapter(p)
-        events = adapter.parse(p)
-        if not events:
-            return {
-                "file": p.name, "status": "skip", "reason": "no notes",
-            }
+
+        # Discover guitar tracks. GP files expose list_all_tracks (all
+        # instruments) or list_guitar_tracks; fall back to default single parse.
+        guitar_tracks: list[tuple[int | None, str]] = []
+        if hasattr(adapter, "list_all_tracks"):
+            for tid, name, _tuning, kind in adapter.list_all_tracks(p):
+                if kind == KIND_GUITAR:
+                    guitar_tracks.append((tid, name))
+        elif hasattr(adapter, "list_guitar_tracks"):
+            for tid, name, _tuning in adapter.list_guitar_tracks(p):
+                guitar_tracks.append((tid, name))
+        if not guitar_tracks:
+            # Single-track or no kind info — treat the default parse as guitar.
+            guitar_tracks = [(None, "Guitar")]
+
         weights = CostWeights.performance()
         player_cost_model = _get_player_cost_model() if weights.gamma > 0 else None
-        cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
+
         t0 = _time.monotonic()
-        payload = run_pipeline_with_guard_report(
-            events, StateGenerator(), ViterbiOptimizer(cost_fn),
-            pattern_matcher=PatternMatcher(),
-            chord_finger_classifier=_get_chord_finger_classifier(),
-            phrase_window_fingerer=_get_phrase_window_fingerer(),
-        )
-        if payload.biomechanical_report.fatal_count:
-            return {
-                "file": p.name,
-                "status": "error",
-                "error": "biomechanical guard failed",
-                "guard": _guard_summary(payload),
-            }
-        results = payload.results
+        total_annotated = 0
+        total_fatal = 0
+        merged_mapping: dict = {}
+
+        for track_id, _track_name in guitar_tracks:
+            try:
+                if track_id is not None and hasattr(adapter, "parse_track"):
+                    events = adapter.parse_track(p, track_id)
+                else:
+                    events = adapter.parse(p)
+            except Exception:
+                continue
+            if not events:
+                continue
+
+            cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
+            payload = run_pipeline_with_guard_report(
+                events, StateGenerator(), ViterbiOptimizer(cost_fn),
+                pattern_matcher=PatternMatcher(),
+                chord_finger_classifier=_get_chord_finger_classifier(),
+                phrase_window_fingerer=_get_phrase_window_fingerer(),
+            )
+            results = payload.results
+            if not results:
+                continue
+
+            total_fatal += payload.biomechanical_report.fatal_count
+            mapping = fingerings_by_source_id(results)
+            merged_mapping.update(mapping)
+            total_annotated += len(mapping)
+
+            section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+            audit = _safe_audit(events, results, section_markers)
+            _write_fingering_sidecar(p, results, audit=audit, track_id=track_id)
+
+        if not total_annotated:
+            return {"file": p.name, "status": "error", "error": "no fingering results"}
+
         elapsed_s = round(_time.monotonic() - t0, 2)
-        mapping = fingerings_by_source_id(results)
-        gp_bytes = write_gp_with_fingerings(p, mapping)
-        out = p.with_name(f"{p.stem}_fingered{p.suffix}")
-        out.write_bytes(gp_bytes)
+
+        # Embed all tracks' fingerings into the .gp in one pass (each
+        # write_gp_with_fingerings call strips then re-injects, so we merge
+        # all mappings first to avoid overwriting earlier tracks' annotations).
+        try:
+            gp_bytes = write_gp_with_fingerings(p, merged_mapping)
+            p.write_bytes(gp_bytes)
+        except ValueError:
+            pass
+
         return {
             "file": p.name, "status": "ok",
-            "annotated": len(mapping), "out": out.name,
+            "annotated": total_annotated, "out": p.name,
             "elapsed_s": elapsed_s,
+            "fatal": total_fatal,
         }
     except Exception as exc:  # noqa: BLE001 — never break the pool
         return {"file": p.name, "status": "error", "error": str(exc)}
@@ -2299,6 +2902,7 @@ def _run_core_pipeline_for_events(
     *,
     representation_mode: RepresentationMode,
     track_kind: str = "guitar",
+    page_width: float | None = None,
 ) -> Any:
     track_name: str = getattr(adapter, "track_name", "") or ""
     source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
@@ -2323,6 +2927,7 @@ def _run_core_pipeline_for_events(
         raw_score,
         representation_mode=representation_mode,
         track_kind=track_kind,
+        page_width=page_width,
     )
 
 
@@ -2330,12 +2935,13 @@ def _extract_measure_regions(
     render_scene: Any,
     canonical_score: Any,
     mode: str = "standard_tablature",
+    page_width: float | None = None,
 ) -> list[dict[str, Any]]:
     """Compute per-measure {measure_idx, x, y0, y1, width} regions for SVG cursor."""
     try:
         from fretwise.core.layout import canonical_to_page_layout  # lazy import
 
-        page_layout = canonical_to_page_layout(canonical_score, mode=mode)
+        page_layout = canonical_to_page_layout(canonical_score, mode=mode, page_width=page_width)
 
         # Collect y-bounds per system from barline recipes in the render scene
         pages = render_scene.document_scene.pages if render_scene else []
@@ -2415,6 +3021,204 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "tuplet_actual": ne.tuplet_actual,
         "tuplet_normal": ne.tuplet_normal,
     }
+
+
+# ── Embedded GP fingering reader ──────────────────────────────────────────────
+# GP 7/8 files store the left-hand finger directly on each note as
+# <LeftFingering>X</LeftFingering> (Spanish convention P/I/M/A/C). When a file
+# already carries these (imported, hand-annotated, or saved by FretWise) we can
+# display them on open without re-running Viterbi — even if no sidecar exists.
+
+_GPIF_LETTER_TO_FINGER: dict[str, Finger] = {
+    "P": Finger.OPEN,
+    "I": Finger.INDEX,
+    "M": Finger.MIDDLE,
+    "A": Finger.RING,
+    "C": Finger.PINKY,
+}
+_EMBEDDED_NOTE_RE = re.compile(r'<Note id="(\d+)">(.*?)</Note>', re.DOTALL)
+_EMBEDDED_LF_RE = re.compile(r"<LeftFingering>([^<]*)</LeftFingering>")
+
+
+def _gp_has_embedded_fingering(filepath: Path) -> bool:
+    """Fast presence check: does the GP file carry any LeftFingering element?
+
+    Cheaper than :func:`_read_embedded_gp_fingerings` (substring scan, no
+    regex/parse) so :func:`list_files` can flag pre-fingered files across a
+    large library without a measurable hit. Never raises.
+    """
+    import zipfile
+
+    if filepath.suffix.lower() != ".gp":
+        return False
+    try:
+        if not zipfile.is_zipfile(filepath):
+            return False
+        with zipfile.ZipFile(filepath, "r") as z:
+            if GPIF_CONTENT_NAME not in z.namelist():
+                return False
+            return b"<LeftFingering>" in z.read(GPIF_CONTENT_NAME)
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _read_embedded_gp_fingerings(filepath: Path) -> dict[str, str]:
+    """Return ``{source_note_id → gpif_letter}`` for embedded LeftFingering.
+
+    Empty dict when the file is not a GP archive, has no GPIF content, or
+    carries no LeftFingering elements. Never raises.
+    """
+    import zipfile
+
+    if filepath.suffix.lower() != ".gp":
+        return {}
+    try:
+        if not zipfile.is_zipfile(filepath):
+            return {}
+        with zipfile.ZipFile(filepath, "r") as z:
+            if GPIF_CONTENT_NAME not in z.namelist():
+                return {}
+            xml = z.read(GPIF_CONTENT_NAME).decode("utf-8")
+    except Exception:  # noqa: BLE001
+        return {}
+    out: dict[str, str] = {}
+    for m in _EMBEDDED_NOTE_RE.finditer(xml):
+        lf = _EMBEDDED_LF_RE.search(m.group(2))
+        if lf and lf.group(1).strip():
+            out[m.group(1)] = lf.group(1).strip()
+    return out
+
+
+def _embedded_results_from_events(
+    events: list[NoteEvent],
+    embedded: dict[str, str],
+) -> list[FingeringResult]:
+    """Build FingeringResults from parsed events + embedded finger letters.
+
+    Uses each event's ``string_hint``/``fret_hint`` (the corde/fret from the
+    source tab) and the embedded ``LeftFingering`` keyed by ``source_note_id``.
+    Open strings (fret 0) and notes without an embedded letter get ``OPEN``.
+    """
+    results: list[FingeringResult] = []
+    for i, ev in enumerate(events):
+        fret = ev.fret_hint if ev.fret_hint is not None else 0
+        string_num = ev.string_hint if ev.string_hint is not None else 0
+        letter = embedded.get(ev.source_note_id) if ev.source_note_id else None
+        if fret == 0 or letter is None:
+            finger = Finger.OPEN
+        else:
+            finger = _GPIF_LETTER_TO_FINGER.get(letter, Finger.INDEX)
+        state = FingeringState(
+            string_num=string_num,
+            fret=fret,
+            finger=finger,
+            hand_position=max(1, fret),
+        )
+        results.append(
+            FingeringResult(note_id=i + 1, note_event=ev, state=state, cost=0.0)
+        )
+    return results
+
+
+# ── Fingering sidecar helpers ─────────────────────────────────────────────────
+# Two files live next to the source score (local storage only):
+#   <stem>_fingering.json      — tiny header: algo_version + source_mtime
+#   <stem>_fingering_data.json — full serialised results array
+# Written by /api/save/gp and the batch refresh worker. Read by /api/solve and
+# /api/files. Keeping the header tiny lets /api/files scan large libraries
+# without loading the full result arrays.
+
+def _fingering_meta_path(filepath: Path) -> Path:
+    return filepath.with_name(f"{filepath.stem}_fingering.json")
+
+
+def _fingering_data_path(filepath: Path) -> Path:
+    return filepath.with_name(f"{filepath.stem}_fingering_data.json")
+
+
+def _read_fingering_meta(filepath: Path) -> dict[str, Any] | None:
+    import json as _json
+    p = _fingering_meta_path(filepath)
+    if not p.exists():
+        return None
+    try:
+        return _json.loads(p.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _fingering_meta_is_current(meta: dict[str, Any], filepath: Path) -> bool:
+    """True when the sidecar version matches the current algo and the source file is unchanged."""
+    if meta.get("algo_version") != FINGERING_ALGO_VERSION:
+        return False
+    try:
+        stored = meta.get("source_mtime")
+        if stored is not None and abs(float(stored) - filepath.stat().st_mtime) > 1.0:
+            return False
+    except OSError:
+        return False
+    return True
+
+
+def _write_fingering_sidecar(
+    filepath: Path,
+    results: list[FingeringResult],
+    audit: dict[str, Any] | None = None,
+    track_id: int | None = None,
+) -> None:
+    """Write both sidecar files next to *filepath* (best-effort, never raises).
+
+    The optional ``audit`` (a serialized AuditReport) is stored alongside the
+    results so /api/solve can serve a real audit banner without re-running the
+    pipeline — the Viterbi step that produced it already lives in save_gp.
+
+    Per-track aware (bug #3): the data sidecar keeps one entry per guitar track
+    under ``tracks[str(track_id)]`` so a multi-guitar song can cache *every*
+    track's fingering at once. The top-level ``results``/``audit`` mirror the
+    most recently saved track (the "primary"), and ``meta["track_id"]`` records
+    which track that is — both for backward compatibility with old single-track
+    sidecars and so /api/solve can serve the primary without a tracks lookup.
+    Existing tracks are preserved on each save (read-merge-write).
+    """
+    import datetime
+    import json as _json
+    try:
+        serialized = [_serialize_result(r) for r in results]
+        source_mtime = filepath.stat().st_mtime
+        meta = {
+            "algo_version": FINGERING_ALGO_VERSION,
+            "model": "phrase_window_v2",
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "source_mtime": source_mtime,
+            "track_id": track_id,
+        }
+        _fingering_meta_path(filepath).write_text(
+            _json.dumps(meta, ensure_ascii=False), encoding="utf-8"
+        )
+        # Merge into any existing data sidecar so OTHER tracks survive this save.
+        existing: dict[str, Any] = {}
+        try:
+            existing = _json.loads(
+                _fingering_data_path(filepath).read_text(encoding="utf-8")
+            )
+        except Exception:  # noqa: BLE001
+            existing = {}
+        tracks: dict[str, Any] = (
+            existing.get("tracks") if isinstance(existing.get("tracks"), dict) else {}
+        )
+        entry: dict[str, Any] = {"results": serialized}
+        if audit is not None:
+            entry["audit"] = audit
+        if track_id is not None:
+            tracks[str(track_id)] = entry
+        data: dict[str, Any] = {"results": serialized, "tracks": tracks}
+        if audit is not None:
+            data["audit"] = audit
+        _fingering_data_path(filepath).write_text(
+            _json.dumps(data, ensure_ascii=False), encoding="utf-8"
+        )
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _staff_only_results(events: list[NoteEvent]) -> list[FingeringResult]:

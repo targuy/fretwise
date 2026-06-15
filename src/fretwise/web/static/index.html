@@ -12,6 +12,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;500;600;700&family=Bebas+Neue&family=Anton&family=Oswald:wght@400;500;600;700&family=UnifrakturCook:wght@700&family=Metal+Mania&family=Italianno&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Permanent+Marker&family=Bowlby+One&family=Righteous&family=Bungee&family=Bungee+Shade&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Allura&family=Rye&family=Smokum&family=Audiowide&family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="stylesheet" href="/static/css/leather-icons.css">
+<!-- Self-host SpessaSynth. The vendored spessasynth.esm.js is a jsDelivr "+esm"
+     bundle that imports its core from "/npm/spessasynth_core@3.27.8/+esm" — a path
+     that 404s when self-hosted (no /npm route, no import-map), so the synth used to
+     fail to load and fall back silently to the MusyngKite MP3 presets. Remap that
+     bare specifier to the locally vendored, self-contained core so SpessaSynth (and
+     thus all SF2/SF3 soundfonts) actually loads. Must precede any module script. -->
+<script type="importmap">
+{ "imports": { "/npm/spessasynth_core@3.27.8/+esm": "/static/js/vendor/spessasynth_core.esm.js" } }
+</script>
 </head>
 <body>
 
@@ -20,11 +29,39 @@
      whole overlay is clickable.  Dismissed on click / Enter / Space, then
      removed.  Inline (non-module) so it works on first paint even before
      main.js loads, and survives a main.js error. -->
-<div id="splash-screen" role="button" tabindex="0" aria-label="Tap to start FretWise"></div>
+<div id="splash-screen" role="button" tabindex="0" aria-label="Tap to start FretWise">
+  <div id="splash-loader">
+    <div class="splash-spinner"></div>
+    <span id="splash-load-count">Chargement…</span>
+  </div>
+</div>
 <script>
   (function () {
     var splash = document.getElementById('splash-screen');
     if (!splash) return;
+
+    // Native artwork size. Show at native resolution when it fits comfortably;
+    // clamp to 2/3 of the window when the window is too small, and grow to 4/5
+    // of the window when the window is much larger. Aspect ratio preserved.
+    var NW = 1024, NH = 572;
+    function fitFrac(frac) {
+      return Math.min((frac * window.innerWidth) / NW, (frac * window.innerHeight) / NH);
+    }
+    function sizeSplash() {
+      var scale;
+      if (fitFrac(2 / 3) < 1) {
+        scale = fitFrac(2 / 3);          // window too small → cap at 2/3
+      } else if (fitFrac(4 / 5) > 1) {
+        scale = fitFrac(4 / 5);          // window too large → grow to 4/5
+      } else {
+        scale = 1;                       // native resolution
+      }
+      splash.style.setProperty('--splash-w', (NW * scale) + 'px');
+      splash.style.setProperty('--splash-h', (NH * scale) + 'px');
+    }
+    sizeSplash();
+    window.addEventListener('resize', sizeSplash);
+
     var done = false;
     function dismiss() {
       if (done) return;
@@ -129,6 +166,15 @@
       </svg>
       <span class="ic-btn-label">GP</span>
     </button>
+    <!-- Save fingerings to server (writes {stem}_fingered.gp into the library) -->
+    <button class="ic-btn ic-btn-export" id="btn-header-save" title="Sauvegarder les doigtés sur le serveur — écrit {nom}_fingered.gp dans la bibliothèque" aria-label="Sauver les doigtés">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      <span class="ic-btn-label">Sauver</span>
+    </button>
     <!-- MusicXML export (opens in MuseScore/Finale/Guitar Pro for verification) -->
     <button class="ic-btn ic-btn-export" id="btn-header-musicxml" title="Export MusicXML (.musicxml) — click for current track, Shift/Alt-click or right-click to choose all tracks" aria-label="Export MusicXML">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -161,14 +207,9 @@
 
 </header>
 
-<!-- ═══════════════ TRACK TABS BAR ═══════════════ -->
-<button type="button" id="track-tabs-chevron-left" class="track-tabs-chevron track-tabs-chevron-left" aria-label="Scroll track tabs left" hidden>
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-</button>
-<div id="track-tabs-bar" style="display:none"></div>
-<button type="button" id="track-tabs-chevron-right" class="track-tabs-chevron track-tabs-chevron-right" aria-label="Scroll track tabs right" hidden>
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-</button>
+<!-- Track tabs moved inside #tab-viewer, docked directly above the score
+     (see #track-tabs-wrap below) so the active tab reads like a paper folder tab
+     attached to the partition. -->
 
 <!-- ═══════════════ FILE SELECTOR (shown initially) ═══════════════ -->
 <div id="file-selector" class="page" style="display:none">
@@ -190,17 +231,30 @@
                   title="Enrich your catalog with your own LLM: Export list → run the prompt in your LLM → import the JSON"
                   aria-haspopup="true" aria-expanded="false">Metadata &#9662;</button>
         </div>
+        <!-- Pagination — 15 songs per page, nav lives in the search bar -->
+        <div class="lib-pager" id="lib-pager" role="navigation" aria-label="Pagination" style="display:none"></div>
       </div>
       <div class="lib-meta-hint">Enrich metadata with your LLM: Export list &rarr; run the prompt in your LLM &rarr; import the JSON.</div>
       <span id="lib-meta-status" class="lib-meta-status" aria-live="polite"></span>
       <input type="file" id="lib-meta-import-input" accept=".json,application/json" style="display:none">
     </div>
     <div class="lib-az-bar" id="lib-az-bar" role="navigation" aria-label="Alphabetical index"></div>
+    <!-- Selection bar — appears at the top of the list when ≥1 file is checked -->
+    <div id="lib-selection-bar" class="lib-selection-bar" style="display:none" aria-live="polite">
+      <span id="lib-selection-count" class="lib-selection-count"></span>
+      <button id="lib-btn-calc-fingerings" class="tx-btn lib-calc-btn" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M6 14v1a6 6 0 0012 0v-2"/></svg>
+        Calculer les doigtés
+      </button>
+      <button id="lib-btn-cancel-selection" class="tx-btn" type="button">Annuler</button>
+      <span id="lib-calc-status" class="lib-calc-status" aria-live="polite"></span>
+    </div>
   </div>
   <div class="lib-table-wrap">
     <table class="lib-table" id="lib-table">
       <thead>
         <tr>
+          <th class="col-check"><input type="checkbox" id="lib-check-all" title="Tout sélectionner / désélectionner" aria-label="Tout sélectionner"></th>
           <th data-col="title" class="sortable">Title <span class="sort-arrow"></span></th>
           <th data-col="artist" class="sortable">Artist <span class="sort-arrow"></span></th>
           <th data-col="genre" class="sortable">Genre <span class="sort-arrow"></span></th>
@@ -237,15 +291,17 @@
 <div id="debug-overlay" style="display:none"></div>
 
 <div id="tab-viewer" style="display:none">
-  <!-- Title block -->
+  <!-- Title line: Accords toggle (left) + centered song title -->
   <div id="tab-header">
-    <h1 id="song-title"></h1>
-    <div id="song-artist"></div>
-    <div id="song-meta">
-      <span id="meta-instrument" class="badge"></span>
-      <span id="meta-mode" class="badge badge-green"></span>
-      <span id="meta-view-mode" class="badge badge-green"></span>
-      <span id="meta-tempo"></span>
+    <button id="chord-bar-toggle" class="chord-bar-toggle" type="button" aria-label="Afficher/masquer les accords" aria-expanded="false" style="display:none">
+      <svg class="chord-chevron" width="11" height="7" viewBox="0 0 11 7" fill="none">
+        <path d="M1 1L5.5 6L10 1" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Accords</span>
+    </button>
+    <div class="tab-header-center">
+      <h1 id="song-title"></h1>
+      <div id="song-artist"></div>
     </div>
   </div>
 
@@ -255,8 +311,8 @@
     <span class="song-loading-text">Chargement du morceau…</span>
   </div>
 
-  <!-- Audit banner — surfaces quality / system-limit warnings per movement -->
-  <div id="audit-banner" class="audit-banner" style="display:none">
+  <!-- Audit banner / status bar — always visible, messages appear here -->
+  <div id="audit-banner" class="audit-banner">
     <div class="audit-summary" id="audit-summary">
       <span class="audit-dot" id="audit-dot"></span>
       <span class="audit-text" id="audit-text"></span>
@@ -266,26 +322,28 @@
     <div id="audit-details" class="audit-details" style="display:none"></div>
   </div>
 
-  <!-- Chord diagram strip (collapsible) -->
-  <div id="chord-bar" style="display:none">
-    <button id="chord-bar-toggle" class="chord-bar-toggle" aria-label="Afficher/masquer les accords">
-      <svg class="chord-chevron" width="11" height="7" viewBox="0 0 11 7" fill="none">
-        <path d="M1 1L5.5 6L10 1" stroke="currentColor" stroke-width="1.7"
-              stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Accords</span>
-    </button>
-    <div id="chord-strip"></div>
-  </div>
-
   <!-- Inline chord popup (appears near click, no scroll) -->
   <div id="chord-popup" class="chord-popup" style="display:none"></div>
 
   <!-- Multi-track audio mixer strip -->
   <div id="multi-track-bar" style="display:none"></div>
 
+  <!-- Track tabs — docked directly on top of the score (folder-tab look) -->
+  <div id="track-tabs-wrap">
+    <button type="button" id="track-tabs-chevron-left" class="track-tabs-chevron track-tabs-chevron-left" aria-label="Scroll track tabs left" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div id="track-tabs-bar" style="display:none"></div>
+    <button type="button" id="track-tabs-chevron-right" class="track-tabs-chevron track-tabs-chevron-right" aria-label="Scroll track tabs right" hidden>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
   <!-- Canvas tab area -->
   <div id="tab-container">
+    <!-- Chords render INSIDE the score, at the top; opening them pushes the
+         staves (SVG / canvas, offset via .chords-open) down. -->
+    <div id="chord-strip-host"><div id="chord-strip"></div></div>
     <div id="core-svg-view" style="display:none; position:absolute; inset:0; overflow:auto; z-index:2;"></div>
     <canvas id="tab-canvas"></canvas>
     <canvas id="cursor-canvas"></canvas>
@@ -327,8 +385,12 @@
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       <span id="review-badge" class="review-badge" hidden>0</span>
     </button>
-    <button id="btn-recalc" class="tx-btn" title="Recalculer les doigtés — relance l'optimiseur sur ce morceau" aria-label="Recalculate fingering">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M21 12a9 9 0 11-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+    <button id="btn-insert-fingerings" class="tx-btn" title="Calculer et insérer les doigtés — lance le pipeline Viterbi + ML et sauvegarde" aria-label="Insérer les doigtés">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M6 14v1a6 6 0 0012 0v-2"/></svg>
+      <span class="btn-insert-label">Doigtés</span>
+    </button>
+    <button id="btn-rig" class="tx-btn" title="Voir le rig GP-180 de ce morceau" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/><circle cx="18" cy="13" r="1.5" fill="currentColor"/></svg>
     </button>
     <details id="prefs-panel" class="tb-prefs">
       <summary title="Preferences">
@@ -382,14 +444,23 @@
 
   <!-- Right: volume · view segmented control -->
   <div class="toolbar-right">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--fg-3);flex-shrink:0"><path d="M3 10v4h4l5 4V6L7 10z" fill="currentColor" stroke="currentColor"/></svg>
-    <input type="range" id="rng-volume" min="0" max="100" value="70" class="rng-volume" title="Master volume">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--fg-3);flex-shrink:0" title="Volume général"><path d="M3 10v4h4l5 4V6L7 10z" fill="currentColor" stroke="currentColor"/></svg>
+    <input type="range" id="rng-volume" min="0" max="100" value="70" class="rng-volume" title="Volume général">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--signal);flex-shrink:0"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    <input type="range" id="rng-track-volume" min="0" max="100" value="80" class="rng-volume rng-track-volume" title="Volume de la piste ouverte">
     <span class="tb-sep"></span>
     <!-- View segmented control (pills) — keeps hidden <select> in sync -->
     <div class="view-seg" id="view-seg" role="group" aria-label="Score view">
       <button class="view-seg-btn" data-mode="standard" title="Standard notation">Staff</button>
       <button class="view-seg-btn view-seg-active" data-mode="standard_tablature" title="Standard + Tab (default)">Mixed</button>
       <button class="view-seg-btn" data-mode="tablature" title="Tablature only">Tab</button>
+    </div>
+    <span class="tb-sep"></span>
+    <!-- Per-view zoom slider (-50% → +50%) -->
+    <div class="zoom-ctrl" id="zoom-ctrl" title="Zoom de la partition">
+      <svg class="zoom-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      <input type="range" id="rng-zoom" min="-50" max="50" value="0" step="5" class="rng-zoom" aria-label="Zoom de la partition">
+      <span id="zoom-label" class="zoom-label">0%</span>
     </div>
     <!-- Hidden select — keeps existing logic working -->
     <select id="representation-mode-select" class="toolbar-select" style="display:none" title="Notation representation mode">
@@ -420,6 +491,30 @@
     </div>
   </div>
   <iframe id="hand-viz-frame" src="/static/hand_viz.html" title="Hand visualization"></iframe>
+</div>
+
+<!-- ═══════════════ RIG GP-180 FLOATING PANEL ═══════════════ -->
+<div id="rig-panel" class="floating-panel" style="display:none;width:720px">
+  <div class="floating-panel-header" id="rig-drag">
+    <span class="floating-panel-title" id="rig-panel-title">Rig GP-180</span>
+    <div class="floating-panel-actions">
+      <button class="floating-panel-btn" id="rig-close" title="Fermer">×</button>
+    </div>
+  </div>
+  <div id="rig-body" class="rig-body">
+    <div id="rig-meta" class="rig-meta"></div>
+    <div id="rig-chain" class="rig-chain"></div>
+    <div id="rig-notes-wrap" class="rig-notes-wrap" style="display:none">
+      <details class="rig-details">
+        <summary>Notes de jeu</summary>
+        <pre id="rig-notes" class="rig-text"></pre>
+      </details>
+      <details class="rig-details">
+        <summary>Limites / compromis</summary>
+        <pre id="rig-limites" class="rig-text"></pre>
+      </details>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════ SETTINGS PAGE ═══════════════ -->
@@ -460,28 +555,6 @@
           <button id="set-index-apply" class="tx-btn">Apply</button>
         </div>
         <p class="settings-hint">Offline, tab-separated catalog. Header row + columns: filename, title, artist, album, genre, year, notes. Catalog values override names parsed from filenames. See data/songs.tsv.example.</p>
-      </div>
-    </section>
-    <section class="settings-section">
-      <h3>Doigtés de la bibliothèque</h3>
-      <div class="settings-field">
-        <div class="settings-action-row">
-          <button id="set-refresh-fingerings" class="tx-btn">Compléter / reprendre les fichiers non traités</button>
-          <button id="set-refresh-force-save" class="tx-btn" type="button">Tout recalculer et sauvegarder</button>
-          <button id="set-refresh-resume" class="tx-btn" type="button" style="display:none">Reprise</button>
-          <button id="set-refresh-stop" class="tx-btn" type="button" style="display:none">Arrêter</button>
-        </div>
-        <div class="settings-slider-row">
-          <label for="set-refresh-workers">Threads</label>
-          <input id="set-refresh-workers" type="range" min="1" max="8" value="4" step="1" />
-          <output id="set-refresh-workers-value" for="set-refresh-workers">4</output>
-        </div>
-        <div id="set-refresh-progress-wrap" style="display:none;margin-top:8px">
-          <progress id="set-refresh-progress" value="0" max="100" style="width:100%;height:8px"></progress>
-          <div id="set-refresh-eta" style="font-size:12px;color:var(--text-muted,#888);margin-top:3px"></div>
-        </div>
-        <span id="set-refresh-fingerings-status" class="sf-upload-status" style="margin-top:6px;display:block"></span>
-        <p class="settings-hint"><strong>Compléter / reprendre</strong> traite uniquement les fichiers <code>.gp</code> qui n'ont pas encore de <code>_fingered.gp</code> à jour. <strong>Tout recalculer et sauvegarder</strong> s'applique à tous les fichiers <code>.gp</code> du dossier de partitions et remplace leurs sorties <code>_fingered.gp</code>. Les originaux restent intacts.</p>
       </div>
     </section>
     <section class="settings-section">

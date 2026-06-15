@@ -209,7 +209,10 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
     assert payload["representation_mode"] == "standard_tablature"
     assert payload["core_svg"] == "<svg id='core'/>"
     assert payload["core_conformance_issues"] == 2
-    assert payload["results"][0]["string"] == 1
+    # /api/solve no longer runs Viterbi — with no sidecar/embedded fingerings
+    # the guitar track renders as tablature with no finger annotations.
+    assert payload["results"] == []
+    assert payload["has_saved_fingering"] is False
 
 
 def test_solve_endpoint_caches_repeat_calls(
@@ -256,16 +259,18 @@ def test_solve_endpoint_caches_repeat_calls(
         filename="song.gp", track_id=None,
         representation_mode="standard+tablature",
     )
-    # Second call must be served from cache → pipeline runs exactly once.
-    assert call_count["pipeline"] == 1
+    # /api/solve never runs the Viterbi pipeline anymore (fingerings come from
+    # the sidecar). The core render runs once and the second call is cached.
+    assert call_count["pipeline"] == 0
     assert call_count["core"] == 1
 
 
 def test_solve_endpoint_embeds_audit_field(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
-    """The /api/solve response must include an 'audit' field auto-computed
-    from events + results + section_markers."""
+    """/api/solve is now a thin sidecar reader: it does not run Viterbi and so
+    does not auto-compute an audit. The 'audit' field is present but empty when
+    no fingerings are available, and the legacy pipeline is never invoked."""
     from fretwise.models import Finger, FingeringResult, FingeringState
 
     file_path = tmp_path / "song.gp"
@@ -305,12 +310,13 @@ def test_solve_endpoint_embeds_audit_field(
         del track_id
         return adapter, adapter.parse(file_path)
 
+    pipeline_calls = {"n": 0}
+
     def _fake_legacy(
         events: list[NoteEvent], *, rule_preferences: Any = None
     ) -> tuple[list[Any], dict[str, int]]:
         del rule_preferences
-        # Use real FingeringResult so audit_score can read measure_index +
-        # voice_hint via the embedded NoteEvent.
+        pipeline_calls["n"] += 1  # must stay 0 — solve never runs Viterbi
         out: list[FingeringResult] = []
         for i, ev in enumerate(events):
             state = FingeringState(
@@ -340,18 +346,10 @@ def test_solve_endpoint_embeds_audit_field(
         representation_mode="standard+tablature",
     )
 
+    # Thin-solve contract: audit field present but empty, Viterbi never ran.
     assert "audit" in payload
-    audit = payload["audit"]
-    assert audit["available"] is True
-    assert audit["overall"] in ("clean", "suspect", "bad")
-    assert audit["ml_signal_available"] is False
-    # Explicit section markers → 2 movements named Movement A / Movement B.
-    movements = audit["movements"]
-    assert len(movements) == 2
-    assert [m["span"]["name"] for m in movements] == ["Movement A", "Movement B"]
-    assert all(m["span"]["source"] == "explicit" for m in movements)
-    # All notes are cheap and the source is clean → both movements clean.
-    assert all(m["verdict"] == "clean" for m in movements)
+    assert payload["audit"] == {}
+    assert pipeline_calls["n"] == 0
 
 
 def test_export_pdf_uses_legacy_engine_and_shadows_core_conformance(
