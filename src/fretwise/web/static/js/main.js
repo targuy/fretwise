@@ -51,6 +51,7 @@ const _ZOOM_BASE = {
   [MODES.STANDARD]:           20,   // Staff  : +20 %
   [MODES.STANDARD_TABLATURE]: 40,   // Mixed  : +40 %
   [MODES.TABLATURE]:          -5,   // Tab    :  -5 %
+  [MODES.TABLATURE_RHYTHM]:   -5,   // Tab+Rhythm : same as Tab
 };
 // User slider offset relative to each view's baseline (-50 to +50).
 const _viewZoom = {};
@@ -67,12 +68,17 @@ function _solveCacheKey(file, trackId, mode, prefs, svgWidth) {
 /**
  * Return the SVG render width to request for staff/mixed views: nearest-50px
  * bucket of (innerWidth minus #core-svg-view horizontal padding).  Returns
- * undefined for the pure-tab mode (no SVG rendered, width irrelevant).
+ * undefined for canvas-only modes (tablature, tablature_rhythm) where the
+ * backend never generates a core SVG.
  */
 function _svgRenderWidth(mode) {
-  if (mode === MODES.TABLATURE) return undefined;
-  const factor = 1 + ((_ZOOM_BASE[mode] + (_viewZoom[mode] ?? 0)) / 100);
-  return Math.round((window.innerWidth - 48) / factor / 50) * 50;
+  // Canvas-only modes: no SVG is generated, width is irrelevant.
+  if (mode === MODES.TABLATURE || mode === MODES.TABLATURE_RHYTHM) return undefined;
+  const base = _ZOOM_BASE[mode] ?? 0;          // fallback 0 if unknown mode
+  const factor = 1 + ((base + (_viewZoom[mode] ?? 0)) / 100);
+  const w = Math.round((window.innerWidth - 48) / factor / 50) * 50;
+  // Guard against NaN / non-finite values from unknown modes or extreme zoom.
+  return Number.isFinite(w) && w >= 400 ? w : undefined;
 }
 
 /**
@@ -1509,7 +1515,7 @@ function applyRepresentationModeView(data) {
     coreSvgView.style.display = showCore ? 'block' : 'none';
     coreSvgView.innerHTML = showCore && data?.core_svg ? data.core_svg : '';
     if (showCore) {
-      _lastSvgWidth = _svgRenderWidth(representationMode);
+      _lastSvgWidth[representationMode] = _svgRenderWidth(representationMode);
       _applyResponsiveCoreSvg();
       _syncCoreSvgFingering();
       _syncCoreSvgAnnotations();
@@ -2059,6 +2065,9 @@ function initRenderer(data) {
   const engineOpts = {
     tempo: data.tempo || 120,
     beatsPerMeasure: data.beats_per_measure || 4,
+    // Real per-measure beat counts → meter-aware playback timeline (keeps the
+    // cursor, audio and all tracks aligned across meter changes / pickup bars).
+    measureBeats: Array.isArray(data.measure_beats) ? data.measure_beats : null,
   };
   if (playback) {
     playback.rebind(renderer, engineOpts);
@@ -3666,9 +3675,9 @@ function _onZoomInput() {
   _viewZoom[mode] = pct;
   if (zoomLabel) zoomLabel.textContent = _zoomLabelText(pct);
   _applyZoomForMode(mode);
-  if (mode !== MODES.TABLATURE) {
+  if (mode !== MODES.TABLATURE && mode !== MODES.TABLATURE_RHYTHM) {
     // Force SVG re-fetch with the new (zoom-adjusted) page width.
-    _lastSvgWidth = null;
+    _lastSvgWidth[mode] = null;
     _refreshSvgView();
   }
 }
@@ -3678,25 +3687,59 @@ rngZoom?.addEventListener('input', _onZoomInput);
 // ── resize handling ─────────────────────────────────────────────────
 
 let resizeTimer;
-let _lastSvgWidth = null;  // tracks the width bucket used for the current SVG render
+// Per-mode width-bucket used for the current SVG render.  Keyed by mode string
+// (e.g. 'standard', 'standard_tablature') so switching modes never contaminates
+// the guard for another mode.  A null/missing entry means "force-refresh".
+const _lastSvgWidth = {};
 
-/** Re-fetch and repaint the SVG when the viewport width bucket changed. */
+/**
+ * Re-fetch and repaint the SVG when the viewport width bucket or zoom changed.
+ *
+ * Robustness invariants (why Staff/Mixed used to break on every zoom/resize):
+ *  - `_lastSvgWidth` is now per-mode so switching Staff↔Mixed never pollutes
+ *    the guard for the other mode.
+ *  - `_svgDriver` is recreated after every innerHTML swap: the old instance
+ *    held orphaned DOM refs (the rects it injected were destroyed by innerHTML
+ *    replacement), making measure highlights invisible after the first refresh.
+ *  - `newWidth === undefined` (canvas-only / unknown mode) → early-exit, no fetch.
+ *  - Errors are surfaced to the console instead of being swallowed silently.
+ */
 async function _refreshSvgView() {
   if (!currentFile || !currentTrackId) return;
   const mode = getSelectedRepresentationMode();
-  if (mode === MODES.TABLATURE) return;
   const newWidth = _svgRenderWidth(mode);
-  if (newWidth === _lastSvgWidth) return;
-  _lastSvgWidth = newWidth;
+  // Canvas-only modes (tablature, tablature_rhythm) return undefined — skip.
+  if (newWidth === undefined) return;
+  // Per-mode guard: avoid redundant fetches when the width bucket didn't change.
+  if (newWidth === _lastSvgWidth[mode]) return;
+  _lastSvgWidth[mode] = newWidth;
   try {
     const data = await _cachedSolve(currentFile, currentTrackId, mode, getRulePreferences(), newWidth);
+    // Guard: user may have switched to Tab (hidden) while the fetch was in flight.
     if (!coreSvgView || coreSvgView.style.display === 'none') return;
     coreSvgView.innerHTML = data?.core_svg || '';
     _applyResponsiveCoreSvg();
     _syncCoreSvgFingering();
     _syncCoreSvgAnnotations();
     _syncCoreSvgHandOverlay();
-  } catch { /* silent — current SVG stays visible */ }
+    // Recreate the cursor driver: the previous instance's rects were destroyed
+    // when innerHTML was replaced above.  Without this, measure highlights and
+    // click-to-seek are silently broken after every zoom or resize.
+    if (data?.measure_regions?.length && coreSvgView) {
+      _svgDriver = new SvgCursorDriver(coreSvgView, data);
+      _svgDriver.init();
+      _svgDriver.followPlayhead = _followPlayhead;
+      // Restore the current-measure highlight immediately (no wait for next tick).
+      if (playback && renderer) {
+        _svgDriver.highlight(
+          renderer.cursorMeasure ?? 0, playback.loopStart, playback.loopEnd,
+        );
+      }
+    }
+  } catch (err) {
+    // Log the error so it is visible in DevTools, but keep the existing SVG.
+    console.warn('[fretwise] SVG refresh failed:', err);
+  }
 }
 
 window.addEventListener('resize', () => {
@@ -3707,6 +3750,10 @@ window.addEventListener('resize', () => {
       renderer.render();
     }
     _updateTrackTabsChevrons();
+    // _refreshSvgView uses a per-mode bucket guard — it only fetches when the
+    // 50 px-quantised render width actually changed, so rapid minor resizes
+    // don't hammer the server.  _svgDriver is recreated inside _refreshSvgView
+    // whenever the SVG content changes (new bucket → new measure regions).
     _refreshSvgView();
   }, 200);
 });
@@ -3929,11 +3976,8 @@ function stopCursorLoop() {
 }
 
 function _tickSvgCursor() {
-  if (!_svgDriver || !playback?.isPlaying) return;
-  const elapsed = (performance.now() - playback._startTime) / 1000;
-  const elapsedBeats = elapsed * playback.tempo / 60 * playback.speed;
-  const onset = playback._startMeasure * playback.bpm + elapsedBeats;
-  _svgDriver.tick(onset, playback.bpm);
+  // The SVG cursor line was removed; the current-measure highlight is driven by
+  // playback.onMeasureChange (meter-aware timeline). Nothing to update per frame.
 }
 
 function _drawCursorOverlay() {
@@ -3958,11 +4002,10 @@ function _drawCursorOverlay() {
 
   if (!playback.isPlaying) return;
 
-  // Current onset in beats
-  const elapsed = (performance.now() - playback._startTime) / 1000;
-  const elapsedBeats = elapsed * playback.tempo / 60 * playback.speed;
-  const cursorOnset  = playback._startMeasure * playback.bpm + elapsedBeats;
-
+  // The cursor LINE was removed; we only need the current measure's screen column
+  // to keep it in the reading zone (auto-scroll). Use the meter-aware measure-start
+  // onset so scrolling stays correct across meter changes.
+  const cursorOnset = playback._measureOnsetBeats(renderer.cursorMeasure || 0);
   const col = renderer.getCursorX(cursorOnset);
   if (!col) return;
 
@@ -3991,19 +4034,8 @@ function _drawCursorOverlay() {
     }
   }
   // ─────────────────────────────────────────────────────────────────
-
-  ctx.save();
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.strokeStyle = '#e53935';
-  ctx.lineWidth = 1.5;
-  ctx.globalAlpha = 0.85;
-  ctx.shadowColor = '#e53935';
-  ctx.shadowBlur = 3;
-  ctx.beginPath();
-  ctx.moveTo(col.x, col.yTop);
-  ctx.lineTo(col.x, col.yBottom);
-  ctx.stroke();
-  ctx.restore();
+  // No cursor line is drawn — the highlighted current measure is the only
+  // playback indicator. The cleared canvas above removes any stale line.
 }
 
 // ── Library table: sort and filter events ──────────────────────────

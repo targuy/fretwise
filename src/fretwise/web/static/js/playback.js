@@ -14,6 +14,12 @@ export class PlaybackEngine {
     this.renderer = renderer;
     this.tempo = opts.tempo || renderer.tempo || 120;
     this.bpm = opts.beatsPerMeasure || renderer.bpm || 4;
+    // Per-measure length in quarter beats (index i = measure i+1), shipped by the
+    // backend from the real per-measure time signatures. null ⇒ uniform `bpm`
+    // fallback (MusicXML/MIDI). Drives a meter-aware timeline so the cursor, the
+    // audio and every track stay aligned across meter changes / pickup bars.
+    this._measureBeats = Array.isArray(opts.measureBeats) ? opts.measureBeats : null;
+    this._slotStartBeat = null;  // lazily (re)built slot timeline; see _ensureTimeline()
     this.speed = 1.0;       // playback speed multiplier
     this.loopStart = -1;
     this.loopEnd = -1;
@@ -89,13 +95,12 @@ export class PlaybackEngine {
    * clock (e.g. the floating hand-visualization panel).
    */
   getCurrentTimeSec() {
-    const spm = this.secondsPerMeasure;
     if (this.isPlaying && this._startTime != null) {
       const elapsed = (performance.now() - this._startTime) / 1000;
-      return this._startMeasure * spm + elapsed;
+      return this._measureStartSec(this._startMeasure) + elapsed;
     }
     const cursor = this.renderer ? (this.renderer.cursorMeasure || 0) : 0;
-    return cursor * spm;
+    return this._measureStartSec(cursor);
   }
 
   /**
@@ -132,6 +137,8 @@ export class PlaybackEngine {
     this.renderer = renderer;
     this.tempo = opts.tempo || renderer.tempo || 120;
     this.bpm = opts.beatsPerMeasure || renderer.bpm || 4;
+    this._measureBeats = Array.isArray(opts.measureBeats) ? opts.measureBeats : null;
+    this._slotStartBeat = null;  // force timeline rebuild for the new score
     this.speed = 1.0;
     this.loopStart = -1;
     this.loopEnd = -1;
@@ -147,9 +154,90 @@ export class PlaybackEngine {
     return this.renderer.measures.length;
   }
 
-  /** Seconds per measure = (beatsPerMeasure / tempo) * 60 */
+  /** Seconds per measure for a uniform 4/4-style score (legacy approximation).
+   *  Per-measure timing now flows through the meter-aware timeline below; this
+   *  getter is kept for external/rough consumers and equals the first-measure
+   *  duration when meters vary. */
   get secondsPerMeasure() {
     return (this.bpm / this.tempo) * 60 / this.speed;
+  }
+
+  /** Seconds per quarter-note beat at the current tempo + speed. */
+  get _secPerBeat() {
+    return (60 / this.tempo) / this.speed;
+  }
+
+  /**
+   * (Re)build the meter-aware timeline. `_slotStartBeat[s]` is the onset, in
+   * quarter beats relative to the first rendered measure, where cursor slot `s`
+   * begins; `_measureBaseBeat` is the absolute onset (in note-onset units) of
+   * that first measure. Per-measure lengths come from `_measureBeats` (the real
+   * time signatures); any measure without data falls back to uniform `this.bpm`,
+   * so a null `_measureBeats` reproduces the legacy uniform behaviour exactly.
+   * Cached and rebuilt only when the score, measure count or bpm changes.
+   */
+  _ensureTimeline() {
+    const n = this.totalMeasures;
+    const beats = this._measureBeats;
+    if (this._slotStartBeat
+        && this._slotStartBeat.length === n + 1
+        && this._timelineBeatsRef === beats
+        && this._timelineRendererRef === this.renderer
+        && this._timelineBpm === this.bpm) {
+      return;
+    }
+    const nums = this.renderer ? this.renderer.measureNumbers : null;
+    const minMeasure = (nums && nums.length) ? nums[0] : 1;
+    const beatsFor = (globalIdx0) =>
+      (beats && beats[globalIdx0] > 0) ? beats[globalIdx0] : this.bpm;
+    // Absolute onset of the first rendered measure = beats of all measures before it.
+    let base = 0;
+    for (let i = 0; i < minMeasure - 1; i++) base += beatsFor(i);
+    const start = new Array(n + 1);
+    start[0] = 0;
+    for (let s = 0; s < n; s++) {
+      const globalIdx0 = ((nums && nums[s] != null) ? nums[s] : (minMeasure + s)) - 1;
+      start[s + 1] = start[s] + beatsFor(globalIdx0);
+    }
+    this._slotStartBeat = start;
+    this._measureBaseBeat = base;
+    this._timelineBeatsRef = beats;
+    this._timelineRendererRef = this.renderer;
+    this._timelineBpm = this.bpm;
+  }
+
+  /** Onset (quarter beats relative to the first measure) at the start of slot `m`. */
+  _slotStartBeatAt(m) {
+    this._ensureTimeline();
+    const i = Math.max(0, Math.min(m, this.totalMeasures));
+    return this._slotStartBeat[i];
+  }
+
+  /** Wall-clock seconds (from the first measure) at the start of cursor slot `m`. */
+  _measureStartSec(m) {
+    return this._slotStartBeatAt(m) * this._secPerBeat;
+  }
+
+  /** Absolute measure-start onset (note-onset units) for cursor slot `m`.
+   *  This is the shared reference EVERY track uses to place notes within the
+   *  measure, which is what keeps the tracks in sync with each other. */
+  _measureOnsetBeats(m) {
+    this._ensureTimeline();
+    return this._measureBaseBeat + this._slotStartBeatAt(m);
+  }
+
+  /** Cursor slot containing wall-clock second `sec` (0…totalMeasures; the upper
+   *  bound signals past-the-end so the play loop can stop). */
+  _secToMeasure(sec) {
+    this._ensureTimeline();
+    const beat = Math.max(0, sec / this._secPerBeat);
+    const starts = this._slotStartBeat;
+    let lo = 0, hi = starts.length - 1;          // largest m with starts[m] <= beat
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (starts[mid] <= beat) lo = mid; else hi = mid - 1;
+    }
+    return lo;
   }
 
   /** Enable audio — must be called on user gesture */
@@ -564,13 +652,13 @@ export class PlaybackEngine {
       this._raf = null;
     }
     // Snap the cursor to the matching measure so getCurrentTimeSec()
-    // returns `frozen` while paused (spm-granular is enough here), and
-    // remember the sub-measure offset so play() can restore the exact
-    // position instead of restarting the measure from its first beat.
-    const spm = this.secondsPerMeasure;
-    const m = Math.floor(frozen / spm);
-    if (this.renderer) this.renderer.cursorMeasure = Math.max(0, Math.min(m, this.totalMeasures - 1));
-    this._resumeSubMeasureSec = Math.max(0, frozen - m * spm);
+    // returns `frozen` while paused, and remember the sub-measure offset so
+    // play() can restore the exact position instead of restarting the measure
+    // from its first beat. Uses the meter-aware timeline so a short/long bar
+    // resolves to the right measure.
+    const m = Math.min(this._secToMeasure(frozen), Math.max(0, this.totalMeasures - 1));
+    if (this.renderer) this.renderer.cursorMeasure = Math.max(0, m);
+    this._resumeSubMeasureSec = Math.max(0, frozen - this._measureStartSec(m));
     // Cut all already-scheduled audio immediately so notes don't ring
     // past the pause point and don't double when play resumes.
     if (this._spessa) {
@@ -706,8 +794,10 @@ export class PlaybackEngine {
 
   _tickBody() {
     const elapsed = (performance.now() - this._startTime) / 1000;
-    const measureOffset = Math.floor(elapsed / this.secondsPerMeasure);
-    let targetMeasure = this._startMeasure + measureOffset;
+    // Map elapsed wall-clock time to a measure via the meter-aware timeline:
+    // each measure consumes its own real duration, so the cursor no longer
+    // drifts from the audio after a meter change or pickup bar.
+    let targetMeasure = this._secToMeasure(this._measureStartSec(this._startMeasure) + elapsed);
 
     // Loop handling
     if (this.loopStart >= 0 && this.loopEnd >= this.loopStart) {
@@ -787,12 +877,16 @@ export class PlaybackEngine {
 
   // ── Metronome click ───────────────────────────────────────────────
 
-  /** Schedule N metronome clicks for the given measure (one per beat). */
-  _scheduleMetronomeMeasure(_measureIdx) {
+  /** Schedule one metronome click per beat for the given measure, using that
+   *  measure's real beat count (so a 2/4 or 6/8 bar clicks the right number). */
+  _scheduleMetronomeMeasure(measureIdx) {
     if (!this._audioCtx) return;
-    const secPerBeat = (60 / this.tempo) / this.speed;
+    this._ensureTimeline();
+    const slotBeats = this._slotStartBeat[measureIdx + 1] - this._slotStartBeat[measureIdx];
+    const clicks = Math.max(1, Math.round(slotBeats > 0 ? slotBeats : this.bpm));
+    const secPerBeat = this._secPerBeat;
     const now = this._audioCtx.currentTime;
-    for (let b = 0; b < this.bpm; b++) {
+    for (let b = 0; b < clicks; b++) {
       this._click(now + b * secPerBeat, b === 0);
     }
   }
@@ -874,6 +968,12 @@ export class PlaybackEngine {
       for (const ch of this._secondaryChannels) {
         spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
         ch.synth = 'spessa';
+        // Catch up any missed notes in the current measure (SpessaSynth finished
+        // loading while the song was already playing, so secondary channels were
+        // silent for the first few bars).
+        if (this.isPlaying && this._lastScheduledMeasure >= 0) {
+          this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
+        }
       }
 
       console.log(`[FretWise] SpessaSynth ready — ${this._spessaPresets.length} presets; `
@@ -992,52 +1092,53 @@ export class PlaybackEngine {
   _scheduleMeasureNotesImpl(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
     if (!this._audioCtx || !this.audioEnabled) return;
     const notes = this.renderer.measures[measureIdx];
-    if (!notes || !notes.length) return;
 
-    if (this._spessa) {
-      // SpessaSynth: precise AudioContext-time scheduling via noteOn/noteOff
-      const bpm = this.bpm;
-      const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
-      const secPerBeat = (60 / this.tempo) / this.speed;
-      const now = this._audioCtx.currentTime;
-      for (const note of notes) {
-        const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
-        if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-        const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-        const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
-        const velocity = this._dynamicToVelocity(note.dynamic);
-        // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
-        // (debug, startTime) pair. Passing a boolean makes the lib do
-        // `'time' in false` and throw on every note → total silence.
-        this._spessa.noteOn(0, note.pitch, velocity, { time: when });
-        this._spessa.noteOff(0, note.pitch, false, { time: when + duration });
+    // Primary track scheduling (skipped for rest bars, but secondary always runs below).
+    if (notes && notes.length) {
+      if (this._spessa) {
+        // SpessaSynth: precise AudioContext-time scheduling via noteOn/noteOff
+        const measureOnset = this._measureOnsetBeats(measureIdx);
+        const secPerBeat = this._secPerBeat;
+        const now = this._audioCtx.currentTime;
+        for (const note of notes) {
+          const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+          if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
+          const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
+          const velocity = this._dynamicToVelocity(note.dynamic);
+          // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
+          // (debug, startTime) pair. Passing a boolean makes the lib do
+          // `'time' in false` and throw on every note → total silence.
+          this._spessa.noteOn(0, note.pitch, velocity, { time: when });
+          this._spessa.noteOff(0, note.pitch, false, { time: when + duration });
+        }
+      } else if (this._synth) {
+        // soundfont-player fallback
+        const measureOnset = this._measureOnsetBeats(measureIdx);
+        const secPerBeat = this._secPerBeat;
+        const now = this._audioCtx.currentTime;
+        for (const note of notes) {
+          const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+          if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
+          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
+          const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
+          const gain = this._dynamicToVelocity(note.dynamic) / 127;
+          this._synth.play(note.pitch, when, { duration, gain });
+        }
+      } else if (this._synthLoading) {
+        // SpessaSynth (SF2) is still loading: stay silent for this measure instead
+        // of playing the harsh oscillator. The real instrument takes over within a
+        // few seconds — and only on the first page-load, since later songs reuse
+        // the already-loaded synth. Brief silence beats a few bars of bad tone.
+      } else {
+        // Synth definitively unavailable (SpessaSynth + MusyngKite both failed):
+        // last-resort oscillator so playback is never completely silent.
+        this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
       }
-    } else if (this._synth) {
-      // soundfont-player fallback
-      const bpm = this.bpm;
-      const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
-      const secPerBeat = (60 / this.tempo) / this.speed;
-      const now = this._audioCtx.currentTime;
-      for (const note of notes) {
-        const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
-        if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-        const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-        const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
-        const gain = this._dynamicToVelocity(note.dynamic) / 127;
-        this._synth.play(note.pitch, when, { duration, gain });
-      }
-    } else if (this._synthLoading) {
-      // SpessaSynth (SF2) is still loading: stay silent for this measure instead
-      // of playing the harsh oscillator. The real instrument takes over within a
-      // few seconds — and only on the first page-load, since later songs reuse
-      // the already-loaded synth. Brief silence beats a few bars of bad tone.
-    } else {
-      // Synth definitively unavailable (SpessaSynth + MusyngKite both failed):
-      // last-resort oscillator so playback is never completely silent.
-      this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
     }
 
-    // Schedule secondary audio channels (same AudioContext time base = perfect sync)
+    // Schedule secondary audio channels (same AudioContext time base = perfect sync).
+    // Runs even when the primary measure is empty so backing tracks play through rest bars.
     for (const ch of this._secondaryChannels) {
       if (!ch.enabled || !ch.synth) continue;
       this._scheduleChannelNotes(ch, measureIdx, offsetSec, skipBeforeMeasureSec);
@@ -1051,10 +1152,20 @@ export class PlaybackEngine {
    */
   _scheduleChannelNotes(ch, measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
     if (!ch.synth || !ch.enabled || !this._audioCtx || !this.audioEnabled) return;
-    const chNotes = ch.measures[measureIdx];
+    // ch.measures is indexed by (1-based measure_index − 1), built from all
+    // measures starting at 1.  The primary renderer's slot `measureIdx` maps to
+    // global measure number `measureNumbers[measureIdx]` (which can be > 1 when
+    // the primary track starts with rest bars).  Without this lookup, secondary
+    // notes for measures 1..minM-1 are compared against a chMeasureOnset that is
+    // already minM beats ahead, making every noteOffsetInMeasure negative and
+    // silencing the entire secondary channel.
+    const globalMeasureNum = (this.renderer?.measureNumbers?.[measureIdx] ?? (measureIdx + 1));
+    const chNotes = ch.measures[globalMeasureNum - 1];
     if (!chNotes || !chNotes.length) return;
-    const chMeasureOnset = Math.floor(chNotes[0].onset / this.bpm) * this.bpm;
-    const chSpb = (60 / this.tempo) / this.speed;
+    // Same shared measure-onset reference the primary track uses — keeps secondary
+    // tracks locked to the primary even when meters change.
+    const chMeasureOnset = this._measureOnsetBeats(measureIdx);
+    const chSpb = this._secPerBeat;
     const chNow = this._audioCtx.currentTime;
 
     if (this._spessa) {
@@ -1086,9 +1197,8 @@ export class PlaybackEngine {
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
 
-    const bpm = this.bpm;
-    const measureOnset = Math.floor(notes[0].onset / bpm) * bpm;
-    const secPerBeat = (60 / this.tempo) / this.speed;
+    const measureOnset = this._measureOnsetBeats(measureIdx);
+    const secPerBeat = this._secPerBeat;
     const now = this._audioCtx.currentTime;
 
     for (const note of notes) {

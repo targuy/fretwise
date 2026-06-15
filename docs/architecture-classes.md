@@ -191,8 +191,23 @@ Fichiers : [`web/static/`](../src/fretwise/web/static/).
 | Mixed (défaut) | `standard_tablature` | Portée + Tab | `TabRenderer` + `SvgCursorDriver` |
 | Tab | `tablature` | Tab seule | `TabRenderer` + `#cursor-canvas` |
 
-`main.js._setRepresentationMode()` re-frappe `GET /api/solve?representation_mode=…`
-puis re-rend. `playback.usesSvgCursor = !!_svgDriver` arbitre le scroll.
+`main.js` re-frappe `GET /api/solve?representation_mode=…` via `selectTrack()` lors
+de chaque changement de mode. `playback.usesSvgCursor = !!_svgDriver` arbitre le scroll.
+
+**Zoom et mesures-par-ligne (Staff / Mixed)** — architecture en deux niveaux :
+
+- `_ZOOM_BASE` : décalage baseline de chaque vue en % (20 = Staff, 40 = Mixed).
+- `_viewZoom[mode]` : décalage slider utilisateur (−50 … +50).
+- `_svgRenderWidth(mode)` : arrondit `(innerWidth − 48) / factor` à 50 px près
+  (bucket) et le transmet comme `svg_width` au backend. Le backend génère le SVG à
+  cette largeur réduite ; le SVG affiché à `width:100%` crée l'effet de zoom.
+- `_refreshSvgView()` : async, garde per-mode `_lastSvgWidth[mode]` pour éviter les
+  re-fetchs inutiles. **Recrée systématiquement `_svgDriver`** après toute mise à jour
+  du SVG (les rects `.fw-cursor` injectés par `init()` sont détruits par le remplacement
+  `innerHTML` — ne pas recréer le driver rendait highlights et click-to-seek silencieusement
+  cassés après chaque zoom/resize).
+- Tab (canvas) n'a pas ces contraintes : zoom = CSS `zoom` direct ; resize =
+  `renderer._buildSystems()` synchrone. C'est pourquoi Tab n'a jamais régressé.
 
 ### 9.3 Affichage des mains (hand viz)
 
@@ -212,7 +227,12 @@ puis re-rend. `playback.usesSvgCursor = !!_svgDriver` arbitre le scroll.
   curseur au tempo, synthèse MIDI (SpessaSynth → soundfont-player → fallback), métronome,
   boucle A/B, vitesse, mixage multi-pistes (gain/mute par piste secondaire), résilience
   de l'`AudioContext` (auto-reprise). Callbacks `onMeasureChange`, `onPositionChange`,
-  `onSynthStatusChange`, `onTimeChange`.
+  `onSynthStatusChange`, `onTimeChange`. **Timeline par mesure** (`_ensureTimeline`) :
+  l'avance du curseur et le placement des notes utilisent les longueurs réelles de
+  chaque mesure (`measure_beats` fourni par l'API) au lieu d'un `beats_per_measure`
+  scalaire — toutes les pistes partagent le **même** début de mesure, ce qui les garde
+  synchronisées (et calées sur la notation) à travers les changements de signature /
+  mesures de levée. Sans `measure_beats` (MusicXML/MIDI), repli sur le tempo uniforme.
 
 ### 9.5 Panneaux (boucle de feedback)
 

@@ -492,6 +492,7 @@ def _register_routes(app: FastAPI) -> None:
             "fingered": fingered,
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
+            "measure_beats": _measure_beats_array(adapter, events),
             "results": serialized_results,
         }
 
@@ -562,6 +563,7 @@ def _register_routes(app: FastAPI) -> None:
                 "beats_per_measure": float(
                     getattr(adapter, "beats_per_measure", 4.0)
                 ),
+                "measure_beats": _measure_beats_array(adapter, events),
             }
             _legacy_cache_put(base_key, base)
 
@@ -709,6 +711,7 @@ def _register_routes(app: FastAPI) -> None:
             "representation_mode": render_mode.value,
             "tempo": base["tempo"],
             "beats_per_measure": base["beats_per_measure"],
+            "measure_beats": base.get("measure_beats", []),
             "section_markers": base["section_markers"],
             "chord_diagrams": base["chord_diagrams"],
             "chord_markers": base["chord_markers"],
@@ -2279,6 +2282,39 @@ def _load_adapter_and_events(
     except (ParseError, UnsupportedFormatError) as exc:
         raise HTTPException(400, str(exc))
     return adapter, events
+
+
+def _measure_beats_array(adapter: Any, events: list[NoteEvent]) -> list[float]:
+    """Per-measure length in quarter-note beats, 0-based (index i = measure i+1).
+
+    Built from ``adapter.measure_time_signatures`` ({1-based measure → (num, den)}),
+    carrying the last seen signature forward for measures that don't restate it.
+    Returns ``[]`` when the adapter exposes no per-measure signatures
+    (MusicXML/MIDI), so the player keeps its uniform ``beats_per_measure`` fallback.
+
+    Why this exists: the multi-track player reconstructs each measure's start as
+    ``floor(onset / beats_per_measure) * beats_per_measure`` from a single scalar.
+    That drifts after any meter change or short (pickup) bar — desyncing the
+    cursor from the audio and the tracks from one another. Shipping the true
+    per-measure beat counts lets the player place every measure exactly.
+    """
+    mts = getattr(adapter, "measure_time_signatures", None) or {}
+    if not mts:
+        return []
+    default = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    max_measure = max(mts.keys())
+    if events:
+        max_measure = max(max_measure, max((e.measure_index or 0) for e in events))
+    out: list[float] = []
+    last = default
+    for measure in range(1, max_measure + 1):
+        ts = mts.get(measure)
+        if ts:
+            numerator, denominator = ts
+            if numerator > 0 and denominator > 0:
+                last = numerator * 4.0 / denominator
+        out.append(last)
+    return out
 
 
 def _track_kind(adapter: Any, filepath: Path, track_id: int | None) -> str:
