@@ -11,33 +11,36 @@
  *  - Songsterr-style colors and proportions
  */
 
+// ── Zoom factor (change to rescale all notation proportionally) ──────
+const ZOOM = 1.25;
+
 // ── Layout constants (px at 1× DPR) ────────────────────────────────
-const MARGIN_L = 60;          // left margin (TAB label + string names)
-const MARGIN_R = 20;
-const MARGIN_T = 12;
-const STRING_SPACING = 16;    // distance between strings
+const MARGIN_L = Math.round(60 * ZOOM);   // left margin (TAB label + string names)
+const MARGIN_R = Math.round(20 * ZOOM);
+const MARGIN_T = Math.round(12 * ZOOM);
+const STRING_SPACING = Math.round(16 * ZOOM);  // distance between strings
 const NUM_STRINGS = 6;
-const STRINGS_H = (NUM_STRINGS - 1) * STRING_SPACING; // 80px
+const STRINGS_H = (NUM_STRINGS - 1) * STRING_SPACING;
 const STRING_NAMES = ['e', 'B', 'G', 'D', 'A', 'E'];
 
 // System vertical layout
-const ABOVE_STRINGS = 80;     // space above string 1 (tempo, chord, section, stems)
-const BELOW_STRINGS = 70;     // space below string 6 (annotations, rhythm)
+const ABOVE_STRINGS = Math.round(80 * ZOOM);  // space above string 1
+const BELOW_STRINGS = Math.round(70 * ZOOM);  // space below string 6
 const SYSTEM_H = ABOVE_STRINGS + STRINGS_H + BELOW_STRINGS;
-const INTER_SYSTEM = 16;
+const INTER_SYSTEM = Math.round(16 * ZOOM);
 
 // Note rendering
-const NOTE_RX = 8;            // oval x radius
-const NOTE_RY = 5.5;          // oval y radius
-const COL_STEP = 30;          // fixed px between consecutive note columns
-const LEFT_PAD = 28;          // left margin in measure (room for measure number)
-const RIGHT_PAD = 18;         // right margin in measure
+const NOTE_RX = Math.round(8 * ZOOM);    // oval x radius
+const NOTE_RY = 5.5 * ZOOM;              // oval y radius
+const COL_STEP = Math.round(30 * ZOOM);  // fixed px between consecutive note columns
+const LEFT_PAD = Math.round(28 * ZOOM);  // left margin in measure (room for measure number)
+const RIGHT_PAD = Math.round(18 * ZOOM); // right margin in measure
 
 // Stem / rhythm (below tab)
-const STEM_GAP = 20;      // room for PM/let ring annotation band below strings
-const STEM_H = 16;
-const BEAM_H = 3;
-const BEAM_GAP_Y = 4;
+const STEM_GAP = Math.round(20 * ZOOM);  // room for PM/let ring annotation band
+const STEM_H = Math.round(16 * ZOOM);
+const BEAM_H = Math.round(3 * ZOOM);
+const BEAM_GAP_Y = Math.round(4 * ZOOM);
 
 // Colors (Songsterr palette)
 const COL_STRING     = '#c4bfb5';  // soft warm grey on cream bg
@@ -67,20 +70,21 @@ const COL_CURSOR_LINE = '#4caf50';
 const MONO            = '"JetBrains Mono", monospace';
 const SANS            = 'Inter, system-ui, sans-serif';
 const SERIF           = '"Fraunces", Georgia, serif';
-const FONT_FRET       = `bold 11px ${MONO}`;
-const FONT_FRET_SM    = `bold 10px ${MONO}`;
-const FONT_STRING     = `500 10px ${SANS}`;
-const FONT_TAB        = `bold 13px ${MONO}`;
-const FONT_CHORD      = `600 12px ${SANS}`;
-const FONT_SECTION    = `italic 600 11px ${SERIF}`;
-const FONT_TEMPO      = `500 10px ${MONO}`;
-const FONT_MNUM       = `400 9px ${SANS}`;
-const FONT_FINGER     = `bold 8px ${MONO}`;
-const FONT_SYMBOL     = `500 10px ${SANS}`;
-const FONT_SYMBOL_SM  = `400 9px ${SANS}`;
-const FONT_DYNAMIC    = `italic bold 11px ${SERIF}`;
-const FONT_LEGEND_H   = `600 14px ${SANS}`;
-const FONT_LEGEND     = `400 12px ${SANS}`;
+const _z = (n) => Math.round(n * ZOOM);
+const FONT_FRET       = `bold ${_z(11)}px ${MONO}`;
+const FONT_FRET_SM    = `bold ${_z(10)}px ${MONO}`;
+const FONT_STRING     = `500 ${_z(10)}px ${SANS}`;
+const FONT_TAB        = `bold ${_z(13)}px ${MONO}`;
+const FONT_CHORD      = `600 ${_z(12)}px ${SANS}`;
+const FONT_SECTION    = `italic 600 ${_z(11)}px ${SERIF}`;
+const FONT_TEMPO      = `500 ${_z(10)}px ${MONO}`;
+const FONT_MNUM       = `400 ${_z(9)}px ${SANS}`;
+const FONT_FINGER     = `bold ${_z(8)}px ${MONO}`;
+const FONT_SYMBOL     = `500 ${_z(10)}px ${SANS}`;
+const FONT_SYMBOL_SM  = `400 ${_z(9)}px ${SANS}`;
+const FONT_DYNAMIC    = `italic bold ${_z(11)}px ${SERIF}`;
+const FONT_LEGEND_H   = `600 ${_z(14)}px ${SANS}`;
+const FONT_LEGEND     = `400 ${_z(12)}px ${SANS}`;
 
 /**
  * @typedef {Object} Note  – from API /api/solve

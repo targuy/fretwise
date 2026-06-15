@@ -198,9 +198,13 @@ def test_solve_guitar_track_is_fingered(monkeypatch: Any, tmp_path: Path) -> Non
 
     assert payload["kind"] == "guitar"
     assert payload["fingered"] is True
-    assert call_log.get("legacy") == 1  # Viterbi ran
+    # /api/solve no longer runs Viterbi — fingerings come from the sidecar (or
+    # embedded GP data). With neither present, the guitar track renders as
+    # tablature with no finger annotations and flags has_saved_fingering=False.
+    assert call_log.get("legacy", 0) == 0
     assert call_log["core_mode"] == RepresentationMode.STANDARD_TAB
-    assert payload["results"][0]["finger"] is not None
+    assert payload["has_saved_fingering"] is False
+    assert payload["results"] == []
 
 
 def test_solve_vocal_track_is_staff_only(monkeypatch: Any, tmp_path: Path) -> None:

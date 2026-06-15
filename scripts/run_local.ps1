@@ -16,6 +16,9 @@ $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 
+# Shared helpers (benign-pixi-line filter, etc.).
+. (Join-Path $PSScriptRoot 'pixi-helpers.ps1')
+
 $pixiBin = Join-Path $env:USERPROFILE ".pixi\bin"
 if (Test-Path (Join-Path $pixiBin "pixi.exe")) { $env:Path = "$pixiBin;$env:Path" }
 if (-not (Get-Command pixi -ErrorAction SilentlyContinue)) {
@@ -44,4 +47,19 @@ $env:FRETWISE_PARTITIONS_DIR = $partitions
 Write-Host "==> FretWise (SINGLE-USER, no login)"
 Write-Host "    library : $partitions"
 Write-Host "    url     : http://${bindHost}:${port}   (Ctrl+C to stop)"
-pixi run fretwise web --host $bindHost --port $port --dir $partitions
+
+# Launch via pixi, filtering out pixi's harmless "`.pixi\envs` already exists"
+# (os error 183) line so it does not look like a real failure. Every other line
+# (including live uvicorn logs) passes straight through. Ctrl+C still stops the
+# server; we echo pixi's own exit code afterwards.
+$ErrorActionPreference = 'Continue'
+pixi run fretwise web --host $bindHost --port $port --dir $partitions 2>&1 |
+  ForEach-Object {
+    $text = if ($_ -is [System.Management.Automation.ErrorRecord]) { $_.ToString() } else { [string]$_ }
+    if (Test-IsBenignPixiEnvLine $text) {
+      Write-Host "    (pixi: ignored a harmless '.pixi\envs already exists' notice - environment OK)" -ForegroundColor DarkGray
+    } else {
+      Write-Host $text
+    }
+  }
+exit $LASTEXITCODE

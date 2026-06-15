@@ -73,6 +73,17 @@ def test_alternatives_unknown_measure_returns_empty() -> None:
     assert measure_alternatives(events, payload.results, measure_index=99) == []
 
 
+def test_proposed_alternatives_are_all_playable() -> None:
+    """Unplayable/impossible candidates must never be proposed. The current
+    solution (variant #1) is exempt — it is the thing being reviewed."""
+    events = _events()
+    payload = _solve(events)
+    alts = measure_alternatives(events, payload.results, measure_index=2)
+    for a in alts:
+        if not a.is_current:
+            assert a.playable is True
+
+
 def test_m5_viterbi_interface_unchanged() -> None:
     """Guard: the feature must never alter the M5 public contract."""
     init_params = list(inspect.signature(ViterbiOptimizer.__init__).parameters)

@@ -164,9 +164,11 @@ def _score_clef(score: Score) -> str:
     return "treble"
 
 
-def canonical_to_render_scene(score: Score, *, mode: str = "tablature") -> RenderScene:
+def canonical_to_render_scene(
+    score: Score, *, mode: str = "tablature", page_width: float | None = None
+) -> RenderScene:
     """Build a scene representation from canonical score through layout."""
-    page_layout = canonical_to_page_layout(score, mode=mode)
+    page_layout = canonical_to_page_layout(score, mode=mode, page_width=page_width)
     return layout_to_render_scene(page_layout=page_layout, score=score, mode=mode)
 
 

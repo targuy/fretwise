@@ -38,10 +38,23 @@ class _MeasurePack:
 
 
 def canonical_to_page_layout(
-    score: Score, *, rules: LayoutRules | None = None, mode: str = "standard_tablature"
+    score: Score,
+    *,
+    rules: LayoutRules | None = None,
+    mode: str = "standard_tablature",
+    page_width: float | None = None,
 ) -> PageLayout:
     """Build the first-page layout contract from a canonical score."""
     layout_rules = rules or default_layout_rules()
+    # Override page/content width when the caller supplies a client-side viewport
+    # width (e.g. from the browser's window.innerWidth).  This makes the number
+    # of measures per row scale with the container instead of just stretching notes.
+    if page_width is not None and page_width >= 400.0:
+        layout_rules = replace(
+            layout_rules,
+            page_width=page_width,
+            content_width=max(200.0, page_width - 2.0 * layout_rules.margin_x),
+        )
     # Adjust system height based on rendering mode so vertical spacing is appropriate.
     # Delegate to notation_mode.system_height_for_mode — single source of truth.
     layout_rules = replace(layout_rules, system_height=system_height_for_mode(mode))

@@ -1,9 +1,49 @@
 /** api.js — FretWise API client */
 
 export async function fetchFiles() {
-  const res = await fetch('/api/files');
+  // no-store: fingering badges change after a save, so a cached body would
+  // show stale icons when returning to the library.
+  const res = await fetch('/api/files', { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to load files');
   return res.json();
+}
+
+/**
+ * Stream score files progressively from the server as NDJSON.
+ * `onItem(fileObj)` is called once per file as it arrives.
+ * Resolves when the stream is fully consumed.
+ */
+export async function streamFiles(onItem) {
+  const res = await fetch('/api/files/stream', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to stream files');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let nl;
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (!line) continue;
+      const item = JSON.parse(line);
+      if (item.error) throw new Error(item.error);
+      onItem(item);
+    }
+  }
+}
+
+export async function fetchRig(filename) {
+  // Valeton GP-180 rig for a song; null when the song has no rig.
+  try {
+    const res = await fetch(`/api/rig/${encodeURIComponent(filename)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (_e) {
+    return null;
+  }
 }
 
 export async function fetchStorage() {
@@ -25,15 +65,40 @@ export async function fetchTracks(filename) {
   return res.json();
 }
 
-export async function uploadFile(file) {
-  const form = new FormData();
-  form.append('file', file);
-  const res = await fetch('/api/upload', { method: 'POST', body: form });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
-    throw new Error(err.detail || 'Upload failed');
-  }
-  return res.json();
+export function uploadFile(file, onProgress) {
+  return _xhrUpload('/api/upload', file, onProgress);
+}
+
+/**
+ * POST a file as multipart/form-data via XHR so upload progress is observable.
+ * @param {string} url
+ * @param {File} file
+ * @param {(frac:number, loaded:number, total:number)=>void} [onProgress]
+ * @returns {Promise<object>} parsed JSON response
+ */
+function _xhrUpload(url, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    if (onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress(e.loaded / e.total, e.loaded, e.total);
+      };
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } catch { resolve({}); }
+      } else {
+        let detail = 'Upload failed';
+        try { detail = JSON.parse(xhr.responseText).detail || detail; } catch { /* keep default */ }
+        reject(new Error(detail));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Upload failed (network error)'));
+    xhr.send(fd);
+  });
 }
 
 export async function fetchNotes(filename, trackId, preferences = {}) {
@@ -51,7 +116,7 @@ export async function fetchNotes(filename, trackId, preferences = {}) {
   return res.json();
 }
 
-export async function fetchSolve(filename, trackId, representationMode, preferences = {}) {
+export async function fetchSolve(filename, trackId, representationMode, preferences = {}, svgWidth) {
   const sameFingerPenalty = preferences.sameFingerPenalty !== false;
   const inferImplicitLegato = preferences.inferImplicitLegato !== false;
   let url =
@@ -60,6 +125,7 @@ export async function fetchSolve(filename, trackId, representationMode, preferen
     `&same_finger_motion_penalty=${sameFingerPenalty ? 'true' : 'false'}` +
     `&infer_implicit_legato=${inferImplicitLegato ? 'true' : 'false'}`;
   if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
+  if (svgWidth) url += `&svg_width=${svgWidth}`;
   const res = await fetch(url);
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
@@ -83,6 +149,26 @@ export async function fetchExportGp(filename, trackId) {
     res.headers.get('x-fretwise-annotated-notes') || '0', 10,
   );
   return { blob, filename: m ? m[1] : 'fingered.gp', annotatedNotes };
+}
+
+export async function fetchSaveGp(filename, trackId) {
+  let url = `/api/save/gp/${encodeURIComponent(filename)}`;
+  if (trackId !== null && trackId !== undefined) url += `?track_id=${trackId}`;
+  const res = await fetch(url, { method: 'POST' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Sauvegarde GP échouée' }));
+    throw new Error(err.detail || 'Sauvegarde GP échouée');
+  }
+  return res.json();
+}
+
+export async function cleanupLibrary() {
+  const res = await fetch('/api/library/cleanup', { method: 'POST' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Nettoyage échoué' }));
+    throw new Error(err.detail || 'Nettoyage échoué');
+  }
+  return res.json();
 }
 
 export async function fetchExportMusicXml(filename, trackId, scope = 'current') {
@@ -206,15 +292,8 @@ export async function deleteSoundfont(name) {
   return res.json();
 }
 
-export async function uploadSoundfont(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  const res = await fetch('/api/soundfonts/upload', { method: 'POST', body: fd });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
-    throw new Error(err.detail || 'Upload failed');
-  }
-  return res.json();
+export function uploadSoundfont(file, onProgress) {
+  return _xhrUpload('/api/soundfonts/upload', file, onProgress);
 }
 
 /** Current authenticated user + storage status. Returns null in single-user mode. */

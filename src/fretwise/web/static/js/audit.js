@@ -38,20 +38,48 @@ let _onMaskChange = null;          // callback invoked after toggle
  * @param {Function} [opts.onMaskedMeasuresChange] Called after user toggles
  *   any per-movement mask, receives the new Set of masked measure indices.
  */
+/**
+ * Show an arbitrary status message in the banner (clears audit state).
+ * Used by other modules to display info/warning in the status bar.
+ */
+export function statusBanner(text, level = 'neutral') {
+  const banner = document.getElementById('audit-banner');
+  if (!banner) return;
+  _maskedMeasures = new Set();
+  _onMaskChange = null;
+  banner.classList.remove('audit-overall-clean', 'audit-overall-suspect', 'audit-overall-bad');
+  if (level !== 'neutral') banner.classList.add(`audit-overall-${level}`);
+  const dot = document.getElementById('audit-dot');
+  if (dot) { dot.className = 'audit-dot'; }
+  const auditText = document.getElementById('audit-text');
+  if (auditText) auditText.textContent = text;
+  const reviewBtn = document.getElementById('audit-review-open');
+  if (reviewBtn) reviewBtn.style.display = 'none';
+  const toggleBtn = document.getElementById('audit-toggle');
+  if (toggleBtn) toggleBtn.style.display = 'none';
+  const details = document.getElementById('audit-details');
+  if (details) { details.style.display = 'none'; details.innerHTML = ''; }
+}
+
 export function renderAuditBanner(audit, opts = {}) {
   const banner = document.getElementById('audit-banner');
   if (!banner) return;
   _onMaskChange = opts.onMaskedMeasuresChange || null;
   _maskedMeasures = new Set();
 
-  if (!audit || audit.available === false) {
-    banner.style.display = 'none';
+  // Show a neutral ready state when there is no real audit verdict.
+  if (!audit || audit.available === false || !audit.overall) {
+    statusBanner('');
     return;
   }
-
-  banner.style.display = 'block';
   banner.classList.remove('audit-overall-clean', 'audit-overall-suspect', 'audit-overall-bad');
   banner.classList.add(`audit-overall-${audit.overall}`);
+
+  // Re-show controls hidden by statusBanner()
+  const reviewBtnEl = document.getElementById('audit-review-open');
+  if (reviewBtnEl) reviewBtnEl.style.display = '';
+  const toggleBtnEl = document.getElementById('audit-toggle');
+  if (toggleBtnEl) toggleBtnEl.style.display = '';
 
   const dot = document.getElementById('audit-dot');
   if (dot) {
@@ -115,12 +143,9 @@ export function getMaskedMeasures() {
   return new Set(_maskedMeasures);
 }
 
-/** Clear the banner (e.g. when leaving the tab viewer). */
+/** Clear the banner content (status bar stays visible). */
 export function resetAuditBanner() {
-  _maskedMeasures = new Set();
-  _onMaskChange = null;
-  const banner = document.getElementById('audit-banner');
-  if (banner) banner.style.display = 'none';
+  statusBanner('');
 }
 
 // ── internals ──────────────────────────────────────────────────────────

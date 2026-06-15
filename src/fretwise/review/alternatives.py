@@ -307,14 +307,26 @@ def measure_alternatives(
             )
         )
 
-    # Rank: playable first, then lowest cost (closest to the current optimum).
-    candidates.sort(key=lambda a: (0 if a.playable else 1, a.cost))
-    for i, alt in enumerate(candidates[: count - 1]):
+    # Only ever propose *playable* alternatives — drop any candidate with a fatal
+    # biomechanical violation in the measure (unplayable / impossible). The
+    # current solution (variant #1) is always kept so the user sees what is being
+    # reviewed, even when it is itself flagged. Remaining playable candidates are
+    # ranked by lowest cost (closest to the current optimum).
+    playable_candidates = sorted(
+        (a for a in candidates if a.playable), key=lambda a: a.cost,
+    )
+    dropped = len(candidates) - len(playable_candidates)
+    for i, alt in enumerate(playable_candidates[: count - 1]):
         alternatives.append(replace(alt, variant_id=f"v{i + 2}"))
 
+    if dropped:
+        logger.info(
+            "Dropped %d unplayable alternative(s) for measure %d.",
+            dropped, measure_index,
+        )
     if len(alternatives) < count:
         logger.info(
-            "Only %d distinct alternatives for measure %d (requested %d).",
+            "Only %d distinct playable alternatives for measure %d (requested %d).",
             len(alternatives), measure_index, count,
         )
     return alternatives

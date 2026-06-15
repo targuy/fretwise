@@ -305,19 +305,22 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .loading { text-align: center; padding: 40px; color: var(--fg-2); font-size: 14px; }
 
 /* ── Track tabs bar ─────────────────────────────────────── */
-#track-tabs-bar {
-  position: fixed;
-  top: 44px; left: 0; right: 0;
-  height: 56px;
-  background: var(--bg-1);
-  border-bottom: 1px solid var(--line-1);
+/* Wrapper docks the tabs directly on top of the score (folder-tab look). */
+#track-tabs-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 3;            /* above the score so the active tab overlaps its top frame */
   padding: 0 8px;
+  background: var(--bg-1);
+}
+#track-tabs-bar {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 3px;
+  height: 44px;
+  margin-bottom: -3px;   /* sink onto the score's top edge so the tabs attach to it */
   overflow-x: auto;
   overflow-y: hidden;
-  z-index: 90;
   scrollbar-width: none;
 }
 #track-tabs-bar::-webkit-scrollbar { display: none; }
@@ -326,12 +329,11 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
    Positioned (fixed) over the left/right edges of #track-tabs-bar so a plain
    mouse (no horizontal wheel / trackpad) can still reach off-screen tabs. */
 .track-tabs-chevron {
-  position: fixed;
-  top: 44px;
-  height: 56px;
-  width: 34px;
-  z-index: 91;
-  display: none;            /* JS toggles to 'flex' when overflowing */
+  position: absolute;
+  top: 0; bottom: 3px;     /* span the tab row inside #track-tabs-wrap */
+  width: 30px;
+  z-index: 4;
+  display: flex;           /* JS toggles the [hidden] attribute to show/hide */
   align-items: center;
   justify-content: center;
   border: none;
@@ -361,26 +363,35 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: var(--r-3) var(--r-3) 0 0;
-  min-width: 170px;
-  max-width: 260px;
-  margin-top: 6px;
-  background: var(--bg-2);
-  border: 1px solid var(--line-2);
+  padding: 7px 13px 8px;
+  min-width: 148px;
+  max-width: 240px;
+  margin-top: 7px;
+  /* Folder tab: a parchment tone clearly lighter than the dark fake-wood, with
+     dark high-contrast text and an open bottom edge — a paper tab on the score. */
+  background: oklch(0.80 0.035 82);
+  color: var(--ink-score);
+  border: 1px solid oklch(0.60 0.03 70);
   border-bottom: none;
+  border-radius: 9px 9px 0 0;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.12s;
   position: relative;
   user-select: none;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
 }
-.track-tab:hover { background: var(--bg-3); }
+.track-tab:hover { background: oklch(0.86 0.04 84); }
 .track-tab[data-active="1"] {
+  /* Selected tab — brightest (score paper) + a vivid gold accent, raised; its
+     bottom edge overlaps the score's top frame so it merges with the page. */
   background: var(--bg-score);
-  border-color: var(--line-1);
-  margin-bottom: -1px;
-  padding-bottom: 9px;
+  color: var(--ink-score);
+  border-color: var(--signal);
+  border-bottom: 3px solid var(--bg-score);
+  margin-bottom: -3px;
+  padding-bottom: 11px;
+  z-index: 2;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.20), inset 0 2px 0 var(--signal);
 }
 
 .track-tab-color {
@@ -400,19 +411,19 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .track-tab-name {
   font-weight: 500;
   font-size: 12px;
-  color: var(--fg-1);
+  color: var(--ink-score);       /* dark text on the light parchment tab */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .track-tab[data-active="1"] .track-tab-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink-score);
 }
 .track-tab-meta {
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--fg-3);
+  color: var(--ink-score-soft);
   white-space: nowrap;
 }
 .track-tab[data-active="1"] .track-tab-meta { color: var(--ink-score-soft); }
@@ -460,38 +471,51 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
 
 /* ── Tab Viewer ─────────────────────────────────────────── */
 #tab-viewer {
-  margin-top: 100px; /* header (44px) + track tabs (56px) */
+  margin-top: 44px; /* header only — track tabs now dock above the score */
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px); /* fill viewport below header+tabs */
+  height: calc(100vh - 44px); /* fill viewport below the header */
   overflow: hidden; /* tab-container handles its own scroll */
 }
 #tab-container { flex: 1; min-height: 0; }
 
 /* Tab-header hidden — info lives in titlebar + track tabs */
-#tab-header { display: none; }
+/* Title line: Accords toggle pinned left, song title centered on the page. */
+#tab-header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+  padding: 7px 12px 5px;
+}
+#tab-header .chord-bar-toggle {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.tab-header-center { flex: 1; text-align: center; min-width: 0; }
+/* Title now lives centered in #tab-header — drop the duplicate in the top bar
+   (the top bar keeps track + tempo for context). */
+#header-meta-title { display: none; }
 
 /* Fingering toggle hidden — fingerings are always shown as colored dots */
 #btn-fingering { display: none; }
 #song-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin: 0 0 2px;
 }
 #song-artist {
-  font-size: 15px;
-  color: var(--green);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
-#song-meta {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--text-light);
-}
+/* #song-meta removed — info lives in the status bar */
 .badge {
   background: #f0f0f0;
   padding: 2px 10px;
@@ -501,52 +525,57 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
 .badge-green { background: var(--green); color: #fff; }
 
 /* ── Chord bar: collapsible strip ──────────────────────────────── */
-#chord-bar {
-  background: var(--bg-score);
-  border-bottom: 1px solid var(--border);
-}
-
+/* "Accords" toggle — a compact pill on the title line (top-left). */
 .chord-bar-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  padding: 5px 16px;
-  background: none;
-  border: none;
-  border-bottom: 1px solid transparent;
+  padding: 4px 11px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-1);
+  border-radius: 14px;
   cursor: pointer;
-  font: 500 11px Inter, system-ui, sans-serif;
-  color: var(--fg-2, #666);
-  text-align: left;
-  transition: color 0.15s;
+  font: 600 11px Inter, system-ui, sans-serif;
+  color: var(--fg-1);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
   user-select: none;
 }
-.chord-bar-toggle:hover { color: var(--fg-1, #222); }
+.chord-bar-toggle:hover { color: var(--fg-0); border-color: var(--line-2); }
+.chord-bar-toggle[aria-expanded="true"] {
+  background: var(--signal);
+  color: #1d1a14;
+  border-color: var(--signal);
+}
+.chord-chevron { flex-shrink: 0; transition: transform 0.25s ease; transform: rotate(-90deg); }
+.chord-bar-toggle[aria-expanded="true"] .chord-chevron { transform: rotate(0deg); }
 
-/* Chevron rotates when collapsed */
-.chord-chevron { flex-shrink: 0; transition: transform 0.25s ease; }
-#chord-bar.collapsed .chord-chevron { transform: rotate(-90deg); }
-
-/* Collapsible strip content */
+/* Chords live INSIDE the score, docked at the top. Closed = 0 height; opening
+   adds --chord-h and offsets the staves (SVG + cursor overlay) down by the same. */
+#tab-container { --chord-h: 116px; }
+#chord-strip-host {
+  height: 0;
+  box-sizing: border-box;
+  background: var(--bg-score);
+  overflow: hidden;
+  position: relative;
+  z-index: 3;
+}
+#tab-container.chords-open #chord-strip-host {
+  height: var(--chord-h);
+  border-bottom: 1px solid var(--line-3);
+}
 #chord-strip {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  padding: 6px 16px 10px;
-  justify-content: flex-start;
-  max-height: 500px;
-  overflow: hidden;
-  transition: max-height 0.28s ease, padding 0.28s ease, opacity 0.22s ease;
-  opacity: 1;
+  height: var(--chord-h);
+  padding: 8px 14px;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
-#chord-bar.collapsed #chord-strip {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
-  pointer-events: none;
-}
+#tab-container.chords-open #core-svg-view { top: var(--chord-h) !important; }
+#tab-container.chords-open #cursor-canvas { top: var(--chord-h); }
 
 .chord-diagram-item {
   display: inline-flex;
@@ -590,6 +619,14 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   overflow-y: auto;
   position: relative; /* needed for absolute cursor canvas */
   background: var(--bg-score); /* score area always light/cream */
+  /* Fancy maple 9-slice frame — same family as the library plaques, but WITHOUT
+     `fill` so the cream score paper shows through (only the frame edges paint).
+     Explicit transparent border reserves the slice space so the notation is not
+     clipped by the frame. */
+  border-style: solid;
+  border-width: 14px 12px 16px 12px;
+  border-color: transparent;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 / 14px 12px 16px 12px stretch;
   /* Thin scrollbar on cream bg */
   scrollbar-width: thin;
   scrollbar-color: var(--line-2) transparent;
@@ -947,6 +984,31 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   vertical-align: middle;
 }
 
+/* Zoom control — per-view magnify slider in the toolbar */
+.zoom-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--fg-3);
+}
+.zoom-icon { flex-shrink: 0; }
+.rng-zoom {
+  width: 72px;
+  height: 4px;
+  cursor: pointer;
+  accent-color: var(--fg-2);
+  background: transparent;
+  vertical-align: middle;
+}
+.zoom-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--fg-2);
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── SVG playback cursor ────────────────────────────────── */
 .fw-cursor {
   fill: transparent;
@@ -1121,7 +1183,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .file-grid { grid-template-columns: 1fr; }
-  #song-title { font-size: 18px; }
+  #song-title { font-size: 19px; }
   .toolbar-center { gap: 4px; }
   .tb-label { display: none; }
 }
@@ -1154,7 +1216,11 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   position: sticky;
   top: 44px;
   z-index: 20;
-  padding: 6px 12px 4px;
+  /* Match .lib-table-wrap's 12px side inset so the search/filter plaque lines
+     up edge-to-edge with the song-list plaque below it. Horizontal padding is
+     8px to match .lib-table-wrap so the search row aligns with the table content. */
+  margin: 0 12px;
+  padding: 6px 8px 4px;
   background:
     linear-gradient(rgba(252, 246, 235, 0.92), rgba(248, 240, 224, 0.94)),
     url("/static/img/wood/light.png") repeat;
@@ -1223,6 +1289,36 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-meta-menu { width: 240px; }
+
+/* Pagination control — rides at the right end of the search bar. */
+.lib-pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.lib-pager-btn {
+  min-width: 28px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 14px;
+  font-family: var(--ui);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-pager-btn:hover:not(:disabled) { background: var(--bg-3); border-color: var(--signal); }
+.lib-pager-btn:disabled { opacity: 0.4; cursor: default; }
+.lib-pager-info {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+  padding: 0 4px;
+  white-space: nowrap;
+}
 
 .lib-search-bar input:focus,
 .lib-search-bar select:focus {
@@ -1436,6 +1532,118 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   background: rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.80);
   border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Fingering presence marker — distinctive hand icon next to the title */
+.lib-finger-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 7px;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+.lib-finger-mark.is-ok {
+  color: oklch(0.85 0.15 150);
+  background: oklch(0.35 0.12 150 / 0.30);
+  border: 1px solid oklch(0.55 0.15 150 / 0.5);
+}
+.lib-finger-mark.is-old {
+  color: oklch(0.90 0.14 65);
+  background: oklch(0.40 0.15 55 / 0.30);
+  border: 1px solid oklch(0.65 0.18 60 / 0.5);
+}
+/* Chord diagram badge — shown when the file has embedded chord diagrams */
+.lib-chord-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  border-radius: 4px;
+  color: oklch(0.80 0.12 260);
+  background: oklch(0.35 0.10 260 / 0.28);
+  border: 1px solid oklch(0.55 0.12 260 / 0.45);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.lib-chord-ic { display: block; }
+
+.lib-finger-mark .lib-finger-ic { display: block; }
+.lib-finger-warn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 10px;
+  line-height: 1;
+  color: oklch(0.95 0.16 75);
+  text-shadow: 0 0 2px #000;
+}
+
+/* Checkbox column */
+.col-check { width: 32px; text-align: center; }
+.lib-cell-check { width: 32px; text-align: center; vertical-align: middle; }
+.lib-cell-check input[type="checkbox"],
+.col-check input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--signal);
+  cursor: pointer;
+}
+
+/* Selection action bar — sits at the top of the list, inside the sticky strip */
+.lib-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 8px 0 0;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  flex-wrap: wrap;
+}
+.lib-selection-count {
+  font-size: 13px;
+  color: var(--fg-1);
+  flex: 0 0 auto;
+}
+.lib-calc-btn {
+  gap: 6px;
+}
+.lib-calc-status {
+  font-size: 12px;
+  color: var(--fg-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Insert-fingerings toolbar button — labeled, so it must size to its content
+   (icon + "Doigtés") rather than the fixed 32px square the other .tx-btn use,
+   otherwise the label overflows the button box. */
+#btn-insert-fingerings {
+  width: auto;
+  gap: 5px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+#btn-insert-fingerings.is-needed {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+#btn-insert-fingerings.is-outdated {
+  color: oklch(0.78 0.18 60);
+  border-color: oklch(0.55 0.18 60 / 0.6);
+}
+/* Busy state: hide both glyph and label so only the spinner shows. */
+#btn-insert-fingerings.is-busy .btn-insert-label { visibility: hidden; }
+.btn-insert-label {
+  font-size: 11px;
+  line-height: 1;
 }
 
 .lib-cell-actions {
@@ -1978,8 +2186,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* ── Landscape phone ── */
 @media (max-width: 640px) and (orientation: landscape) {
   .app-header { height: 36px; }
-  #track-tabs-bar { top: 36px; }
-  .track-tabs-chevron { top: 36px; }
+  #tab-viewer { margin-top: 36px; height: calc(100vh - 36px); }
 }
 
 /* ── Touch swipe support ── */
@@ -1994,18 +2201,23 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
    ───────────────────────────────────────────────────────────────────────── */
 
 .audit-banner {
-  margin: 8px 12px 4px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  border-left: 3px solid #888;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.88);
+  margin: 0 12px 4px;
+  padding: 5px 12px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-left: 3px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.70);
+  min-height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.audit-banner.audit-overall-clean    { border-left-color: #6cc26c; }
-.audit-banner.audit-overall-suspect  { border-left-color: #f0b955; }
-.audit-banner.audit-overall-bad      { border-left-color: #ef6e5b; background: rgba(239, 110, 91, 0.07); }
+.audit-banner.audit-overall-clean    { border-left-color: #6cc26c; border-color: rgba(108,194,108,0.25); }
+.audit-banner.audit-overall-suspect  { border-left-color: #f0b955; border-color: rgba(240,185,85,0.25); }
+.audit-banner.audit-overall-bad      { border-left-color: #ef6e5b; border-color: rgba(239,110,91,0.30); background: rgba(239, 110, 91, 0.06); }
 
 .audit-summary {
   display: flex;
@@ -2112,7 +2324,12 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: #0c0b0d url("/static/img/splashscreen.jpg") center / contain no-repeat;
+  /* Artwork is rendered at its native size (1024×572) by default; JS clamps it
+     to 2/3 of the window when the window is too small to show it natively, and
+     scales it up to 4/5 of the window when the window is much larger. The
+     --splash-w / --splash-h custom props carry the JS-computed size; the
+     fallback below (native px) keeps it correct before JS runs. */
+  background: #0c0b0d url("/static/img/splashscreen.jpg") center / var(--splash-w, 1024px) var(--splash-h, 572px) no-repeat;
   cursor: pointer;
   opacity: 1;
   transition: opacity 0.45s ease;
@@ -2123,6 +2340,43 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #splash-screen { transition: none; }
+}
+
+/* Loading indicator shown on the splash while the library is streaming */
+#splash-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#splash-loader.splash-loader-done {
+  opacity: 0;
+}
+.splash-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+  animation: splash-spin 0.75s linear infinite;
+}
+#splash-load-count {
+  font: 500 10px 'Inter', system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+@keyframes splash-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-spinner { animation: none; border-top-color: rgba(255,255,255,0.5); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2211,6 +2465,46 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 .review-alt-pick:disabled { opacity: 0.5; cursor: default; filter: grayscale(0.4); }
 
+/* Hand-visualisation embed (shared across the current + alternatives). */
+.review-handviz {
+  margin: 6px 2px 10px;
+  border: 1px solid #2d3036;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #0c0b0d;
+}
+.review-handviz-frame {
+  display: block;
+  width: 100%;
+  height: 230px;
+  border: 0;
+  background: #0c0b0d;
+}
+.review-cur-head { display: flex; align-items: center; gap: 8px; }
+.review-alt-actions { display: flex; align-items: center; gap: 8px; }
+.review-alt-actions .review-alt-pick { margin-left: auto; }
+.review-viz-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 9px; border-radius: 5px; cursor: pointer;
+  color: #c6cad0;
+  background: #20242b;
+  border: 1px solid #3b3e44;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.review-viz-btn:hover { background: #2a2f37; color: #fff; }
+.review-viz-btn.is-viz-active {
+  color: var(--signal, #d99a4e);
+  border-color: var(--signal, #d99a4e);
+  background: rgba(217, 154, 78, 0.15);
+}
+/* Reset the uppercase/letter-spacing of the head label only, not the button. */
+.review-cur-head > span:first-child {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: #aeb4bc;
+}
+.review-cur-head .review-viz-btn { margin-left: auto; }
+
 /* ── Review panel: feedback-round refinements ──────────────────────────── */
 /* Force the dark studio look even under the light-maple .floating-panel theme,
    so every label/diff/legend keeps high contrast. */
@@ -2259,3 +2553,233 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .audit-review-open:hover { background: rgba(201,137,47,0.30); }
 .review-item.is-noalt { opacity: 0.5; }
 .review-item.is-noalt .review-sev { filter: grayscale(0.5); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Rig GP-180 floating panel
+   ═══════════════════════════════════════════════════════════════ */
+#rig-panel {
+  width: min(720px, calc(100vw - 40px));
+  max-height: min(600px, calc(100vh - 48px));
+  background: #15171c;
+  color: #d6d8db;
+  border: 1px solid #3b3e44;
+  border-image: none !important;
+}
+.rig-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 10px 12px 12px;
+  flex: 1;
+}
+
+/* Guitar meta strip */
+.rig-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid #2d3036;
+  padding-bottom: 8px;
+}
+.rig-meta-item { display: flex; flex-direction: column; gap: 1px; }
+.rig-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #7a8290; }
+.rig-meta-value { color: #cdd3da; font-size: 12px; }
+.rig-fiabilite-badge {
+  display: inline-block;
+  font-weight: 700; font-size: 11px;
+  padding: 1px 6px; border-radius: 4px; margin-left: 6px;
+  background: rgba(201,137,47,0.2); color: #d8a24a;
+  border: 1px solid rgba(201,137,47,0.35);
+  vertical-align: middle;
+}
+.rig-fiabilite-badge.grade-a { background: rgba(60,180,80,0.2); color: #5dc87a; border-color: rgba(60,180,80,0.35); }
+.rig-fiabilite-badge.grade-b { background: rgba(60,140,220,0.2); color: #60aaee; border-color: rgba(60,140,220,0.35); }
+.rig-fiabilite-badge.grade-c { background: rgba(200,180,40,0.2); color: #ccc038; border-color: rgba(200,180,40,0.35); }
+
+/* GP-180 effect chain */
+.rig-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: stretch;
+}
+.rig-chain-arrow {
+  display: flex;
+  align-items: center;
+  color: #4a5060;
+  font-size: 14px;
+  padding: 0 1px;
+  align-self: center;
+}
+.rig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  border: 1px solid #2d3036;
+  border-radius: 6px;
+  padding: 6px 4px 5px;
+  background: #1c1f25;
+  transition: border-color 0.15s;
+  position: relative;
+}
+.rig-block.active { border-color: #d8a24a; background: #1f2115; }
+.rig-block.inactive { opacity: 0.35; }
+.rig-block-name {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  color: #7a8290;
+}
+.rig-block.active .rig-block-name { color: #d8a24a; }
+.rig-block-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+}
+.rig-block-preset {
+  font-size: 9px;
+  text-align: center;
+  color: #cdd3da;
+  line-height: 1.25;
+  max-width: 70px;
+  word-break: break-word;
+}
+.rig-block-params {
+  font-size: 8px;
+  text-align: center;
+  color: #7a8290;
+  line-height: 1.3;
+  max-width: 70px;
+  word-break: break-word;
+}
+
+/* Notes / limites collapsibles */
+.rig-notes-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+.rig-details {
+  border: 1px solid #2d3036;
+  border-radius: 5px;
+  background: #1c1f25;
+}
+.rig-details summary {
+  font-size: 11px;
+  font-weight: 600;
+  color: #aeb4bc;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.rig-details summary::-webkit-details-marker { display: none; }
+.rig-details summary::before {
+  content: "▸ ";
+  color: #7a8290;
+  font-size: 10px;
+}
+.rig-details[open] summary::before { content: "▾ "; }
+.rig-text {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: #aeb4bc;
+  white-space: pre-wrap;
+  padding: 6px 10px 8px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Lib-table rig icon */
+.lib-btn-rig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--signal, #d8a24a);
+  vertical-align: middle;
+  transition: background 0.12s;
+}
+.lib-btn-rig:hover { background: rgba(216,162,74,0.15); }
+
+/* ── Unified notifications (notify.js) ──────────────────────────────
+ * Transient toasts + persistent task overlays (spinner / message / progress).
+ * No OK buttons; tasks auto-dismiss when finished and can be clicked away. */
+#fw-notify-host {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 12px; z-index: 3000; pointer-events: none;
+}
+#fw-notify-host > * { pointer-events: auto; }
+
+.fw-spinner {
+  width: 16px; height: 16px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.28); border-top-color: #fff;
+  border-radius: 50%; animation: fw-spin 0.7s linear infinite;
+}
+@keyframes fw-spin { to { transform: rotate(360deg); } }
+
+.fw-toast {
+  display: flex; align-items: center; gap: 9px; max-width: min(520px, 92vw);
+  background: rgba(22,22,26,0.92); color: #f3f3f3;
+  padding: 9px 15px; border-radius: 20px; font-size: 13.5px; line-height: 1.35;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.34); backdrop-filter: blur(6px); cursor: pointer;
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.fw-toast.fw-in { opacity: 1; transform: scale(1); }
+.fw-toast.fw-out { opacity: 0; transform: scale(0.94); }
+.fw-toast--success { background: rgba(20,80,45,0.94); }
+.fw-toast--warn    { background: rgba(120,80,10,0.94); }
+.fw-toast--error   { background: rgba(120,30,30,0.94); }
+
+.fw-task--inline {
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.fw-task--inline.fw-in { opacity: 1; transform: scale(1); }
+.fw-task--inline.fw-out { opacity: 0; transform: scale(0.94); }
+
+.fw-task--blocking {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(10,10,14,0.46); backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.fw-task--blocking.fw-in { opacity: 1; }
+.fw-task--blocking.fw-out { opacity: 0; }
+
+.fw-task-card {
+  min-width: 240px; max-width: min(440px, 92vw);
+  background: rgba(24,24,28,0.92); color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; padding: 15px 18px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+}
+.fw-task--inline .fw-task-card {
+  box-shadow: 0 6px 22px rgba(0,0,0,0.34); border-radius: 22px; padding: 10px 16px; min-width: 0;
+}
+.fw-task-head { display: flex; align-items: center; gap: 11px; }
+.fw-task-title { font-weight: 600; font-size: 13.5px; margin-bottom: 2px; }
+.fw-task-msg { font-size: 13.5px; line-height: 1.35; }
+
+.fw-task-progress {
+  margin-top: 11px; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.14); overflow: hidden;
+}
+.fw-task-progress-fill {
+  height: 100%; width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, #4da3ff, #7bc1ff); transition: width 0.2s ease;
+}
+
+.fw-task-card.fw-done .fw-spinner,
+.fw-task-card.fw-error .fw-spinner { animation: none; border: none; }
+.fw-task-card.fw-done .fw-spinner::after { content: '✓'; color: #6fe0a0; font-size: 16px; }
+.fw-task-card.fw-error .fw-spinner::after { content: '!'; color: #ff8a8a; font-weight: 700; font-size: 15px; }
+.fw-task-card.fw-error { border-color: rgba(200,60,60,0.5); }

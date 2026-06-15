@@ -8,13 +8,19 @@
 
 ## 📚 Documentation de référence
 
-Avant toute action, consulter ces trois fichiers de spécifications situés à la racine du projet :
+Avant toute action, consulter ces trois fichiers de spécifications situés dans `docs/` :
 
 | Fichier | Contenu |
 |---|---|
-| `fretwise_architecture.docx` | Architecture fonctionnelle et technique — 6 modules (M1–M6), modèle de données, fonction de coût composite, formats de sortie, roadmap |
-| `fretwise_conception_donnees.docx` | Acquisition des données externes — datasets (DadaGP, GuitarSet, GAPS, Iino 2025), formats d'entrée, pipeline de parsing, bibliothèques Python |
-| `fretwise_plan_projet.docx` | Plan projet — 4 phases, 12 sprints, critères de succès, métriques de suivi, gestion des risques |
+| `docs/fretwise_architecture.md` | Architecture fonctionnelle et technique — 6 modules (M1–M6), modèle de données, fonction de coût composite, formats de sortie, roadmap |
+| `docs/fretwise_conception_donnees.md` | Acquisition des données externes — datasets (DadaGP, GuitarSet, GAPS, Iino 2025), formats d'entrée, pipeline de parsing, bibliothèques Python |
+| `docs/fretwise_plan_projet.md` | Plan projet — 4 phases, 12 sprints, critères de succès, métriques de suivi, gestion des risques |
+
+Carte du **code réel** (complète les specs ci-dessus) :
+
+| Fichier | Contenu |
+|---|---|
+| `docs/architecture-classes.md` | Grandes classes du code : modèles, M1–M6, biomécanique/audit/révision, pipeline de notation `core/`, export, API web, et front office (vues, mains, lecture) + lien front ↔ back |
 
 **Règle :** toute décision d'implémentation doit être traceable à l'une de ces spécifications. En cas d'ambiguïté, demander une clarification plutôt qu'inventer.
 
@@ -83,9 +89,6 @@ Modes de pondération (α, β, γ, δ) :
 ```
 fretwise/
 ├── CLAUDE.md                          ← ce fichier
-├── fretwise_architecture.docx         ← spécifications architecture
-├── fretwise_conception_donnees.docx   ← spécifications données
-├── fretwise_plan_projet.docx          ← plan projet
 │
 ├── pyproject.toml
 ├── README.md
