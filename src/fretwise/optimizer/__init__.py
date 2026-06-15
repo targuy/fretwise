@@ -81,6 +81,40 @@ class ViterbiOptimizer:
     def __init__(self, cost_fn: CostFunctionProtocol) -> None:
         self._cost_fn = cost_fn
 
+    @property
+    def cost_fn(self) -> CostFunctionProtocol:
+        """The injected cost function (read-only public access).
+
+        Callers that need cost-aware post-processing (e.g. arpeggio resolvers)
+        should read this property rather than reaching into ``_cost_fn``
+        directly, keeping the M5 interface stable.
+        """
+        return self._cost_fn
+
+    def set_segment_anchors(self, anchors: list[int | None]) -> None:
+        """Activate segment-aware shift cost for the next ``solve()`` call.
+
+        Delegates to the injected cost function if it exposes
+        ``set_segment_anchors``; silently no-ops otherwise so that
+        non-CostFunction optimizers remain compatible.
+
+        Args:
+            anchors: One entry per note in the upcoming sequence.
+        """
+        set_fn = getattr(self._cost_fn, "set_segment_anchors", None)
+        if callable(set_fn):
+            set_fn(anchors)
+
+    def clear_segment_anchors(self) -> None:
+        """Deactivate segment-aware shift cost after ``solve()`` completes.
+
+        Mirrors ``set_segment_anchors``; silently no-ops when the cost
+        function does not support this operation.
+        """
+        clear_fn = getattr(self._cost_fn, "clear_segment_anchors", None)
+        if callable(clear_fn):
+            clear_fn()
+
     def solve(
         self,
         notes: list[NoteEvent],

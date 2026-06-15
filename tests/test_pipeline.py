@@ -62,7 +62,13 @@ class _StubGenerator:
 
 
 class _StubOptimizer:
-    _cost_fn = None
+    cost_fn = None  # public API expected by pipeline
+
+    def set_segment_anchors(self, anchors: list) -> None:  # noqa: ANN001
+        pass
+
+    def clear_segment_anchors(self) -> None:
+        pass
 
     def solve(
         self,
@@ -89,7 +95,13 @@ class _ChordGenerator:
 
 
 class _BadChordOptimizer:
-    _cost_fn = None
+    cost_fn = None  # public API expected by pipeline
+
+    def set_segment_anchors(self, anchors: list) -> None:  # noqa: ANN001
+        pass
+
+    def clear_segment_anchors(self) -> None:
+        pass
 
     def solve(
         self,

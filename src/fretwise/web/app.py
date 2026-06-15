@@ -151,6 +151,35 @@ def create_app(
     # Cache-busting for dev assets + baseline hardening headers.
     @app.middleware("http")
     async def _security_and_cache_headers(request: Request, call_next: Any) -> Any:
+        # CSRF guard for state-mutating API endpoints.
+        # Strategy (defence-in-depth alongside TrustedHostMiddleware):
+        #  1. Sec-Fetch-Site (Fetch Metadata, Chrome 76+/Firefox 90+/Edge 79+):
+        #     can't be forged by a cross-origin web page.  Allow same-origin and
+        #     "none" (user-initiated direct navigation, extensions, native clients).
+        #  2. Origin header fallback for older browsers: must match the Host.
+        #  3. No Sec-Fetch-Site AND no Origin: programmatic caller (curl, pixi,
+        #     API scripts) — allowed without a token so the CLI stays usable.
+        if (
+            request.method in ("POST", "PUT", "DELETE", "PATCH")
+            and request.url.path.startswith("/api/")
+        ):
+            sec_fetch_site = request.headers.get("sec-fetch-site")
+            origin = request.headers.get("origin")
+            if sec_fetch_site is not None:
+                if sec_fetch_site not in ("same-origin", "none"):
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "CSRF: cross-site request rejected"},
+                    )
+            elif origin is not None:
+                from urllib.parse import urlparse
+                host = request.headers.get("host", "")
+                if urlparse(origin).netloc != host:
+                    return JSONResponse(
+                        status_code=403,
+                        content={"detail": "CSRF: origin mismatch"},
+                    )
+
         response = await call_next(request)
         # Defensive headers applied to every response.
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
