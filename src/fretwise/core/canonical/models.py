@@ -196,6 +196,10 @@ class Track:
     track_id: str
     name: str
     staff_groups: list[StaffGroup] = field(default_factory=list)
+    #: Instrument family driving clef/octave choices:
+    #: "guitar" | "bass" | "drums" | "vocal" | "other". Defaults to guitar so
+    #: existing single-track guitar paths render exactly as before.
+    kind: str = "guitar"
 
 
 @dataclass

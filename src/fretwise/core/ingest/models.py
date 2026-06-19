@@ -154,6 +154,9 @@ class RawScore:
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     unknown_fields: dict[str, Any] = field(default_factory=dict)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
+    #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
+    #: Empty dict means uniform meter (use beats_per_measure for all measures).
+    measure_time_signatures: dict[int, tuple[int, int]] = field(default_factory=dict)
 
 
 @dataclass
@@ -172,6 +175,9 @@ class NormalizedScore:
     chord_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
+    #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
+    #: Empty dict means uniform meter (use beats_per_measure for all measures).
+    measure_time_signatures: dict[int, tuple[int, int]] = field(default_factory=dict)
     normalization_log: NormalizationLog = field(default_factory=NormalizationLog)
 
 
@@ -192,6 +198,9 @@ class CompletedScore:
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
     completion_log: CompletionLog = field(default_factory=CompletionLog)
+    #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
+    #: Empty dict means uniform meter (use beats_per_measure for all measures).
+    measure_time_signatures: dict[int, tuple[int, int]] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

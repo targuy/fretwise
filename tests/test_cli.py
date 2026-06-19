@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from click.testing import CliRunner
@@ -304,6 +305,55 @@ class TestSolveCommand:
         assert out_file.exists()
         assert out_file.read_bytes().startswith(b"%PDF-")
         assert "Legacy PDF shadow core conformance issues: 2" in result.output
+
+
+class TestFingerCommand:
+    def test_finger_writes_default_gp_output(self, tmp_path: Path) -> None:
+        gp_file = tmp_path / "song.gp"
+        gp_file.touch()
+        fake_adapter = MagicMock()
+        fake_adapter.parse.return_value = [object()]
+        fake_report = SimpleNamespace(fatal_count=0, high_count=0, by_measure=lambda: {})
+        fake_payload = SimpleNamespace(results=[object()], biomechanical_report=fake_report)
+
+        runner = CliRunner()
+        with (
+            patch("fretwise.cli.get_adapter", return_value=fake_adapter),
+            patch("fretwise.cli._guarded_pipeline_result", return_value=(fake_payload, None)),
+            patch("fretwise.cli.fingerings_by_source_id", return_value={"1": "I"}),
+            patch("fretwise.cli.write_gp_with_fingerings", return_value=b"GPIF"),
+        ):
+            result = runner.invoke(main, ["finger", str(gp_file)])
+
+        out_file = tmp_path / "song_fingered.gp"
+        assert result.exit_code == 0
+        assert out_file.read_bytes() == b"GPIF"
+        assert "GP written" in result.output
+
+    def test_finger_blocks_fatal_guard_report(self, tmp_path: Path) -> None:
+        gp_file = tmp_path / "song.gp"
+        gp_file.touch()
+        fake_adapter = MagicMock()
+        fake_adapter.parse.return_value = [object()]
+        fake_report = SimpleNamespace(
+            fatal_count=1,
+            high_count=0,
+            by_measure=lambda: {12: [object()]},
+        )
+        fake_payload = SimpleNamespace(results=[object()], biomechanical_report=fake_report)
+
+        runner = CliRunner()
+        with (
+            patch("fretwise.cli.get_adapter", return_value=fake_adapter),
+            patch("fretwise.cli._guarded_pipeline_result", return_value=(fake_payload, None)),
+            patch("fretwise.cli.write_gp_with_fingerings") as writer,
+        ):
+            result = runner.invoke(main, ["finger", str(gp_file)])
+
+        assert result.exit_code == 1
+        assert "biomechanical guard failed" in result.output
+        assert "measures=12" in result.output
+        writer.assert_not_called()
 
 
 class TestCliHelpers:

@@ -99,6 +99,38 @@ def test_default_output_backend_registry_exposes_svg_and_pdf() -> None:
     assert pdf.startswith(b"%PDF-")
 
 
+def test_pdf_clef_branches_on_metadata_clef() -> None:
+    import reportlab.pdfgen.canvas as rl_canvas
+
+    from fretwise.core.backends.pdf import _draw_glyph
+
+    drawn: list[tuple[float, float, str]] = []
+
+    class _RecordingCanvas:
+        def setFillColorRGB(self, *_a: object) -> None: ...
+        def setStrokeColorRGB(self, *_a: object) -> None: ...
+        def setFont(self, *_a: object) -> None: ...
+
+        def drawString(self, x: float, y: float, text: str) -> None:
+            drawn.append((x, y, text))
+
+    canvas = _RecordingCanvas()
+    for clef in ("treble", "bass", "percussion"):
+        _draw_glyph(
+            canvas,  # type: ignore[arg-type]
+            100.0,
+            glyph_id="clef",
+            x=0.0,
+            y=10.0,
+            size=12.0,
+            metadata={"clef": clef},
+        )
+
+    chars = [text for _x, _y, text in drawn]
+    assert chars == ["G", "F", "||"]
+    assert rl_canvas is not None
+
+
 def test_svg_and_pdf_backends_share_same_scene_input() -> None:
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),

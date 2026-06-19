@@ -1,0 +1,48 @@
+# FretWise — pile d'ACQUISITION DES SOURCES pour Synology (Container Manager).
+#
+# Rôle NAS : chercher + télécharger les pages brutes → song_raw_sources.json
+# Rôle PC  : lire song_raw_sources.json → ollama/gemma4 extrait → song_facts.json
+#
+# Démarrage :
+#   1) éditer searxng/settings.yml -> mettre un server.secret_key unique
+#      python -c "import secrets; print(secrets.token_hex(32))"
+#   2) déposer la liste des morceaux dans ./data/songs.tsv
+#      (copier data/songs_index_clean.tsv du repo)
+#   3) docker compose up -d
+#
+# Puis sur le PC (quand le NAS a fini ou en cours de route) :
+#   Synchroniser data/song_raw_sources.json NAS -> PC, puis :
+#   pixi run python tools/extract_facts.py      <- extraction ollama locale
+#   pixi run python tools/rig_batch.py          <- génération des fiches ancrées
+
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: fretwise-searxng
+    ports:
+      - "8888:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8888/
+    restart: unless-stopped
+
+  facts-worker:
+    image: python:3.11-slim
+    container_name: fretwise-facts-worker
+    depends_on:
+      - searxng
+    command: python /app/acquire_loop.py
+    environment:
+      - SEARXNG_URL=http://searxng:8080
+      - SONGS_TSV=/data/songs.tsv
+      - RAW_DB=/data/song_raw_sources.json
+      - SLEEP_BETWEEN=2
+      - RESCAN_SECONDS=3600
+      - MAX_PAGES=4
+      - PYTHONUNBUFFERED=1
+      - PYTHONUTF8=1
+    volumes:
+      - ./data:/data:rw
+      - ./facts-worker/acquire_loop.py:/app/acquire_loop.py:ro
+    restart: unless-stopped

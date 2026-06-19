@@ -39,16 +39,31 @@ def run_core_pipeline_from_raw(
     *,
     decision_policy: DecisionPolicy | None = None,
     representation_mode: RepresentationMode = RepresentationMode.TAB,
+    track_kind: str = "guitar",
+    page_width: float | None = None,
 ) -> CorePipelineResult:
-    """Execute the minimal core chain from raw input to SVG output."""
+    """Execute the minimal core chain from raw input to SVG output.
+
+    Args:
+        raw_score: The raw extraction payload.
+        decision_policy: Optional notation decision policy.
+        representation_mode: Standard/tab/hybrid render mode.
+        track_kind: Instrument family ("guitar"|"bass"|"drums"|"vocal"|
+            "other").  Drives the staff clef and the written-pitch octave
+            convention.  Defaults to ``"guitar"`` (legacy behaviour).
+        page_width: Optional client viewport width in pixels.  When provided
+            the layout engine uses it to determine how many measures fit per
+            row, so the note size stays fixed rather than stretching to fill.
+    """
     normalized_score = normalize_raw_score(raw_score)
     completed_score = complete_normalized_score(normalized_score)
     validation_report = validate_completed_score(completed_score)
     decision_outcome = decide_from_validation(validation_report, policy=decision_policy)
-    canonical_score = completed_to_canonical_score(completed_score)
+    canonical_score = completed_to_canonical_score(completed_score, track_kind=track_kind)
     render_scene = canonical_to_render_scene(
         canonical_score,
         mode=representation_mode.value,
+        page_width=page_width,
     )
     conformance_issues = check_scene_conformance(
         render_scene,

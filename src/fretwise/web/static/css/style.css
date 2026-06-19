@@ -78,6 +78,34 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); background: var(--bg-0); }
 
+/* ═══ Debug overlay (toggle: Shift+D in viewer mode) ═══ */
+#debug-overlay {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.82);
+  color: #e0e0e0;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.55;
+  padding: 10px 14px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  pointer-events: none;
+  white-space: pre;
+  max-width: 480px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+#debug-overlay .dbg-title {
+  color: #ffc000;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+#debug-overlay .dbg-drift-high { color: #ff6b6b; }
+#debug-overlay .dbg-drift-mid  { color: #ffd166; }
+#debug-overlay .dbg-drift-ok   { color: #95e1a3; }
+
 /* ── Header ─────────────────────────────────────────────── */
 #header {
   display: flex;
@@ -128,6 +156,23 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 }
 .ic-btn:hover { background: var(--bg-2); color: var(--fg-0); border-color: var(--line-2); }
 .ic-btn[data-on="1"] { background: var(--bg-3); border-color: var(--line-1); color: var(--fg-0); }
+
+/* Header export buttons: larger, with a short label beside the icon so PDF /
+   GP / XML are easy to tell apart. */
+.ic-btn-export {
+  width: auto; height: 34px;
+  flex-direction: row;
+  gap: 4px;
+  padding: 0 9px;
+  border-color: var(--line-2);
+}
+.ic-btn-export .ic-btn-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.ic-btn-export:hover { border-color: var(--line-1); }
 
 .header-btn {
   background: transparent;
@@ -260,47 +305,93 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .loading { text-align: center; padding: 40px; color: var(--fg-2); font-size: 14px; }
 
 /* ── Track tabs bar ─────────────────────────────────────── */
-#track-tabs-bar {
-  position: fixed;
-  top: 44px; left: 0; right: 0;
-  height: 56px;
-  background: var(--bg-1);
-  border-bottom: 1px solid var(--line-1);
+/* Wrapper docks the tabs directly on top of the score (folder-tab look). */
+#track-tabs-wrap {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 3;            /* above the score so the active tab overlaps its top frame */
   padding: 0 8px;
+  background: var(--bg-1);
+}
+#track-tabs-bar {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
+  gap: 3px;
+  height: 44px;
+  margin-bottom: -3px;   /* sink onto the score's top edge so the tabs attach to it */
   overflow-x: auto;
   overflow-y: hidden;
-  z-index: 90;
   scrollbar-width: none;
 }
 #track-tabs-bar::-webkit-scrollbar { display: none; }
+
+/* Overflow chevrons — shown only when the tabs bar overflows horizontally.
+   Positioned (fixed) over the left/right edges of #track-tabs-bar so a plain
+   mouse (no horizontal wheel / trackpad) can still reach off-screen tabs. */
+.track-tabs-chevron {
+  position: absolute;
+  top: 0; bottom: 3px;     /* span the tab row inside #track-tabs-wrap */
+  width: 30px;
+  z-index: 4;
+  display: flex;           /* JS toggles the [hidden] attribute to show/hide */
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  color: var(--fg-1);
+  background: var(--bg-1);
+  opacity: 0.96;
+  transition: opacity 0.12s, color 0.12s;
+}
+.track-tabs-chevron:hover { color: var(--signal); opacity: 1; }
+.track-tabs-chevron:disabled { display: none !important; }
+.track-tabs-chevron[hidden] { display: none !important; }
+.track-tabs-chevron-left {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-1) 60%, transparent);
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+.track-tabs-chevron-right {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-1) 60%, transparent);
+  justify-content: flex-end;
+  padding-right: 4px;
+}
 
 .track-tab {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  border-radius: var(--r-3) var(--r-3) 0 0;
-  min-width: 170px;
-  max-width: 260px;
-  margin-top: 6px;
-  background: var(--bg-2);
-  border: 1px solid var(--line-2);
+  padding: 7px 13px 8px;
+  min-width: 148px;
+  max-width: 240px;
+  margin-top: 7px;
+  /* Folder tab: a parchment tone clearly lighter than the dark fake-wood, with
+     dark high-contrast text and an open bottom edge — a paper tab on the score. */
+  background: oklch(0.80 0.035 82);
+  color: var(--ink-score);
+  border: 1px solid oklch(0.60 0.03 70);
   border-bottom: none;
+  border-radius: 9px 9px 0 0;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.12s;
   position: relative;
   user-select: none;
+  transition: background 0.12s, color 0.12s, box-shadow 0.12s;
 }
-.track-tab:hover { background: var(--bg-3); }
+.track-tab:hover { background: oklch(0.86 0.04 84); }
 .track-tab[data-active="1"] {
+  /* Selected tab — brightest (score paper) + a vivid gold accent, raised; its
+     bottom edge overlaps the score's top frame so it merges with the page. */
   background: var(--bg-score);
-  border-color: var(--line-1);
-  margin-bottom: -1px;
-  padding-bottom: 9px;
+  color: var(--ink-score);
+  border-color: var(--signal);
+  border-bottom: 3px solid var(--bg-score);
+  margin-bottom: -3px;
+  padding-bottom: 11px;
+  z-index: 2;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.20), inset 0 2px 0 var(--signal);
 }
 
 .track-tab-color {
@@ -320,19 +411,19 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .track-tab-name {
   font-weight: 500;
   font-size: 12px;
-  color: var(--fg-1);
+  color: var(--ink-score);       /* dark text on the light parchment tab */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .track-tab[data-active="1"] .track-tab-name {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink-score);
 }
 .track-tab-meta {
   font-family: var(--mono);
   font-size: 10px;
-  color: var(--fg-3);
+  color: var(--ink-score-soft);
   white-space: nowrap;
 }
 .track-tab[data-active="1"] .track-tab-meta { color: var(--ink-score-soft); }
@@ -380,38 +471,51 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
 
 /* ── Tab Viewer ─────────────────────────────────────────── */
 #tab-viewer {
-  margin-top: 100px; /* header (44px) + track tabs (56px) */
+  margin-top: 44px; /* header only — track tabs now dock above the score */
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px); /* fill viewport below header+tabs */
+  height: calc(100vh - 44px); /* fill viewport below the header */
   overflow: hidden; /* tab-container handles its own scroll */
 }
 #tab-container { flex: 1; min-height: 0; }
 
 /* Tab-header hidden — info lives in titlebar + track tabs */
-#tab-header { display: none; }
+/* Title line: Accords toggle pinned left, song title centered on the page. */
+#tab-header {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+  padding: 7px 12px 5px;
+}
+#tab-header .chord-bar-toggle {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.tab-header-center { flex: 1; text-align: center; min-width: 0; }
+/* Title now lives centered in #tab-header — drop the duplicate in the top bar
+   (the top bar keeps track + tempo for context). */
+#header-meta-title { display: none; }
 
 /* Fingering toggle hidden — fingerings are always shown as colored dots */
 #btn-fingering { display: none; }
 #song-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+  margin: 0 0 2px;
 }
 #song-artist {
-  font-size: 15px;
-  color: var(--green);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
-#song-meta {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--text-light);
-}
+/* #song-meta removed — info lives in the status bar */
 .badge {
   background: #f0f0f0;
   padding: 2px 10px;
@@ -421,52 +525,57 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
 .badge-green { background: var(--green); color: #fff; }
 
 /* ── Chord bar: collapsible strip ──────────────────────────────── */
-#chord-bar {
-  background: var(--bg-score);
-  border-bottom: 1px solid var(--border);
-}
-
+/* "Accords" toggle — a compact pill on the title line (top-left). */
 .chord-bar-toggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  padding: 5px 16px;
-  background: none;
-  border: none;
-  border-bottom: 1px solid transparent;
+  padding: 4px 11px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-1);
+  border-radius: 14px;
   cursor: pointer;
-  font: 500 11px Inter, system-ui, sans-serif;
-  color: var(--fg-2, #666);
-  text-align: left;
-  transition: color 0.15s;
+  font: 600 11px Inter, system-ui, sans-serif;
+  color: var(--fg-1);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
   user-select: none;
 }
-.chord-bar-toggle:hover { color: var(--fg-1, #222); }
+.chord-bar-toggle:hover { color: var(--fg-0); border-color: var(--line-2); }
+.chord-bar-toggle[aria-expanded="true"] {
+  background: var(--signal);
+  color: #1d1a14;
+  border-color: var(--signal);
+}
+.chord-chevron { flex-shrink: 0; transition: transform 0.25s ease; transform: rotate(-90deg); }
+.chord-bar-toggle[aria-expanded="true"] .chord-chevron { transform: rotate(0deg); }
 
-/* Chevron rotates when collapsed */
-.chord-chevron { flex-shrink: 0; transition: transform 0.25s ease; }
-#chord-bar.collapsed .chord-chevron { transform: rotate(-90deg); }
-
-/* Collapsible strip content */
+/* Chords live INSIDE the score, docked at the top. Closed = 0 height; opening
+   adds --chord-h and offsets the staves (SVG + cursor overlay) down by the same. */
+#tab-container { --chord-h: 116px; }
+#chord-strip-host {
+  height: 0;
+  box-sizing: border-box;
+  background: var(--bg-score);
+  overflow: hidden;
+  position: relative;
+  z-index: 3;
+}
+#tab-container.chords-open #chord-strip-host {
+  height: var(--chord-h);
+  border-bottom: 1px solid var(--line-3);
+}
 #chord-strip {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  padding: 6px 16px 10px;
-  justify-content: flex-start;
-  max-height: 500px;
-  overflow: hidden;
-  transition: max-height 0.28s ease, padding 0.28s ease, opacity 0.22s ease;
-  opacity: 1;
+  height: var(--chord-h);
+  padding: 8px 14px;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
 }
-#chord-bar.collapsed #chord-strip {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
-  pointer-events: none;
-}
+#tab-container.chords-open #core-svg-view { top: var(--chord-h) !important; }
+#tab-container.chords-open #cursor-canvas { top: var(--chord-h); }
 
 .chord-diagram-item {
   display: inline-flex;
@@ -510,6 +619,14 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   overflow-y: auto;
   position: relative; /* needed for absolute cursor canvas */
   background: var(--bg-score); /* score area always light/cream */
+  /* Fancy maple 9-slice frame — same family as the library plaques, but WITHOUT
+     `fill` so the cream score paper shows through (only the frame edges paint).
+     Explicit transparent border reserves the slice space so the notation is not
+     clipped by the frame. */
+  border-style: solid;
+  border-width: 14px 12px 16px 12px;
+  border-color: transparent;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 / 14px 12px 16px 12px stretch;
   /* Thin scrollbar on cream bg */
   scrollbar-width: thin;
   scrollbar-color: var(--line-2) transparent;
@@ -522,9 +639,37 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   padding: 16px 24px;
   box-sizing: border-box;
 }
+/* Make the score SVG fill the available width (responsive) instead of sitting
+ * at a fixed page-width that looks narrow / cut on wide screens. Height is
+ * derived from the viewBox aspect ratio; the container scrolls vertically. */
+#core-svg-view > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
 #tab-canvas {
   display: block;
   margin: 0 auto;
+}
+#slope-canvas {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #07080b;
+  z-index: 3;
+}
+#hand3d-view-frame {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #101216;
+  z-index: 4;
 }
 /* Red note cursor overlay — on top, never steals pointer events */
 #cursor-canvas {
@@ -694,6 +839,23 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border-color: var(--signal);
   color: var(--signal);
 }
+.tx-btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.tx-btn:disabled:hover { background: var(--bg-2); color: var(--fg-1); }
+/* Busy state: hide the glyph and overlay a spinner (reuses fw-spin). */
+.tx-btn.is-busy { position: relative; }
+.tx-btn.is-busy > svg { visibility: hidden; }
+.tx-btn.is-busy::after {
+  content: "";
+  position: absolute;
+  width: 13px; height: 13px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--signal);
+  border-radius: 50%;
+  animation: fw-spin 0.7s linear infinite;
+}
 
 /* Loop clear button — dual icon states */
 #btn-loop-clear .loop-icon-on { display: none; }
@@ -748,7 +910,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   padding: 4px 6px;
   font-family: var(--mono);
   font-size: 12px;
-  width: 52px;
+  width: 58px;
   text-align: center;
   -moz-appearance: textfield;
 }
@@ -763,6 +925,8 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   padding: 4px 4px;
   font-family: var(--mono);
   font-size: 11px;
+  min-width: 62px;
+  text-align: center;
 }
 .speed-sel option { background: var(--bg-1); }
 
@@ -841,6 +1005,31 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   vertical-align: middle;
 }
 
+/* Zoom control — per-view magnify slider in the toolbar */
+.zoom-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--fg-3);
+}
+.zoom-icon { flex-shrink: 0; }
+.rng-zoom {
+  width: 72px;
+  height: 4px;
+  cursor: pointer;
+  accent-color: var(--fg-2);
+  background: transparent;
+  vertical-align: middle;
+}
+.zoom-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--fg-2);
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ── SVG playback cursor ────────────────────────────────── */
 .fw-cursor {
   fill: transparent;
@@ -853,13 +1042,12 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .fw-cursor.loop {
   fill: rgba(64, 148, 255, 0.12);
 }
-/* Red beat-accurate cursor line in SVG mode */
-.fw-cursor-line {
-  stroke: #e53935;
-  stroke-width: 1.5;
-  opacity: 0.85;
-  pointer-events: none;
-  filter: drop-shadow(0 0 2px #e53935);
+/* (The red beat-accurate cursor line was removed — the highlighted current
+   measure, .fw-cursor.active above, is the sole playback indicator.) */
+/* Tempo marks — bold, slightly darker for prominence */
+.fw-tempo-mark {
+  fill: #111;
+  font-family: "Bravura", "Segoe UI Symbol", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 /* Chord name labels in SVG — clickable */
 .fw-chord-name {
@@ -876,6 +1064,8 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .fw-tab-note-mask.fw-finger-2 { fill: var(--f2); }
 .fw-tab-note-mask.fw-finger-3 { fill: var(--f3); }
 .fw-tab-note-mask.fw-finger-4 { fill: var(--f4); }
+.fw-tab-note-mask.fw-finger-impossible { fill: #ffd6d6; stroke: #d32f2f; stroke-width: 1.1; }
+.fw-tab-note-mask.fw-finger-suspect { fill: #fff1c7; stroke: #f59e0b; stroke-width: 1.1; }
 /* Technique/expression annotations injected into SVG by _syncCoreSvgAnnotations() */
 .fw-svg-annotation {
   pointer-events: none;
@@ -942,12 +1132,12 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* ── Floating hand-viz panel ──────────────────────────── */
 .floating-panel {
   position: fixed;
-  bottom: 86px;
-  right: 24px;
-  width: 760px;
-  height: 420px;
-  min-width: 420px;
-  min-height: 260px;
+  top: 16px;
+  right: 28px;
+  width: min(715px, calc(100vw - 56px));
+  height: min(610px, calc(100vh - 32px));
+  min-width: 620px;
+  min-height: 520px;
   background: #14161a;
   color: #d6d8db;
   border: 1px solid #3b3e44;
@@ -992,6 +1182,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border: none;
   background: #0f1013;
   width: 100%;
+  min-height: 0;
 }
 
 /* ── Legend HTML card layout ──────────────────────────── */
@@ -1009,7 +1200,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* ── Responsive ─────────────────────────────────────────── */
 @media (max-width: 600px) {
   .file-grid { grid-template-columns: 1fr; }
-  #song-title { font-size: 18px; }
+  #song-title { font-size: 19px; }
   .toolbar-center { gap: 4px; }
   .tb-label { display: none; }
 }
@@ -1026,3 +1217,1732 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   }
   #tab-canvas { max-width: 100%; page-break-inside: avoid; }
 }
+
+/* ═══════════════ Page base (file selector + settings) ═══════════════ */
+.page { margin-top: 44px; }
+
+/* ═══════════════ Library Table ═══════════════ */
+
+/* Sticky control strip = .lib-header + .lib-az-bar wrapped together. Pins to
+ * the top under the 44px app header so search, filters AND the A–Z index
+ * never scroll away. Background is OPAQUE light-wood (high-opacity cream
+ * scrim over the maple tile) — the old translucent var(--bg-1) let the row
+ * list bleed through. The maple frame border-image is the same 9-slice used
+ * by the song-info / track-selector plaques. */
+.lib-sticky-strip {
+  position: sticky;
+  top: 44px;
+  z-index: 20;
+  /* Match .lib-table-wrap's 12px side inset so the search/filter plaque lines
+     up edge-to-edge with the song-list plaque below it. Horizontal padding is
+     8px to match .lib-table-wrap so the search row aligns with the table content. */
+  margin: 0 12px;
+  padding: 6px 8px 4px;
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.92), rgba(248, 240, 224, 0.94)),
+    url("/static/img/wood/light.png") repeat;
+  background-size: auto, 256px 256px;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+  box-shadow: 0 6px 12px rgba(20, 12, 4, 0.32);
+}
+
+.lib-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 8px 6px;
+  background: transparent;
+}
+
+.lib-search-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lib-search-bar input[type="search"],
+.lib-search-bar select {
+  padding: 7px 12px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--ui);
+}
+
+.lib-search-bar input[type="search"] { flex: 1 1 200px; }
+
+/* Song metadata workflow: a compact dropdown trigger styled to match the
+   search/filter controls + the dark dropdown theme (.instr-dropdown). */
+.lib-meta-wrap { display: flex; align-items: stretch; }
+
+.lib-meta-btn {
+  padding: 7px 12px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 13px;
+  font-family: var(--ui);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-meta-btn:hover { background: var(--bg-3); border-color: var(--signal); }
+.lib-meta-btn:focus { border-color: var(--signal); outline: none; }
+
+.lib-meta-hint {
+  font-size: 11px;
+  color: var(--fg-2);
+}
+
+.lib-meta-status {
+  font-size: 12px;
+  color: #888;
+  min-height: 14px;
+}
+
+.lib-meta-menu { width: 240px; }
+
+/* Pagination control — rides at the right end of the search bar. */
+.lib-pager {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.lib-pager-btn {
+  min-width: 28px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 14px;
+  font-family: var(--ui);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-pager-btn:hover:not(:disabled) { background: var(--bg-3); border-color: var(--signal); }
+.lib-pager-btn:disabled { opacity: 0.4; cursor: default; }
+.lib-pager-info {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-1);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.lib-search-bar input:focus,
+.lib-search-bar select:focus {
+  border-color: var(--signal);
+}
+
+/* A–Z alphabetical index bar. Sits inside .lib-sticky-strip, so it rides the
+ * same opaque maple background as the search/filter row above it. */
+.lib-az-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px 8px 2px;
+  background: transparent;
+  border-top: 1px solid var(--line-2);
+}
+.lib-az-bar:empty { display: none; }
+.lib-az-letter {
+  min-width: 20px;
+  padding: 2px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--fg-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-3);
+  cursor: pointer;
+  font-family: var(--ui);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.lib-az-letter:hover:not(:disabled) {
+  background: var(--bg-2);
+  color: var(--fg-0);
+  border-color: var(--line-2);
+}
+.lib-az-letter:disabled {
+  color: var(--fg-3, var(--fg-2));
+  opacity: 0.3;
+  cursor: default;
+}
+.lib-row-flash > td {
+  animation: lib-row-flash 0.8s ease-out;
+}
+@keyframes lib-row-flash {
+  from { background: var(--bg-3); }
+  to { background: transparent; }
+}
+
+.lib-search-bar select option { background: var(--bg-1); color: var(--fg-0); }
+
+/* ── Fretboard list area ────────────────────────────────────────────────
+ * The row list is meant to look like a guitar fretboard: dark wood
+ * (rosewood/ebony) tile, framed by the dark-frame 9-slice, with metallic
+ * "fret wire" separators between rows and white text for high contrast. We
+ * scope the foreground tokens here so every nested label/badge auto-flips
+ * to white-on-dark without per-cell overrides. */
+.lib-table-wrap {
+  /* Override the light-wood retoning that #file-selector imposes — this
+   * patch is the dark fretboard, not maple. */
+  --fg-0: #ffffff;
+  --fg-1: rgba(255, 255, 255, 0.86);
+  --fg-2: rgba(255, 255, 255, 0.70);
+  --fg-3: rgba(255, 255, 255, 0.52);
+  --line-1: rgba(255, 255, 255, 0.18);
+  --line-2: rgba(255, 255, 255, 0.12);
+  --line-3: rgba(255, 255, 255, 0.07);
+  /* Restore the warm accent against dark wood (the file-selector retoning
+   * had darkened it for legibility on light maple). */
+  --signal: oklch(0.84 0.16 75);
+
+  margin: 12px 12px 20px;
+  padding: 6px 8px 10px;
+  /* No overflow:auto here — that would make this wrap the nearest scroll
+   * container for the sticky <thead>, so the th would only stick to the
+   * wrap (which doesn't scroll) and slide off with page scroll. The page
+   * is the scroll container; thead sticks to the viewport. */
+  overflow: visible;
+  color: var(--fg-0);
+  background:
+    linear-gradient(rgba(18, 10, 4, 0.62), rgba(14, 8, 3, 0.72)),
+    url("/static/img/wood/dark.png") repeat;
+  background-size: auto, 256px 256px;
+  border-image: url("/static/img/wood/dark-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.55);
+}
+
+.lib-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: var(--fg-0);
+}
+
+/* Sticky sort-column header. Pins below .lib-sticky-strip — the JS-measured
+ * --lib-sticky-h drives the offset so this never overlaps. The opaque maple
+ * background matches the strip above so the seam reads as one continuous
+ * top bar. */
+.lib-table thead th {
+  position: sticky;
+  top: calc(44px + var(--lib-sticky-h, 110px));
+  z-index: 5;
+  text-align: left;
+  padding: 9px 10px;
+  color: oklch(0.30 0.04 50);
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.94), rgba(244, 232, 210, 0.96)),
+    url("/static/img/wood/light.png") repeat;
+  background-size: auto, 256px 256px;
+  border-bottom: 2px solid rgba(60, 40, 20, 0.40);
+  box-shadow: 0 4px 8px rgba(20, 12, 4, 0.34);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.lib-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.lib-table th.sortable:hover { color: oklch(0.42 0.16 50); }
+
+.sort-arrow { opacity: 0.75; }
+
+/* Row = a space between two fret wires. Darker stripe on even rows reads
+ * like the alternating shadow you get along a fretboard. */
+.lib-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lib-row td {
+  padding: 10px 10px;
+  color: var(--fg-0);
+  vertical-align: middle;
+  /* Metallic "fret wire" — silver gradient line under each row. */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 -1px 0 rgba(220, 220, 230, 0.22),
+    inset 0 -2px 0 rgba(80, 80, 90, 0.18);
+  background: transparent;
+}
+.lib-row:nth-child(even) td { background: rgba(255, 255, 255, 0.018); }
+.lib-row:hover td {
+  background: rgba(220, 180, 100, 0.10);
+  color: #ffffff;
+}
+
+/* Position-marker inlays: subtle pale dots at fret 3 / 5 / 7 / 9, and a
+ * double dot at fret 12 (~24-row octave). Pure ::before pseudo on the
+ * first cell so we don't touch row markup. */
+.lib-row:nth-child(3) .lib-cell-title::before,
+.lib-row:nth-child(5) .lib-cell-title::before,
+.lib-row:nth-child(7) .lib-cell-title::before,
+.lib-row:nth-child(9) .lib-cell-title::before,
+.lib-row:nth-child(15) .lib-cell-title::before,
+.lib-row:nth-child(17) .lib-cell-title::before,
+.lib-row:nth-child(19) .lib-cell-title::before,
+.lib-row:nth-child(21) .lib-cell-title::before {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 240, 230, 0.85) 0%, rgba(200, 195, 180, 0.5) 60%, rgba(120, 115, 100, 0.2) 100%);
+  box-shadow: 0 0 4px rgba(245, 240, 230, 0.35);
+  vertical-align: middle;
+}
+/* Octave marker: double dot at row 12. */
+.lib-row:nth-child(12) .lib-cell-title::before {
+  content: "● ●";
+  display: inline-block;
+  margin-right: 6px;
+  color: rgba(245, 240, 230, 0.65);
+  font-size: 7px;
+  letter-spacing: 2px;
+  vertical-align: middle;
+  text-shadow: 0 0 3px rgba(245, 240, 230, 0.3);
+}
+
+.lib-cell-title { cursor: pointer; color: #ffffff; }
+.lib-title-text {
+  font-weight: 600;
+  color: #ffffff;
+  transition: color 0.15s;
+}
+.lib-row:hover .lib-title-text { color: oklch(0.92 0.13 78); }
+
+.lib-cell-artist,
+.lib-cell-year { color: rgba(255, 255, 255, 0.78); }
+
+.lib-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.lib-badge-genre {
+  background: oklch(0.84 0.16 75 / 0.22);
+  color: oklch(0.94 0.13 80);
+  border: 1px solid oklch(0.84 0.16 75 / 0.35);
+}
+
+.lib-badge-fmt {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.80);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* Fingering presence marker — distinctive hand icon next to the title */
+.lib-finger-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 7px;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+.lib-finger-mark.is-ok {
+  color: oklch(0.85 0.15 150);
+  background: oklch(0.35 0.12 150 / 0.30);
+  border: 1px solid oklch(0.55 0.15 150 / 0.5);
+}
+.lib-finger-mark.is-old {
+  color: oklch(0.90 0.14 65);
+  background: oklch(0.40 0.15 55 / 0.30);
+  border: 1px solid oklch(0.65 0.18 60 / 0.5);
+}
+/* Chord diagram badge — shown when the file has embedded chord diagrams */
+.lib-chord-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  border-radius: 4px;
+  color: oklch(0.80 0.12 260);
+  background: oklch(0.35 0.10 260 / 0.28);
+  border: 1px solid oklch(0.55 0.12 260 / 0.45);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.lib-chord-ic { display: block; }
+
+.lib-finger-mark .lib-finger-ic { display: block; }
+.lib-finger-warn {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 10px;
+  line-height: 1;
+  color: oklch(0.95 0.16 75);
+  text-shadow: 0 0 2px #000;
+}
+
+/* Checkbox column */
+.col-check { width: 32px; text-align: center; }
+.lib-cell-check { width: 32px; text-align: center; vertical-align: middle; }
+.lib-cell-check input[type="checkbox"],
+.col-check input[type="checkbox"] {
+  width: 15px; height: 15px;
+  accent-color: var(--signal);
+  cursor: pointer;
+}
+
+/* Selection action bar — sits at the top of the list, inside the sticky strip */
+.lib-selection-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 8px 0 0;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  flex-wrap: wrap;
+}
+.lib-selection-count {
+  font-size: 13px;
+  color: var(--fg-1);
+  flex: 0 0 auto;
+}
+.lib-calc-btn {
+  gap: 6px;
+}
+.lib-calc-status {
+  font-size: 12px;
+  color: var(--fg-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Insert-fingerings toolbar button — labeled, so it must size to its content
+   (icon + "Doigtés") rather than the fixed 32px square the other .tx-btn use,
+   otherwise the label overflows the button box. */
+#btn-insert-fingerings {
+  width: auto;
+  gap: 5px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+#btn-insert-fingerings.is-needed {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+#btn-insert-fingerings.is-outdated {
+  color: oklch(0.78 0.18 60);
+  border-color: oklch(0.55 0.18 60 / 0.6);
+}
+/* Busy state: hide both glyph and label so only the spinner shows. */
+#btn-insert-fingerings.is-busy .btn-insert-label { visibility: hidden; }
+.btn-insert-label {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.lib-cell-actions {
+  display: flex;
+  gap: 4px;
+  min-width: 72px;
+}
+
+.lib-btn-info,
+.lib-btn-dl {
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  color: var(--fg-2);
+  transition: all 0.15s;
+}
+
+.lib-btn-info:hover,
+.lib-btn-dl:hover {
+  background: var(--bg-2);
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+.lib-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--fg-2);
+  font-size: 14px;
+}
+
+/* Song info panel (side drawer) */
+.song-info-panel {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  bottom: 0;
+  width: 340px;
+  background: var(--bg-1);
+  border-left: 1px solid var(--line-2);
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.song-info-panel.open { transform: translateX(0); }
+
+.song-info-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--fg-2);
+  padding: 4px 8px;
+  border-radius: var(--r-1);
+  transition: color 0.15s, background 0.15s;
+}
+
+.song-info-close:hover { color: var(--fg-0); background: var(--bg-2); }
+
+.song-info-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-right: 30px;
+  color: var(--fg-0);
+}
+
+.song-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.song-info-table th {
+  text-align: left;
+  padding: 6px 8px;
+  color: var(--fg-2);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  width: 40%;
+  vertical-align: top;
+}
+
+.song-info-table td {
+  padding: 6px 8px;
+  color: var(--fg-0);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.song-info-table tr { border-bottom: 1px solid var(--line-2); }
+
+.song-info-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.song-info-loading {
+  text-align: center;
+  color: var(--fg-2);
+  padding: 40px 0;
+  font-size: 14px;
+}
+
+/* ═══════════════ Settings Page ═══════════════ */
+.settings-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.settings-nav-btn {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  font-size: 12px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+/* All text buttons inside the settings panel override the icon-size defaults */
+.settings-wrap .tx-btn {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 14px;
+}
+#set-back-viewer:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.settings-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.settings-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--fg-0);
+}
+
+.settings-section {
+  margin-bottom: 32px;
+  background: var(--bg-2);
+  border-radius: var(--r-4);
+  padding: 20px;
+  border: 1px solid var(--line-2);
+}
+
+.settings-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-2);
+  margin-bottom: 16px;
+}
+
+.settings-field { margin-bottom: 16px; }
+
+.settings-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.settings-inline-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.settings-slider-row {
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  max-width: 360px;
+  margin-top: 10px;
+}
+
+.settings-slider-row input[type="range"] {
+  width: 100%;
+}
+
+.settings-slider-row output {
+  font: 600 13px/1 var(--font-ui, inherit);
+  text-align: right;
+  color: var(--fg-1);
+}
+
+.settings-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--fg-0);
+}
+
+.settings-field .settings-inline-check {
+  display: flex;
+  margin-bottom: 0;
+}
+
+.settings-field .settings-slider-row label {
+  margin-bottom: 0;
+}
+
+.settings-path-row { display: flex; gap: 8px; }
+
+.settings-path-row input[type="text"],
+.settings-text-input,
+.settings-select,
+.settings-textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  color: var(--fg-0);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: var(--mono);
+}
+
+.settings-select {
+  min-width: 0;
+  height: 34px;
+  font-family: var(--font-ui, inherit);
+}
+
+.settings-textarea {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  font-family: var(--font-ui, inherit);
+  line-height: 1.4;
+}
+
+.settings-grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+.settings-binding-row {
+  display: grid;
+  grid-template-columns: 110px minmax(150px, 1fr) minmax(170px, 1fr) max-content;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--line-2);
+  margin: 16px 0;
+}
+
+.settings-path-row input:focus,
+.settings-text-input:focus,
+.settings-select:focus,
+.settings-textarea:focus { border-color: var(--signal); }
+
+.settings-hint {
+  font-size: 12px;
+  color: var(--fg-2);
+  margin-top: 4px;
+}
+
+/* ═══════════════ Instrument Picker ═══════════════ */
+.instr-picker-btn {
+  font-size: 11px;
+  padding: 0 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.6;
+  color: inherit;
+  transition: opacity 0.15s;
+  vertical-align: middle;
+}
+.instr-picker-btn:hover { opacity: 1; }
+
+.instr-dropdown {
+  position: fixed;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 999;
+  width: 260px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px 0;
+  animation: fadeIn 0.12s ease;
+}
+
+.instr-category {
+  padding: 4px 12px 2px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-2);
+  background: none;
+}
+
+.instr-item {
+  display: block;
+  width: 100%;
+  padding: 6px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--fg-0);
+  transition: background 0.1s;
+}
+
+.instr-item:hover {
+  background: var(--signal);
+  color: #000;
+}
+
+.instr-item.active {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════ Soundfont Panel ═══════════════ */
+.sf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-height: 40px;
+}
+
+.sf-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  gap: 12px;
+  flex-wrap: wrap;
+  transition: border-color 0.2s;
+}
+
+.sf-row.active {
+  border-color: var(--signal);
+}
+
+.sf-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sf-size {
+  font-size: 11px;
+  color: var(--fg-2);
+  flex-shrink: 0;
+}
+
+.sf-active-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: var(--signal);
+  color: #000;
+  flex-shrink: 0;
+}
+
+.sf-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sf-empty, .sf-loading {
+  color: var(--fg-2);
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}
+
+.sf-upload-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sf-upload-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--line-2);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--fg-0);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.sf-upload-label:hover {
+  border-color: var(--signal);
+  background: var(--signal-soft);
+}
+
+.sf-upload-status {
+  font-size: 12px;
+  color: var(--fg-2);
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE / ADAPTIVE DESIGN
+   Breakpoints: mobile <640px, tablet 640-1024px
+   ═══════════════════════════════════════════════ */
+
+/* Touch-friendly tap targets */
+@media (hover: none) {
+  button, a, .lib-row, .track-card {
+    min-height: 44px;
+  }
+  .lib-btn-info, .lib-btn-dl {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* ── Tablet (640-1024px) ── */
+@media (max-width: 1024px) {
+  .song-info-panel { width: 300px; }
+
+  .lib-cell-artist,
+  .lib-cell-year { display: none; }
+
+  .settings-wrap { padding: 16px; }
+}
+
+/* ── Mobile (<640px) ── */
+@media (max-width: 640px) {
+  /* Header */
+  .app-header { padding: 0 8px; }
+  .header-meta { display: none; }
+
+  /* Track tabs */
+  #track-tabs-bar {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  #track-tabs-bar::-webkit-scrollbar { display: none; }
+
+  /* Library table — card layout on mobile */
+  .lib-table thead { display: none; }
+  .lib-table, .lib-table tbody, .lib-table tr { display: block; width: 100%; }
+  .lib-row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 4px;
+    position: relative;
+  }
+  .lib-cell-title {
+    flex: 1 1 100%;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .lib-cell-artist {
+    flex: 1 1 auto;
+    font-size: 12px;
+    color: var(--fg-2);
+  }
+  .lib-cell-genre { flex: 0 0 auto; }
+  .lib-cell-year { flex: 0 0 auto; font-size: 12px; color: var(--fg-2); }
+  .lib-cell-format { flex: 0 0 auto; }
+  .lib-cell-actions {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Song info panel: full width on mobile */
+  .song-info-panel {
+    width: 100%;
+    top: 44px;
+    border-left: none;
+    border-top: 1px solid var(--line-2);
+  }
+
+  /* Toolbar: compact */
+  #toolbar {
+    padding: 4px 6px;
+  }
+  .toolbar-right .ic-btn > span,
+  .toolbar-right .ic-btn > .btn-label { display: none; }
+
+  /* Search bar: stacked */
+  .lib-search-bar {
+    flex-direction: column;
+  }
+  .lib-search-bar input[type="search"],
+  .lib-search-bar select { width: 100%; }
+
+  /* Settings */
+  .settings-wrap { padding: 12px 8px; }
+  .settings-path-row { flex-direction: column; }
+  .settings-path-row .tx-btn { align-self: flex-end; }
+
+  /* Soundfont rows */
+  .sf-row { flex-direction: column; align-items: flex-start; }
+
+  /* Track grid */
+  .track-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Tab container: full width */
+  #tab-container { margin: 0; }
+
+  /* Hand viz panel: smaller on mobile */
+  #hand-viz-panel {
+    width: min(280px, 90vw) !important;
+    min-width: 0;
+    height: min(440px, 78vh) !important;
+    min-height: 320px;
+  }
+}
+
+/* ── Landscape phone ── */
+@media (max-width: 640px) and (orientation: landscape) {
+  .app-header { height: 36px; }
+  #tab-viewer { margin-top: 36px; height: calc(100vh - 36px); }
+}
+
+/* ── Touch swipe support ── */
+@media (pointer: coarse) {
+  #tab-container { touch-action: pan-y; }
+  .lib-table-wrap { -webkit-overflow-scrolling: touch; }
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   AUDIT BANNER — per-movement quality / system-limit verdicts
+   ───────────────────────────────────────────────────────────────────────── */
+
+.audit-banner {
+  margin: 0 12px 4px;
+  padding: 5px 12px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-left: 3px solid rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.70);
+  min-height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.audit-banner.audit-overall-clean    { border-left-color: #6cc26c; border-color: rgba(108,194,108,0.25); }
+.audit-banner.audit-overall-suspect  { border-left-color: #f0b955; border-color: rgba(240,185,85,0.25); }
+.audit-banner.audit-overall-bad      { border-left-color: #ef6e5b; border-color: rgba(239,110,91,0.30); background: rgba(239, 110, 91, 0.06); }
+
+.audit-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.audit-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.audit-dot.audit-clean    { background: #6cc26c; }
+.audit-dot.audit-suspect  { background: #f0b955; }
+.audit-dot.audit-bad      { background: #ef6e5b; }
+
+.audit-text { flex: 1 1 auto; }
+
+.audit-toggle {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: inherit;
+  padding: 2px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.audit-toggle:hover { border-color: rgba(255,255,255,0.4); }
+
+.audit-details {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.audit-mvt-row {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.audit-mvt-row .audit-dot { width: 8px; height: 8px; }
+.audit-mvt-row .audit-mvt-name { font-weight: 500; }
+.audit-mvt-row .audit-mvt-meta { opacity: 0.7; margin-left: 6px; font-size: 11px; }
+.audit-mvt-row .audit-mvt-reasons { opacity: 0.75; font-style: italic; }
+
+.audit-mvt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+.audit-mvt-toggle input { margin: 0; }
+
+/* ── Song loading banner + spinner (B3.2 / B2.1) ─────────────────────── */
+.song-loading-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(120, 160, 255, 0.12);
+  border: 1px solid rgba(120, 160, 255, 0.30);
+  color: #cdd6f4;
+  font-size: 13px;
+  font-weight: 600;
+}
+.song-loading-spinner {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(180, 200, 255, 0.35);
+  border-top-color: rgba(180, 200, 255, 0.95);
+  border-radius: 50%;
+  animation: fw-spin 0.7s linear infinite;
+}
+@keyframes fw-spin { to { transform: rotate(360deg); } }
+/* Tabs are visually dimmed while a solve is in flight (set inline in JS too,
+   so this is just a belt-and-braces cursor hint). */
+#track-tabs-bar.tabs-busy { cursor: progress; }
+
+@media (prefers-reduced-motion: reduce) {
+  .song-loading-spinner { animation-duration: 2s; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Splash screen — branded intro shown on first paint, dismissed on
+   tap/click/Enter.  The "TAP TO START" button is baked into the
+   artwork (splashscreen.jpg), so the whole overlay is the hit target.
+   `contain` letterboxes onto the near-black stage colour, matching the
+   image's own dark backdrop so the fill is invisible.
+   ═══════════════════════════════════════════════════════════════ */
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  /* Artwork is rendered at its native size (1024×572) by default; JS clamps it
+     to 2/3 of the window when the window is too small to show it natively, and
+     scales it up to 4/5 of the window when the window is much larger. The
+     --splash-w / --splash-h custom props carry the JS-computed size; the
+     fallback below (native px) keeps it correct before JS runs. */
+  background: #0c0b0d url("/static/img/splashscreen.jpg") center / var(--splash-w, 1024px) var(--splash-h, 572px) no-repeat;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+#splash-screen.is-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #splash-screen { transition: none; }
+}
+
+/* Loading indicator shown on the splash while the library is streaming */
+#splash-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+#splash-loader.splash-loader-done {
+  opacity: 0;
+}
+.splash-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: rgba(255, 255, 255, 0.65);
+  border-radius: 50%;
+  animation: splash-spin 0.75s linear infinite;
+}
+#splash-load-count {
+  font: 500 10px 'Inter', system-ui, sans-serif;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+@keyframes splash-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-spinner { animation: none; border-top-color: rgba(255,255,255,0.5); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Fingering review panel ("Doigtés à revoir")
+   ═══════════════════════════════════════════════════════════════ */
+.review-panel {
+  width: min(420px, calc(100vw - 56px));
+  height: min(620px, calc(100vh - 32px));
+  min-width: 320px;
+  min-height: 280px;
+}
+/* Toolbar button badge */
+#btn-review { position: relative; }
+.review-badge {
+  position: absolute;
+  top: -4px; right: -4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--signal-deep, #b5722a);
+  color: #fff;
+  font-size: 10px; line-height: 16px; font-weight: 700;
+  text-align: center;
+}
+.review-filters {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2d3036;
+  background: #16181d;
+}
+.review-chip {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: 11px;
+  border: 1px solid #3b3e44; background: transparent;
+  color: #9aa0a8; cursor: pointer; opacity: 0.5;
+}
+.review-chip.is-on { opacity: 1; }
+.review-chip.sev-impossible.is-on { background: rgba(190,60,50,0.22); color: #f0a89f; border-color: #7a3a33; }
+.review-chip.sev-suspect.is-on    { background: rgba(200,140,40,0.20); color: #f0c98a; border-color: #7a5a24; }
+.review-chip.sev-high.is-on       { background: rgba(90,120,200,0.20); color: #a9c0f0; border-color: #3a4a7a; }
+.review-list { flex: 1; overflow-y: auto; padding: 6px 8px; }
+.review-empty { color: #8a909a; font-size: 13px; text-align: center; padding: 24px 8px; }
+.review-item {
+  padding: 8px 10px; margin: 4px 2px;
+  border: 1px solid #2d3036; border-radius: 6px;
+  background: #1a1d22; cursor: pointer;
+}
+.review-item:hover { background: #20242b; }
+.review-item.is-active { border-color: var(--signal, #c9892f); background: #22262d; }
+.review-item-head { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.review-sev { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
+.review-sev.sev-impossible { background: rgba(190,60,50,0.25); color: #f0a89f; }
+.review-sev.sev-suspect    { background: rgba(200,140,40,0.22); color: #f0c98a; }
+.review-sev.sev-high       { background: rgba(90,120,200,0.22); color: #a9c0f0; }
+.review-measure { font-size: 12px; color: #c6cad0; font-weight: 600; }
+.review-reason { font-size: 11px; color: #8f959d; line-height: 1.35; }
+.review-alts { padding: 4px 6px 8px; margin: 0 2px 6px; }
+.review-altnote { font-size: 11px; color: #d0a060; padding: 2px 4px 6px; }
+.review-alt {
+  border: 1px solid #2d3036; border-radius: 6px;
+  background: #14171c; padding: 8px; margin: 6px 0;
+}
+.review-alt.is-current { border-style: dashed; opacity: 0.85; }
+.review-alt-head { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 6px; }
+.review-alt-label { font-weight: 600; color: #d6d8db; }
+.review-alt-cur { font-size: 10px; color: #9aa0a8; border: 1px solid #3b3e44; border-radius: 8px; padding: 0 6px; }
+.review-alt-warn { font-size: 10px; color: #f0a89f; }
+.review-alt-cost { margin-left: auto; font-size: 11px; color: #8f959d; }
+.review-alt-tab { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.review-note {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; color: #c6cad0;
+  background: #1f232a; border: 1px solid #2d3036;
+  border-radius: 4px; padding: 1px 5px 1px 2px;
+}
+.review-dot {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border-radius: 50%;
+  font-size: 9px; font-weight: 700; color: #11130f;
+}
+.review-alt-pick {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 12px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--signal-deep, #9a5f24);
+  background: linear-gradient(180deg, #c98a3f, #9a5f24); color: #fff;
+}
+.review-alt-pick:disabled { opacity: 0.5; cursor: default; filter: grayscale(0.4); }
+
+/* Hand-visualisation embed (shared across the current + alternatives). */
+.review-handviz {
+  margin: 6px 2px 10px;
+  border: 1px solid #2d3036;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #0c0b0d;
+}
+.review-handviz-frame {
+  display: block;
+  width: 100%;
+  height: 230px;
+  border: 0;
+  background: #0c0b0d;
+}
+.review-cur-head { display: flex; align-items: center; gap: 8px; }
+.review-alt-actions { display: flex; align-items: center; gap: 8px; }
+.review-alt-actions .review-alt-pick { margin-left: auto; }
+.review-viz-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600;
+  padding: 4px 9px; border-radius: 5px; cursor: pointer;
+  color: #c6cad0;
+  background: #20242b;
+  border: 1px solid #3b3e44;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.review-viz-btn:hover { background: #2a2f37; color: #fff; }
+.review-viz-btn.is-viz-active {
+  color: var(--signal, #d99a4e);
+  border-color: var(--signal, #d99a4e);
+  background: rgba(217, 154, 78, 0.15);
+}
+/* Reset the uppercase/letter-spacing of the head label only, not the button. */
+.review-cur-head > span:first-child {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: #aeb4bc;
+}
+.review-cur-head .review-viz-btn { margin-left: auto; }
+
+/* ── Review panel: feedback-round refinements ──────────────────────────── */
+/* Force the dark studio look even under the light-maple .floating-panel theme,
+   so every label/diff/legend keeps high contrast. */
+#review-panel.review-panel {
+  background: #15171c !important;
+  color: #d6d8db !important;
+  border: 1px solid #3b3e44 !important;
+  border-image: none !important;
+}
+#review-panel .review-loading { color: #aeb4bc; font-size: 12px; padding: 8px 4px; }
+.review-legend {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  font-size: 10px; color: #aeb4bc;
+  padding: 4px 4px 8px; border-bottom: 1px solid #2d3036; margin-bottom: 6px;
+}
+.review-legend-lbl { font-weight: 600; color: #c6cad0; }
+.review-legend-item { display: inline-flex; align-items: center; gap: 3px; }
+.review-cur-head {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: #aeb4bc; margin: 8px 2px 4px;
+}
+.review-note-pos { font-variant-numeric: tabular-nums; }
+.review-note-pos small { opacity: 0.6; margin: 0 1px; }
+/* High-contrast "constrained voicing" / info note (was barely legible). */
+.review-altnote {
+  font-size: 11.5px; line-height: 1.45; font-weight: 500;
+  color: #f0d2a0;
+  background: rgba(120,80,30,0.22);
+  border: 1px solid #6a4a24; border-radius: 6px;
+  padding: 7px 9px; margin: 6px 2px;
+}
+.review-diff {
+  font-size: 11px; color: #cdd3da; margin: 2px 0 8px;
+  padding: 3px 6px; background: rgba(255,255,255,0.05); border-radius: 4px;
+}
+/* Measure flash when jumping to a flagged spot. */
+.review-flash { fill: rgba(201,137,47,0.35) !important; transition: fill 0.3s; }
+/* Audit-banner entry point. */
+.audit-review-open {
+  margin-left: auto;
+  font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--signal-deep, #9a5f24);
+  background: rgba(201,137,47,0.18); color: var(--signal, #d8a24a);
+}
+.audit-review-open:hover { background: rgba(201,137,47,0.30); }
+.review-item.is-noalt { opacity: 0.5; }
+.review-item.is-noalt .review-sev { filter: grayscale(0.5); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Rig GP-180 floating panel
+   ═══════════════════════════════════════════════════════════════ */
+#rig-panel {
+  width: min(720px, calc(100vw - 40px));
+  max-height: min(600px, calc(100vh - 48px));
+  /* Light wood: vertical grain streaks layered over a warm oak gradient. */
+  background:
+    repeating-linear-gradient(91deg,
+      rgba(150, 110, 66, 0.00) 0px,
+      rgba(150, 110, 66, 0.07) 3px,
+      rgba(120, 84, 46, 0.05) 6px,
+      rgba(150, 110, 66, 0.00) 11px),
+    repeating-linear-gradient(90deg,
+      rgba(120, 84, 46, 0.06) 0px,
+      rgba(120, 84, 46, 0.06) 1px,
+      rgba(150, 110, 66, 0.00) 1px,
+      rgba(150, 110, 66, 0.00) 38px),
+    linear-gradient(180deg, #efddbb 0%, #e6cfa6 48%, #ddc499 100%);
+  color: #2a1f12;
+  border: 1px solid #b7986b;
+  border-image: none !important;
+  box-shadow: 0 10px 32px rgba(50, 32, 12, 0.38);
+}
+#rig-panel .floating-panel-header {
+  background: linear-gradient(180deg, rgba(120, 84, 46, 0.22), rgba(120, 84, 46, 0.10));
+  border-bottom: 1px solid #c0a279;
+}
+#rig-panel .floating-panel-title { color: #2a1f12; font-weight: 700; }
+#rig-panel .floating-panel-btn { color: #4a3520; }
+#rig-panel .floating-panel-btn:hover { color: #1d1408; }
+.rig-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  padding: 10px 12px 12px;
+  flex: 1;
+}
+
+/* AI generation: header buttons + status banner (single unified view).
+   Override .tx-btn's fixed 32x32 square so the text label is not clipped and
+   does not overflow onto the close (×) button. */
+.rig-gen-btn, .rig-save-btn {
+  width: auto;
+  height: auto;
+  min-height: 26px;
+  padding: 3px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.rig-gen-btn:disabled, .rig-save-btn:disabled { opacity: 0.6; cursor: progress; }
+.rig-save-btn { display: none; }  /* shown only once a rig is generated */
+
+.rig-gen-status {
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+}
+.rig-gen-status.busy { background: rgba(28, 96, 180, 0.12); color: #1a548c; border: 1px solid rgba(28, 96, 180, 0.30); }
+.rig-gen-status.error { background: rgba(180, 40, 40, 0.12); color: #9a2a2a; border: 1px solid rgba(180, 40, 40, 0.35); }
+
+.rig-bank-control {
+  border: 1px solid rgba(120, 84, 46, 0.34);
+  border-radius: 6px;
+  background: rgba(255, 251, 243, 0.62);
+  padding: 7px 8px;
+}
+.rig-bank-row {
+  display: grid;
+  grid-template-columns: max-content minmax(180px, 1fr) minmax(140px, 0.8fr) max-content;
+  gap: 6px;
+  align-items: center;
+}
+.rig-bank-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b4f30;
+  font-weight: 800;
+}
+.rig-profile-select,
+.rig-midi-output-select {
+  min-width: 0;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid rgba(120, 84, 46, 0.45);
+  background: rgba(255, 255, 255, 0.74);
+  color: #2a1f12;
+  font-size: 12px;
+  padding: 0 8px;
+}
+.rig-midi-output-select { font-size: 11px; }
+.rig-midi-btn {
+  width: auto;
+  height: 28px;
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.rig-midi-send-btn { font-weight: 800; }
+.rig-bank-status {
+  min-height: 16px;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #4a3520;
+  white-space: pre-wrap;
+}
+.rig-bank-status.error { color: #9a2a2a; }
+
+/* Guitar meta strip */
+.rig-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(120, 84, 46, 0.40);
+  padding-bottom: 8px;
+}
+.rig-meta-item { display: flex; flex-direction: column; gap: 1px; }
+.rig-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b4f30; font-weight: 700; }
+.rig-meta-value { color: #211708; font-size: 12px; font-weight: 600; }
+.rig-guitar-img {
+  display: block;
+  margin-top: 5px;
+  width: 100%;
+  max-width: 180px;
+  height: 64px;
+  object-fit: contain;
+  object-position: left center;
+  border-radius: 5px;
+  mix-blend-mode: multiply;
+}
+.rig-fiabilite-badge {
+  display: inline-block;
+  font-weight: 800; font-size: 11px;
+  padding: 1px 6px; border-radius: 4px; margin-left: 6px;
+  background: rgba(150, 96, 20, 0.22); color: #7a4d0a;
+  border: 1px solid rgba(150, 96, 20, 0.45);
+  vertical-align: middle;
+}
+.rig-fiabilite-badge.grade-a { background: rgba(34, 130, 50, 0.20); color: #1d6e2c; border-color: rgba(34, 130, 50, 0.45); }
+.rig-fiabilite-badge.grade-b { background: rgba(28, 96, 180, 0.18); color: #1a548c; border-color: rgba(28, 96, 180, 0.45); }
+.rig-fiabilite-badge.grade-c { background: rgba(150, 120, 10, 0.20); color: #7a5e08; border-color: rgba(150, 120, 10, 0.45); }
+
+/* GP-180 effect chain */
+.rig-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: stretch;
+}
+.rig-chain-arrow {
+  display: flex;
+  align-items: center;
+  color: #8a6a40;
+  font-size: 14px;
+  padding: 0 1px;
+  align-self: center;
+}
+.rig-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 72px;
+  border: 1px solid rgba(120, 84, 46, 0.40);
+  border-radius: 6px;
+  padding: 6px 4px 5px;
+  background: rgba(255, 251, 243, 0.72);
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.rig-block.active { border-color: #9a5d12; background: rgba(255, 245, 224, 0.92); box-shadow: 0 0 0 1px rgba(154, 93, 18, 0.25); }
+.rig-block.inactive { opacity: 0.45; }
+.rig-block-name {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 800;
+  color: #6b4f30;
+}
+.rig-block.active .rig-block-name { color: #8a4f06; }
+.rig-block-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+  mix-blend-mode: multiply;
+}
+.rig-block-preset {
+  font-size: 9px;
+  text-align: center;
+  color: #2a1f12;
+  font-weight: 600;
+  line-height: 1.25;
+  max-width: 70px;
+  word-break: break-word;
+}
+.rig-block-params {
+  font-size: 8px;
+  text-align: center;
+  color: #6b4f30;
+  line-height: 1.3;
+  max-width: 70px;
+  word-break: break-word;
+}
+
+/* Notes / limites collapsibles */
+.rig-notes-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+.rig-details {
+  border: 1px solid rgba(120, 84, 46, 0.40);
+  border-radius: 5px;
+  background: rgba(255, 251, 243, 0.72);
+}
+.rig-details summary {
+  font-size: 11px;
+  font-weight: 700;
+  color: #4a3520;
+  padding: 5px 8px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.rig-details summary::-webkit-details-marker { display: none; }
+.rig-details summary::before {
+  content: "▸ ";
+  color: #8a6a40;
+  font-size: 10px;
+}
+.rig-details[open] summary::before { content: "▾ "; }
+.rig-text {
+  font-family: var(--mono, monospace);
+  font-size: 11px;
+  color: #33271a;
+  white-space: pre-wrap;
+  padding: 6px 10px 8px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Lib-table rig icon */
+.lib-btn-rig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--signal, #d8a24a);
+  vertical-align: middle;
+  transition: background 0.12s;
+}
+.lib-btn-rig:hover { background: rgba(216,162,74,0.15); }
+
+/* ── Unified notifications (notify.js) ──────────────────────────────
+ * Transient toasts + persistent task overlays (spinner / message / progress).
+ * No OK buttons; tasks auto-dismiss when finished and can be clicked away. */
+#fw-notify-host {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 12px; z-index: 3000; pointer-events: none;
+}
+#fw-notify-host > * { pointer-events: auto; }
+
+.fw-spinner {
+  width: 16px; height: 16px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,0.28); border-top-color: #fff;
+  border-radius: 50%; animation: fw-spin 0.7s linear infinite;
+}
+@keyframes fw-spin { to { transform: rotate(360deg); } }
+
+.fw-toast {
+  display: flex; align-items: center; gap: 9px; max-width: min(520px, 92vw);
+  background: rgba(22,22,26,0.92); color: #f3f3f3;
+  padding: 9px 15px; border-radius: 20px; font-size: 13.5px; line-height: 1.35;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.34); backdrop-filter: blur(6px); cursor: pointer;
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.fw-toast.fw-in { opacity: 1; transform: scale(1); }
+.fw-toast.fw-out { opacity: 0; transform: scale(0.94); }
+.fw-toast--success { background: rgba(20,80,45,0.94); }
+.fw-toast--warn    { background: rgba(120,80,10,0.94); }
+.fw-toast--error   { background: rgba(120,30,30,0.94); }
+
+.fw-task--inline {
+  opacity: 0; transform: scale(0.94);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.fw-task--inline.fw-in { opacity: 1; transform: scale(1); }
+.fw-task--inline.fw-out { opacity: 0; transform: scale(0.94); }
+
+.fw-task--blocking {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(10,10,14,0.46); backdrop-filter: blur(2px);
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.fw-task--blocking.fw-in { opacity: 1; }
+.fw-task--blocking.fw-out { opacity: 0; }
+
+.fw-task-card {
+  min-width: 240px; max-width: min(440px, 92vw);
+  background: rgba(24,24,28,0.92); color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; padding: 15px 18px;
+  box-shadow: 0 10px 34px rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+}
+.fw-task--inline .fw-task-card {
+  box-shadow: 0 6px 22px rgba(0,0,0,0.34); border-radius: 22px; padding: 10px 16px; min-width: 0;
+}
+.fw-task-head { display: flex; align-items: center; gap: 11px; }
+.fw-task-title { font-weight: 600; font-size: 13.5px; margin-bottom: 2px; }
+.fw-task-msg { font-size: 13.5px; line-height: 1.35; }
+
+.fw-task-progress {
+  margin-top: 11px; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,0.14); overflow: hidden;
+}
+.fw-task-progress-fill {
+  height: 100%; width: 0%; border-radius: 3px;
+  background: linear-gradient(90deg, #4da3ff, #7bc1ff); transition: width 0.2s ease;
+}
+
+.fw-task-card.fw-done .fw-spinner,
+.fw-task-card.fw-error .fw-spinner { animation: none; border: none; }
+.fw-task-card.fw-done .fw-spinner::after { content: '✓'; color: #6fe0a0; font-size: 16px; }
+.fw-task-card.fw-error .fw-spinner::after { content: '!'; color: #ff8a8a; font-weight: 700; font-size: 15px; }
+.fw-task-card.fw-error { border-color: rgba(200,60,60,0.5); }

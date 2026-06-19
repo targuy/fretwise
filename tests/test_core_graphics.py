@@ -70,6 +70,32 @@ def test_default_reference_glyph_set_has_expected_glyphs() -> None:
     assert "tab_digit_0" in glyphs
 
 
+def test_render_glyph_clef_branches_on_metadata_clef() -> None:
+    from fretwise.core.backends.svg import _render_glyph
+
+    treble = _render_glyph("clef", x=0.0, y=0.0, size=20.0, metadata={"clef": "treble"})
+    bass = _render_glyph("clef", x=0.0, y=0.0, size=20.0, metadata={"clef": "bass"})
+    perc = _render_glyph("clef", x=0.0, y=0.0, size=20.0, metadata={"clef": "percussion"})
+
+    # Treble and bass draw distinct Unicode musical symbols.
+    assert "\U0001D11E" in treble and "fw-clef-treble" in treble
+    assert "\U0001D122" in bass and "fw-clef-bass" in bass
+    assert "\U0001D11E" not in bass and "\U0001D122" not in treble
+    # Percussion draws a font-free neutral clef: two <rect> bars, not a font
+    # glyph (the Unicode drum-clef char is missing from common browser fonts).
+    assert "fw-clef-percussion" in perc
+    assert perc.count("<rect") == 2
+    assert "\U0001D125" not in perc and "\U0001D11E" not in perc
+
+
+def test_render_glyph_clef_defaults_to_treble_without_metadata() -> None:
+    from fretwise.core.backends.svg import _render_glyph
+
+    rendered = _render_glyph("clef", x=0.0, y=0.0, size=20.0, metadata={})
+    assert "\U0001D11E" in rendered
+    assert "fw-clef-treble" in rendered
+
+
 def test_default_recipe_catalog_has_expected_recipes() -> None:
     recipes = default_recipe_catalog()
     assert "tab_lines" in recipes

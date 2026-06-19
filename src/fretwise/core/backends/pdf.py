@@ -346,16 +346,16 @@ def _draw_tuplet_bracket(
         font_name = "Times-BoldItalic"
         font_size = 10.0
         text_half_w = 5.8
-        # In scene coords Y increases downward (same as SVG).  "down" means the bracket
-        # is placed below the beam line (hooks open downward, away from the staff).
-        hook_y1 = y + 4.2 if direction == "down" else y - 4.2
+        # Direction names the side where the number sits. Hooks open toward the
+        # notes: top-side brackets point down; bottom-side brackets point up.
+        hook_y1 = y - 4.2 if direction == "down" else y + 4.2
         line_width = 1.1
     else:
         margin = 2.5
         font_name = "Times-Italic"
         font_size = 8.0
         text_half_w = 4.2
-        hook_y1 = y + 3.0 if direction == "down" else y - 3.0
+        hook_y1 = y + 3.0 if direction == "up" else y - 3.0
         line_width = 0.8
 
     bx0 = x0 - margin
@@ -401,8 +401,13 @@ def _draw_glyph(
         return
 
     if glyph_id == "clef":
+        clef = str((metadata or {}).get("clef", "treble"))
+        # ReportLab base-14 fonts lack SMuFL clef glyphs, so use the
+        # conventional clef letters: treble = G clef, bass = F clef,
+        # percussion = the neutral two-bar symbol (rendered as "||").
+        char = {"bass": "F", "percussion": "||"}.get(clef, "G")
         canvas.setFont("Times-Roman", max(10.0, size))
-        canvas.drawString(x, y_pdf, "G")
+        canvas.drawString(x, y_pdf, char)
         return
 
     if glyph_id == "time_signature":

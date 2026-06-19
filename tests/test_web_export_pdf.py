@@ -18,6 +18,7 @@ from fretwise.web.app import (
     _load_adapter_and_events,
     _parse_representation_mode,
     _render_core_pdf_payload,
+    _run_core_pipeline_for_events,
     _safe_pdf_filename,
     create_app,
 )
@@ -29,6 +30,10 @@ class _DummyAdapter:
     chord_diagrams: list[Any] = []
     chord_markers: dict[str, str] = {}
     beats_per_measure: float = 4.0
+    measure_time_signatures: dict[int, tuple[int, int]] = {}
+    key_signature_fifths: int = 0
+    time_denominator: int = 4
+    has_anacrusis: bool = False
 
     def parse(self, _path: Path) -> list[NoteEvent]:
         return [
@@ -196,22 +201,162 @@ def test_solve_endpoint_exposes_core_svg_and_representation_mode(
     monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
 
     endpoint = _route_endpoint(app, "/api/solve/{filename}")
-    payload = asyncio.run(
-        endpoint(
-            filename="song.gp",
-            track_id=None,
-            representation_mode="standard+tablature",
-        )
+    payload = endpoint(
+        filename="song.gp",
+        track_id=None,
+        representation_mode="standard+tablature",
     )
     assert payload["representation_mode"] == "standard_tablature"
     assert payload["core_svg"] == "<svg id='core'/>"
     assert payload["core_conformance_issues"] == 2
-    assert payload["results"][0]["string"] == 1
+    # /api/solve no longer runs Viterbi — with no sidecar/embedded fingerings
+    # the guitar track renders as tablature with no finger annotations.
+    assert payload["results"] == []
+    assert payload["has_saved_fingering"] is False
 
 
-def test_export_pdf_core_engine_uses_requested_representation_mode(
+def test_solve_endpoint_caches_repeat_calls(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
+    """Second identical /api/solve call must hit the cache (no re-pipeline)."""
+    from fretwise.web.app import _solve_cache_clear
+
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+    app = create_app(tmp_path)
+    adapter = _DummyAdapter()
+    _solve_cache_clear()
+
+    call_count = {"pipeline": 0, "core": 0}
+
+    def _fake_load(
+        _filepath: Path, *, track_id: int | None = None,
+    ) -> tuple[Any, list[NoteEvent]]:
+        del track_id
+        return adapter, adapter.parse(file_path)
+
+    def _fake_legacy(
+        events: list[NoteEvent], *, rule_preferences: Any = None,
+    ) -> tuple[list[Any], dict[str, int]]:
+        call_count["pipeline"] += 1
+        return [_legacy_result() for _ in events], {"parsed": len(events)}
+
+    def _fake_core(*_args: Any, **kwargs: Any) -> Any:
+        del kwargs
+        call_count["core"] += 1
+        return SimpleNamespace(svg="<svg/>", conformance_issues=[])
+
+    monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
+    monkeypatch.setattr("fretwise.web.app._run_legacy_pipeline", _fake_legacy)
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
+
+    endpoint = _route_endpoint(app, "/api/solve/{filename}")
+    endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    )
+    endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    )
+    # /api/solve never runs the Viterbi pipeline anymore (fingerings come from
+    # the sidecar). The core render runs once and the second call is cached.
+    assert call_count["pipeline"] == 0
+    assert call_count["core"] == 1
+
+
+def test_solve_endpoint_embeds_audit_field(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """/api/solve is now a thin sidecar reader: it does not run Viterbi and so
+    does not auto-compute an audit. The 'audit' field is present but empty when
+    no fingerings are available, and the legacy pipeline is never invoked."""
+    from fretwise.models import Finger, FingeringResult, FingeringState
+
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+    app = create_app(tmp_path)
+
+    class _AdapterWithMeasures(_DummyAdapter):
+        # Override the default Intro marker — keep it simple so the audit
+        # produces a deterministic shape.
+        section_markers = {1: "Movement A", 3: "Movement B"}
+
+        def parse(self, _path: Path) -> list[NoteEvent]:
+            return [
+                NoteEvent(
+                    pitch=64, onset=0.0, duration=0.5, tempo=120.0,
+                    measure_index=1,
+                ),
+                NoteEvent(
+                    pitch=66, onset=1.0, duration=0.5, tempo=120.0,
+                    measure_index=2,
+                ),
+                NoteEvent(
+                    pitch=67, onset=2.0, duration=0.5, tempo=120.0,
+                    measure_index=3,
+                ),
+                NoteEvent(
+                    pitch=69, onset=3.0, duration=0.5, tempo=120.0,
+                    measure_index=4,
+                ),
+            ]
+
+    adapter = _AdapterWithMeasures()
+
+    def _fake_load(
+        _filepath: Path, *, track_id: int | None = None,
+    ) -> tuple[Any, list[NoteEvent]]:
+        del track_id
+        return adapter, adapter.parse(file_path)
+
+    pipeline_calls = {"n": 0}
+
+    def _fake_legacy(
+        events: list[NoteEvent], *, rule_preferences: Any = None
+    ) -> tuple[list[Any], dict[str, int]]:
+        del rule_preferences
+        pipeline_calls["n"] += 1  # must stay 0 — solve never runs Viterbi
+        out: list[FingeringResult] = []
+        for i, ev in enumerate(events):
+            state = FingeringState(
+                string_num=3, fret=5, finger=Finger.INDEX, hand_position=5,
+            )
+            out.append(FingeringResult(
+                note_id=i, note_event=ev, state=state,
+                cost=1.0, alternatives=[],
+            ))
+        return out, {"parsed": len(events)}
+
+    def _fake_core(*_args: Any, **kwargs: Any) -> Any:
+        del kwargs
+        return SimpleNamespace(svg="<svg/>", conformance_issues=[])
+
+    monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
+    monkeypatch.setattr("fretwise.web.app._run_legacy_pipeline", _fake_legacy)
+    monkeypatch.setattr("fretwise.web.app._run_core_pipeline_for_events", _fake_core)
+    # Force ML model off so the test doesn't depend on the ONNX file.
+    monkeypatch.setattr(
+        "fretwise.web.app._get_player_cost_model", lambda: None,
+    )
+
+    endpoint = _route_endpoint(app, "/api/solve/{filename}")
+    payload = endpoint(
+        filename="song.gp", track_id=None,
+        representation_mode="standard+tablature",
+    )
+
+    # Thin-solve contract: audit field present but empty, Viterbi never ran.
+    assert "audit" in payload
+    assert payload["audit"] == {}
+    assert pipeline_calls["n"] == 0
+
+
+def test_export_pdf_uses_legacy_engine_and_shadows_core_conformance(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """Export goes through the legacy renderer (fingering present); the core
+    engine is run in shadow to report conformance via response headers."""
     file_path = tmp_path / "song.gp"
     file_path.touch()
     app = create_app(tmp_path)
@@ -227,18 +372,24 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
 
     captured: dict[str, Any] = {}
 
-    def _fake_render(
-        _filepath: Path,
-        _adapter: Any,
-        _events: list[NoteEvent],
-        *,
-        representation_mode: RepresentationMode,
-    ) -> tuple[bytes, int]:
-        captured["representation_mode"] = representation_mode
-        return b"%PDF-core", 0
+    def _fake_legacy_render(
+        _filepath: Path, _adapter: Any, _events: list[NoteEvent],
+    ) -> bytes:
+        captured["legacy_called"] = True
+        return b"%PDF-legacy"
+
+    def _fake_shadow(
+        _filepath: Path, _adapter: Any, _events: list[NoteEvent],
+        *, representation_mode: RepresentationMode,
+    ) -> tuple[int, bool]:
+        captured["shadow_representation_mode"] = representation_mode
+        return 0, False
 
     monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
-    monkeypatch.setattr("fretwise.web.app._render_core_pdf_payload", _fake_render)
+    monkeypatch.setattr("fretwise.web.app._render_legacy_pdf_payload", _fake_legacy_render)
+    monkeypatch.setattr(
+        "fretwise.web.app._shadow_core_conformance_outcome", _fake_shadow,
+    )
 
     endpoint = _route_endpoint(app, "/api/export/pdf/{filename}")
     response = asyncio.run(
@@ -249,5 +400,95 @@ def test_export_pdf_core_engine_uses_requested_representation_mode(
         )
     )
     assert response.status_code == 200
-    assert response.headers["x-fretwise-pdf-engine"] == "core"
-    assert captured["representation_mode"] == RepresentationMode.TAB_RHYTHM
+    assert response.headers["x-fretwise-pdf-engine"] == "legacy"
+    assert captured["legacy_called"] is True
+    assert captured["shadow_representation_mode"] == RepresentationMode.TAB_RHYTHM
+
+
+def test_run_core_pipeline_for_events_propagates_measure_time_signatures(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """_run_core_pipeline_for_events must pass measure_time_signatures to legacy_parse_to_raw_score.
+
+    Regression test for the Aigle Noir bug: the web handler was calling
+    legacy_parse_to_raw_score without measure_time_signatures, causing the
+    mapper to use a uniform global meter for all measures even when the
+    score contained meter changes (e.g. 4/4 → 3/4 at measure 77).
+    """
+    file_path = tmp_path / "song.gp"
+    file_path.touch()
+
+    class _VariableMeterAdapter(_DummyAdapter):
+        beats_per_measure: float = 4.0
+        measure_time_signatures: dict[int, tuple[int, int]] = {
+            1: (4, 4),
+            77: (3, 4),
+        }
+        key_signature_fifths: int = -2  # Bb major (2 flats)
+
+    adapter = _VariableMeterAdapter()
+    events = [
+        NoteEvent(
+            pitch=60,
+            onset=0.0,
+            duration=1.0,
+            tempo=120.0,
+            articulation=Articulation.NORMAL,
+            dynamic=Dynamic.MF,
+            voice_hint=0,
+            string_hint=1,
+            fret_hint=0,
+            measure_index=1,
+        )
+    ]
+
+    captured: dict[str, Any] = {}
+
+    import fretwise.core.ingest.adapters as ingest_adapters
+
+    original_fn = ingest_adapters.legacy_parse_to_raw_score
+
+    def _capturing_legacy_parse(path: Any, **kwargs: Any) -> Any:
+        captured.update(kwargs)
+        return original_fn(path, **kwargs)
+
+    monkeypatch.setattr(
+        "fretwise.web.app.legacy_parse_to_raw_score",
+        _capturing_legacy_parse,
+    )
+
+    # Run with a fake downstream pipeline that just returns a minimal result
+    from fretwise.core.ingest import RawScore
+
+    def _fake_run_core(raw: RawScore, **kwargs: Any) -> Any:
+        return SimpleNamespace(
+            normalized_score=None,
+            completed_score=None,
+            validation_report=None,
+            decision_outcome=None,
+            canonical_score=None,
+            render_scene=SimpleNamespace(document_scene=SimpleNamespace(pages=[])),
+            conformance_issues=[],
+            svg="<svg/>",
+        )
+
+    monkeypatch.setattr("fretwise.web.app.run_core_pipeline_from_raw", _fake_run_core)
+
+    _run_core_pipeline_for_events(
+        file_path,
+        adapter,
+        events,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+    )
+
+    assert "measure_time_signatures" in captured, (
+        "measure_time_signatures was not passed to legacy_parse_to_raw_score"
+    )
+    assert captured["measure_time_signatures"] == {1: (4, 4), 77: (3, 4)}, (
+        f"Expected measure_time_signatures {{1:(4,4), 77:(3,4)}}, "
+        f"got {captured.get('measure_time_signatures')}"
+    )
+    assert "key_signature_fifths" in captured, (
+        "key_signature_fifths was not passed to legacy_parse_to_raw_score"
+    )
+    assert captured["key_signature_fifths"] == -2

@@ -47,6 +47,7 @@ from pathlib import Path
 from reportlab.lib import colors
 from reportlab.pdfgen import canvas as rl_canvas
 
+from fretwise.config import config
 from fretwise.export.chord_diagram import draw_chord_diagram
 from fretwise.models import Articulation, ChordDiagram, Finger, FingeringResult, SlideType
 from fretwise.patterns.chord_recognition import recognize_chord
@@ -55,45 +56,48 @@ from fretwise.patterns.chord_recognition import recognize_chord
 # Layout constants  (all in pt — 1 pt = 1/72 inch)
 # ---------------------------------------------------------------------------
 
-_PAGE_W = 595.0
-_PAGE_H = 842.0
-_MARGIN = 28.5
+_PAGE_CFG = config().export.page
+_TAB_CFG = config().export.pdf_tab
+
+_PAGE_W: float = _PAGE_CFG.width_pt
+_PAGE_H: float = _PAGE_CFG.height_pt
+_MARGIN: float = _PAGE_CFG.margin_pt
 
 # Left label column that carries "TAB" + string names
-_TAB_LABEL_W = 34.0
+_TAB_LABEL_W: float = _TAB_CFG.tab_label_w_pt
 _STRINGS_X0 = _MARGIN + _TAB_LABEL_W     # 62.5 pt from left edge
 
-_NUM_STRINGS = 6
+_NUM_STRINGS: int = _TAB_CFG.num_strings
 _STRING_NAMES = ("e", "B", "G", "D", "A", "E")   # index 0 = string 1 = high e
-_STRING_SPACING = 10.0                            # pts between adjacent strings
+_STRING_SPACING: float = _TAB_CFG.string_spacing_pt      # pts between adjacent strings
 _STRINGS_HEIGHT = (_NUM_STRINGS - 1) * _STRING_SPACING   # 50 pt
 
 # Rhythm notation (above sys_y = y of string 1)
-_STEM_GAP = 2.5      # gap between string-1 and stem base
-_STEM_H = 14.0       # total stem height above string-1  (was 16, reduced for R09)
+_STEM_GAP: float = _TAB_CFG.stem_gap_pt      # gap between string-1 and stem base
+_STEM_H: float = _TAB_CFG.stem_h_pt          # total stem height above string-1
 
 # Text belt heights above sys_y
-_CHORD_Y = 22.0      # chord-name baseline above sys_y  (was 30)
-_TEMPO_Y = 38.0      # tempo/timesig baseline above sys_y  (was 42)
+_CHORD_Y: float = _TAB_CFG.chord_y_pt        # chord-name baseline above sys_y
+_TEMPO_Y: float = _TAB_CFG.tempo_y_pt        # tempo/timesig baseline above sys_y
 
 # System vertical extents
-_TOP_PAD = 4.0
+_TOP_PAD: float = _TAB_CFG.top_pad_pt
 _ABOVE_STRINGS = _TEMPO_Y + 7.0 + _TOP_PAD    # ~53 pt (was 44)
-_BELOW_STRINGS = 6.0
+_BELOW_STRINGS: float = _TAB_CFG.below_strings_pt
 _SYSTEM_H = _ABOVE_STRINGS + _STRINGS_HEIGHT + _BELOW_STRINGS   # ~109 pt (was 100)
-_INTER_SYSTEM_GAP = 8.0
+_INTER_SYSTEM_GAP: float = _TAB_CFG.inter_system_gap_pt
 _SYSTEM_PITCH = _SYSTEM_H + _INTER_SYSTEM_GAP   # ~117 pt  →  6 systems/page
 
 # Note rendering
 # With 10 pt string spacing:
 #   oval ±3.5 pt, finger cap-top at string_y-3.65 (0.15 pt below oval bottom),
 #   finger text bottom at string_y-7.7, gap to next string = 2.3 pt  ✓
-_OVAL_H = 7.0        # oval covers string line (±3.5 pt from center)
-_OVAL_W1 = 10.0      # 1-digit fret
-_OVAL_W2 = 13.5      # 2-digit fret (10+)
+_OVAL_H: float = _TAB_CFG.oval_h_pt          # oval covers string line (±3.5 pt from center)
+_OVAL_W1: float = _TAB_CFG.oval_w_1digit_pt  # 1-digit fret
+_OVAL_W2: float = _TAB_CFG.oval_w_2digit_pt  # 2-digit fret (10+)
 
 _FRET_FONT = "Helvetica-Bold"
-_FRET_FS = 6.0
+_FRET_FS: float = _TAB_CFG.fret_font_size_pt
 # fret baseline = string_y - fret_fs*0.36  (centres the glyph vertically in oval)
 
 # ── Left-hand (LH) finger annotation — south-west of note oval ──────────────
@@ -102,8 +106,8 @@ _FRET_FS = 6.0
 #   → cap-top  ≈ string_y - 2.0  (below the string line, outside the oval)
 #   → descender ≈ string_y - 7.0  (3 pt clear of the next string line) ✓
 _LH_FINGER_FONT = "Helvetica-Bold"
-_LH_FINGER_FS = 4.5
-_LH_FINGER_Y = -5.5       # baseline offset from string_y
+_LH_FINGER_FS: float = _TAB_CFG.lh_finger_font_size_pt
+_LH_FINGER_Y: float = _TAB_CFG.lh_finger_y_pt    # baseline offset from string_y
 _LH_FINGER_COLOR = colors.Color(0.80, 0.05, 0.05)   # dark red
 
 # ── Right-hand (RH) finger annotation — south-east of note oval ─────────────
@@ -111,30 +115,31 @@ _LH_FINGER_COLOR = colors.Color(0.80, 0.05, 0.05)   # dark red
 #   drawString(x + oval_w/2, string_y + _RH_FINGER_Y, char)
 #   → left edge of text aligns with right edge of oval  (SE corner)
 _RH_FINGER_FONT = "Helvetica-Bold"
-_RH_FINGER_FS = 5.0
-_RH_FINGER_Y = -5.5       # same baseline as LH for visual symmetry
+_RH_FINGER_FS: float = _TAB_CFG.rh_finger_font_size_pt
+_RH_FINGER_Y: float = _TAB_CFG.rh_finger_y_pt    # same baseline as LH for visual symmetry
 _RH_FINGER_COLOR = colors.Color(0.05, 0.05, 0.80)   # dark blue
 
 # Column layout
-_MIN_COL_STEP = 14.0   # minimum x step between consecutive onset columns
-_LEFT_PAD = 9.0        # padding inside measure left edge
+_MIN_COL_STEP: float = _TAB_CFG.min_col_step_pt   # minimum x step between onset columns
+_LEFT_PAD: float = _TAB_CFG.left_pad_pt           # padding inside measure left edge
 
-_MNUM_Y = 31.0         # measure-number baseline above sys_y (between chord and tempo)
-_UNIT_W = 11.0         # pt per rhythmic unit for variable measure widths
-_MIN_MEASURE_W = 42.0  # minimum measure width (whole-note measure)
-_MAX_MEASURE_W = 200.0 # maximum measure width (very dense measure)
+_MNUM_Y: float = _TAB_CFG.measure_number_y_pt  # measure-number baseline above sys_y
+_UNIT_W: float = _TAB_CFG.unit_w_pt            # pt per rhythmic unit for variable measure widths
+_MIN_MEASURE_W: float = _TAB_CFG.min_measure_w_pt  # minimum measure width (whole-note measure)
+_MAX_MEASURE_W: float = _TAB_CFG.max_measure_w_pt  # maximum measure width (very dense measure)
 
 # Rest rendering — centred inside the staff
-_REST_CENTER_Y = 25.0   # offset below sys_y: rest centre = midpoint between strings 3 and 4
-_REST_DISC_R = 6.0       # radius of white disc drawn around small rest symbols
-_REST_DISC_LW = 0.7      # linewidth of the black ring on the disc
+_REST_CENTER_Y: float = _TAB_CFG.rest_center_y_pt  # offset below sys_y: rest centre strings 3/4
+_REST_DISC_R: float = _TAB_CFG.rest_disc_radius_pt     # radius of white disc around small rests
+_REST_DISC_LW: float = _TAB_CFG.rest_disc_line_width_pt  # linewidth of the black ring on the disc
 
 # Default / caps
-_MPS_MIN, _MPS_MAX = 2, 6
+_MPS_MIN: int = _TAB_CFG.measures_per_system_min
+_MPS_MAX: int = _TAB_CFG.measures_per_system_max
 
 # String-name / TAB-label geometry
-_SNAME_X = _MARGIN + 26.0      # x for string-name right edge (just before STRINGS_X0)
-_TAB_X = _MARGIN + 8.0         # x for "T/A/B" centre
+_SNAME_X = _MARGIN + _TAB_CFG.sname_x_offset_pt  # x for string-name right edge
+_TAB_X = _MARGIN + _TAB_CFG.tab_x_offset_pt      # x for "T/A/B" centre
 
 # Colours
 _COL_BLACK = colors.black
@@ -300,11 +305,11 @@ def _draw_title_block(
 
 
 # Chord diagram header constants (compact, first-page-only strip)
-_CD_CELL_W = 7.0   # small cell width for header diagrams
-_CD_CELL_H = 7.0   # small cell height
-_CD_FRET_ROWS = 5
-_CD_MAX = 12       # cap displayed diagrams
-_CD_COLS = 8       # diagrams per row in the header strip
+_CD_CELL_W: float = _TAB_CFG.chord_diagram_cell_w_pt   # small cell width for header diagrams
+_CD_CELL_H: float = _TAB_CFG.chord_diagram_cell_h_pt   # small cell height
+_CD_FRET_ROWS: int = _TAB_CFG.chord_diagram_fret_rows
+_CD_MAX: int = _TAB_CFG.chord_diagram_max       # cap displayed diagrams
+_CD_COLS: int = _TAB_CFG.chord_diagram_cols     # diagrams per row in the header strip
 
 
 def _draw_chord_diagram_header(
@@ -761,7 +766,7 @@ def _get_beam_groups(
     beats_per_measure: float,
     measure_onset: float,
 ) -> list[list[tuple[float, float, float]]]:
-    """Return beam groups for the notes in a measure.
+    """Return meter-aware beam groups for the notes in a measure.
 
     Each group is a list of ``(x, onset, duration)`` tuples for notes that
     should be connected by a primary beam bar.  A group requires ≥ 2 notes.
@@ -769,62 +774,133 @@ def _get_beam_groups(
     Rules applied:
     - Only notes with ``duration < 1.0`` beat (shorter than a quarter note)
       can be beamed.
-    - A group is **broken at each beat boundary** (``measure_onset + N`` for
-      integer N in ``[1, beats_per_measure)``).  In 4/4 this means groups of
-      at most 2 eighth notes or 4 sixteenth notes per beat.
-    - A group is **broken when a rest gap ≥ 1/32 beat (0.115 b)** exists
-      between the end of one note and the start of the next.
+    - The base break is the **quarter-note beat** (``measure_onset + N``) and
+      any **rest gap ≥ 1/32 beat (0.115 b)**.
+    - In simple duple/quadruple meters (e.g. 4/4) a run made up entirely of
+      on-grid eighth notes is then beamed by the **half-note unit** (4 eighths
+      per group in 4/4), matching MuseScore.  Runs containing a sixteenth (or
+      shorter), an off-grid/tuplet onset, or a rest gap stay per beat.
     - A group with a single note is dropped; the note keeps its flags.
 
     Args:
         stem_info: List of ``(x, onset, duration)`` sorted by onset.
-        beats_per_measure: Time-signature numerator (e.g. 4.0 for 4/4).
+        beats_per_measure: Time-signature numerator (e.g. 4.0 for 4/4); the
+            PDF tab always renders an x/4 meter.
         measure_onset: Absolute beat onset of the first beat of this measure.
 
     Returns:
-        List of beam groups; each group is a non-empty list of
-        ``(x, onset, duration)`` tuples.
+        List of beam groups; each group is a list of ``(x, onset, duration)``
+        tuples with ≥ 2 entries.
     """
-    # Beat boundaries within this measure (exclusive of measure start)
+    # Quarter-beat boundaries within this measure (exclusive of measure start).
     beat_boundaries = frozenset(
         round(measure_onset + k, 9)
         for k in range(1, int(beats_per_measure + 0.5))
     )
 
-    groups: list[list[tuple[float, float, float]]] = []
+    # First split at every quarter beat / rest gap, keeping singletons so the
+    # half-bar merge can reason about adjacency.  ``gap_before[i]`` flags a rest
+    # gap immediately before quarter-group ``i`` (which blocks any merge).
+    quarter_groups: list[list[tuple[float, float, float]]] = []
+    gap_before: list[bool] = []
     current: list[tuple[float, float, float]] = []
-
     for x, onset, dur in stem_info:
         if dur >= 1.0:
-            # Quarter note or longer: not beamable — close the current group
-            if len(current) >= 2:
-                groups.append(current)
+            # Quarter note or longer: not beamable — close the current group.
+            if current:
+                quarter_groups.append(current)
             current = []
             continue
-
-        if current:
-            _, prev_onset, prev_dur = current[-1]
-            prev_end = prev_onset + prev_dur
-
-            # Rest gap: gap between end of previous note and start of this one
-            has_rest = (onset - prev_end) >= 0.115
-
-            # Beat crossing: a beat boundary falls between the two onsets
-            crosses_beat = any(prev_onset < bb <= onset for bb in beat_boundaries)
-
-            if has_rest or crosses_beat:
-                if len(current) >= 2:
-                    groups.append(current)
-                current = [(x, onset, dur)]
-            else:
-                current.append((x, onset, dur))
+        if not current:
+            current.append((x, onset, dur))
+            gap_before.append(False)
+            continue
+        _prev_x, prev_onset, prev_dur = current[-1]
+        prev_end = prev_onset + prev_dur
+        has_rest = (onset - prev_end) >= _TAB_CFG.rest_gap_threshold_beats
+        crosses_beat = any(prev_onset < bb <= onset for bb in beat_boundaries)
+        if has_rest or crosses_beat:
+            quarter_groups.append(current)
+            current = [(x, onset, dur)]
+            gap_before.append(has_rest)
         else:
             current.append((x, onset, dur))
+    if current:
+        quarter_groups.append(current)
 
-    if len(current) >= 2:
-        groups.append(current)
+    merged = _merge_eighth_beam_groups_pdf(
+        quarter_groups,
+        gap_before=gap_before,
+        measure_onset=measure_onset,
+        beats_per_measure=beats_per_measure,
+    )
+    return [group for group in merged if len(group) >= 2]
 
-    return groups
+
+def _eighth_beam_unit_pdf(beats_per_measure: float) -> float:
+    """Return the quarter-beat span of one eighth-note beam group (x/4 meter).
+
+    2.0 beams eighths by the half note (4/4, 8/4, …); 1.0 keeps the per-beat
+    unit (e.g. 3/4) so the half-bar merge is a no-op.
+    """
+    num = int(beats_per_measure + 0.5)
+    if num >= 4 and num % 2 == 0:
+        return 2.0
+    return 1.0
+
+
+def _is_pure_eighth_on_grid_pdf(
+    group: list[tuple[float, float, float]], *, measure_onset: float
+) -> bool:
+    """True if every note is an eighth (1 flag) sitting on the 0.5-beat grid."""
+    for _x, onset, dur in group:
+        if _num_flags(dur) != 1:
+            return False
+        rel = onset - measure_onset
+        if abs(round(rel / 0.5) * 0.5 - rel) > 1e-6:
+            return False
+    return True
+
+
+def _merge_eighth_beam_groups_pdf(
+    quarter_groups: list[list[tuple[float, float, float]]],
+    *,
+    gap_before: list[bool],
+    measure_onset: float,
+    beats_per_measure: float,
+) -> list[list[tuple[float, float, float]]]:
+    """Merge adjacent per-beat groups into half-bar eighth-note beam groups.
+
+    Two consecutive quarter groups merge when they fall in the same half-bar
+    window, are contiguous (no rest gap between them), and both contain only
+    on-grid eighth notes — reproducing MuseScore's 4-eighths-per-half-note
+    grouping in 4/4 while leaving sixteenth/tuplet runs per beat.
+    """
+    unit = _eighth_beam_unit_pdf(beats_per_measure)
+    if unit <= 1.0:
+        return quarter_groups
+
+    merged: list[list[tuple[float, float, float]]] = []
+    for idx, group in enumerate(quarter_groups):
+        if not merged:
+            merged.append(list(group))
+            continue
+        prev = merged[-1]
+        same_unit = (
+            int((group[0][1] - measure_onset) // unit)
+            == int((prev[0][1] - measure_onset) // unit)
+        )
+        contiguous = not (idx < len(gap_before) and gap_before[idx])
+        if (
+            same_unit
+            and contiguous
+            and _is_pure_eighth_on_grid_pdf(prev, measure_onset=measure_onset)
+            and _is_pure_eighth_on_grid_pdf(group, measure_onset=measure_onset)
+        ):
+            prev.extend(group)
+        else:
+            merged.append(list(group))
+    return merged
 
 
 def _draw_beams(
@@ -848,8 +924,8 @@ def _draw_beams(
     """
     if not groups:
         return
-    BEAM_H = 2.5
-    BEAM_GAP = 3.0
+    BEAM_H = _TAB_CFG.beam_h_pt
+    BEAM_GAP = _TAB_CFG.beam_gap_pt
     c.setFillColor(_COL_BLACK)
 
     for group in groups:
@@ -951,7 +1027,7 @@ def _compute_rests(
 
     for onset in sorted_onsets:
         gap = onset - cur
-        if gap >= 0.115:   # slightly under 1/32 to tolerate floating-point drift
+        if gap >= _TAB_CFG.rest_gap_threshold_beats:  # ~1/32, tolerates float drift
             rests.extend(_subdivide_rest(cur, gap))
         # Advance cursor to end of this beat (use longest note at this onset)
         max_dur = max(r.note_event.duration for r in onset_map[onset])
@@ -1092,7 +1168,7 @@ def _draw_measure_checksum(
     total_coverage = cur - measure_onset
 
     delta = total_coverage - beats_per_measure
-    if abs(delta) > 0.10:
+    if abs(delta) > _TAB_CFG.checksum_tolerance_beats:
         c.setFillColor(colors.red)
         c.setFont("Helvetica", 4.0)
         label = f"\u03a3={total_coverage:.2f}"
@@ -1899,14 +1975,14 @@ def _measure_w_raw(results: list[FingeringResult], beats_per_measure: float) -> 
     for onset in sorted_onsets:
         dur = onset_min_dur[onset]
         gap = onset - prev_end
-        if gap >= 0.115:  # rest gap >= 1/32 beat
+        if gap >= _TAB_CFG.rest_gap_threshold_beats:  # rest gap >= 1/32 beat
             units += 1.0 / max(gap, 0.125)
         units += 1.0 / max(dur, 0.125)
         prev_end = onset + dur
 
     # Rest at end of measure
     end_gap = (measure_onset + beats_per_measure) - prev_end
-    if end_gap >= 0.115:
+    if end_gap >= _TAB_CFG.rest_gap_threshold_beats:
         units += 1.0 / max(end_gap, 0.125)
 
     if units == 0.0:

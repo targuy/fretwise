@@ -8,13 +8,19 @@
 
 ## 📚 Documentation de référence
 
-Avant toute action, consulter ces trois fichiers de spécifications situés à la racine du projet :
+Avant toute action, consulter ces trois fichiers de spécifications situés dans `docs/` :
 
 | Fichier | Contenu |
 |---|---|
-| `fretwise_architecture.docx` | Architecture fonctionnelle et technique — 6 modules (M1–M6), modèle de données, fonction de coût composite, formats de sortie, roadmap |
-| `fretwise_conception_donnees.docx` | Acquisition des données externes — datasets (DadaGP, GuitarSet, GAPS, Iino 2025), formats d'entrée, pipeline de parsing, bibliothèques Python |
-| `fretwise_plan_projet.docx` | Plan projet — 4 phases, 12 sprints, critères de succès, métriques de suivi, gestion des risques |
+| `docs/fretwise_architecture.md` | Architecture fonctionnelle et technique — 6 modules (M1–M6), modèle de données, fonction de coût composite, formats de sortie, roadmap |
+| `docs/fretwise_conception_donnees.md` | Acquisition des données externes — datasets (DadaGP, GuitarSet, GAPS, Iino 2025), formats d'entrée, pipeline de parsing, bibliothèques Python |
+| `docs/fretwise_plan_projet.md` | Plan projet — 4 phases, 12 sprints, critères de succès, métriques de suivi, gestion des risques |
+
+Carte du **code réel** (complète les specs ci-dessus) :
+
+| Fichier | Contenu |
+|---|---|
+| `docs/architecture-classes.md` | Grandes classes du code : modèles, M1–M6, biomécanique/audit/révision, pipeline de notation `core/`, export, API web, et front office (vues, mains, lecture) + lien front ↔ back |
 
 **Règle :** toute décision d'implémentation doit être traceable à l'une de ces spécifications. En cas d'ambiguïté, demander une clarification plutôt qu'inventer.
 
@@ -83,9 +89,6 @@ Modes de pondération (α, β, γ, δ) :
 ```
 fretwise/
 ├── CLAUDE.md                          ← ce fichier
-├── fretwise_architecture.docx         ← spécifications architecture
-├── fretwise_conception_donnees.docx   ← spécifications données
-├── fretwise_plan_projet.docx          ← plan projet
 │
 ├── pyproject.toml
 ├── README.md
@@ -435,44 +438,49 @@ fretwise solve song.gp5 --mode learning --output song_fingered.json --verbose
 
 # Calibrer le profil joueur
 fretwise calibrate --output data/profiles/mon_profil.json
+
+# Convertir entre formats (court terme — voir roadmap)
+fretwise convert song.gp out.musicxml
+fretwise convert song.musicxml out.gp --to gp
 ```
 
 ---
 
 ## 🚀 Phases de développement
 
-### Phase actuelle : **Phase 1 — MVP**
+### Phase 1 — MVP ✅ **terminée**
 
-**Objectif :** pipeline complet parse → generate → score → optimize, sur fichiers GuitarPro uniquement.
+Pipeline complet parse → generate → score → optimize livré, et largement dépassé depuis :
+- ✅ Modèles de données (`NoteEvent`, `FingeringState`, `FingeringResult`)
+- ✅ Parsers : GuitarPro gp3/4/5 (PyGuitarPro), GP7/8 (GPIF), MusicXML (music21), MIDI (mido)
+- ✅ Générateur d'états, scoring mécanique/musical, Viterbi, profil joueur
+- ✅ CLI (`parse, solve, finger, info, formats, web, gui`), export GP annoté, PDF/SVG/ASCII tab
+- ✅ Suite de tests verte (≥ 1090 tests), couverture large
 
-**Sprint 1 (S1) — Fondations :**
-- [ ] Setup projet (pyproject.toml, pytest, ruff, mypy, GitHub Actions)
-- [ ] Modèles de données : `NoteEvent`, `FingeringState`, `FingeringResult`
-- [ ] Parser GP : adaptateur PyGuitarPro → liste de `NoteEvent`
-- [ ] Générateur d'états : toutes positions valides sur manche 22 frets, accordage EADGBE
-- [ ] 5-10 fichiers GP de test, morceaux simples
+> Le projet a depuis étendu son périmètre bien au-delà du MVP : moteur de notation/gravure (`core/`), web FastAPI + auth multi-utilisateurs OIDC, stockage cloud pluggable (S3/WebDAV/GDrive), composants ML (ONNX), biomécanique.
 
-**Livrable S1 :** `fretwise parse song.gp5` affiche la séquence de notes avec états possibles.
+---
 
-**Sprint 2 (S2) — Scoring et Viterbi :**
-- [ ] Fonction de coût mécanique `C_méca` (4 composantes : shift, étirement, corde, doigt)
-- [ ] Inférence de doigt depuis position (F - P + 1)
-- [ ] Algorithme Viterbi
-- [ ] Stubs M3 (retourne 0 contrainte) et M6 (profil « moyen » fixe)
+### 🎯 Plan à court terme — Interopérabilité des formats (priorité actuelle)
 
-**Livrable S2 :** `fretwise solve song.gp5` produit tablature annotée + JSON.
+**Objectif :** faire de FretWise un convertisseur fiable entre **MusicXML** et **Guitar Pro**, en passant par le modèle canonique interne, avec les doigtés optimisés préservés.
 
-**Sprint 3 (S3) — Intégration :**
-- [ ] CLI complète (parse, solve, export)
-- [ ] Export GP annoté (leftHandFinger via PyGuitarPro)
-- [ ] Benchmark initial sur 10-20 morceaux
-- [ ] README et guide d'installation
+**État de départ :**
+- Import : MusicXML ✅, Guitar Pro ✅ (gp3/4/5 + gp7/8), MIDI ✅
+- Export : Guitar Pro ⚠️ **partiel** (annotation LeftFingering dans un .gp existant, pas de génération from scratch), MusicXML ❌ **absent**, conversion croisée ❌ **absente**
 
-**Critères de succès Phase 1 :**
-- Pipeline complet sans erreur sur 20 morceaux de test
-- Pas de shift impossible, pas d'étirement surhumain dans les doigtés produits
-- Temps de calcul < 1 seconde pour un morceau de 3 minutes à 120 BPM
-- Couverture de tests ≥ 80%
+**Tâches :**
+- [x] **Export MusicXML** — `fretwise solve … -o out.musicxml` ([export/musicxml_writer.py](src/fretwise/export/musicxml_writer.py)) : notes, durées, mesures (quantifiées), tablature `<string>`/`<fret>` + doigté `<fingering>` par note (accords compris). S'ouvre dans MuseScore/Finale/Guitar Pro. Round-trip vérifié.
+- [ ] **Export Guitar Pro complet** — génération d'un `.gp` from scratch (au-delà de la simple injection de doigtés dans un fichier source). *Bloque la conversion MusicXML → GP.*
+- [x] **Conversion GP → MusicXML** via le modèle canonique (signature rythmique réelle préservée, compound meters type 6/8 compris). *MusicXML → GP reste à faire (dépend de l'export GP from scratch).*
+- [x] **CLI `convert`** — `fretwise convert in.gp out.musicxml` (+ `--to {gp,musicxml}`, `--no-fingering`, `--mode`). GP/MusicXML/MIDI → MusicXML ; `.gp` → `.gp` (réannotation). Tempo + signature rythmique lus de la source.
+- [x] **Tests de round-trip** — invariants préservés (hauteurs, rythme, mesures, signature, doigtés) — [tests/test_cli_convert.py](tests/test_cli_convert.py).
+
+**Critères de succès :**
+- Conversion sans perte des informations communes aux deux formats sur les morceaux de test
+- Doigtés (LeftFingering) préservés dans les deux sens
+- Round-trip GP → MusicXML → GP stable (pas de dérive de hauteurs/rythme)
+- Couverture de tests maintenue ≥ 80%
 
 ---
 

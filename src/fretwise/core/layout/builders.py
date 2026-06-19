@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 
+from fretwise.core.notation_mode import has_standard, system_height_for_mode
+
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout.collisions import enforce_min_event_spacing
@@ -19,6 +21,7 @@ from fretwise.core.layout.rules import (
     LayoutRules,
     default_layout_rules,
     event_anchor_x,
+    pitch_to_staff_y,
     raw_measure_width,
     string_row_y,
 )
@@ -35,19 +38,38 @@ class _MeasurePack:
 
 
 def canonical_to_page_layout(
-    score: Score, *, rules: LayoutRules | None = None, mode: str = "standard_tablature"
+    score: Score,
+    *,
+    rules: LayoutRules | None = None,
+    mode: str = "standard_tablature",
+    page_width: float | None = None,
 ) -> PageLayout:
     """Build the first-page layout contract from a canonical score."""
     layout_rules = rules or default_layout_rules()
+    # Override page/content width when the caller supplies a client-side viewport
+    # width (e.g. from the browser's window.innerWidth).  This makes the number
+    # of measures per row scale with the container instead of just stretching notes.
+    if page_width is not None and page_width >= 400.0:
+        layout_rules = replace(
+            layout_rules,
+            page_width=page_width,
+            content_width=max(200.0, page_width - 2.0 * layout_rules.margin_x),
+        )
     # Adjust system height based on rendering mode so vertical spacing is appropriate.
-    # standard_tablature uses the default 168 (standard staff + gap + tab + rhythm zone).
-    # standard-only needs only ~80 px (staff + ledger lines + dynamics room).
-    if mode == "standard":
-        layout_rules = replace(layout_rules, system_height=80.0)
-    elif mode in ("tablature", "tablature_rhythm"):
-        layout_rules = replace(layout_rules, system_height=130.0)
+    # Delegate to notation_mode.system_height_for_mode — single source of truth.
+    layout_rules = replace(layout_rules, system_height=system_height_for_mode(mode))
+    # Standard notation (stems, accidentals, ties) requires wider measure slots than
+    # pure TAB.  Replace the three spacing knobs atomically so all downstream helpers
+    # (raw_measure_width, event_anchor_x, collision enforcer) see consistent values.
+    if has_standard(mode):
+        layout_rules = replace(
+            layout_rules,
+            space_per_beat=layout_rules.standard_space_per_beat,
+            min_note_width=layout_rules.standard_min_note_width,
+            measure_min_width=layout_rules.standard_measure_min_width,
+        )
     systems: list[SystemLayout] = []
-    packs = _measure_packs(score, rules=layout_rules)
+    packs = _measure_packs(score, rules=layout_rules, mode=mode)
     if not packs:
         return PageLayout(
             page_number=1,
@@ -140,13 +162,16 @@ def canonical_to_page_layout(
     )
 
 
-def _measure_packs(score: Score, *, rules: LayoutRules) -> list[_MeasurePack]:
+def _measure_packs(
+    score: Score, *, rules: LayoutRules, mode: str = "standard_tablature"
+) -> list[_MeasurePack]:
     if not score.tracks:
         return []
     track = score.tracks[0]
     if not track.staff_groups or not track.staff_groups[0].staves:
         return []
     staff = track.staff_groups[0].staves[0]
+    clef = getattr(staff, "clef", "treble") or "treble"
 
     packs: list[_MeasurePack] = []
     for measure in staff.measures:
@@ -164,6 +189,8 @@ def _measure_packs(score: Score, *, rules: LayoutRules) -> list[_MeasurePack]:
             measure.voices,
             rules=rules,
             measure_width=raw_width,
+            mode=mode,
+            clef=clef,
         )
         packs.append(
             _MeasurePack(
@@ -179,12 +206,19 @@ def _measure_packs(score: Score, *, rules: LayoutRules) -> list[_MeasurePack]:
 
 
 def _onset_beat_positions(voices: list[object], *, beats_per_measure: int) -> list[float]:
-    """Collect sorted unique onset positions within a measure, in beats."""
+    """Collect sorted unique onset positions within a measure, in beats.
+
+    Uses measure-relative onset (event.onset - measure_start) rather than
+    global-onset modulo, so that measures starting at non-multiple-of-q_beats
+    positions (e.g. after 3/4 or 2/4 bars in an otherwise 4/4 song) are
+    handled correctly.
+    """
+    all_events = [e for v in voices for e in getattr(v, "events", [])]
+    measure_start = min((getattr(e, "onset", 0.0) for e in all_events), default=0.0)
     positions: set[float] = set()
-    beats = max(1, beats_per_measure)
     for voice in voices:
         for event in getattr(voice, "events", []):
-            rel_onset = round(getattr(event, "onset", 0.0) % beats, 9)
+            rel_onset = round(getattr(event, "onset", 0.0) - measure_start, 9)
             positions.add(rel_onset)
     return sorted(positions)
 
@@ -196,6 +230,8 @@ def _measure_event_layouts(
     *,
     rules: LayoutRules,
     measure_width: float | None = None,
+    mode: str = "standard_tablature",
+    clef: str = "treble",
 ) -> tuple[list[EventLayout], list[CollisionIssue]]:
     del measure_number
     # Use the caller-provided width so that proportional x values are consistent
@@ -203,10 +239,17 @@ def _measure_event_layouts(
     width = measure_width if measure_width is not None else rules.measure_min_width
     layouts: list[EventLayout] = []
 
+    # Measure-relative onset: subtract the earliest onset in this measure so
+    # that positions are always in [0, q_beats), even when the canonical measure
+    # starts at a global onset that is not a multiple of q_beats (e.g. after a
+    # 2/4 or 3/4 bar in an otherwise 4/4 song).
+    all_voice_events = [e for v in voices for e in getattr(v, "events", [])]
+    measure_start_onset = min((e.onset for e in all_voice_events), default=0.0)
+
     for voice in voices:
         events = getattr(voice, "events", [])
         for event in events:
-            rel_onset = event.onset % beats_per_measure
+            rel_onset = event.onset - measure_start_onset
             x = event_anchor_x(
                 onset_in_measure=rel_onset,
                 beats_per_measure=beats_per_measure,
@@ -226,7 +269,15 @@ def _measure_event_layouts(
                 string_num = 3
                 if event.tab_info is not None and event.tab_info.string is not None:
                     string_num = max(1, min(6, event.tab_info.string))
-                y = string_row_y(string_num=string_num, rules=rules)
+                if mode in ("standard", "standard_tablature"):
+                    y = pitch_to_staff_y(
+                        event.pitch_notated,
+                        staff_y_origin=rules.row_top,
+                        staff_spacing=rules.standard_staff_spacing,
+                        clef=clef,
+                    )
+                else:
+                    y = string_row_y(string_num=string_num, rules=rules)
                 metadata["pitch_notated"] = str(event.pitch_notated)
                 if event.tab_info is not None and event.tab_info.fret is not None:
                     metadata["tab_fret"] = str(event.tab_info.fret)
@@ -248,29 +299,6 @@ def _measure_event_layouts(
                     metadata=metadata,
                 )
             )
-
-    # Center notes within the measure: shift all events right by half the
-    # trailing space so that left and right margins are approximately equal.
-    if layouts:
-        beats = max(1, beats_per_measure)
-        max_onset_frac = max(
-            (ev.onset % beats) / beats for ev in layouts
-        )
-        tail_frac = 1.0 - max_onset_frac
-        usable_w = max(20.0, width - rules.measure_lr_pad * 2)
-        centering_dx = tail_frac * usable_w / 2.0
-        if centering_dx > 0.5:
-            layouts = [
-                EventLayout(
-                    event_id=ev.event_id,
-                    onset=ev.onset,
-                    duration=ev.duration,
-                    x=ev.x + centering_dx,
-                    y=ev.y,
-                    metadata=dict(ev.metadata),
-                )
-                for ev in layouts
-            ]
 
     adjusted, collision_issues = enforce_min_event_spacing(
         layouts,

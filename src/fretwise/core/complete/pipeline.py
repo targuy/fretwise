@@ -31,4 +31,5 @@ def complete_normalized_score(normalized_score: NormalizedScore) -> CompletedSco
         chord_diagrams=list(normalized_score.chord_diagrams),
         source_trace_map=normalized_score.source_trace_map.copy(),
         completion_log=completion_log,
+        measure_time_signatures=dict(normalized_score.measure_time_signatures),
     )

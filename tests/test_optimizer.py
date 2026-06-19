@@ -166,7 +166,12 @@ class TestViterbiOptimizerWithMockCost:
             0.0 if s is state_a else 10.0
         )
 
-        def transition(s1: FingeringState, s2: FingeringState, note: NoteEvent) -> float:
+        def transition(
+            s1: FingeringState,
+            s2: FingeringState,
+            note: NoteEvent,
+            index: int | None = None,
+        ) -> float:
             if s1 is state_a and s2 is state_c:
                 return 1.0
             if s1 is state_a and s2 is state_d:
