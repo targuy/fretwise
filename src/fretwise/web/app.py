@@ -6,7 +6,10 @@ import asyncio
 import json as _json
 import os
 import re
+import shutil
 import threading
+from collections.abc import Mapping
+from datetime import date as _date
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +26,11 @@ from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 from fretwise.auth.web import current_request_user, setup_auth
 from fretwise.config import config as _fw_config
+from fretwise.control_surface import (
+    build_gp180_control_surface_catalog,
+    find_gp180_control_surface_action,
+    profile_id_for_surface_action,
+)
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
 from fretwise.core.graphics import RepresentationMode
@@ -55,6 +63,30 @@ from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
+from fretwise.rig import (
+    build_rig_index,
+    default_rig_path,
+    find_rig,
+    find_rigs_dir,
+    generated_rig_to_view,
+    parse_rig,
+    partition_has_rig,
+    rig_view_to_markdown,
+)
+from fretwise.rig_bank import (
+    RigBank,
+    RigBankError,
+    RigBinding,
+    RigProfile,
+    RigResolution,
+    list_midi_output_names,
+    load_rig_bank,
+    rig_bank_path,
+    save_rig_bank,
+    send_profile_program_change,
+)
+from fretwise.rig_generation import RigGenerationError, SongRigGenerationService
+from fretwise.rig_pipeline import JsonFactsProvider, generate_grounded_rig
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 from fretwise.storage import (
     CATALOG_NAME,
@@ -67,13 +99,6 @@ from fretwise.storage import (
     safe_score_name,
 )
 from fretwise.storage.local import LocalStorageBackend
-from fretwise.rig import (
-    build_rig_index,
-    find_rig,
-    find_rigs_dir,
-    parse_rig,
-    partition_has_rig,
-)
 
 from . import settings as _settings
 from .songs_index import (
@@ -350,8 +375,9 @@ def _register_routes(app: FastAPI) -> None:
         try:
             objects = list(storage.list_scores())
         except StorageError as exc:
+            message = str(exc)
             async def _err() -> Any:
-                yield _json.dumps({"error": str(exc)}) + "\n"
+                yield _json.dumps({"error": message}) + "\n"
             return StreamingResponse(_err(), media_type="application/x-ndjson")
 
         local_root: Path | None = storage.local_root
@@ -399,20 +425,295 @@ def _register_routes(app: FastAPI) -> None:
         content = rig_path.read_text(encoding="utf-8")
         return JSONResponse(parse_rig(content))
 
+    @app.get("/api/rig-bank")
+    async def get_rig_bank() -> JSONResponse:
+        """Return the structured GP-180 bank used for MIDI activation."""
+        path = _rig_bank_json_path(app)
+        try:
+            bank = load_rig_bank(path)
+        except (OSError, _json.JSONDecodeError, RigBankError) as exc:
+            raise HTTPException(500, f"Invalid rig bank: {exc}")
+        return JSONResponse(bank.to_json())
+
+    @app.post("/api/rig-bank/profile")
+    async def upsert_rig_profile(request: Request) -> JSONResponse:
+        """Add or replace one actionable GP-180 profile in ``rig_bank.json``."""
+        try:
+            body = await request.json()
+            profile = RigProfile.from_json(body)
+            path = _rig_bank_json_path(app)
+            bank = load_rig_bank(path).with_profile(profile)
+            save_rig_bank(path, bank)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        return JSONResponse({"profile": profile.to_json(), "bank": bank.to_json()})
+
+    @app.post("/api/rig-bank/binding")
+    async def upsert_rig_binding(request: Request) -> JSONResponse:
+        """Bind a GP-180 profile to a song, artist, or genre."""
+        try:
+            body = await request.json()
+            binding = RigBinding.from_json(body)
+            path = _rig_bank_json_path(app)
+            bank = load_rig_bank(path).with_binding(binding)
+            save_rig_bank(path, bank)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        return JSONResponse({"binding": binding.to_json(), "bank": bank.to_json()})
+
+    @app.post("/api/rig-bank/resolve")
+    async def resolve_rig_profile(request: Request) -> JSONResponse:
+        """Resolve the profile for a song/artist/genre/profile selection."""
+        try:
+            body = await request.json()
+            resolution = _resolve_rig_bank_request(app, body)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        if resolution is None:
+            raise HTTPException(404, "No matching rig profile")
+        return JSONResponse(resolution.to_json())
+
+    @app.post("/api/rig-bank/recommend")
+    async def recommend_rig_profile(request: Request) -> JSONResponse:
+        """Recommend the nearest GP-180 profile and explain the match."""
+        try:
+            body = await request.json()
+            bank, context = _rig_bank_context_from_request(app, body)
+            recommendation = bank.recommend(**context)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        if recommendation is None:
+            raise HTTPException(404, "No GP-180 profile available")
+        payload = recommendation.to_json()
+        payload["context"] = context
+        return JSONResponse(payload)
+
+    @app.get("/api/rig-bank/midi-outputs")
+    async def get_rig_midi_outputs() -> JSONResponse:
+        """List mido output ports that could drive the GP-180."""
+        try:
+            outputs = list_midi_output_names()
+        except RigBankError as exc:
+            raise HTTPException(500, str(exc))
+        return JSONResponse({"outputs": outputs})
+
+    @app.post("/api/rig-bank/activate")
+    async def activate_rig_profile(request: Request) -> JSONResponse:
+        """Resolve and optionally send MIDI Program Change for a GP-180 profile.
+
+        Body accepts ``profile_id`` or ``filename``/``song``/``artist``/``genre``.
+        ``dry_run`` defaults to true so the UI can preview bytes safely.
+        """
+        try:
+            body = await request.json()
+            resolution = _resolve_rig_bank_request(app, body)
+            if resolution is None:
+                raise RigBankError("No matching rig profile")
+            dry_run = bool(body.get("dry_run", True))
+            messages = resolution.profile.midi_bytes()
+            if not dry_run:
+                port_name = str(body.get("port_name") or "").strip() or None
+                messages = send_profile_program_change(resolution.profile, port_name)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        payload = resolution.to_json()
+        payload["dry_run"] = dry_run
+        payload["sent"] = not dry_run
+        payload["midi"] = [list(message) for message in messages]
+        return JSONResponse(payload)
+
+    @app.get("/api/control-surface/gp180")
+    async def get_gp180_control_surface_catalog() -> JSONResponse:
+        """Return GP-180 actions/layouts for Loupedeck CT/S or other surfaces."""
+
+        try:
+            bank = load_rig_bank(_rig_bank_json_path(app))
+            catalog = build_gp180_control_surface_catalog(bank)
+        except (OSError, _json.JSONDecodeError, RigBankError) as exc:
+            raise HTTPException(500, f"Invalid GP-180 control-surface catalog: {exc}")
+        return JSONResponse(catalog)
+
+    @app.post("/api/control-surface/gp180/action")
+    async def execute_gp180_control_surface_action(request: Request) -> JSONResponse:
+        """Execute one ready GP-180 control-surface action.
+
+        Body: ``{"action_id": str, "port_name"?: str, "dry_run"?: bool}``.
+        ``dry_run`` defaults to false for hardware-surface usage.
+        """
+
+        try:
+            body = await request.json()
+            if not isinstance(body, dict):
+                raise RigBankError("control-surface request body must be an object")
+            action_id = str(body.get("action_id") or "").strip()
+            if not action_id:
+                raise RigBankError("action_id is required")
+            bank = load_rig_bank(_rig_bank_json_path(app))
+            catalog = build_gp180_control_surface_catalog(bank)
+            action = find_gp180_control_surface_action(catalog, action_id)
+            if action is None:
+                raise RigBankError(f"unknown GP-180 control-surface action: {action_id}")
+            if action.get("status") != "ready":
+                raise RigBankError(f"GP-180 action is not MIDI-ready yet: {action_id}")
+            if action.get("kind") == "recommend_context":
+                resolution = _resolve_rig_bank_request(app, body)
+                if resolution is None:
+                    raise RigBankError("No matching rig profile")
+                profile = resolution.profile
+                source = resolution.source
+            else:
+                profile_id = profile_id_for_surface_action(action, bank)
+                if profile_id is None:
+                    raise RigBankError(f"action has no activatable profile: {action_id}")
+                profile = bank.get_profile(profile_id)
+                if profile is None:
+                    raise RigBankError(f"unknown rig profile id: {profile_id}")
+                source = "explicit"
+            dry_run = bool(body.get("dry_run", False))
+            messages = profile.midi_bytes()
+            if not dry_run:
+                port_name = str(body.get("port_name") or "").strip() or None
+                messages = send_profile_program_change(profile, port_name)
+        except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
+            raise HTTPException(400, str(exc))
+        return JSONResponse(
+            {
+                "action_id": action_id,
+                "source": source,
+                "dry_run": dry_run,
+                "sent": not dry_run,
+                "profile": profile.to_json(),
+                "midi": [list(message) for message in messages],
+            }
+        )
+
+    @app.post("/api/rig/generate")
+    async def generate_rig(request: Request) -> JSONResponse:
+        """Generate a GP-180 rig via the local AI wrapper (tools/codex_song_rig.py).
+
+        Body: ``{"artist": str, "title": str, "genre"?: str, "target_guitar"?: str,
+        "refresh"?: bool}``. Returns the wrapper's raw JSON object on success.
+
+        The wrapper is launched as a child process (never a shell) and is slow
+        I/O, so the blocking call is offloaded to a worker thread to keep the
+        event loop responsive. On failure a 502 is returned with the child
+        stderr in the detail — the frontend keeps the previously shown rig.
+        """
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+
+        artist = str(body.get("artist") or "").strip()
+        title = str(body.get("title") or "").strip()
+        if not artist or not title:
+            raise HTTPException(400, "Both 'artist' and 'title' are required")
+        genre = str(body.get("genre") or "").strip() or None
+        target_guitar = str(body.get("target_guitar") or "").strip() or None
+        refresh = bool(body.get("refresh"))
+
+        cfg = _settings.load()
+        service = SongRigGenerationService(
+            python_exe=cfg.get("rig_ai_python") or None,
+            tools_dir=cfg.get("rig_ai_tools_dir") or None,
+            provider=cfg.get("rig_ai_provider") or None,
+            timeout=cfg.get("rig_ai_timeout") or None,
+        )
+        # Grounded pipeline: look up verified facts for this song; when present the
+        # prompt is grounded and the hard facts are written deterministically, then
+        # the rig is validated against the GP-180 palette. Songs without facts are
+        # still generated but flagged ``grounded=False`` and graded down (never an
+        # inflated "A"). Falls back to plain generation if the facts DB is absent.
+        facts = None
+        facts_db = Path(cfg.get("rig_facts_db") or "") if cfg.get("rig_facts_db") else \
+            Path(__file__).resolve().parents[3] / "data" / "song_facts.json"
+        try:
+            if facts_db.is_file():
+                facts = JsonFactsProvider(facts_db).get_facts(artist, title)
+        except (OSError, ValueError):
+            facts = None
+        try:
+            res = await asyncio.to_thread(
+                generate_grounded_rig,
+                service,
+                artist,
+                title,
+                facts=facts,
+                genre=genre,
+                target_guitar=target_guitar,
+                refresh=refresh,
+            )
+        except RigGenerationError as exc:
+            detail = str(exc)
+            if exc.stderr:
+                detail = f"{detail}\n{exc.stderr.strip()}"
+            raise HTTPException(502, detail)
+        # Unified view shape (same as /api/rig) plus grounding metadata so the UI
+        # can badge the rig as ancré / non-ancré and surface device validation flags.
+        return JSONResponse(res.view)
+
+    @app.post("/api/rig/save")
+    async def save_rig(request: Request) -> JSONResponse:
+        """Persist a generated rig as the song's GP-180 ``.md`` sheet.
+
+        Body: ``{"filename": <score name>, "rig": <generated view object>}``.
+        Replaces the existing sheet (backing up the *original* once, as
+        ``<name>.md.bak``, never clobbering that first backup on later saves) or
+        creates a new one at the canonical path. Returns the saved/backup names.
+        """
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+        filename = str(body.get("filename") or "").strip()
+        rig = body.get("rig")
+        if not filename or not isinstance(rig, dict):
+            raise HTTPException(400, "Both 'filename' and 'rig' (object) are required")
+
+        rigs_dir = find_rigs_dir(app.state.fixtures_dir)
+        if not rigs_dir:
+            raise HTTPException(404, "No rigs directory found")
+
+        target = find_rig(filename, rigs_dir) or default_rig_path(filename, rigs_dir)
+        backup_name: str | None = None
+        if target.is_file():
+            backup = target.with_name(target.name + ".bak")
+            # Preserve the very first (curated) version; don't overwrite it on
+            # repeated saves of AI-generated rigs.
+            if not backup.exists():
+                shutil.copy2(target, backup)
+                backup_name = backup.name
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+
+        md = rig_view_to_markdown(rig, date=_date.today().strftime("%m-%d-%Y"))
+        target.write_text(md, encoding="utf-8")
+        return JSONResponse({"saved": target.name, "backup": backup_name})
+
     @app.get("/api/rig-image/{image_name}")
     async def get_rig_image(image_name: str) -> Response:
-        """Serve a pedal image from data/pedals/."""
+        """Serve a rig illustration (pedal or guitar) from data/pedals/ or data/guitars/."""
         if "/" in image_name or "\\" in image_name or ".." in image_name:
             raise HTTPException(400, "Invalid image name")
         project_root = Path(__file__).resolve().parents[3]
-        pedals_dir = project_root / "data" / "pedals"
-        if not pedals_dir.is_dir():
-            pedals_dir = app.state.fixtures_dir.parent / "data" / "pedals"
-        img_path = pedals_dir / image_name
-        if not img_path.is_file():
+        fallback_root = app.state.fixtures_dir.parent
+        img_path: Path | None = None
+        for sub in ("pedals", "guitars"):
+            for root in (project_root / "data", fallback_root / "data"):
+                candidate = root / sub / image_name
+                if candidate.is_file():
+                    img_path = candidate
+                    break
+            if img_path is not None:
+                break
+        if img_path is None:
             raise HTTPException(404, f"Image {image_name!r} not found")
         content = img_path.read_bytes()
-        media_type = "image/jpeg" if image_name.lower().endswith(".jpg") else "image/png"
+        name_lower = image_name.lower()
+        if name_lower.endswith((".jpg", ".jpeg")):
+            media_type = "image/jpeg"
+        else:
+            media_type = "image/png"
         return Response(content=content, media_type=media_type)
 
     @app.get("/api/tracks/{filename}")
@@ -1216,7 +1517,12 @@ def _register_routes(app: FastAPI) -> None:
         # matches the freshly-written file (when the embed succeeded).
         section_markers = dict(getattr(adapter, "section_markers", {}) or {})
         audit = _safe_audit(events, payload.results, section_markers)
-        sidecar_ok = _write_fingering_sidecar(filepath, payload.results, audit=audit, track_id=track_id)
+        sidecar_ok = _write_fingering_sidecar(
+            filepath,
+            payload.results,
+            audit=audit,
+            track_id=track_id,
+        )
 
         return {
             "saved": out_name,
@@ -2249,6 +2555,75 @@ def _load_catalog(app: FastAPI) -> dict[str, dict[str, Any]]:
     return load_index(_settings.load().get("index_path", ""))
 
 
+def _rig_bank_json_path(app: FastAPI) -> Path:
+    """Return the structured GP-180 bank path for the current local library."""
+
+    rigs_dir = find_rigs_dir(app.state.fixtures_dir)
+    if rigs_dir is None:
+        rigs_dir = app.state.fixtures_dir / "rigs"
+    return rig_bank_path(rigs_dir)
+
+
+def _resolve_rig_bank_request(
+    app: FastAPI,
+    body: Mapping[str, object],
+) -> RigResolution | None:
+    """Resolve a rig-bank request using explicit fields plus file metadata."""
+
+    bank, context = _rig_bank_context_from_request(app, body)
+    return bank.resolve(**context)
+
+
+def _rig_bank_context_from_request(
+    app: FastAPI,
+    body: Mapping[str, object],
+) -> tuple[RigBank, dict[str, str | None]]:
+    """Load the rig bank and build song/artist/genre/profile context."""
+
+    if not isinstance(body, dict):
+        raise RigBankError("rig-bank request body must be an object")
+
+    path = _rig_bank_json_path(app)
+    bank = load_rig_bank(path)
+
+    filename = _body_text(body, "filename")
+    explicit_song = _body_text(body, "song") or _body_text(body, "title")
+    explicit_artist = _body_text(body, "artist")
+    explicit_genre = _body_text(body, "genre")
+    song = explicit_song
+    artist = explicit_artist
+    genre = explicit_genre
+    profile_id = _body_text(body, "profile_id")
+
+    if filename:
+        meta = parse_filename_metadata(filename)
+        song = song or meta.get("title", "")
+        artist = artist or meta.get("artist", "")
+        catalog = _load_catalog(app)
+        catalog_row = catalog.get(filename) or catalog.get(Path(filename).stem)
+        if catalog_row:
+            catalog_title = str(catalog_row.get("title") or "").strip()
+            catalog_artist = str(catalog_row.get("artist") or "").strip()
+            catalog_genre = str(catalog_row.get("genre") or "").strip()
+            song = explicit_song or catalog_title or song
+            artist = explicit_artist or catalog_artist or artist
+            genre = explicit_genre or catalog_genre or genre
+
+    return bank, {
+        "song": song or None,
+        "artist": artist or None,
+        "genre": genre or None,
+        "profile_id": profile_id or None,
+    }
+
+
+def _body_text(body: Mapping[str, object], key: str) -> str:
+    raw = body.get(key)
+    if raw is None:
+        return ""
+    return str(raw).strip()
+
+
 def _resolve_file(app: FastAPI, filename: str) -> Path:
     """Resolve a filename to a readable local score path via the storage backend.
 
@@ -3264,7 +3639,7 @@ def _write_fingering_sidecar(
         meta = {
             "algo_version": FINGERING_ALGO_VERSION,
             "model": "phrase_window_v2",
-            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "created_at": datetime.datetime.now(datetime.UTC).isoformat(),
             "source_mtime": source_mtime,
             "track_id": track_id,
         }

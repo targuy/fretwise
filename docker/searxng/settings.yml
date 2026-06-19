@@ -1,0 +1,27 @@
+# Minimal SearXNG config for the FretWise facts worker.
+# IMPORTANT: replace server.secret_key with a unique random string before use:
+#   python -c "import secrets; print(secrets.token_hex(32))"
+use_default_settings: true
+
+server:
+  secret_key: "CHANGE_ME_run_python_secrets_token_hex_32"
+  limiter: false
+  image_proxy: false
+
+search:
+  # The worker queries the JSON API — this MUST include "json".
+  formats:
+    - html
+    - json
+  safe_search: 0
+  autocomplete: ""
+
+engines:
+  - name: google
+    disabled: false
+  - name: bing
+    disabled: false
+  - name: duckduckgo
+    disabled: false
+  - name: brave
+    disabled: false

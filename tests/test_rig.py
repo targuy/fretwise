@@ -24,6 +24,7 @@ from pathlib import Path
 import pytest
 
 from fretwise.rig import (
+    _find_guitar_image,
     _fingerprint,
     _rig_body,
     build_rig_index,
@@ -38,6 +39,7 @@ _SAMPLE_RIG = """# Rig GP-180 — Accept · Balls To The Wall
 
 Artiste : Accept
 Chanson : Balls To The Wall
+Genre : classic rock
 Accordage : Mi standard (E standard)
 Capo : non
 Guitare originale : Non précisé (Les Paul ou Strat)
@@ -189,6 +191,7 @@ def test_parse_rig_extracts_metadata() -> None:
     data = parse_rig(_SAMPLE_RIG)
     assert data["artist"] == "Accept"
     assert data["song"] == "Balls To The Wall"
+    assert data["genre"] == "classic rock"
     assert data["fiabilite"] == "D"
     assert data["accordage"].startswith("Mi standard")
     assert data["capo"] == "non"
@@ -218,12 +221,48 @@ def test_parse_rig_preset_and_param_split() -> None:
 
 def test_parse_rig_maps_pedal_images() -> None:
     reg = parse_rig(_SAMPLE_RIG)["reglages"]
-    assert reg["NR"]["image"] == "01_NR_Gate1_ISP_Decimator.jpg"
+    # Specific art is used only when the file ships; AMP/CAB do.
     assert reg["AMP"]["image"] == "29_AMP_UK45_Marshall_JTM45.jpg"
     assert reg["CAB/IR"]["image"] == "41_CAB_UK4x12_Marshall.jpg"
-    assert reg["EQ"]["image"] == "51_EQ_GuitarEQ1.jpg"
+    # Gate 1 / Guitar EQ 1 have no shipped art -> generic per-category fallback
+    # (never a broken image) keyed off the chain slot.
+    assert reg["NR"]["image"] == "nose gate.png"
+    assert reg["EQ"]["image"] == "equalizer.png"
     # Inactive effects never carry an image.
     assert reg["DST"]["image"] is None
+
+
+def test_parse_rig_active_effect_falls_back_to_category_image() -> None:
+    """An active effect with no specific pedal match gets generic category art."""
+    reg = parse_rig(_SAMPLE_RIG)["reglages"]
+    # "Room" matches no specific reverb pedal, so RVB falls back to the generic.
+    assert reg["RVB"]["active"] is True
+    assert reg["RVB"]["image"] == "reverb.png"
+
+
+@pytest.mark.parametrize(
+    "name, expected",
+    [
+        ("Fender Stratocaster SSS (Gilmour)", "stratocaster sss.jpg"),
+        ("Gibson Les Paul humbuckers", "gibson les paul junior.png"),
+        ("Gibson SG humbuckers (Iommi)", "gibson sg.png"),
+        ("Telecaster (Open G - Richards)", "telecaster.jpg"),
+        ("Strat / Jackson superstrat humbucker", "stratocaster sss.jpg"),
+        ("Non précisé (Les Paul ou Strat)", "gibson les paul junior.png"),
+        (None, None),
+        ("Some unknown lutherie", None),
+    ],
+)
+def test_find_guitar_image_matches_known_models(name, expected) -> None:
+    assert _find_guitar_image(name) == expected
+
+
+def test_parse_rig_sets_guitar_images() -> None:
+    data = parse_rig(_SAMPLE_RIG)
+    # "Non précisé (Les Paul ou Strat)" → longest keyword "les paul" wins.
+    assert data["guitare_originale_image"] == "gibson les paul junior.png"
+    # No "Guitare cible" field in the sample → None.
+    assert data["guitare_cible_image"] is None
 
 
 def test_find_rigs_dir_prefers_local_subdir(tmp_path: Path) -> None:

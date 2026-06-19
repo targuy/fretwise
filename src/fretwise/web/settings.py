@@ -31,6 +31,12 @@ _DEFAULTS: dict[str, Any] = {
     "storage_s3": {},             # {bucket, prefix, endpoint_url, region}
     "storage_webdav": {},         # {base_url}
     "storage_gdrive": {},         # {folder_id}
+    # --- Local AI rig generation (see fretwise.rig_generation) ---
+    # All optional: "" / 0 means "use the wrapper/service default".
+    "rig_ai_provider": "",        # "" = wrapper default (ollama); else codex|lmstudio|openai|mcp
+    "rig_ai_python": "",          # "" = the running interpreter (sys.executable)
+    "rig_ai_tools_dir": "",       # "" = <repo>/tools
+    "rig_ai_timeout": 0,          # 0 = service default (300s)
 }
 
 

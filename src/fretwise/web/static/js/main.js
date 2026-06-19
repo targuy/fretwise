@@ -5,9 +5,10 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, generateRig, recommendRigProfile, saveRig, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
+import { SlopeRenderer } from './slope-renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
 import { task as notifyTask, toast as notifyToast } from './notify.js';
@@ -30,11 +31,14 @@ let _currentTrackKind = 'guitar';
 // the guitar track stuck in Staff view. Defaults to the standard default.
 let _lastGuitarMode = DEFAULT_MODE;
 let renderer = null;
+let _slopeRenderer = null;
 let playback = null;
 let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
 let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
+const _RIG_MIDI_OUTPUT_SESSION_KEY = 'fretwise.rigMidiOutput';
+let _lastRigMidiOutput = _readSessionValue(_RIG_MIDI_OUTPUT_SESSION_KEY);
 // Client-side solve cache: key `${file}#${trackId}#${mode}#${prefsKey}` →
 // /api/solve response. Avoids re-hitting the network (and re-deserialising a
 // large payload) when the user flips back to a track/mode already viewed.
@@ -52,6 +56,8 @@ const _ZOOM_BASE = {
   [MODES.STANDARD_TABLATURE]: 40,   // Mixed  : +40 %
   [MODES.TABLATURE]:          -5,   // Tab    :  -5 %
   [MODES.TABLATURE_RHYTHM]:   -5,   // Tab+Rhythm : same as Tab
+  [MODES.SLOPE]:               0,   // Slope  : full-canvas perspective view
+  [MODES.HAND_3D]:             0,   // 3D     : dedicated hand/guitar view
 };
 // User slider offset relative to each view's baseline (-50 to +50).
 const _viewZoom = {};
@@ -73,12 +79,18 @@ function _solveCacheKey(file, trackId, mode, prefs, svgWidth) {
  */
 function _svgRenderWidth(mode) {
   // Canvas-only modes: no SVG is generated, width is irrelevant.
-  if (mode === MODES.TABLATURE || mode === MODES.TABLATURE_RHYTHM) return undefined;
+  if (mode === MODES.TABLATURE || mode === MODES.TABLATURE_RHYTHM
+      || mode === MODES.SLOPE || mode === MODES.HAND_3D) return undefined;
   const base = _ZOOM_BASE[mode] ?? 0;          // fallback 0 if unknown mode
   const factor = 1 + ((base + (_viewZoom[mode] ?? 0)) / 100);
   const w = Math.round((window.innerWidth - 48) / factor / 50) * 50;
   // Guard against NaN / non-finite values from unknown modes or extreme zoom.
   return Number.isFinite(w) && w >= 400 ? w : undefined;
+}
+
+/** Slope and 3D are frontend-only views; the backend payload is the tablature solve. */
+function _backendRepresentationMode(mode) {
+  return (mode === MODES.SLOPE || mode === MODES.HAND_3D) ? MODES.TABLATURE : mode;
 }
 
 /**
@@ -215,6 +227,8 @@ const tabViewer     = $('#tab-viewer');
 const settingsPage  = $('#settings-page');
 const trackGrid     = $('#track-list');
 const tabCanvas     = $('#tab-canvas');
+const slopeCanvas   = $('#slope-canvas');
+const hand3dViewFrame = $('#hand3d-view-frame');
 const cursorCanvas  = $('#cursor-canvas');
 const coreSvgView   = $('#core-svg-view');
 const legendContent = $('#legend-content');
@@ -261,6 +275,30 @@ function _fmtTime(sec) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+function _speedMultiplier() {
+  const raw = selSpeed ? parseInt(selSpeed.value, 10) : 100;
+  return Math.max(0.1, Math.min(2.0, (Number.isFinite(raw) ? raw : 100) / 100));
+}
+
+function _effectiveTempo(baseTempo) {
+  const tempo = Number(baseTempo ?? playback?.tempo ?? renderer?.tempo ?? 120) || 120;
+  return Math.round(tempo * _speedMultiplier());
+}
+
+function _setTempoText(baseTempo) {
+  const tempo = Math.round(Number(baseTempo ?? playback?.tempo ?? renderer?.tempo ?? 120) || 120);
+  const effective = _effectiveTempo(tempo);
+  const tempoStr = `♩ = ${tempo}`;
+  if (metaTempo) metaTempo.textContent = tempoStr;
+  if (headerMetaTempo) headerMetaTempo.textContent = tempoStr;
+  if (bpmInput) {
+    bpmInput.value = effective;
+    bpmInput.title = effective === tempo
+      ? `BPM: ${tempo}`
+      : `BPM effectif: ${effective} (tempo ${tempo} x ${Math.round(_speedMultiplier() * 100)}%)`;
+  }
+}
+
 // Header extras
 const headerMeta       = $('#header-meta');
 const headerMetaTitle  = $('#header-meta-title');
@@ -290,6 +328,7 @@ const handVizResync = $('#hand-viz-resync');
 const handVizPopout = $('#hand-viz-popout');
 const handVizDrag   = $('#hand-viz-drag');
 let handVizPopupWindow = null;
+let _hand3dFrameLoaded = false;
 
 // ── Page routing ────────────────────────────────────────────────────
 
@@ -498,7 +537,7 @@ function _renderLibTable() {
       <td class="lib-cell-format"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
       <td class="lib-cell-actions">
         <button class="lib-btn-info" title="Song info" data-file="${_esc(f.name)}">ℹ</button>
-        ${f.has_rig ? `<button class="lib-btn-rig" title="Voir rig GP-180" data-file="${_esc(f.name)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/><circle cx="18" cy="13" r="1.5" fill="currentColor"/></svg></button>` : ''}
+        <button class="lib-btn-rig" title="Profil GP-180" data-file="${_esc(f.name)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/><circle cx="18" cy="13" r="1.5" fill="currentColor"/></svg></button>
         <button class="lib-btn-dl" title="Download ${_esc(f.name)}" data-file="${_esc(f.name)}">⬇</button>
       </td>
     `;
@@ -887,9 +926,9 @@ async function selectFile(filename) {
   _solveCache.clear();
   _mutedSecondaryTracks.clear();
   resetReview();
-  // Show the rig button only when this song has a GP-180 rig.
+  // GP-180 profiles can be recommended even when no hand-written rig sheet exists.
   const _fInfo = _allFiles.find((f) => f.name === filename);
-  if (btnRig) btnRig.style.display = _fInfo?.has_rig ? '' : 'none';
+  if (btnRig) btnRig.style.display = _fInfo ? '' : 'none';
   if (rigPanel && rigPanel.style.display !== 'none') _loadRig(filename);
 
   try {
@@ -1042,21 +1081,23 @@ async function selectTrack(trackId, trackName) {
 
   try {
     const representationMode = getSelectedRepresentationMode();
+    const backendMode = _backendRepresentationMode(representationMode);
     const data = await _cachedSolve(
       currentFile,
       trackId,
-      representationMode,
+      backendMode,
       getRulePreferences(),
-      _svgRenderWidth(representationMode),
+      _svgRenderWidth(backendMode),
     );
+    const viewData = { ...data, __client_view_mode: representationMode };
     // A newer selectTrack started while we were awaiting — drop this stale
     // result so it cannot clobber the view the user is now looking at.
     if (myToken !== _selectTrackToken) return;
     // Reconcile kind with the authoritative solve response: if /api/tracks
     // lacked a kind but the solve payload carries one, trust the latter and
     // re-apply the lock (covers a backend that only tags kind on /api/solve).
-    if (data && data.kind != null && data.kind !== _currentTrackKind) {
-      _currentTrackKind = data.kind;
+    if (viewData && viewData.kind != null && viewData.kind !== _currentTrackKind) {
+      _currentTrackKind = viewData.kind;
       if (!_isCurrentTrackGuitar() && selRepresentationMode
           && selRepresentationMode.value !== MODES.STANDARD) {
         selRepresentationMode.value = MODES.STANDARD;
@@ -1064,9 +1105,9 @@ async function selectTrack(trackId, trackName) {
       }
       _applyTrackKindLock();
     }
-    initRenderer(data);
+    initRenderer(viewData);
     // Record chord-diagram availability for this file and update the library badge.
-    if (data?.chord_diagrams?.length && currentFile && !_chordFilesSet.has(currentFile)) {
+    if (viewData?.chord_diagrams?.length && currentFile && !_chordFilesSet.has(currentFile)) {
       _chordFilesSet.add(currentFile);
       const row = document.querySelector(`.lib-row[data-file="${CSS.escape(currentFile)}"]`);
       if (row) {
@@ -1081,10 +1122,10 @@ async function selectTrack(trackId, trackName) {
         }
       }
     }
-    renderAuditBanner(data?.audit, {
+    renderAuditBanner(viewData?.audit, {
       onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
     });
-    _gateReviewButton(data?.audit);
+    _gateReviewButton(viewData?.audit);
     // Restore playback position from the previous track on the new one.
     // Clamp to the new track's measure count to handle tracks of different
     // lengths. Resume playback if it was playing before the switch.
@@ -1340,7 +1381,7 @@ async function exportPDF() {
     const { blob, filename, conformanceIssues } = await fetchExportPdf(
       currentFile,
       currentTrackId,
-      representationMode,
+      _backendRepresentationMode(representationMode),
     );
     _downloadBlob(blob, filename);
     if (conformanceIssues > 0) {
@@ -1470,6 +1511,8 @@ function _applyTrackKindLock() {
       else if (btn.dataset.mode === MODES.STANDARD_TABLATURE) {
         btn.title = 'Standard + Tab (default)';
       } else if (btn.dataset.mode === MODES.TABLATURE) btn.title = 'Tablature only';
+      else if (btn.dataset.mode === MODES.SLOPE) btn.title = 'Perspective playback lane';
+      else if (btn.dataset.mode === MODES.HAND_3D) btn.title = '3D fretting hand';
     }
   });
 
@@ -1496,7 +1539,7 @@ function applyRepresentationModeView(data) {
   // backend echoed back (covers a tab-mode solve issued before the kind was
   // known). Guitar tracks keep the requested / echoed mode unchanged.
   const representationMode = _isCurrentTrackGuitar()
-    ? (data?.representation_mode || getSelectedRepresentationMode())
+    ? (data?.__client_view_mode || data?.representation_mode || getSelectedRepresentationMode())
     : MODES.STANDARD;
   if (selRepresentationMode && selRepresentationMode.value !== representationMode) {
     selRepresentationMode.value = representationMode;
@@ -1508,9 +1551,29 @@ function applyRepresentationModeView(data) {
     metaViewMode.textContent = _representationModeLabel(representationMode);
   }
 
-  const showCore = representationMode !== MODES.TABLATURE;
-  if (tabCanvas) tabCanvas.style.visibility = showCore ? 'hidden' : 'visible';
-  if (cursorCanvas) cursorCanvas.style.visibility = showCore ? 'hidden' : 'visible';
+  const showSlope = representationMode === MODES.SLOPE;
+  const showHand3d = representationMode === MODES.HAND_3D;
+  const showCore = representationMode !== MODES.TABLATURE
+    && representationMode !== MODES.SLOPE
+    && representationMode !== MODES.HAND_3D;
+  if (tabCanvas) {
+    tabCanvas.style.visibility = showCore || showSlope || showHand3d ? 'hidden' : 'visible';
+    tabCanvas.style.display = showSlope || showHand3d ? 'none' : 'block';
+  }
+  if (cursorCanvas) cursorCanvas.style.visibility = showCore || showSlope || showHand3d ? 'hidden' : 'visible';
+  if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
+  if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
+  if (!showHand3d) _releaseHand3dViewFrame();
+  _slopeRenderer?.setVisible(showSlope);
+  if (showHand3d) {
+    const frameReady = _ensureHand3dViewFrame();
+    if (frameReady) {
+      window.requestAnimationFrame(() => {
+        _postHandVizData();
+        _postHandVizTime();
+      });
+    }
+  }
   if (coreSvgView) {
     coreSvgView.style.display = showCore ? 'block' : 'none';
     coreSvgView.innerHTML = showCore && data?.core_svg ? data.core_svg : '';
@@ -1522,6 +1585,32 @@ function applyRepresentationModeView(data) {
       _syncCoreSvgHandOverlay();
     }
   }
+}
+
+function _isHand3dViewVisible() {
+  return getSelectedRepresentationMode() === MODES.HAND_3D
+    && hand3dViewFrame
+    && hand3dViewFrame.style.display !== 'none';
+}
+
+function _ensureHand3dViewFrame() {
+  if (!hand3dViewFrame || !_isHand3dViewVisible()) return false;
+  if (_hand3dFrameLoaded && hand3dViewFrame.contentWindow) return true;
+  const src = hand3dViewFrame.getAttribute('src');
+  if (!src) {
+    const next = hand3dViewFrame.dataset.src || '/static/hand_viz.html?view=3d';
+    hand3dViewFrame.setAttribute('src', next);
+    _hand3dFrameLoaded = true;
+    return false;
+  }
+  _hand3dFrameLoaded = true;
+  return !!hand3dViewFrame.contentWindow;
+}
+
+function _releaseHand3dViewFrame() {
+  if (!hand3dViewFrame || !_hand3dFrameLoaded) return;
+  if (hand3dViewFrame.getAttribute('src')) hand3dViewFrame.removeAttribute('src');
+  _hand3dFrameLoaded = false;
 }
 
 function _fingerGlyph(finger) {
@@ -2002,13 +2091,12 @@ function initRenderer(data) {
   // Update title/artist from API response
   if (data.title) { songTitle.textContent = data.title; if (headerMetaTitle) headerMetaTitle.textContent = data.title; }
   if (data.artist) { songArtist.textContent = data.artist; if (headerMetaTrack) headerMetaTrack.textContent = data.artist; }
-  const tempoStr = `♩ = ${Math.round(data.tempo || 120)}`;
-  if (metaTempo) metaTempo.textContent = tempoStr;
-  if (headerMetaTempo) headerMetaTempo.textContent = tempoStr;
-  if (bpmInput) bpmInput.value = Math.round(data.tempo || 120);
+  _setTempoText(data.tempo || 120);
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
   renderer = new TabRenderer(tabCanvas, data);
+  _slopeRenderer?.destroy();
+  _slopeRenderer = slopeCanvas ? new SlopeRenderer(slopeCanvas, data) : null;
   // Non-guitar tracks carry no fingering: never draw finger annotations and
   // keep the (hidden) fingering toggle inactive. Defensive — the solve
   // response also exposes `fingered:false` for these tracks.
@@ -2018,6 +2106,7 @@ function initRenderer(data) {
   // Update "Insérer les doigtés" button appearance based on sidecar status.
   _updateInsertFingeringsBtn(data);
   renderer.render();
+  _slopeRenderer?.setVisible((data.__client_view_mode || getSelectedRepresentationMode()) === MODES.SLOPE);
   // Notify the floating hand-viz panel that fresh fingering data is ready.
   window.dispatchEvent(new CustomEvent('fretwise:renderer-ready'));
   // Audio is always enabled; the multi-track bar handles per-track muting
@@ -2074,6 +2163,7 @@ function initRenderer(data) {
   } else {
     playback = new PlaybackEngine(renderer, engineOpts);
   }
+  _slopeRenderer?.bindPlayback(playback);
   // Set GM MIDI program (SpessaSynth) and infer MusyngKite instrument (fallback)
   playback.setMidiProgram(data.midi_program ?? -1);
   playback.setInstrument(data.track_name || '');
@@ -2087,9 +2177,11 @@ function initRenderer(data) {
   // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
   playback.onTimeChange = (sec) => {
     if (tcCurrent) tcCurrent.textContent = _fmtTime(sec);
+    _slopeRenderer?.setPlaybackTime(sec, playback);
     const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
     const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
-    if (panelVisible || popupVisible) _postHandVizTime();
+    const hand3dVisible = getSelectedRepresentationMode() === MODES.HAND_3D;
+    if (panelVisible || popupVisible || hand3dVisible) _postHandVizTime();
   };
   // Surface soundfont loading so a big bank (StrixGuitarPack 186 MB, East_West
   // 426 MB) doesn't look like a freeze. Must be wired BEFORE enableAudio() so the
@@ -2171,8 +2263,9 @@ function initRenderer(data) {
 
   // SVG cursor driver for standard / standard+tab modes
   _svgDriver = null;
-  const _svgMode = data.representation_mode || getSelectedRepresentationMode();
-  if (_svgMode !== MODES.TABLATURE && data.measure_regions?.length && coreSvgView) {
+  const _svgMode = data.__client_view_mode || data.representation_mode || getSelectedRepresentationMode();
+  if (_svgMode !== MODES.TABLATURE && _svgMode !== MODES.SLOPE
+      && _svgMode !== MODES.HAND_3D && data.measure_regions?.length && coreSvgView) {
     _svgDriver = new SvgCursorDriver(coreSvgView, data);
     _svgDriver.init();
     _svgDriver.followPlayhead = _followPlayhead;
@@ -2211,26 +2304,33 @@ function initRenderer(data) {
     };
   } else {
     if (coreSvgView) coreSvgView.onclick = null;
-    // Canvas (Tab) view: this engine scrolls #tab-container normally.
-    playback.usesSvgCursor = false;
+    // Canvas (Tab) view scrolls #tab-container. Slope owns its own full-canvas
+    // animation and should not run the legacy tab cursor overlay.
+    playback.usesSvgCursor = _svgMode === MODES.SLOPE || _svgMode === MODES.HAND_3D;
   }
 
   // Speed
   if (selSpeed) {
     selSpeed.value = '100';
+    _slopeRenderer?.setSpeed(1.0);
+    _setTempoText(playback?.tempo || data.tempo || 120);
     selSpeed.onchange = () => {
       const s = parseInt(selSpeed.value, 10) / 100;
       playback.setSpeed(s);
+      _slopeRenderer?.setSpeed(s);
+      _slopeRenderer?.render();
+      _setTempoText(playback.tempo);
     };
   }
 
   if (bpmInput) {
     bpmInput.onchange = () => {
-      const bpm = Math.max(20, Math.min(300, parseInt(bpmInput.value, 10) || 120));
-      bpmInput.value = bpm;
+      const effectiveBpm = Math.max(20, Math.min(300, parseInt(bpmInput.value, 10) || 120));
+      const bpm = Math.max(20, Math.min(300, Math.round(effectiveBpm / _speedMultiplier())));
       if (playback) playback.tempo = bpm;
       if (renderer) { renderer.tempo = bpm; renderer.render(); }
-      if (metaTempo) metaTempo.textContent = `♩ = ${bpm}`;
+      if (_slopeRenderer) { _slopeRenderer.tempo = bpm; _slopeRenderer.render(); }
+      _setTempoText(bpm);
     };
     bpmInput.onkeydown = (e) => { if (e.key === 'Enter') bpmInput.onchange(); };
   }
@@ -2748,6 +2848,7 @@ if (btnFingering) {
       renderer.render();
       return;
     }
+    if (representationMode === MODES.HAND_3D) return;
     _syncCoreSvgFingering();
     _syncCoreSvgAnnotations();
     _syncCoreSvgHandOverlay();
@@ -2977,33 +3078,394 @@ function _toggleRig() {
   }
 }
 
+// Last rig shown in the panel — supplies artist/song to the AI generator.
+let _lastRig = null;
+// Score filename the panel was opened for (used to locate the .md on save).
+let _lastRigFile = null;
+// The most recent generated view (what gets saved to .md). Null until generated.
+let _lastGenerated = null;
+// True once a generation has been shown for the current rig. The next click is a
+// "Régénérer" and must bypass the wrapper cache (otherwise it returns the same
+// cached JSON — the source of "always the same answer").
+let _rigGenDone = false;
+let _rigBank = null;
+let _lastRigResolution = null;
+
 async function _loadRig(filename) {
-  const data = await fetchRig(filename);
-  if (data) _renderRig(data);
+  const data = await fetchRig(filename) || _fallbackRigView(filename);
+  _lastRig = data;
+  _lastRigFile = filename;
+  _rigGenDone = false;
+  _lastGenerated = null;
+  const saveBtn = document.getElementById('rig-save-btn');
+  if (saveBtn) saveBtn.style.display = 'none';
+  _renderRig(data);
+  await _loadRigBankControl(filename, data);
+}
+
+function _fallbackRigView(filename) {
+  const entry = _allFiles.find((f) => f.name === filename) || {};
+  const meta = entry.meta || {};
+  const parsed = _parseArtistTitleFromFilename(filename);
+  return {
+    artist: meta.artist || parsed.artist || '',
+    song: meta.title || parsed.title || filename,
+    genre: meta.genre || '',
+    album: meta.album || '',
+    accordage: '—',
+    capo: '—',
+    guitare_originale: '—',
+    fiabilite: '—',
+    chain: [],
+    reglages: {},
+    notes: '',
+    limites: '',
+    comments: 'Aucune fiche rig écrite pour ce morceau : FretWise conseille un profil GP-180 approchant.',
+  };
+}
+
+function _parseArtistTitleFromFilename(filename) {
+  const stem = (filename || '').replace(/\.[^.]+$/, '').replace(/\s*-\s*\d{1,2}-\d{1,2}-\d{4}\s*$/, '');
+  if (stem.includes(' - ')) {
+    const parts = stem.split(' - ');
+    return { artist: parts[0]?.trim() || '', title: parts.slice(1).join(' - ').trim() || stem };
+  }
+  const idx = stem.indexOf('-');
+  if (idx > 0) {
+    return { artist: stem.slice(0, idx).trim(), title: stem.slice(idx + 1).trim() || stem };
+  }
+  return { artist: '', title: stem };
+}
+
+async function _loadRigBankControl(filename, rigData) {
+  const wrap = document.getElementById('rig-bank-control');
+  const select = document.getElementById('rig-profile-select');
+  const outputSelect = document.getElementById('rig-midi-output-select');
+  const status = document.getElementById('rig-bank-status');
+  if (!wrap || !select || !status) return;
+  wrap.style.display = 'none';
+  select.innerHTML = '';
+  if (outputSelect) outputSelect.innerHTML = '';
+  _lastRigResolution = null;
+  try {
+    _rigBank = await fetchRigBank();
+    const profiles = Array.isArray(_rigBank.profiles) ? _rigBank.profiles : [];
+    if (!profiles.length) {
+      status.className = 'rig-bank-status';
+      status.textContent = 'Aucun profil MIDI dans rig_bank.json.';
+      wrap.style.display = '';
+      return;
+    }
+    const body = {
+      filename,
+      song: rigData?.song || null,
+      artist: rigData?.artist || null,
+      genre: rigData?.genre || null,
+    };
+    const recommendation = await recommendRigProfile(body);
+    const orderedProfiles = _sortRigProfilesForRecommendation(profiles, recommendation, rigData);
+    _renderRigProfileOptions(select, orderedProfiles);
+    if (recommendation?.profile?.id) {
+      select.value = recommendation.profile.id;
+      _lastRigResolution = recommendation;
+      _renderRigBankStatus(recommendation, false);
+    } else {
+      _lastRigResolution = null;
+      status.className = 'rig-bank-status';
+      status.textContent = 'Aucune recommandation disponible. Choisis un profil GP-180 à activer.';
+    }
+    wrap.style.display = '';
+    await _loadRigMidiOutputs();
+  } catch (err) {
+    status.className = 'rig-bank-status error';
+    status.textContent = `Banque GP-180 indisponible : ${err.message || err}`;
+    wrap.style.display = '';
+  }
+}
+
+function _renderRigProfileOptions(select, profiles) {
+  select.innerHTML = '';
+  profiles.forEach((profile) => {
+    const opt = document.createElement('option');
+    opt.value = profile.id;
+    const pgm = Number.isFinite(profile.program) ? `PC ${profile.program}` : 'PC ?';
+    const genre = profile.genre ? ` · ${profile.genre}` : '';
+    opt.textContent = `${profile.name || profile.id} · ${pgm}${genre}`;
+    select.appendChild(opt);
+  });
+}
+
+function _sortRigProfilesForRecommendation(profiles, recommendation, rigData) {
+  const source = recommendation?.source || '';
+  if (!['genre_binding', 'profile_genre', 'genre_match'].includes(source)) {
+    return profiles;
+  }
+  const selectedId = recommendation?.profile?.id || '';
+  const targetGenre = recommendation?.profile?.genre
+    || recommendation?.matched_key
+    || recommendation?.context?.genre
+    || rigData?.genre
+    || '';
+  const targetKey = _textKey(targetGenre);
+  const targetTokens = _textTokens(targetGenre);
+  return [...profiles].sort((a, b) => {
+    const rankA = _rigProfileGenreRank(a, targetKey, targetTokens, selectedId);
+    const rankB = _rigProfileGenreRank(b, targetKey, targetTokens, selectedId);
+    if (rankA !== rankB) return rankA - rankB;
+    const programA = Number.isFinite(a.program) ? a.program : Number.MAX_SAFE_INTEGER;
+    const programB = Number.isFinite(b.program) ? b.program : Number.MAX_SAFE_INTEGER;
+    return programA - programB;
+  });
+}
+
+function _rigProfileGenreRank(profile, targetKey, targetTokens, selectedId) {
+  if (profile?.id === selectedId) return 0;
+  const genreKey = _textKey(profile?.genre || '');
+  if (targetKey && genreKey === targetKey) return 1;
+  const genreTokens = _textTokens(profile?.genre || '');
+  if (targetTokens.size && [...targetTokens].some((token) => genreTokens.has(token))) return 2;
+  if (targetKey && genreKey && (targetKey.includes(genreKey) || genreKey.includes(targetKey))) {
+    return 2;
+  }
+  return 3;
+}
+
+function _textKey(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function _textTokens(value) {
+  return new Set(_textKey(value).split(/\s+/).filter((token) => token.length >= 2));
+}
+
+async function _loadRigMidiOutputs() {
+  const outputSelect = document.getElementById('rig-midi-output-select');
+  const status = document.getElementById('rig-bank-status');
+  if (!outputSelect) return;
+  outputSelect.innerHTML = '';
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = '';
+  defaultOpt.textContent = 'Port par défaut';
+  outputSelect.appendChild(defaultOpt);
+  try {
+    const payload = await fetchRigMidiOutputs();
+    const outputs = Array.isArray(payload.outputs) ? payload.outputs : [];
+    outputs.forEach((name) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      outputSelect.appendChild(opt);
+    });
+    if (_lastRigMidiOutput && outputs.includes(_lastRigMidiOutput)) {
+      outputSelect.value = _lastRigMidiOutput;
+    } else if (outputs.length === 1) {
+      outputSelect.value = outputs[0];
+      _rememberRigMidiOutput(outputs[0]);
+    }
+    if (!outputs.length && status) {
+      status.className = 'rig-bank-status';
+      status.textContent = 'Aucun port MIDI détecté. Branche la GP-180 et vérifie Global > MIDI > USB/Mixed.';
+    }
+  } catch (err) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Backend MIDI indisponible';
+    outputSelect.appendChild(opt);
+    if (status) {
+      status.className = 'rig-bank-status error';
+      status.textContent = `Ports MIDI indisponibles : ${err.message || err}`;
+    }
+  }
+}
+
+function _readSessionValue(key) {
+  try {
+    return window.sessionStorage?.getItem(key) || '';
+  } catch (_err) {
+    return '';
+  }
+}
+
+function _writeSessionValue(key, value) {
+  try {
+    if (value) window.sessionStorage?.setItem(key, value);
+    else window.sessionStorage?.removeItem(key);
+  } catch (_err) {
+    // In private/restricted contexts, the in-memory variable still covers this tab.
+  }
+}
+
+function _rememberRigMidiOutput(value) {
+  _lastRigMidiOutput = value || '';
+  _writeSessionValue(_RIG_MIDI_OUTPUT_SESSION_KEY, _lastRigMidiOutput);
+}
+
+function _renderRigBankStatus(payload, sent) {
+  const status = document.getElementById('rig-bank-status');
+  if (!status) return;
+  const profile = payload?.profile || {};
+  const midi = Array.isArray(payload?.midi)
+    ? payload.midi.map((message) => `[${message.join(', ')}]`).join(' ')
+    : '';
+  const source = payload?.source ? ` · ${payload.source}` : '';
+  const score = Number.isFinite(payload?.score) ? ` · score ${payload.score}` : '';
+  const reasons = Array.isArray(payload?.reasons) && payload.reasons.length
+    ? `\n${payload.reasons.join(' ')}`
+    : '';
+  status.className = 'rig-bank-status';
+  status.textContent = `${sent ? 'Activé' : 'Conseillé'} : ${profile.name || profile.id || 'profil'}${source}${score}${midi ? ` · MIDI ${midi}` : ''}${reasons}`;
+}
+
+async function _previewSelectedRigProfile() {
+  const select = document.getElementById('rig-profile-select');
+  const status = document.getElementById('rig-bank-status');
+  if (!select || !select.value) return;
+  try {
+    const payload = await activateRigProfile({ profile_id: select.value, dry_run: true });
+    _lastRigResolution = payload;
+    _renderRigBankStatus(payload, false);
+  } catch (err) {
+    if (status) {
+      status.className = 'rig-bank-status error';
+      status.textContent = `Prévisualisation MIDI impossible : ${err.message || err}`;
+    }
+  }
+}
+
+async function _activateSelectedRigProfile() {
+  const select = document.getElementById('rig-profile-select');
+  const outputSelect = document.getElementById('rig-midi-output-select');
+  const status = document.getElementById('rig-bank-status');
+  if (!select || !select.value) return;
+  _rememberRigMidiOutput(outputSelect?.value || '');
+  try {
+    const payload = await activateRigProfile({
+      profile_id: select.value,
+      port_name: outputSelect?.value || null,
+      dry_run: false,
+    });
+    _lastRigResolution = payload;
+    _renderRigBankStatus(payload, true);
+  } catch (err) {
+    if (status) {
+      status.className = 'rig-bank-status error';
+      status.textContent = `Activation MIDI impossible : ${err.message || err}`;
+    }
+  }
+}
+
+async function _generateRigForCurrent() {
+  const btn = document.getElementById('rig-gen-btn');
+  const status = document.getElementById('rig-gen-status');
+  const artist = _lastRig?.artist;
+  const song = _lastRig?.song;
+  if (!artist || !song) {
+    if (status) {
+      status.style.display = '';
+      status.className = 'rig-gen-status error';
+      status.textContent = 'Artiste/chanson introuvables pour ce morceau.';
+    }
+    return;
+  }
+  const targetGuitar = _lastRig?.guitare_cible || null;
+  const genre = _lastRig?.genre || null;
+  if (btn) { btn.disabled = true; btn.textContent = '… génération'; }
+  if (status) {
+    status.style.display = '';
+    status.className = 'rig-gen-status busy';
+    status.textContent = `Génération du rig pour « ${artist} · ${song} »… (peut prendre une minute)`;
+  }
+  try {
+    // The endpoint returns the unified view shape (same as /api/rig), so the
+    // generated rig is rendered by the exact same graphical renderer, replacing
+    // the displayed sheet in place — one single representation.
+    const gen = await generateRig(artist, song, { genre, targetGuitar, refresh: _rigGenDone });
+    _rigGenDone = true;
+    _lastGenerated = gen;
+    _lastRig = gen;
+    if (status) { status.style.display = 'none'; status.textContent = ''; }
+    _renderRig(gen);
+    await _loadRigBankControl(_lastRigFile, gen);
+    // Show the save button. Must set an explicit display (not '') — the default
+    // CSS rule is `.rig-save-btn { display: none }`, so '' would fall back to it.
+    const saveBtn = document.getElementById('rig-save-btn');
+    if (saveBtn) { saveBtn.style.display = 'flex'; saveBtn.disabled = false; saveBtn.textContent = '💾 Sauver'; }
+  } catch (err) {
+    // Non-blocking error: keep the currently displayed rig, surface the detail.
+    if (status) {
+      status.style.display = '';
+      status.className = 'rig-gen-status error';
+      status.textContent = `Échec de la génération : ${err.message || err}`;
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Régénérer'; }
+  }
+}
+
+async function _saveGeneratedRig() {
+  const btn = document.getElementById('rig-save-btn');
+  const status = document.getElementById('rig-gen-status');
+  if (!_lastGenerated || !_lastRigFile) return;
+  if (!window.confirm('Remplacer la fiche actuelle par ce rig généré ?\n(une sauvegarde .bak de la fiche originale est conservée)')) return;
+  if (btn) { btn.disabled = true; btn.textContent = '… sauvegarde'; }
+  try {
+    const res = await saveRig(_lastRigFile, _lastGenerated);
+    if (status) {
+      status.style.display = '';
+      status.className = 'rig-gen-status busy';
+      status.textContent = res.backup
+        ? `Fiche enregistrée (${res.saved}). Sauvegarde de l'originale : ${res.backup}.`
+        : `Fiche enregistrée (${res.saved}).`;
+    }
+  } catch (err) {
+    if (status) {
+      status.style.display = '';
+      status.className = 'rig-gen-status error';
+      status.textContent = `Échec de la sauvegarde : ${err.message || err}`;
+    }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Sauver'; }
+  }
 }
 
 function _renderRig(data) {
+  const generated = data.is_generated === true;
   const title = document.getElementById('rig-panel-title');
-  if (title) title.textContent = `Rig GP-180 — ${data.artist || '?'} · ${data.song || '?'}`;
+  if (title) title.textContent = `Rig GP-180${generated ? ' (IA)' : ''} — ${data.artist || '?'} · ${data.song || '?'}`;
 
   const meta = document.getElementById('rig-meta');
   if (meta) {
     const grade = (data.fiabilite || 'D').toUpperCase();
     const gradeClass = grade === 'A' ? 'grade-a' : grade === 'B' ? 'grade-b' : grade === 'C' ? 'grade-c' : '';
+    // Generated rigs carry a recommended guitar; sheets carry the original one.
+    const guitarLabel = generated ? 'Guitare recommandée' : 'Guitare originale';
+    const guitarVal = generated ? data.recommended_guitar : data.guitare_originale;
+    const guitarImgName = generated ? data.recommended_guitar_image : data.guitare_originale_image;
+    const guitarImg = guitarImgName
+      ? `<img class="rig-guitar-img" src="/api/rig-image/${encodeURIComponent(guitarImgName)}" alt="${_esc(guitarVal || '')}" loading="lazy">`
+      : '';
+    // Each value is individually escaped or built from safe HTML before being
+    // injected raw by the map below (XSS-safe).
     meta.innerHTML = [
-      ['Accordage', data.accordage],
-      ['Capo', data.capo],
-      ['Guitare originale', data.guitare_originale],
+      ['Accordage', _esc(data.accordage != null ? String(data.accordage) : '—')],
+      ['Capo', _esc(data.capo != null ? String(data.capo) : '—')],
+      ['Genre', _esc(data.genre != null && data.genre !== '' ? String(data.genre) : '—')],
+      [guitarLabel, `${_esc(guitarVal != null ? String(guitarVal) : '—')}${guitarImg}`],
       ['Fiabilité', `<span class="rig-fiabilite-badge ${gradeClass}">${_esc(grade)}</span>`],
     ].map(([lbl, val]) => `
       <div class="rig-meta-item">
         <span class="rig-meta-label">${_esc(lbl)}</span>
-        <span class="rig-meta-value">${val != null ? (lbl === 'Fiabilité' ? val : _esc(String(val))) : '—'}</span>
+        <span class="rig-meta-value">${val}</span>
       </div>`).join('');
   }
 
   const chain = document.getElementById('rig-chain');
-  if (chain && data.chain && data.reglages) {
+  if (chain && data.chain && data.reglages && data.chain.length) {
     chain.innerHTML = '';
     data.chain.forEach((effect, i) => {
       if (i > 0) {
@@ -3028,15 +3490,27 @@ function _renderRig(data) {
       `;
       chain.appendChild(block);
     });
+  } else if (chain) {
+    chain.innerHTML = '';
   }
 
   const notesWrap = document.getElementById('rig-notes-wrap');
   const notesEl = document.getElementById('rig-notes');
   const limitesEl = document.getElementById('rig-limites');
-  const hasNotes = !!(data.notes || data.limites);
-  if (notesWrap) notesWrap.style.display = hasNotes ? '' : 'none';
-  if (notesEl) notesEl.textContent = data.notes || '';
-  if (limitesEl) limitesEl.textContent = data.limites || '';
+  const commentsEl = document.getElementById('rig-comments');
+  const commentsDetails = document.getElementById('rig-comments-details');
+  if (notesEl) {
+    notesEl.textContent = data.notes || '';
+    if (notesEl.closest('details')) notesEl.closest('details').style.display = data.notes ? '' : 'none';
+  }
+  if (limitesEl) {
+    limitesEl.textContent = data.limites || '';
+    if (limitesEl.closest('details')) limitesEl.closest('details').style.display = data.limites ? '' : 'none';
+  }
+  if (commentsEl) commentsEl.textContent = data.comments || '';
+  if (commentsDetails) commentsDetails.style.display = data.comments ? '' : 'none';
+  const hasAny = !!(data.notes || data.limites || data.comments);
+  if (notesWrap) notesWrap.style.display = hasAny ? '' : 'none';
 }
 
 if (btnRig) btnRig.addEventListener('click', _toggleRig);
@@ -3046,6 +3520,20 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
     if (rigPanel) rigPanel.style.display = 'none';
     if (btnRig) btnRig.classList.remove('tb-btn-active');
   });
+  const rigGenBtn = document.getElementById('rig-gen-btn');
+  if (rigGenBtn) rigGenBtn.addEventListener('click', _generateRigForCurrent);
+  const rigSaveBtn = document.getElementById('rig-save-btn');
+  if (rigSaveBtn) rigSaveBtn.addEventListener('click', _saveGeneratedRig);
+  const rigProfileSelect = document.getElementById('rig-profile-select');
+  if (rigProfileSelect) rigProfileSelect.addEventListener('change', _previewSelectedRigProfile);
+  const rigMidiOutputSelect = document.getElementById('rig-midi-output-select');
+  if (rigMidiOutputSelect) {
+    rigMidiOutputSelect.addEventListener('change', () => {
+      _rememberRigMidiOutput(rigMidiOutputSelect.value || '');
+    });
+  }
+  const rigMidiSendBtn = document.getElementById('rig-midi-send-btn');
+  if (rigMidiSendBtn) rigMidiSendBtn.addEventListener('click', _activateSelectedRigProfile);
   // Drag support for the rig panel (same pattern as the hand-viz panel).
   const rigDrag = document.getElementById('rig-drag');
   if (rigDrag && rigPanel) {
@@ -3322,6 +3810,9 @@ function _postHandVizData() {
   const payload = _buildHandVizPayload();
   if (!payload) return;
   const message = { type: 'fretwise-hand-data', payload };
+  if (_isHand3dViewVisible() && _ensureHand3dViewFrame() && hand3dViewFrame.contentWindow) {
+    hand3dViewFrame.contentWindow.postMessage(message, '*');
+  }
   if (handVizFrame && handVizFrame.contentWindow) {
     handVizFrame.contentWindow.postMessage(message, '*');
   }
@@ -3341,13 +3832,17 @@ function _reloadHandVizFrame() {
 function _postHandVizTime() {
   const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
   const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
-  if (!panelVisible && !popupVisible) return;
+  const hand3dVisible = _isHand3dViewVisible() && _ensureHand3dViewFrame();
+  if (!panelVisible && !popupVisible && !hand3dVisible) return;
   if (!playback || typeof playback.getCurrentTimeSec !== 'function') return;
   const message = {
     type: 'fretwise-hand-seek',
     t: playback.getCurrentTimeSec(),
     playing: !!playback.isPlaying,
   };
+  if (hand3dVisible && hand3dViewFrame.contentWindow) {
+    hand3dViewFrame.contentWindow.postMessage(message, '*');
+  }
   if (panelVisible && handVizFrame && handVizFrame.contentWindow) {
     handVizFrame.contentWindow.postMessage(message, '*');
   }
@@ -3675,7 +4170,8 @@ function _onZoomInput() {
   _viewZoom[mode] = pct;
   if (zoomLabel) zoomLabel.textContent = _zoomLabelText(pct);
   _applyZoomForMode(mode);
-  if (mode !== MODES.TABLATURE && mode !== MODES.TABLATURE_RHYTHM) {
+  if (mode !== MODES.TABLATURE && mode !== MODES.TABLATURE_RHYTHM
+      && mode !== MODES.SLOPE && mode !== MODES.HAND_3D) {
     // Force SVG re-fetch with the new (zoom-adjusted) page width.
     _lastSvgWidth[mode] = null;
     _refreshSvgView();
@@ -4279,6 +4775,8 @@ async function initSettingsPage() {
 
   await _initCloudStorage();
 
+  await _loadRigProfileEditor();
+
   await _loadSoundfontsPanel();
 
   const sfUploadInput = $('#sf-upload-input');
@@ -4308,6 +4806,119 @@ async function initSettingsPage() {
         e.target.value = '';
       });
     }
+  }
+}
+
+async function _loadRigProfileEditor(selectedId = null) {
+  const select = $('#set-rig-profile-select');
+  const bindingProfile = $('#set-rig-binding-profile');
+  const status = $('#set-rig-profile-status');
+  if (!select || !bindingProfile) return;
+  try {
+    const bank = await fetchRigBank();
+    _rigBank = bank;
+    const profiles = Array.isArray(bank.profiles) ? bank.profiles : [];
+    select.innerHTML = '';
+    bindingProfile.innerHTML = '';
+    for (const profile of profiles) {
+      const genre = profile.genre ? ` · ${profile.genre}` : '';
+      const label = `${profile.name || profile.id} · PC ${profile.program}${genre}`;
+      const opt = document.createElement('option');
+      opt.value = profile.id;
+      opt.textContent = label;
+      select.appendChild(opt);
+      const bindOpt = document.createElement('option');
+      bindOpt.value = profile.id;
+      bindOpt.textContent = label;
+      bindingProfile.appendChild(bindOpt);
+    }
+    const nextId = selectedId || select.value || profiles[0]?.id || '';
+    if (nextId) {
+      select.value = nextId;
+      bindingProfile.value = nextId;
+      _fillRigProfileForm(profiles.find((profile) => profile.id === nextId) || profiles[0]);
+    } else {
+      _fillRigProfileForm(null);
+    }
+    if (status && !profiles.length) status.textContent = 'No GP-180 profiles yet.';
+  } catch (err) {
+    if (status) status.textContent = `Failed to load GP-180 profiles: ${err.message || err}`;
+  }
+}
+
+function _fillRigProfileForm(profile) {
+  const set = (id, value) => { const el = $(id); if (el) el.value = value ?? ''; };
+  set('#set-rig-profile-id', profile?.id || '');
+  set('#set-rig-profile-name', profile?.name || '');
+  set('#set-rig-profile-program', profile?.program ?? 0);
+  set('#set-rig-profile-channel', profile?.midi_channel ?? 1);
+  set('#set-rig-profile-artist', profile?.artist || '');
+  set('#set-rig-profile-genre', profile?.genre || '');
+  set('#set-rig-profile-tags', Array.isArray(profile?.tags) ? profile.tags.join(', ') : '');
+  set('#set-rig-profile-notes', profile?.notes || '');
+}
+
+function _rigProfileFromSettingsForm() {
+  const id = $('#set-rig-profile-id')?.value?.trim();
+  const name = $('#set-rig-profile-name')?.value?.trim();
+  const program = parseInt($('#set-rig-profile-program')?.value || '', 10);
+  const midiChannel = parseInt($('#set-rig-profile-channel')?.value || '', 10);
+  const artist = $('#set-rig-profile-artist')?.value?.trim();
+  const genre = $('#set-rig-profile-genre')?.value?.trim();
+  const tags = ($('#set-rig-profile-tags')?.value || '')
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+  const notes = $('#set-rig-profile-notes')?.value?.trim() || '';
+  if (!id || !name || !Number.isInteger(program) || !Number.isInteger(midiChannel)) {
+    throw new Error('Profile id, name, program and MIDI channel are required.');
+  }
+  return {
+    id,
+    name,
+    program,
+    midi_channel: midiChannel,
+    artist: artist || undefined,
+    genre: genre || undefined,
+    tags,
+    source: 'settings',
+    notes,
+  };
+}
+
+async function _saveRigProfileFromSettings() {
+  const btn = $('#set-rig-profile-save');
+  const status = $('#set-rig-profile-status');
+  try {
+    if (btn) btn.disabled = true;
+    const profile = _rigProfileFromSettingsForm();
+    await saveRigProfile(profile);
+    if (status) status.textContent = 'Profile saved.';
+    await _loadRigProfileEditor(profile.id);
+  } catch (err) {
+    if (status) status.textContent = `Save failed: ${err.message || err}`;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function _saveRigBindingFromSettings() {
+  const scope = $('#set-rig-binding-scope')?.value || 'song';
+  const key = $('#set-rig-binding-key')?.value?.trim();
+  const profileId = $('#set-rig-binding-profile')?.value;
+  const status = $('#set-rig-profile-status');
+  if (!key || !profileId) {
+    if (status) status.textContent = 'Binding key and profile are required.';
+    return;
+  }
+  try {
+    await saveRigBinding({ scope, key, profile_id: profileId });
+    if (status) status.textContent = `Binding saved: ${scope} "${key}".`;
+    const keyInput = $('#set-rig-binding-key');
+    if (keyInput) keyInput.value = '';
+    await _loadRigProfileEditor(profileId);
+  } catch (err) {
+    if (status) status.textContent = `Binding failed: ${err.message || err}`;
   }
 }
 
@@ -4392,6 +5003,36 @@ if (setIndexApply) {
     }
   });
 }
+
+const setRigProfileSelect = $('#set-rig-profile-select');
+if (setRigProfileSelect) {
+  setRigProfileSelect.addEventListener('change', () => {
+    const profiles = Array.isArray(_rigBank?.profiles) ? _rigBank.profiles : [];
+    _fillRigProfileForm(profiles.find((profile) => profile.id === setRigProfileSelect.value) || null);
+  });
+}
+
+const setRigProfileNew = $('#set-rig-profile-new');
+if (setRigProfileNew) {
+  setRigProfileNew.addEventListener('click', () => {
+    _fillRigProfileForm({
+      id: 'new-gp180-profile',
+      name: 'New GP-180 Profile',
+      program: 0,
+      midi_channel: 1,
+      tags: [],
+      notes: '',
+    });
+    const status = $('#set-rig-profile-status');
+    if (status) status.textContent = 'Edit the new id/name, then save.';
+  });
+}
+
+const setRigProfileSave = $('#set-rig-profile-save');
+if (setRigProfileSave) setRigProfileSave.addEventListener('click', _saveRigProfileFromSettings);
+
+const setRigBindingSave = $('#set-rig-binding-save');
+if (setRigBindingSave) setRigBindingSave.addEventListener('click', _saveRigBindingFromSettings);
 
 // ── Boot ────────────────────────────────────────────────────────────
 
