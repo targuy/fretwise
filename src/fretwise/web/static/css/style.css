@@ -652,6 +652,25 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   display: block;
   margin: 0 auto;
 }
+#slope-canvas {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #07080b;
+  z-index: 3;
+}
+#hand3d-view-frame {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #101216;
+  z-index: 4;
+}
 /* Red note cursor overlay — on top, never steals pointer events */
 #cursor-canvas {
   position: absolute;
@@ -891,7 +910,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   padding: 4px 6px;
   font-family: var(--mono);
   font-size: 12px;
-  width: 52px;
+  width: 58px;
   text-align: center;
   -moz-appearance: textfield;
 }
@@ -906,6 +925,8 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   padding: 4px 4px;
   font-family: var(--mono);
   font-size: 11px;
+  min-width: 62px;
+  text-align: center;
 }
 .speed-sel option { background: var(--bg-1); }
 
@@ -1868,7 +1889,10 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 
 .settings-path-row { display: flex; gap: 8px; }
 
-.settings-path-row input[type="text"] {
+.settings-path-row input[type="text"],
+.settings-text-input,
+.settings-select,
+.settings-textarea {
   flex: 1;
   padding: 8px 12px;
   border-radius: var(--r-2);
@@ -1881,7 +1905,43 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   font-family: var(--mono);
 }
 
-.settings-path-row input:focus { border-color: var(--signal); }
+.settings-select {
+  min-width: 0;
+  height: 34px;
+  font-family: var(--font-ui, inherit);
+}
+
+.settings-textarea {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  font-family: var(--font-ui, inherit);
+  line-height: 1.4;
+}
+
+.settings-grid-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+.settings-binding-row {
+  display: grid;
+  grid-template-columns: 110px minmax(150px, 1fr) minmax(170px, 1fr) max-content;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--line-2);
+  margin: 16px 0;
+}
+
+.settings-path-row input:focus,
+.settings-text-input:focus,
+.settings-select:focus,
+.settings-textarea:focus { border-color: var(--signal); }
 
 .settings-hint {
   font-size: 12px;
@@ -2554,11 +2614,31 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 #rig-panel {
   width: min(720px, calc(100vw - 40px));
   max-height: min(600px, calc(100vh - 48px));
-  background: #15171c;
-  color: #d6d8db;
-  border: 1px solid #3b3e44;
+  /* Light wood: vertical grain streaks layered over a warm oak gradient. */
+  background:
+    repeating-linear-gradient(91deg,
+      rgba(150, 110, 66, 0.00) 0px,
+      rgba(150, 110, 66, 0.07) 3px,
+      rgba(120, 84, 46, 0.05) 6px,
+      rgba(150, 110, 66, 0.00) 11px),
+    repeating-linear-gradient(90deg,
+      rgba(120, 84, 46, 0.06) 0px,
+      rgba(120, 84, 46, 0.06) 1px,
+      rgba(150, 110, 66, 0.00) 1px,
+      rgba(150, 110, 66, 0.00) 38px),
+    linear-gradient(180deg, #efddbb 0%, #e6cfa6 48%, #ddc499 100%);
+  color: #2a1f12;
+  border: 1px solid #b7986b;
   border-image: none !important;
+  box-shadow: 0 10px 32px rgba(50, 32, 12, 0.38);
 }
+#rig-panel .floating-panel-header {
+  background: linear-gradient(180deg, rgba(120, 84, 46, 0.22), rgba(120, 84, 46, 0.10));
+  border-bottom: 1px solid #c0a279;
+}
+#rig-panel .floating-panel-title { color: #2a1f12; font-weight: 700; }
+#rig-panel .floating-panel-btn { color: #4a3520; }
+#rig-panel .floating-panel-btn:hover { color: #1d1408; }
 .rig-body {
   display: flex;
   flex-direction: column;
@@ -2568,29 +2648,114 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   flex: 1;
 }
 
+/* AI generation: header buttons + status banner (single unified view).
+   Override .tx-btn's fixed 32x32 square so the text label is not clipped and
+   does not overflow onto the close (×) button. */
+.rig-gen-btn, .rig-save-btn {
+  width: auto;
+  height: auto;
+  min-height: 26px;
+  padding: 3px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.rig-gen-btn:disabled, .rig-save-btn:disabled { opacity: 0.6; cursor: progress; }
+.rig-save-btn { display: none; }  /* shown only once a rig is generated */
+
+.rig-gen-status {
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 6px 8px;
+  border-radius: 5px;
+  white-space: pre-wrap;
+}
+.rig-gen-status.busy { background: rgba(28, 96, 180, 0.12); color: #1a548c; border: 1px solid rgba(28, 96, 180, 0.30); }
+.rig-gen-status.error { background: rgba(180, 40, 40, 0.12); color: #9a2a2a; border: 1px solid rgba(180, 40, 40, 0.35); }
+
+.rig-bank-control {
+  border: 1px solid rgba(120, 84, 46, 0.34);
+  border-radius: 6px;
+  background: rgba(255, 251, 243, 0.62);
+  padding: 7px 8px;
+}
+.rig-bank-row {
+  display: grid;
+  grid-template-columns: max-content minmax(180px, 1fr) minmax(140px, 0.8fr) max-content;
+  gap: 6px;
+  align-items: center;
+}
+.rig-bank-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b4f30;
+  font-weight: 800;
+}
+.rig-profile-select,
+.rig-midi-output-select {
+  min-width: 0;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid rgba(120, 84, 46, 0.45);
+  background: rgba(255, 255, 255, 0.74);
+  color: #2a1f12;
+  font-size: 12px;
+  padding: 0 8px;
+}
+.rig-midi-output-select { font-size: 11px; }
+.rig-midi-btn {
+  width: auto;
+  height: 28px;
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.rig-midi-send-btn { font-weight: 800; }
+.rig-bank-status {
+  min-height: 16px;
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #4a3520;
+  white-space: pre-wrap;
+}
+.rig-bank-status.error { color: #9a2a2a; }
+
 /* Guitar meta strip */
 .rig-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px 16px;
   font-size: 12px;
-  border-bottom: 1px solid #2d3036;
+  border-bottom: 1px solid rgba(120, 84, 46, 0.40);
   padding-bottom: 8px;
 }
 .rig-meta-item { display: flex; flex-direction: column; gap: 1px; }
-.rig-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #7a8290; }
-.rig-meta-value { color: #cdd3da; font-size: 12px; }
+.rig-meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b4f30; font-weight: 700; }
+.rig-meta-value { color: #211708; font-size: 12px; font-weight: 600; }
+.rig-guitar-img {
+  display: block;
+  margin-top: 5px;
+  width: 100%;
+  max-width: 180px;
+  height: 64px;
+  object-fit: contain;
+  object-position: left center;
+  border-radius: 5px;
+  mix-blend-mode: multiply;
+}
 .rig-fiabilite-badge {
   display: inline-block;
-  font-weight: 700; font-size: 11px;
+  font-weight: 800; font-size: 11px;
   padding: 1px 6px; border-radius: 4px; margin-left: 6px;
-  background: rgba(201,137,47,0.2); color: #d8a24a;
-  border: 1px solid rgba(201,137,47,0.35);
+  background: rgba(150, 96, 20, 0.22); color: #7a4d0a;
+  border: 1px solid rgba(150, 96, 20, 0.45);
   vertical-align: middle;
 }
-.rig-fiabilite-badge.grade-a { background: rgba(60,180,80,0.2); color: #5dc87a; border-color: rgba(60,180,80,0.35); }
-.rig-fiabilite-badge.grade-b { background: rgba(60,140,220,0.2); color: #60aaee; border-color: rgba(60,140,220,0.35); }
-.rig-fiabilite-badge.grade-c { background: rgba(200,180,40,0.2); color: #ccc038; border-color: rgba(200,180,40,0.35); }
+.rig-fiabilite-badge.grade-a { background: rgba(34, 130, 50, 0.20); color: #1d6e2c; border-color: rgba(34, 130, 50, 0.45); }
+.rig-fiabilite-badge.grade-b { background: rgba(28, 96, 180, 0.18); color: #1a548c; border-color: rgba(28, 96, 180, 0.45); }
+.rig-fiabilite-badge.grade-c { background: rgba(150, 120, 10, 0.20); color: #7a5e08; border-color: rgba(150, 120, 10, 0.45); }
 
 /* GP-180 effect chain */
 .rig-chain {
@@ -2602,7 +2767,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .rig-chain-arrow {
   display: flex;
   align-items: center;
-  color: #4a5060;
+  color: #8a6a40;
   font-size: 14px;
   padding: 0 1px;
   align-self: center;
@@ -2613,34 +2778,36 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   align-items: center;
   gap: 4px;
   width: 72px;
-  border: 1px solid #2d3036;
+  border: 1px solid rgba(120, 84, 46, 0.40);
   border-radius: 6px;
   padding: 6px 4px 5px;
-  background: #1c1f25;
-  transition: border-color 0.15s;
+  background: rgba(255, 251, 243, 0.72);
+  transition: border-color 0.15s, background 0.15s;
   position: relative;
 }
-.rig-block.active { border-color: #d8a24a; background: #1f2115; }
-.rig-block.inactive { opacity: 0.35; }
+.rig-block.active { border-color: #9a5d12; background: rgba(255, 245, 224, 0.92); box-shadow: 0 0 0 1px rgba(154, 93, 18, 0.25); }
+.rig-block.inactive { opacity: 0.45; }
 .rig-block-name {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  font-weight: 700;
-  color: #7a8290;
+  font-weight: 800;
+  color: #6b4f30;
 }
-.rig-block.active .rig-block-name { color: #d8a24a; }
+.rig-block.active .rig-block-name { color: #8a4f06; }
 .rig-block-img {
   width: 48px;
   height: 48px;
   object-fit: contain;
   border-radius: 4px;
   display: block;
+  mix-blend-mode: multiply;
 }
 .rig-block-preset {
   font-size: 9px;
   text-align: center;
-  color: #cdd3da;
+  color: #2a1f12;
+  font-weight: 600;
   line-height: 1.25;
   max-width: 70px;
   word-break: break-word;
@@ -2648,7 +2815,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .rig-block-params {
   font-size: 8px;
   text-align: center;
-  color: #7a8290;
+  color: #6b4f30;
   line-height: 1.3;
   max-width: 70px;
   word-break: break-word;
@@ -2657,14 +2824,14 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 /* Notes / limites collapsibles */
 .rig-notes-wrap { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
 .rig-details {
-  border: 1px solid #2d3036;
+  border: 1px solid rgba(120, 84, 46, 0.40);
   border-radius: 5px;
-  background: #1c1f25;
+  background: rgba(255, 251, 243, 0.72);
 }
 .rig-details summary {
   font-size: 11px;
-  font-weight: 600;
-  color: #aeb4bc;
+  font-weight: 700;
+  color: #4a3520;
   padding: 5px 8px;
   cursor: pointer;
   user-select: none;
@@ -2673,14 +2840,14 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .rig-details summary::-webkit-details-marker { display: none; }
 .rig-details summary::before {
   content: "▸ ";
-  color: #7a8290;
+  color: #8a6a40;
   font-size: 10px;
 }
 .rig-details[open] summary::before { content: "▾ "; }
 .rig-text {
   font-family: var(--mono, monospace);
   font-size: 11px;
-  color: #aeb4bc;
+  color: #33271a;
   white-space: pre-wrap;
   padding: 6px 10px 8px;
   margin: 0;

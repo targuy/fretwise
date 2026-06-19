@@ -59,6 +59,39 @@ PEDAL_IMAGES: dict[str, str | None] = {
     "sweep echo": "76_DLY_SweepEcho.jpg",
 }
 
+# Generic per-category artwork (in data/pedals/) used as a fallback when no
+# specific pedal image matches the preset, so every active effect block still
+# gets an illustration keyed off its slot in the GP-180 chain.
+CATEGORY_FALLBACK_IMAGES: dict[str, str] = {
+    "NR": "nose gate.png",
+    "PRE": "overdrive.png",
+    "DST": "distortion.png",
+    "AMP": "ampli.jpg",
+    "CAB/IR": "cabinet.jpg",
+    "EQ": "equalizer.png",
+    "MOD": "chorus.png",
+    "DLY": "delay.png",
+    "RVB": "reverb.png",
+}
+
+# Maps lowercased keyword substrings (longest match wins) to guitar photo
+# filenames in data/guitars/, used to illustrate the "Guitare originale" /
+# "Guitare cible" rig fields.
+GUITAR_IMAGES: dict[str, str] = {
+    "les paul junior": "gibson les paul junior.png",
+    "les paul": "gibson les paul junior.png",
+    "sg": "gibson sg.png",
+    "telecaster sh": "telecaster SH.jpg",
+    "tele-gib": "telecaster SH.jpg",
+    "telecaster": "telecaster.jpg",
+    "tele": "telecaster.jpg",
+    "superstrat": "stratocaster sss.jpg",
+    "stratocaster sss": "stratocaster sss.jpg",
+    "strat sss": "stratocaster sss.jpg",
+    "stratocaster": "stratocaster sss.jpg",
+    "strat": "stratocaster sss.jpg",
+}
+
 
 def _strip_accents(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
@@ -150,6 +183,17 @@ def find_rig(partition_name: str, rigs_dir: Path) -> Path | None:
     return None
 
 
+def default_rig_path(partition_name: str, rigs_dir: Path) -> Path:
+    """Return the canonical rig ``.md`` path for ``partition_name`` (the name
+    :func:`find_rig` looks for), whether or not the file exists yet.
+
+    Used when saving a generated rig for a song that has no sheet on disk so the
+    new file lands at the exact path a later :func:`find_rig` will resolve.
+    """
+    artist_n, song_n = _partition_key(Path(partition_name).stem)
+    return rigs_dir / f"rig_{song_n}_{artist_n}.md"
+
+
 def build_rig_index(rigs_dir: Path | None) -> set[str]:
     """Scan ``rigs_dir`` **once** and return a set of rig fingerprints.
 
@@ -198,12 +242,60 @@ def _find_image(preset: str | None) -> str | None:
     return None
 
 
-_INACTIVE_VALUES = frozenset({"off", "non", "no", "aucun", "aucune", "non (désactivé)", "non (none)"})
+# Where the effect/pedal artwork shipped with the repo lives. Many PEDAL_IMAGES
+# entries name art that was never added (e.g. Gate 1, Guitar EQ 1, DD3); without
+# an existence check those produce broken <img>s instead of the generic
+# per-category illustration. Resolution is done against this directory.
+_DATA_PEDALS_DIR = Path(__file__).resolve().parents[2] / "data" / "pedals"
+
+
+def _effect_image(preset: str | None, effect_key: str) -> str | None:
+    """Pick the illustration for an active effect, never a broken image.
+
+    Uses the specific pedal art only when its file actually exists on disk;
+    otherwise falls back to the generic per-category artwork keyed off the chain
+    slot (``ampli``/``cabinet``/``nose gate``/…), which always ships.
+    """
+    specific = _find_image(preset)
+    if specific and (_DATA_PEDALS_DIR / specific).is_file():
+        return specific
+    return CATEGORY_FALLBACK_IMAGES.get(effect_key)
+
+
+def _find_guitar_image(name: str | None) -> str | None:
+    """Return the guitar photo filename best matching a free-text guitar name.
+
+    Matching mirrors :func:`_find_image`: accent-insensitive, longest keyword
+    wins. Returns None when no keyword matches.
+    """
+    if not name:
+        return None
+    nl = _strip_accents(name).lower()
+    best = max((k for k in GUITAR_IMAGES if k in nl), key=len, default=None)
+    if best:
+        return GUITAR_IMAGES[best]
+    return None
+
+
+_INACTIVE_VALUES = frozenset(
+    {"off", "non", "no", "aucun", "aucune", "non (désactivé)", "non (none)"}
+)
 
 # Regex patterns for section extraction
-_RE_FIELD = re.compile(r"^(Artiste|Chanson|Fiabilit[eé]|Accordage|Capo|Guitare originale|Guitare cible|Guitare target)\s*:\s*(.+)$", re.MULTILINE)
-_RE_COMPENSATION = re.compile(r"Compensation guitare\s*:\s*\n(.*?)(?=\n(?:Objectif|R[eé]f[eé]rence|Cœur|Cha[iî]ne|R[eé]glages|\Z))", re.DOTALL)
-_RE_REGLAGES = re.compile(r"R[eé]glages GP-180\s*:\s*\n(.*?)(?=\n\n|\nNotes de jeu|\nLimites|\Z)", re.DOTALL)
+_RE_FIELD = re.compile(
+    r"^(Artiste|Chanson|Genre|Fiabilit[eé]|Accordage|Capo|Guitare originale|"
+    r"Guitare cible|Guitare target)\s*:\s*(.+)$",
+    re.MULTILINE,
+)
+_RE_COMPENSATION = re.compile(
+    r"Compensation guitare\s*:\s*\n"
+    r"(.*?)(?=\n(?:Objectif|R[eé]f[eé]rence|Cœur|Cha[iî]ne|R[eé]glages|\Z))",
+    re.DOTALL,
+)
+_RE_REGLAGES = re.compile(
+    r"R[eé]glages GP-180\s*:\s*\n(.*?)(?=\n\n|\nNotes de jeu|\nLimites|\Z)",
+    re.DOTALL,
+)
 _RE_NOTES = re.compile(r"Notes de jeu\s*:\s*\n(.*?)(?=\n\nLimites|\n\ndate_added|\Z)", re.DOTALL)
 _RE_LIMITES = re.compile(r"Limites\s*/\s*compromis\s*:\s*\n(.*?)(?=\n\ndate_added|\Z)", re.DOTALL)
 _RE_EFFECT_LINE = re.compile(r"(.+?)\s*:\s*(.+)")
@@ -265,7 +357,9 @@ def parse_rig(content: str) -> dict:
                 preset = re.split(r"\s+—\s+", preset)[0].strip()
                 params_m = re.search(r"[·—–]\s*(.+)$", value_raw)
                 params = params_m.group(1).strip() if params_m else None
-                image = _find_image(preset)
+                # Specific pedal art when its file exists, else generic
+                # per-category artwork keyed off the chain slot (no broken image).
+                image = _effect_image(preset, effect_key)
             else:
                 preset = params = image = None
 
@@ -280,14 +374,139 @@ def parse_rig(content: str) -> dict:
     return {
         "artist": fields.get("Artiste"),
         "song": fields.get("Chanson"),
+        "genre": fields.get("Genre"),
         "fiabilite": fiabilite,
         "accordage": fields.get("Accordage"),
         "capo": fields.get("Capo"),
         "guitare_originale": fields.get("Guitare originale"),
+        "guitare_originale_image": _find_guitar_image(fields.get("Guitare originale")),
         "guitare_cible": fields.get("Guitare cible"),
+        "guitare_cible_image": _find_guitar_image(fields.get("Guitare cible")),
         "compensation": compensation,
         "chain": GP180_CHAIN,
         "reglages": reglages,
         "notes": notes,
         "limites": limites,
     }
+
+
+# Maps the AI rig slot keys (codex_output_schema_v1) to GP-180 chain effect keys.
+# Slots the model never produces (WAH, N→S, VOL) stay inactive in the view.
+_GENERATED_SLOT_TO_CHAIN: dict[str, str] = {
+    "nr": "NR",
+    "pre": "PRE",
+    "dst": "DST",
+    "amp": "AMP",
+    "cab": "CAB/IR",
+    "eq": "EQ",
+    "mod": "MOD",
+    "dly": "DLY",
+    "rvb": "RVB",
+}
+_CHAIN_TO_GENERATED_SLOT: dict[str, str] = {v: k for k, v in _GENERATED_SLOT_TO_CHAIN.items()}
+
+
+def generated_rig_to_view(data: dict) -> dict:
+    """Convert an AI-generated rig (``codex_output_schema_v1``) into the same view
+    shape :func:`parse_rig` returns, so the frontend renders it with the existing
+    graphical chain + meta strip — one unified representation.
+
+    Module presets are split into preset/params (on ``·``/``—``) and matched to
+    pedal artwork exactly like :func:`parse_rig`; the recommended guitar gets a
+    photo. ``recommended_guitar`` / ``comments`` / ``is_generated`` are added so
+    the renderer can label the guitar row and show the comments block.
+    """
+    rig = data.get("rig") or {}
+    reglages: dict[str, dict] = {}
+    for chain_key in GP180_CHAIN:
+        slot = _CHAIN_TO_GENERATED_SLOT.get(chain_key)
+        raw_val = str(rig.get(slot, "")).strip() if slot else ""
+        value_lower = raw_val.lower()
+        active = (
+            bool(raw_val)
+            and value_lower not in _INACTIVE_VALUES
+            and not value_lower.startswith("non ")
+        )
+        if active:
+            preset = re.split(r"\s*[·—–]\s*", raw_val)[0].strip()
+            params_m = re.search(r"[·—–]\s*(.+)$", raw_val)
+            params = params_m.group(1).strip() if params_m else None
+            image = _effect_image(preset, chain_key)
+        else:
+            preset = params = image = None
+        reglages[chain_key] = {
+            "effect": chain_key,
+            "preset": preset,
+            "params": params,
+            "active": active,
+            "image": image,
+        }
+
+    recommended = data.get("recommended_guitar")
+    reliability = data.get("reliability")
+    fiabilite = str(reliability).strip()[:1].upper() if reliability else None
+    return {
+        "artist": data.get("artist"),
+        "song": data.get("song"),
+        "genre": data.get("genre"),
+        "fiabilite": fiabilite,
+        "accordage": data.get("accordage"),
+        "capo": data.get("capo"),
+        "recommended_guitar": recommended,
+        "recommended_guitar_image": _find_guitar_image(recommended),
+        "signal_chain": data.get("signal_chain"),
+        "chain": GP180_CHAIN,
+        "reglages": reglages,
+        "comments": data.get("comments"),
+        "is_generated": True,
+    }
+
+
+def rig_view_to_markdown(view: dict, *, generator: str = "IA locale", date: str = "") -> str:
+    """Serialise a rig view (the shape :func:`generated_rig_to_view` returns) into
+    a GP-180 ``.md`` that :func:`parse_rig` reads back without loss.
+
+    The recommended guitar is written as ``Guitare originale`` so the reloaded
+    sheet shows its photo; each chain module is ``preset · params`` or ``off``,
+    matching the réglages block :func:`parse_rig` parses (presets re-acquire their
+    pedal artwork on reload).
+    """
+    artist = (view.get("artist") or "").strip()
+    song = (view.get("song") or "").strip()
+    genre = (view.get("genre") or "—").strip()
+    accordage = (view.get("accordage") or "—").strip()
+    capo = (view.get("capo") or "non").strip()
+    guitar = (view.get("recommended_guitar") or "—").strip()
+    grade = ((view.get("fiabilite") or "C").strip().upper()[:1]) or "C"
+    signal_chain = (view.get("signal_chain") or "").strip()
+    comments = (view.get("comments") or "").strip()
+    reglages = view.get("reglages") or {}
+
+    lines: list[str] = [
+        f"# Rig GP-180 — {artist} · {song}",
+        "",
+        f"Artiste : {artist}",
+        f"Chanson : {song}",
+        f"Genre : {genre}",
+        f"Guitare originale : {guitar}",
+        f"Accordage : {accordage}",
+        f"Capo : {capo}",
+        f"Fiabilité : {grade} — généré par {generator}",
+        "",
+    ]
+    if signal_chain:
+        lines += [f"Chaîne de signal : {signal_chain}", ""]
+    lines += ["Chaîne GP-180 :", " → ".join(GP180_CHAIN), "", "Réglages GP-180 :"]
+    for chain_key in GP180_CHAIN:
+        reg = reglages.get(chain_key) or {}
+        if reg.get("active") and reg.get("preset"):
+            params = reg.get("params")
+            val = f"{reg['preset']} · {params}" if params else str(reg["preset"])
+        else:
+            val = "off"
+        lines.append(f"- {chain_key} : {val}")
+    lines.append("")
+    if comments:
+        lines += ["Limites / compromis :", f"- {comments}", ""]
+    lines += [f"date_added : {date}", ""]
+    return "\n".join(lines)

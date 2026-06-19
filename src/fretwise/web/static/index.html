@@ -345,6 +345,8 @@
          staves (SVG / canvas, offset via .chords-open) down. -->
     <div id="chord-strip-host"><div id="chord-strip"></div></div>
     <div id="core-svg-view" style="display:none; position:absolute; inset:0; overflow:auto; z-index:2;"></div>
+    <iframe id="hand3d-view-frame" data-src="/static/hand_viz.html?view=3d" title="3D hand view" style="display:none"></iframe>
+    <canvas id="slope-canvas" style="display:none"></canvas>
     <canvas id="tab-canvas"></canvas>
     <canvas id="cursor-canvas"></canvas>
   </div>
@@ -368,11 +370,11 @@
       <input type="number" id="bpm-input" class="bpm-input" min="20" max="300" step="1" title="BPM">
     </div>
     <select id="speed-select" class="toolbar-select speed-sel" title="Playback speed">
-      <option value="25">×¼</option>
-      <option value="50">×½</option>
-      <option value="75">×¾</option>
-      <option value="100" selected>×1</option>
-      <option value="125">×1¼</option>
+      <option value="25">25%</option>
+      <option value="50">50%</option>
+      <option value="75">75%</option>
+      <option value="100" selected>100%</option>
+      <option value="125">125%</option>
     </select>
     <span class="tb-sep"></span>
     <button id="btn-fingering" class="tx-btn" title="Toggle left-hand fingering">
@@ -454,6 +456,8 @@
       <button class="view-seg-btn" data-mode="standard" title="Standard notation">Staff</button>
       <button class="view-seg-btn view-seg-active" data-mode="standard_tablature" title="Standard + Tab (default)">Mixed</button>
       <button class="view-seg-btn" data-mode="tablature" title="Tablature only">Tab</button>
+      <button class="view-seg-btn" data-mode="slope" title="Perspective playback lane">Slope</button>
+      <button class="view-seg-btn" data-mode="hand_3d" title="3D fretting hand">3D</button>
     </div>
     <span class="tb-sep"></span>
     <!-- Per-view zoom slider (-50% → +50%) -->
@@ -468,6 +472,8 @@
       <option value="standard">Standard</option>
       <option value="tablature_rhythm">Tab + Rhythm</option>
       <option value="tablature">Tab</option>
+      <option value="slope">Slope</option>
+      <option value="hand_3d">3D</option>
     </select>
     <!-- Hidden PDF + back (functionality via header buttons) -->
     <button class="tb-btn" id="btn-export-pdf" style="display:none" title="Export PDF">PDF</button>
@@ -494,14 +500,26 @@
 </div>
 
 <!-- ═══════════════ RIG GP-180 FLOATING PANEL ═══════════════ -->
-<div id="rig-panel" class="floating-panel" style="display:none;width:720px">
+<div id="rig-panel" class="floating-panel" style="display:none;width:760px">
   <div class="floating-panel-header" id="rig-drag">
     <span class="floating-panel-title" id="rig-panel-title">Rig GP-180</span>
     <div class="floating-panel-actions">
+      <button id="rig-gen-btn" class="tx-btn rig-gen-btn" type="button" title="Générer le rig via l'IA locale">⚡ Générer</button>
+      <button id="rig-save-btn" class="tx-btn rig-save-btn" type="button" title="Enregistrer ce rig généré et remplacer la fiche actuelle">💾 Sauver</button>
       <button class="floating-panel-btn" id="rig-close" title="Fermer">×</button>
     </div>
   </div>
   <div id="rig-body" class="rig-body">
+    <div id="rig-gen-status" class="rig-gen-status" style="display:none"></div>
+    <div id="rig-bank-control" class="rig-bank-control" style="display:none">
+      <div class="rig-bank-row">
+        <label class="rig-bank-label" for="rig-profile-select">Profil GP-180</label>
+        <select id="rig-profile-select" class="rig-profile-select"></select>
+        <select id="rig-midi-output-select" class="rig-midi-output-select" title="Port MIDI de sortie"></select>
+        <button id="rig-midi-send-btn" class="tx-btn rig-midi-btn rig-midi-send-btn" type="button" title="Envoyer le Program Change MIDI et activer ce profil sur la GP-180 via USB">Activer MIDI</button>
+      </div>
+      <div id="rig-bank-status" class="rig-bank-status"></div>
+    </div>
     <div id="rig-meta" class="rig-meta"></div>
     <div id="rig-chain" class="rig-chain"></div>
     <div id="rig-notes-wrap" class="rig-notes-wrap" style="display:none">
@@ -512,6 +530,10 @@
       <details class="rig-details">
         <summary>Limites / compromis</summary>
         <pre id="rig-limites" class="rig-text"></pre>
+      </details>
+      <details class="rig-details" id="rig-comments-details" style="display:none">
+        <summary>Commentaires</summary>
+        <pre id="rig-comments" class="rig-text"></pre>
       </details>
     </div>
   </div>
@@ -555,6 +577,70 @@
           <button id="set-index-apply" class="tx-btn">Apply</button>
         </div>
         <p class="settings-hint">Offline, tab-separated catalog. Header row + columns: filename, title, artist, album, genre, year, notes. Catalog values override names parsed from filenames. See data/songs.tsv.example.</p>
+      </div>
+    </section>
+    <section class="settings-section">
+      <h3>GP-180 Rig Profiles</h3>
+      <div class="settings-field">
+        <label for="set-rig-profile-select">Profile</label>
+        <div class="settings-path-row">
+          <select id="set-rig-profile-select" class="settings-select"></select>
+          <button id="set-rig-profile-new" class="tx-btn" type="button">New</button>
+        </div>
+        <p class="settings-hint">Factory/user GP-180 patch names, with editable artist/genre guesses and MIDI slot.</p>
+      </div>
+      <div class="settings-grid-two">
+        <div class="settings-field">
+          <label for="set-rig-profile-id">Profile id</label>
+          <input id="set-rig-profile-id" class="settings-text-input" type="text" />
+        </div>
+        <div class="settings-field">
+          <label for="set-rig-profile-name">Name</label>
+          <input id="set-rig-profile-name" class="settings-text-input" type="text" />
+        </div>
+        <div class="settings-field">
+          <label for="set-rig-profile-program">Program (0-199)</label>
+          <input id="set-rig-profile-program" class="settings-text-input" type="number" min="0" max="199" />
+        </div>
+        <div class="settings-field">
+          <label for="set-rig-profile-channel">MIDI channel</label>
+          <input id="set-rig-profile-channel" class="settings-text-input" type="number" min="1" max="16" />
+        </div>
+        <div class="settings-field">
+          <label for="set-rig-profile-artist">Artist guess</label>
+          <input id="set-rig-profile-artist" class="settings-text-input" type="text" />
+        </div>
+        <div class="settings-field">
+          <label for="set-rig-profile-genre">Genre guess</label>
+          <input id="set-rig-profile-genre" class="settings-text-input" type="text" />
+        </div>
+      </div>
+      <div class="settings-field">
+        <label for="set-rig-profile-tags">Tags</label>
+        <input id="set-rig-profile-tags" class="settings-text-input" type="text" placeholder="comma-separated tags" />
+      </div>
+      <div class="settings-field">
+        <label for="set-rig-profile-notes">Notes</label>
+        <textarea id="set-rig-profile-notes" class="settings-textarea" rows="3"></textarea>
+      </div>
+      <div class="settings-action-row">
+        <button id="set-rig-profile-save" class="tx-btn" type="button">Save profile</button>
+        <span id="set-rig-profile-status" class="settings-hint"></span>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-field">
+        <label>Bind profile to a song, artist, or genre</label>
+        <div class="settings-binding-row">
+          <select id="set-rig-binding-scope" class="settings-select">
+            <option value="song">Song</option>
+            <option value="artist">Artist</option>
+            <option value="genre">Genre</option>
+          </select>
+          <input id="set-rig-binding-key" class="settings-text-input" type="text" placeholder="Name to match" />
+          <select id="set-rig-binding-profile" class="settings-select"></select>
+          <button id="set-rig-binding-save" class="tx-btn" type="button">Bind</button>
+        </div>
+        <p class="settings-hint">Resolution order is exact profile, song, artist, genre, then profile metadata.</p>
       </div>
     </section>
     <section class="settings-section">

@@ -97,7 +97,8 @@ const ROLE_COLOR = {
   hover:   0x3fbf48,  // green — hovering, ready
   idle:    0x3fbf48,  // green — hovering, no purpose
 };
-const SKIN = 0xe2b694;
+const SKIN = 0xbec6cf;
+const IMPACT_HALO = 0x61d7ff;
 
 /* ---- World vertical layout ------------------------------------------------ */
 /* Board surface (top face of the fretboard) sits at world Y = 0. */
@@ -709,6 +710,15 @@ class Hand3DRenderer {
     this.scene.background = new THREE.Color(0xe9ebf0);   // light studio background
 
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 2000);
+    this._dedicatedView = (() => {
+      try { return new URLSearchParams(window.location.search || "").get("view") === "3d"; }
+      catch (e) { return false; }
+    })();
+    if (this._dedicatedView) {
+      // Dedicated 3D view: face the fretboard like a right-handed guitarist's
+      // left hand in front of us. +Z is screen-up, so high E is top and low E bottom.
+      this.camera.up.set(0, 0, 1);
+    }
     // _lookAt is the persistent camera target; setGeometry() recenters it on
     // the actual board centre once the live geometry is known.  resize() and
     // pointer/wheel handlers re-aim at this target after every change.
@@ -723,15 +733,17 @@ class Hand3DRenderer {
     // fingertips and strings occupy the centre.  Radius 160 accommodates
     // the ~120 wu forearm + ~50 wu hand at this steeper angle; the wheel
     // clamp (60..300) bounds runtime zoom.
-    this._camSpherical = { radius: 160, azimuth: 12 * Math.PI / 180, polar: 28 * Math.PI / 180 };
+    this._camSpherical = this._dedicatedView
+      ? { radius: 155, azimuth: 0 * Math.PI / 180, polar: 8 * Math.PI / 180 }
+      : { radius: 160, azimuth: 12 * Math.PI / 180, polar: 28 * Math.PI / 180 };
     this._dragging = false;
     this._lastPx = 0;
     this._lastPy = 0;
     this.camera.position.set(0, 60, 150);
     this.camera.lookAt(this._lookAt);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer = new THREE.WebGLRenderer({ antialias: !this._dedicatedView, alpha: false });
+    this.renderer.setPixelRatio(this._dedicatedView ? 1 : Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setSize(w, h, false);
     this.renderer.domElement.style.width = "100%";
     this.renderer.domElement.style.height = "auto";
@@ -811,12 +823,12 @@ class Hand3DRenderer {
 
     // Shared materials (no textures, no normal maps — flat skin).
     this.skinMat = new THREE.MeshStandardMaterial({
-      color: SKIN, roughness: 0.75, metalness: 0.0,
+      color: SKIN, roughness: 0.22, metalness: 0.88,
     });
     this.roleMats = {};
     for (const r in ROLE_COLOR) {
       this.roleMats[r] = new THREE.MeshStandardMaterial({
-        color: ROLE_COLOR[r], roughness: 0.55, metalness: 0.05,
+        color: ROLE_COLOR[r], roughness: 0.28, metalness: 0.65,
       });
     }
 
@@ -840,6 +852,10 @@ class Hand3DRenderer {
     this.main = new Main({ skin: this.skinMat, roleMats: this.roleMats });
     this.main.attachTo(this.handGroup);
     this.anim = new AnimationMain(this, this.main);
+    this._impactHalos = [];
+    this._activePressKeys = new Set();
+    this._haloGroup = new THREE.Group();
+    this.scene.add(this._haloGroup);
 
     if (this._rigMode === "articulated") {
       // Hide the legacy hand (keep its forearm tube as the arm) and show Main.
@@ -865,6 +881,7 @@ class Hand3DRenderer {
 
     this._onResize = () => this.resize();
     window.addEventListener("resize", this._onResize);
+    this._hideForearm();
   }
 
   /* Build the hand rig: back-of-hand slab, 4 finger chains parented to the
@@ -1532,6 +1549,11 @@ class Hand3DRenderer {
     }
   }
 
+  _hideForearm() {
+    if (this.forearmBone) this.forearmBone.visible = false;
+    if (this.forearmJoint) this.forearmJoint.visible = false;
+  }
+
   /* Build (or rebuild) the fretboard, neck, frets, and strings from the
      geometry snapshot the host computed.  All board geometry is built in
      world coordinates that match the convention documented at the top of
@@ -1554,12 +1576,13 @@ class Hand3DRenderer {
     }
     if (!geom) return;
     const { NUT_X, fretX, numFrets, numStrings } = geom;
+    const visibleFrets = this._dedicatedView ? Math.max(22, numFrets || 0) : numFrets;
 
     // Board world-X span.  The nut sits 18 px inboard of NUT_X (matching the
     // SVG board's left margin) and the body end extends 10 px past the last
     // fret.  This places the board centre at boardCX so the camera frames it.
     const x0       = wx(NUT_X - 18);
-    const x1       = wx(fretX(numFrets) + 10);
+    const x1       = wx(fretX(visibleFrets) + 10);
     const boardCX  = (x0 + x1) / 2;
     const length   = x1 - x0;
 
@@ -1621,7 +1644,7 @@ class Hand3DRenderer {
     });
     const crownR = 0.10;
     const crownLen = boardWidthZ * 0.96;
-    for (let fr = 0; fr <= numFrets; fr++) {
+    for (let fr = 0; fr <= visibleFrets; fr++) {
       const fx = wx(fretX(fr));
       const wire = new THREE.Mesh(
         new THREE.CylinderGeometry(crownR, crownR, crownLen, 10),
@@ -1644,10 +1667,11 @@ class Hand3DRenderer {
     const zMid = (boardZ0 + boardZ1) / 2;
     const dotOff = boardWidthZ * 0.22;        // double-dot Z spread
     const dotGeo = new THREE.CylinderGeometry(dotR, dotR, 0.05, 18);
-    for (let fr = 2; fr <= numFrets; fr++) {
+    for (let fr = 2; fr <= visibleFrets; fr++) {
       const dbl = DOUBLE_DOTS.has(fr), sgl = SINGLE_DOTS.has(fr);
-      if (!dbl && !sgl) continue;
       const cx = (wx(fretX(fr - 1)) + wx(fretX(fr))) / 2;
+      if (this._dedicatedView) this._addFretNumber(fr, cx, dotY + 0.16, boardZ0 + boardWidthZ * 0.06);
+      if (!dbl && !sgl) continue;
       const zs = dbl ? [zMid - dotOff, zMid + dotOff] : [zMid];
       for (const z of zs) {
         const dot = new THREE.Mesh(dotGeo, dotMat);
@@ -1656,18 +1680,24 @@ class Hand3DRenderer {
       }
     }
 
-    // Full Stratocaster: body (sunburst) + pickguard + pickups + tremolo +
-    // knobs/switch/jack + the accurate 6-in-line headstock with tuners.
-    this._buildStrat({
+    // The dedicated playback view must enter quickly, so it uses a lightweight
+    // connected guitar body/headstock. The floating inspector keeps the richer
+    // Strat model where construction cost is less disruptive.
+    const guitarCtx = {
       xNut: wx(fretX(0)),
       bridgeX: wx(NUT_X + 1120),     // 25.5" scale point (same px→wu mapping as the frets)
       x1, boardWidthZ, hw, boardMat,
-    });
+    };
+    if (this._dedicatedView) this._buildLiteGuitar(guitarCtx);
+    else this._buildStrat(guitarCtx);
 
     // Strings: 6 thin tubes along +X at Y = STRING_SURFACE.  Re-built per
     // setGeometry call so the string count can change with the tuning.
-    const strMat = new THREE.MeshStandardMaterial({
-      color: 0xc9ccd1, roughness: 0.3, metalness: 0.7,
+    const plainStrMat = new THREE.MeshStandardMaterial({
+      color: 0xd9dde2, roughness: 0.24, metalness: 0.78,
+    });
+    const woundStrMat = new THREE.MeshStandardMaterial({
+      color: 0xc4a965, roughness: 0.28, metalness: 0.72,
     });
     this.stringMeshes = [];
     this._stringZ = new Array(numStrings + 1);
@@ -1679,8 +1709,10 @@ class Hand3DRenderer {
         new THREE.Vector3(x0, STRING_SURFACE, sz),
         new THREE.Vector3(x1, STRING_SURFACE, sz),
       );
-      const tube = new THREE.TubeGeometry(path, 8, 0.06, 6, false);
-      const str = new THREE.Mesh(tube, strMat);
+      const isWound = s >= Math.max(1, numStrings - 2);
+      const radius = isWound ? 0.085 + (s - (numStrings - 2)) * 0.012 : 0.052;
+      const tube = new THREE.TubeGeometry(path, 8, radius, 6, false);
+      const str = new THREE.Mesh(tube, isWound ? woundStrMat : plainStrMat);
       this.fretboardGroup.add(str);
       this.stringMeshes.push({
         mesh: str, sz, x0, x1, baseY: STRING_SURFACE, deflect: 0, pressFret: null,
@@ -1689,7 +1721,7 @@ class Hand3DRenderer {
 
     // Stash the geometry helpers we need each frame.
     this._fretX = fretX;
-    this._numFrets = numFrets;
+    this._numFrets = visibleFrets;
     this._numStrings = numStrings;
     this._boardCX = boardCX;
     this._stringZMax = stringZMax;
@@ -1717,6 +1749,36 @@ class Hand3DRenderer {
     this._applyCamera();
   }
 
+  _addFretNumber(fr, x, y, z) {
+    if (!this._dedicatedView) return;
+    const c = (typeof document !== "undefined") ? document.createElement("canvas") : null;
+    if (!c) return;
+    c.width = 128;
+    c.height = 72;
+    const ctx = c.getContext("2d");
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.font = fr >= 20 ? "bold 52px Arial, sans-serif" : "bold 46px Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "rgba(245, 220, 172, 0.92)";
+    ctx.strokeText(String(fr), c.width / 2, c.height / 2);
+    ctx.fillStyle = "rgba(18, 14, 8, 0.92)";
+    ctx.fillText(String(fr), c.width / 2, c.height / 2);
+    const tex = new THREE.CanvasTexture(c);
+    if ("colorSpace" in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(fr >= 10 ? 7.2 : 4.6, 2.8), mat);
+    label.rotation.x = -Math.PI / 2;
+    label.position.set(x, y, z);
+    this.fretboardGroup.add(label);
+  }
+
   /* 3-tone sunburst as a CanvasTexture (radial amber→orange→dark). */
   _makeSunburst() {
     const S = 512;
@@ -1735,6 +1797,51 @@ class Hand3DRenderer {
     if ("colorSpace" in tex) tex.colorSpace = THREE.SRGBColorSpace;
     try { tex.anisotropy = this.renderer.capabilities.getMaxAnisotropy(); } catch (e) { /* */ }
     return tex;
+  }
+
+  _buildLiteGuitar(ctx) {
+    const { xNut, bridgeX, x1, boardWidthZ, hw, boardMat } = ctx;
+    const G = this.fretboardGroup;
+    const chrome = new THREE.MeshStandardMaterial({ color: 0xd8dbe0, roughness: 0.22, metalness: 0.88 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x171416, roughness: 0.38, metalness: 0.25 });
+    const guard = new THREE.MeshStandardMaterial({ color: 0xf1eee5, roughness: 0.35, metalness: 0.0 });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x7a2f14, roughness: 0.26, metalness: 0.0 });
+
+    const body = new THREE.Group();
+    body.position.set(x1 + mm(58), -1.5, 0);
+    const bodyCore = new THREE.Mesh(new THREE.SphereGeometry(mm(128), 24, 12), bodyMat);
+    bodyCore.scale.set(1.15, 0.16, 0.58);
+    body.add(bodyCore);
+    const bodyWaist = new THREE.Mesh(new THREE.BoxGeometry(mm(142), mm(18), boardWidthZ * 1.15), bodyMat);
+    bodyWaist.position.set(-mm(54), 0, 0);
+    body.add(bodyWaist);
+    const guardPlate = new THREE.Mesh(new THREE.BoxGeometry(mm(88), mm(2), boardWidthZ * 1.35), guard);
+    guardPlate.position.set(-mm(20), 2.1, 0);
+    body.add(guardPlate);
+    G.add(body);
+
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(mm(72), mm(4), boardWidthZ * 1.05), chrome);
+    bridge.position.set(bridgeX, 1.2, 0);
+    G.add(bridge);
+
+    const head = new THREE.Group();
+    head.position.set(xNut - mm(80), BOARD_TOP_Y, 0);
+    const headCore = new THREE.Mesh(new THREE.BoxGeometry(mm(145), mm(7), boardWidthZ * 1.28), boardMat);
+    headCore.rotation.z = THREE.MathUtils.degToRad(-7);
+    head.add(headCore);
+    const tunerGeo = new THREE.CylinderGeometry(mm(3), mm(3), mm(8), 10);
+    const knobGeo = new THREE.BoxGeometry(mm(7), mm(4), mm(12));
+    for (let i = 0; i < 6; i++) {
+      const x = mm(50) - i * mm(20);
+      const z = -hw * 0.82;
+      const post = new THREE.Mesh(tunerGeo, chrome);
+      post.position.set(x, 5, z);
+      head.add(post);
+      const knob = new THREE.Mesh(knobGeo, dark);
+      knob.position.set(x, -2, z - mm(8));
+      head.add(knob);
+    }
+    G.add(head);
   }
 
   /* Build a full Fender Stratocaster (body + hardware + headstock) from the
@@ -1928,6 +2035,62 @@ class Hand3DRenderer {
       Math.abs(p.y - this._bellyY(p.z)) <= CONTACT_EPS;
   }
 
+  _syncImpactHalos(kin) {
+    if (!kin || !kin.fingers || !this._fretX || !this._stringZ) return;
+    const nextKeys = new Set();
+    const now = (typeof performance !== "undefined" ? performance.now() : Date.now()) / 1000;
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers[f];
+      if (!fg || fg.role !== "active" || !(fg.fret > 0) || !fg.strings || !fg.strings.length) {
+        continue;
+      }
+      const str = fg.strings[0];
+      const key = `${f}:${fg.fret}:${str}`;
+      nextKeys.add(key);
+      if (!this._activePressKeys.has(key)) {
+        this._spawnImpactHalo(this._pressX(fg.fret), this._stringZAt(str), now);
+      }
+    }
+    this._activePressKeys = nextKeys;
+  }
+
+  _spawnImpactHalo(x, z, now) {
+    const geo = new THREE.RingGeometry(1.8, 2.6, 40);
+    geo.rotateX(Math.PI / 2);
+    const mat = new THREE.MeshBasicMaterial({
+      color: IMPACT_HALO,
+      transparent: true,
+      opacity: 0.95,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const ring = new THREE.Mesh(geo, mat);
+    ring.position.set(x, STRING_SURFACE + 0.08, z);
+    this._haloGroup.add(ring);
+    this._impactHalos.push({ mesh: ring, born: now, ttl: 0.42 });
+  }
+
+  _updateImpactHalos() {
+    if (!this._impactHalos || !this._impactHalos.length) return;
+    const now = (typeof performance !== "undefined" ? performance.now() : Date.now()) / 1000;
+    for (let i = this._impactHalos.length - 1; i >= 0; i--) {
+      const h = this._impactHalos[i];
+      const age = now - h.born;
+      const k = Math.max(0, Math.min(1, age / h.ttl));
+      if (k >= 1) {
+        this._haloGroup.remove(h.mesh);
+        if (h.mesh.geometry) h.mesh.geometry.dispose();
+        if (h.mesh.material) h.mesh.material.dispose();
+        this._impactHalos.splice(i, 1);
+        continue;
+      }
+      const pulse = 1 + k * 5.5;
+      h.mesh.scale.set(pulse, pulse, pulse);
+      h.mesh.material.opacity = (1 - k) * (0.9 + 0.1 * Math.sin(age * 90));
+    }
+  }
+
   /* Per-frame re-pose from the shared kinematic snapshot.
 
      We use ONLY semantic intent (target string + fret + role) from the kin
@@ -1947,6 +2110,8 @@ class Hand3DRenderer {
     try {
       if (this._rigMode === "articulated") {
         this._updateArticulated(kin);
+        this._syncImpactHalos(kin);
+        this._updateImpactHalos();
         this._applyCamera();
         this.renderer.render(this.scene, this.camera);
         return;
@@ -1969,6 +2134,8 @@ class Hand3DRenderer {
         this._poseThumb(kin);
         this._poseForearm(kin);
       }
+      this._syncImpactHalos(kin);
+      this._updateImpactHalos();
       this._applyCamera();
       this.renderer.render(this.scene, this.camera);
     } catch (e) {
@@ -2341,6 +2508,8 @@ class Hand3DRenderer {
      stays attached to the back of the palm slab, regardless of where the
      hand has slid along the neck. */
   _poseForearm(kin) {
+    this._hideForearm();
+    return;
     let wristX, wristY, wristZ;
     if (this._rigMode === "articulated" && this.main) {
       // Anchor the forearm tube to the ACTUAL articulated wrist (Main.node), so
@@ -2430,6 +2599,11 @@ class Hand3DRenderer {
         canvas.removeEventListener("pointerleave", this._onPointerUp);
         canvas.removeEventListener("wheel", this._onWheel);
       }
+      for (const h of this._impactHalos || []) {
+        if (h.mesh.geometry) h.mesh.geometry.dispose();
+        if (h.mesh.material) h.mesh.material.dispose();
+      }
+      this._impactHalos = [];
       this.renderer.dispose();
       if (this.renderer.domElement && this.renderer.domElement.parentNode) {
         this.renderer.domElement.parentNode.removeChild(this.renderer.domElement);

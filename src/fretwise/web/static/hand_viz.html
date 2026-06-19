@@ -115,6 +115,47 @@
       #scene-wrap { padding: 6px; }
       #timeline { margin-top: 8px; }
     }
+    body.dedicated-3d {
+      background: #101216;
+      overflow: hidden;
+    }
+    body.dedicated-3d #app {
+      max-width: none;
+      height: 100%;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    body.dedicated-3d #hud {
+      padding: 8px 14px;
+      background: #17191d;
+      border-bottom: 1px solid #2b2e35;
+      flex: 0 0 auto;
+    }
+    body.dedicated-3d #btn-3d,
+    body.dedicated-3d #btn-play,
+    body.dedicated-3d #btn-rewind,
+    body.dedicated-3d #legend,
+    body.dedicated-3d #notelog {
+      display: none;
+    }
+    body.dedicated-3d #scene-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+    body.dedicated-3d #scene3d,
+    body.dedicated-3d #scene3d canvas {
+      height: 100% !important;
+    }
+    body.dedicated-3d #timeline {
+      flex: 0 0 auto;
+      margin: 0;
+      height: 5px;
+      border-radius: 0;
+    }
   </style>
 </head>
 <body>
@@ -223,6 +264,9 @@
 
 /* ---------- Fretboard geometry (px) --------------------------------------- */
 const SCENE_W = 1440, SCENE_H = 560;
+const URL_PARAMS = new URLSearchParams(window.location.search || "");
+const DEDICATED_3D_VIEW = URL_PARAMS.get("view") === "3d";
+if (DEDICATED_3D_VIEW) document.body.classList.add("dedicated-3d");
 
 const NUT_X    = 110;
 const SCALE_PX = 1120;
@@ -488,8 +532,10 @@ function configureGeometry(data) {
     STRING_MIDI_BASE = [64, 59, 55, 50, 45, 40];
   }
 
-  NUM_FRETS = (typeof fb.num_frets === 'number' && fb.num_frets >= 1)
-    ? Math.round(fb.num_frets) : 15;
+  NUM_FRETS = DEDICATED_3D_VIEW ? 22 : (
+    (typeof fb.num_frets === 'number' && fb.num_frets >= 1)
+      ? Math.round(fb.num_frets) : 15
+  );
   SCALE_LENGTH_MM = (typeof fb.scale_length_mm === 'number' && fb.scale_length_mm > 0)
     ? fb.scale_length_mm : 648;
   CAPO_FRET = (typeof fb.capo === 'number' && fb.capo > 0)
@@ -2273,6 +2319,7 @@ let playT                = 0;     // internal clock (standalone mode)
 let playing              = true;
 let EXT_SYNCED           = false; // true = parent drives the clock via `seek`
 let extT                 = 0;     // last time received from parent
+let extWallMs            = 0;     // wall-clock instant of the last parent seek
 let NO_FINGERING         = false; // true = staff-only / empty track, show message
 
 /* ---------- Milestone 5: optional 3D renderer (feature flag, OFF by default) -
@@ -2289,6 +2336,7 @@ const HAND3D_STORAGE_KEY = "fretwise.hand3d";
 function hand3dRequested() {
   try {
     const params = new URLSearchParams(window.location.search || "");
+    if (params.get("view") === "3d") return true;
     if (params.has("hand3d")) {
       const v = params.get("hand3d");
       return v === "" || v === "1" || v === "true";   // ?hand3d, =1, =true → on
@@ -2532,6 +2580,7 @@ window.addEventListener("message", (ev) => {
     installData(msg.payload);
   } else if (msg.type === "fretwise-hand-seek") {
     extT    = typeof msg.t === "number" ? msg.t : 0;
+    extWallMs = performance.now();
     playing = !!msg.playing;
     EXT_SYNCED = true;
   }
@@ -2679,23 +2728,31 @@ window.addEventListener("message", (ev) => {
   btnRew .addEventListener("click", () => { playT = 0; });
 
   let lastMs = performance.now();
+  let lastDedicated3dFrameMs = 0;
   function frame(now) {
+    if (DEDICATED_3D_VIEW && HAND3D_ACTIVE && HAND3D_RENDERER) {
+      const minFrameMs = 1000 / 30;
+      if (lastDedicated3dFrameMs > 0 && (now - lastDedicated3dFrameMs) < minFrameMs) {
+        requestAnimationFrame(frame);
+        return;
+      }
+      lastDedicated3dFrameMs = now;
+    }
     const dtMs = now - lastMs; lastMs = now;
     const dt   = Math.min(0.1, dtMs / 1000);
 
     /* Clock selection:
-       - External (synced) mode: parent drives the clock via seek messages.
-         We just read `extT` every frame; no internal accumulation, no loop.
-         INVARIANT (sync-drift guard): each `fretwise-hand-seek` carries an
-         ABSOLUTE timestamp (parent's playback.getCurrentTimeSec()), and we never
-         integrate `dt` here — so tNow always equals the parent's clock exactly,
-         with zero accumulated error no matter how long the piece runs.  Do NOT
-         change this to `extT += dt` or any incremental form; that would
-         reintroduce drift over a multi-minute timeline (regression-tested).
+       - External (synced) mode: parent sends absolute seek samples. While
+         playing, the dedicated 3D view interpolates from the last absolute
+         sample using wall-clock time, then snaps back on every new sample. This
+         keeps the sound engine authoritative while avoiding visible step-jumps.
        - Standalone mode: internal loop (pre-existing behaviour).  */
     let tNow;
     if (EXT_SYNCED) {
-      tNow = extT;
+      const smooth = DEDICATED_3D_VIEW && playing && extWallMs > 0
+        ? (now - extWallMs) / 1000
+        : 0;
+      tNow = extT + smooth;
     } else {
       if (playing && CURRENT_DATA) {
         playT += dt;

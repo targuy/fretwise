@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FretWise - Maquette Guitar Lane</title>
+  <style>
+    :root {
+      --bg: #101014;
+      --panel: rgba(22, 23, 26, 0.82);
+      --panel-border: rgba(235, 231, 220, 0.16);
+      --text: #f4efe4;
+      --muted: #b6afa2;
+      --wood-a: #3b2118;
+      --wood-b: #6a3f29;
+      --string: rgba(244, 239, 228, 0.74);
+      --hit: #f7e8a4;
+      --open: #d9d6cc;
+      --index: #ffd44d;
+      --middle: #60c060;
+      --ring: #6090e0;
+      --pinky: #c060c0;
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% 12%, rgba(255, 232, 163, 0.13), transparent 28%),
+        linear-gradient(120deg, rgba(255, 255, 255, 0.04), transparent 35%),
+        repeating-linear-gradient(
+          92deg,
+          var(--wood-a) 0,
+          var(--wood-b) 28px,
+          #2c1812 56px,
+          var(--wood-b) 84px
+        );
+    }
+
+    .app {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      width: 100vw;
+      height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent 18%, rgba(0, 0, 0, 0.72)),
+        rgba(8, 8, 10, 0.28);
+    }
+
+    .topbar,
+    .bottombar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--panel);
+      border-color: var(--panel-border);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar {
+      justify-content: space-between;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .bottombar {
+      justify-content: center;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--panel-border);
+    }
+
+    .timeline {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px 0;
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+    }
+
+    .timeline span {
+      min-width: 42px;
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timeline input[type="range"] {
+      width: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .heart {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      transform: rotate(-45deg) scale(var(--heart-scale, 1));
+      background: #e85d75;
+      border-radius: 9px 0 7px 0;
+      box-shadow: 0 0 calc(20px * var(--heart-glow, 1)) rgba(232, 93, 117, 0.7);
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -18px;
+      left: 0;
+    }
+
+    .heart::after {
+      top: 0;
+      left: 18px;
+    }
+
+    .tempo-heart {
+      position: absolute;
+      z-index: 3;
+      left: clamp(16px, 4.5vw, 64px);
+      top: 50%;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .tempo-bpm {
+      min-width: 68px;
+      padding: 6px 10px;
+      color: #fff8e6;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0;
+      text-shadow: 0 0 12px rgba(247, 232, 164, 0.52);
+      background: rgba(10, 10, 12, 0.52);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+    }
+
+    .brand strong {
+      font-size: 18px;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .brand span,
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .stage {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hit-line {
+      position: absolute;
+      left: 9%;
+      right: 9%;
+      bottom: 22%;
+      height: 2px;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, var(--hit), transparent);
+      box-shadow: 0 0 24px rgba(247, 232, 164, 0.75);
+    }
+
+    .hit-line::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 78%;
+      height: 58px;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(247, 232, 164, 0.16);
+      border-radius: 50%;
+      box-shadow: inset 0 0 38px rgba(247, 232, 164, 0.08);
+    }
+
+    .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 12px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+    }
+
+    button.control {
+      min-width: 42px;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    button.control:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    label.control {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input[type="range"] {
+      width: min(30vw, 220px);
+      accent-color: var(--hit);
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      box-shadow: 0 0 14px currentColor;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .legend {
+        justify-content: flex-start;
+      }
+
+      .brand span {
+        white-space: normal;
+      }
+
+      input[type="range"] {
+        width: 42vw;
+      }
+
+      .tempo-heart {
+        left: 14px;
+        gap: 10px;
+      }
+
+      .tempo-bpm {
+        font-size: 14px;
+        min-width: 56px;
+      }
+
+      .heart {
+        width: 28px;
+        height: 28px;
+      }
+
+      .heart::before,
+      .heart::after {
+        width: 28px;
+        height: 28px;
+      }
+
+      .heart::before {
+        top: -14px;
+      }
+
+      .heart::after {
+        left: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <strong>FretWise</strong>
+        <span>Guitar lane mockup</span>
+      </div>
+      <div class="legend" aria-label="Convention couleur des doigts">
+        <span class="legend-item"><i class="swatch" style="color: var(--open); background: var(--open)"></i>0</span>
+        <span class="legend-item"><i class="swatch" style="color: var(--index); background: var(--index)"></i>i</span>
+        <span class="legend-item"><i class="swatch" style="color: var(--middle); background: var(--middle)"></i>m</span>
+        <span class="legend-item"><i class="swatch" style="color: var(--ring); background: var(--ring)"></i>r</span>
+        <span class="legend-item"><i class="swatch" style="color: var(--pinky); background: var(--pinky)"></i>p</span>
+      </div>
+    </header>
+
+    <section class="stage" aria-label="Visualisation en perspective">
+      <canvas id="lane"></canvas>
+      <div class="tempo-heart" aria-label="Tempo">
+        <span id="heart" class="heart" aria-hidden="true"></span>
+        <span id="tempoHeartOut" class="tempo-bpm">108 BPM</span>
+      </div>
+      <div class="hit-line" aria-hidden="true"></div>
+    </section>
+
+    <div class="timeline" aria-label="Timeline">
+      <span id="timeNow">0:00</span>
+      <input id="timeline" type="range" min="0" max="12" step="0.01" value="0" aria-label="Position">
+      <span id="timeEnd">0:07</span>
+    </div>
+
+    <footer class="bottombar">
+      <button id="play" class="control" type="button" aria-label="Lecture">Pause</button>
+      <button id="restart" class="control" type="button" aria-label="Retour debut">↺</button>
+      <label class="control">
+        Vitesse
+        <input id="speed" type="range" min="60" max="150" value="100">
+        <output id="speedOut">100%</output>
+      </label>
+      <span id="status" class="status">Mesure 1 · 4/4</span>
+    </footer>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("lane");
+    const ctx = canvas.getContext("2d");
+    const playBtn = document.getElementById("play");
+    const restartBtn = document.getElementById("restart");
+    const speedInput = document.getElementById("speed");
+    const speedOut = document.getElementById("speedOut");
+    const statusEl = document.getElementById("status");
+    const heartEl = document.getElementById("heart");
+    const tempoHeartOut = document.getElementById("tempoHeartOut");
+    const timelineInput = document.getElementById("timeline");
+    const timeNow = document.getElementById("timeNow");
+    const timeEnd = document.getElementById("timeEnd");
+
+    const fingerMeta = {
+      open: { label: "0", color: "#d9d6cc" },
+      index: { label: "i", color: "#ffd44d" },
+      middle: { label: "m", color: "#60c060" },
+      ring: { label: "r", color: "#6090e0" },
+      pinky: { label: "p", color: "#c060c0" },
+    };
+
+    const rawDemoNotes = [
+      { onset: 0.0, duration: 1.0, string: 6, fret: 3, finger: "index", chord: "G" },
+      { onset: 0.0, duration: 1.0, string: 5, fret: 2, finger: "middle", chord: "G" },
+      { onset: 0.0, duration: 1.0, string: 1, fret: 3, finger: "ring", chord: "G" },
+      { onset: 0.5, duration: 0.5, string: 5, fret: 5, finger: "ring" },
+      { onset: 1.0, duration: 1.0, string: 4, fret: 5, finger: "pinky" },
+      { onset: 2.0, duration: 0.5, string: 3, fret: 4, finger: "middle" },
+      { onset: 2.5, duration: 0.5, string: 2, fret: 3, finger: "index" },
+      { onset: 3.0, duration: 1.0, string: 1, fret: 0, finger: "open" },
+      { onset: 4.0, duration: 1.0, string: 5, fret: 3, finger: "ring", chord: "C" },
+      { onset: 4.0, duration: 1.0, string: 4, fret: 2, finger: "middle", chord: "C" },
+      { onset: 4.0, duration: 1.0, string: 2, fret: 1, finger: "index", chord: "C" },
+      { onset: 4.0, duration: 0.5, string: 1, fret: 0, finger: "open", chord: "C" },
+      { onset: 4.5, duration: 0.5, string: 3, fret: 7, finger: "ring" },
+      { onset: 5.0, duration: 0.5, string: 4, fret: 8, finger: "pinky" },
+      { onset: 5.5, duration: 0.5, string: 3, fret: 7, finger: "ring" },
+      { onset: 6.0, duration: 1.0, string: 2, fret: 5, finger: "index" },
+      { onset: 7.0, duration: 1.0, string: 1, fret: 8, finger: "pinky" },
+      { onset: 8.0, duration: 1.0, string: 4, fret: 0, finger: "open", chord: "D" },
+      { onset: 8.0, duration: 1.0, string: 3, fret: 2, finger: "index", chord: "D" },
+      { onset: 8.0, duration: 1.0, string: 2, fret: 3, finger: "ring", chord: "D" },
+      { onset: 8.0, duration: 1.0, string: 1, fret: 2, finger: "middle", chord: "D" },
+      { onset: 8.0, duration: 0.75, string: 5, fret: 7, finger: "index" },
+      { onset: 8.75, duration: 0.25, string: 4, fret: 9, finger: "middle" },
+      { onset: 9.0, duration: 0.5, string: 3, fret: 9, finger: "ring" },
+      { onset: 9.5, duration: 0.5, string: 2, fret: 10, finger: "pinky" },
+      { onset: 10.0, duration: 1.0, string: 1, fret: 7, finger: "index" },
+      { onset: 11.0, duration: 1.0, string: 6, fret: 0, finger: "open" },
+    ];
+
+    const songBeats = 12;
+    const MEASURE_BEATS = 4;
+    const FUTURE_BEATS = MEASURE_BEATS * 2;
+    const HORIZON_Y_RATIO = 0.30;
+    const COLLISION_GAP_BEATS = 0.32;
+    const BASE_BPM = 108;
+    const demoNotes = applyStringCollisionGuard(rawDemoNotes, songBeats);
+    const chordEvents = buildChordEvents(demoNotes);
+    window.__debugNotes = demoNotes.map((note) => ({ ...note }));
+    let playing = true;
+    let currentBeat = 0;
+    let lastFrame = performance.now();
+    let seeking = false;
+
+    function applyStringCollisionGuard(notes, loopBeats) {
+      const guarded = notes
+        .map((note, order) => ({ ...note, order }))
+        .sort((a, b) => a.onset - b.onset || a.string - b.string || a.order - b.order);
+
+      for (let stringNum = 1; stringNum <= 6; stringNum += 1) {
+        const onString = guarded.filter((note) => note.string === stringNum);
+        onString.forEach((note, index) => {
+          const next = onString[(index + 1) % onString.length];
+          const nextOnset = next.onset <= note.onset ? next.onset + loopBeats : next.onset;
+          const maxDuration = Math.max(0.05, nextOnset - note.onset);
+          note.duration = Math.min(note.duration, maxDuration);
+        });
+      }
+
+      return guarded.sort((a, b) => a.order - b.order).map(({ order, ...note }) => note);
+    }
+
+    function buildChordEvents(notes) {
+      const byKey = new Map();
+      notes.forEach((note) => {
+        if (!note.chord) return;
+        const key = `${note.onset}:${note.chord}`;
+        const entry = byKey.get(key) || {
+          label: note.chord,
+          onset: note.onset,
+          duration: note.duration,
+          strings: [],
+        };
+        entry.duration = Math.max(entry.duration, note.duration);
+        entry.strings.push(note.string);
+        byKey.set(key, entry);
+      });
+      return Array.from(byKey.values()).sort((a, b) => a.onset - b.onset);
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function lanePoint(stringNum, depth) {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const farY = h * HORIZON_Y_RATIO;
+      const nearY = h * 0.78;
+      const farHalf = Math.min(w * 0.15, 160);
+      const nearHalf = Math.min(w * 0.50, 590);
+      const centerX = w * 0.5;
+      const index = 6 - stringNum;
+      const t = index / 5;
+      const farX = lerp(centerX - farHalf, centerX + farHalf, t);
+      const nearX = lerp(centerX - nearHalf, centerX + nearHalf, t);
+      return {
+        x: lerp(nearX, farX, depth),
+        y: lerp(nearY, farY, depth),
+        scale: lerp(1.0, 0.18, depth),
+      };
+    }
+
+    function depthForBeat(noteBeat) {
+      return (noteBeat - currentBeat) / FUTURE_BEATS;
+    }
+
+    function hitY() {
+      return canvas.clientHeight * 0.78;
+    }
+
+    function capsulePath(a, b, widthA, widthB) {
+      const angle = Math.atan2(b.y - a.y, b.x - a.x);
+      const nx = Math.cos(angle + Math.PI / 2);
+      const ny = Math.sin(angle + Math.PI / 2);
+      ctx.beginPath();
+      ctx.moveTo(a.x + nx * widthA, a.y + ny * widthA);
+      ctx.lineTo(b.x + nx * widthB, b.y + ny * widthB);
+      ctx.ellipse(b.x, b.y, widthB, widthB * 0.72, angle, Math.PI / 2, -Math.PI / 2);
+      ctx.lineTo(a.x - nx * widthA, a.y - ny * widthA);
+      ctx.ellipse(a.x, a.y, widthA, widthA * 0.72, angle, -Math.PI / 2, Math.PI / 2);
+      ctx.closePath();
+    }
+
+    function drawBackground(w, h) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, h);
+      gradient.addColorStop(0, "#07080b");
+      gradient.addColorStop(0.56, "#161214");
+      gradient.addColorStop(1, "#050506");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i < 21; i += 1) {
+        const depth = i / 20;
+        const left = lanePoint(6, depth);
+        const right = lanePoint(1, depth);
+        ctx.strokeStyle = depth > 0.78 ? "rgba(255,255,255,0.05)" : "rgba(255,232,164,0.14)";
+        ctx.lineWidth = Math.max(1, 4 * (1 - depth));
+        ctx.beginPath();
+        ctx.moveTo(left.x, left.y);
+        ctx.lineTo(right.x, right.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      const horizonLeft = lanePoint(6, 1);
+      const horizonRight = lanePoint(1, 1);
+      ctx.save();
+      ctx.strokeStyle = "rgba(238, 238, 232, 0.82)";
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = "rgba(238, 238, 232, 0.55)";
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(horizonLeft.x - 36, horizonLeft.y);
+      ctx.lineTo(horizonRight.x + 36, horizonRight.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawStrings() {
+      for (let stringNum = 1; stringNum <= 6; stringNum += 1) {
+        const near = lanePoint(stringNum, 0);
+        const far = lanePoint(stringNum, 1);
+        const grad = ctx.createLinearGradient(near.x, near.y, far.x, far.y);
+        grad.addColorStop(0, "rgba(255,255,255,0.88)");
+        grad.addColorStop(1, "rgba(255,255,255,0.16)");
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.1 + (7 - stringNum) * 0.34;
+        ctx.shadowColor = "rgba(255,255,255,0.28)";
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(near.x, near.y);
+        ctx.lineTo(far.x, far.y);
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+    }
+
+    function drawChordTriangle(point, radius, scale) {
+      const size = 10 * scale + 7;
+      const tipY = point.y - radius - 4;
+      ctx.save();
+      ctx.fillStyle = "#ff3030";
+      ctx.shadowColor = "rgba(255, 48, 48, 0.8)";
+      ctx.shadowBlur = 12 * scale + 4;
+      ctx.beginPath();
+      ctx.moveTo(point.x, tipY);
+      ctx.lineTo(point.x - size * 0.72, tipY - size * 1.2);
+      ctx.lineTo(point.x + size * 0.72, tipY - size * 1.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawChordLabel(chord) {
+      const depth = Math.max(0, Math.min(1.04, depthForBeat(chord.onset)));
+      const right = lanePoint(1, depth);
+      const rawX = right.x + (72 * right.scale + 34);
+      const x = Math.min(canvas.clientWidth - 92, rawX);
+      const y = right.y;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, canvas.clientWidth, hitY());
+      ctx.clip();
+      ctx.fillStyle = "#ff3030";
+      ctx.shadowColor = "rgba(255, 48, 48, 0.72)";
+      ctx.shadowBlur = 18 * right.scale + 8;
+      ctx.font = `900 ${Math.max(18, 30 * right.scale)}px Inter, sans-serif`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(chord.label, x, y);
+      ctx.restore();
+    }
+
+    function drawNoteBar(note) {
+      const startDepth = depthForBeat(note.onset);
+      const endDepth = depthForBeat(note.onset + note.duration);
+      if (endDepth < 0 || startDepth > 1.16) return;
+
+      const active = note.onset <= currentBeat && currentBeat <= note.onset + note.duration;
+      const vibration = active ? 1 + 0.18 * Math.sin(performance.now() / 34) : 1;
+      const a = lanePoint(note.string, Math.max(0, Math.min(1.08, startDepth)));
+      const b = lanePoint(note.string, Math.max(0, Math.min(1.08, endDepth)));
+      const meta = fingerMeta[note.finger] || fingerMeta.open;
+      const widthA = (18 * a.scale + 10) * vibration;
+      const widthB = 18 * b.scale + 10;
+      const angle = Math.atan2(b.y - a.y, b.x - a.x);
+      const nx = Math.cos(angle + Math.PI / 2);
+      const ny = Math.sin(angle + Math.PI / 2);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, canvas.clientWidth, hitY());
+      ctx.clip();
+
+      const tubeWidth = Math.max(20, (widthA + widthB) * 0.92);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.shadowColor = meta.color;
+      ctx.shadowBlur = active ? 44 * vibration : 28 * a.scale + 14;
+      ctx.strokeStyle = meta.color;
+      ctx.lineWidth = tubeWidth * 1.9;
+      ctx.globalAlpha = active ? 0.44 : 0.25;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.92;
+      ctx.shadowBlur = active ? 24 * vibration : 16 * a.scale + 5;
+      const fill = ctx.createLinearGradient(
+        a.x - nx * widthA,
+        a.y - ny * widthA,
+        a.x + nx * widthA,
+        a.y + ny * widthA,
+      );
+      fill.addColorStop(0, "rgba(0,0,0,0.58)");
+      fill.addColorStop(0.16, meta.color);
+      fill.addColorStop(0.48, "#fff7d8");
+      fill.addColorStop(0.72, meta.color);
+      fill.addColorStop(1, "rgba(0,0,0,0.48)");
+      ctx.strokeStyle = fill;
+      ctx.lineWidth = tubeWidth;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = "rgba(255,255,255,0.78)";
+      ctx.lineWidth = Math.max(2, 5 * a.scale);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(a.x + nx * tubeWidth * 0.17, a.y + ny * tubeWidth * 0.17);
+      ctx.lineTo(b.x + nx * tubeWidth * 0.17, b.y + ny * tubeWidth * 0.17);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = "rgba(0,0,0,0.72)";
+      ctx.lineWidth = Math.max(2, 7 * a.scale);
+      ctx.beginPath();
+      ctx.moveTo(a.x - nx * tubeWidth * 0.2, a.y - ny * tubeWidth * 0.2);
+      ctx.lineTo(b.x - nx * tubeWidth * 0.2, b.y - ny * tubeWidth * 0.2);
+      ctx.stroke();
+
+      const labelPoint = {
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+        scale: (a.scale + b.scale) / 2,
+      };
+      const labelRadius = 18 * labelPoint.scale + 12;
+      ctx.globalAlpha = 1;
+      ctx.shadowColor = "rgba(255,255,255,0.62)";
+      ctx.shadowBlur = 16;
+      ctx.fillStyle = "#fffdf2";
+      ctx.beginPath();
+      ctx.arc(labelPoint.x, labelPoint.y, labelRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0,0,0,0.28)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#050505";
+      ctx.font = `900 ${Math.max(16, labelRadius * 1.08)}px Inter, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(note.fret), labelPoint.x, labelPoint.y + 0.5);
+
+      if (note.chord) {
+        drawChordTriangle(labelPoint, labelRadius, labelPoint.scale);
+      }
+
+      ctx.restore();
+    }
+
+    function visibleNotesForFrame() {
+      const visible = [];
+      for (let repeat = -1; repeat <= 1; repeat += 1) {
+        demoNotes.forEach((source) => {
+          const note = { ...source, onset: source.onset + repeat * songBeats };
+          const startDepth = depthForBeat(note.onset);
+          const endDepth = depthForBeat(note.onset + note.duration);
+          if (endDepth >= 0 && startDepth <= 1.16) {
+            visible.push(note);
+          }
+        });
+      }
+
+      visible.sort((a, b) => a.string - b.string || a.onset - b.onset);
+      for (let i = 0; i < visible.length; i += 1) {
+        const note = visible[i];
+        const next = visible.find((candidate) => (
+          candidate.string === note.string && candidate.onset > note.onset
+        ));
+        if (next) {
+          const maxDuration = Math.max(0.05, next.onset - note.onset - COLLISION_GAP_BEATS);
+          note.duration = Math.min(note.duration, maxDuration);
+        }
+      }
+
+      return visible.sort((a, b) => b.onset - a.onset);
+    }
+
+    function visibleChordsForFrame() {
+      const visible = [];
+      for (let repeat = -1; repeat <= 1; repeat += 1) {
+        chordEvents.forEach((source) => {
+          const chord = { ...source, onset: source.onset + repeat * songBeats };
+          const depth = depthForBeat(chord.onset);
+          if (depth >= -0.08 && depth <= 1.16) {
+            visible.push(chord);
+          }
+        });
+      }
+      return visible.sort((a, b) => b.onset - a.onset);
+    }
+
+    function drawNowPulse() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      const beatPhase = currentBeat - Math.floor(currentBeat);
+      const alpha = 1 - beatPhase;
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.18;
+      ctx.strokeStyle = "#f7e8a4";
+      ctx.lineWidth = 2;
+      const y = h * 0.78;
+      ctx.beginPath();
+      ctx.ellipse(w * 0.5, y, w * 0.39 * (1 + beatPhase * 0.16), 54, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function effectiveBpm() {
+      return Math.round(BASE_BPM * (Number(speedInput.value) / 100));
+    }
+
+    function formatTimeForBeat(beatValue) {
+      const seconds = Math.max(0, (beatValue * 60) / effectiveBpm());
+      const minutes = Math.floor(seconds / 60);
+      const remainder = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${remainder}`;
+    }
+
+    function updateTransportReadouts() {
+      const bpm = effectiveBpm();
+      tempoHeartOut.textContent = `${bpm} BPM`;
+      speedOut.textContent = `${speedInput.value}%`;
+      timelineInput.value = currentBeat.toFixed(2);
+      timeNow.textContent = formatTimeForBeat(currentBeat);
+      timeEnd.textContent = formatTimeForBeat(songBeats);
+    }
+
+    function draw(now) {
+      const dt = Math.min(0.05, (now - lastFrame) / 1000);
+      lastFrame = now;
+      if (playing && !seeking) {
+        currentBeat = (currentBeat + (dt * effectiveBpm()) / 60) % songBeats;
+      }
+
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      drawBackground(w, h);
+      drawStrings();
+
+      visibleNotesForFrame().forEach(drawNoteBar);
+      visibleChordsForFrame().forEach(drawChordLabel);
+
+      drawNowPulse();
+
+      const beatPhase = currentBeat - Math.floor(currentBeat);
+      const heartPulse = 1 + Math.pow(1 - beatPhase, 5) * 0.34;
+      heartEl.style.setProperty("--heart-scale", heartPulse.toFixed(3));
+      heartEl.style.setProperty("--heart-glow", (1 + (heartPulse - 1) * 2).toFixed(3));
+      if (!seeking) {
+        updateTransportReadouts();
+      }
+
+      const measure = Math.floor(currentBeat / 4) + 1;
+      const beat = Math.floor(currentBeat % 4) + 1;
+      statusEl.textContent = `Mesure ${measure} · Temps ${beat} · 4/4`;
+      requestAnimationFrame(draw);
+    }
+
+    playBtn.addEventListener("click", () => {
+      playing = !playing;
+      playBtn.textContent = playing ? "Pause" : "Play";
+    });
+
+    restartBtn.addEventListener("click", () => {
+      currentBeat = 0;
+      lastFrame = performance.now();
+      updateTransportReadouts();
+    });
+
+    speedInput.addEventListener("input", () => {
+      updateTransportReadouts();
+    });
+
+    timelineInput.addEventListener("input", () => {
+      seeking = true;
+      currentBeat = Number(timelineInput.value);
+      timeNow.textContent = formatTimeForBeat(currentBeat);
+      statusEl.textContent = `Mesure ${Math.floor(currentBeat / 4) + 1} · Temps ${Math.floor(currentBeat % 4) + 1} · 4/4`;
+    });
+
+    timelineInput.addEventListener("change", () => {
+      currentBeat = Number(timelineInput.value);
+      lastFrame = performance.now();
+      seeking = false;
+      updateTransportReadouts();
+    });
+
+    window.addEventListener("resize", resize);
+    resize();
+    updateTransportReadouts();
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>
