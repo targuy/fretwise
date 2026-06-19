@@ -51,13 +51,43 @@ _RELIA = {
     "D": "D — À confirmer (peu de références ; valeurs à l'oreille)",
 }
 
-_COMPENSATION = (
-    "Compensation guitare :\n"
-    "- Cible Strat (si original humbucker) : Gain +5, Bass −2, Mid +2, Treble −3, Presence −1\n"
-    "- Cible SG/Les Paul (si original single coil) : Gain −5, Bass +2, Mid +2, Treble +3, Presence +2\n"
-    "- Si guitare cible = guitare originale : aucune compensation"
-)
 _CHAIN = "NR → PRE → WAH → DST → N→S → AMP → CAB/IR → EQ → MOD → DLY → RVB → VOL"
+
+# Rapprochement genre -> ampli par défaut GP-180, utilisé seulement quand la
+# fiche ne fixe pas explicitement un ampli (faits trop minces / chanson peu
+# documentée). Ordre = priorité de correspondance (sous-chaînes du genre).
+_GENRE_AMP_DEFAULTS: tuple[tuple[tuple[str, ...], str], ...] = (
+    (("doom", "stoner", "sludge"), "Mesa Dual Recto"),
+    (("djent", "progressive metal", "deathcore"), "ENGL Gigmaster"),
+    (("thrash", "death metal", "metalcore", "industrial metal", "black metal"), "ENGL Savage"),
+    (("metal",), "UK 900"),
+    (("punk",), "UK 50"),
+    (("hard rock",), "UK 45"),
+    (("blues", "grunge"), "Bassman"),
+    (("jazz", "fusion", "funk"), "Foxy30"),
+    (("acoustic", "folk", "country", "bluegrass"), "Tweedy"),
+    (("ambient", "shoegaze", "post-rock", "psychedelic", "synth"), "Tremoverb"),
+    (("classic rock", "progressive rock", "rock"), "UK 45"),
+    (("pop",), "Foxy30"),
+)
+
+# Rapprochement guitare originale -> famille idéale modélisée par le GP-180
+# (Strat, Tele, Les Paul, SG, Superstrat). Sous-chaînes testées sur le texte
+# "guitar" en minuscules ; ordre = priorité.
+_GUITAR_FAMILIES: tuple[tuple[str, tuple[str, ...], str], ...] = (
+    ("Gibson SG", ("gibson sg", " sg ", "sg standard", "sg special"), "humbucker"),
+    ("Gibson Les Paul", (
+        "les paul", "es-335", "es335", " 335", "explorer", "flying v", "prs",
+    ), "humbucker"),
+    ("Superstrat", (
+        "superstrat", "ibanez", "jackson", "esp", "charvel", "kramer",
+        "floyd rose", "jem", "rg series", "soloist",
+    ), "humbucker"),
+    ("Fender Telecaster", ("telecaster", "tele"), "single coil"),
+    ("Fender Stratocaster", (
+        "stratocaster", "strat", "jaguar", "jazzmaster", "mustang",
+    ), "single coil"),
+)
 
 
 def _g(d: dict, key: str, default: str) -> str:
@@ -65,9 +95,46 @@ def _g(d: dict, key: str, default: str) -> str:
     return str(v) if v not in (None, "") else default
 
 
-def _amp_line(d: dict) -> tuple[str, str]:
+def _default_amp_for_genre(genre: str) -> str:
+    g = (genre or "").lower()
+    for keys, amp in _GENRE_AMP_DEFAULTS:
+        if any(k in g for k in keys):
+            return amp
+    return "UK 50"
+
+
+def _ideal_guitar(original: str, pickups: str) -> tuple[str, str, bool]:
+    """Retourne (famille_idéale_GP-180, type_micro, déjà_native)."""
+    o = (original or "").lower()
+    for name, keys, pk in _GUITAR_FAMILIES:
+        if any(k in o for k in keys):
+            return name, pk, True
+    p = (pickups or "").lower()
+    if "humbucker" in p:
+        return "Gibson Les Paul", "humbucker", False
+    return "Fender Stratocaster", "single coil", False
+
+
+def _guitar_target_lines(d: dict) -> str:
+    name, ideal_pk, native = _ideal_guitar(d.get("guitar", ""), d.get("pickups", ""))
+    orig_pk = _g(d, "pickups", "").lower()
+    if native:
+        return f"Guitare cible : identique à l'originale ({name})\nCompensation guitare : aucune (originale déjà dans la palette GP-180)"
+    if "single" in orig_pk and ideal_pk == "humbucker":
+        comp = "Gain −5, Bass +2, Mid +2, Treble +3, Presence +2"
+    elif "humbucker" in orig_pk and ideal_pk == "single coil":
+        comp = "Gain +5, Bass −2, Mid +2, Treble −3, Presence −1"
+    else:
+        comp = "à l'oreille, originale non modélisée par le GP-180"
+    return (
+        f"Guitare cible idéale GP-180 (originale non modélisée) : {name}\n"
+        f"Compensation guitare : {comp}"
+    )
+
+
+def _amp_line(d: dict, genre: str) -> tuple[str, str]:
     """Retourne (ligne_ampli, cab)."""
-    model = _g(d, "amp", "UK 50")
+    model = _g(d, "amp", _default_amp_for_genre(genre))
     prof = _AMP_PROFILE.get(model, _AMP_PROFILE["UK 50"])
     g, b, m, t, p, lvl, cab = prof
     g = int(d.get("gain", g))
@@ -80,7 +147,8 @@ def _amp_line(d: dict) -> tuple[str, str]:
 def render(d: dict) -> str:
     artist = d["artist"]
     title = d["title"]
-    amp_line, cab = _amp_line(d)
+    genre = _g(d, "genre", "non précisé")
+    amp_line, cab = _amp_line(d, genre)
     relia = d.get("reliability", "C")
     notes = d.get("notes", []) or ["Régler les niveaux à l'oreille en comparant à l'enregistrement."]
     note_block = "\n".join(f"- {n}" for n in notes)
@@ -102,14 +170,14 @@ Album / période : {_g(d, "album", "Non documenté")}
 Version ciblée : {_g(d, "version", "studio")}
 Guitariste : {_g(d, "guitarist", "Non précisé")}
 Rôle guitare : {_g(d, "role", "rythmique / lead selon section")}
+Genre : {genre}
 
 Guitare originale : {_g(d, "guitar", "Non précisé")}
 Micros originaux : {_g(d, "pickups", "Non précisé")}
 Position micro : {_g(d, "pickup_pos", "à préciser selon section du morceau")}
 Accordage : {_g(d, "tuning", "Mi standard (E standard)")}
 Capo : {_g(d, "capo", "non")}
-Guitare cible : identique à la guitare originale par défaut
-{_COMPENSATION}
+{_guitar_target_lines(d)}
 
 Objectif sonore : reproduction fidèle du son du morceau original, dans l'esprit du genre et de l'époque
 Référence sonore principale : version {_g(d, "version", "studio")} originale de « {title} » par {artist}
