@@ -16,8 +16,10 @@ const FINGER_META = {
 
 const MEASURE_BEATS = 4;
 const FUTURE_BEATS = MEASURE_BEATS * 3;
-const STRING_COLLISION_GAP_BEATS = 0.22;
-const MIN_NOTE_GAP_PX = 24;
+const PAST_BEATS = 0.75;
+const STRING_COLLISION_GAP_BEATS = 0.18;
+const MIN_NOTE_GAP_PX = 28;
+const MIN_CIRCLE_PAD_PX = 5;
 const MIN_FRAME_MS = 1000 / 24;
 const HIGH_QUALITY_FRAME_MS = 1000 / 42;
 const LOW_QUALITY_FRAME_MS = 1000 / 18;
@@ -218,6 +220,7 @@ export class SlopeRenderer {
     if (!w || !h) return;
     this._drawBackground(w, h);
     this._drawStrings();
+    this._drawMeasureBars();
     for (const note of this._visibleNotesForFrame()) this._drawNoteBar(note);
     for (const chord of this._visibleChordsForFrame()) this._drawChordLabel(chord);
     this._drawHitFlashes();
@@ -316,19 +319,21 @@ export class SlopeRenderer {
   _foldGeometry() {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    const marginX = Math.max(46, Math.min(92, w * 0.075));
-    const spacing = Math.max(10, Math.min(24, h * 0.034, w * 0.024));
+    const marginX = Math.max(70, Math.min(120, w * 0.055));
+    const spacing = Math.max(30, Math.min(44, h * 0.052, w * 0.024));
     const spread = spacing * 5;
-    const topBase = Math.max(74 + spread / 2, h * 0.25);
-    const bottomBase = Math.min(h - 74 - spread / 2, h * 0.70);
-    const startX = Math.max(marginX + 92, Math.min(w * 0.38, w - 320));
-    const bendX = Math.min(w - marginX - 80, Math.max(startX + 210, w * 0.74));
-    const farX = Math.max(marginX + 10, Math.min(startX - 132, w * 0.16));
-    const radius = Math.max(58, (bottomBase - topBase) / 2);
+    const topBase = Math.max(54 + spread / 2, h * 0.20);
+    const bottomBase = Math.min(h - 54 - spread / 2, h * 0.80);
+    const radius = Math.max(86, (bottomBase - topBase) / 2);
+    const outerRadius = radius + spread / 2;
+    const startX = Math.max(marginX + 70, Math.min(w * 0.12, w - 520));
+    const bendX = Math.max(startX + 260, w - marginX - outerRadius - 18);
+    const farX = Math.max(marginX + 28, Math.min(startX - 96, w * 0.085));
     const centerY = (topBase + bottomBase) / 2;
     const bottomLen = Math.max(1, bendX - startX);
     const arcLen = Math.PI * radius;
     const topLen = Math.max(1, bendX - farX);
+    const pastLen = (PAST_BEATS / FUTURE_BEATS) * (bottomLen + arcLen + topLen);
 
     return {
       w,
@@ -341,10 +346,12 @@ export class SlopeRenderer {
       bendX,
       farX,
       radius,
+      outerRadius,
       centerY,
       bottomLen,
       arcLen,
       topLen,
+      pastLen,
       totalLen: bottomLen + arcLen + topLen,
     };
   }
@@ -356,9 +363,18 @@ export class SlopeRenderer {
 
   _lanePoint(stringNum, depth) {
     const g = this._foldGeometry();
-    const t = this._clamp(depth, 0, 1.08);
+    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const t = this._clamp(depth, minDepth, 1.08);
     const d = t * g.totalLen;
     const offset = (Number(stringNum) - 1 - 2.5) * g.spacing;
+
+    if (d < 0) {
+      return {
+        x: g.startX + d,
+        y: g.bottomBase + offset,
+        scale: 1,
+      };
+    }
 
     if (d <= g.bottomLen) {
       return {
@@ -371,9 +387,10 @@ export class SlopeRenderer {
     if (d <= g.bottomLen + g.arcLen) {
       const arcD = d - g.bottomLen;
       const angle = Math.PI / 2 - arcD / g.radius;
+      const stringRadius = g.radius + offset;
       return {
-        x: g.bendX + Math.cos(angle) * g.radius,
-        y: g.centerY + offset + Math.sin(angle) * g.radius,
+        x: g.bendX + Math.cos(angle) * stringRadius,
+        y: g.centerY + Math.sin(angle) * stringRadius,
         scale: 1,
       };
     }
@@ -381,7 +398,7 @@ export class SlopeRenderer {
     const topD = d - g.bottomLen - g.arcLen;
     return {
       x: g.bendX - topD,
-      y: g.topBase + offset,
+      y: g.topBase - offset,
       scale: 1,
     };
   }
@@ -430,23 +447,6 @@ export class SlopeRenderer {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, w, h);
 
-    const g = this._foldGeometry();
-    ctx.save();
-    ctx.globalAlpha = 0.36;
-    const gridSteps = this._quality >= 2 ? 12 : 24;
-    for (let i = 0; i <= gridSteps; i += 1) {
-      const depth = i / gridSteps;
-      const high = this._lanePoint(1, depth);
-      const low = this._lanePoint(6, depth);
-      ctx.strokeStyle = i % 4 === 0 ? 'rgba(255,232,164,0.17)' : 'rgba(255,255,255,0.055)';
-      ctx.lineWidth = i % 4 === 0 ? 1.5 : 1;
-      ctx.beginPath();
-      ctx.moveTo(high.x, high.y - g.spacing * 0.68);
-      ctx.lineTo(low.x, low.y + g.spacing * 0.68);
-      ctx.stroke();
-    }
-    ctx.restore();
-
     ctx.save();
     ctx.strokeStyle = 'rgba(238, 238, 232, 0.56)';
     ctx.lineWidth = 1.4;
@@ -494,9 +494,68 @@ export class SlopeRenderer {
     ctx.shadowBlur = 0;
   }
 
+  _measureBoundaryBeats() {
+    const totalBeats = this._totalBeats();
+    const measureBeats = Array.isArray(this.data.measure_beats)
+      ? this.data.measure_beats.map((b) => Number(b) || 0).filter((b) => b > 0)
+      : [];
+    const boundaries = [];
+    if (measureBeats.length) {
+      let beat = 0;
+      boundaries.push(0);
+      for (const length of measureBeats) {
+        beat += length;
+        boundaries.push(beat);
+      }
+    } else {
+      for (let beat = 0; beat <= totalBeats + MEASURE_BEATS; beat += MEASURE_BEATS) {
+        boundaries.push(beat);
+      }
+    }
+    return boundaries;
+  }
+
+  _drawMeasureBars() {
+    const totalBeats = this._totalBeats();
+    const boundaries = this._measureBoundaryBeats();
+    const minBeat = this.currentBeat - PAST_BEATS;
+    const maxBeat = this.currentBeat + FUTURE_BEATS * 1.08;
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,0,0,0.82)';
+    ctx.lineWidth = 1.15;
+    ctx.shadowBlur = 0;
+
+    for (let repeat = -1; repeat <= 1; repeat += 1) {
+      for (const boundary of boundaries) {
+        const beat = boundary + repeat * totalBeats;
+        if (beat < minBeat || beat > maxBeat) continue;
+        if (Math.abs(beat - this.currentBeat) < 0.015) continue;
+        this._strokeStringCrossbar(ctx, this._depthForBeat(beat), 0.62);
+      }
+    }
+    ctx.restore();
+  }
+
+  _strokeStringCrossbar(ctx, depth, extraSpacing = 0.55) {
+    const g = this._foldGeometry();
+    const high = this._lanePoint(1, depth);
+    const low = this._lanePoint(6, depth);
+    const dx = low.x - high.x;
+    const dy = low.y - high.y;
+    const len = Math.max(1, Math.hypot(dx, dy));
+    const ux = dx / len;
+    const uy = dy / len;
+    ctx.beginPath();
+    ctx.moveTo(high.x - ux * g.spacing * extraSpacing, high.y - uy * g.spacing * extraSpacing);
+    ctx.lineTo(low.x + ux * g.spacing * extraSpacing, low.y + uy * g.spacing * extraSpacing);
+    ctx.stroke();
+  }
+
   _traceDepthPath(ctx, stringNum, startDepth, endDepth) {
-    const start = this._clamp(startDepth, 0, 1.08);
-    const end = this._clamp(endDepth, 0, 1.08);
+    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const start = this._clamp(startDepth, minDepth, 1.08);
+    const end = this._clamp(endDepth, minDepth, 1.08);
     const steps = Math.max(3, Math.ceil(Math.abs(end - start) * (this._quality >= 2 ? 18 : 42)));
     for (let i = 0; i <= steps; i += 1) {
       const depth = this._lerp(start, end, i / steps);
@@ -504,6 +563,33 @@ export class SlopeRenderer {
       if (i === 0) ctx.moveTo(p.x, p.y);
       else ctx.lineTo(p.x, p.y);
     }
+  }
+
+  _circleRadius() {
+    return Math.max(10, Math.min(16, this._laneSpacing() * 0.36));
+  }
+
+  _markReadableLabels(visible) {
+    const radius = this._circleRadius();
+    const minDistance = radius * 2 + MIN_CIRCLE_PAD_PX;
+    const byString = new Map();
+    for (const note of visible.sort((a, b) => a.onset - b.onset || a.string - b.string)) {
+      const startDepth = this._depthForBeat(note.onset);
+      const endDepth = this._depthForBeat(note.onset + note.duration);
+      const labelDepth = this._clamp(
+        (Math.max(-PAST_BEATS / FUTURE_BEATS, startDepth) + Math.min(1.06, endDepth)) / 2,
+        -PAST_BEATS / FUTURE_BEATS,
+        1.06,
+      );
+      const point = this._lanePoint(note.string, labelDepth);
+      note._labelPoint = point;
+      note._labelDepth = labelDepth;
+      const prev = byString.get(note.string);
+      const farEnough = !prev || Math.hypot(point.x - prev.x, point.y - prev.y) >= minDistance;
+      note.showLabel = farEnough;
+      if (farEnough) byString.set(note.string, point);
+    }
+    return visible;
   }
 
   _visibleNotesForFrame() {
@@ -514,7 +600,7 @@ export class SlopeRenderer {
         const note = { ...source, onset: source.onset + repeat * totalBeats };
         const startDepth = this._depthForBeat(note.onset);
         const endDepth = this._depthForBeat(note.onset + note.duration);
-        if (endDepth >= 0 && startDepth <= 1.12) visible.push(note);
+        if (endDepth >= -PAST_BEATS / FUTURE_BEATS && startDepth <= 1.12) visible.push(note);
       }
     }
     visible.sort((a, b) => a.string - b.string || a.onset - b.onset);
@@ -528,7 +614,7 @@ export class SlopeRenderer {
         note.duration = Math.min(note.duration, maxDuration);
       }
     }
-    return visible.sort((a, b) => b.onset - a.onset);
+    return this._markReadableLabels(visible).sort((a, b) => b.onset - a.onset);
   }
 
   _visibleChordsForFrame() {
@@ -582,7 +668,7 @@ export class SlopeRenderer {
       const alpha = Math.max(0, 1 - age / ttl);
       const point = this._lanePoint(flash.string, 0);
       const meta = FINGER_META[String(flash.finger || '').toLowerCase()] || FINGER_META.open;
-      const radius = Math.max(16, Math.min(27, this._laneSpacing() * 1.12));
+      const radius = this._circleRadius();
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.shadowColor = meta.color;
@@ -623,11 +709,12 @@ export class SlopeRenderer {
     const now = this.currentBeat;
     const active = note.onset <= now && now <= note.onset + note.duration;
     const vibration = active ? 1 + 0.16 * Math.sin(performance.now() / 34) : 1;
-    const aDepth = Math.max(0, Math.min(1.08, startDepth));
+    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const aDepth = Math.max(minDepth, Math.min(1.08, startDepth));
     const bDepth = Math.max(0, Math.min(1.08, endDepth));
     const meta = FINGER_META[String(note.finger || '').toLowerCase()] || FINGER_META.open;
     const ctx = this.ctx;
-    const tubeWidth = Math.max(15, Math.min(28, this._laneSpacing() * 1.04)) * vibration;
+    const tubeWidth = Math.max(8, Math.min(14, this._laneSpacing() * 0.34)) * vibration;
 
     ctx.save();
     ctx.lineCap = 'round';
@@ -659,37 +746,44 @@ export class SlopeRenderer {
     this._traceDepthPath(ctx, note.string, aDepth, bDepth);
     ctx.stroke();
 
-    const labelDepth = this._clamp((aDepth + bDepth) / 2, 0, 1.06);
-    const labelPoint = this._lanePoint(note.string, labelDepth);
-    const labelRadius = Math.max(16, Math.min(27, this._laneSpacing() * 1.12));
-    ctx.globalAlpha = 1;
-    ctx.shadowColor = 'rgba(255,255,255,0.62)';
-    ctx.shadowBlur = this._quality >= 2 ? 0 : 15;
-    this._drawFretDisc(ctx, note, labelPoint, labelRadius, meta);
-    if (note.chord) this._drawChordTriangle(labelPoint, labelRadius, labelPoint.scale);
+    const labelPoint = note._labelPoint || this._lanePoint(note.string, this._clamp((aDepth + bDepth) / 2, minDepth, 1.06));
+    const labelRadius = this._circleRadius();
+    if (note.showLabel !== false) {
+      ctx.globalAlpha = 1;
+      ctx.shadowColor = 'rgba(255,255,255,0.48)';
+      ctx.shadowBlur = this._quality >= 2 ? 0 : 9;
+      this._drawFretDisc(ctx, note, labelPoint, labelRadius, meta);
+      if (note.chord) this._drawChordTriangle(labelPoint, labelRadius, labelPoint.scale);
+    } else if (active) {
+      ctx.globalAlpha = 0.95;
+      ctx.shadowColor = meta.color;
+      ctx.shadowBlur = this._quality >= 2 ? 0 : 10;
+      this._drawFretDisc(ctx, note, labelPoint, labelRadius * 0.72, meta, false);
+    }
     ctx.restore();
   }
 
-  _drawFretDisc(ctx, note, point, radius, meta) {
+  _drawFretDisc(ctx, note, point, radius, meta, showText = true) {
     ctx.fillStyle = meta.discColor || '#fffdf2';
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = meta.color;
-    ctx.lineWidth = 2.2;
+    ctx.lineWidth = Math.max(1.4, radius * 0.14);
     ctx.stroke();
+    if (!showText) return;
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#050505';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const noteName = note.noteName || '';
     const alpha = ctx.globalAlpha;
-    const fretSize = noteName ? Math.max(14, radius * 0.88) : Math.max(16, radius * 1.06);
+    const fretSize = noteName ? Math.max(10, radius * 0.82) : Math.max(11, radius * 0.98);
     ctx.font = `900 ${fretSize}px Inter, sans-serif`;
     ctx.fillText(String(note.fret), point.x, point.y - (noteName ? radius * 0.18 : -0.5));
     if (noteName) {
       ctx.globalAlpha = alpha * 0.88;
-      ctx.font = `850 ${Math.max(8, radius * 0.42)}px Inter, sans-serif`;
+      ctx.font = `850 ${Math.max(6, radius * 0.38)}px Inter, sans-serif`;
       ctx.fillText(noteName, point.x, point.y + radius * 0.42);
       ctx.globalAlpha = alpha;
     }
@@ -720,25 +814,14 @@ export class SlopeRenderer {
   _drawNowPulse() {
     const ctx = this.ctx;
     const g = this._foldGeometry();
-    const beatPhase = this.currentBeat - Math.floor(this.currentBeat);
-    const high = this._lanePoint(1, 0);
-    const low = this._lanePoint(6, 0);
-    const pulse = 1 + beatPhase * 0.16;
     ctx.save();
-    ctx.strokeStyle = '#f7e8a4';
-    ctx.lineWidth = 3.6;
-    ctx.shadowColor = 'rgba(247, 232, 164, 0.76)';
-    ctx.shadowBlur = this._quality >= 2 ? 0 : 14 * pulse;
-    ctx.beginPath();
-    ctx.moveTo(g.startX, high.y - g.spacing * 0.82 * pulse);
-    ctx.lineTo(g.startX, low.y + g.spacing * 0.82 * pulse);
-    ctx.stroke();
-
-    ctx.globalAlpha = (1 - beatPhase) * 0.28;
-    ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    ctx.arc(g.startX, (high.y + low.y) / 2, g.spread * 0.66 * pulse, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.strokeStyle = '#1f8fff';
+    ctx.lineWidth = Math.max(3.2, g.spacing * 0.13);
+    ctx.shadowColor = 'rgba(31,143,255,0.75)';
+    ctx.shadowBlur = this._quality >= 2 ? 0 : 12;
+    this._strokeStringCrossbar(ctx, 0, 0.78);
+    ctx.translate(5, 0);
+    this._strokeStringCrossbar(ctx, 0, 0.78);
     ctx.restore();
   }
 
