@@ -62,6 +62,8 @@ const COL_HARMONIC    = '#8a6200';
 const COL_SLIDE       = '#555548';
 const COL_ACCENT      = '#c0392b';
 const COL_MUTED       = '#1a1a1a';
+const COL_EXPORT_WARN = '#d32f2f';
+const COL_EXPORT_WARN_FILL = '#ffe3e3';
 const COL_MEASURE_NUM = '#bbb8b0';  // subtle on cream
 const COL_CURSOR      = 'rgba(76, 175, 80, 0.10)';
 const COL_CURSOR_LINE = '#4caf50';
@@ -113,6 +115,7 @@ const FONT_LEGEND     = `400 ${_z(12)}px ${SANS}`;
  * @property {boolean} accent
  * @property {boolean} accent_strong
  * @property {boolean} tremolo_picking
+ * @property {string} gp_fingering_export_status
  */
 
 // ── Public interface ────────────────────────────────────────────────
@@ -597,6 +600,7 @@ export class TabRenderer {
     const fret = note.fret;
     const isMuted = note.muted;
     const isHarmonic = !!note.harmonic_type;
+    const isExportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
 
     // ── White oval (erases string line)
     const label = note.ghost ? `(${fret})` : String(fret);
@@ -606,14 +610,20 @@ export class TabRenderer {
     const fingerFill = (!isMuted && !isHarmonic && note.finger && note.finger !== 'open' && fret > 0)
       ? (this._fingerColors[note.finger] || '#ffffff')
       : '#ffffff';
+    const noteFill = isExportWarning ? COL_EXPORT_WARN_FILL : fingerFill;
 
     if (isHarmonic) {
       this._drawDiamond(ctx, x, y, ovalRX, NOTE_RY);
     } else {
-      ctx.fillStyle = fingerFill;
+      ctx.fillStyle = noteFill;
       ctx.beginPath();
       ctx.ellipse(x, y, ovalRX + 1, NOTE_RY + 1, 0, 0, Math.PI * 2);
       ctx.fill();
+      if (isExportWarning) {
+        ctx.strokeStyle = COL_EXPORT_WARN;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
 
     // ── Fret number (or X for muted, ghost in parens, harmonic label)
@@ -630,7 +640,7 @@ export class TabRenderer {
     } else {
       ctx.font = label.length > 1 ? FONT_FRET_SM : FONT_FRET;
       // Dark text on colored ovals; keep existing dark color — all finger colors are light enough
-      ctx.fillStyle = COL_FRET;
+      ctx.fillStyle = isExportWarning ? COL_EXPORT_WARN : COL_FRET;
       ctx.fillText(label, x, y + 0.5);
     }
 
@@ -2578,4 +2588,3 @@ export function buildLegendHTML(container) {
 export function renderLegend(canvas) {
   // No-op: legend now uses buildLegendHTML()
 }
-

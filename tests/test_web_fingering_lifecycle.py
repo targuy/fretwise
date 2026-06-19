@@ -13,12 +13,23 @@ from __future__ import annotations
 import io
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from fretwise.export.gp_writer import GPIF_CONTENT_NAME
+from fretwise.models import (
+    Articulation,
+    Dynamic,
+    Finger,
+    FingeringResult,
+    FingeringState,
+    NoteEvent,
+)
 from fretwise.web.app import (
     _gp_has_embedded_fingering,
+    _merged_gp_fingering_mapping,
     _read_embedded_gp_fingerings,
+    _solve_cache_clear,
     create_app,
 )
 
@@ -54,6 +65,62 @@ def _route_endpoint(app: Any, path: str) -> Any:
     raise AssertionError(f"Route not found: {path}")
 
 
+def _note(source_note_id: str | None, onset: float = 0.0) -> NoteEvent:
+    return NoteEvent(
+        pitch=60,
+        onset=onset,
+        duration=1.0,
+        tempo=120.0,
+        articulation=Articulation.NORMAL,
+        dynamic=Dynamic.MF,
+        string_hint=1,
+        fret_hint=5,
+        source_note_id=source_note_id,
+    )
+
+
+def _result(
+    source_note_id: str | None,
+    finger: Finger = Finger.INDEX,
+    *,
+    onset: float = 0.0,
+) -> FingeringResult:
+    return FingeringResult(
+        note_id=1,
+        note_event=_note(source_note_id, onset),
+        state=FingeringState(
+            string_num=1,
+            fret=5,
+            finger=finger,
+            hand_position=5,
+        ),
+        cost=0.0,
+    )
+
+
+def _clean_guard_payload(results: list[FingeringResult]) -> SimpleNamespace:
+    return SimpleNamespace(
+        results=results,
+        biomechanical_report=SimpleNamespace(
+            fatal_count=0,
+            high_count=0,
+            violations=[],
+            by_measure=lambda: {},
+        ),
+    )
+
+
+class _Adapter:
+    track_name = "Guitar"
+    midi_program = 24
+    section_markers: dict[int, str] = {}
+    chord_diagrams: list[Any] = []
+    chord_markers: dict[str, str] = {}
+    beats_per_measure = 4.0
+    measure_time_signatures: dict[int, tuple[int, int]] = {}
+    time_denominator = 4
+
+
 def test_read_embedded_gp_fingerings_round_trip(tmp_path: Path) -> None:
     gp = tmp_path / "song.gp"
     _write_gp(gp, _GPIF_WITH_FINGERS)
@@ -73,6 +140,86 @@ def test_embedded_reader_handles_missing_and_plain_files(tmp_path: Path) -> None
     junk.write_text("not a zip")
     assert _gp_has_embedded_fingering(junk) is False
     assert _read_embedded_gp_fingerings(junk) == {}
+
+
+def test_gp_save_merge_preserves_existing_track_fingerings(tmp_path: Path) -> None:
+    """Saving another track must not erase LeftFingering already in the GP."""
+    gp = tmp_path / "song.gp"
+    _write_gp(gp, _GPIF_WITH_FINGERS)
+
+    merged = _merged_gp_fingering_mapping(gp, {"2": "M"})
+
+    assert merged["0"] == "I"
+    assert merged["1"] == "A"
+    assert merged["2"] == "M"
+
+
+def test_save_gp_invalidates_solve_cache_after_writing_sidecar(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """A stale no-fingering solve response must not survive a save."""
+    _solve_cache_clear()
+    gp = tmp_path / "song.gp"
+    _write_gp(gp, _GPIF_NO_FINGERS)
+    app = create_app(tmp_path)
+    adapter = _Adapter()
+    events = [_note("0")]
+    results = [_result("0")]
+
+    def _fake_load(_path: Path, *, track_id: int | None = None) -> tuple[Any, list[NoteEvent]]:
+        del track_id
+        return adapter, events
+
+    monkeypatch.setattr("fretwise.web.app._load_adapter_and_events", _fake_load)
+    monkeypatch.setattr(
+        "fretwise.web.app._run_core_pipeline_for_events",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            svg="<svg/>",
+            conformance_issues=[],
+            render_scene=None,
+            canonical_score=None,
+        ),
+    )
+    monkeypatch.setattr(
+        "fretwise.web.app._run_legacy_pipeline_with_guard",
+        lambda _events: _clean_guard_payload(results),
+    )
+    monkeypatch.setattr(
+        "fretwise.web.app._safe_audit",
+        lambda *_args, **_kwargs: {"available": True, "overall": "clean"},
+    )
+
+    solve_endpoint = _route_endpoint(app, "/api/solve/{filename}")
+    save_endpoint = _route_endpoint(app, "/api/save/gp/{filename}")
+
+    before = solve_endpoint(
+        filename="song.gp",
+        track_id=0,
+        representation_mode="standard_tablature",
+    )
+    assert before["results"] == []
+    assert before["has_saved_fingering"] is False
+
+    saved = save_endpoint(filename="song.gp", track_id=0)
+    assert saved["sidecar_saved"] is True
+
+    after = solve_endpoint(
+        filename="song.gp",
+        track_id=0,
+        representation_mode="standard_tablature",
+    )
+    assert after["has_saved_fingering"] is True
+    assert len(after["results"]) == 1
+    assert after["results"][0]["source_note_id"] == "0"
+
+
+def test_serialize_marks_fretted_note_without_source_id_red_candidate() -> None:
+    from fretwise.web.app import _serialize_result
+
+    row = _serialize_result(_result(None))
+
+    assert row["source_note_id"] is None
+    assert row["gp_fingering_export_status"] == "missing_source_note_id"
 
 
 def test_files_endpoint_flags_embedded_fingerings(tmp_path: Path) -> None:

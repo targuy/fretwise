@@ -756,6 +756,8 @@ export class SlopeRenderer {
     const rawADepth = Math.max(minDepth, Math.min(1.08, startDepth));
     const rawBDepth = Math.max(0, Math.min(1.08, endDepth));
     const meta = FINGER_META[String(note.finger || '').toLowerCase()] || FINGER_META.open;
+    const exportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
+    const strokeColor = exportWarning ? '#e53935' : meta.color;
     const ctx = this.ctx;
     const tubeWidth = Math.max(8, Math.min(14, this._laneSpacing() * 0.34)) * vibration;
     const segments = this._noteBeatSegments(note)
@@ -769,9 +771,9 @@ export class SlopeRenderer {
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.shadowColor = meta.color;
+    ctx.shadowColor = strokeColor;
     ctx.shadowBlur = this._quality >= 2 ? 0 : active ? 28 * vibration : 14;
-    ctx.strokeStyle = meta.color;
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = tubeWidth * 1.45;
     ctx.globalAlpha = active ? 0.34 : 0.18;
     if (this._quality < 2 || active) {
@@ -784,7 +786,7 @@ export class SlopeRenderer {
 
     ctx.globalAlpha = 0.92;
     ctx.shadowBlur = this._quality >= 2 ? 0 : active ? 16 * vibration : 9;
-    ctx.strokeStyle = meta.color;
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = tubeWidth;
     for (const [aDepth, bDepth] of segments) {
       ctx.beginPath();
@@ -815,7 +817,7 @@ export class SlopeRenderer {
       if (note.chord) this._drawChordTriangle(labelPoint, labelRadius, labelPoint.scale);
     } else if (active) {
       ctx.globalAlpha = 0.95;
-      ctx.shadowColor = meta.color;
+      ctx.shadowColor = strokeColor;
       ctx.shadowBlur = this._quality >= 2 ? 0 : 10;
       this._drawFretDisc(ctx, note, labelPoint, labelRadius * 0.72, meta, false);
     }
@@ -823,16 +825,17 @@ export class SlopeRenderer {
   }
 
   _drawFretDisc(ctx, note, point, radius, meta, showText = true) {
-    ctx.fillStyle = meta.discColor || '#fffdf2';
+    const exportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
+    ctx.fillStyle = exportWarning ? '#ffe3e3' : (meta.discColor || '#fffdf2');
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = meta.color;
+    ctx.strokeStyle = exportWarning ? '#e53935' : meta.color;
     ctx.lineWidth = Math.max(1.4, radius * 0.14);
     ctx.stroke();
     if (!showText) return;
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#050505';
+    ctx.fillStyle = exportWarning ? '#d32f2f' : '#050505';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const noteName = note.noteName || '';
