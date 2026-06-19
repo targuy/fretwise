@@ -1434,8 +1434,9 @@ def _register_routes(app: FastAPI) -> None:
             )
 
         mapping = fingerings_by_source_id(payload.results)
+        merged_mapping = _merged_gp_fingering_mapping(filepath, mapping)
         try:
-            gp_bytes = write_gp_with_fingerings(filepath, mapping)
+            gp_bytes = write_gp_with_fingerings(filepath, merged_mapping)
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
 
@@ -1446,7 +1447,7 @@ def _register_routes(app: FastAPI) -> None:
             media_type="application/octet-stream",
             headers={
                 "Content-Disposition": f'attachment; filename="{safe_name}"',
-                "X-Fretwise-Annotated-Notes": str(len(mapping)),
+                "X-Fretwise-Annotated-Notes": str(len(merged_mapping)),
                 "X-Fretwise-Biomechanical-Fatal": str(guard["fatal"]),
                 "X-Fretwise-Biomechanical-High": str(guard["high"]),
             },
@@ -1487,6 +1488,7 @@ def _register_routes(app: FastAPI) -> None:
         # renders with fingering and the bad measures are surfaced, not hidden.
 
         mapping = fingerings_by_source_id(payload.results)
+        merged_mapping = _merged_gp_fingering_mapping(filepath, mapping)
         out_name = filepath.name
         storage: StorageBackend = _current_storage(app)
         # Write the fingerings back into the original file (in place) — no
@@ -1503,7 +1505,7 @@ def _register_routes(app: FastAPI) -> None:
         # passage. The audit below flags it FIRST (biomechanical FATAL → "bad").
         gp_embed_error: str | None = None
         try:
-            gp_bytes = write_gp_with_fingerings(filepath, mapping)
+            gp_bytes = write_gp_with_fingerings(filepath, merged_mapping)
             storage.write_bytes(out_name, gp_bytes)
         except ValueError as exc:
             gp_embed_error = str(exc)
@@ -1523,10 +1525,13 @@ def _register_routes(app: FastAPI) -> None:
             audit=audit,
             track_id=track_id,
         )
+        _solve_cache_clear()
 
         return {
             "saved": out_name,
-            "annotated_notes": len(mapping),
+            "annotated_notes": len(merged_mapping),
+            "track_annotated_notes": len(mapping),
+            "unexportable_notes": _count_unexportable_gp_fingerings(payload.results),
             "biomechanical_high": guard["high"],
             "biomechanical_fatal": guard["fatal"],
             "fatal_measures": guard["fatal_measures"],
@@ -3230,9 +3235,11 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
         try:
             gp_bytes = write_gp_with_fingerings(p, merged_mapping)
             p.write_bytes(gp_bytes)
+            _refresh_fingering_meta_source_mtime(p)
         except ValueError:
             pass
 
+        _solve_cache_clear()
         return {
             "file": p.name, "status": "ok",
             "annotated": total_annotated, "out": p.name,
@@ -3433,6 +3440,7 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
     st = r.state
     return {
         "note_id": r.note_id,
+        "source_note_id": ne.source_note_id,
         "pitch": ne.pitch,
         "onset": ne.onset,
         "duration": ne.duration,
@@ -3446,6 +3454,7 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "hand_position": st.hand_position,
         "cost": r.cost,
         "measure_index": ne.measure_index,
+        "gp_fingering_export_status": _gp_fingering_export_status(r),
         # Sedentary fingers annotation (see docs/finger_placement_strategy.md).
         # getattr for backward compat with legacy mocks that predate the field.
         "planted_fingers": {
@@ -3482,6 +3491,9 @@ _GPIF_LETTER_TO_FINGER: dict[str, Finger] = {
     "M": Finger.MIDDLE,
     "A": Finger.RING,
     "C": Finger.PINKY,
+}
+_FINGER_VALUE_TO_GPIF_LETTER: dict[str, str] = {
+    str(finger): letter for letter, finger in _GPIF_LETTER_TO_FINGER.items()
 }
 _EMBEDDED_NOTE_RE = re.compile(r'<Note id="(\d+)">(.*?)</Note>', re.DOTALL)
 _EMBEDDED_LF_RE = re.compile(r"<LeftFingering>([^<]*)</LeftFingering>")
@@ -3565,6 +3577,83 @@ def _embedded_results_from_events(
             FingeringResult(note_id=i + 1, note_event=ev, state=state, cost=0.0)
         )
     return results
+
+
+def _gp_fingering_export_status(result: FingeringResult) -> str:
+    """Classify whether a computed fingering can be written back to GPIF."""
+    if result.state.fret == 0 or str(result.state.finger) == str(Finger.OPEN):
+        return "not_needed"
+    if result.note_event.source_note_id:
+        return "exportable"
+    return "missing_source_note_id"
+
+
+def _count_unexportable_gp_fingerings(results: list[FingeringResult]) -> int:
+    """Count fretted computed fingerings that cannot be mapped to a GPIF note id."""
+    return sum(
+        1 for result in results
+        if _gp_fingering_export_status(result) == "missing_source_note_id"
+    )
+
+
+def _serialized_fingerings_by_source_id(results: object) -> dict[str, str]:
+    """Return GPIF fingering letters from serialized sidecar result rows."""
+    if not isinstance(results, list):
+        return {}
+    out: dict[str, str] = {}
+    for row in results:
+        if not isinstance(row, dict):
+            continue
+        source_note_id = row.get("source_note_id")
+        if not source_note_id:
+            continue
+        try:
+            fret = int(row.get("fret") or 0)
+        except (TypeError, ValueError):
+            fret = 0
+        if fret == 0:
+            continue
+        letter = _FINGER_VALUE_TO_GPIF_LETTER.get(str(row.get("finger") or ""))
+        if letter is not None:
+            out[str(source_note_id)] = letter
+    return out
+
+
+def _current_sidecar_fingering_mapping(filepath: Path) -> dict[str, str]:
+    """Read current sidecar fingerings as ``{source_note_id: gpif_letter}``."""
+    import json as _json
+
+    meta = _read_fingering_meta(filepath)
+    if meta is None or not _fingering_meta_is_current(meta, filepath):
+        return {}
+    try:
+        data = _json.loads(_fingering_data_path(filepath).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return {}
+    out = _serialized_fingerings_by_source_id(data.get("results"))
+    tracks = data.get("tracks") if isinstance(data.get("tracks"), dict) else {}
+    for entry in tracks.values():
+        if isinstance(entry, dict):
+            out.update(_serialized_fingerings_by_source_id(entry.get("results")))
+    return out
+
+
+def _merged_gp_fingering_mapping(
+    filepath: Path,
+    current_mapping: Mapping[str, str],
+) -> dict[str, str]:
+    """Merge existing GP/sidecar annotations with the newly computed track.
+
+    ``write_gp_with_fingerings`` strips all ``LeftFingering`` elements before
+    injecting the supplied map. Saving one track therefore has to carry forward
+    the other tracks' existing annotations, otherwise a later save erases an
+    earlier one.
+    """
+    merged: dict[str, str] = {}
+    merged.update(_read_embedded_gp_fingerings(filepath))
+    merged.update(_current_sidecar_fingering_mapping(filepath))
+    merged.update({str(k): str(v) for k, v in current_mapping.items()})
+    return merged
 
 
 # ── Fingering sidecar helpers ─────────────────────────────────────────────────
@@ -3673,6 +3762,27 @@ def _write_fingering_sidecar(
     return True
 
 
+def _refresh_fingering_meta_source_mtime(filepath: Path) -> bool:
+    """Refresh sidecar ``source_mtime`` after an in-place GP rewrite."""
+    import datetime
+    import json as _json
+
+    try:
+        meta = _read_fingering_meta(filepath) or {}
+        meta["algo_version"] = meta.get("algo_version") or FINGERING_ALGO_VERSION
+        meta["model"] = meta.get("model") or "phrase_window_v2"
+        meta["created_at"] = meta.get("created_at") or datetime.datetime.now(
+            datetime.UTC
+        ).isoformat()
+        meta["source_mtime"] = filepath.stat().st_mtime
+        _fingering_meta_path(filepath).write_text(
+            _json.dumps(meta, ensure_ascii=False), encoding="utf-8"
+        )
+    except Exception:  # noqa: BLE001
+        return False
+    return True
+
+
 def _staff_only_results(events: list[NoteEvent]) -> list[FingeringResult]:
     """Wrap NoteEvents as un-fingered FingeringResults for staff-only export.
 
@@ -3716,6 +3826,7 @@ def _serialize_staff_note(ne: NoteEvent, note_id: int) -> dict[str, Any]:
     """
     return {
         "note_id": note_id,
+        "source_note_id": ne.source_note_id,
         "pitch": ne.pitch,
         "onset": ne.onset,
         "duration": ne.duration,
@@ -3731,6 +3842,7 @@ def _serialize_staff_note(ne: NoteEvent, note_id: int) -> dict[str, Any]:
         "cost": None,
         "measure_index": ne.measure_index,
         "planted_fingers": {},
+        "gp_fingering_export_status": "not_applicable",
         # Notation fields (kept for standard-notation rendering).
         "let_ring": ne.let_ring,
         "bend_value": ne.bend_value,
