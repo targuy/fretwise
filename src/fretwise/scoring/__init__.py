@@ -21,40 +21,62 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Any
 
+from fretwise.config import config as _config
 from fretwise.models import Articulation, Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.profile import PlayerProfile, default_profile
 
 logger = logging.getLogger(__name__)
 
+# All tunable constants below are sourced from the centralized config
+# (src/fretwise/config/defaults.yaml, section ``scoring``) at import time.
+# The module-level names are preserved so other modules and tests that import
+# them (e.g. ``from fretwise.scoring import _FINGER_RANK``) keep working.
+_SCORING = _config().scoring
+
+
+def _weights_tuple(values: Any) -> tuple[float, float, float, float]:
+    """Coerce a 4-element YAML sequence into a typed (α, β, γ, δ) tuple."""
+    a, b, c, d = (float(v) for v in values)
+    return (a, b, c, d)
+
+
+def _finger_floats(mapping: Any) -> dict[Finger, float]:
+    """Re-key a finger-name → number YAML mapping to ``Finger`` → float."""
+    return {Finger(name): float(value) for name, value in mapping.to_dict().items()}
+
+
+def _finger_ints(mapping: Any) -> dict[Finger, int]:
+    """Re-key a finger-name → number YAML mapping to ``Finger`` → int."""
+    return {Finger(name): int(value) for name, value in mapping.to_dict().items()}
+
+
 # ---------------------------------------------------------------------------
 # Weighting presets (α, β, γ, δ)
 # ---------------------------------------------------------------------------
 
-WEIGHTS_REFERENCE: tuple[float, float, float, float] = (1.0, 1.0, 0.0, 0.0)
-WEIGHTS_PERFORMANCE: tuple[float, float, float, float] = (1.0, 0.5, 2.0, 0.0)
-WEIGHTS_MUSICAL: tuple[float, float, float, float] = (1.0, 2.0, 1.0, 0.0)
-WEIGHTS_LEARNING: tuple[float, float, float, float] = (1.0, 0.5, 1.0, 1.5)
+_Weights = tuple[float, float, float, float]
+
+WEIGHTS_REFERENCE: _Weights = _weights_tuple(_SCORING.weights.reference)
+WEIGHTS_PERFORMANCE: _Weights = _weights_tuple(_SCORING.weights.performance)
+WEIGHTS_MUSICAL: _Weights = _weights_tuple(_SCORING.weights.musical)
+WEIGHTS_LEARNING: _Weights = _weights_tuple(_SCORING.weights.learning)
 
 # Intrinsic difficulty per finger (index baseline = 1.0).
-_FINGER_BASE_COST: dict[Finger, float] = {
-    Finger.OPEN: 0.0,
-    Finger.INDEX: 1.0,
-    Finger.MIDDLE: 1.15,
-    Finger.RING: 1.3,
-    Finger.PINKY: 1.5,
-}
+_FINGER_BASE_COST: dict[Finger, float] = _finger_floats(_SCORING.finger_base_cost)
 
 # Natural anatomical rank on the neck (lowest fret = lowest rank).
 # INDEX = 0 (closest to headstock), PINKY = 3 (furthest).
-_FINGER_RANK: dict[Finger, int] = {
-    Finger.OPEN: -1,
-    Finger.INDEX: 0,
-    Finger.MIDDLE: 1,
-    Finger.RING: 2,
-    Finger.PINKY: 3,
-}
+_FINGER_RANK: dict[Finger, int] = _finger_ints(_SCORING.finger_rank)
+
+# Default composite cost weights (α, β, γ, δ) for CostWeights().
+_DEFAULT_WEIGHTS_ALPHA: float = float(_SCORING.default_weights.alpha)
+_DEFAULT_WEIGHTS_BETA: float = float(_SCORING.default_weights.beta)
+_DEFAULT_WEIGHTS_GAMMA: float = float(_SCORING.default_weights.gamma)
+_DEFAULT_WEIGHTS_DELTA: float = float(_SCORING.default_weights.delta)
 
 # ---------------------------------------------------------------------------
 # Biomechanical rules for chord finger assignment
@@ -171,10 +193,10 @@ class CostWeights:
         delta: Weight for C_péda (pedagogical cost).
     """
 
-    alpha: float = 1.0
-    beta: float = 1.0
-    gamma: float = 0.0
-    delta: float = 0.0
+    alpha: float = _DEFAULT_WEIGHTS_ALPHA
+    beta: float = _DEFAULT_WEIGHTS_BETA
+    gamma: float = _DEFAULT_WEIGHTS_GAMMA
+    delta: float = _DEFAULT_WEIGHTS_DELTA
 
     @classmethod
     def reference(cls) -> CostWeights:
@@ -221,16 +243,43 @@ class CostFunction:
         weights: CostWeights | None = None,
         profile: PlayerProfile | None = None,
         rule_preferences: RulePreferences | None = None,
+        player_cost_model: object | None = None,
     ) -> None:
         self._weights = weights or CostWeights.reference()
         self._profile = profile or default_profile()
         self._rule_preferences = rule_preferences or RulePreferences()
+        # B integration: per-note-index segment anchor lookup. Populated by
+        # the pipeline before each voice's Viterbi run via set_segment_anchors.
+        # None disables segment-aware shift (fallback to A' tolerance).
+        self._segment_anchors: list[int | None] | None = None
+        # Phase 3: optional learned transition-cost model (PlayerCostModel).
+        # When set and gamma > 0, contributes -log(p[curr_finger]) per
+        # transition. Typed loosely to avoid pulling fretwise.ml at module
+        # load (no onnxruntime required for the rule-based pipeline).
+        self._player_cost_model = player_cost_model
+
+    def set_segment_anchors(self, anchors: list[int | None]) -> None:
+        """Activate segment-aware shift cost for the next Viterbi run.
+
+        Args:
+            anchors: One entry per note in the sequence. ``anchors[i]`` is the
+                fret anchor of the segment containing note ``i``, or ``None``
+                if the note is not anchored (open strings, unhinted notes).
+                A None on either side of a transition falls back to the
+                A' per-state shift cost for that transition.
+        """
+        self._segment_anchors = list(anchors)
+
+    def clear_segment_anchors(self) -> None:
+        """Disable segment-aware shift cost (fallback to A' behaviour)."""
+        self._segment_anchors = None
 
     def transition_cost(
         self,
         s1: FingeringState,
         s2: FingeringState,
         note: NoteEvent,
+        index: int | None = None,
     ) -> float:
         """Compute the composite transition cost between two fingering states.
 
@@ -238,21 +287,73 @@ class CostFunction:
             s1: The previous (source) fingering state.
             s2: The next (target) fingering state.
             note: The NoteEvent associated with s2 (provides tempo context).
+            index: Index of s2 in the sequence (0-based). Used to consult
+                segment anchors when ``set_segment_anchors`` has been called.
+                Defaults to None for backward compatibility with callers that
+                don't track positional context.
 
         Returns:
-            Non-negative composite cost.  Lower = more desirable transition.
+            Non-negative composite cost. Lower = more desirable transition.
         """
         w = self._weights
+        anchor_prev: int | None = None
+        anchor_curr: int | None = None
+        if (
+            self._segment_anchors is not None
+            and index is not None
+            and 0 < index < len(self._segment_anchors)
+        ):
+            anchor_prev = self._segment_anchors[index - 1]
+            anchor_curr = self._segment_anchors[index]
         c_meca = compute_mechanical_cost(
             s1,
             s2,
             note,
             rule_preferences=self._rule_preferences,
+            segment_anchor_prev=anchor_prev,
+            segment_anchor_curr=anchor_curr,
         )
         c_music = compute_musical_cost(s1, s2, note)
-        c_joueur = 0.0  # stub — Phase 3
+        # Phase 3: learned transition cost contributes only when a model is
+        # injected AND gamma > 0. The gamma check short-circuits the ONNX
+        # call for reference / musical modes where γ=0 (free regardless).
+        c_joueur = 0.0
+        if self._player_cost_model is not None and w.gamma > 0:
+            c_joueur = self._call_player_cost_model(s1, s2, note)
         c_peda = 0.0    # stub — Phase 3
         return w.alpha * c_meca + w.beta * c_music + w.gamma * c_joueur + w.delta * c_peda
+
+    def _call_player_cost_model(
+        self,
+        s1: FingeringState,
+        s2: FingeringState,
+        note: NoteEvent,
+    ) -> float:
+        """Bridge FretWise state convention → PlayerCostModel.transition_cost.
+
+        Catches any model-side exception and returns 0.0 so a broken model
+        never breaks the Viterbi run. Phase 2's resolve_chord_learned_fingers
+        uses the same defensive pattern.
+        """
+        from fretwise.ml import PlayerContext
+
+        try:
+            return self._player_cost_model.transition_cost(  # type: ignore[union-attr]
+                prev_string=s1.string_num,
+                prev_fret=s1.fret,
+                prev_finger=s1.finger.value,
+                curr_string=s2.string_num,
+                curr_fret=s2.fret,
+                curr_finger=s2.finger.value,
+                hand_position=s2.hand_position,
+                context=PlayerContext(
+                    onset=note.onset,
+                    duration=note.duration,
+                    tempo=note.tempo,
+                ),
+            )
+        except Exception:
+            return 0.0
 
     def emission_cost(self, state: FingeringState) -> float:
         """Initial cost for the first note in a sequence.
@@ -295,17 +396,66 @@ def cost_position_shift(s1: FingeringState, s2: FingeringState, note: NoteEvent)
         or s2.fret == 0
     )
 
-    shift = abs(s2.hand_position - s1.hand_position)
+    # hand_position = fret - finger_offset, so changing finger alone can change hp by up
+    # to 3 even if the hand stays physically anchored. Absorb a 1-fret tolerance so that
+    # adjacent finger swaps (e.g. INDEX@3 → MIDDLE@5: hp 3→4) don't read as a real shift.
+    raw_shift = abs(s2.hand_position - s1.hand_position)
+    shift = max(0, raw_shift - _POSITION_SHIFT_TOLERANCE_FRETS)
     if shift == 0:
         return 0.0
     # beats_per_minute / 60 = beats per second; duration in beats → seconds
     # Short duration = fast note = harder to shift
     seconds = note.duration * 60.0 / max(note.tempo, 1.0)
-    tempo_factor = 1.0 / max(seconds, 0.1)  # cap to avoid infinity
+    tempo_factor = 1.0 / max(seconds, _POSITION_SHIFT_MIN_SECONDS)  # cap to avoid infinity
     if open_transition:
         # Open strings allow hand motion while sounding, but the reset is not free.
-        return 0.35 * shift * tempo_factor
+        return _POSITION_SHIFT_OPEN_FACTOR * shift * tempo_factor
 
+    return shift * tempo_factor
+
+
+def cost_position_shift_segment_aware(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    anchor_prev: int,
+    anchor_curr: int,
+) -> float:
+    """Segment-aware variant of ``cost_position_shift`` (B integration).
+
+    When both notes belong to the same segment (same anchor), the cost is 0:
+    the hand is physically anchored, no real wrist motion is required. When
+    they belong to different segments, the cost is proportional to the
+    anchor delta — which is the actual physical hand-position change.
+
+    This eliminates the F2/F3/F4 pathologies caused by the per-state
+    ``hand_position = fret - finger_offset`` confounding finger changes with
+    real wrist shifts.
+
+    Args:
+        s1: Source state.
+        s2: Target state.
+        note: NoteEvent for s2 (provides tempo / duration).
+        anchor_prev: Hand anchor (lowest fret) of the segment containing s1.
+        anchor_curr: Hand anchor of the segment containing s2.
+
+    Returns:
+        Non-negative cost. 0.0 when same segment.
+    """
+    if anchor_prev == anchor_curr:
+        return 0.0
+
+    open_transition = (
+        s1.finger == Finger.OPEN
+        or s2.finger == Finger.OPEN
+        or s1.fret == 0
+        or s2.fret == 0
+    )
+    shift = abs(anchor_curr - anchor_prev)
+    seconds = note.duration * 60.0 / max(note.tempo, 1.0)
+    tempo_factor = 1.0 / max(seconds, _POSITION_SHIFT_MIN_SECONDS)
+    if open_transition:
+        return _POSITION_SHIFT_OPEN_FACTOR * shift * tempo_factor
     return shift * tempo_factor
 
 
@@ -342,7 +492,9 @@ def cost_stretch(s1: FingeringState, s2: FingeringState) -> float:
     stretch = abs(desired_offset - natural_offset)
 
     # Frets above 12 are physically closer together; reduce cost slightly.
-    position_factor = 1.0 - 0.3 * min(s2.hand_position / 12.0, 1.0)
+    position_factor = 1.0 - _STRETCH_HIGH_FRET_RELIEF * min(
+        s2.hand_position / _STRETCH_HIGH_FRET_PIVOT, 1.0
+    )
     return stretch * position_factor
 
 
@@ -376,10 +528,55 @@ def cost_finger_difficulty(s2: FingeringState) -> float:
     return _FINGER_BASE_COST.get(s2.finger, 1.0)
 
 
-_SEQUENTIAL_CROSS_PENALTY = 2.0
+_SEQUENTIAL_CROSS_PENALTY = float(_SCORING.sequential_cross_penalty)
 # A position shift larger than this (in frets) means the hand fully relocates,
 # making any finger ordering acceptable for the landing note.
-_SHIFT_EXEMPT_THRESHOLD = 1
+_SHIFT_EXEMPT_THRESHOLD = int(_SCORING.shift_exempt_threshold_frets)
+
+# Shift-cost tunables (consumed by cost_position_shift / segment-aware variant).
+_POSITION_SHIFT_TOLERANCE_FRETS: int = int(_SCORING.position_shift_tolerance_frets)
+_POSITION_SHIFT_OPEN_FACTOR: float = float(_SCORING.position_shift_open_factor)
+_POSITION_SHIFT_MIN_SECONDS: float = float(_SCORING.position_shift_min_seconds)
+
+# Stretch-cost tunables (consumed by cost_stretch).
+_STRETCH_HIGH_FRET_RELIEF: float = float(_SCORING.stretch_high_fret_relief)
+_STRETCH_HIGH_FRET_PIVOT: float = float(_SCORING.stretch_high_fret_pivot)
+
+# Same-fret finger-swap penalty (consumed by compute_mechanical_cost).
+_SAME_FRET_FINGER_SWAP_PENALTY: float = float(_SCORING.same_fret_finger_swap_penalty)
+
+# Same-finger-motion tunables (consumed by cost_same_finger_motion).
+_SAME_FINGER_MOTION_MIN_SECONDS: float = float(_SCORING.same_finger_motion_min_seconds)
+_SAME_FINGER_MOTION_FRET_WEIGHT: float = float(_SCORING.same_finger_motion_fret_weight)
+_SAME_FINGER_MOTION_STRING_WEIGHT: float = float(_SCORING.same_finger_motion_string_weight)
+_IMPLICIT_LEGATO_MAX_DURATION_BEATS: float = float(_SCORING.implicit_legato_max_duration_beats)
+
+# Maximum fret span of a chord before it is flagged for revoicing
+# (consumed by resolve_chord_stretch).
+_CHORD_MAX_FRET_SPAN: int = int(_SCORING.chord_max_fret_span)
+
+# Minimum string span for a two-endpoint partial barre
+# (consumed by _find_partial_barre).
+_PARTIAL_BARRE_MIN_STRING_SPAN: int = int(_SCORING.partial_barre_min_string_span)
+
+# ---------------------------------------------------------------------------
+# Musical-cost penalties (consumed by compute_musical_cost).
+# ---------------------------------------------------------------------------
+_MUSICAL = _SCORING.musical
+_LEGATO_CROSS_STRING_PENALTY: float = float(_MUSICAL.legato_cross_string_penalty)
+_SLIDE_CROSS_STRING_PENALTY: float = float(_MUSICAL.slide_cross_string_penalty)
+_VIBRATO_OPEN_STRING_PENALTY: float = float(_MUSICAL.vibrato_open_string_penalty)
+_VIBRATO_LOW_FRET_PENALTY: float = float(_MUSICAL.vibrato_low_fret_penalty)
+_VIBRATO_LOW_FRET_MAX: int = int(_MUSICAL.vibrato_low_fret_max)
+_WIDE_VIBRATO_LOW_PENALTY: float = float(_MUSICAL.wide_vibrato_low_penalty)
+_WIDE_VIBRATO_FRET_MAX: int = int(_MUSICAL.wide_vibrato_fret_max)
+_BEND_OPEN_STRING_PENALTY: float = float(_MUSICAL.bend_open_string_penalty)
+_BEND_HEAVY_WOUND_FACTOR: float = float(_MUSICAL.bend_heavy_wound_factor)
+_BEND_HEAVY_WOUND_MIN_STRING: int = int(_MUSICAL.bend_heavy_wound_min_string)
+_BEND_MEDIUM_WOUND_FACTOR: float = float(_MUSICAL.bend_medium_wound_factor)
+_HARMONIC_WRONG_FRET_PENALTY: float = float(_MUSICAL.harmonic_wrong_fret_penalty)
+_TAPPING_LOW_FRET_PENALTY: float = float(_MUSICAL.tapping_low_fret_penalty)
+_TAPPING_LOW_FRET_MAX: int = int(_MUSICAL.tapping_low_fret_max)
 
 
 def cost_same_finger_motion(
@@ -432,14 +629,17 @@ def cost_same_finger_motion(
         prefs.infer_implicit_legato
         and s1.string_num == s2.string_num
         and fret_delta == 1
-        and note.duration <= 0.5
+        and note.duration <= _IMPLICIT_LEGATO_MAX_DURATION_BEATS
     ):
         return 0.0
 
     string_delta = abs(s2.string_num - s1.string_num)
     seconds = note.duration * 60.0 / max(note.tempo, 1.0)
-    tempo_factor = 1.0 / max(seconds, 0.2)
-    return ((1.5 * fret_delta) + (0.75 * string_delta)) * tempo_factor
+    tempo_factor = 1.0 / max(seconds, _SAME_FINGER_MOTION_MIN_SECONDS)
+    return (
+        (_SAME_FINGER_MOTION_FRET_WEIGHT * fret_delta)
+        + (_SAME_FINGER_MOTION_STRING_WEIGHT * string_delta)
+    ) * tempo_factor
 
 
 def cost_sequential_crossing(s1: FingeringState, s2: FingeringState) -> float:
@@ -495,7 +695,7 @@ def _build_pitch_voicings(
 
 def resolve_chord_stretch(
     results: list[FingeringResult],
-    max_fret_span: int = 4,
+    max_fret_span: int = _CHORD_MAX_FRET_SPAN,
 ) -> list[FingeringResult]:
     """Detect and fix chords where the fret span exceeds physical reach.
 
@@ -532,8 +732,11 @@ def resolve_chord_stretch(
         if len(indices) < 2:
             continue
 
-        fretted = [(idx, resolved[idx].state.string_num, resolved[idx].state.fret)
-                   for idx in indices if resolved[idx].state.fret > 0]
+        fretted = [
+            (idx, resolved[idx].state.string_num, resolved[idx].state.fret)
+            for idx in indices
+            if resolved[idx].state.fret > 0 and not resolved[idx].note_event.muted
+        ]
         if len(fretted) < 2:
             continue
 
@@ -619,6 +822,16 @@ def resolve_chord_stretch(
     return resolved
 
 
+def _are_contiguous(values: list[int]) -> bool:
+    if len(values) < 2:
+        return True
+    ordered = sorted(set(values))
+    return len(ordered) == len(values) and all(
+        current + 1 == following
+        for current, following in zip(ordered, ordered[1:], strict=False)
+    )
+
+
 def resolve_chord_conflicts(results: list[FingeringResult]) -> list[FingeringResult]:
     """Fix physically impossible finger assignments within chords.
 
@@ -647,16 +860,28 @@ def resolve_chord_conflicts(results: list[FingeringResult]) -> list[FingeringRes
         # Iteratively resolve conflicts (one pass per conflict, up to group size).
         for _ in range(len(indices)):
             used_fingers: set[Finger] = set()
+            used_index_barres: dict[int, list[int]] = defaultdict(list)
             conflict_idx: int | None = None
 
             for result_idx in indices:
-                f = resolved[result_idx].state.finger
+                state = resolved[result_idx].state
+                f = state.finger
                 if f == Finger.OPEN:
                     continue
+                if f == Finger.INDEX:
+                    barre_strings = used_index_barres[state.fret]
+                    if barre_strings and state.string_num not in barre_strings:
+                        candidate_strings = barre_strings + [state.string_num]
+                        if _are_contiguous(candidate_strings):
+                            barre_strings.append(state.string_num)
+                            used_fingers.add(f)
+                            continue
                 if f in used_fingers:
                     conflict_idx = result_idx
                     break
                 used_fingers.add(f)
+                if f == Finger.INDEX:
+                    used_index_barres[state.fret].append(state.string_num)
 
             if conflict_idx is None:
                 break  # no more conflicts in this onset group
@@ -771,7 +996,7 @@ def resolve_chord_finger_ordering(results: list[FingeringResult]) -> list[Finger
         valid_fingers = _natural_finger_assignment(frets_sorted)
         if valid_fingers is None:
             onset_val = resolved[fretted[0][0]].note_event.onset
-            logger.warning(
+            logger.debug(
                 "No valid finger assignment for chord at onset %.3f "
                 "(frets %s) — leaving current assignment.",
                 onset_val, frets_sorted,
@@ -808,13 +1033,19 @@ def resolve_chord_finger_ordering(results: list[FingeringResult]) -> list[Finger
 # Adjacent fingers (rank_diff=1): max 2 frets.
 # Skip-one  fingers (rank_diff=2): max 3 frets.
 # Index–Pinky       (rank_diff=3): max 4 frets (= chord stretch limit).
+# YAML keys (``index_middle`` …) map to anatomical rank pairs
+# (INDEX=0, MIDDLE=1, RING=2, PINKY=3).
+_FINGER_PAIR_RANK_KEYS: dict[str, tuple[int, int]] = {
+    "index_middle": (0, 1),
+    "index_ring": (0, 2),
+    "index_pinky": (0, 3),
+    "middle_ring": (1, 2),
+    "middle_pinky": (1, 3),
+    "ring_pinky": (2, 3),
+}
 _MAX_FINGER_PAIR_SPAN: dict[tuple[int, int], int] = {
-    (0, 1): 2,  # index–middle
-    (0, 2): 3,  # index–ring
-    (0, 3): 4,  # index–pinky
-    (1, 2): 2,  # middle–ring
-    (1, 3): 3,  # middle–pinky
-    (2, 3): 2,  # ring–pinky
+    _FINGER_PAIR_RANK_KEYS[name]: int(span)
+    for name, span in _SCORING.max_finger_pair_span.to_dict().items()
 }
 
 _FRETTED_FINGERS: list[Finger] = [Finger.INDEX, Finger.MIDDLE, Finger.RING, Finger.PINKY]
@@ -968,7 +1199,7 @@ def resolve_chord_finger_span(results: list[FingeringResult]) -> list[FingeringR
         valid_fingers = _natural_finger_assignment(frets_sorted)
         if valid_fingers is None:
             onset_val = resolved[fretted[0][0]].note_event.onset
-            logger.warning(
+            logger.debug(
                 "No valid finger assignment for chord at onset %.3f "
                 "(frets %s) — leaving current assignment.",
                 onset_val, frets_sorted,
@@ -999,14 +1230,153 @@ def resolve_chord_finger_span(results: list[FingeringResult]) -> list[FingeringR
 
 
 # Finger → fret offset from hand_position (index=0, middle=1, ring=2, pinky=3).
-_FINGER_OFFSET: dict[Finger, int] = {
-    Finger.INDEX: 0, Finger.MIDDLE: 1, Finger.RING: 2, Finger.PINKY: 3,
-}
+_FINGER_OFFSET: dict[Finger, int] = _finger_ints(_SCORING.finger_offset)
+
+# Lookback window (in beats) for arpeggio-aware finger continuity
+# (consumed by resolve_finger_continuity).
+_FINGER_CONTINUITY_LOOKBACK_BEATS: float = float(_SCORING.finger_continuity_lookback_beats)
+
+
+def resolve_chord_learned_fingers(
+    results: list[FingeringResult],
+    classifier: object | None,
+) -> list[FingeringResult]:
+    """Override chord finger assignment using a learned ChordFingerClassifier.
+
+    Designed for the GuitarDataSet Phase 2 model: 97.7 % chord-finger accuracy
+    on unseen chord names (vs 80.9 % rule-based baseline). This resolver runs
+    AFTER the rule-based chord resolvers and OVERRIDES their finger field for
+    fretted notes within each chord onset group. Open strings are untouched.
+
+    When ``classifier`` is None (default), no-op — preserves the rule-based
+    output. When provided, the classifier MUST satisfy the
+    ``fretwise.ml.ChordFingerClassifier`` protocol.
+
+    Args:
+        results: Sequence of FingeringResult from the rule-based pipeline.
+        classifier: Pluggable chord finger classifier, or None to skip.
+
+    Returns:
+        New list with chord-finger assignments potentially overridden.
+    """
+    if classifier is None or not results:
+        return results
+
+    from fretwise.ml import ChordNote, PlayerContext
+
+    onset_groups: dict[float, list[int]] = defaultdict(list)
+    for idx, r in enumerate(results):
+        onset_groups[round(r.note_event.onset, 6)].append(idx)
+
+    resolved = list(results)
+
+    for indices in onset_groups.values():
+        if len(indices) < 2:
+            continue
+        fretted_pairs: list[tuple[int, FingeringResult]] = [
+            (i, resolved[i]) for i in indices
+            if resolved[i].state.fret > 0 and resolved[i].state.finger is not Finger.OPEN
+        ]
+        # Require at least 2 fretted notes — single-fretted "chords" (one
+        # fret + open strings) are out of the classifier's training
+        # distribution and produce noisy predictions.
+        if len(fretted_pairs) < 2:
+            continue
+        n_open = sum(
+            1 for i in indices
+            if resolved[i].state.fret == 0 or resolved[i].state.finger is Finger.OPEN
+        )
+        frets_in_chord = [r.state.fret for _, r in fretted_pairs]
+        min_fret = min(frets_in_chord)
+        chord_notes = [
+            ChordNote(
+                string=r.state.string_num,
+                fret=r.state.fret,
+                pitch=r.note_event.pitch,
+                is_barre_candidate=(r.state.fret == min_fret and frets_in_chord.count(min_fret) >= 2),
+            )
+            for _, r in fretted_pairs
+        ]
+
+        any_event = fretted_pairs[0][1].note_event
+        ctx = PlayerContext(
+            onset=float(any_event.onset),
+            duration=float(any_event.duration),
+            tempo=float(any_event.tempo),
+            articulation=any_event.articulation.value if any_event.articulation else "normal",
+            is_chord_member=True,
+            chord_size=len(fretted_pairs) + n_open,
+        )
+
+        try:
+            predicted = classifier.predict_fingers(
+                chord_notes, hand_position=min_fret, context=ctx,
+            )
+        except Exception as exc:
+            logger.warning("ChordFingerClassifier failed on onset %s: %s",
+                           any_event.onset, exc)
+            continue
+
+        if len(predicted) != len(fretted_pairs):
+            logger.warning(
+                "Classifier returned %d fingers for %d notes; skipping.",
+                len(predicted), len(fretted_pairs),
+            )
+            continue
+
+        # Post-inference sanity check (GDS validate_assignment): if the
+        # predicted assignment is not physically playable, fall back to
+        # the rule-based output for this chord. Cost layer = ~0.12% of
+        # chord predictions per GDS-008.
+        try:
+            from fretwise.ml import validate_assignment as _validate
+            strings_arr: list[int | None] = [None] * 6
+            fingers_arr: list[int | None] = [None] * 6
+            _finger_int = {
+                "index": 1, "middle": 2, "ring": 3, "pinky": 4,
+            }
+            for (_, r), name in zip(fretted_pairs, predicted):
+                gds_idx = 6 - r.state.string_num  # FretWise 1=high e → GDS 5
+                if 0 <= gds_idx < 6:
+                    strings_arr[gds_idx] = r.state.fret
+                    fingers_arr[gds_idx] = _finger_int.get(name.lower())
+            result = _validate(strings_arr, fingers_arr)
+            if not result["valid"]:
+                logger.info(
+                    "ML chord assignment failed sanity check at onset %s "
+                    "(%s); falling back to rule-based.",
+                    any_event.onset, "; ".join(result["violations"]),
+                )
+                continue
+        except Exception as exc:
+            logger.warning("validate_assignment crashed: %s — keeping ML output", exc)
+
+        for (orig_idx, r), finger_name in zip(fretted_pairs, predicted):
+            try:
+                new_finger = Finger(finger_name.lower())
+            except ValueError:
+                continue
+            new_hp = max(1, r.state.fret - _FINGER_OFFSET.get(new_finger, 0))
+            resolved[orig_idx] = FingeringResult(
+                note_id=r.note_id,
+                note_event=r.note_event,
+                state=FingeringState(
+                    string_num=r.state.string_num,
+                    fret=r.state.fret,
+                    finger=new_finger,
+                    hand_position=new_hp,
+                ),
+                cost=r.cost,
+                alternatives=r.alternatives,
+                planted_fingers=r.planted_fingers,
+            )
+
+    return resolved
 
 
 def resolve_finger_continuity(
     results: list[FingeringResult],
-    lookback_beats: float = 8.0,
+    lookback_beats: float = _FINGER_CONTINUITY_LOOKBACK_BEATS,
 ) -> list[FingeringResult]:
     """Preserve finger assignments across arpeggios and repeated positions.
 
@@ -1051,7 +1421,7 @@ def resolve_finger_continuity(
 
             # Scan backwards until we find the most recent occurrence of this
             # string, or exceed the lookback window.
-            prev_finger: Finger | None = None
+            prev_state: FingeringState | None = None
             for look_back in range(1, oi + 1):
                 prev_onset = sorted_onsets[oi - look_back]
                 if curr_onset - prev_onset > lookback_beats:
@@ -1064,15 +1434,23 @@ def resolve_finger_continuity(
                         continue
                     same_string_found = True
                     if prev_r.state.fret == curr_r.state.fret and prev_r.state.fret != 0:
-                        prev_finger = prev_r.state.finger  # same position → reuse
+                        prev_state = prev_r.state  # same position → reuse
                     # Different fret on same string → finger has moved; no reuse.
                     break
 
                 if same_string_found:
                     break  # found the most recent history for this string
 
-            if prev_finger is None or prev_finger == curr_r.state.finger:
+            if prev_state is None or prev_state.finger == curr_r.state.finger:
                 continue  # nothing to fix
+
+            if (
+                curr_r.note_event.measure_index is not None
+                and prev_r.note_event.measure_index is not None
+                and curr_r.note_event.measure_index != prev_r.note_event.measure_index
+                and curr_r.state.hand_position != prev_state.hand_position
+            ):
+                continue  # phrase/measure boundary: keep the new hand position.
 
             # Guard: don't propagate a finger already used by another note in
             # the same chord — that would create a new conflict.
@@ -1082,6 +1460,7 @@ def resolve_finger_continuity(
                 if other_idx != curr_idx
                 and resolved[other_idx].state.finger != Finger.OPEN
             }
+            prev_finger = prev_state.finger
             if prev_finger in fingers_already_used:
                 continue  # propagating would cause a chord finger conflict
 
@@ -1134,15 +1513,20 @@ def resolve_finger_continuity(
 # considered released.  4 beats = 1 full 4/4 measure; beyond that the
 # player has almost certainly lifted the finger even if the hand itself
 # did not shift.
-_SEDENTARY_MAX_INACTIVE_BEATS: float = 4.0
+_SEDENTARY_MAX_INACTIVE_BEATS: float = float(_SCORING.sedentary_max_inactive_beats)
 
 # Max distance (in notes) within which the NEXT use of a finger must
 # occur at the same (string, fret) to justify staying planted (R3a).
-_SEDENTARY_REUSE_LOOKAHEAD_NOTES: int = 4
+_SEDENTARY_REUSE_LOOKAHEAD_NOTES: int = int(_SCORING.sedentary_reuse_lookahead_notes)
 
 # Max onset gap (beats) that qualifies two notes as "same chord context"
 # for the arpeggiation rule R3b.
-_SEDENTARY_CHORD_CONTEXT_BEATS: float = 2.0
+_SEDENTARY_CHORD_CONTEXT_BEATS: float = float(_SCORING.sedentary_chord_context_beats)
+
+# Reachability window (frets below / above the hand position) within which a
+# planted finger is still considered within reach (R2).
+_SEDENTARY_REACH_BELOW: int = int(_SCORING.sedentary_reach_below)
+_SEDENTARY_REACH_ABOVE: int = int(_SCORING.sedentary_reach_above)
 
 
 def _has_future_reuse(
@@ -1206,9 +1590,11 @@ def _find_partial_barre(
 
     Rule:
       * Contiguous-string subset of >= 2 notes → partial barre (always).
-      * Non-contiguous subset of >= 3 notes at the same lowest fret → full
-        barre across the gaps (the index is physically flat across the neck;
-        for 3+ notes the barre is always the natural fingering).
+            * Non-contiguous subset of >= 3 notes at the same lowest fret → full
+                barre across the gaps (the index is physically flat across the neck).
+            * Two non-contiguous endpoints are only a barre when they span at least
+                four string steps (wide E/A-shape territory). Short two-endpoint clamps
+                such as 6-7-6 are left to separate fingers.
 
     Args:
         chord_notes: list of (note_idx, string_num, fret) for the fretted
@@ -1235,27 +1621,14 @@ def _find_partial_barre(
     if is_contiguous:
         return [idx for idx, _ in lowest_notes], lowest_fret
 
-    # Case 2 — non-contiguous lowest-fret notes.  Accept as a FULL barre
-    # only if there are 3+ notes (the physical reality of a flat index
-    # across the neck in E/A-shape barre chords).  For 2 non-contiguous
-    # notes, two separate fingers are the natural choice.
-    if len(lowest_notes) >= 3:
+    # Case 2 — non-contiguous lowest-fret notes. Accept as a FULL barre when
+    # 3+ notes clearly anchor the flattened index, or when two endpoints span
+    # a wide E/A-shape barre. Short two-endpoint clamps with a fretted note
+    # between them (e.g. Django 6-7-6-8) should use separate fingers.
+    string_span = strings[-1] - strings[0]
+    if len(lowest_notes) >= 3 or string_span >= _PARTIAL_BARRE_MIN_STRING_SPAN:
         return [idx for idx, _ in lowest_notes], lowest_fret
 
-    # Case 3 — contiguous sub-run within a larger non-contiguous set.
-    best: list[tuple[int, int]] = [lowest_notes[0]]
-    current: list[tuple[int, int]] = [lowest_notes[0]]
-    for n in lowest_notes[1:]:
-        if n[1] == current[-1][1] + 1:
-            current.append(n)
-        else:
-            if len(current) > len(best):
-                best = list(current)
-            current = [n]
-    if len(current) > len(best):
-        best = current
-    if len(best) >= 2:
-        return [idx for idx, _ in best], lowest_fret
     return None, None
 
 
@@ -1291,6 +1664,7 @@ def resolve_chord_partial_barre(
             for idx in indices
             if resolved[idx].state.fret > 0
             and resolved[idx].state.finger is not Finger.OPEN
+            and not resolved[idx].note_event.muted
         ]
         if len(fretted) < 2:
             continue
@@ -1323,7 +1697,8 @@ def resolve_chord_partial_barre(
              for idx in indices
              if idx not in barre_set
              and resolved[idx].state.fret > 0
-             and resolved[idx].state.finger is not Finger.OPEN],
+             and resolved[idx].state.finger is not Finger.OPEN
+             and not resolved[idx].note_event.muted],
             key=lambda t: (t[1], t[2]),
         )
         available = [Finger.MIDDLE, Finger.RING, Finger.PINKY]
@@ -1339,7 +1714,9 @@ def resolve_chord_partial_barre(
                     break
             if chosen is None:
                 # Fallback: lower rank (stretch backward) — rare.
-                for off in range(max(0, offset) - 1, 0, -1):
+                # Clamp the start at 3 (last valid _FRETTED_FINGERS index) for
+                # the case where the note sits more than 4 frets above the barre.
+                for off in range(min(max(0, offset) - 1, 3), 0, -1):
                     fng = _FRETTED_FINGERS[off]
                     if fng in available:
                         chosen = fng
@@ -1406,6 +1783,7 @@ def resolve_chord_unified_hand_position(
             idx for idx in indices
             if resolved[idx].state.fret > 0
             and resolved[idx].state.finger is not Finger.OPEN
+            and not resolved[idx].note_event.muted
         ]
         if len(fretted) < 2:
             continue
@@ -1454,9 +1832,22 @@ def resolve_chord_unified_hand_position(
 # same hand_position and use the finger consistent with that position.
 # ---------------------------------------------------------------------------
 
-_ARPEGGIO_WINDOW_BEATS: float = 4.0   # max onset span for one arpeggio chord
-_ARPEGGIO_MAX_SPAN: int = 4           # max fret distance (standard reach)
-_ARPEGGIO_MIN_NOTES: int = 3          # minimum notes to trigger stabilisation
+# max onset span for one arpeggio chord
+_ARPEGGIO_WINDOW_BEATS: float = float(_SCORING.arpeggio_window_beats)
+# max fret distance (standard reach)
+_ARPEGGIO_MAX_SPAN: int = int(_SCORING.arpeggio_max_span_frets)
+# minimum notes to trigger stabilisation
+_ARPEGGIO_MIN_NOTES: int = int(_SCORING.arpeggio_min_notes)
+
+
+# Epsilon slack (in composite-cost units) allowed when judging a cost-aware
+# arpeggio override.  The override is applied when the candidate's total
+# transition cost is no more than ``current + epsilon`` — i.e. cost-neutral
+# (including genuine ties) or strictly cheaper.  The small positive slack lets
+# the anti-oscillation stabilisation still fire on exact ties and on
+# negligible cost differences (floating-point noise), while a real cost
+# increase above the slack blocks the override and preserves Viterbi's choice.
+_ARPEGGIO_COST_EPSILON: float = 1e-6
 
 
 def resolve_arpeggio_chord_fingering(
@@ -1464,13 +1855,16 @@ def resolve_arpeggio_chord_fingering(
     window_beats: float = _ARPEGGIO_WINDOW_BEATS,
     max_span: int = _ARPEGGIO_MAX_SPAN,
     min_notes: int = _ARPEGGIO_MIN_NOTES,
+    *,
+    cost_fn: CostFunction | None = None,
+    cost_epsilon: float = _ARPEGGIO_COST_EPSILON,
 ) -> list[FingeringResult]:
     """Stabilise hand position across arpeggio patterns.
 
     Groups consecutive non-open notes into windows where all fretted positions
     fit within ``max_span`` frets.  Within each window every note is
-    re-fingerised to a single hand_position (the minimum natural hp of the
-    window) and the appropriate finger derived from its fret offset.
+    re-fingerised to a single hand_position anchored on the lowest played fret,
+    and the appropriate finger derived from its fret offset.
 
     This prevents the hand from oscillating by ±1–2 frets across an arpeggio
     that a guitarist would play entirely from one chord shape.
@@ -1478,11 +1872,36 @@ def resolve_arpeggio_chord_fingering(
     Notes with open strings, muted notes, or bends/slides that span across the
     window boundary are left untouched.
 
+    Cost-awareness:
+        When ``cost_fn`` is provided, the resolver no longer overrides Viterbi
+        unconditionally.  For each candidate re-finger it evaluates the
+        composite transition cost of the candidate state *in context* — the
+        prev→k and k→next edges against the neighbours **as they currently
+        stand in the (partially re-finger ed) ``resolved`` list** — and only
+        commits the override when the candidate's total cost is
+        ``<= current_total + cost_epsilon`` (cost-neutral-or-better; the
+        epsilon lets exact ties and floating-point-noise differences still get
+        the stabilisation).  Notes within a window are processed left-to-right,
+        so each note is judged against neighbours that have already been
+        committed (anti-oscillation is preserved when it does not fight the
+        cost layer).  The candidate state always carries the anchored
+        ``target_hp`` so the cost's position-shift / stretch terms see the
+        hand_position change.
+
+        When ``cost_fn is None`` the legacy local-stretch guard is used and the
+        behaviour is byte-for-byte backward compatible.
+
     Args:
         results: FingeringResult list sorted by onset.
         window_beats: Maximum beat span for a single arpeggio window.
         max_span: Maximum fret range (fretted notes only) to qualify.
         min_notes: Minimum number of fretted notes required.
+        cost_fn: Optional injected composite ``CostFunction``.  When supplied,
+            overrides are gated on cost-neutral-or-better (see above) instead of
+            the local stretch heuristic.  Uses the same weights/profile as the
+            Viterbi run that produced ``results``.
+        cost_epsilon: Slack (composite-cost units) added to the current cost
+            when comparing.  Defaults to a tiny positive value so ties stabilise.
 
     Returns:
         New list with stabilised arpeggio hand positions.
@@ -1520,6 +1939,12 @@ def resolve_arpeggio_chord_fingering(
             if rj.note_event.onset - onset0 > window_beats:
                 break
             if (
+                r0.note_event.measure_index is not None
+                and rj.note_event.measure_index is not None
+                and rj.note_event.measure_index != r0.note_event.measure_index
+            ):
+                break
+            if (
                 rj.state.fret == 0
                 or rj.state.finger is Finger.OPEN
                 or rj.note_event.muted
@@ -1541,12 +1966,7 @@ def resolve_arpeggio_chord_fingering(
             i += 1
             continue
 
-        # Compute target hand_position: minimum natural hp across window.
-        target_hp = min(
-            resolved[k].state.hand_position for k in window_indices
-        )
-        if target_hp < 1:
-            target_hp = 1
+        target_hp = max(1, min_fret)
 
         # Re-fingerise each note: choose the finger whose natural position
         # (target_hp + offset) best matches the note's fret.
@@ -1565,22 +1985,32 @@ def resolve_arpeggio_chord_fingering(
             new_finger = _FRETTED_FINGERS[offset]
             if new_finger == r.state.finger and r.state.hand_position == target_hp:
                 continue  # already correct
-            # Validate: only rewrite if the new assignment is not more
-            # stretched than the original (avoid making things worse).
-            old_stretch = abs((r.state.fret - r.state.hand_position)
-                              - _FINGER_OFFSET.get(r.state.finger, 0))
-            new_stretch = abs(offset - _FINGER_OFFSET.get(new_finger, 0))
-            if new_stretch > old_stretch:
-                continue
+            candidate_state = FingeringState(
+                string_num=r.state.string_num,
+                fret=fret,
+                finger=new_finger,
+                hand_position=target_hp,
+            )
+            if cost_fn is not None:
+                # Cost-aware gate: judge the candidate against the injected
+                # composite cost, in context.  Only override when it is
+                # cost-neutral-or-better than keeping the current state.
+                if not _arpeggio_override_is_cost_neutral(
+                    resolved, k, candidate_state, cost_fn, cost_epsilon,
+                ):
+                    continue
+            else:
+                # Legacy local-stretch guard: only rewrite if the new
+                # assignment is not more stretched than the original.
+                old_stretch = abs((r.state.fret - r.state.hand_position)
+                                  - _FINGER_OFFSET.get(r.state.finger, 0))
+                new_stretch = abs(offset - _FINGER_OFFSET.get(new_finger, 0))
+                if new_stretch > old_stretch:
+                    continue
             resolved[k] = FingeringResult(
                 note_id=r.note_id,
                 note_event=r.note_event,
-                state=FingeringState(
-                    string_num=r.state.string_num,
-                    fret=fret,
-                    finger=new_finger,
-                    hand_position=target_hp,
-                ),
+                state=candidate_state,
                 cost=r.cost,
                 alternatives=r.alternatives,
                 planted_fingers=r.planted_fingers,
@@ -1589,6 +2019,46 @@ def resolve_arpeggio_chord_fingering(
         i = j if j > i + 1 else i + 1
 
     return resolved
+
+
+def _arpeggio_override_is_cost_neutral(
+    resolved: list[FingeringResult],
+    k: int,
+    candidate: FingeringState,
+    cost_fn: CostFunction,
+    epsilon: float,
+) -> bool:
+    """Return True if re-fingering note ``k`` to ``candidate`` is cost-neutral.
+
+    Compares the composite transition cost of the candidate state against
+    keeping ``resolved[k]``'s current state, summed over the prev→k and k→next
+    edges.  Neighbours are taken from ``resolved`` as it currently stands (so
+    already-committed re-fingers in the same window are respected).  Edge notes
+    (no prev / no next) simply omit the missing edge from both sums, so the
+    comparison stays symmetric.
+
+    The override is judged acceptable when
+    ``candidate_total <= current_total + epsilon`` — cost-neutral-or-better,
+    with the epsilon admitting exact ties and floating-point noise so genuine
+    arpeggio stabilisation still fires.
+    """
+    current = resolved[k].state
+    current_total = 0.0
+    candidate_total = 0.0
+
+    if k > 0:
+        prev = resolved[k - 1].state
+        note_k = resolved[k].note_event
+        current_total += cost_fn.transition_cost(prev, current, note_k, k)
+        candidate_total += cost_fn.transition_cost(prev, candidate, note_k, k)
+    if k + 1 < len(resolved):
+        nxt = resolved[k + 1]
+        current_total += cost_fn.transition_cost(current, nxt.state, nxt.note_event, k + 1)
+        candidate_total += cost_fn.transition_cost(
+            candidate, nxt.state, nxt.note_event, k + 1,
+        )
+
+    return candidate_total <= current_total + epsilon
 
 
 # ---------------------------------------------------------------------------
@@ -1609,8 +2079,8 @@ def resolve_arpeggio_chord_fingering(
 # while ring/middle/index play nearby frets) untouched.
 # ---------------------------------------------------------------------------
 
-_PINKY_RUN_MIN: int = 3       # run length that triggers the rewrite
-_PINKY_RUN_WINDOW: int = 8    # notes before/after to inspect for shared hp
+_PINKY_RUN_MIN: int = int(_SCORING.pinky_run_min)        # run length that triggers the rewrite
+_PINKY_RUN_WINDOW: int = int(_SCORING.pinky_run_window)  # notes before/after to inspect for hp
 
 
 def resolve_pinky_run_to_index(
@@ -1800,7 +2270,9 @@ def resolve_sedentary_fingers(
             if hp_prev != hp:
                 last_pos[f] = None
                 continue
-            if not (max(1, hp - 1) <= f_prev <= hp + 4):
+            if not (
+                max(1, hp - _SEDENTARY_REACH_BELOW) <= f_prev <= hp + _SEDENTARY_REACH_ABOVE
+            ):
                 last_pos[f] = None
                 continue
 
@@ -2010,6 +2482,8 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
 
     for onset in sorted(onset_to_indices.keys()):
         indices = onset_to_indices[onset]
+        if len(indices) < 2:
+            continue
         abs_shape = frozenset(
             (resolved[i].state.string_num, resolved[i].state.fret) for i in indices
         )
@@ -2061,23 +2535,77 @@ def resolve_section_consistency(results: list[FingeringResult]) -> list[Fingerin
     return resolved
 
 
-def compute_musical_cost(
+# ---------------------------------------------------------------------------
+# Feature-vector plumbing (internal — unlocks per-feature learning in Part B).
+#
+# Both cost aggregators below build an explicit, fixed-length FEATURE VECTOR
+# (one non-negative component per penalty term) and return the inner product of
+# that vector with a per-feature WEIGHT vector. With the default identity
+# weights (all 1.0) the returned scalar reproduces the historical flat sum
+# *in the same left-to-right addition order*, so it is byte-identical and the
+# existing behaviour / test suite is unchanged. Part B may later attach
+# non-trivial weights to the named indices below.
+#
+# Ordering is load-bearing: the index constants name each slot so Part B can map
+# weights to features by name. Do NOT reorder without updating both the
+# ``*_features`` producer and any weight vector that targets these indices.
+# The hot path (Viterbi O(N·S²)) stays allocation-light: producers return a
+# fixed-size tuple (no per-call dict/dataclass) and the wrappers sum without
+# building intermediate containers.
+# ---------------------------------------------------------------------------
+
+# Musical-cost feature ordering (see compute_musical_cost_features).
+MUSICAL_FEATURE_LEGATO_CROSS_STRING: int = 0
+MUSICAL_FEATURE_SLIDE_CROSS_STRING: int = 1
+MUSICAL_FEATURE_VIBRATO_POSITION: int = 2
+MUSICAL_FEATURE_WIDE_VIBRATO_LOW: int = 3
+MUSICAL_FEATURE_BEND_FEASIBILITY: int = 4
+MUSICAL_FEATURE_HARMONIC_POSITION: int = 5
+MUSICAL_FEATURE_TAPPING_LOW_FRET: int = 6
+MUSICAL_FEATURE_NAMES: tuple[str, ...] = (
+    "legato_cross_string",
+    "slide_cross_string",
+    "vibrato_position",
+    "wide_vibrato_low",
+    "bend_feasibility",
+    "harmonic_position",
+    "tapping_low_fret",
+)
+MUSICAL_FEATURE_COUNT: int = len(MUSICAL_FEATURE_NAMES)
+
+# Mechanical-cost feature ordering (see compute_mechanical_cost_features).
+MECHANICAL_FEATURE_POSITION_SHIFT: int = 0
+MECHANICAL_FEATURE_STRETCH: int = 1
+MECHANICAL_FEATURE_STRING_CHANGE: int = 2
+MECHANICAL_FEATURE_FINGER_DIFFICULTY: int = 3
+MECHANICAL_FEATURE_SAME_FINGER_MOTION: int = 4
+MECHANICAL_FEATURE_SEQUENTIAL_CROSSING: int = 5
+MECHANICAL_FEATURE_NAMES: tuple[str, ...] = (
+    "position_shift",
+    "stretch",
+    "string_change",
+    "finger_difficulty",
+    "same_finger_motion",
+    "sequential_crossing",
+)
+MECHANICAL_FEATURE_COUNT: int = len(MECHANICAL_FEATURE_NAMES)
+
+
+def compute_musical_cost_features(
     s1: FingeringState,
     s2: FingeringState,
     note: NoteEvent,
-) -> float:
-    """Aggregate musical cost C_music(s1, s2).
+) -> tuple[float, float, float, float, float, float, float]:
+    """Return the musical-cost FEATURE VECTOR for the transition s1 -> s2.
 
-    Penalises fingering choices that conflict with the note's articulation.
-    Each sub-component returns a non-negative cost; their sum is the total
-    C_music for the transition.
+    Each component is an independent, non-negative penalty term indexed by the
+    ``MUSICAL_FEATURE_*`` constants (see ``MUSICAL_FEATURE_NAMES``). The scalar
+    cost is the inner product of this vector with a per-feature weight vector;
+    with identity weights the components sum to the historical
+    :func:`compute_musical_cost`.
 
-    Components:
-    1. Legato same-string requirement (hammer-on, pull-off, legato)
-    2. Slide same-string requirement
-    3. Vibrato position quality (open-string penalty, low-fret penalty)
-    4. Bend feasibility (open-string impossible, thick-string difficulty)
-    5. Harmonic position matching (natural harmonics at specific frets)
+    Hot-path note: returns a fixed-size tuple with no intermediate
+    dict/dataclass allocation (runs in the Viterbi O(N·S²) inner loop).
 
     Args:
         s1: Previous (source) fingering state.
@@ -2085,66 +2613,245 @@ def compute_musical_cost(
         note: NoteEvent for s2 (provides articulation context).
 
     Returns:
-        Non-negative musical cost.
+        Seven-component feature tuple (see ``MUSICAL_FEATURE_NAMES``).
     """
-    cost = 0.0
-
-    # --- 1. Legato same-string requirement ---
+    # --- legato_cross_string ---
     # Hammer-on, pull-off, and legato are physically impossible across strings.
+    f_legato = 0.0
     if note.articulation in (
         Articulation.HAMMER_ON,
         Articulation.PULL_OFF,
         Articulation.LEGATO,
-    ):
-        if s1.string_num != s2.string_num:
-            cost += 5.0  # strong penalty: technique impossible across strings
+    ) and s1.string_num != s2.string_num:
+        f_legato = _LEGATO_CROSS_STRING_PENALTY  # impossible across strings
 
-    # --- 2. Slide same-string requirement ---
+    # --- slide_cross_string ---
     # Slides require the finger to glide along a single string.
-    if note.slide_type is not None:
-        if s1.string_num != s2.string_num:
-            cost += 5.0  # slide impossible across strings
+    f_slide = 0.0
+    if note.slide_type is not None and s1.string_num != s2.string_num:
+        f_slide = _SLIDE_CROSS_STRING_PENALTY  # slide impossible across strings
 
-    # --- 3. Vibrato position quality ---
+    # --- vibrato_position ---
     # Vibrato is achieved by oscillating the fretting finger. Open strings
     # cannot be vibrated (no fretting finger); very low frets near the nut
     # have less room for finger oscillation.
+    f_vibrato = 0.0
     if note.articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO):
         if s2.fret == 0:
-            cost += 4.0  # open string: vibrato impossible
-        elif s2.fret <= 2:
-            cost += 1.5  # frets 1-2: vibrato awkward near the nut
-    # Wide vibrato needs more finger travel; penalise further on low frets.
-    if note.vibrato_wide and 0 < s2.fret <= 3:
-        cost += 1.0
+            f_vibrato = _VIBRATO_OPEN_STRING_PENALTY  # open string: vibrato impossible
+        elif s2.fret <= _VIBRATO_LOW_FRET_MAX:
+            f_vibrato = _VIBRATO_LOW_FRET_PENALTY  # low frets: vibrato awkward near the nut
 
-    # --- 4. Bend feasibility ---
+    # --- wide_vibrato_low ---
+    # Wide vibrato needs more finger travel; penalise further on low frets.
+    f_wide_vibrato = 0.0
+    if note.vibrato_wide and 0 < s2.fret <= _WIDE_VIBRATO_FRET_MAX:
+        f_wide_vibrato = _WIDE_VIBRATO_LOW_PENALTY
+
+    # --- bend_feasibility ---
     # Bending requires pushing/pulling the string sideways.  Open strings
     # cannot be bent.  Wound strings (6, 5, 4) are harder to bend,
     # especially for larger bend values.
+    f_bend = 0.0
     if note.bend_value is not None and note.bend_value > 0:
         if s2.fret == 0:
-            cost += 6.0  # open string: bend impossible
-        else:
-            # Wound strings (low E=6, A=5, D=4) require more force.
-            if s2.string_num >= 5:
-                cost += 1.5 * note.bend_value  # strings 5-6: heavy wound
-            elif s2.string_num == 4:
-                cost += 0.8 * note.bend_value  # string 4: medium wound
+            f_bend = _BEND_OPEN_STRING_PENALTY  # open string: bend impossible
+        # Wound strings (low E=6, A=5, D=4) require more force.
+        elif s2.string_num >= _BEND_HEAVY_WOUND_MIN_STRING:
+            f_bend = _BEND_HEAVY_WOUND_FACTOR * note.bend_value  # heavy wound
+        elif s2.string_num == 4:
+            f_bend = _BEND_MEDIUM_WOUND_FACTOR * note.bend_value  # string 4: medium wound
 
-    # --- 5. Natural harmonic position matching ---
+    # --- harmonic_position ---
     # Natural harmonics ring at specific fret positions (5, 7, 12, 19).
     # If the source specifies a harmonic_fret, the fingering should match.
-    if note.harmonic_type == "natural" and note.harmonic_fret is not None:
-        if s2.fret != note.harmonic_fret:
-            cost += 4.0  # wrong fret for the harmonic node
+    f_harmonic = 0.0
+    if (
+        note.harmonic_type == "natural"
+        and note.harmonic_fret is not None
+        and s2.fret != note.harmonic_fret
+    ):
+        f_harmonic = _HARMONIC_WRONG_FRET_PENALTY  # wrong fret for the harmonic node
 
-    # --- 6. Muted / tapping modifiers ---
+    # --- tapping_low_fret ---
     # Tapping is easier at higher frets where the action is lower.
-    if note.tapping and s2.fret < 5:
-        cost += 1.5  # tapping near the nut is harder
+    f_tapping = 0.0
+    if note.tapping and s2.fret < _TAPPING_LOW_FRET_MAX:
+        f_tapping = _TAPPING_LOW_FRET_PENALTY  # tapping near the nut is harder
 
+    return (
+        f_legato,
+        f_slide,
+        f_vibrato,
+        f_wide_vibrato,
+        f_bend,
+        f_harmonic,
+        f_tapping,
+    )
+
+
+def compute_musical_cost(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    *,
+    feature_weights: Sequence[float] | None = None,
+) -> float:
+    """Aggregate musical cost C_music(s1, s2).
+
+    Penalises fingering choices that conflict with the note's articulation.
+    Thin wrapper over :func:`compute_musical_cost_features`: the scalar is the
+    inner product of the feature vector with ``feature_weights`` (identity by
+    default, reproducing the historical flat sum byte-for-byte).
+
+    Components (see ``MUSICAL_FEATURE_NAMES`` for the index order):
+    1. Legato same-string requirement (hammer-on, pull-off, legato)
+    2. Slide same-string requirement
+    3. Vibrato position quality (open-string penalty, low-fret penalty)
+    4. Wide-vibrato low-fret penalty
+    5. Bend feasibility (open-string impossible, thick-string difficulty)
+    6. Harmonic position matching (natural harmonics at specific frets)
+    7. Tapping low-fret penalty
+
+    Args:
+        s1: Previous (source) fingering state.
+        s2: Next (target) fingering state.
+        note: NoteEvent for s2 (provides articulation context).
+        feature_weights: Optional per-feature weights aligned with the
+            ``MUSICAL_FEATURE_*`` indices. ``None`` means identity weights
+            (all 1.0), i.e. a plain sum of the feature components.
+
+    Returns:
+        Non-negative musical cost.
+
+    Note:
+        The default (identity-weight) path is inlined here rather than routing
+        through :func:`compute_musical_cost_features`, to keep the Viterbi inner
+        loop free of the extra call + tuple allocation. The inlined branch logic
+        is kept byte-identical to the producer; ``test_*`` and the equivalence
+        checks guard against divergence. Only the rare weighted path builds the
+        feature tuple.
+    """
+    if feature_weights is not None:
+        w = feature_weights
+        features = compute_musical_cost_features(s1, s2, note)
+        return (
+            features[MUSICAL_FEATURE_LEGATO_CROSS_STRING]
+            * w[MUSICAL_FEATURE_LEGATO_CROSS_STRING]
+            + features[MUSICAL_FEATURE_SLIDE_CROSS_STRING]
+            * w[MUSICAL_FEATURE_SLIDE_CROSS_STRING]
+            + features[MUSICAL_FEATURE_VIBRATO_POSITION]
+            * w[MUSICAL_FEATURE_VIBRATO_POSITION]
+            + features[MUSICAL_FEATURE_WIDE_VIBRATO_LOW]
+            * w[MUSICAL_FEATURE_WIDE_VIBRATO_LOW]
+            + features[MUSICAL_FEATURE_BEND_FEASIBILITY]
+            * w[MUSICAL_FEATURE_BEND_FEASIBILITY]
+            + features[MUSICAL_FEATURE_HARMONIC_POSITION]
+            * w[MUSICAL_FEATURE_HARMONIC_POSITION]
+            + features[MUSICAL_FEATURE_TAPPING_LOW_FRET]
+            * w[MUSICAL_FEATURE_TAPPING_LOW_FRET]
+        )
+
+    # Identity-weight hot path: inlined flat sum in the historical order.
+    cost = 0.0
+    if note.articulation in (
+        Articulation.HAMMER_ON,
+        Articulation.PULL_OFF,
+        Articulation.LEGATO,
+    ) and s1.string_num != s2.string_num:
+        cost += _LEGATO_CROSS_STRING_PENALTY
+    if note.slide_type is not None and s1.string_num != s2.string_num:
+        cost += _SLIDE_CROSS_STRING_PENALTY
+    if note.articulation in (Articulation.VIBRATO, Articulation.WIDE_VIBRATO):
+        if s2.fret == 0:
+            cost += _VIBRATO_OPEN_STRING_PENALTY
+        elif s2.fret <= _VIBRATO_LOW_FRET_MAX:
+            cost += _VIBRATO_LOW_FRET_PENALTY
+    if note.vibrato_wide and 0 < s2.fret <= _WIDE_VIBRATO_FRET_MAX:
+        cost += _WIDE_VIBRATO_LOW_PENALTY
+    if note.bend_value is not None and note.bend_value > 0:
+        if s2.fret == 0:
+            cost += _BEND_OPEN_STRING_PENALTY
+        elif s2.string_num >= _BEND_HEAVY_WOUND_MIN_STRING:
+            cost += _BEND_HEAVY_WOUND_FACTOR * note.bend_value
+        elif s2.string_num == 4:
+            cost += _BEND_MEDIUM_WOUND_FACTOR * note.bend_value
+    if (
+        note.harmonic_type == "natural"
+        and note.harmonic_fret is not None
+        and s2.fret != note.harmonic_fret
+    ):
+        cost += _HARMONIC_WRONG_FRET_PENALTY
+    if note.tapping and s2.fret < _TAPPING_LOW_FRET_MAX:
+        cost += _TAPPING_LOW_FRET_PENALTY
     return cost
+
+
+def compute_mechanical_cost_features(
+    s1: FingeringState,
+    s2: FingeringState,
+    note: NoteEvent,
+    *,
+    rule_preferences: RulePreferences | None = None,
+    segment_anchor_prev: int | None = None,
+    segment_anchor_curr: int | None = None,
+) -> tuple[float, float, float, float, float, float]:
+    """Return the mechanical-cost FEATURE VECTOR for the transition s1 -> s2.
+
+    Each component is an independent, non-negative penalty term indexed by the
+    ``MECHANICAL_FEATURE_*`` constants (see ``MECHANICAL_FEATURE_NAMES``). The
+    scalar cost is the inner product of this vector with a per-feature weight
+    vector; with identity weights the components sum to the historical
+    :func:`compute_mechanical_cost`.
+
+    Special case — same string and same fret (fret != 0):
+    - Same finger: all components zero (finger already placed, no movement).
+    - Different finger: the redundant-swap scalar
+      (``cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY``) is
+      folded into the ``finger_difficulty`` component, all others zero — so the
+      identity inner product reproduces the historical scalar exactly.
+
+    Hot-path note: returns a fixed-size tuple with no intermediate
+    dict/dataclass allocation (runs in the Viterbi O(N·S²) inner loop).
+
+    Args:
+        s1: Previous fingering state.
+        s2: Next fingering state.
+        note: NoteEvent for s2 (tempo and duration context).
+        rule_preferences: Optional rule toggles.
+        segment_anchor_prev: Optional anchor of the segment containing s1.
+            When both anchors are provided, segment-aware shift cost is used.
+        segment_anchor_curr: Optional anchor of the segment containing s2.
+
+    Returns:
+        Six-component feature tuple (see ``MECHANICAL_FEATURE_NAMES``).
+    """
+    if s1.string_num == s2.string_num and s1.fret == s2.fret and s1.fret != 0:
+        if s1.finger == s2.finger:
+            # Finger already in place — re-articulate at zero cost.
+            return (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        # Switching finger on the same fret: wasteful, add stiff penalty.
+        # Folded into the finger_difficulty slot so the identity sum matches.
+        swap = cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY
+        return (0.0, swap, 0.0, 0.0, 0.0, 0.0)
+
+    prefs = rule_preferences or RulePreferences()
+
+    if segment_anchor_prev is not None and segment_anchor_curr is not None:
+        shift_cost = cost_position_shift_segment_aware(
+            s1, s2, note, segment_anchor_prev, segment_anchor_curr,
+        )
+    else:
+        shift_cost = cost_position_shift(s1, s2, note)
+
+    return (
+        shift_cost,
+        cost_stretch(s1, s2),
+        cost_string_change(s1, s2),
+        cost_finger_difficulty(s2),
+        cost_same_finger_motion(s1, s2, note, rule_preferences=prefs),
+        cost_sequential_crossing(s1, s2),
+    )
 
 
 def compute_mechanical_cost(
@@ -2153,14 +2860,25 @@ def compute_mechanical_cost(
     note: NoteEvent,
     *,
     rule_preferences: RulePreferences | None = None,
+    segment_anchor_prev: int | None = None,
+    segment_anchor_curr: int | None = None,
+    feature_weights: Sequence[float] | None = None,
 ) -> float:
     """Aggregate mechanical cost C_méca(s1, s2).
 
-    Combines four components:
-    1. Position shift (wrist movement, tempo-weighted)
-    2. Stretch (fret span from hand position)
-    3. String change (number of strings crossed)
-    4. Finger difficulty (intrinsic per-finger cost)
+    Thin wrapper over :func:`compute_mechanical_cost_features`: the scalar is the
+    inner product of the feature vector with ``feature_weights`` (identity by
+    default, reproducing the historical flat sum byte-for-byte).
+
+    Combines components (see ``MECHANICAL_FEATURE_NAMES`` for the index order):
+    1. Position shift (wrist movement, tempo-weighted) — segment-aware when
+       both ``segment_anchor_prev`` and ``segment_anchor_curr`` are provided,
+       per-state hp delta otherwise (A' tolerance fallback).
+    2. Stretch (fret span from hand position).
+    3. String change (number of strings crossed).
+    4. Finger difficulty (intrinsic per-finger cost).
+    5. Same-finger-motion penalty.
+    6. Sequential crossing penalty (R-S1).
 
     Special case — same string and same fret:
     - Same finger: cost 0 (finger already placed, no movement).
@@ -2170,24 +2888,107 @@ def compute_mechanical_cost(
         s1: Previous fingering state.
         s2: Next fingering state.
         note: NoteEvent for s2 (tempo and duration context).
+        rule_preferences: Optional rule toggles.
+        segment_anchor_prev: Optional anchor of the segment containing s1.
+            When both anchors are provided, segment-aware shift cost is used.
+        segment_anchor_curr: Optional anchor of the segment containing s2.
+        feature_weights: Optional per-feature weights aligned with the
+            ``MECHANICAL_FEATURE_*`` indices. ``None`` means identity weights
+            (all 1.0), i.e. a plain sum of the feature components.
 
     Returns:
         Non-negative mechanical cost.
-    """
-    prefs = rule_preferences or RulePreferences()
 
+    Note:
+        The default (identity-weight) path is inlined here rather than routing
+        through :func:`compute_mechanical_cost_features`, to keep the Viterbi
+        inner loop free of the extra call + tuple allocation. The inlined branch
+        logic is kept byte-identical to the producer; ``test_*`` and the
+        equivalence checks guard against divergence. Only the rare weighted path
+        builds the feature tuple.
+    """
+    if feature_weights is not None:
+        w = feature_weights
+        features = compute_mechanical_cost_features(
+            s1,
+            s2,
+            note,
+            rule_preferences=rule_preferences,
+            segment_anchor_prev=segment_anchor_prev,
+            segment_anchor_curr=segment_anchor_curr,
+        )
+        return (
+            features[MECHANICAL_FEATURE_POSITION_SHIFT]
+            * w[MECHANICAL_FEATURE_POSITION_SHIFT]
+            + features[MECHANICAL_FEATURE_STRETCH] * w[MECHANICAL_FEATURE_STRETCH]
+            + features[MECHANICAL_FEATURE_STRING_CHANGE]
+            * w[MECHANICAL_FEATURE_STRING_CHANGE]
+            + features[MECHANICAL_FEATURE_FINGER_DIFFICULTY]
+            * w[MECHANICAL_FEATURE_FINGER_DIFFICULTY]
+            + features[MECHANICAL_FEATURE_SAME_FINGER_MOTION]
+            * w[MECHANICAL_FEATURE_SAME_FINGER_MOTION]
+            + features[MECHANICAL_FEATURE_SEQUENTIAL_CROSSING]
+            * w[MECHANICAL_FEATURE_SEQUENTIAL_CROSSING]
+        )
+
+    # Identity-weight hot path: inlined, byte-identical to the historical sum.
     if s1.string_num == s2.string_num and s1.fret == s2.fret and s1.fret != 0:
         if s1.finger == s2.finger:
             return 0.0  # finger already in place — re-articulate at zero cost
-        else:
-            # Switching finger on the same fret: wasteful, add stiff penalty
-            return cost_finger_difficulty(s2) + 4.0
+        # Switching finger on the same fret: wasteful, add stiff penalty.
+        return cost_finger_difficulty(s2) + _SAME_FRET_FINGER_SWAP_PENALTY
+
+    prefs = rule_preferences or RulePreferences()
+
+    if segment_anchor_prev is not None and segment_anchor_curr is not None:
+        shift_cost = cost_position_shift_segment_aware(
+            s1, s2, note, segment_anchor_prev, segment_anchor_curr,
+        )
+    else:
+        shift_cost = cost_position_shift(s1, s2, note)
 
     return (
-        cost_position_shift(s1, s2, note)
+        shift_cost
         + cost_stretch(s1, s2)
         + cost_string_change(s1, s2)
         + cost_finger_difficulty(s2)
         + cost_same_finger_motion(s1, s2, note, rule_preferences=prefs)
         + cost_sequential_crossing(s1, s2)
     )
+
+
+def marginal_costs(
+    results: Sequence[FingeringResult],
+    cost_fn: CostFunction | None = None,
+) -> dict[int, float]:
+    """Return the per-note *marginal* cost keyed by ``note_id``.
+
+    ``FingeringResult.cost`` is the *cumulative* Viterbi path cost, which grows
+    monotonically along the piece — using it as a per-note signal makes the whole
+    back half of every song look "expensive". This recomputes each note's
+    marginal cost from the final chosen states (grouped by voice so transitions
+    stay within a single hand), with a deterministic performance-mode default.
+
+    Args:
+        results: Fingered results for the track.
+        cost_fn: Cost function to score with; a performance-mode default is
+            created when ``None``.
+
+    Returns:
+        Map of ``note_id`` → non-negative marginal cost.
+    """
+    fn = cost_fn or CostFunction(weights=CostWeights.performance())
+    by_voice: dict[int, list[FingeringResult]] = {}
+    for r in results:
+        by_voice.setdefault(r.note_event.voice_hint or 0, []).append(r)
+    out: dict[int, float] = {}
+    for voice_results in by_voice.values():
+        ordered = sorted(voice_results, key=lambda r: r.note_event.onset)
+        prev: FingeringResult | None = None
+        for r in ordered:
+            if prev is None:
+                out[r.note_id] = fn.emission_cost(r.state)
+            else:
+                out[r.note_id] = fn.transition_cost(prev.state, r.state, r.note_event)
+            prev = r
+    return out

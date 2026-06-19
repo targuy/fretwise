@@ -24,14 +24,14 @@ def enforce_min_event_spacing(
 
     for event in sorted_events:
         target_x = event.x
-        onset_key = round(event.onset, 6)
+        onset_key = round(event.onset, 4)
         if onset_key in onset_anchor_x:
             # Keep true chord columns vertically aligned on the same onset.
             target_x = onset_anchor_x[onset_key]
         elif (
             prev_x is not None
             and prev_onset is not None
-            and abs(event.onset - prev_onset) > 1e-6
+            and abs(event.onset - prev_onset) > 1e-4
             and target_x < prev_x + min_spacing
         ):
             new_x = prev_x + min_spacing

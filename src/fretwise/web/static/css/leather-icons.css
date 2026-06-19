@@ -1,0 +1,235 @@
+/* ============================================================================
+ * leather-icons.css — FretWise custom (leather) icon set + button re-skin.
+ *
+ * Usage model (theme-independent, "leather everywhere"):
+ *   - Each icon is ONE image at /static/img/icons/<name>.png (names = manifest.json).
+ *     (Add <name>@2x.png for retina; the rule below picks it up via image-set.)
+ *   - A button shows an icon by getting:  class="fw-ico fw-ico--m fw-ico--export-pdf"
+ *     The icons.js swap reads manifest.json and applies these classes to each
+ *     button id, hiding the old inline <svg>.
+ *   - Buttons get the leather plaque look via .lthr-btn (applied to .ic-btn etc).
+ *
+ * Sizes:  S=20px (utility/toolbar), M=22px (primary export), L=30px (play/pause).
+ * The brushed-metal disc needs a touch more room than a flat glyph to read, so
+ * S is 20px (the engraved feature would blur into the rim at 16px).
+ * ========================================================================== */
+
+:root {
+  --fw-ico-s: 20px;
+  --fw-ico-m: 22px;
+  --fw-ico-l: 30px;
+  /* Leather plaque surface (used by the button re-skin). */
+  --lthr-face:   #5a3b24;
+  --lthr-face-2: #4a2f1c;
+  --lthr-edge-hi: rgba(255, 214, 150, 0.35);
+  --lthr-edge-lo: rgba(0, 0, 0, 0.55);
+  --lthr-glow:   #c9892f;
+}
+
+/* ---- icon base ---------------------------------------------------------- */
+.fw-ico {
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  width: var(--fw-ico-s);
+  height: var(--fw-ico-s);
+  flex: 0 0 auto;
+  vertical-align: middle;
+  line-height: 0;
+}
+/* When an .fw-ico class is on a <button>, hide any leftover inline svg/text. */
+.fw-ico > svg,
+.fw-ico > .ic-btn-label { display: none; }
+
+.fw-ico--s { width: var(--fw-ico-s); height: var(--fw-ico-s); }
+.fw-ico--m { width: var(--fw-ico-m); height: var(--fw-ico-m); }
+.fw-ico--l { width: var(--fw-ico-l); height: var(--fw-ico-l); }
+
+/* ---- per-icon images (one file per icon; @2x auto-selected if present) --- */
+/* Macro pattern — duplicated per name so a missing file simply shows nothing
+ * (the swap keeps the original svg as fallback when the image 404s). */
+.fw-ico--theme-picker      { background-image: image-set(url("/static/img/icons/theme-picker.png") 1x,      url("/static/img/icons/theme-picker@2x.png") 2x); }
+.fw-ico--back              { background-image: image-set(url("/static/img/icons/back.png") 1x,              url("/static/img/icons/back@2x.png") 2x); }
+.fw-ico--logout            { background-image: image-set(url("/static/img/icons/logout.png") 1x,            url("/static/img/icons/logout@2x.png") 2x); }
+.fw-ico--settings          { background-image: image-set(url("/static/img/icons/settings.png") 1x,          url("/static/img/icons/settings@2x.png") 2x); }
+.fw-ico--export-pdf        { background-image: image-set(url("/static/img/icons/export-pdf.png") 1x,        url("/static/img/icons/export-pdf@2x.png") 2x); }
+.fw-ico--export-gp         { background-image: image-set(url("/static/img/icons/export-gp.png") 1x,         url("/static/img/icons/export-gp@2x.png") 2x); }
+.fw-ico--export-musicxml   { background-image: image-set(url("/static/img/icons/export-musicxml.png") 1x,   url("/static/img/icons/export-musicxml@2x.png") 2x); }
+.fw-ico--metadata-menu     { background-image: image-set(url("/static/img/icons/metadata-menu.png") 1x,     url("/static/img/icons/metadata-menu@2x.png") 2x); }
+.fw-ico--search            { background-image: image-set(url("/static/img/icons/search.png") 1x,            url("/static/img/icons/search@2x.png") 2x); }
+.fw-ico--upload            { background-image: image-set(url("/static/img/icons/upload.png") 1x,            url("/static/img/icons/upload@2x.png") 2x); }
+.fw-ico--chevron-left      { background-image: image-set(url("/static/img/icons/chevron-left.png") 1x,      url("/static/img/icons/chevron-left@2x.png") 2x); }
+.fw-ico--chevron-right     { background-image: image-set(url("/static/img/icons/chevron-right.png") 1x,     url("/static/img/icons/chevron-right@2x.png") 2x); }
+.fw-ico--setmute           { background-image: image-set(url("/static/img/icons/setmute.png") 1x,           url("/static/img/icons/setmute@2x.png") 2x); }
+.fw-ico--play-pause        { background-image: image-set(url("/static/img/icons/play-pause.png") 1x,        url("/static/img/icons/play-pause@2x.png") 2x); }
+.fw-ico--jump-figure       { background-image: image-set(url("/static/img/icons/jump-figure.png") 1x,       url("/static/img/icons/jump-figure@2x.png") 2x); }
+.fw-ico--prev              { background-image: image-set(url("/static/img/icons/prev.png") 1x,              url("/static/img/icons/prev@2x.png") 2x); }
+.fw-ico--next              { background-image: image-set(url("/static/img/icons/next.png") 1x,              url("/static/img/icons/next@2x.png") 2x); }
+.fw-ico--loop-a            { background-image: image-set(url("/static/img/icons/loop-a.png") 1x,            url("/static/img/icons/loop-a@2x.png") 2x); }
+.fw-ico--loop-b            { background-image: image-set(url("/static/img/icons/loop-b.png") 1x,            url("/static/img/icons/loop-b@2x.png") 2x); }
+.fw-ico--loop-clear        { background-image: image-set(url("/static/img/icons/loop-clear.png") 1x,        url("/static/img/icons/loop-clear@2x.png") 2x); }
+.fw-ico--metronome         { background-image: image-set(url("/static/img/icons/metronome.png") 1x,         url("/static/img/icons/metronome@2x.png") 2x); }
+.fw-ico--follow            { background-image: image-set(url("/static/img/icons/follow.png") 1x,            url("/static/img/icons/follow@2x.png") 2x); }
+.fw-ico--fingering-diagram { background-image: image-set(url("/static/img/icons/fingering-diagram.png") 1x, url("/static/img/icons/fingering-diagram@2x.png") 2x); }
+.fw-ico--fretboard         { background-image: image-set(url("/static/img/icons/fretboard.png") 1x,         url("/static/img/icons/fretboard@2x.png") 2x); }
+.fw-ico--hand-viz          { background-image: image-set(url("/static/img/icons/hand-viz.png") 1x,          url("/static/img/icons/hand-viz@2x.png") 2x); }
+.fw-ico--legend            { background-image: image-set(url("/static/img/icons/legend.png") 1x,            url("/static/img/icons/legend@2x.png") 2x); }
+.fw-ico--audit-toggle      { background-image: image-set(url("/static/img/icons/audit-toggle.png") 1x,      url("/static/img/icons/audit-toggle@2x.png") 2x); }
+.fw-ico--chords-toggle     { background-image: image-set(url("/static/img/icons/chords-toggle.png") 1x,     url("/static/img/icons/chords-toggle@2x.png") 2x); }
+.fw-ico--resync            { background-image: image-set(url("/static/img/icons/resync.png") 1x,            url("/static/img/icons/resync@2x.png") 2x); }
+.fw-ico--popout            { background-image: image-set(url("/static/img/icons/popout.png") 1x,            url("/static/img/icons/popout@2x.png") 2x); }
+.fw-ico--close             { background-image: image-set(url("/static/img/icons/close.png") 1x,             url("/static/img/icons/close@2x.png") 2x); }
+.fw-ico--cloud-icons       { background-image: image-set(url("/static/img/icons/cloud-icons.png") 1x,       url("/static/img/icons/cloud-icons@2x.png") 2x); }
+.fw-ico--google-drive      { background-image: image-set(url("/static/img/icons/google-drive.png") 1x,      url("/static/img/icons/google-drive@2x.png") 2x); }
+.fw-ico--cloud-connect     { background-image: image-set(url("/static/img/icons/cloud-connect.png") 1x,     url("/static/img/icons/cloud-connect@2x.png") 2x); }
+.fw-ico--download-gp       { background-image: image-set(url("/static/img/icons/download-gp.png") 1x,       url("/static/img/icons/download-gp@2x.png") 2x); }
+
+/* ---- icon swap (icons.js) ------------------------------------------------ */
+/* Once a button is iconified, its inline vector glyph is hidden in favour of
+ * the knob span icons.js inserted. Text-only glyph buttons (play, loop A/B)
+ * hide their character with font-size:0; the knob span keeps its own px size,
+ * and export buttons keep their PDF/GP/XML label (only the <svg> is hidden). */
+.fw-iconified > svg { display: none !important; }
+#btn-play.fw-iconified,
+#btn-loop-a.fw-iconified,
+#btn-loop-b.fw-iconified { font-size: 0; }
+
+/* ---- leather plaque button re-skin (applied to icon buttons) ------------ */
+/* Apply .lthr-btn to .ic-btn / .tx-btn so the button itself looks like the
+ * carved leather plaque the icons sit on. Works on every color theme. */
+.lthr-btn {
+  background:
+    linear-gradient(180deg, var(--lthr-face) 0%, var(--lthr-face-2) 100%);
+  border: 1px solid var(--lthr-edge-lo);
+  border-radius: 9px;
+  box-shadow:
+    inset 0 1px 0 var(--lthr-edge-hi),
+    inset 0 -2px 4px var(--lthr-edge-lo),
+    0 1px 2px rgba(0,0,0,0.45);
+  color: #f0d9b5;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.12s ease, box-shadow 0.12s ease, transform 0.05s ease;
+}
+.lthr-btn:hover { filter: brightness(1.12); box-shadow: inset 0 1px 0 var(--lthr-edge-hi), 0 0 6px var(--lthr-glow), 0 1px 2px rgba(0,0,0,0.45); }
+.lthr-btn:active { transform: translateY(1px); filter: brightness(0.95); }
+.lthr-btn:disabled, .lthr-btn[aria-disabled="true"] { opacity: 0.45; filter: grayscale(0.4); cursor: default; }
+.lthr-btn[aria-pressed="true"], .lthr-btn.is-active {
+  box-shadow: inset 0 2px 5px var(--lthr-edge-lo), 0 0 6px var(--lthr-glow);
+  filter: brightness(1.05);
+}
+
+/* ============================================================================
+ * Wood palette + app background tiles.  (Designer sheets sliced by
+ * scripts/slice_wood.py into img/wood/*.png — used UNCUT: tiled or 9-sliced,
+ * never stretched.)  style.css loads first, so these :root overrides win and
+ * retone the whole UI toward the wood + metal-knob look.
+ *
+ * Scheme:  DARK wood on the chrome (header / bars / toolbar) + body backdrop;
+ *          LIGHT maple plaques for the reading panels (library, settings, song
+ *          info, floating panels) — each retokened to dark-ink-on-light so its
+ *          whole subtree flips legible automatically.
+ * ========================================================================== */
+:root {
+  --wood-dark:  url("/static/img/wood/dark.png");
+  --wood-light: url("/static/img/wood/light.png");
+
+  --bg-0: oklch(0.16 0.020 55);   /* app background — deep wood          */
+  --bg-1: oklch(0.21 0.028 52);   /* panels — wood plaque                */
+  --bg-2: oklch(0.26 0.034 50);   /* raised surfaces                     */
+  --bg-3: oklch(0.31 0.038 50);   /* hover                               */
+  --signal:      oklch(0.74 0.13 70);   /* accent = copper/gold of knobs */
+  --signal-deep: oklch(0.62 0.14 62);
+  --line-1: oklch(0.42 0.05 45 / .9);   /* borders = wood edges          */
+  --line-2: oklch(0.40 0.05 45 / .55);
+  /* Score paper (--bg-score cream / --ink-score brown) already suits wood. */
+}
+
+/* Body backdrop — dark wood tiled at native size (no upscale), with the deep
+ * --bg-0 as a solid fallback underneath. `fixed` so the grain stays put while
+ * content scrolls. */
+body {
+  background:
+    var(--wood-dark) repeat fixed,
+    var(--bg-0);
+  background-size: 256px 256px, auto;
+}
+
+/* DARK wood on every chrome surface — header, track tabs, bottom toolbar,
+ * mixer.  A dark scrim keeps light glyphs/labels readable; `fixed` lines the
+ * grain up with the body so the bars read as cut-outs of one wood top. */
+#header,
+#track-tabs-bar,
+#toolbar,
+#multi-track-bar {
+  background:
+    linear-gradient(rgba(22,13,6,0.50), rgba(22,13,6,0.62)),
+    var(--wood-dark) repeat fixed !important;
+  background-size: auto, 256px 256px !important;
+}
+
+/* LIGHT maple plaques — the reading panels.  Redefining the surface/foreground
+ * tokens here re-tones the entire subtree (tables, labels, badges, inputs) to
+ * dark-ink-on-light without touching style.css.  A soft cream scrim over the
+ * maple guarantees text contrast. */
+#file-selector,
+#settings-page,
+#track-selector,
+.song-info-panel,
+.floating-panel {
+  --fg-0: oklch(0.22 0.020 50);
+  --fg-1: oklch(0.32 0.022 50);
+  --fg-2: oklch(0.44 0.022 50);
+  --fg-3: oklch(0.56 0.020 50);
+  --bg-0: transparent;
+  --bg-1: rgba(255, 250, 240, 0.42);
+  --bg-2: rgba(110, 74, 36, 0.14);
+  --bg-3: rgba(110, 74, 36, 0.24);
+  --line-1: rgba(60, 40, 20, 0.48);
+  --line-2: rgba(60, 40, 20, 0.30);
+  --line-3: rgba(60, 40, 20, 0.16);
+  --signal:      oklch(0.52 0.16 55);   /* darker amber reads on light wood */
+  --signal-soft: oklch(0.52 0.16 55 / .16);
+  --signal-deep: oklch(0.42 0.16 50);
+  color: var(--fg-0);
+}
+#file-selector,
+#settings-page {
+  background:
+    linear-gradient(rgba(250, 243, 231, 0.56), rgba(250, 243, 231, 0.60)),
+    var(--wood-light) repeat fixed !important;
+  background-size: auto, 256px 256px !important;
+  min-height: 100vh;
+}
+
+/* Self-contained plaques get the carved maple frame (border-image 9-slice) +
+ * tiled maple interior. */
+#track-selector,
+.song-info-panel,
+.floating-panel {
+  background:
+    linear-gradient(rgba(252, 246, 235, 0.60), rgba(252, 246, 235, 0.66)),
+    var(--wood-light) repeat !important;
+  background-size: auto, 256px 256px !important;
+  border-image: url("/static/img/wood/light-frame.png") 14 12 16 12 fill / 14px 12px 16px 12px stretch;
+}
+
+/* EXCEPTION — the partitions (score) keep their ivory paper, never the wood.
+ * Real paper grain (paper.png) sits under a dense cream scrim (~82%) so only a
+ * faint tooth shows through: the engraving stays crisp and the tile seams are
+ * masked by the scrim.  Applied to both the scroll area and the sheet itself
+ * (#core-svg-view carries its own !important cream in style.css, overridden
+ * here since leather-icons.css loads last). */
+#tab-container,
+#core-svg-view {
+  background-color: var(--bg-score) !important;
+  background-image:
+    linear-gradient(rgba(250, 246, 238, 0.82), rgba(250, 246, 238, 0.82)),
+    url("/static/img/paper.png") !important;
+  background-repeat: repeat, repeat !important;
+  background-size: auto, auto !important;
+  background-position: center top !important;
+}

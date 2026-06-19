@@ -18,15 +18,24 @@ import logging
 import math
 from typing import Protocol
 
+from fretwise.config import config
 from fretwise.models import FingeringResult, FingeringState, NoteEvent
 
 logger = logging.getLogger(__name__)
+
+# Number of top alternative states retained per note in each FingeringResult.
+# Sourced from fretwise.config -> defaults.yaml: ``optimizer.max_alternatives``.
+_MAX_ALTERNATIVES: int = config().optimizer.max_alternatives
 
 
 class CostFunctionProtocol(Protocol):
     """Structural type for cost functions injected into ViterbiOptimizer.
 
-    Any object with these two methods satisfies the contract.
+    Any object with these two methods satisfies the contract. The ``index``
+    parameter on ``transition_cost`` is optional (defaults to None) so
+    implementations that don't need positional context stay compatible.
+    Segment-aware implementations (B integration) use ``index`` to consult
+    a per-note-index anchor lookup populated by the pipeline.
     """
 
     def transition_cost(
@@ -34,8 +43,18 @@ class CostFunctionProtocol(Protocol):
         s1: FingeringState,
         s2: FingeringState,
         note: NoteEvent,
+        index: int | None = None,
     ) -> float:
-        """Cost of transitioning from s1 to s2 when playing note."""
+        """Cost of transitioning from s1 to s2 when playing note.
+
+        Args:
+            s1: Source state.
+            s2: Target state.
+            note: NoteEvent for s2 (current step).
+            index: Index of the current step in the sequence (0-based).
+                Always non-None when passed by ``ViterbiOptimizer.solve``;
+                callers passing None opt out of positional context.
+        """
         ...
 
     def emission_cost(self, state: FingeringState) -> float:
@@ -61,6 +80,40 @@ class ViterbiOptimizer:
 
     def __init__(self, cost_fn: CostFunctionProtocol) -> None:
         self._cost_fn = cost_fn
+
+    @property
+    def cost_fn(self) -> CostFunctionProtocol:
+        """The injected cost function (read-only public access).
+
+        Callers that need cost-aware post-processing (e.g. arpeggio resolvers)
+        should read this property rather than reaching into ``_cost_fn``
+        directly, keeping the M5 interface stable.
+        """
+        return self._cost_fn
+
+    def set_segment_anchors(self, anchors: list[int | None]) -> None:
+        """Activate segment-aware shift cost for the next ``solve()`` call.
+
+        Delegates to the injected cost function if it exposes
+        ``set_segment_anchors``; silently no-ops otherwise so that
+        non-CostFunction optimizers remain compatible.
+
+        Args:
+            anchors: One entry per note in the upcoming sequence.
+        """
+        set_fn = getattr(self._cost_fn, "set_segment_anchors", None)
+        if callable(set_fn):
+            set_fn(anchors)
+
+    def clear_segment_anchors(self) -> None:
+        """Deactivate segment-aware shift cost after ``solve()`` completes.
+
+        Mirrors ``set_segment_anchors``; silently no-ops when the cost
+        function does not support this operation.
+        """
+        clear_fn = getattr(self._cost_fn, "clear_segment_anchors", None)
+        if callable(clear_fn):
+            clear_fn()
 
     def solve(
         self,
@@ -118,7 +171,9 @@ class ViterbiOptimizer:
 
             for j, s2 in enumerate(curr_states):
                 for k, s1 in enumerate(prev_states):
-                    cost = viterbi[i - 1][k] + self._cost_fn.transition_cost(s1, s2, note)
+                    cost = viterbi[i - 1][k] + self._cost_fn.transition_cost(
+                        s1, s2, note, index=i,
+                    )
                     if cost < viterbi[i][j]:
                         viterbi[i][j] = cost
                         backtrack[i][j] = k
@@ -153,7 +208,7 @@ class ViterbiOptimizer:
                     note_event=note,
                     state=chosen,
                     cost=chosen_cost,
-                    alternatives=alternatives[:3],  # top 3 alternatives
+                    alternatives=alternatives[:_MAX_ALTERNATIVES],  # top N alternatives
                 )
             )
 

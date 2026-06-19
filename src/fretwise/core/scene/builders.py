@@ -2,9 +2,36 @@
 
 from __future__ import annotations
 
+import bisect
+
+from fretwise.config import config as _config
+
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
+from fretwise.core.notation_mode import has_standard as _has_standard_mode
+from fretwise.core.notation_mode import has_tab as _has_tab_mode
+from fretwise.core.notation_utils import (
+    diatonic_step_from_metadata as _diatonic_step_from_metadata,
+    is_x_notehead_drum as _is_x_notehead_drum,
+    percussion_note_y as _notation_percussion_note_y,
+    standard_note_y as _notation_standard_note_y,
+)
+from .render_helpers import (
+    base_duration as _base_duration,
+    boolish as _boolish,
+    dot_count as _dot_count,
+    duration_class as _duration_class,
+    duration_components as _duration_components,
+    flag_count as _flag_count,
+    is_filled_notehead as _is_filled_notehead,
+    is_measure_rest_event as _is_measure_rest_event,
+    notated_duration as _notated_duration,
+    rest_kind as _rest_kind,
+    safe_int as _safe_int,
+    stem_direction as _stem_direction,
+    stem_x_for_notehead as _stem_x_for_notehead,
+)
 from fretwise.core.scene.models import (
     DocumentScene,
     GlyphInstance,
@@ -17,51 +44,56 @@ from fretwise.core.scene.models import (
     TextInstance,
 )
 
-_PAGE_W = 1200.0
-_PAGE_H = 380.0
-_MARGIN_X = 60.0
-_MARGIN_Y = 40.0
-_STAFF_W = 1080.0
-_STAFF_H = 240.0
+# Tunable scene metrics are sourced from the centralized config
+# (src/fretwise/config/defaults.yaml -> layout.scene). Values mirror the prior
+# inline literals exactly; this is a refactor, not a tuning change. Derived
+# constants (e.g. _TAB_Y, _STANDARD_STEM_TOP_Y) stay computed from these bases.
+_SCENE_CFG = _config().layout.scene
+
+_PAGE_W = _SCENE_CFG.page_width
+_PAGE_H = _SCENE_CFG.page_height
+_MARGIN_X = _SCENE_CFG.margin_x
+_MARGIN_Y = _SCENE_CFG.margin_y
+_STAFF_W = _SCENE_CFG.staff_width
+_STAFF_H = _SCENE_CFG.staff_height
 _TAB_Y = _MARGIN_Y + 60.0
-_TAB_SPACING = 10.0
+_TAB_SPACING = _SCENE_CFG.tab_spacing
 _STAFF_STD_Y = _MARGIN_Y - 8.0
-_STAFF_STD_SPACING = 8.0
-_STAFF_TAB_CLEARANCE = 40.0
+_STAFF_STD_SPACING = _SCENE_CFG.standard_staff_spacing
+_STAFF_TAB_CLEARANCE = _SCENE_CFG.standard_tab_clearance
 _STANDARD_STEM_TOP_Y = _STAFF_STD_Y - 2 * _STAFF_STD_SPACING
 _STANDARD_STEM_BOTTOM_Y = _STAFF_STD_Y + 6 * _STAFF_STD_SPACING
 _STANDARD_REST_CENTER_Y = _STAFF_STD_Y + 2.0 * _STAFF_STD_SPACING
 _STANDARD_REST_VOICE_OFFSET = 2.0 * _STAFF_STD_SPACING
 _TAB_RHYTHM_BEAM_Y = _TAB_Y + 5.0 * _TAB_SPACING + 14.0
 _TAB_RHYTHM_REST_CENTER_Y = _TAB_Y + 5.0 * _TAB_SPACING + 8.0
-_REST_GAP_BREAK = 0.115
-_TAB_SPAN_PAD = 6.0
-_BEAM_GAP = 3.0
-_FLAG_STACK_SPACING = 3.5
-_TAB_RHYTHM_BEAM_THICKNESS = 3.1
-_TAB_RHYTHM_BEAM_GAP = 3.4
-_TAB_RHYTHM_FLAG_SPACING = 4.1
-_TAB_RHYTHM_STEM_WIDTH = 0.95
-_SECONDARY_BEAM_HOOK_LEN = 8.0
-_MIN_STEM_LENGTH = 18.0
-_MAX_BEAM_SLOPE = 0.35
-_MAX_BEAM_VERTICAL_DELTA = 16.0
-_STANDARD_STEM_LENGTH_SPACES = 3.5
-_STANDARD_BEAMED_STEM_MIN_SPACES = 3.5
-_STANDARD_STEM_MAX_SPACES = 5.0
-_STANDARD_BEAMED_STEM_MAX_SPACES = 5.0
-_STANDARD_STEM_OUTER_EXTENSION_SPACES = 1.5
-_NOTEHEAD_STEM_X_OFFSET = 3.3
-_NOTEHEAD_RX = 3.9
-_NOTEHEAD_RY = 2.8
-_NOTEHEAD_ROTATION_DEG = -20.0
-_NOTEHEAD_STROKE_WIDTH = 0.8
-_REST_BLOCK_WIDTH = 8.0
-_REST_BLOCK_HEIGHT = 3.0
-_ARC_ONSET_TOLERANCE = 0.06
+_REST_GAP_BREAK = _SCENE_CFG.rest_gap_break
+_TAB_SPAN_PAD = _SCENE_CFG.tab_span_pad
+_BEAM_GAP = _SCENE_CFG.beam_gap
+_FLAG_STACK_SPACING = _SCENE_CFG.flag_stack_spacing
+_STANDARD_BEAM_THICKNESS = 2.5
+_TAB_RHYTHM_BEAM_THICKNESS = _SCENE_CFG.tab_rhythm_beam_thickness
+_TAB_RHYTHM_BEAM_GAP = _SCENE_CFG.tab_rhythm_beam_gap
+_TAB_RHYTHM_FLAG_SPACING = _SCENE_CFG.tab_rhythm_flag_spacing
+_TAB_RHYTHM_STEM_WIDTH = _SCENE_CFG.tab_rhythm_stem_width
+_SECONDARY_BEAM_HOOK_LEN = _SCENE_CFG.secondary_beam_hook_len
+_MIN_STEM_LENGTH = _SCENE_CFG.min_stem_length
+_MAX_BEAM_SLOPE = _SCENE_CFG.max_beam_slope
+_MAX_BEAM_VERTICAL_DELTA = _SCENE_CFG.max_beam_vertical_delta
+_STANDARD_STEM_LENGTH_SPACES = _SCENE_CFG.standard_stem_length_spaces
+_STANDARD_BEAMED_STEM_MIN_SPACES = _SCENE_CFG.standard_beamed_stem_min_spaces
+_STANDARD_STEM_MAX_SPACES = _SCENE_CFG.standard_stem_max_spaces
+_STANDARD_BEAMED_STEM_MAX_SPACES = _SCENE_CFG.standard_beamed_stem_max_spaces
+_STANDARD_STEM_OUTER_EXTENSION_SPACES = _SCENE_CFG.standard_stem_outer_extension_spaces
+_NOTEHEAD_STEM_X_OFFSET = _SCENE_CFG.notehead_stem_x_offset
+_NOTEHEAD_RX = _SCENE_CFG.notehead_rx
+_NOTEHEAD_RY = _SCENE_CFG.notehead_ry
+_NOTEHEAD_ROTATION_DEG = _SCENE_CFG.notehead_rotation_deg
+_NOTEHEAD_STROKE_WIDTH = _SCENE_CFG.notehead_stroke_width
+_REST_BLOCK_WIDTH = _SCENE_CFG.rest_block_width
+_REST_BLOCK_HEIGHT = _SCENE_CFG.rest_block_height
+_ARC_ONSET_TOLERANCE = _SCENE_CFG.arc_onset_tolerance
 _SLUR_TECHNIQUES = frozenset({"legato", "hammer_on", "pull_off", "slide"})
-_MODES_WITH_TAB = {"tablature", "tablature_rhythm", "standard_tablature"}
-_MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 
 # Key signature glyph layout constants (treble clef).
 # Y offsets expressed as *multiples of staff_spacing* from staff_std_y.
@@ -69,9 +101,9 @@ _MODES_WITH_STANDARD = {"standard", "standard_tablature"}
 _KEY_SIG_SHARP_Y_MULT: tuple[float, ...] = (0.0, 1.5, -0.5, 1.0, 2.5, 0.5, 2.0)
 # Flats: Bb Eb Ab Db Gb Cb Fb
 _KEY_SIG_FLAT_Y_MULT: tuple[float, ...] = (2.0, 0.5, 2.5, 1.0, 3.0, 1.5, 3.5)
-_KEY_SIG_START_X = 24.0   # offset from staff_layout.x (right of clef)
-_KEY_SIG_ACC_STEP = 6.5   # horizontal gap between consecutive accidentals
-_KEY_SIG_TIMESIG_PAD = 7.0  # extra padding between last key sig acc and time sig
+_KEY_SIG_START_X = _config().notation.key_signature.start_x  # offset from staff_layout.x
+_KEY_SIG_ACC_STEP = _config().notation.key_signature.accidental_step  # gap between accidentals
+_KEY_SIG_TIMESIG_PAD = _config().notation.key_signature.timesig_pad  # pad before time sig
 
 # Circle-of-fifths: diatonic step indices (mod 7) altered by the key signature.
 # Sharp order: F C G D A E B
@@ -113,9 +145,31 @@ def _layout_float(page_layout: PageLayout, key: str, default: float) -> float:
         return default
 
 
-def canonical_to_render_scene(score: Score, *, mode: str = "tablature") -> RenderScene:
+# Diatonic step (absolute, C0 = 0) of each clef's bottom staff line.  The
+# standard-staff note-Y math is anchored on this reference so that notes land
+# on the staff for the instrument's natural register:
+#   treble → E4 (MIDI 64), bass → G2 (MIDI 43), percussion → unused (neutral).
+_E4_DIATONIC_INDEX = _config().notation.clef_reference.treble_bottom_line_diatonic_index
+_G2_DIATONIC_INDEX = _config().notation.clef_reference.bass_bottom_line_diatonic_index
+
+
+def _score_clef(score: Score) -> str:
+    """Return the standard-staff clef for the score's first staff.
+
+    Falls back to ``"treble"`` so single-track guitar scores are unaffected.
+    """
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                return getattr(staff, "clef", "treble") or "treble"
+    return "treble"
+
+
+def canonical_to_render_scene(
+    score: Score, *, mode: str = "tablature", page_width: float | None = None
+) -> RenderScene:
     """Build a scene representation from canonical score through layout."""
-    page_layout = canonical_to_page_layout(score, mode=mode)
+    page_layout = canonical_to_page_layout(score, mode=mode, page_width=page_width)
     return layout_to_render_scene(page_layout=page_layout, score=score, mode=mode)
 
 
@@ -123,9 +177,11 @@ def layout_to_render_scene(
     *, page_layout: PageLayout, score: Score, mode: str = "tablature"
 ) -> RenderScene:
     """Build render scene from explicit page layout contract."""
-    has_tab = mode in _MODES_WITH_TAB
-    has_standard = mode in _MODES_WITH_STANDARD
+    has_tab = _has_tab_mode(mode)
+    has_standard = _has_standard_mode(mode)
     has_tab_rhythm = mode == "tablature_rhythm"
+    clef = _score_clef(score)
+    is_percussion = clef == "percussion"
     staff_spacing = _layout_float(page_layout, "standard_staff_spacing", _STAFF_STD_SPACING)
     tab_spacing = _layout_float(page_layout, "tab_staff_spacing", _TAB_SPACING)
     standard_tab_gap = _layout_float(page_layout, "standard_tab_gap", _STAFF_TAB_CLEARANCE)
@@ -150,6 +206,8 @@ def layout_to_render_scene(
                     sn = getattr(_meas, "section_name", "")
                     if sn:
                         _section_measures[_meas.number] = sn
+    # Build tempo-change lookup: {measure_number: bpm} — only measures where tempo changes.
+    _tempo_by_measure: dict[int, int] = _build_tempo_by_measure(score)
     page_systems: list[SystemScene] = []
     for system_index, system_layout in enumerate(page_layout.systems, start=1):
         staff_scenes: list[StaffScene] = []
@@ -221,17 +279,29 @@ def layout_to_render_scene(
                     )
                 )
             if has_standard:
+                # Bass clef sits a line lower than treble; percussion clef is
+                # centred.  The y reference keeps the clef visually anchored to
+                # its defining staff line.
+                if clef == "bass":
+                    clef_y = staff_std_y + 1.0 * staff_spacing
+                elif clef == "percussion":
+                    clef_y = staff_std_y + 2.0 * staff_spacing
+                else:
+                    clef_y = staff_std_y + 2.0 * staff_spacing
                 staff_layer.glyph_instances.append(
                     GlyphInstance(
                         glyph_id="clef",
                         x=staff_layout.x + 8.0,
-                        y=staff_std_y + 2.0 * staff_spacing,
+                        y=clef_y,
                         size=31.0,
-                        metadata={"clef": "treble"},
+                        # staff_spacing lets the SVG backend draw a font-free
+                        # percussion (neutral two-bar) clef sized to the staff.
+                        metadata={"clef": clef, "staff_spacing": staff_spacing},
                     )
                 )
                 # Key signature glyphs (sharps or flats) — shown on every system.
-                if key_sig_count > 0:
+                # Percussion staves carry no key signature.
+                if key_sig_count > 0 and not is_percussion:
                     ks_glyph = "key_sig_sharp" if key_fifths > 0 else "key_sig_flat"
                     ks_y_mults = _KEY_SIG_SHARP_Y_MULT if key_fifths > 0 else _KEY_SIG_FLAT_Y_MULT
                     for i in range(key_sig_count):
@@ -244,17 +314,7 @@ def layout_to_render_scene(
                                 metadata={"index": str(i), "fifths": str(key_fifths)},
                             )
                         )
-            if system_index == 1 and staff_index == 1 and score.tempo_marks:
-                bpm = int(round(score.tempo_marks[0].bpm))
-                staff_layer.text_instances.append(
-                    TextInstance(
-                        text=f"♩ = {bpm}",
-                        x=staff_layout.x + 2.0,
-                        y=staff_layout.y - 16.0,
-                        font_size=9.0,
-                        metadata={"kind": "tempo"},
-                    )
-                )
+            # Tempo marks are rendered per-measure inside the measure loop below.
 
             if has_standard:
                 staff_layer.recipe_instances.append(
@@ -287,7 +347,7 @@ def layout_to_render_scene(
                     staff_x=staff_layout.x,
                     tab_y=tab_y,
                     tab_spacing=tab_spacing,
-                    open_pitches=_extract_open_pitches(score) if has_tab_rhythm else None,
+                    open_pitches=None,
                 )
             _append_measure_barlines(
                 staff_layer,
@@ -327,6 +387,7 @@ def layout_to_render_scene(
                     measure_layout.event_layouts,
                     staff_std_y=staff_std_y,
                     staff_spacing=staff_spacing,
+                    clef=clef,
                 )
                 standard_visible_event_ids = _standard_visible_event_ids(
                     measure_layout.event_layouts
@@ -338,6 +399,7 @@ def layout_to_render_scene(
                     staff_spacing=staff_spacing,
                     notehead_rx=notehead_rx,
                     visible_event_ids=standard_visible_event_ids,
+                    clef=clef,
                 )
                 measure_number_x = measure_layout.x + (18.0 if measure_index == 0 else 2.0)
                 measure_number_y = staff_std_y - 6.0 if has_standard else tab_y - 6.0
@@ -388,6 +450,23 @@ def layout_to_render_scene(
                                 },
                             )
                         )
+                # Tempo mark at this measure (if the tempo changes here).
+                _measure_bpm = _tempo_by_measure.get(measure_layout.measure_number)
+                if _measure_bpm is not None:
+                    # Anchor the tempo mark just above the measure number so it
+                    # stays in the correct inter-system gap regardless of mode.
+                    _tempo_y = measure_number_y - 14.0
+                    _tempo_x = measure_layout.x + (18.0 if measure_index == 0 else 2.0)
+                    notes_layer.text_instances.append(
+                        TextInstance(
+                            text=f"♩ = {_measure_bpm}",
+                            x=_tempo_x,
+                            y=_tempo_y,
+                            font_family="Helvetica-Bold",
+                            font_size=10.0,
+                            metadata={"kind": "tempo"},
+                        )
+                    )
                 for event_layout in measure_layout.event_layouts:
                     event_type = event_layout.metadata.get("event_type")
                     if event_type != "RestEvent":
@@ -395,7 +474,12 @@ def layout_to_render_scene(
                         _tn = _safe_int(event_layout.metadata.get("tuplet_normal"))
                         if _ta and _tn and _ta != _tn:
                             tuplet_by_onset[round(event_layout.onset, 6)] = (_ta, _tn)
-                    if has_tab and event_type != "RestEvent":
+                    # Harmonic *resultant* overtones are a standard-staff-only
+                    # diamond notehead; they have no string/fret and must not
+                    # produce a tab digit (but must still reach the standard plane
+                    # below, so this only gates the tab block — never ``continue``).
+                    tab_hidden = event_layout.metadata.get("tab_hidden") == "true"
+                    if has_tab and event_type != "RestEvent" and not tab_hidden:
                         techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                         if "muted" in techniques:
                             text = "X"
@@ -408,10 +492,14 @@ def layout_to_render_scene(
                             tab_y=tab_y,
                             tab_spacing=tab_spacing,
                         )
+                        tab_note_x = min(
+                            event_layout.x,
+                            measure_layout.x + measure_layout.width - 4.0,
+                        )
                         notes_layer.text_instances.append(
                             TextInstance(
                                 text=str(text),
-                                x=event_layout.x,
+                                x=tab_note_x,
                                 y=tab_note_y,
                                 font_family="Times-Roman",
                                 font_size=8.5,
@@ -490,22 +578,29 @@ def layout_to_render_scene(
                                 event_layout.metadata,
                                 staff_std_y=staff_std_y,
                                 staff_spacing=staff_spacing,
+                                clef=clef,
                             )
                             techniques = _parse_techniques(event_layout.metadata.get("techniques"))
                             pitch = _safe_int(event_layout.metadata.get("pitch_notated")) or 64
-                            diatonic_step = _diatonic_step_index_for_metadata(
+                            diatonic_step = _diatonic_step_from_metadata(
                                 event_layout.metadata,
                                 fallback_pitch=pitch,
                             )
                             onset_key = round(event_layout.onset, 6)
+                            tuplet = tuplet_by_onset.get(onset_key)
                             display_duration = rhythm_duration_by_onset_voice.get(
                                 (onset_key, voice_number),
                                 event_layout.duration,
                             )
-                            note_x = event_layout.x + notehead_offset_by_event_id.get(
-                                event_layout.event_id,
-                                0.0,
+                            notated_display_duration = _notated_duration(
+                                display_duration,
+                                tuplet[0] if tuplet else None,
+                                tuplet[1] if tuplet else None,
                             )
+                            chord_offset = notehead_offset_by_event_id.get(
+                                event_layout.event_id, 0.0
+                            )
+                            note_x = event_layout.x + chord_offset
                             stem_direction = stem_direction_by_onset_voice.get(
                                 (onset_key, voice_number),
                                 _stem_direction_for_note(
@@ -570,9 +665,19 @@ def layout_to_render_scene(
                                     )
                                 )
                                 shown_accidentals_by_step[diatonic_step] = accidental
-                            if "muted" in techniques:
+                            is_dyad_fundamental = (
+                                event_layout.metadata.get("harmonic_dyad_fundamental") == "true"
+                            )
+                            if is_percussion and _is_x_notehead_drum(pitch):
+                                # Hi-hats, cymbals and the ride use an 'x'-shaped
+                                # notehead.  The muted glyph already renders as an X.
                                 notehead_glyph = "notehead_muted"
-                            elif "harmonic" in techniques:
+                            elif "muted" in techniques:
+                                notehead_glyph = "notehead_muted"
+                            elif "harmonic" in techniques and not is_dyad_fundamental:
+                                # The diamond belongs to the resultant overtone; the
+                                # fretted fundamental of a harmonic dyad keeps a normal
+                                # notehead (matching Guitar Pro / MuseScore).
                                 notehead_glyph = "notehead_harmonic"
                             else:
                                 notehead_glyph = "notehead"
@@ -586,10 +691,15 @@ def layout_to_render_scene(
                                         "event_id": event_layout.event_id,
                                         "onset": event_layout.onset,
                                         "duration": display_duration,
+                                        "notated_duration": notated_display_duration,
                                         "pitch_notated": pitch,
-                                        "filled": _is_filled_notehead(display_duration),
-                                        "duration_class": _duration_class(display_duration),
-                                        "dot_count": _dot_count(display_duration),
+                                        "filled": _is_filled_notehead(
+                                            notated_display_duration
+                                        ),
+                                        "duration_class": _duration_class(
+                                            notated_display_duration
+                                        ),
+                                        "dot_count": _dot_count(notated_display_duration),
                                         "on_staff_line": "true"
                                         if diatonic_step % 2 == 0
                                         else "false",
@@ -599,9 +709,9 @@ def layout_to_render_scene(
                                         "rotation": notehead_rotation,
                                         "stroke_width": notehead_stroke_width,
                                         "head_displaced": "true"
-                                        if abs(note_x - event_layout.x) > 0.1
+                                        if abs(chord_offset) > 0.1
                                         else "false",
-                                        "head_dx": note_x - event_layout.x,
+                                        "head_dx": chord_offset,
                                     },
                                 )
                             )
@@ -636,7 +746,7 @@ def layout_to_render_scene(
                                 (
                                     note_x,
                                     event_layout.onset,
-                                    event_layout.duration,
+                                    display_duration,
                                     note_y,
                                     stem_direction,
                                 )
@@ -804,7 +914,11 @@ def _append_note_text(
 
 
 def _standard_note_y(
-    metadata: dict[str, str], *, staff_std_y: float, staff_spacing: float
+    metadata: dict[str, str],
+    *,
+    staff_std_y: float,
+    staff_spacing: float,
+    clef: str = "treble",
 ) -> float:
     pitch_raw = metadata.get("pitch_notated", "64")
     try:
@@ -812,59 +926,29 @@ def _standard_note_y(
     except ValueError:
         pitch = 64
 
-    # Treble staff reference:
-    # bottom line = E4 (MIDI 64), each staff step = half line spacing.
-    diatonic_delta = _diatonic_step_index_for_metadata(
-        metadata,
-        fallback_pitch=pitch,
-    ) - _diatonic_step_index_for_step_octave("E", 4)
-    return staff_std_y + 4 * staff_spacing - diatonic_delta * (staff_spacing / 2.0)
+    if clef == "percussion":
+        return _notation_percussion_note_y(
+            pitch,
+            staff_y_origin=staff_std_y,
+            staff_spacing=staff_spacing,
+        )
 
-
-def _diatonic_step_index_for_metadata(metadata: dict[str, str], *, fallback_pitch: int) -> int:
-    step_raw = str(metadata.get("pitch_step", "")).strip().upper()
+    step_raw = str(metadata.get("pitch_step", "")).strip().upper() or None
     octave_raw = str(metadata.get("pitch_octave", "")).strip()
-    if step_raw in {"A", "B", "C", "D", "E", "F", "G"}:
-        try:
-            octave = int(octave_raw)
-            return _diatonic_step_index_for_step_octave(step_raw, octave)
-        except ValueError:
-            pass
-    return _diatonic_step_index_for_pitch(fallback_pitch)
+    octave: int | None
+    try:
+        octave = int(octave_raw) if octave_raw else None
+    except ValueError:
+        octave = None
 
-
-def _diatonic_step_index_for_step_octave(step: str, octave: int) -> int:
-    letter_step = {
-        "C": 0,
-        "D": 1,
-        "E": 2,
-        "F": 3,
-        "G": 4,
-        "A": 5,
-        "B": 6,
-    }[step]
-    return octave * 7 + letter_step
-
-
-def _diatonic_step_index_for_pitch(pitch: int) -> int:
-    pitch_class = pitch % 12
-    octave = pitch // 12 - 1
-    # C D E F G A B
-    letter_step = {
-        0: 0,   # C
-        1: 0,   # C#
-        2: 1,   # D
-        3: 1,   # Eb
-        4: 2,   # E
-        5: 3,   # F
-        6: 3,   # F#
-        7: 4,   # G
-        8: 4,   # Ab
-        9: 5,   # A
-        10: 5,  # Bb
-        11: 6,  # B
-    }[pitch_class]
-    return octave * 7 + letter_step
+    return _notation_standard_note_y(
+        pitch,
+        staff_y_origin=staff_std_y,
+        staff_spacing=staff_spacing,
+        step=step_raw,
+        octave=octave,
+        clef=clef,
+    )
 
 
 def _append_ledger_lines(
@@ -1042,6 +1126,39 @@ def _tab_note_y_from_metadata(
     return tab_y + (string_num - 1) * tab_spacing
 
 
+def _build_tempo_by_measure(score: Score) -> dict[int, int]:
+    """Return {measure_number: bpm} for every measure where tempo changes.
+
+    Uses the canonical measure list to determine each measure's start onset
+    (from the first event in the measure), then bisects the sorted tempo_marks
+    list to find the active BPM.  Only measures where the BPM differs from
+    the previous measure are included, so the renderer can skip unchanged bars.
+    """
+    if not score.tempo_marks:
+        return {}
+    tm_onsets = [tm.onset for tm in score.tempo_marks]
+    tm_bpms = [tm.bpm for tm in score.tempo_marks]
+    result: dict[int, int] = {}
+    prev_bpm: float | None = None
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                for measure in staff.measures:
+                    # Find the earliest event onset in this measure.
+                    all_events = [e for v in measure.voices for e in v.events]
+                    if not all_events:
+                        continue
+                    measure_onset = min(e.onset for e in all_events)
+                    idx = bisect.bisect_right(tm_onsets, measure_onset) - 1
+                    idx = max(0, idx)
+                    bpm = tm_bpms[idx]
+                    if prev_bpm is None or abs(bpm - prev_bpm) > 0.5:
+                        result[measure.number] = int(round(bpm))
+                        prev_bpm = bpm
+                return result  # Only process first track/staff
+    return result
+
+
 def _score_time_signature(score: Score) -> tuple[int, int]:
     for track in score.tracks:
         for staff_group in track.staff_groups:
@@ -1194,120 +1311,86 @@ def _append_measure_barlines(
         )
 
 
-def _is_filled_notehead(duration: float) -> bool:
-    return _base_duration(duration) <= 1.0
-
-
-_KNOWN_BASE_DURATIONS = (8.0, 4.0, 2.0, 1.0, 0.5, 0.25, 0.125, 0.0625)
-
-
-def _duration_components(duration: float) -> tuple[float, int]:
-    tol = 0.01
-    for base in _KNOWN_BASE_DURATIONS:
-        if abs(duration - base) <= tol:
-            return base, 0
-        if abs(duration - base * 1.5) <= tol:
-            return base, 1
-        if abs(duration - base * 1.75) <= tol:
-            return base, 2
-    return duration, 0
-
-
-def _notated_duration(
-    actual: float,
-    tuplet_actual: int | None,
-    tuplet_normal: int | None,
-) -> float:
-    """Return the notated/display duration for flag-count and beam-level computation.
-
-    For a triplet 8th (actual≈0.333, tuplet_actual=3, tuplet_normal=2):
-    returns 0.333 × (3/2) = 0.5 (the display 8th-note base).
-    """
-    if tuplet_actual and tuplet_normal and tuplet_normal > 0:
-        return actual * tuplet_actual / tuplet_normal
-    return actual
-
-
 def _tuplet_bracket_runs(
     group: list[tuple[float, float, float]],
     tuplet_by_onset: dict[float, tuple[int, int]],
 ) -> list[tuple[float, float, int]]:
-    """Find contiguous runs of same-tuplet notes within a beam group.
+    """Find complete same-ratio tuplet windows within a rhythm group.
 
-    Returns a list of (x0, x1, tuplet_number) for each run of ≥2 consecutive
-    notes sharing the same non-trivial tuplet ratio.  This handles the common
-    case where a beam group mixes tuplet notes and regular notes (e.g. 3 triplet
-    16ths followed by a regular 8th in the same beat).
+    A bracket is emitted only when the real duration covered by the run matches
+    the tuplet time span from the source rhythm.  For example, a triplet made of
+    ``1/3 + 1/6 + 1/3 + 1/6`` beats has notated values
+    ``1/2 + 1/4 + 1/2 + 1/4``; the largest notated unit is an eighth, so the
+    3:2 bracket must cover ``2 * 1/2 == 1`` real beat.
     """
     results: list[tuple[float, float, int]] = []
-    run_start: int | None = None
+    run: list[tuple[float, float, float]] = []
     run_tup: tuple[int, int] | None = None
+    prev_end: float | None = None
 
-    def _flush(end_idx: int) -> None:
-        nonlocal run_start, run_tup
-        if run_start is not None and end_idx - run_start >= 2:
-            results.append((group[run_start][0], group[end_idx - 1][0], run_tup[0]))  # type: ignore[index]
-        run_start = None
+    def _flush() -> None:
+        nonlocal run, run_tup, prev_end
+        _append_complete_tuplet_windows(results, run, run_tup)
+        run = []
         run_tup = None
+        prev_end = None
 
-    for idx, (x, onset, _dur) in enumerate(group):
+    for x, onset, duration in group:
         tup = tuplet_by_onset.get(round(onset, 6))
-        if tup is not None:
-            if tup == run_tup:
-                pass  # extend current run
-            else:
-                _flush(idx)
-                run_start = idx
-                run_tup = tup
-        else:
-            _flush(idx)
+        has_gap = prev_end is not None and onset - prev_end >= _REST_GAP_BREAK
+        if tup is None:
+            _flush()
+            continue
+        if has_gap:
+            _flush()
+        if run_tup is not None and tup != run_tup:
+            _flush()
+        run_tup = tup
+        run.append((x, onset, duration))
+        prev_end = onset + duration
 
-    _flush(len(group))
+    _flush()
     return results
 
 
-def _dot_count(duration: float) -> int:
-    return _duration_components(duration)[1]
+def _append_complete_tuplet_windows(
+    results: list[tuple[float, float, int]],
+    run: list[tuple[float, float, float]],
+    run_tup: tuple[int, int] | None,
+) -> None:
+    if run_tup is None or len(run) < 2:
+        return
+    actual, normal = run_tup
+    if actual <= 0 or normal <= 0:
+        return
+
+    group: list[tuple[float, float, float]] = []
+    notated_total = 0.0
+    for item in run:
+        x, onset, duration = item
+        if not group:
+            notated_total = 0.0
+        group.append(item)
+        notated_total += _notated_duration(duration, actual, normal)
+        unit = _complete_tuplet_base_unit(notated_total, actual)
+        if unit is not None:
+            expected_span = normal * unit
+            span = onset + duration - group[0][1]
+            if len(group) >= 2 and abs(span - expected_span) <= max(
+                1e-4, expected_span * 1e-4
+            ):
+                results.append((group[0][0], x, actual))
+            group = []
+            notated_total = 0.0
 
 
-def _duration_class(duration: float) -> str:
-    base = _duration_components(duration)[0]
-    if base >= 4.0:
-        return "whole"
-    if base >= 2.0:
-        return "half"
-    if base >= 1.0:
-        return "quarter"
-    if base >= 0.5:
-        return "eighth"
-    if base >= 0.25:
-        return "sixteenth"
-    if base >= 0.125:
-        return "thirty_second"
-    return "sixty_fourth"
-
-
-def _rest_kind(duration: float, *, is_measure_rest: bool = False) -> str:
-    if is_measure_rest:
-        return "whole"
-    return _duration_class(duration)
-
-
-def _is_measure_rest_event(
-    onset: float,
-    duration: float,
-    *,
-    measure_number: int,
-    beats_per_measure: int,
-) -> bool:
-    tolerance = 1e-6
-    measure_start = (measure_number - 1) * beats_per_measure
-    onset_in_measure = onset - measure_start
-    return abs(onset_in_measure) <= tolerance and abs(duration - beats_per_measure) <= 0.01
-
-
-def _boolish(value: object) -> bool:
-    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+def _complete_tuplet_base_unit(notated_total: float, actual: int) -> float | None:
+    """Return the notated base unit when a tuplet window is complete."""
+    unit = notated_total / actual
+    for candidate in (0.125, 0.25, 0.5, 1.0, 2.0, 4.0):
+        if abs(unit - candidate) <= 1e-4:
+            return candidate
+    return None
 
 
 def _rhythm_duration_by_onset_voice(events: list[object]) -> dict[tuple[float, int], float]:
@@ -1332,6 +1415,7 @@ def _stem_direction_by_onset_voice(
     *,
     staff_std_y: float,
     staff_spacing: float,
+    clef: str = "treble",
 ) -> dict[tuple[float, int], str]:
     grouped_note_ys: dict[tuple[float, int], list[float]] = {}
     # Track which voices are active at each specific onset, not globally.
@@ -1351,6 +1435,7 @@ def _stem_direction_by_onset_voice(
             getattr(event, "metadata", {}),
             staff_std_y=staff_std_y,
             staff_spacing=staff_spacing,
+            clef=clef,
         )
         grouped_note_ys.setdefault((onset, voice_number), []).append(note_y)
 
@@ -1377,6 +1462,7 @@ def _standard_notehead_offsets_by_event_id(
     staff_spacing: float,
     notehead_rx: float,
     visible_event_ids: set[str] | None = None,
+    clef: str = "treble",
 ) -> dict[str, float]:
     by_key: dict[tuple[float, int], list[tuple[str, float]]] = {}
     # Keep packed chord clusters readable by alternating displaced heads when
@@ -1399,6 +1485,7 @@ def _standard_notehead_offsets_by_event_id(
             metadata,
             staff_std_y=staff_std_y,
             staff_spacing=staff_spacing,
+            clef=clef,
         )
         by_key.setdefault((onset, voice_number), []).append((event_id, note_y))
 
@@ -1570,20 +1657,25 @@ def _append_standard_rhythm(
         else:
             extents_by_key[key] = (note_y, note_y)
     collapsed_events = _collapse_standard_rhythm_events(events)
-    up_note_ys = [
-        note_y
-        for _x, _onset, _duration, note_y, direction in collapsed_events
+    up_outer_note_ys = [
+        min_y
+        for (_onset, direction), (min_y, _max_y) in extents_by_key.items()
         if direction == "up"
     ]
-    down_note_ys = [
-        note_y
-        for _x, _onset, _duration, note_y, direction in collapsed_events
+    down_outer_note_ys = [
+        max_y
+        for (_onset, direction), (_min_y, max_y) in extents_by_key.items()
         if direction == "down"
     ]
-    anchor_up_target = min((y - 22.0 for y in up_note_ys), default=stem_top_y)
-    anchor_down_target = max((y + 22.0 for y in down_note_ys), default=stem_bottom_y)
-    anchor_up = min(stem_top_y, max(anchor_up_target, stem_top_y))
-    anchor_down = max(stem_bottom_y, min(anchor_down_target, stem_bottom_y))
+    beam_note_clearance = max(staff_spacing, outer_note_extension)
+    beam_bar_clearance = beam_note_clearance + _STANDARD_BEAM_THICKNESS
+    anchor_up_target = min((y - beam_bar_clearance for y in up_outer_note_ys), default=stem_top_y)
+    anchor_down_target = max(
+        (y + beam_bar_clearance for y in down_outer_note_ys),
+        default=stem_bottom_y,
+    )
+    anchor_up = min(stem_top_y, anchor_up_target)
+    anchor_down = max(stem_bottom_y, anchor_down_target)
     for x, onset, duration, note_y, stem_direction in sorted(
         collapsed_events, key=lambda item: (item[1], item[0])
     ):
@@ -1675,6 +1767,13 @@ def _append_standard_rhythm(
                 "note_y": note_y,
                 "y0": stem_y0,
                 "y1": stem_y1,
+                "min_y": min_y,
+                "max_y": max_y,
+                "beam_clear_y": (
+                    max_y + beam_bar_clearance
+                    if stem_direction == "down"
+                    else min_y - beam_bar_clearance
+                ),
                 "flag_count": _flag_count(_ndur) if base_dur < 1.0 else 0,
             }
         )
@@ -1722,7 +1821,7 @@ def _append_standard_rhythm(
                 max_stem_length=beamed_max_stem_length,
             )
             for resolved_group_stems, resolved_entries in resolved_groups:
-                _draw_single_beam_group(
+                _beam_line = _draw_single_beam_group(
                     layer,
                     group=resolved_group_stems,
                     group_entries=resolved_entries,
@@ -1735,8 +1834,17 @@ def _append_standard_rhythm(
                     beamed_keys=beamed_keys,
                 )
                 if tuplet_by_onset:
+                    if _beam_line is not None:
+                        _line_y0, _line_y1 = _beam_line
+                        _beam_edge_y = min(_line_y0, _line_y1) if direction == "up" else max(
+                            _line_y0, _line_y1
+                        )
+                    else:
+                        _beam_edge_y = anchor_up if direction == "up" else anchor_down
                     _bracket_y = (
-                        anchor_up - 6.0 if direction == "up" else anchor_down + 8.0
+                        max(_beam_edge_y - 7.0, stem_top_y - 0.8 * staff_spacing)
+                        if direction == "up"
+                        else _beam_edge_y + 8.0
                     )
                     for _bx0, _bx1, _bta in _tuplet_bracket_runs(
                         resolved_group_stems, tuplet_by_onset
@@ -1755,6 +1863,44 @@ def _append_standard_rhythm(
                                 metadata={"direction": direction, "style": "standard"},
                             )
                         )
+
+    if tuplet_by_onset:
+        for direction in ("up", "down"):
+            standalone_entries = [
+                entry
+                for entry in stem_entries
+                if str(entry["direction"]) == direction
+                and (round(float(entry["onset"]), 6), direction) not in beamed_keys
+                and tuplet_by_onset.get(round(float(entry["onset"]), 6)) is not None
+            ]
+            if len(standalone_entries) < 2:
+                continue
+            standalone_stems = [
+                (float(entry["x"]), float(entry["onset"]), float(entry["duration"]))
+                for entry in sorted(standalone_entries, key=lambda item: float(item["onset"]))
+            ]
+            if direction == "up":
+                bracket_y = max(
+                    min(float(entry["y1"]) for entry in standalone_entries) - 7.0,
+                    stem_top_y - 0.8 * staff_spacing,
+                )
+            else:
+                bracket_y = max(float(entry["y1"]) for entry in standalone_entries) + 8.0
+            for x0, x1, number in _tuplet_bracket_runs(standalone_stems, tuplet_by_onset):
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="tuplet_bracket",
+                        params={
+                            "x0": x0,
+                            "x1": x1,
+                            "y": bracket_y,
+                            "number": number,
+                            "direction": direction,
+                            "style": "standard",
+                        },
+                        metadata={"direction": direction, "style": "standard"},
+                    )
+                )
 
     for entry in stem_entries:
         onset = float(entry["onset"])
@@ -2042,7 +2188,9 @@ def _resolve_beam_crossing(
     for i, entry in enumerate(group_entries):
         entry_x = float(entry["x"])
         beam_y = _beam_y_at_x(entry_x, x0=group_x0, x1=group_x1, y0=line_y0, y1=line_y1)
-        chord_tip_y = float(entry["y1"])  # pre-computed chord-aware stem tip
+        chord_tip_y = float(
+            entry.get("beam_clear_y", entry["y1"])
+        )  # chord-aware beam clearance line
         is_interior = 0 < i < (len(group_entries) - 1)
         if direction == "down" and beam_y < chord_tip_y - 1.0 and is_interior:
             split_idx = i
@@ -2094,10 +2242,10 @@ def _draw_single_beam_group(
     max_stem_length: float,
     flag_by_onset: dict[float, int],
     beamed_keys: set[tuple[float, str]],
-) -> None:
+) -> tuple[float, float] | None:
     """Compute the final beam line for a group and emit beam + stem updates."""
     if len(group_entries) < 2:
-        return
+        return None
     line_y0, line_y1 = _beam_line_for_group(
         group_entries,
         direction=direction,
@@ -2133,7 +2281,7 @@ def _draw_single_beam_group(
                 "y0": line_y0,
                 "y1": line_y1,
                 "level": 1,
-                "thickness": 2.5,
+                "thickness": _STANDARD_BEAM_THICKNESS,
                 "gap": _BEAM_GAP,
                 "direction": direction,
             },
@@ -2151,12 +2299,13 @@ def _draw_single_beam_group(
                     "y0": seg_y0,
                     "y1": seg_y1,
                     "level": level,
-                    "thickness": 2.5,
+                    "thickness": _STANDARD_BEAM_THICKNESS,
                     "gap": _BEAM_GAP,
                     "direction": direction,
                 },
             )
         )
+    return (line_y0, line_y1)
 
 
 def _beam_anchor_y(
@@ -2214,13 +2363,17 @@ def _beam_line_for_group(
             # Beam must clear the ENTIRE chord extent (entry["y1"]), not just
             # stem_y0 + min_stem_length; the chord's lowest note may be much
             # further below the topmost notehead.
-            required_y = max(note_side_y + min_stem_length, stem_extent_y)
+            beam_clear_y = float(entry.get("beam_clear_y", stem_extent_y))
+            required_y = max(note_side_y + min_stem_length, stem_extent_y, beam_clear_y)
             low_shift = max(low_shift, required_y - beam_y)
-            high_shift = min(high_shift, note_side_y + max_stem_length - beam_y)
+            far_limit_y = max(note_side_y + max_stem_length, stem_extent_y, beam_clear_y)
+            high_shift = min(high_shift, far_limit_y - beam_y)
         else:
             # Symmetric for up-stems: beam must be above the topmost chord note.
-            required_y = min(note_side_y - min_stem_length, stem_extent_y)
-            low_shift = max(low_shift, note_side_y - max_stem_length - beam_y)
+            beam_clear_y = float(entry.get("beam_clear_y", stem_extent_y))
+            required_y = min(note_side_y - min_stem_length, stem_extent_y, beam_clear_y)
+            far_limit_y = min(note_side_y - max_stem_length, stem_extent_y, beam_clear_y)
+            low_shift = max(low_shift, far_limit_y - beam_y)
             high_shift = min(high_shift, required_y - beam_y)
 
     if low_shift <= high_shift:
@@ -2252,16 +2405,6 @@ def _beam_y_at_x(
         return y0
     t = (x - x0) / (x1 - x0)
     return y0 + (y1 - y0) * t
-
-
-def _stem_x_for_notehead(x: float, *, direction: str, stem_offset: float) -> float:
-    if direction == "down":
-        return x - stem_offset
-    return x + stem_offset
-
-
-def _stem_direction(voice_number: int) -> str:
-    return "down" if voice_number >= 1 else "up"
 
 
 def _stem_direction_for_note(
@@ -2487,57 +2630,161 @@ def _beam_groups(
     measure_number: int,
     time_denominator: int = 4,
 ) -> list[list[tuple[float, float, float]]]:
+    """Group consecutive short stems into meter-aware beam groups.
+
+    The fundamental beam break is the quarter-note beat (and any rest gap).
+    In simple duple/quadruple meters (e.g. 4/4, 2/4, 2/2) a run made up
+    entirely of eighth notes sitting on the eighth-note grid is then beamed
+    by the half-note unit (4 eighths per group in 4/4), matching MuseScore's
+    default.  Runs that contain a sixteenth (or shorter), a tuplet/off-grid
+    onset, or a rest gap keep the per-beat break so secondary beams stay
+    readable.
+
+    Args:
+        stems: ``(x, onset, duration)`` tuples sorted by onset (durations in
+            quarter-note beats).
+        beats_per_measure: Time-signature numerator (quarter-beat count).
+        measure_number: 1-based measure index (sets the absolute beat origin).
+        time_denominator: Time-signature denominator (4 for x/4 meters).
+
+    Returns:
+        Beam groups; each is a list of ``(x, onset, duration)`` with ≥ 2 stems.
+    """
     if len(stems) < 2:
         return []
 
-    # One beam group per quarter-note beat.  This is the simplest
-    # universal rule and matches the user's "group per beat" expectation
-    # for all meters: 6/8 → 3 groups, 4/4 → 4 groups, 3/4 → 3 groups.
     q_beats = beats_per_measure  # already in quarter-note beat units
-    beat_group_q = 1.0  # one q-beat per group
-    num_groups = q_beats
-
     measure_onset = max(0.0, (measure_number - 1) * q_beats)
-    beat_boundaries = frozenset(
-        round(measure_onset + k * beat_group_q, 9)
-        for k in range(1, num_groups)
-    )
 
+    # First split on the quarter-note beat and on rest gaps, keeping singleton
+    # groups so the half-bar merge below can reason about adjacency.
+    quarter_groups, gap_before = _quarter_beam_groups(
+        stems, measure_onset=measure_onset, beats_per_measure=beats_per_measure
+    )
+    merged = _merge_eighth_beam_groups(
+        quarter_groups,
+        gap_before=gap_before,
+        measure_onset=measure_onset,
+        beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
+    )
+    return [group for group in merged if len(group) >= 2]
+
+
+def _quarter_beam_groups(
+    stems: list[tuple[float, float, float]],
+    *,
+    measure_onset: float,
+    beats_per_measure: int,
+) -> tuple[list[list[tuple[float, float, float]]], list[bool]]:
+    """Split stems at every quarter-beat boundary and rest gap.
+
+    Returns the per-quarter groups (singletons retained) plus a parallel list
+    of flags marking whether each group is preceded by a rest gap (which must
+    block any later half-bar merge).
+    """
+    beat_boundaries = frozenset(
+        round(measure_onset + k, 9) for k in range(1, beats_per_measure)
+    )
     groups: list[list[tuple[float, float, float]]] = []
+    gap_before: list[bool] = []
     current: list[tuple[float, float, float]] = []
     for x, onset, duration in stems:
         if not current:
             current.append((x, onset, duration))
+            gap_before.append(False)
             continue
         _prev_x, prev_onset, prev_duration = current[-1]
         prev_end = prev_onset + prev_duration
         has_rest_gap = (onset - prev_end) >= _REST_GAP_BREAK
         crosses_beat = any(prev_onset < bb <= onset for bb in beat_boundaries)
         if has_rest_gap or crosses_beat:
-            if len(current) >= 2:
-                groups.append(current)
+            groups.append(current)
             current = [(x, onset, duration)]
+            gap_before.append(has_rest_gap)
             continue
         current.append((x, onset, duration))
-
-    if len(current) >= 2:
+    if current:
         groups.append(current)
-    return groups
+    return groups, gap_before
 
 
-def _base_duration(duration: float) -> float:
-    return _duration_components(duration)[0]
+# Beam-unit (in quarter-note beats) for an all-eighth run in simple meters.
+# 4/4 and 2/2-style meters beam eighths by the half note (2 beats); other
+# simple meters keep the per-beat unit so the half-bar merge is a no-op.
+def _eighth_beam_unit(beats_per_measure: int, time_denominator: int) -> float:
+    """Return the quarter-beat span of one eighth-note beam group.
+
+    A value of 1.0 disables the half-bar merge (per-beat grouping); 2.0 beams
+    eighths by the half note as in 4/4.
+    """
+    if time_denominator == 4 and beats_per_measure % 2 == 0 and beats_per_measure >= 4:
+        # Simple quadruple (4/4, 8/4, …): half-note beam unit for eighths.
+        return 2.0
+    if time_denominator == 2:
+        # Cut-time family (2/2, 4/2): the notated beat already spans 2 quarters.
+        return 2.0
+    return 1.0
 
 
-def _flag_count(duration: float) -> int:
-    base = _base_duration(duration)
-    if base >= 1.0:
-        return 0
-    if base >= 0.5:
-        return 1
-    if base >= 0.25:
-        return 2
-    return 3
+def _group_is_pure_eighth_on_grid(
+    group: list[tuple[float, float, float]], *, measure_onset: float
+) -> bool:
+    """True if every note is an eighth (1 flag) sitting on the eighth grid.
+
+    Sixteenths (2 flags) force a per-beat break; tuplet / off-beat onsets do
+    not land on the 0.5-beat grid and must not be merged across beats.
+    """
+    for _x, onset, duration in group:
+        if _flag_count(duration) != 1:
+            return False
+        rel = onset - measure_onset
+        if abs(round(rel / 0.5) * 0.5 - rel) > 1e-6:
+            return False
+    return True
+
+
+def _merge_eighth_beam_groups(
+    quarter_groups: list[list[tuple[float, float, float]]],
+    *,
+    gap_before: list[bool],
+    measure_onset: float,
+    beats_per_measure: int,
+    time_denominator: int,
+) -> list[list[tuple[float, float, float]]]:
+    """Merge adjacent per-beat groups into half-bar eighth-note beam groups.
+
+    Two consecutive quarter groups merge when they share the same eighth-beam
+    unit window, are contiguous (no rest gap between them), and both contain
+    only on-grid eighth notes.  This reproduces MuseScore's grouping of four
+    eighths per half note in 4/4 while leaving sixteenth/tuplet runs per beat.
+    """
+    unit = _eighth_beam_unit(beats_per_measure, time_denominator)
+    if unit <= 1.0:
+        return quarter_groups
+
+    merged: list[list[tuple[float, float, float]]] = []
+    for idx, group in enumerate(quarter_groups):
+        if not merged:
+            merged.append(list(group))
+            continue
+        prev = merged[-1]
+        same_unit = (
+            int((group[0][1] - measure_onset) // unit)
+            == int((prev[0][1] - measure_onset) // unit)
+        )
+        contiguous = not gap_before[idx]
+        if (
+            same_unit
+            and contiguous
+            and _group_is_pure_eighth_on_grid(prev, measure_onset=measure_onset)
+            and _group_is_pure_eighth_on_grid(group, measure_onset=measure_onset)
+        ):
+            prev.extend(group)
+        else:
+            merged.append(list(group))
+    return merged
+
 
 
 def _secondary_beam_segments(
@@ -2545,7 +2792,10 @@ def _secondary_beam_segments(
     *,
     flag_by_onset: dict[float, int],
 ) -> list[tuple[int, float, float]]:
-    max_level = max((flag_by_onset.get(onset, 0) for _x, onset, _dur in group), default=0)
+    max_level = max(
+        (_flag_count_for_onset(flag_by_onset, onset) for _x, onset, _dur in group),
+        default=0,
+    )
     if max_level < 2:
         return []
 
@@ -2554,7 +2804,7 @@ def _secondary_beam_segments(
         qualifying: list[int] = [
             idx
             for idx, (_x, onset, _dur) in enumerate(group)
-            if flag_by_onset.get(onset, 0) >= level
+            if _flag_count_for_onset(flag_by_onset, onset) >= level
         ]
         if not qualifying:
             continue
@@ -2565,35 +2815,38 @@ def _secondary_beam_segments(
                 if len(run) >= 2:
                     segments.append((level, group[run[0]][0], group[run[-1]][0]))
                 elif len(run) == 1:
-                    solo = run[0]
-                    if solo == 0 and len(group) > 1:
-                        x0 = group[solo][0]
-                        x1 = min(group[solo + 1][0] - 0.5, x0 + _SECONDARY_BEAM_HOOK_LEN)
-                        if x1 > x0:
-                            segments.append((level, x0, x1))
-                    elif solo == len(group) - 1 and len(group) > 1:
-                        x1 = group[solo][0]
-                        x0 = max(group[solo - 1][0] + 0.5, x1 - _SECONDARY_BEAM_HOOK_LEN)
-                        if x1 > x0:
-                            segments.append((level, x0, x1))
+                    segment = _isolated_secondary_beamlet(group, run[0])
+                    if segment is not None:
+                        segments.append((level, segment[0], segment[1]))
                 run = []
             run.append(idx)
 
         if len(run) >= 2:
             segments.append((level, group[run[0]][0], group[run[-1]][0]))
         elif len(run) == 1:
-            solo = run[0]
-            if solo == 0 and len(group) > 1:
-                x0 = group[solo][0]
-                x1 = min(group[solo + 1][0] - 0.5, x0 + _SECONDARY_BEAM_HOOK_LEN)
-                if x1 > x0:
-                    segments.append((level, x0, x1))
-            elif solo == len(group) - 1 and len(group) > 1:
-                x1 = group[solo][0]
-                x0 = max(group[solo - 1][0] + 0.5, x1 - _SECONDARY_BEAM_HOOK_LEN)
-                if x1 > x0:
-                    segments.append((level, x0, x1))
+            segment = _isolated_secondary_beamlet(group, run[0])
+            if segment is not None:
+                segments.append((level, segment[0], segment[1]))
     return segments
+
+
+def _flag_count_for_onset(flag_by_onset: dict[float, int], onset: float) -> int:
+    return flag_by_onset.get(onset, flag_by_onset.get(round(onset, 6), 0))
+
+
+def _isolated_secondary_beamlet(
+    group: list[tuple[float, float, float]],
+    solo: int,
+) -> tuple[float, float] | None:
+    """Return a short secondary beamlet for an isolated flagged note."""
+    if len(group) < 2:
+        return None
+    x = group[solo][0]
+    if solo < len(group) - 1:
+        x1 = min(group[solo + 1][0] - 0.5, x + _SECONDARY_BEAM_HOOK_LEN)
+        return (x, x1) if x1 > x else None
+    x0 = max(group[solo - 1][0] + 0.5, x - _SECONDARY_BEAM_HOOK_LEN)
+    return (x0, x) if x > x0 else None
 
 
 def _emit_standalone_tuplet_brackets(
@@ -2828,13 +3081,6 @@ def _parse_techniques(value: str | None) -> set[str]:
     if not value:
         return set()
     return {item.strip() for item in value.split(",") if item.strip()}
-
-
-def _safe_int(value: str | None) -> int | None:
-    try:
-        return int(value) if value is not None else None
-    except ValueError:
-        return None
 
 
 def _accidental_column_for_note_y(

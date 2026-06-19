@@ -571,15 +571,20 @@ class TestGetBeamGroups:
         assert len(groups) == 1
         assert len(groups[0]) == 2
 
-    def test_eight_eighth_notes_4_4_four_groups(self) -> None:
-        """8 eighth notes in 4/4 must produce 4 groups of 2 (one per beat)."""
+    def test_eight_eighth_notes_4_4_two_half_bar_groups(self) -> None:
+        """8 eighth notes in 4/4 beam by the half note: 2 groups of 4.
+
+        Matches MuseScore's default simple-quadruple grouping (four eighths per
+        half note), confirmed against the oracle export.  The earlier per-beat
+        rule (4 groups of 2) over-broke these beams.
+        """
         from fretwise.export.pdf_tab import _get_beam_groups
 
         stems = [self._stem(i * 17.0, i * 0.5, 0.5) for i in range(8)]
         groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=0.0)
-        assert len(groups) == 4
+        assert len(groups) == 2
         for g in groups:
-            assert len(g) == 2
+            assert len(g) == 4
 
     def test_rest_between_two_eighth_notes_no_beam(self) -> None:
         """A rest gap >= 1/32 beat between notes must break the beam group."""
@@ -634,12 +639,13 @@ class TestGetBeamGroups:
         """Beat boundaries are computed from measure_onset, not from 0."""
         from fretwise.export.pdf_tab import _get_beam_groups
 
-        # Measure starts at beat 8 (e.g. measure 3 in 4/4)
+        # Measure starts at beat 8 (e.g. measure 3 in 4/4).  Four eighths fill
+        # the first half note (beats 1-2) and beam as a single half-bar group.
         mo = 8.0
         stems = [self._stem(i * 17.0, mo + i * 0.5, 0.5) for i in range(4)]
         groups = _get_beam_groups(stems, beats_per_measure=4.0, measure_onset=mo)
-        # Should produce 2 groups of 2 (only 2 beats worth of 8ths here)
-        assert len(groups) == 2
+        assert len(groups) == 1
+        assert len(groups[0]) == 4
 
 
 # ---------------------------------------------------------------------------

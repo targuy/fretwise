@@ -24,6 +24,7 @@ def legacy_parse_to_raw_score(
     chord_markers: Mapping[str, str] | None = None,
     chord_diagrams: Sequence[ChordDiagram] | None = None,
     unknown_fields: Mapping[str, Any] | None = None,
+    measure_time_signatures: Mapping[int, tuple[int, int]] | None = None,
 ) -> RawScore:
     """Build a RawScore from the current parser contract.
 
@@ -57,4 +58,5 @@ def legacy_parse_to_raw_score(
         chord_diagrams=list(chord_diagrams or []),
         unknown_fields=dict(unknown_fields or {}),
         source_trace_map=source_trace_map,
+        measure_time_signatures=dict(measure_time_signatures or {}),
     )

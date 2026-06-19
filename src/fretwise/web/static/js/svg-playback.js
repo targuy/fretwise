@@ -17,8 +17,10 @@ export class SvgCursorDriver {
     this.regions = (data.measure_regions || []).sort((a, b) => a.measure_idx - b.measure_idx);
     /** @type {SVGRectElement[]} */
     this._rects = [];
-    /** @type {SVGLineElement|null} */
-    this._line = null;
+    /** When false the user is exploring freely — highlight() stops auto-scrolling.
+     *  Mirrors main.js `_followPlayhead`; the Follow toolbar button / click-to-seek
+     *  toggle it via main.js `_setFollowPlayhead`. */
+    this.followPlayhead = true;
   }
 
   /**
@@ -40,14 +42,9 @@ export class SvgCursorDriver {
       svg.appendChild(rect);   // appended last → rendered on top
       this._rects.push(rect);
     }
-
-    // Red cursor line — drawn on top of everything, hidden until playback starts
-    this._line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    this._line.setAttribute('class', 'fw-cursor-line');
-    this._line.setAttribute('x1', '0'); this._line.setAttribute('x2', '0');
-    this._line.setAttribute('y1', '0'); this._line.setAttribute('y2', '0');
-    this._line.setAttribute('visibility', 'hidden');
-    svg.appendChild(this._line);
+    // The moving red cursor line was removed: the only playback indicator is the
+    // highlighted current measure (the rects above), driven by the meter-aware
+    // timeline. No per-beat line element / note-anchor table is built anymore.
   }
 
   /**
@@ -66,34 +63,61 @@ export class SvgCursorDriver {
       rect.classList.toggle('loop', inLoop && !isActive);
       if (isActive) activeRect = rect;
     }
-    // Scroll active measure into view within the SVG container
-    if (activeRect) {
-      activeRect.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // Scroll the active measure into view — but ONLY within the score container
+    // (#core-svg-view), never the page/body, and CLAMPED to the container's
+    // scrollable range. The previous activeRect.scrollIntoView() scrolled every
+    // scrollable ancestor and was unbounded, so after the first system playback
+    // could fling the view far past the content into the blank tail (the user
+    // then had to scroll way back up to find the staves). Centering on the
+    // active rect and clamping to [0, scrollHeight - clientHeight] prevents that.
+    if (this.followPlayhead && activeRect && this.container) {
+      const c = this.container;
+      const r = activeRect.getBoundingClientRect();
+      const cr = c.getBoundingClientRect();
+      if (r.height > 0 && cr.height > 0) {
+        const relTop = (r.top - cr.top) + c.scrollTop;       // rect top in scroll space
+        const target = relTop - c.clientHeight / 2 + r.height / 2;  // center it
+        const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
+        const clamped = Math.max(0, Math.min(target, maxTop));
+        if (Math.abs(clamped - c.scrollTop) > 2) {
+          c.scrollTo({ top: clamped, behavior: 'smooth' });
+        }
+      }
     }
   }
 
   /**
-   * Move the red cursor line to the given beat onset position.
-   * @param {number} onset         - current playback position in beats (from song start)
-   * @param {number} beatsPerMeasure
+   * Scroll a measure into view (centered) and briefly flash it. Independent of
+   * playback follow state — used by the review panel to locate a flagged spot.
+   * @param {number} measureIdx  0-based measure index (matches data-measure).
+   * @returns {boolean} true when the measure rect was found.
    */
-  tick(onset, beatsPerMeasure) {
-    if (!this._line) return;
-    const measureIdx = Math.floor(onset / beatsPerMeasure);
-    const region = this.regions.find(r => r.measure_idx === measureIdx);
-    if (!region) { this._line.setAttribute('visibility', 'hidden'); return; }
-    const fraction = Math.min(1, (onset - measureIdx * beatsPerMeasure) / beatsPerMeasure);
-    const x = (region.x + fraction * region.width).toFixed(2);
-    this._line.setAttribute('x1', x); this._line.setAttribute('x2', x);
-    this._line.setAttribute('y1', region.y0.toFixed(2));
-    this._line.setAttribute('y2', region.y1.toFixed(2));
-    this._line.setAttribute('visibility', 'visible');
+  scrollToMeasure(measureIdx) {
+    const rect = this._rects.find(
+      (r) => parseInt(r.getAttribute('data-measure') || '-1', 10) === measureIdx,
+    );
+    if (!rect || !this.container) return false;
+    const c = this.container;
+    const r = rect.getBoundingClientRect();
+    const cr = c.getBoundingClientRect();
+    if (r.height > 0 && cr.height > 0) {
+      const relTop = (r.top - cr.top) + c.scrollTop;
+      const target = relTop - c.clientHeight / 2 + r.height / 2;
+      const maxTop = Math.max(0, c.scrollHeight - c.clientHeight);
+      c.scrollTo({ top: Math.max(0, Math.min(target, maxTop)), behavior: 'smooth' });
+    }
+    rect.classList.add('review-flash');
+    setTimeout(() => rect.classList.remove('review-flash'), 1600);
+    return true;
   }
 
-  /** Hide the red cursor line (on pause / stop). */
-  hideLine() {
-    if (this._line) this._line.setAttribute('visibility', 'hidden');
-  }
+  /** No-op: the moving cursor line was removed; the current-measure highlight
+   *  (updated via {@link highlight}) is now the sole playback indicator. Kept as
+   *  a stub so the playback loop can call it unconditionally. */
+  tick() { /* cursor line removed — highlight only */ }
+
+  /** No-op: kept for callers (pause/stop) now that there is no cursor line. */
+  hideLine() { /* cursor line removed — nothing to hide */ }
 
   /**
    * Resolve a DOM click event to a measure index via SVG coordinate transform.

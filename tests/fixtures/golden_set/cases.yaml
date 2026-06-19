@@ -1,0 +1,140 @@
+# FretWise — Golden test set (regression on known pathologies)
+#
+# Each case describes a passage where the current algorithm produces a
+# fingering a guitarist would never choose. Rules are intentionally
+# aggregate (per-measure shares) rather than per-note annotations so a
+# domain expert (guitarist) can review them quickly.
+#
+# Format conventions:
+#   - source: path relative to partitions/ (private corpus, gitignored)
+#   - measure: 1-based measure index from the parser
+#   - rule.type: one of {max_finger_share, min_finger_share, no_consecutive_pinky}
+#   - annotation_status: "seeded" (auto-generated proposal), "verified"
+#       (a guitarist confirmed the rule), "rejected" (turned out to be
+#       idiomatic, not a bug — keep as documentation)
+#
+# Seeded cases below come from the pathological-measures audit run on
+# the original 39-fixture corpus. Numbers may shift slightly after the
+# resolve_chord_partial_barre fix (commit pending). Re-validate on
+# re-audit.
+
+version: 0.1
+schema_doc: docs/handoff/MODEL_SPEC.md
+
+# data_quality_protocol: at every anomaly, the source file's quality is
+# assessed via src/fretwise/quality.py before the pathology is attributed to
+# the algorithm. Fields below per case:
+#   data_quality.verdict: "clean" | "suspect" | "bad" (from QualityReport)
+#   data_quality.notes:   optional human note about why this verdict applies
+# Cases with verdict=bad should be treated as "out of scope" — re-evaluate
+# only after the source is fixed or replaced.
+
+cases:
+
+  - id: bb_king_thrill_m8_pinky_spam
+    source: "Bb King-The Thrill Is Gone-12-26-2025.gp"
+    measure: 8
+    description: |
+      Five-note phrase, current FretWise output: 100% PINKY.
+      A guitarist with a hand anchored in position would alternate
+      INDEX/MIDDLE/RING based on the actual fret positions.
+      Source-measure indexing (GP file) — the original 2026-04-20
+      audit had this pattern at running-index 22 (different counter).
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.6
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+
+  - id: bb_king_thrill_m94_pinky_heavy
+    source: "Bb King-The Thrill Is Gone-12-26-2025.gp"
+    measure: 94
+    description: |
+      Seven-note phrase, current output: 5/7 PINKY (71%) + 2 INDEX.
+      The PINKY-INDEX alternation suggests the algo refuses to use
+      MIDDLE or RING even when the hand position would allow them.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.6
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+
+  - id: steppenwolf_born_wild_m23_pinky_run
+    source: "Steppenwolf-Born To Be Wild-10-15-2025.gp"
+    measure: 23
+    description: |
+      Pattern [0, 7, 7, 7, 9, 7, 9, 7]. Current output: 7× PINKY + 1 OPEN.
+      Idiomatic in position 7: INDEX@7 + RING@9. The OPEN string at the
+      start of the measure shouldn't force the hand low.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.6
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+
+  - id: cream_sunshine_pinky_heavy
+    source: "Cream-Sunshine Of Your Love-12-26-2025.gp"
+    measure: null  # whole-piece check
+    description: |
+      Iconic Sunshine riff on the D string area. Current output: 35.6%
+      PINKY + 27% RING = 62.6% RP on the whole piece. Idiomatic riff
+      uses RING for the highest note in the box but not throughout.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.25
+      scope: whole_piece
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+
+  - id: zz_top_la_grange_m50_alternation
+    source: "ZZ Top-La Grange-02-25-2026.gp"
+    measure: 50
+    description: |
+      Boogie pattern [5, 5, 3, 5, 5, 3, ...]. Current output:
+      [RING, PINKY, INDEX, RING, PINKY, INDEX, ...] — alternates the
+      doubled fret-5 between RING and PINKY for no clear reason.
+      Idiomatic: INDEX@3 + PINKY@5 (Billy Gibbons style) OR
+      INDEX@3 + RING@5 — pick one and stick with it.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.4
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+
+  - id: django_nuages_jazz_pinky
+    source: "Django Reinhardt-Nuages-05-30-2025.gp"
+    measure: null
+    description: |
+      Django's manouche-jazz piece. Current output 42.5% PINKY is high
+      even for jazz manouche where the pinky is more active. Documented
+      here to track whether B integration brings it into the 25–35%
+      range typical of jazz fingerstyle.
+    rule:
+      type: max_finger_share
+      finger: PINKY
+      max_share: 0.30
+      scope: whole_piece
+    annotation_status: seeded
+    data_quality:
+      verdict: clean
+      checked_with: src/fretwise/quality.py
+    notes: |
+      Caveat: Django Reinhardt famously played with only two functional
+      left-hand fingers (index + middle) after his fire injury, so the
+      "idiomatic" doigté for his pieces is unusual. This rule reflects
+      what a modern fingerstyle player would do, not Django himself.

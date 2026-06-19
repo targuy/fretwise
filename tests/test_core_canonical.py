@@ -129,6 +129,81 @@ def test_completed_to_canonical_score_extracts_strum_direction_technique() -> No
     assert "strum_down" in technique_names
 
 
+def _hint_map(event: object) -> dict[str, str]:
+    return {h.key: h.value for h in getattr(event, "layout_hints", [])}
+
+
+def test_completed_to_canonical_score_splits_harmonic_into_dyad() -> None:
+    # A 12th-fret natural harmonic (fretted D#3 = 51) must yield TWO stacked
+    # events: the fretted fundamental (normal notehead, keeps string/fret) and a
+    # resultant overtone D#4 = 63 (diamond notehead, no tab, no fingering).
+    harmonic = NoteEvent(
+        pitch=51,
+        onset=0.0,
+        duration=1.0,
+        tempo=120.0,
+        articulation=Articulation.HARMONIC,
+        dynamic=Dynamic.MF,
+        voice_hint=0,
+        string_hint=6,
+        fret_hint=12,
+        harmonic_type="natural",
+        harmonic_fret=12,
+        harmonic_resultant_pitch=63,
+    )
+    completed = CompletedScore(source_path="song.gp", source_format="gpif", notes=[harmonic])
+
+    score = completed_to_canonical_score(completed)
+    events = score.tracks[0].staff_groups[0].staves[0].measures[0].voices[0].events
+    notes = [e for e in events if e.__class__.__name__ == "NoteEvent"]
+    assert len(notes) == 2
+
+    fundamental, resultant = notes
+    # Fundamental: played note, keeps string/fret, drawn as a normal notehead.
+    assert fundamental.pitch_sounding == 51
+    assert fundamental.tab_info is not None
+    assert fundamental.tab_info.string == 6
+    assert fundamental.tab_info.fret == 12
+    assert _hint_map(fundamental).get("harmonic_dyad_fundamental") == "true"
+
+    # Resultant: overtone, same onset/voice, no tab/fingering, diamond + tab_hidden.
+    assert resultant.pitch_sounding == 63
+    assert resultant.onset == fundamental.onset
+    assert resultant.voice == fundamental.voice
+    assert resultant.tab_info is None
+    assert {t.name for t in resultant.techniques} == {"harmonic"}
+    hints = _hint_map(resultant)
+    assert hints.get("harmonic_resultant") == "true"
+    assert hints.get("tab_hidden") == "true"
+
+
+def test_completed_to_canonical_score_harmonic_without_offset_stays_single() -> None:
+    # An unknown node (no resultant pitch) keeps a single harmonic note.
+    harmonic = NoteEvent(
+        pitch=51,
+        onset=0.0,
+        duration=1.0,
+        tempo=120.0,
+        articulation=Articulation.HARMONIC,
+        dynamic=Dynamic.MF,
+        voice_hint=0,
+        string_hint=6,
+        fret_hint=12,
+        harmonic_type="natural",
+        harmonic_fret=99,
+        harmonic_resultant_pitch=None,
+    )
+    completed = CompletedScore(source_path="song.gp", source_format="gpif", notes=[harmonic])
+
+    score = completed_to_canonical_score(completed)
+    events = score.tracks[0].staff_groups[0].staves[0].measures[0].voices[0].events
+    notes = [e for e in events if e.__class__.__name__ == "NoteEvent"]
+    assert len(notes) == 1
+    assert notes[0].pitch_sounding == 51
+    assert "harmonic" in {t.name for t in notes[0].techniques}
+    assert _hint_map(notes[0]).get("harmonic_resultant") is None
+
+
 def test_completed_to_canonical_score_handles_empty_input() -> None:
     completed = CompletedScore(
         source_path="song.gp",

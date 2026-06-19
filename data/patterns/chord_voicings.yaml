@@ -80,8 +80,8 @@ chords:
     base_fret: 1
 
   - name: Fm         # 133111
-    frets: [1, 1, 2, 3, 3, 1]
-    fingers: [1, 1, 2, 4, 3, 1]
+    frets: [1, 1, 1, 3, 3, 1]
+    fingers: [1, 1, 1, 3, 4, 1]
     base_fret: 1
 
   - name: Gm         # 355333
@@ -221,14 +221,14 @@ chords:
     fingers: [3, 4, 0, 1, 2, 0]
     base_fret: 1
 
-  - name: Dadd9      # xx0230
-    frets: [0, 3, 2, 0, -1, -1]
-    fingers: [0, 4, 2, 0, 0, 0]
+  - name: Dadd9      # xx0252 (D A F# E — keeps both the 3rd and the 9th)
+    frets: [2, 5, 2, 0, -1, -1]
+    fingers: [1, 4, 2, 0, 0, 0]
     base_fret: 1
 
-  - name: Gadd9      # 320033
-    frets: [3, 3, 0, 0, 2, 3]
-    fingers: [3, 4, 0, 0, 1, 2]
+  - name: Gadd9      # 300003 (G B D A — keeps the 9th on the open A string)
+    frets: [3, 0, 0, 0, 0, 3]
+    fingers: [3, 0, 0, 0, 0, 4]
     base_fret: 1
 
   # ── Sixth chords ──────────────────────────────────────────────────────────
@@ -354,9 +354,9 @@ chords:
     fingers: [0, 2, 4, 3, 1, 0]
     base_fret: 1
 
-  - name: C#dim      # x4545x
-    frets: [-1, 5, 4, 5, 4, -1]
-    fingers: [0, 3, 1, 4, 2, 0]
+  - name: C#dim      # x46564 → triad C# E G (the x4545x form was a dim7)
+    frets: [-1, 5, 6, 5, 4, -1]
+    fingers: [0, 2, 4, 3, 1, 0]
     base_fret: 1
 
   # ── Augmented ─────────────────────────────────────────────────────────────
@@ -434,3 +434,113 @@ chords:
     frets: [4, 4, 5, 6, 6, 4]
     fingers: [1, 1, 2, 4, 3, 1]
     base_fret: 4
+
+# ── Movable barre shapes (generated voicings) ───────────────────────────────
+#
+# These define the canonical moveable forms used to GENERATE a standard barre
+# voicing for any (root, quality) that is NOT present in the curated `chords:`
+# list above.  The curated open voicings always take precedence.
+#
+# Each shape is anchored on a root string (6 = low E, "E-shape"; 5 = A,
+# "A-shape").  `frets` are OFFSETS from the anchor fret (the fret where the
+# root lands on the root string): 0 = at the anchor fret, n = anchor+n,
+# -1 = muted.  Indexing is the same per-string order as everywhere else:
+# [str1 high_e, str2 B, str3 G, str4 D, str5 A, str6 low_E].
+#
+# Finger numbers are NOT stored here — they are derived deterministically in
+# chord_library.py (one finger per distinct fret offset, ascending), which
+# guarantees finger/fret consistency.  Every shape below has been validated so
+# that its sounding pitch classes equal the quality's interval formula
+# (see tests/test_chord_dictionary.py), the root is the lowest sounding note,
+# the fret span is <= 4, and at most 4 distinct fingers are required.
+#
+# `quality` is the suffix appended to the root note name (e.g. root "C" +
+# quality "m7" -> "Cm7").  "" = major (no suffix).
+
+movable_shapes:
+
+  - quality: ""          # major
+    families:
+      - {root_string: 6, frets: [0, 0, 1, 2, 2, 0]}   # E-shape
+      - {root_string: 5, frets: [0, 2, 2, 2, 0, -1]}  # A-shape
+
+  - quality: "m"         # minor
+    families:
+      - {root_string: 6, frets: [0, 0, 0, 2, 2, 0]}
+      - {root_string: 5, frets: [0, 1, 2, 2, 0, -1]}
+
+  - quality: "7"         # dominant 7
+    families:
+      - {root_string: 6, frets: [0, 0, 1, 0, 2, 0]}
+      - {root_string: 5, frets: [0, 2, 0, 2, 0, -1]}
+
+  - quality: "maj7"
+    families:
+      - {root_string: 6, frets: [0, 0, 1, 1, 2, 0]}
+      - {root_string: 5, frets: [0, 2, 1, 2, 0, -1]}
+
+  - quality: "m7"
+    families:
+      - {root_string: 6, frets: [0, 0, 0, 0, 2, 0]}
+      - {root_string: 5, frets: [0, 1, 0, 2, 0, -1]}
+
+  - quality: "m7b5"      # half-diminished
+    families:
+      - {root_string: 5, frets: [-1, 1, 0, 1, 0, -1]}
+
+  - quality: "dim"       # diminished triad
+    families:
+      - {root_string: 5, frets: [-1, 1, 2, 1, 0, -1]}
+
+  - quality: "dim7"      # diminished 7
+    families:
+      - {root_string: 5, frets: [2, 1, 2, 1, 0, -1]}
+
+  - quality: "aug"       # augmented triad
+    families:
+      - {root_string: 6, frets: [0, 1, 1, 2, 3, 0]}
+
+  - quality: "sus2"
+    families:
+      - {root_string: 5, frets: [0, 0, 2, 2, 0, -1]}
+
+  - quality: "sus4"
+    families:
+      - {root_string: 6, frets: [0, 0, 2, 2, 2, 0]}
+      - {root_string: 5, frets: [0, 3, 2, 2, 0, -1]}
+
+  - quality: "6"
+    families:
+      - {root_string: 6, frets: [0, 2, 1, 2, 2, 0]}
+      - {root_string: 5, frets: [2, 2, 2, 2, 0, -1]}
+
+  - quality: "m6"
+    families:
+      - {root_string: 6, frets: [0, 2, 0, 2, 2, 0]}
+      - {root_string: 5, frets: [2, 1, 2, 2, 0, -1]}
+
+  - quality: "9"
+    families:
+      - {root_string: 6, frets: [2, 0, 1, 0, 2, 0]}
+      - {root_string: 5, frets: [3, 2, 4, 2, 0, -1]}
+
+  - quality: "maj9"
+    families:
+      - {root_string: 5, frets: [4, 2, 4, 2, 0, -1]}
+
+  - quality: "m9"
+    families:
+      - {root_string: 6, frets: [2, -1, 0, 0, 2, 0]}
+
+  - quality: "add9"
+    families:
+      - {root_string: 5, frets: [0, 2, 4, 2, 0, -1]}
+
+  - quality: "6/9"
+    families:
+      - {root_string: 5, frets: [2, 2, 4, 2, 0, -1]}
+
+  - quality: "mM7"       # minor/major 7
+    families:
+      - {root_string: 6, frets: [0, 0, 0, 1, 2, 0]}
+      - {root_string: 5, frets: [0, 1, 1, 2, 0, -1]}

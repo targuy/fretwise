@@ -3,6 +3,7 @@
 Usage:
     fretwise parse song.gp5
     fretwise solve song.gp5
+    fretwise finger song.gp
     fretwise solve song.gp5 --mode performance --output song_fingered.pdf
     fretwise solve song.gp5 --mode learning --output song_fingered.txt
     fretwise info song.gp5
@@ -15,7 +16,10 @@ import json
 import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from fretwise.ml import LearnedPhraseWindowFingerer
 
 import click
 
@@ -29,9 +33,11 @@ from fretwise.export import (
     render_pdf_tab,
     render_staff_pdf,
     render_text_report,
+    write_musicxml,
 )
+from fretwise.export.gp_writer import fingerings_by_source_id, write_gp_with_fingerings
 from fretwise.generator import StateGenerator
-from fretwise.models import FingeringResult
+from fretwise.models import Finger, FingeringResult, FingeringState
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
 from fretwise.parser.base import ParseError, UnsupportedFormatError
@@ -40,8 +46,208 @@ from fretwise.pdf_conformance import (
     core_pdf_conformance_report,
     legacy_shadow_pdf_conformance_report,
 )
-from fretwise.pipeline import run_pipeline
+from fretwise.pipeline import PipelineResult, run_pipeline_with_guard_report
 from fretwise.scoring import CostFunction, CostWeights
+
+
+def _load_chord_finger_classifier() -> object | None:
+    """Load the optional ChordFingerClassifier (Phase 2 ONNX model) if present.
+
+    Returns None silently when the model file or onnxruntime are not available,
+    so the CLI keeps working with the rule-based pipeline.
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_path = model_dir / "finger_classifier.onnx"
+    spec_path = model_dir / "finger_classifier_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedChordFingerClassifier
+        return LearnedChordFingerClassifier(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        return None
+
+
+def _print_audit_summary(
+    events: list,
+    results: list,
+    adapter: object,
+    player_cost_model: object | None,
+) -> None:
+    """Print per-movement audit verdict to stderr (verbose mode).
+
+    Never raises — audit failure is logged but doesn't break the solve.
+    """
+    try:
+        from fretwise.audit import audit_score
+        section_markers = dict(getattr(adapter, "section_markers", {}) or {})
+        report = audit_score(
+            events, results,
+            section_markers=section_markers or None,
+            ml_cost_model=player_cost_model,
+        )
+    except Exception as exc:
+        click.echo(f"Audit failed: {exc}", err=True)
+        return
+
+    bad_count = sum(1 for m in report.movements if m.verdict == "bad")
+    suspect_count = sum(1 for m in report.movements if m.verdict == "suspect")
+    ml_note = " (ML signal: on)" if report.ml_signal_available else " (ML signal: off)"
+    click.echo(
+        f"Audit: overall={report.overall}  "
+        f"|  {len(report.movements)} movement(s)  "
+        f"|  bad={bad_count} suspect={suspect_count}{ml_note}",
+        err=True,
+    )
+    for m in report.movements:
+        if m.verdict == "clean":
+            continue  # only print non-clean movements (signal-to-noise)
+        reasons = ",".join(m.reasons) or "-"
+        click.echo(
+            f"  - mvt {m.span.measure_start}-{m.span.measure_end} "
+            f"({m.span.name}, {m.span.source}): "
+            f"{m.verdict}  reasons=[{reasons}]  notes={m.note_count}",
+            err=True,
+        )
+
+
+def _load_player_cost_model() -> object | None:
+    """Load the optional PlayerCostModel (Phase 3 ONNX transition cost).
+
+    Same defensive pattern as ``_load_chord_finger_classifier``. Only
+    contributes when the active CostWeights preset has ``gamma > 0``
+    (performance / learning modes).
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_path = model_dir / "transition_cost_v3.onnx"
+    spec_path = model_dir / "transition_cost_v3_spec.json"
+    if not model_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPlayerCost
+        return LearnedPlayerCost(
+            str(model_path),
+            str(spec_path) if spec_path.exists() else None,
+        )
+    except (ImportError, FileNotFoundError, AssertionError):
+        return None
+
+
+def _load_phrase_window_fingerer() -> LearnedPhraseWindowFingerer | None:
+    """Load the production phrase-window fingerer (GuitarDataSet phrase_window_v2).
+
+    Production model (GDS-026 #63 GO): melodic fingers from the pipeline are
+    overridden by the v2 predictions with the pinky demotion belt (see
+    ``fretwise.ml.phrase_window.resolve_phrase_window_fingers``). Returns None
+    silently when the bundle or onnxruntime are unavailable — the pipeline
+    then stays rule-only.
+    """
+    from pathlib import Path
+    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    manifest_path = model_dir / "phrase_window_fingering_v2_manifest.json"
+    if not manifest_path.exists():
+        return None
+    try:
+        from fretwise.ml import LearnedPhraseWindowFingerer
+        return LearnedPhraseWindowFingerer.from_model_dir(model_dir, version="v2")
+    except (ImportError, FileNotFoundError, AssertionError, KeyError):
+        return None
+
+
+def _print_phrase_window_applied_summary(stats: dict[str, int]) -> None:
+    """Print the phrase_window v2 production-application counters to stderr.
+
+    GO-prod contract (GDS-026 #63): melodic fingers are overridden in the
+    pipeline itself; this just surfaces how many notes the model changed and
+    how often the pinky demotion belt fired.
+    """
+    if "phrase_window_applied" not in stats:
+        click.echo(
+            "Phrase-window ML: inactive (bundle or onnxruntime unavailable) "
+            "— rule-only fingering.",
+            err=True,
+        )
+        return
+    click.echo(
+        f"Phrase-window ML (v2, applied): "
+        f"{stats['phrase_window_applied']} melodic finger(s) overridden  "
+        f"|  pinky demotions={stats['phrase_window_demoted']}",
+        err=True,
+    )
+
+
+def _guarded_pipeline_result(
+    events: list[Any],
+    mode: str,
+) -> tuple[PipelineResult, object | None]:
+    weights = _MODES[mode]()
+    player_cost_model = _load_player_cost_model() if weights.gamma > 0 else None
+    cost_fn = CostFunction(weights=weights, player_cost_model=player_cost_model)
+    optimizer = ViterbiOptimizer(cost_fn)
+    matcher = PatternMatcher()
+    payload = run_pipeline_with_guard_report(
+        events,
+        StateGenerator(),
+        optimizer,
+        pattern_matcher=matcher,
+        chord_finger_classifier=_load_chord_finger_classifier(),
+        phrase_window_fingerer=_load_phrase_window_fingerer(),
+    )
+    return payload, player_cost_model
+
+
+def _format_guard_measures(payload: PipelineResult) -> str:
+    measures = sorted(payload.biomechanical_report.by_measure())
+    if not measures:
+        return "-"
+    shown = ",".join(str(measure) for measure in measures[:20])
+    if len(measures) > 20:
+        shown += f",...(+{len(measures) - 20})"
+    return shown
+
+
+def _write_guarded_gp_file(
+    source: Path,
+    output: Path,
+    payload: PipelineResult,
+    *,
+    quiet: bool,
+) -> None:
+    if source.suffix.lower() != ".gp":
+        click.echo(
+            "Error: GP regeneration only supports Guitar Pro 7/8 (.gp) files.",
+            err=True,
+        )
+        sys.exit(1)
+    if payload.biomechanical_report.fatal_count:
+        click.echo(
+            "Error: biomechanical guard failed before GP export: "
+            f"{payload.biomechanical_report.fatal_count} fatal violation(s), "
+            f"measures={_format_guard_measures(payload)}",
+            err=True,
+        )
+        sys.exit(1)
+
+    mapping = fingerings_by_source_id(payload.results)
+    try:
+        gp_bytes = write_gp_with_fingerings(source, mapping)
+    except ValueError as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    output.write_bytes(gp_bytes)
+    if not quiet:
+        click.echo(
+            f"GP written to '{output}' "
+            f"({len(mapping)} annotated note(s), "
+            f"fatal={payload.biomechanical_report.fatal_count}, "
+            f"high={payload.biomechanical_report.high_count})."
+        )
 
 _MODES = {
     "reference": CostWeights.reference,
@@ -50,7 +256,7 @@ _MODES = {
     "learning": CostWeights.learning,
 }
 
-_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined")
+_OUTPUT_FORMATS = ("json", "txt", "pdf", "staff", "combined", "gp", "musicxml", "xml")
 
 _SUPPORTED_INPUT = {
     ".gp3": "GuitarPro 3",
@@ -70,6 +276,9 @@ _SUPPORTED_OUTPUT = {
     "pdf": "Professional A4 PDF tablature with LH finger annotations",
     "staff": "Standard music notation (treble clef) PDF",
     "combined": "Standard notation + tab stacked PDF",
+    "gp": "Guitar Pro 7/8 GPIF with LeftFingering annotations",
+    "musicxml": "MusicXML with tab (string/fret) + LH fingering — opens in "
+    "MuseScore/Finale/Guitar Pro",
 }
 
 
@@ -87,6 +296,7 @@ def main() -> None:
       fretwise parse song.gp5         # list all notes with candidate states
       fretwise solve song.gp5         # print JSON fingerings to stdout
       fretwise solve song.gp5 -o out.pdf   # export PDF tablature
+    fretwise finger song.gp         # write song_fingered.gp
       fretwise formats                # list supported file formats
     """
 
@@ -218,7 +428,7 @@ def parse(file: Path, verbose: bool, limit: int, quiet: bool) -> None:
     default=None,
     help=(
         "Force output format, overriding the file extension. "
-        "Choices: json, txt, pdf."
+        "Choices: json, txt, pdf, staff, combined, gp."
     ),
 )
 @click.option(
@@ -300,6 +510,7 @@ def solve(
       .json            - full note-by-note JSON (fingering + alternatives + cost)
       .txt             - ASCII tablature + text report (plain text)
       .pdf             - A4 PDF tablature with LH finger annotations
+            .gp              - Guitar Pro 7/8 file annotated with LeftFingering
 
     Use --format / -f to override the format inferred from the output extension.
     Use --format staff or --format combined with a .pdf output path
@@ -311,12 +522,6 @@ def solve(
         click.echo(f"Error: {exc}", err=True)
         sys.exit(1)
 
-    generator = StateGenerator()
-    weights = _MODES[mode]()
-    cost_fn = CostFunction(weights=weights)
-    optimizer = ViterbiOptimizer(cost_fn)
-    matcher = PatternMatcher()
-
     try:
         events = adapter.parse(file)
     except (UnsupportedFormatError, ParseError) as exc:
@@ -327,7 +532,9 @@ def solve(
         click.echo("No notes found.")
         return
 
-    results, stats = run_pipeline(events, generator, optimizer, pattern_matcher=matcher)
+    payload, player_cost_model = _guarded_pipeline_result(events, mode)
+    results = payload.results
+    stats = payload.stats
     if not results:
         click.echo("No valid fingering states could be generated.", err=True)
         sys.exit(1)
@@ -339,6 +546,8 @@ def solve(
             f"|  total cost = {total_cost:.2f}",
             err=True,
         )
+        _print_audit_summary(events, results, adapter, player_cost_model)
+        _print_phrase_window_applied_summary(stats)
 
     # --- resolve output format -----------------------------------------------
     if output is None and fmt is None:
@@ -489,9 +698,237 @@ def solve(
         if not quiet:
             click.echo(f"Combined PDF written to '{output}'.")
 
+    elif effective_fmt == "gp":
+        _write_guarded_gp_file(file, output, payload, quiet=quiet)
+
+    elif effective_fmt in ("musicxml", "xml"):
+        write_musicxml(
+            results,
+            output,
+            title=pdf_title,
+            artist=pdf_artist,
+            instrument=track_name,
+            beats_per_measure=beats_per_measure,
+        )
+        if not quiet:
+            click.echo(f"MusicXML written to '{output}'.")
+
     else:
         click.echo(f"Error: Unsupported format '{effective_fmt}'.", err=True)
         sys.exit(1)
+
+
+# ---------------------------------------------------------------------------
+# finger
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise finger song.gp\n"
+        "  fretwise finger song.gp -o song_checked.gp\n"
+        "  fretwise finger song.gp --mode learning\n"
+    )
+)
+@click.argument("file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(path_type=Path),
+    default=None,
+    help="Output .gp path (default: FILE stem suffixed with _fingered).",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(list(_MODES.keys())),
+    default="performance",
+    show_default=True,
+    help="Weighting mode for the cost function.",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress success messages; errors still go to stderr.",
+)
+def finger(file: Path, output: Path | None, mode: str, quiet: bool) -> None:
+    """Regenerate one Guitar Pro 7/8 file with left-hand fingerings."""
+    if file.suffix.lower() != ".gp":
+        click.echo(
+            "Error: 'finger' only supports Guitar Pro 7/8 (.gp) files.",
+            err=True,
+        )
+        sys.exit(1)
+
+    try:
+        adapter = get_adapter(file)
+        events = adapter.parse(file)
+    except (UnsupportedFormatError, ParseError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+
+    if not events:
+        click.echo("No notes found.")
+        return
+
+    payload, _player_cost_model = _guarded_pipeline_result(events, mode)
+    if not payload.results:
+        click.echo("No valid fingering states could be generated.", err=True)
+        sys.exit(1)
+
+    output_path = output or file.with_name(f"{file.stem}_fingered{file.suffix}")
+    _write_guarded_gp_file(file, output_path, payload, quiet=quiet)
+
+
+# ---------------------------------------------------------------------------
+# convert
+# ---------------------------------------------------------------------------
+
+
+@main.command(
+    epilog=(
+        "\b\nExamples:\n"
+        "  fretwise convert song.gp song.musicxml          # GP -> MusicXML\n"
+        "  fretwise convert song.mid song.musicxml         # MIDI -> MusicXML\n"
+        "  fretwise convert song.gp out.xml --to musicxml  # force target\n"
+        "  fretwise convert song.gp out.gp                 # re-annotate GP fingerings\n"
+        "  fretwise convert song.gp plain.musicxml --no-fingering\n"
+    )
+)
+@click.argument("input_file", type=click.Path(exists=True, path_type=Path))
+@click.argument("output_file", type=click.Path(path_type=Path))
+@click.option(
+    "--to",
+    "to_fmt",
+    type=click.Choice(["gp", "musicxml"]),
+    default=None,
+    help="Target format. Default: inferred from OUTPUT extension (.gp / .musicxml / .xml).",
+)
+@click.option(
+    "--mode",
+    type=click.Choice(list(_MODES.keys())),
+    default="performance",
+    show_default=True,
+    help="Cost-function weighting for the fingerings embedded in the output.",
+)
+@click.option(
+    "--no-fingering",
+    "no_fingering",
+    is_flag=True,
+    help="Convert notes / rhythm / meter only — skip fingering optimisation.",
+)
+@click.option(
+    "--title",
+    default=None,
+    metavar="TEXT",
+    help="Title metadata (default: parsed from the input filename).",
+)
+@click.option(
+    "--artist",
+    default=None,
+    metavar="TEXT",
+    help="Artist/composer metadata (default: parsed from the input filename).",
+)
+@click.option(
+    "--quiet",
+    "-q",
+    is_flag=True,
+    help="Suppress success messages; errors still go to stderr.",
+)
+def convert(
+    input_file: Path,
+    output_file: Path,
+    to_fmt: str | None,
+    mode: str,
+    no_fingering: bool,
+    title: str | None,
+    artist: str | None,
+    quiet: bool,
+) -> None:
+    """Convert a score between formats via the canonical model.
+
+    \b
+    Supported conversions:
+      <any> -> .musicxml / .xml   from GuitarPro, MusicXML or MIDI input
+      .gp   -> .gp                re-annotate the source GP with FretWise fingerings
+
+    The time signature and tempo are carried faithfully from the source when the
+    input format records them (Guitar Pro). MusicXML / MIDI inputs that omit the
+    meter default to 4/4. MusicXML -> Guitar Pro (generating a .gp from scratch)
+    is not yet implemented — convert to .gp only from a .gp source.
+
+    Use --to to force the target when the output extension is ambiguous.
+    """
+    # --- resolve the target format --------------------------------------------
+    target = (to_fmt or output_file.suffix.lstrip(".").lower())
+    if target == "xml":
+        target = "musicxml"
+    if target not in ("gp", "musicxml"):
+        click.echo(
+            f"Error: cannot infer target format from '{output_file.suffix}'. "
+            "Use --to {gp,musicxml} or a .gp/.musicxml/.xml output path.",
+            err=True,
+        )
+        sys.exit(1)
+
+    # --- parse the source -----------------------------------------------------
+    try:
+        adapter = get_adapter(input_file)
+        events = adapter.parse(input_file)
+    except (UnsupportedFormatError, ParseError) as exc:
+        click.echo(f"Error: {exc}", err=True)
+        sys.exit(1)
+    if not events:
+        click.echo("No notes found.", err=True)
+        sys.exit(1)
+
+    # --- target: Guitar Pro ---------------------------------------------------
+    # Generating a .gp from scratch is not implemented yet, so GP output is only
+    # possible by re-annotating a .gp source (the 'finger' path).
+    if target == "gp":
+        if input_file.suffix.lower() != ".gp":
+            click.echo(
+                "Error: conversion to Guitar Pro is only supported from a .gp "
+                "source (generating a .gp from scratch is not yet implemented).",
+                err=True,
+            )
+            sys.exit(1)
+        payload, _ = _guarded_pipeline_result(events, mode)
+        if not payload.results:
+            click.echo("No valid fingering states could be generated.", err=True)
+            sys.exit(1)
+        _write_guarded_gp_file(input_file, output_file, payload, quiet=quiet)
+        return
+
+    # --- target: MusicXML -----------------------------------------------------
+    auto_title, auto_artist = _auto_title_artist(input_file)
+    track_name: str = getattr(adapter, "track_name", "") or ""
+    beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
+    time_denominator = int(getattr(adapter, "time_denominator", 4) or 4)
+
+    if no_fingering:
+        results: list[FingeringResult] = _unfingered_results(events)
+    else:
+        payload, _ = _guarded_pipeline_result(events, mode)
+        results = payload.results or _unfingered_results(events)
+
+    write_musicxml(
+        results,
+        output_file,
+        title=title if title is not None else auto_title,
+        artist=artist if artist is not None else auto_artist,
+        instrument=track_name,
+        beats_per_measure=beats_per_measure,
+        time_denominator=time_denominator,
+    )
+    if not quiet:
+        fingered = "fingered" if not no_fingering else "notes-only"
+        click.echo(
+            f"MusicXML written to '{output_file}' "
+            f"({len(results)} note(s), {fingered}, "
+            f"{_time_signature_label(beats_per_measure, time_denominator)})."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -609,7 +1046,7 @@ def formats() -> None:
     type=click.Path(file_okay=False),
     help="Directory containing score files to browse (default: ./partitions).",
 )
-@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+@click.option("--host", default="localhost", show_default=True, help="Bind address.")
 def web(port: int, fixtures_dir: str, host: str) -> None:
     """Launch the interactive Songsterr-style web tab viewer.
 
@@ -629,7 +1066,10 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
 
     from fretwise.web.app import create_app
 
-    app = create_app(Path(fixtures_dir).resolve())
+    app = create_app(
+        Path(fixtures_dir).resolve(),
+        allowed_hosts=_web_allowed_hosts(host),
+    )
     click.echo(f"FretWise web -> http://{host}:{port}")
     click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
     click.echo("Press Ctrl+C to stop.\n")
@@ -646,7 +1086,7 @@ def web(port: int, fixtures_dir: str, host: str) -> None:
     type=click.Path(file_okay=False),
     help="Directory containing score files to browse (default: ./partitions).",
 )
-@click.option("--host", default="127.0.0.1", show_default=True, help="Bind address.")
+@click.option("--host", default="localhost", show_default=True, help="Bind address.")
 def gui(port: int, fixtures_dir: str, host: str) -> None:
     """Launch the web GUI and open it in the default browser.
 
@@ -671,7 +1111,10 @@ def gui(port: int, fixtures_dir: str, host: str) -> None:
     from fretwise.web.app import create_app
 
     url = f"http://{host}:{port}"
-    app = create_app(Path(fixtures_dir).resolve())
+    app = create_app(
+        Path(fixtures_dir).resolve(),
+        allowed_hosts=_web_allowed_hosts(host),
+    )
     click.echo(f"FretWise GUI -> {url}")
     click.echo(f"Score directory: {Path(fixtures_dir).resolve()}")
     click.echo("Press Ctrl+C to stop.\n")
@@ -681,8 +1124,74 @@ def gui(port: int, fixtures_dir: str, host: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# hash-password
+# ---------------------------------------------------------------------------
+
+
+@main.command(name="hash-password")
+@click.option(
+    "--stdin", "from_stdin", is_flag=True, default=False,
+    help="Read the password from stdin (one line) instead of prompting.",
+)
+def hash_password_cmd(from_stdin: bool) -> None:
+    """Hash an admin password for FRETWISE_ADMIN_PASSWORD_HASH.
+
+    \b
+    Prompts for a password (not echoed) and prints its PBKDF2 hash. Paste the
+    hash into the FRETWISE_ADMIN_PASSWORD_HASH environment variable together
+    with FRETWISE_ADMIN_EMAIL to enable a local admin login (no Google needed).
+    The plaintext password is never stored or printed.
+
+    \b
+    Example:
+      export FRETWISE_ADMIN_EMAIL=me@example.com
+      export FRETWISE_ADMIN_PASSWORD_HASH="$(fretwise hash-password)"
+    """
+    import getpass
+    import sys
+
+    from fretwise.auth.passwords import hash_password
+
+    if from_stdin:
+        password = sys.stdin.readline().rstrip("\n")
+    else:
+        password = getpass.getpass("Password: ")
+        confirm = getpass.getpass("Confirm: ")
+        if password != confirm:
+            click.echo("Error: passwords do not match.", err=True)
+            raise SystemExit(1)
+    if len(password) < 8:
+        click.echo("Error: password must be at least 8 characters.", err=True)
+        raise SystemExit(1)
+    click.echo(hash_password(password))
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
+
+def _web_allowed_hosts(host: str) -> list[str] | None:
+    """Compute the Host-header allowlist for the web server.
+
+    Loopback binds keep the secure loopback-only default. A concrete bind
+    address is added to the allowlist so the server stays reachable. Binding
+    to ``0.0.0.0`` exposes the (unauthenticated) API on every interface, so we
+    warn and defer to ``FRETWISE_ALLOWED_HOSTS`` (returning ``None`` lets
+    ``create_app`` read that env var) rather than silently trusting all hosts.
+    """
+    loopback = {"127.0.0.1", "localhost", "::1", ""}
+    if host in loopback:
+        return None  # create_app applies the loopback-only default / env var
+    if host == "0.0.0.0":  # noqa: S104 - user explicitly opted into all interfaces
+        click.echo(
+            "Warning: binding to 0.0.0.0 exposes the unauthenticated API on all "
+            "interfaces. Set FRETWISE_ALLOWED_HOSTS to the hostname(s) clients "
+            "use (or '*' to disable the Host-header guard).",
+            err=True,
+        )
+        return None
+    return ["localhost", "127.0.0.1", "[::1]", "testserver", host]
 
 
 _NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
@@ -742,15 +1251,52 @@ def _run_core_pipeline_for_events(
         track_name=getattr(adapter, "track_name", "") or "",
         beats_per_measure=source_beats_per_measure,
         time_denominator=int(getattr(adapter, "time_denominator", 4) or 4),
+        key_signature_fifths=int(getattr(adapter, "key_signature_fifths", 0) or 0),
         has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=dict(getattr(adapter, "section_markers", {}) or {}),
         chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
         chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),
+        measure_time_signatures=dict(getattr(adapter, "measure_time_signatures", {}) or {}),
     )
     return run_core_pipeline_from_raw(
         raw_score,
         representation_mode=representation_mode,
     )
+
+
+def _auto_title_artist(path: Path) -> tuple[str, str]:
+    """Parse an ``Artist-Title-MM-DD-YYYY`` style stem into ``(title, artist)``.
+
+    Falls back to ``(stem, "")`` when the stem has no ``Artist-Title`` split.
+    """
+    clean_stem = re.sub(r"-\d{2}-\d{2}-\d{4}$", "", path.stem).strip()
+    parts = clean_stem.split("-", 1)
+    if len(parts) == 2:
+        return parts[1].strip(), parts[0].strip()
+    return clean_stem, ""
+
+
+def _unfingered_results(events: list[Any]) -> list[FingeringResult]:
+    """Wrap NoteEvents as un-fingered FingeringResults (no optimizer run).
+
+    The MusicXML writer consumes ``FingeringResult`` objects; for ``--no-fingering``
+    we pair each event with a placeholder state. The writer skips the
+    ``<technical>`` block for ``string_num <= 0``, so these render as plain staff
+    notation with no tablature.
+    """
+    placeholder = FingeringState(
+        string_num=0, fret=0, finger=Finger.OPEN, hand_position=1,
+    )
+    return [
+        FingeringResult(note_id=i, note_event=ev, state=placeholder, cost=0.0)
+        for i, ev in enumerate(events)
+    ]
+
+
+def _time_signature_label(beats_per_measure: float, time_denominator: int) -> str:
+    """Human-readable meter from quarter-beats + denominator, e.g. (3.0, 8) → '6/8'."""
+    numerator = max(1, round(beats_per_measure * time_denominator / 4.0))
+    return f"{numerator}/{time_denominator}"
 
 
 def _results_to_json(results: list[FingeringResult]) -> str:
@@ -786,3 +1332,7 @@ def _results_to_json(results: list[FingeringResult]) -> str:
 
 def _print_json(results: list[FingeringResult]) -> None:
     click.echo(_results_to_json(results))
+
+
+if __name__ == "__main__":
+    main()

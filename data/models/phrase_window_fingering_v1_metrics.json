@@ -1,0 +1,77 @@
+{
+  "schema_version": "fretwise-ml-v2",
+  "model_name": "phrase_window_fingering_v1",
+  "validation_metrics_train_split": {
+    "per_note_finger_accuracy": 0.6780942762744285,
+    "exact_window_match_rate": 0.23649995318289438,
+    "pinky_overuse_rate": 0.09657241092308796,
+    "anchor_head_accuracy": 0.9700236760791343,
+    "per_slot_metrics": {
+      "slot_0": {
+        "accuracy": 0.6579140972993218,
+        "n_pinky_true": 68094,
+        "n_pinky_pred": 73236,
+        "pinky_fpr": 0.10702687254808567,
+        "pinky_fnr": 0.2874702616970658,
+        "nll": 0.8353922775079039
+      },
+      "slot_1": {
+        "accuracy": 0.6880442488529809,
+        "n_pinky_true": 67873,
+        "n_pinky_pred": 70574,
+        "pinky_fpr": 0.08838784753615414,
+        "pinky_fnr": 0.2612379001959542,
+        "nll": 0.7677568576110817
+      },
+      "slot_2": {
+        "accuracy": 0.6939733008734734,
+        "n_pinky_true": 67572,
+        "n_pinky_pred": 70653,
+        "pinky_fpr": 0.08786247537414026,
+        "pinky_fnr": 0.2553720475936779,
+        "nll": 0.7548293808357895
+      },
+      "slot_3": {
+        "accuracy": 0.6886261185944167,
+        "n_pinky_true": 67964,
+        "n_pinky_pred": 71582,
+        "pinky_fpr": 0.09150394682176984,
+        "pinky_fnr": 0.2578718144900241,
+        "nll": 0.7663343982344073
+      },
+      "slot_4": {
+        "accuracy": 0.6619136157519496,
+        "n_pinky_true": 67850,
+        "n_pinky_pred": 73663,
+        "pinky_fpr": 0.10809910634727016,
+        "pinky_fnr": 0.2826529108327192,
+        "nll": 0.8271218234796929
+      }
+    }
+  },
+  "golden_set_v1_metrics": {
+    "_comment": "rev2: CANONICAL numbers under the spec inference protocol (sliding window stride=1 + overlap-averaging + model-selected anchor, alpha=1.0). Cross-verified: GDS ran FretWise's eval_phrase_window_golden.py and reproduced these exactly. Supersedes the rev1 single-window/no-overlap/alpha=0.2 numbers (per_note 0.5088), which were a non-canonical harness artifact — NOT a model difference (anchor_accuracy matched all along).",
+    "n_cases": 13,
+    "n_evaluated": 13,
+    "per_note_accuracy": 0.6780,
+    "exact_window_match_rate": 0.1538,
+    "anchor_accuracy": 0.8571,
+    "pinky_false_positive_rate": 0.1455,
+    "counts": {
+      "per_note": "40/59",
+      "exact_window": "2/13",
+      "anchor": "42/49",
+      "pinky_false_positive": "8/55"
+    }
+  },
+  "eval_protocol": {
+    "status": "CANONICAL — both sides agree (GDS-025)",
+    "windowing": "Slide a window of 5 notes (stride=1) across the phrase; non-chord notes only.",
+    "anchor": "Model-SELECTED per window (not GT-imposed): argmax of anchor_prob - alpha*mean(slot_NLL), alpha=1.0.",
+    "decoding": "Average overlapping per-note softmaxes (spec step 6) before argmax — phrase-level smoothing.",
+    "chord_notes": "Treated SEQUENTIALLY (onset=order). Confirmed identical on both sides — NOT a source of divergence.",
+    "scoring_scope": "ALL notes of each golden case (not just the first window).",
+    "reference_impl": "fretwise/scripts/eval_phrase_window_golden.py (LearnedPhraseWindowFingerer.predict_sequence); GDS golden harness updated to match in scripts/eval_phrase_window_v1.py.",
+    "rev1_note": "The deprecated rev1 GDS harness scored only the first <=5 notes of each case, no overlap-averaging, alpha=0.2."
+  }
+}

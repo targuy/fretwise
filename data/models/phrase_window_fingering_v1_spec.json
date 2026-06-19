@@ -1,0 +1,169 @@
+{
+  "model_name": "phrase_window_fingering_v1",
+  "model_version": "1.0.0",
+  "status": "released-baseline",
+  "status_note": "This IS the shipped, trained v1 (1,495,179 training rows; see training_dataset_artifacts). 'baseline' denotes the 5-head XGBoost architecture, NOT a scaffold or placeholder. Renamed from 'trained-baseline' for clarity (FW-023 question #50).",
+  "spec_revision": 2,
+  "spec_changelog": [
+    "rev2 (2026-06-09): DOC-ONLY. Model ONNX bytes, feature code, and feature VALUES are unchanged. (1) Added explicit has(k) formulas for the 5 win_* heuristic features + a feature_formula_reference block — clarifies what build_window_feature_vector already computes. (2) Completed candidate_anchor_generation: union over ALL fretted notes + the {lowest,highest,median} reduction rule (answers FW-023 #49). (3) status 'trained-baseline' -> 'released-baseline' (FW-023 #50)."
+  ],
+  "training_date": "2026-05-21",
+  "schema_version": "fretwise-ml-v2",
+  "fretwise_commit_reference": "refactor/p0-notation-fixes@621dcf8 (FW head at delivery time)",
+  "dataset_version": "gds-v0.4",
+  "training_dataset_artifacts": {
+    "input_file": "data/processed/sequential_fingering_training.json",
+    "source_breakdown": {
+      "classclef_pieces": "ClassClef sequential fingering (3000+ classical pieces with GPIF LeftFingering)",
+      "gaps_pieces": "GAPS classical guitar fingering dataset"
+    },
+    "rows_generated": 1495179,
+    "classclef_rows": 1289027,
+    "gaps_rows": 206152,
+    "windows_skipped_no_finger": 0
+  },
+  "model_training_command": "python scripts/train_phrase_window_v1.py",
+  "feature_extractor_module": "src.features.phrase_window_features",
+  "string_convention": {
+    "fretwise_facing": "1-based, 1=high_e, 6=low_E",
+    "internal_features": "0-based, 0=high_e, 5=low_E",
+    "conversion": "subtract 1 when consuming FretWise NoteEvent.string_num",
+    "note": "Same internal convention as transition_cost_v3 (unified 0=high_e)."
+  },
+  "finger_classes": ["open", "index", "middle", "ring", "pinky"],
+  "finger_class_indices": {"open": 0, "index": 1, "middle": 2, "ring": 3, "pinky": 4},
+  "window_size": 5,
+  "padding_value": -1.0,
+  "padding_strategy": "Right-pad short windows with PAD_VALUE in every per-note feature slot. Windows shorter than 3 notes are NOT recommended for inference (the model will degrade).",
+  "feature_layout": {
+    "per_note_slot_features": [
+      "n{slot}_string",
+      "n{slot}_fret",
+      "n{slot}_pitch",
+      "n{slot}_fret_rel_min",
+      "n{slot}_fret_rel_anchor",
+      "n{slot}_is_open",
+      "n{slot}_onset_delta",
+      "n{slot}_duration",
+      "n{slot}_is_repeated_pos",
+      "n{slot}_same_string_as_prev",
+      "n{slot}_same_fret_as_prev",
+      "n{slot}_has_legato"
+    ],
+    "window_level_features": [
+      "win_num_notes",
+      "win_min_fret",
+      "win_max_fret",
+      "win_fret_span",
+      "win_num_strings",
+      "win_string_span",
+      "win_contains_open",
+      "win_contains_chord",
+      "win_candidate_anchor",
+      "win_index_anchor_required",
+      "win_ring_natural_for_anchor_plus_2",
+      "win_pinky_natural_for_anchor_plus_3",
+      "win_pinky_used_without_lower_anchor",
+      "win_would_shift_hand_if_no_pinky"
+    ],
+    "total_feature_count": 74,
+    "feature_count_formula": "WINDOW_SIZE(5) * PER_NOTE_KEYS(12) + WINDOW_LEVEL_KEYS(14) = 60 + 14 = 74"
+  },
+  "feature_descriptions": {
+    "n{slot}_string": "0-based string index for note at window slot (0=high_e). PAD_VALUE=-1 if slot empty.",
+    "n{slot}_fret": "Fret of note at slot (0=open, 1..22 fretted). PAD_VALUE=-1.",
+    "n{slot}_pitch": "MIDI pitch of note at slot (0..127). PAD_VALUE=-1.",
+    "n{slot}_fret_rel_min": "fret - window_min_fret. Negative for open strings when window has fretted notes.",
+    "n{slot}_fret_rel_anchor": "fret - candidate_anchor. Positive when note is above the anchor.",
+    "n{slot}_is_open": "1 if fret==0, else 0. PAD_VALUE=-1.",
+    "n{slot}_onset_delta": "onset - window_first_onset (in beats).",
+    "n{slot}_duration": "Note duration in beats.",
+    "n{slot}_is_repeated_pos": "1 if an earlier slot in this window had the same (string, fret).",
+    "n{slot}_same_string_as_prev": "1 if same string as slot-1.",
+    "n{slot}_same_fret_as_prev": "1 if same fret as slot-1.",
+    "n{slot}_has_legato": "1 if note has hammer_on/pull_off/slide technique tag.",
+    "win_num_notes": "Number of real notes in the window (not counting padding).",
+    "win_min_fret": "min over fretted notes; 0 if all open.",
+    "win_max_fret": "max over fretted notes; 0 if all open.",
+    "win_fret_span": "max_fret - min_fret.",
+    "win_num_strings": "Count of distinct strings touched in the window.",
+    "win_string_span": "max_string - min_string.",
+    "win_contains_open": "1 if any note has fret==0.",
+    "win_contains_chord": "1 if any note has is_chord_member==true.",
+    "win_candidate_anchor": "The candidate anchor fret being scored for this row.",
+    "win_index_anchor_required": "has(0). 1 if any fretted note sits exactly on the anchor fret (anchor+0). NOTE: this is presence-of-a-note-AT-the-anchor, NOT win_min_fret==anchor.",
+    "win_ring_natural_for_anchor_plus_2": "has(2). 1 if any fretted note sits exactly on anchor+2. NOTE: exact presence, NOT max_fret>=anchor+2, and unrelated to win_contains_chord.",
+    "win_pinky_natural_for_anchor_plus_3": "has(3). 1 if any fretted note sits exactly on anchor+3. NOTE: exact presence, NOT max_fret>=anchor+3.",
+    "win_pinky_used_without_lower_anchor": "has(3) and not has(0) and not has(1). 1 if a note sits on anchor+3 while no note sits on the anchor or anchor+1 fret (PRIOR — model can override).",
+    "win_would_shift_hand_if_no_pinky": "has(3) and not has(2) and not has(1) and not has(0). 1 if a note sits on anchor+3 and nothing sits on anchor, anchor+1, or anchor+2 (no lower fret anchors the hand, so dropping the pinky note would force a shift)."
+  },
+  "feature_formula_reference": {
+    "note": "DOC-ONLY clarification added in spec_revision 2; these formulas describe what build_window_feature_vector already computes (unchanged since v1 training). has(k) := any fretted note in the window has fret == candidate_anchor + k.",
+    "win_index_anchor_required": "has(0)",
+    "win_ring_natural_for_anchor_plus_2": "has(2)",
+    "win_pinky_natural_for_anchor_plus_3": "has(3)",
+    "win_pinky_used_without_lower_anchor": "has(3) and not has(0) and not has(1)",
+    "win_would_shift_hand_if_no_pinky": "has(3) and not has(2) and not has(1) and not has(0)"
+  },
+  "feature_ranges": {
+    "fret": {"min": -1, "max": 22, "note": "-1 means PAD"},
+    "string": {"min": -1, "max": 5},
+    "pitch": {"min": -1, "max": 127},
+    "candidate_anchor": {"min": 1, "max": 22}
+  },
+  "input_schema": {
+    "format": "float32 array of shape [batch_size, 74] in the exact order produced by `src.features.phrase_window_features.feature_names(WINDOW_SIZE=5)`.",
+    "preprocessor": "src/features/phrase_window_features.py :: build_window_feature_vector(notes, candidate_anchor)"
+  },
+  "output_schema": {
+    "format": "Multi-head bundle. The ONNX file contains 5 finger-classifier heads (slot_0..slot_4) plus 1 anchor head.",
+    "outputs": [
+      {
+        "name": "slot{slot}_finger__probabilities",
+        "shape": "[batch_size, 5]",
+        "type": "softmax over finger classes [open, index, middle, ring, pinky]",
+        "interpretation": "Probability that note at window slot `slot` is fingered with class i, GIVEN the candidate anchor encoded in the input."
+      },
+      {
+        "name": "anchor_head__probability",
+        "shape": "[batch_size, 1]",
+        "type": "sigmoid",
+        "interpretation": "Probability that the candidate_anchor encoded in the input is the correct ground-truth anchor for this window."
+      }
+    ],
+    "usage_pattern": "For each candidate anchor in candidate_anchors(window), build a feature row, run the bundle, then aggregate cost = anchor_loss + sum(slot_finger_losses)."
+  },
+  "inference_protocol": {
+    "step_1": "Slide a window of `window_size` notes across the score (non-chord notes only).",
+    "step_2": "Compute candidate_anchors(window) -> list of up to 4 candidate frets.",
+    "step_3": "For each candidate, build feature vector and run the ONNX bundle.",
+    "step_4": "Pick the candidate that maximizes anchor_head_prob - alpha * mean(slot_finger_NLL_over_uncertain_slots) (alpha tunable, default 1.0).",
+    "step_5": "Decode the slot finger probabilities under the chosen anchor as the prediction for each note in the window.",
+    "step_6": "For overlapping windows (stride < window_size), average the per-note probabilities across windows before argmax — this gives smoothed phrase-level decisions."
+  },
+  "candidate_anchor_generation": {
+    "rule": "For EVERY fretted note in the window, candidate ∈ {fret-0, fret-1, fret-2, fret-3} intersected with [1, 22], deduplicated. This is the union over ALL fretted notes — NOT the {min, min-1, min-2, min-3} subset of the lowest note only.",
+    "reduction_when_over_max": "If the deduped union has more than max_candidates entries, keep exactly {lowest, highest, median} where median = sorted_candidates[n // 2]. (This is the only reason the union can exceed max_candidates yet the protocol still says 'up to 4'.)",
+    "all_open_default": 1,
+    "max_candidates": 4,
+    "reference_impl": "src/features/phrase_window_features.py :: candidate_anchors",
+    "worked_example": "Window with fretted frets {7,5} -> union {2,3,4,5,6,7} (6>4) -> reduced to {2,5,7}. Window with {2,2,2,4,2} -> {1,2,3,4} (exactly 4, no reduction) — which is why anchor 4 is a valid candidate and the 'apache_4_wrong' calibration case exists."
+  },
+  "training_sources": {
+    "primary": ["classclef_sequential_fingering.json", "gaps_sequential_fingering.json"],
+    "validation_holdout": "GAPS subset (sources flag = 0)",
+    "golden_set": "golden_set_v1.jsonl in this handoff dir — NOT used at training, only at evaluation"
+  },
+  "known_limitations": [
+    "v1 is a 5-head XGBoost baseline; it does not see across windows so phrase-level coherence relies on overlap-averaging at inference time.",
+    "Anchor head is binary (correct / incorrect) not ranked — for windows with multiple defensible anchors the scores may be close.",
+    "Trained on classical + acoustic sources; metal/jazz coverage limited until DadaGP integration ships.",
+    "Pinky-role priors are HEURISTICS encoded in the feature vector — the model can override them but they bias training when data is thin.",
+    "WINDOW_SIZE is fixed at 5 in v1. Phrases longer than 5 notes need overlapping windows."
+  ],
+  "biomechanical_fallback_contract": {
+    "fretwise_responsibility": "After ML prediction, FretWise MUST run the deterministic validator (same set of rules as in `src/processors/validator.py`). If any constraint is violated (same finger on different frets, span > MAX_FRET_SPAN, non-contiguous partial barre), fall back to rule-only fingering for that window.",
+    "invalid_prediction_target": "<= 0.5% before fallback, 0% after."
+  },
+  "calibration_file": "phrase_window_fingering_v1_calibration.json"
+}
