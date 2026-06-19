@@ -54,6 +54,8 @@ def _note(
     note_accidental: str | None = None,
     note_octave: int | None = None,
     is_tie_dest: bool = False,
+    tuplet_actual: int | None = None,
+    tuplet_normal: int | None = None,
 ) -> NoteEvent:
     return NoteEvent(
         pitch=pitch,
@@ -72,6 +74,8 @@ def _note(
         note_accidental=note_accidental,
         note_octave=note_octave,
         is_tie_dest=is_tie_dest,
+        tuplet_actual=tuplet_actual,
+        tuplet_normal=tuplet_normal,
     )
 
 
@@ -222,6 +226,119 @@ def test_canonical_to_render_scene_standard_contains_secondary_beam_for_mixed_gr
     assert 1 in levels
     assert 2 in levels
     assert svg.count("<polygon ") >= 2
+
+
+def test_canonical_to_render_scene_standard_draws_isolated_middle_secondary_beamlets() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=1.0 / 3.0,
+                string_hint=1,
+                fret_hint=0,
+                tuplet_actual=3,
+                tuplet_normal=2,
+            ),
+            _note(
+                pitch=66,
+                onset=1.0 / 3.0,
+                duration=1.0 / 6.0,
+                string_hint=1,
+                fret_hint=2,
+                tuplet_actual=3,
+                tuplet_normal=2,
+            ),
+            _note(
+                pitch=67,
+                onset=0.5,
+                duration=1.0 / 3.0,
+                string_hint=1,
+                fret_hint=3,
+                tuplet_actual=3,
+                tuplet_normal=2,
+            ),
+            _note(
+                pitch=69,
+                onset=5.0 / 6.0,
+                duration=1.0 / 6.0,
+                string_hint=1,
+                fret_hint=5,
+                tuplet_actual=3,
+                tuplet_normal=2,
+            ),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    secondary = [
+        recipe
+        for recipe in staff.layer_groups[1].recipe_instances
+        if recipe.recipe_id == "beam_group" and int(recipe.params.get("level", 1)) == 2
+    ]
+
+    assert len(secondary) >= 2
+    assert all(float(recipe.params["x1"]) > float(recipe.params["x0"]) for recipe in secondary)
+
+
+def test_canonical_to_render_scene_beams_clear_chord_noteheads_in_standard_planes() -> None:
+    for mode in (RepresentationMode.STANDARD, RepresentationMode.STANDARD_TAB):
+        for chord_pitches in ([28, 40, 52], [52, 64, 76]):
+            events = [
+                _note(pitch=pitch, onset=onset, duration=0.5, string_hint=1, fret_hint=0)
+                for onset in (0.0, 0.5)
+                for pitch in chord_pitches
+            ]
+            raw_score = legacy_parse_to_raw_score(
+                Path("beam-clearance.gp"),
+                source_format="gpif",
+                events=events,
+                beats_per_measure=4.0,
+            )
+            result = run_core_pipeline_from_raw(raw_score, representation_mode=mode)
+            staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+            notes_layer = staff.layer_groups[1]
+            noteheads = [
+                glyph
+                for glyph in notes_layer.glyph_instances
+                if glyph.glyph_id == "notehead"
+            ]
+            stems = [
+                recipe for recipe in notes_layer.recipe_instances if recipe.recipe_id == "stem_line"
+            ]
+            beam = next(
+                recipe
+                for recipe in notes_layer.recipe_instances
+                if recipe.recipe_id == "beam_group" and int(recipe.params.get("level", 1)) == 1
+            )
+
+            heads_by_onset: dict[float, list[float]] = {}
+            for notehead in noteheads:
+                onset = round(float(notehead.metadata.get("onset", 0.0)), 6)
+                heads_by_onset.setdefault(onset, []).append(notehead.y)
+            staff_spacing = float(noteheads[0].metadata.get("staff_spacing", 10.0))
+            beam_direction = str(beam.params.get("direction", "up"))
+            beam_thickness = float(beam.params.get("thickness", 2.5))
+
+            for stem in stems:
+                onset = round(float(stem.metadata.get("onset", 0.0)), 6)
+                stem_x = float(stem.params.get("x", 0.0))
+                beam_y = scene_builders._beam_y_at_x(
+                    stem_x,
+                    x0=float(beam.params.get("x0", 0.0)),
+                    x1=float(beam.params.get("x1", 0.0)),
+                    y0=float(beam.params.get("y0", 0.0)),
+                    y1=float(beam.params.get("y1", 0.0)),
+                )
+                note_ys = heads_by_onset[onset]
+                if beam_direction == "up":
+                    closest_beam_edge = beam_y + beam_thickness
+                    assert min(note_ys) - closest_beam_edge >= staff_spacing - 0.1
+                else:
+                    closest_beam_edge = beam_y - beam_thickness
+                    assert closest_beam_edge - max(note_ys) >= staff_spacing - 0.1
 
 
 def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() -> None:
@@ -731,6 +848,174 @@ def test_tuplet_brackets_are_mode_specific_between_standard_and_tab_rhythm_build
     assert float(tab_rhythm_stems[0].params.get("width", 0.0)) > 0.8
 
 
+def test_standard_tuplet_brackets_split_on_beat_windows() -> None:
+    layer = LayerGroup(layer_id="standard")
+    tuplet_by_onset = {
+        round(idx / 3.0, 6): (3, 2)
+        for idx in range(6)
+    }
+    scene_builders._append_standard_rhythm(
+        layer,
+        measure_number=1,
+        beats_per_measure=4,
+        time_denominator=4,
+        events=[
+            (100.0 + idx * 20.0, idx / 3.0, 1.0 / 3.0, 60.0, "up")
+            for idx in range(6)
+        ],
+        stem_top_y=20.0,
+        stem_bottom_y=100.0,
+        staff_spacing=8.0,
+        stem_offset=3.3,
+        tuplet_by_onset=tuplet_by_onset,
+    )
+
+    tuplets = [r for r in layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
+
+    assert len(tuplets) == 2
+    assert [r.params["number"] for r in tuplets] == [3, 3]
+    assert tuplets[0].params["x1"] < tuplets[1].params["x0"]
+
+
+def test_tuplet_bracket_runs_require_complete_gp_time_window() -> None:
+    tuplet_by_onset = {
+        0.0: (3, 2),
+        round(1.0 / 3.0, 6): (3, 2),
+        0.5: (3, 2),
+        round(5.0 / 6.0, 6): (3, 2),
+    }
+    mixed_triplet_beat = [
+        (10.0, 0.0, 1.0 / 3.0),
+        (20.0, 1.0 / 3.0, 1.0 / 6.0),
+        (30.0, 0.5, 1.0 / 3.0),
+        (40.0, 5.0 / 6.0, 1.0 / 6.0),
+    ]
+    incomplete_tuplet = mixed_triplet_beat[:1]
+    dotted_middle_triplet_beat = [
+        (10.0, 1.0, 1.0 / 3.0),
+        (20.0, 4.0 / 3.0, 0.5),
+        (30.0, 11.0 / 6.0, 1.0 / 6.0),
+    ]
+    quarter_sized_final_triplet_beat = [
+        (10.0, 3.0, 1.0 / 3.0),
+        (20.0, 10.0 / 3.0, 2.0 / 3.0),
+    ]
+
+    assert scene_builders._tuplet_bracket_runs(
+        mixed_triplet_beat, tuplet_by_onset
+    ) == [(10.0, 20.0, 3), (30.0, 40.0, 3)]
+    assert scene_builders._tuplet_bracket_runs(incomplete_tuplet, tuplet_by_onset) == []
+    assert scene_builders._tuplet_bracket_runs(
+        dotted_middle_triplet_beat,
+        {
+            1.0: (3, 2),
+            round(4.0 / 3.0, 6): (3, 2),
+            round(11.0 / 6.0, 6): (3, 2),
+        },
+    ) == [(10.0, 30.0, 3)]
+    assert scene_builders._tuplet_bracket_runs(
+        quarter_sized_final_triplet_beat,
+        {
+            3.0: (3, 2),
+            round(10.0 / 3.0, 6): (3, 2),
+        },
+    ) == [(10.0, 20.0, 3)]
+
+
+def test_tuplet_bracket_runs_match_aerosmith_intro_measure_pattern() -> None:
+    durations = [
+        1.0 / 3.0,
+        1.0 / 6.0,
+        1.0 / 3.0,
+        1.0 / 6.0,
+        1.0 / 3.0,
+        0.5,
+        1.0 / 6.0,
+        1.0 / 3.0,
+        1.0 / 6.0,
+        1.0 / 3.0,
+        1.0 / 6.0,
+        1.0 / 3.0,
+        2.0 / 3.0,
+    ]
+    onsets: list[float] = []
+    onset = 0.0
+    for duration in durations:
+        onsets.append(onset)
+        onset += duration
+    group = [
+        (float(idx), round(onset, 6), duration)
+        for idx, (onset, duration) in enumerate(zip(onsets, durations))
+    ]
+    tuplet_by_onset = {round(onset, 6): (3, 2) for onset in onsets}
+
+    assert scene_builders._tuplet_bracket_runs(group, tuplet_by_onset) == [
+        (0.0, 1.0, 3),
+        (2.0, 3.0, 3),
+        (4.0, 6.0, 3),
+        (7.0, 8.0, 3),
+        (9.0, 10.0, 3),
+        (11.0, 12.0, 3),
+    ]
+
+
+def test_standard_tuplet_bracket_emits_for_unbeamed_complete_time_window() -> None:
+    layer = LayerGroup(layer_id="standard")
+    tuplet_by_onset = {
+        3.0: (3, 2),
+        round(10.0 / 3.0, 6): (3, 2),
+    }
+    scene_builders._append_standard_rhythm(
+        layer,
+        measure_number=1,
+        beats_per_measure=4,
+        time_denominator=4,
+        events=[
+            (100.0, 3.0, 1.0 / 3.0, 60.0, "up"),
+            (130.0, 10.0 / 3.0, 2.0 / 3.0, 62.0, "up"),
+        ],
+        stem_top_y=20.0,
+        stem_bottom_y=100.0,
+        staff_spacing=8.0,
+        stem_offset=3.3,
+        tuplet_by_onset=tuplet_by_onset,
+    )
+
+    tuplets = [r for r in layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
+
+    assert len(tuplets) == 1
+    assert tuplets[0].params["x0"] == 103.3
+    assert tuplets[0].params["x1"] == 133.3
+
+
+def test_standard_notehead_uses_notated_tuplet_duration_for_dots() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(
+                pitch=64,
+                onset=0.0,
+                duration=0.5,
+                string_hint=1,
+                fret_hint=0,
+                tuplet_actual=3,
+                tuplet_normal=2,
+            ),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    notehead = next(
+        glyph for glyph in staff.layer_groups[1].glyph_instances if glyph.glyph_id == "notehead"
+    )
+
+    assert notehead.metadata["duration"] == 0.5
+    assert notehead.metadata["notated_duration"] == 0.75
+    assert notehead.metadata["duration_class"] == "eighth"
+    assert notehead.metadata["dot_count"] == 1
+
+
 def test_svg_tuplet_brackets_use_distinct_styles_for_standard_tab_and_tab_rhythm() -> None:
     standard_layer = LayerGroup(
         layer_id="standard",
@@ -759,7 +1044,7 @@ def test_svg_tuplet_brackets_use_distinct_styles_for_standard_tab_and_tab_rhythm
                     "x1": 60.0,
                     "y": 30.0,
                     "number": 3,
-                    "direction": "up",
+                    "direction": "down",
                     "style": "tablature_rhythm",
                 },
                 metadata={"style": "tablature_rhythm"},
@@ -834,6 +1119,10 @@ def test_svg_tuplet_brackets_use_distinct_styles_for_standard_tab_and_tab_rhythm
         )
     )
 
+    assert 'x1="17.50" y1="30.00" x2="17.50" y2="33.00"' in standard_svg
+    assert 'x1="62.50" y1="30.00" x2="62.50" y2="33.00"' in standard_svg
+    assert 'x1="16.50" y1="30.00" x2="16.50" y2="25.80"' in tab_rhythm_svg
+    assert 'x1="63.50" y1="30.00" x2="63.50" y2="25.80"' in tab_rhythm_svg
     assert 'font-size="8"' in standard_svg
     assert 'font-weight="bold"' not in standard_svg
     assert 'font-size="10"' in tab_rhythm_svg

@@ -329,6 +329,8 @@ const handVizPopout = $('#hand-viz-popout');
 const handVizDrag   = $('#hand-viz-drag');
 let handVizPopupWindow = null;
 let _hand3dFrameLoaded = false;
+const HAND_VIZ_SEEK_POST_MS = 1000 / 60;
+let _lastHandVizSeekPostMs = 0;
 
 // ── Page routing ────────────────────────────────────────────────────
 
@@ -639,7 +641,7 @@ function _renderPager(pageCount) {
 // ── Library multi-select + batch fingering calculation ───────────────────────
 
 // Algo version must match FINGERING_ALGO_VERSION in app.py (bumped on pipeline changes).
-const FINGERING_ALGO_VERSION = '2.0';
+const FINGERING_ALGO_VERSION = '2.1';
 
 function _updateSelectionBar() {
   const bar = $('#lib-selection-bar');
@@ -1570,7 +1572,7 @@ function applyRepresentationModeView(data) {
     if (frameReady) {
       window.requestAnimationFrame(() => {
         _postHandVizData();
-        _postHandVizTime();
+        _postHandVizTime(true);
       });
     }
   }
@@ -1640,7 +1642,10 @@ function _syncCoreSvgFingering() {
   if (!svg) return;
 
   // Clear previous finger classes from all masks
-  const FINGER_CLASSES = ['fw-finger-1', 'fw-finger-2', 'fw-finger-3', 'fw-finger-4'];
+  const FINGER_CLASSES = [
+    'fw-finger-1', 'fw-finger-2', 'fw-finger-3', 'fw-finger-4',
+    'fw-finger-impossible', 'fw-finger-suspect',
+  ];
   svg.querySelectorAll('.fw-tab-note-mask').forEach((rect) => {
     rect.classList.remove(...FINGER_CLASSES);
   });
@@ -1672,13 +1677,17 @@ function _syncCoreSvgFingering() {
       continue;
     }
 
+    const reviewSeverity = String(resultNote.review_severity || 'ok');
+    const reviewClass = reviewSeverity === 'impossible'
+      ? 'fw-finger-impossible'
+      : (reviewSeverity === 'suspect' ? 'fw-finger-suspect' : '');
     const fc = fingerClassMap[resultNote.finger];
-    if (!fc) continue;
+    if (!reviewClass && !fc) continue;
 
     // The mask rect is the element immediately before the note text in the SVG
     const maskRect = noteText.previousElementSibling;
     if (maskRect && maskRect.classList.contains('fw-tab-note-mask')) {
-      maskRect.classList.add(fc);
+      maskRect.classList.add(reviewClass || fc);
     }
   }
 }
@@ -1704,6 +1713,24 @@ function _syncCoreSvgAnnotations() {
   const NS = 'http://www.w3.org/2000/svg';
   const mk = (tag) => document.createElementNS(NS, tag);
   const push = (el) => { el.classList.add('fw-svg-annotation'); svg.appendChild(el); return el; };
+  const pushText = (content, x, y, {
+    size = '6.5',
+    weight = '700',
+    fill = '#555555',
+    anchor = 'middle',
+    family = 'Inter, sans-serif',
+  } = {}) => {
+    const t = mk('text');
+    t.setAttribute('x', x.toFixed(2));
+    t.setAttribute('y', y.toFixed(2));
+    t.setAttribute('font-family', family);
+    t.setAttribute('font-size', size);
+    t.setAttribute('font-weight', weight);
+    t.setAttribute('fill', fill);
+    t.setAttribute('text-anchor', anchor);
+    t.textContent = content;
+    return push(t);
+  };
 
   const byOnsetString = _buildResultByOnsetString(renderer.data?.results || []);
   const tabNotes = Array.from(svg.querySelectorAll('text.fw-tab-note'));
@@ -1763,7 +1790,36 @@ function _syncCoreSvgAnnotations() {
       }
     }
 
-    if (ok <= 0) continue; // open strings skip technique labels
+    // ── Always-visible note-state effects. These mirror the Tab canvas
+    // renderer so every audible playback effect also leaves a visible mark
+    // in Staff/Mixed SVG mode.
+    if (r.muted) {
+      pushText('X', x, y + 2, { size: '9', fill: '#555555' });
+    } else if (r.ghost) {
+      pushText('(', x - 5, y + 2, { size: '9', fill: '#888888', weight: '600' });
+      pushText(')', x + 5, y + 2, { size: '9', fill: '#888888', weight: '600' });
+    }
+
+    let lowerLabelY = y + 12;
+    const pushLowerLabel = (content, fill) => {
+      pushText(content, x, lowerLabelY, { size: '5.5', fill });
+      lowerLabelY += 8;
+    };
+    if (r.palm_muted) pushLowerLabel('P.M.', '#6b6b55');
+    if (r.let_ring) pushLowerLabel('L.R.', '#2c7a45');
+    if (r.harmonic_type) {
+      const hLabel = {
+        natural: 'N.H.',
+        pinch: 'P.H.',
+        artificial: 'A.H.',
+        harp: 'H.H.',
+      }[r.harmonic_type] || 'Harm.';
+      pushLowerLabel(hLabel, '#6a4c93');
+    }
+
+    if (r.tremolo_picking) {
+      pushText('///', x + 6, y - 1, { size: '7', fill: '#37474f' });
+    }
 
     // ── Hammer-on / Pull-off label
     if (r.articulation === 'hammer_on' || r.articulation === 'pull_off') {
@@ -1848,6 +1904,45 @@ function _syncCoreSvgAnnotations() {
       t.setAttribute('font-size', '8'); t.setAttribute('font-weight', '700');
       t.setAttribute('fill', '#c0392b'); t.setAttribute('text-anchor', 'middle');
       t.textContent = '>';
+      push(t);
+    }
+
+    // ── Staccato dot
+    if (r.staccato || r.articulation === 'staccato') {
+      const c = mk('circle');
+      c.setAttribute('cx', x.toFixed(2));
+      c.setAttribute('cy', (y - 6).toFixed(2));
+      c.setAttribute('r', '1.2');
+      c.setAttribute('fill', '#333333');
+      push(c);
+    }
+
+    // ── Strum direction / right-hand techniques
+    if (r.strum_direction === 'up' || r.strum_direction === 'down') {
+      const t = mk('text');
+      t.setAttribute('x', (x - 6).toFixed(2));
+      t.setAttribute('y', (y - 10).toFixed(2));
+      t.setAttribute('font-family', 'Inter, sans-serif');
+      t.setAttribute('font-size', '7');
+      t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', '#37474f');
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = r.strum_direction === 'up' ? 'V' : '\u22a4';
+      push(t);
+    }
+
+    const rhLabel = r.slap ? 'S'
+      : (r.pop ? 'P' : (r.golpe ? '*' : (r.rasgueado ? 'Rasp.' : '')));
+    if (rhLabel) {
+      const t = mk('text');
+      t.setAttribute('x', (x + 8).toFixed(2));
+      t.setAttribute('y', (y - 10).toFixed(2));
+      t.setAttribute('font-family', 'Inter, sans-serif');
+      t.setAttribute('font-size', rhLabel === 'Rasp.' ? '5.5' : '7');
+      t.setAttribute('font-weight', '700');
+      t.setAttribute('fill', r.golpe || r.rasgueado ? '#795548' : '#1565c0');
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = rhLabel;
       push(t);
     }
   }
@@ -2171,7 +2266,7 @@ function initRenderer(data) {
   playback.onStop = () => {
     updatePlayButton(false);
     stopCursorLoop();
-    _postHandVizTime();
+    _postHandVizTime(true);
   };
   // Feed the floating hand-viz panel with the current playhead time on every
   // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
@@ -3821,7 +3916,7 @@ function _postHandVizData() {
   }
   // After reinstalling data, also push current time so the iframe starts
   // at the right place instead of t=0.
-  _postHandVizTime();
+  _postHandVizTime(true);
 }
 
 function _reloadHandVizFrame() {
@@ -3829,12 +3924,17 @@ function _reloadHandVizFrame() {
   handVizFrame.src = `/static/hand_viz.html?v=${Date.now()}`;
 }
 
-function _postHandVizTime() {
+function _postHandVizTime(force = false) {
   const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
   const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
   const hand3dVisible = _isHand3dViewVisible() && _ensureHand3dViewFrame();
   if (!panelVisible && !popupVisible && !hand3dVisible) return;
   if (!playback || typeof playback.getCurrentTimeSec !== 'function') return;
+  const now = performance.now();
+  if (!force && playback.isPlaying && now - _lastHandVizSeekPostMs < HAND_VIZ_SEEK_POST_MS) {
+    return;
+  }
+  _lastHandVizSeekPostMs = now;
   const message = {
     type: 'fretwise-hand-seek',
     t: playback.getCurrentTimeSec(),
@@ -3857,7 +3957,7 @@ function _openHandVizPopup() {
     handVizPopupWindow.focus();
   }
   setTimeout(_postHandVizData, 350);
-  setTimeout(_postHandVizTime, 450);
+  setTimeout(() => _postHandVizTime(true), 450);
 }
 
 function _toggleHandViz() {

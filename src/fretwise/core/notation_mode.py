@@ -95,12 +95,13 @@ def system_height_for_mode(mode: str) -> float:
 
     Returns:
         Appropriate system height in layout units.  ``standard_tablature``
-        (the default) returns ``168.0`` to accommodate staff + gap + tab +
-        rhythm zone.  ``standard``-only needs only ``80.0``.
+        (the default) returns ``190.0`` to accommodate staff + gap + tab +
+        rhythm zone plus tuplet brackets above beamed passages.
+        ``standard``-only needs ``96.0`` for the same upper-bracket clearance.
         ``tablature`` and ``tablature_rhythm`` use ``130.0``.
     """
     if mode == _MODE_STANDARD:
-        return 80.0
+        return 96.0
     if mode in (_MODE_TAB, _MODE_TAB_RHYTHM):
         return 130.0
-    return 168.0  # standard_tablature (default)
+    return 190.0  # standard_tablature (default)

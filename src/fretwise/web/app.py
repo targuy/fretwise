@@ -1024,6 +1024,10 @@ def _register_routes(app: FastAPI) -> None:
 
         auto_title, auto_artist = _infer_title_artist(filepath)
 
+        serialized_results = _annotate_serialized_review_status(
+            serialized_results, audit,
+        )
+
         payload: dict[str, Any] = {
             "title": auto_title,
             "artist": auto_artist,
@@ -2807,8 +2811,8 @@ _PHRASE_WINDOW_FINGERER_LOADED: bool = False
 
 # Current fingering algorithm version — bump this when the pipeline changes
 # significantly enough that existing saved fingerings should be recalculated.
-# "2.0" = phrase_window_v2 + pinky demotion belt (GDS-026, activated 2026-06-12).
-FINGERING_ALGO_VERSION = "2.0"
+# "2.1" = preserve source-tab notes with no valid generated state as red review items.
+FINGERING_ALGO_VERSION = "2.1"
 
 # In-memory LRU cache for /api/solve responses. Keyed by (file, mtime, params)
 # so it auto-invalidates when the source file is edited. Bounded entry count
@@ -3114,6 +3118,53 @@ def _safe_audit(
         return payload
     except Exception as exc:  # pragma: no cover — defensive
         return {"available": False, "error": str(exc)}
+
+
+def _annotate_serialized_review_status(
+    rows: list[dict[str, Any]],
+    audit: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    """Attach note-level review severity from the serialized audit payload."""
+    if not rows:
+        return rows
+
+    severity_by_note: dict[int, str] = {}
+    report = audit.get("biomechanical_report") if isinstance(audit, dict) else None
+    violations = report.get("violations") if isinstance(report, dict) else None
+    if isinstance(violations, list):
+        for violation in violations:
+            if not isinstance(violation, dict):
+                continue
+            severity = str(violation.get("severity") or "").lower()
+            if severity == "fatal":
+                review = "impossible"
+            elif severity == "high":
+                review = "suspect"
+            else:
+                continue
+            rank = 2 if review == "impossible" else 1
+            for note_id in violation.get("note_ids") or ():
+                try:
+                    key = int(note_id)
+                except (TypeError, ValueError):
+                    continue
+                previous = severity_by_note.get(key)
+                if previous != "impossible" or rank > 1:
+                    severity_by_note[key] = review
+
+    annotated: list[dict[str, Any]] = []
+    for row in rows:
+        try:
+            note_id = int(row.get("note_id"))  # type: ignore[union-attr]
+        except (AttributeError, TypeError, ValueError):
+            annotated.append(row)
+            continue
+        item = dict(row)
+        item["review_severity"] = severity_by_note.get(
+            note_id, item.get("review_severity", "ok"),
+        )
+        annotated.append(item)
+    return annotated
 
 
 def _infer_title_artist(filepath: Path) -> tuple[str, str]:
@@ -3454,6 +3505,7 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "hand_position": st.hand_position,
         "cost": r.cost,
         "measure_index": ne.measure_index,
+        "review_severity": "ok",
         "gp_fingering_export_status": _gp_fingering_export_status(r),
         # Sedentary fingers annotation (see docs/finger_placement_strategy.md).
         # getattr for backward compat with legacy mocks that predate the field.
@@ -3468,12 +3520,20 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "vibrato_wide": ne.vibrato_wide,
         "harmonic_type": ne.harmonic_type,
         "harmonic_fret": ne.harmonic_fret,
+        "harmonic_resultant_pitch": ne.harmonic_resultant_pitch,
         "muted": ne.muted,
         "palm_muted": ne.palm_muted,
         "tapping": ne.tapping,
         "accent": ne.accent,
         "accent_strong": ne.accent_strong,
         "tremolo_picking": ne.tremolo_picking,
+        "ghost": ne.ghost,
+        "staccato": ne.staccato,
+        "strum_direction": ne.strum_direction,
+        "slap": ne.slap,
+        "pop": ne.pop,
+        "rasgueado": ne.rasgueado,
+        "golpe": ne.golpe,
         "tuplet_actual": ne.tuplet_actual,
         "tuplet_normal": ne.tuplet_normal,
     }
@@ -3841,6 +3901,7 @@ def _serialize_staff_note(ne: NoteEvent, note_id: int) -> dict[str, Any]:
         "hand_position": None,
         "cost": None,
         "measure_index": ne.measure_index,
+        "review_severity": "ok",
         "planted_fingers": {},
         "gp_fingering_export_status": "not_applicable",
         # Notation fields (kept for standard-notation rendering).
@@ -3851,12 +3912,20 @@ def _serialize_staff_note(ne: NoteEvent, note_id: int) -> dict[str, Any]:
         "vibrato_wide": ne.vibrato_wide,
         "harmonic_type": ne.harmonic_type,
         "harmonic_fret": ne.harmonic_fret,
+        "harmonic_resultant_pitch": ne.harmonic_resultant_pitch,
         "muted": ne.muted,
         "palm_muted": ne.palm_muted,
         "tapping": ne.tapping,
         "accent": ne.accent,
         "accent_strong": ne.accent_strong,
         "tremolo_picking": ne.tremolo_picking,
+        "ghost": ne.ghost,
+        "staccato": ne.staccato,
+        "strum_direction": ne.strum_direction,
+        "slap": ne.slap,
+        "pop": ne.pop,
+        "rasgueado": ne.rasgueado,
+        "golpe": ne.golpe,
         "tuplet_actual": ne.tuplet_actual,
         "tuplet_normal": ne.tuplet_normal,
     }

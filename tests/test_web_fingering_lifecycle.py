@@ -26,6 +26,7 @@ from fretwise.models import (
     NoteEvent,
 )
 from fretwise.web.app import (
+    _annotate_serialized_review_status,
     _gp_has_embedded_fingering,
     _merged_gp_fingering_mapping,
     _read_embedded_gp_fingerings,
@@ -220,6 +221,84 @@ def test_serialize_marks_fretted_note_without_source_id_red_candidate() -> None:
 
     assert row["source_note_id"] is None
     assert row["gp_fingering_export_status"] == "missing_source_note_id"
+
+
+def test_serialize_result_preserves_expression_fields() -> None:
+    from fretwise.web.app import _serialize_result
+
+    result = _result("expr-1")
+    note = result.note_event
+    note.harmonic_resultant_pitch = 76
+    note.ghost = True
+    note.staccato = True
+    note.strum_direction = "down"
+    note.slap = True
+    note.pop = True
+    note.rasgueado = True
+    note.golpe = True
+
+    row = _serialize_result(result)
+
+    assert row["harmonic_resultant_pitch"] == 76
+    assert row["ghost"] is True
+    assert row["staccato"] is True
+    assert row["strum_direction"] == "down"
+    assert row["slap"] is True
+    assert row["pop"] is True
+    assert row["rasgueado"] is True
+    assert row["golpe"] is True
+
+
+def test_serialize_staff_note_preserves_expression_fields() -> None:
+    from fretwise.web.app import _serialize_staff_note
+
+    note = _note("staff-expr")
+    note.harmonic_resultant_pitch = 88
+    note.ghost = True
+    note.staccato = True
+    note.strum_direction = "up"
+    note.slap = True
+    note.pop = True
+    note.rasgueado = True
+    note.golpe = True
+
+    row = _serialize_staff_note(note, 42)
+
+    assert row["note_id"] == 42
+    assert row["finger"] is None
+    assert row["harmonic_resultant_pitch"] == 88
+    assert row["ghost"] is True
+    assert row["staccato"] is True
+    assert row["strum_direction"] == "up"
+    assert row["slap"] is True
+    assert row["pop"] is True
+    assert row["rasgueado"] is True
+    assert row["golpe"] is True
+
+
+def test_annotate_serialized_review_status_marks_impossible_and_suspect() -> None:
+    rows: list[dict[str, Any]] = [
+        {"note_id": 1, "review_severity": "ok"},
+        {"note_id": 2, "review_severity": "ok"},
+        {"note_id": 3, "review_severity": "ok"},
+    ]
+    audit = {
+        "biomechanical_report": {
+            "violations": [
+                {"severity": "high", "note_ids": [1]},
+                {"severity": "fatal", "note_ids": [2, 3]},
+                {"severity": "medium", "note_ids": [3]},
+            ],
+        },
+    }
+
+    annotated = _annotate_serialized_review_status(rows, audit)
+
+    assert [row["review_severity"] for row in annotated] == [
+        "suspect",
+        "impossible",
+        "impossible",
+    ]
 
 
 def test_files_endpoint_flags_embedded_fingerings(tmp_path: Path) -> None:

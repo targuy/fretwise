@@ -2321,6 +2321,10 @@ let EXT_SYNCED           = false; // true = parent drives the clock via `seek`
 let extT                 = 0;     // last time received from parent
 let extWallMs            = 0;     // wall-clock instant of the last parent seek
 let NO_FINGERING         = false; // true = staff-only / empty track, show message
+const HAND3D_MIN_FPS = 50;
+const HAND3D_RAF_CAP_MS = 0;
+const HUD_FRAME_MS = 1000 / 15;
+const LOG_FRAME_MS = 1000 / 10;
 
 /* ---------- Milestone 5: optional 3D renderer (feature flag, OFF by default) -
    The 3D hand is a strictly additive, opt-in alternative to the SVG renderer
@@ -2729,10 +2733,15 @@ window.addEventListener("message", (ev) => {
 
   let lastMs = performance.now();
   let lastDedicated3dFrameMs = 0;
+  let lastHudFrameMs = 0;
+  let lastLogFrameMs = 0;
   function frame(now) {
     if (DEDICATED_3D_VIEW && HAND3D_ACTIVE && HAND3D_RENDERER) {
-      const minFrameMs = 1000 / 30;
-      if (lastDedicated3dFrameMs > 0 && (now - lastDedicated3dFrameMs) < minFrameMs) {
+      // Let high-refresh displays use their native rAF cadence. A non-zero
+      // cap can be restored for profiling, but the production path must not
+      // force 160 Hz panels down to a visibly uneven cadence.
+      const minFrameMs = HAND3D_RAF_CAP_MS;
+      if (minFrameMs > 0 && lastDedicated3dFrameMs > 0 && (now - lastDedicated3dFrameMs) < minFrameMs) {
         requestAnimationFrame(frame);
         return;
       }
@@ -2790,7 +2799,15 @@ window.addEventListener("message", (ev) => {
     }
 
     if (CURRENT_SIM && CURRENT_DATA) {
-      const st = sampleState(tNow, CURRENT_DATA.frames);
+      const threeDLive = HAND3D_ACTIVE && HAND3D_RENDERER;
+      const dedicated3dLive = DEDICATED_3D_VIEW && threeDLive;
+      const updateHud = !dedicated3dLive || (now - lastHudFrameMs) >= HUD_FRAME_MS;
+      const updateLog = !dedicated3dLive || (now - lastLogFrameMs) >= LOG_FRAME_MS;
+      let sampledState = null;
+      const getSampledState = () => {
+        if (!sampledState) sampledState = sampleState(tNow, CURRENT_DATA.frames);
+        return sampledState;
+      };
       /* Only animate the hand when playing; freeze in place on pause so
          the user can inspect/screenshot the current finger positions. */
       if (playing) {
@@ -2801,7 +2818,7 @@ window.addEventListener("message", (ev) => {
       // we skip the SVG hand draw.  Otherwise the unchanged SVG path runs.  Both
       // read the identical `CURRENT_SIM` updated above, so the time-sync (M4) and
       // kinematics are shared with zero divergence.
-      if (HAND3D_ACTIVE && HAND3D_RENDERER) {
+      if (threeDLive) {
         try {
           HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM));
         } catch (e) {
@@ -2812,27 +2829,35 @@ window.addEventListener("message", (ev) => {
       } else {
         drawHand(layerHand, layerShadow, CURRENT_SIM, tNow);
       }
-      drawOverlay(st, tNow, CURRENT_CHORD_GROUPS);
-      // Chord-name flash: HTML overlay, visible in both SVG (2D) and 3D modes.
-      updateChordFlash(tNow, CURRENT_CHORD_GROUPS);
-
-      tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
-      const actParts = [], pltParts = [], hoverParts = [];
-      for (const f of FINGER_ORDER) {
-        const a = st.active[f];
-        if (a) actParts.push(FINGER_LABEL[f] + ": S" + a.string + " F" + a.fret);
-        const p = st.planted[f];
-        if (p) pltParts.push(FINGER_LABEL[f] + ": S" + p.string + " F" + p.fret);
-        const h = st.upcoming[f];
-        if (h) hoverParts.push(FINGER_LABEL[f] + ": S" + h.string + " F" + h.fret);
+      if (!threeDLive) drawOverlay(getSampledState(), tNow, CURRENT_CHORD_GROUPS);
+      if (updateHud) {
+        lastHudFrameMs = now;
+        // Chord-name flash: HTML overlay, visible in both SVG (2D) and 3D modes.
+        updateChordFlash(tNow, CURRENT_CHORD_GROUPS);
+        tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       }
-      const openList = [...st.openStrings].sort((a,b) => a - b)
-        .map(s => "S" + s).join(" ");
-      logEl.textContent = "t=" + tNow.toFixed(2) + "s - pos=" + st.handPos +
-                           "   actifs: " + (actParts.join("  ") || "-") +
-                           "   sedentaires: " + (pltParts.join("  ") || "-") +
-                           "   prets: " + (hoverParts.join("  ") || "-") +
-                           "   cordes a vide: " + (openList || "-");
+      if (updateLog) {
+        lastLogFrameMs = now;
+        const st = getSampledState();
+        const actParts = [], pltParts = [], hoverParts = [];
+        for (const f of FINGER_ORDER) {
+          const a = st.active[f];
+          if (a) actParts.push(FINGER_LABEL[f] + ": S" + a.string + " F" + a.fret);
+          const p = st.planted[f];
+          if (p) pltParts.push(FINGER_LABEL[f] + ": S" + p.string + " F" + p.fret);
+          const h = st.upcoming[f];
+          if (h) hoverParts.push(FINGER_LABEL[f] + ": S" + h.string + " F" + h.fret);
+        }
+        const openList = [...st.openStrings].sort((a,b) => a - b)
+          .map(s => "S" + s).join(" ");
+        const fpsLabel = dedicated3dLive ? "   cible: " + HAND3D_MIN_FPS + "+ fps" : "";
+        logEl.textContent = "t=" + tNow.toFixed(2) + "s - pos=" + st.handPos +
+                             "   actifs: " + (actParts.join("  ") || "-") +
+                             "   sedentaires: " + (pltParts.join("  ") || "-") +
+                             "   prets: " + (hoverParts.join("  ") || "-") +
+                             "   cordes a vide: " + (openList || "-") +
+                             fpsLabel;
+      }
     }
 
     requestAnimationFrame(frame);
