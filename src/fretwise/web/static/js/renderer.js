@@ -64,6 +64,10 @@ const COL_ACCENT      = '#c0392b';
 const COL_MUTED       = '#1a1a1a';
 const COL_EXPORT_WARN = '#d32f2f';
 const COL_EXPORT_WARN_FILL = '#ffe3e3';
+const COL_REVIEW_IMPOSSIBLE = '#d32f2f';
+const COL_REVIEW_IMPOSSIBLE_FILL = '#ffd6d6';
+const COL_REVIEW_SUSPECT = '#f59e0b';
+const COL_REVIEW_SUSPECT_FILL = '#fff1c7';
 const COL_MEASURE_NUM = '#bbb8b0';  // subtle on cream
 const COL_CURSOR      = 'rgba(76, 175, 80, 0.10)';
 const COL_CURSOR_LINE = '#4caf50';
@@ -109,13 +113,24 @@ const FONT_LEGEND     = `400 ${_z(12)}px ${SANS}`;
  * @property {boolean} vibrato_wide
  * @property {string|null} harmonic_type
  * @property {number|null} harmonic_fret
+ * @property {number|null} harmonic_resultant_pitch
  * @property {boolean} muted
  * @property {boolean} palm_muted
  * @property {boolean} tapping
  * @property {boolean} accent
  * @property {boolean} accent_strong
  * @property {boolean} tremolo_picking
+ * @property {boolean} ghost
+ * @property {boolean} staccato
+ * @property {string|null} strum_direction
+ * @property {boolean} slap
+ * @property {boolean} pop
+ * @property {boolean} rasgueado
+ * @property {boolean} golpe
+ * @property {number|null} tuplet_actual
+ * @property {number|null} tuplet_normal
  * @property {string} gp_fingering_export_status
+ * @property {string} review_severity
  */
 
 // ── Public interface ────────────────────────────────────────────────
@@ -131,6 +146,9 @@ export class TabRenderer {
     this.data = data;
     this.results = data.results || [];
     this.bpm = data.beats_per_measure || 4;
+    this.measureBeats = Array.isArray(data.measure_beats)
+      ? data.measure_beats.map(v => Number(v))
+      : null;
     this.tempo = data.tempo || 120;
     this.sectionMarkers = data.section_markers || {};
     this.chordDiagrams = data.chord_diagrams || [];
@@ -286,16 +304,39 @@ export class TabRenderer {
     const availW = this.systemWidth - MARGIN_L - MARGIN_R;
 
     // Measure width: margins + (nCols-1) inter-note gaps, so last note sits at mW-RIGHT_PAD
-    const measureWidth = (notes) => {
+    const measureWidth = (notes, measureNum) => {
       const nCols = notes.length ? new Set(notes.map(n => n.onset.toFixed(6))).size : 1;
-      return LEFT_PAD + Math.max(nCols - 1, 1) * COL_STEP + RIGHT_PAD;
+      if (!notes.length) return LEFT_PAD + COL_STEP + RIGHT_PAD;
+
+      const measureStart = this._measureStartBeat(measureNum);
+      const measureBeats = this._measureBeatCount(measureNum);
+      const onsets = [...new Set(notes.map(n => Number(n.onset)))]
+        .filter(v => Number.isFinite(v))
+        .sort((a, b) => a - b);
+      let minGap = Infinity;
+      for (let j = 1; j < onsets.length; j++) {
+        const gap = onsets[j] - onsets[j - 1];
+        if (gap > 0.001) minGap = Math.min(minGap, gap);
+      }
+      const firstGap = onsets.length ? onsets[0] - measureStart : Infinity;
+      if (firstGap > 0.001) minGap = Math.min(minGap, firstGap);
+      const lastGap = onsets.length
+        ? (measureStart + measureBeats) - onsets[onsets.length - 1]
+        : Infinity;
+      if (lastGap > 0.001) minGap = Math.min(minGap, lastGap);
+
+      const indexedIntervals = Math.max(nCols - 1, 1);
+      const timedIntervals = Number.isFinite(minGap)
+        ? Math.ceil(measureBeats / Math.max(minGap, 0.001))
+        : indexedIntervals;
+      return LEFT_PAD + Math.max(indexedIntervals, timedIntervals) * COL_STEP + RIGHT_PAD;
     };
 
     const systems = [];
     let cur = [];
     let curW = 0;
     for (let i = 0; i < measures.length; i++) {
-      const w = measureWidth(measures[i]);
+      const w = measureWidth(measures[i], this.measureNumbers[i]);
       if (cur.length >= 1 && curW + w > availW) {
         systems.push(cur);
         cur = [];
@@ -375,7 +416,7 @@ export class TabRenderer {
       }
 
       // Chord name (first note's onset → check for chord recognition)
-      this._drawChordName(ctx, mNotes, mX, mW, sysY);
+      this._drawChordName(ctx, mNotes, mX, mW, sysY, measureNum);
 
       // Measure number
       ctx.font = FONT_MNUM;
@@ -427,7 +468,7 @@ export class TabRenderer {
       }
 
       // Draw notes
-      this._drawMeasureNotes(ctx, mNotes, mX, mW, sysY);
+      this._drawMeasureNotes(ctx, mNotes, mX, mW, sysY, measureNum);
 
       mX += mW;
     }
@@ -448,7 +489,34 @@ export class TabRenderer {
 
   // ── Notes in a measure ────────────────────────────────────────────
 
-  _drawMeasureNotes(ctx, notes, mX, mW, sysY) {
+  _measureBeatCount(measureNum) {
+    const idx = Math.max(0, Math.trunc(Number(measureNum || 1)) - 1);
+    const beats = this.measureBeats?.[idx];
+    if (Number.isFinite(beats) && beats > 0) return beats;
+    const fallback = Number(this.bpm);
+    return Number.isFinite(fallback) && fallback > 0 ? fallback : 4;
+  }
+
+  _measureStartBeat(measureNum) {
+    const target = Math.max(1, Math.trunc(Number(measureNum || 1)));
+    if (Array.isArray(this.measureBeats) && this.measureBeats.length) {
+      let acc = 0;
+      for (let i = 1; i < target; i++) {
+        const beats = this.measureBeats[i - 1];
+        acc += Number.isFinite(beats) && beats > 0 ? beats : this._measureBeatCount(i);
+      }
+      return acc;
+    }
+    return (target - 1) * this._measureBeatCount(target);
+  }
+
+  _xForOnset(onset, mX, mW, measureStart, measureBeats) {
+    const usable = Math.max(1, mW - LEFT_PAD - RIGHT_PAD);
+    const local = Math.min(Math.max(Number(onset) - measureStart, 0), measureBeats);
+    return mX + LEFT_PAD + (local / Math.max(measureBeats, 0.001)) * usable;
+  }
+
+  _drawMeasureNotes(ctx, notes, mX, mW, sysY, measureNum = 1) {
     if (!notes.length) {
       // Draw whole rest centered in measure
       this._drawRest(ctx, mX + mW / 2, sysY, 4.0);
@@ -465,10 +533,10 @@ export class TabRenderer {
 
     // Sort onsets → compute x per column
     const sortedKeys = [...onsetMap.keys()].sort((a, b) => parseFloat(a) - parseFloat(b));
-    const nCols = sortedKeys.length;
-    // Single column → center in measure; multiple → LEFT_PAD…mW-RIGHT_PAD evenly
-    const colXs = sortedKeys.map((_, i) =>
-      nCols === 1 ? mX + mW / 2 : mX + LEFT_PAD + i * COL_STEP
+    const measureStart = this._measureStartBeat(measureNum);
+    const measureBeats = this._measureBeatCount(measureNum);
+    const colXs = sortedKeys.map(key =>
+      this._xForOnset(parseFloat(key), mX, mW, measureStart, measureBeats)
     );
 
     const notePositions = [];
@@ -517,7 +585,7 @@ export class TabRenderer {
     this._drawSpanAnnotations(ctx, notePositions, sysY, mX, mW);
 
     // Draw rhythm below
-    this._drawRhythm(ctx, notePositions, sysY, mX, mW);
+    this._drawRhythm(ctx, notePositions, sysY, mX, mW, measureStart, measureBeats);
   }
 
   // ── Span annotations: PM and let-ring bands below the TAB staff ───
@@ -601,6 +669,8 @@ export class TabRenderer {
     const isMuted = note.muted;
     const isHarmonic = !!note.harmonic_type;
     const isExportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
+    const isImpossible = note.review_severity === 'impossible';
+    const isSuspect = note.review_severity === 'suspect';
 
     // ── White oval (erases string line)
     const label = note.ghost ? `(${fret})` : String(fret);
@@ -610,7 +680,10 @@ export class TabRenderer {
     const fingerFill = (!isMuted && !isHarmonic && note.finger && note.finger !== 'open' && fret > 0)
       ? (this._fingerColors[note.finger] || '#ffffff')
       : '#ffffff';
-    const noteFill = isExportWarning ? COL_EXPORT_WARN_FILL : fingerFill;
+    let noteFill = fingerFill;
+    if (isImpossible) noteFill = COL_REVIEW_IMPOSSIBLE_FILL;
+    else if (isSuspect) noteFill = COL_REVIEW_SUSPECT_FILL;
+    else if (isExportWarning) noteFill = COL_EXPORT_WARN_FILL;
 
     if (isHarmonic) {
       this._drawDiamond(ctx, x, y, ovalRX, NOTE_RY);
@@ -619,8 +692,10 @@ export class TabRenderer {
       ctx.beginPath();
       ctx.ellipse(x, y, ovalRX + 1, NOTE_RY + 1, 0, 0, Math.PI * 2);
       ctx.fill();
-      if (isExportWarning) {
-        ctx.strokeStyle = COL_EXPORT_WARN;
+      if (isImpossible || isSuspect || isExportWarning) {
+        ctx.strokeStyle = isImpossible
+          ? COL_REVIEW_IMPOSSIBLE
+          : (isSuspect ? COL_REVIEW_SUSPECT : COL_EXPORT_WARN);
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
@@ -640,7 +715,9 @@ export class TabRenderer {
     } else {
       ctx.font = label.length > 1 ? FONT_FRET_SM : FONT_FRET;
       // Dark text on colored ovals; keep existing dark color — all finger colors are light enough
-      ctx.fillStyle = isExportWarning ? COL_EXPORT_WARN : COL_FRET;
+      ctx.fillStyle = isImpossible
+        ? COL_REVIEW_IMPOSSIBLE
+        : (isSuspect ? COL_REVIEW_SUSPECT : (isExportWarning ? COL_EXPORT_WARN : COL_FRET));
       ctx.fillText(label, x, y + 0.5);
     }
 
@@ -1019,7 +1096,7 @@ export class TabRenderer {
 
   // ── Chord name detection ──────────────────────────────────────────
 
-  _drawChordName(ctx, notes, mX, mW, sysY) {
+  _drawChordName(ctx, notes, mX, mW, sysY, measureNum = 1) {
     if (!notes.length) return;
 
     // Build onset→group map
@@ -1030,9 +1107,10 @@ export class TabRenderer {
       onsetMap.get(key).push(n);
     }
     const sortedKeys = [...onsetMap.keys()].sort((a, b) => parseFloat(a) - parseFloat(b));
-    const nColsChord = sortedKeys.length;
-    const chordColXs = sortedKeys.map((_, i) =>
-      nColsChord === 1 ? mX + mW / 2 : mX + LEFT_PAD + i * COL_STEP
+    const measureStart = this._measureStartBeat(measureNum);
+    const measureBeats = this._measureBeatCount(measureNum);
+    const chordColXs = sortedKeys.map(key =>
+      this._xForOnset(parseFloat(key), mX, mW, measureStart, measureBeats)
     );
 
     let drawn = 0;
@@ -1094,7 +1172,15 @@ export class TabRenderer {
 
   // ── Rhythm notation below tab ─────────────────────────────────────
 
-  _drawRhythm(ctx, notePositions, sysY, mX = 0, mW = Infinity) {
+  _drawRhythm(
+    ctx,
+    notePositions,
+    sysY,
+    mX = 0,
+    mW = Infinity,
+    measureOnset = null,
+    measureBeats = null,
+  ) {
     const baseY = sysY + ABOVE_STRINGS + STRINGS_H + STEM_GAP;
 
     // Group by onset for beam grouping
@@ -1111,23 +1197,29 @@ export class TabRenderer {
       const dur = Math.min(...group.map(g => g.note.duration));
       const ta = group[0].note.tuplet_actual ?? null;
       const tn = group[0].note.tuplet_normal ?? null;
-      cols.push({ x, duration: dur, onset: parseFloat(key), tuplet_actual: ta, tuplet_normal: tn });
+      cols.push({
+        x,
+        duration: dur,
+        notatedDuration: this._notatedDuration(dur, ta, tn),
+        onset: parseFloat(key),
+        tuplet_actual: ta,
+        tuplet_normal: tn,
+      });
     }
     cols.sort((a, b) => a.onset - b.onset);
 
-    // Determine beat boundaries: floor the first note's onset to the nearest integer beat.
-    // This is robust to variable time signatures (avoids the fixed bpm*floor formula).
-    const bpm = this.bpm;
-    let measureOnset = 0;
-    if (cols.length > 0) {
-      measureOnset = Math.floor(cols[0].onset + 1e-6);
-    }
+    const rhythmMeasureOnset = Number.isFinite(measureOnset)
+      ? Number(measureOnset)
+      : (cols.length > 0 ? Math.floor(cols[0].onset + 1e-6) : 0);
+    const rhythmMeasureBeats = Number.isFinite(measureBeats) && measureBeats > 0
+      ? Number(measureBeats)
+      : this._measureBeatCount(1);
 
     // Draw stems
     for (const col of cols) {
-      if (col.duration >= 4.0) continue; // whole note: nothing in rhythm zone
+      if (col.notatedDuration >= 4.0) continue; // whole note: nothing in rhythm zone
 
-      const stemLen = col.duration >= 2.0 ? STEM_H / 2 : STEM_H;
+      const stemLen = col.notatedDuration >= 2.0 ? STEM_H / 2 : STEM_H;
 
       ctx.strokeStyle = COL_TEXT;
       ctx.lineWidth = 0.9;
@@ -1136,22 +1228,31 @@ export class TabRenderer {
       ctx.lineTo(col.x, baseY + stemLen);
       ctx.stroke();
 
-      // Dotted note: augmentation dot beside stem bottom
-      if (this._isDotted(col.duration)) {
-        ctx.fillStyle = COL_TEXT;
-        ctx.beginPath();
-        ctx.arc(col.x + 4, baseY + stemLen - 2, 1.3, 0, Math.PI * 2);
-        ctx.fill();
-      }
     }
 
     // Beat-aware beams
-    this._drawBeams(ctx, cols, baseY, measureOnset);
+    this._drawBeams(ctx, cols, baseY, rhythmMeasureOnset, rhythmMeasureBeats);
+
+    // Dotted notes: draw augmentation dots after beams so they are never
+    // half-covered by a beam bar.
+    for (const col of cols) {
+      if (!this._isDotted(col.notatedDuration)) continue;
+      const dotX = col.x + 5;
+      const dotY = baseY + STEM_H - 2;
+      ctx.fillStyle = this._bgScore;
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = COL_TEXT;
+      ctx.beginPath();
+      ctx.arc(dotX, dotY, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // Flags for unbeamed notes (drawn after beams to know which are beamed)
-    const beamedOnsets = this._getBeamedOnsets(cols, measureOnset);
+    const beamedOnsets = this._getBeamedOnsets(cols, rhythmMeasureOnset, rhythmMeasureBeats);
     for (const col of cols) {
-      const nFlags = this._numFlags(col.duration);
+      const nFlags = this._numFlags(col.notatedDuration);
       if (nFlags > 0 && !beamedOnsets.has(col.onset.toFixed(4))) {
         for (let fi = 0; fi < nFlags; fi++) {
           this._drawFlag(ctx, col.x, baseY + STEM_H, fi);
@@ -1160,10 +1261,10 @@ export class TabRenderer {
     }
 
     // ── Rest symbols for gaps within the measure ──────────────────────
-    const measureEnd = measureOnset + this.bpm;
+    const measureEnd = rhythmMeasureOnset + rhythmMeasureBeats;
     const rightBound = mX + mW - RIGHT_PAD - 4;
     for (let i = 0; i <= cols.length; i++) {
-      const gapStart = i === 0 ? measureOnset
+      const gapStart = i === 0 ? rhythmMeasureOnset
         : cols[i - 1].onset + cols[i - 1].duration;
       const gapEnd   = i === cols.length ? measureEnd : cols[i].onset;
       const gapDur   = gapEnd - gapStart;
@@ -1193,34 +1294,80 @@ export class TabRenderer {
   }
 
   _drawTupletBrackets(ctx, cols, baseY) {
-    // Scan for runs of notes that share the same tuplet_actual value and group
-    // them into bracket spans. A run of N notes with tuplet_actual===N is one group.
+    // Scan contiguous same-ratio tuplets and emit a bracket only when the
+    // covered real duration equals the source tuplet window.  Mixed values such
+    // as 1/3 + 1/6 + 1/3 + 1/6 therefore form one 1-beat 3:2 bracket, not two
+    // half-beat fragments.
     let run = [];
-    let curTA = null;
+    let curRatio = null;
+    let prevEnd = null;
 
     const flush = () => {
-      if (run.length < 2 || curTA === null) { run = []; curTA = null; return; }
-      const x1 = run[0].x;
-      const x2 = run[run.length - 1].x;
-      this._drawTupletBracket(ctx, x1, x2, baseY, curTA);
+      if (run.length < 2 || curRatio === null) {
+        run = [];
+        curRatio = null;
+        prevEnd = null;
+        return;
+      }
+      let group = [];
+      let notatedTotal = 0;
+      for (const col of run) {
+        if (group.length === 0) {
+          notatedTotal = 0;
+        }
+        group.push(col);
+        notatedTotal += col.notatedDuration || col.duration;
+        const unit = this._completeTupletBaseUnit(notatedTotal, curRatio.actual);
+        if (unit !== null) {
+          const targetSpan = curRatio.normal * unit;
+          const span = (col.onset + col.duration) - group[0].onset;
+          if (group.length >= 2 && Math.abs(span - targetSpan) <= Math.max(0.01, targetSpan * 0.001)) {
+            this._drawTupletBracket(
+              ctx,
+              group[0].x,
+              group[group.length - 1].x,
+              baseY,
+              curRatio.actual,
+            );
+          }
+          group = [];
+          notatedTotal = 0;
+        }
+      }
       run = [];
-      curTA = null;
+      curRatio = null;
+      prevEnd = null;
     };
 
     for (const col of cols) {
       const ta = col.tuplet_actual;
-      if (ta === null || ta === undefined) {
+      const tn = col.tuplet_normal;
+      if (ta === null || ta === undefined || tn === null || tn === undefined) {
         flush();
         continue;
       }
-      if (ta !== curTA) {
+      if (prevEnd !== null && col.onset - prevEnd >= 0.115) {
         flush();
-        curTA = ta;
+      }
+      const ratio = `${ta}:${tn}`;
+      if (curRatio !== null && ratio !== curRatio.key) {
+        flush();
+      }
+      if (curRatio === null) {
+        curRatio = { key: ratio, actual: ta, normal: tn };
       }
       run.push(col);
-      if (run.length === ta) flush(); // completed group of N
+      prevEnd = col.onset + col.duration;
     }
     flush();
+  }
+
+  _completeTupletBaseUnit(notatedTotal, actual) {
+    const unit = notatedTotal / actual;
+    for (const candidate of [0.125, 0.25, 0.5, 1.0, 2.0, 4.0]) {
+      if (Math.abs(unit - candidate) <= 0.0001) return candidate;
+    }
+    return null;
   }
 
   _drawTupletBracket(ctx, x1, x2, baseY, number) {
@@ -1364,6 +1511,15 @@ export class TabRenderer {
     return 3;
   }
 
+  _notatedDuration(duration, tupletActual, tupletNormal) {
+    const actual = Number(tupletActual);
+    const normal = Number(tupletNormal);
+    if (Number.isFinite(actual) && Number.isFinite(normal) && normal > 0 && actual > 0) {
+      return duration * actual / normal;
+    }
+    return duration;
+  }
+
   _drawFlag(ctx, x, stemEnd, flagIdx) {
     // Straight horizontal tick — one per sub-beat division (8th=1, 16th=2, 32nd=3)
     ctx.strokeStyle = COL_TEXT;
@@ -1377,9 +1533,9 @@ export class TabRenderer {
     ctx.lineCap = 'butt';
   }
 
-  _drawBeams(ctx, cols, baseY, measureOnset) {
+  _drawBeams(ctx, cols, baseY, measureOnset, measureBeats) {
     if (cols.length < 2) return;
-    const groups = this._computeBeamGroups(cols, measureOnset);
+    const groups = this._computeBeamGroups(cols, measureOnset, measureBeats);
     const BEAMLET_W = 6; // partial-beam stub width (px)
 
     for (const group of groups) {
@@ -1408,9 +1564,10 @@ export class TabRenderer {
           ctx.lineTo(runEnd, y + BEAM_GAP_Y);
           ctx.stroke();
         } else {
-          // Single isolated sub-8th note → partial beam (beamlet)
-          // Direction: RIGHT when at the start of the group, LEFT otherwise
-          const dir = (runStartIdx === 0) ? 1 : -1;
+          // Single isolated sub-8th note → partial beam (beamlet).
+          // Direction matches the backend renderer: toward the next note when
+          // one exists, otherwise back toward the previous note.
+          const dir = (runStartIdx < group.length - 1) ? 1 : -1;
           ctx.beginPath();
           ctx.moveTo(runStart, y + BEAM_GAP_Y);
           ctx.lineTo(runStart + dir * BEAMLET_W, y + BEAM_GAP_Y);
@@ -1423,7 +1580,7 @@ export class TabRenderer {
 
       for (let i = 0; i < group.length; i++) {
         const col = group[i];
-        if (col.duration < 0.5) {
+        if (col.notatedDuration < 0.5) {
           if (runStart === null) { runStart = col.x; runStartIdx = i; }
           runEnd = col.x;
         } else {
@@ -1435,8 +1592,8 @@ export class TabRenderer {
   }
 
   /** Compute beam groups respecting beat boundaries and rests */
-  _computeBeamGroups(cols, measureOnset) {
-    const bpm = this.bpm;
+  _computeBeamGroups(cols, measureOnset, measureBeats = this.bpm) {
+    const bpm = Number.isFinite(measureBeats) && measureBeats > 0 ? measureBeats : this.bpm;
     // Build beat boundary list
     const beatBounds = [];
     for (let i = 1; i <= Math.ceil(bpm); i++) {
@@ -1449,7 +1606,7 @@ export class TabRenderer {
     for (let i = 0; i < cols.length; i++) {
       const col = cols[i];
       // Only sub-quarter notes (duration < 1.0) can be beamed
-      if (col.duration >= 1.0) {
+      if (col.notatedDuration >= 1.0) {
         if (curGroup.length >= 2) groups.push([...curGroup]);
         curGroup = [];
         continue;
@@ -1480,8 +1637,8 @@ export class TabRenderer {
   }
 
   /** Returns a Set of onset keys that are beamed (for suppressing flags) */
-  _getBeamedOnsets(cols, measureOnset) {
-    const groups = this._computeBeamGroups(cols, measureOnset);
+  _getBeamedOnsets(cols, measureOnset, measureBeats = this.bpm) {
+    const groups = this._computeBeamGroups(cols, measureOnset, measureBeats);
     const beamed = new Set();
     for (const group of groups) {
       for (const col of group) {

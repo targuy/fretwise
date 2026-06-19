@@ -40,6 +40,8 @@ export class PlaybackEngine {
     this._synthLoading = false;   // loading guard to avoid double-init
     this._midiProgram = 25;       // GM program for primary track (25 = acoustic steel guitar)
     this._instrumentName = 'electric_guitar_clean'; // soundfont-player fallback instrument
+    this._pitchBendRangeSemitones = 12; // wide enough for guitar slides, bends and vibrato
+    this._pitchBendRangeChannels = new Set();
     // Secondary audio channels: [{trackId, trackName, measures, synth, gain, enabled,
     //                             _loading, midiChannel, midiProgram}]
     this._secondaryChannels = [];
@@ -389,6 +391,7 @@ export class PlaybackEngine {
 
     if (this._spessa) {
       this._spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
+      this._ensurePitchBendRange(ch.midiChannel);
       ch.synth = 'spessa';
       console.log(`[FretWise] secondary "${ch.trackName}" → GM ${ch.midiProgram} (ch ${ch.midiChannel})`);
       if (this.isPlaying && this._lastScheduledMeasure >= 0) {
@@ -485,6 +488,7 @@ export class PlaybackEngine {
     this._midiProgram = program;
     if (this._spessa) {
       this._spessa.programChange(0, this._resolveProgram(program));
+      this._ensurePitchBendRange(0);
       return;
     }
     // Soundfont fallback: map GM program to nearest MusyngKite instrument
@@ -563,6 +567,7 @@ export class PlaybackEngine {
     // Secondary channels
     if (this._spessa) {
       try { this._spessa.programChange(channel, program); } catch (_) {}
+      this._ensurePitchBendRange(channel);
     }
     // Update the stored midiProgram for the matching secondary channel
     const ch = this._secondaryChannels.find(c => c.midiChannel === channel);
@@ -663,6 +668,7 @@ export class PlaybackEngine {
     // past the pause point and don't double when play resumes.
     if (this._spessa) {
       try { this._spessa.stopAll?.(); } catch (_) {}
+      this._resetPitchBends();
     } else {
       if (this._synth && this._synth !== 'spessa') { try { this._synth.stop(); } catch (_) {} }
       for (const ch of this._secondaryChannels) {
@@ -963,10 +969,12 @@ export class PlaybackEngine {
       // Set the (resolved) GM program for primary and any registered secondary channels
       const primaryProg = this._resolveProgram(this._midiProgram);
       spessa.programChange(0, primaryProg);
+      this._ensurePitchBendRange(0);
       // Balance the open track against the backing tracks (CC7 on channel 0).
       try { spessa.controllerChange(0, 7, Math.round(this._primaryVolume * 127)); } catch (_) { /* */ }
       for (const ch of this._secondaryChannels) {
         spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
+        this._ensurePitchBendRange(ch.midiChannel);
         ch.synth = 'spessa';
         // Catch up any missed notes in the current measure (SpessaSynth finished
         // loading while the song was already playing, so secondary channels were
@@ -1042,6 +1050,282 @@ export class PlaybackEngine {
     return { pp: 32, p: 48, mp: 64, mf: 80, f: 96, ff: 112 }[dynamic] ?? 80;
   }
 
+  _playbackPitch(note) {
+    const harmonicPitch = Number(note?.harmonic_resultant_pitch);
+    if (Number.isFinite(harmonicPitch) && harmonicPitch > 0) return harmonicPitch;
+    const pitch = Number(note?.pitch);
+    return Number.isFinite(pitch) ? pitch : 60;
+  }
+
+  _clampVelocity(value) {
+    return Math.max(1, Math.min(127, Math.round(value)));
+  }
+
+  _expressionForNote(note, baseDurationSec) {
+    let duration = baseDurationSec;
+    let velocityScale = 1.0;
+
+    if (note.ghost) velocityScale *= 0.45;
+    if (note.muted) velocityScale *= 0.65;
+    if (note.palm_muted) velocityScale *= 0.78;
+    if (note.accent) velocityScale *= 1.15;
+    if (note.accent_strong) velocityScale *= 1.32;
+    if (note.slap || note.pop) velocityScale *= 1.22;
+    if (note.golpe) velocityScale *= 1.35;
+    if (note.tapping) velocityScale *= 1.1;
+    if (note.rasgueado) velocityScale *= 1.12;
+
+    if (note.let_ring) duration *= 1.35;
+    if (note.palm_muted) duration *= 0.55;
+    if (note.staccato || note.articulation === 'staccato') duration *= 0.45;
+    if (note.rasgueado) duration *= 0.82;
+    if (note.articulation === 'hammer_on' || note.articulation === 'pull_off') {
+      velocityScale *= 0.82;
+      duration *= 1.08;
+    } else if (note.articulation === 'legato') {
+      velocityScale *= 0.9;
+      duration *= 1.12;
+    }
+    if (note.muted || note.golpe) duration = Math.min(duration * 0.28, 0.12);
+
+    return {
+      duration: Math.max(0.035, duration),
+      velocityScale,
+    };
+  }
+
+  _strumOffsetSec(note, measureNotes, secPerBeat) {
+    const direction = note?.strum_direction || (note?.rasgueado ? 'down' : null);
+    if (direction !== 'up' && direction !== 'down') return 0;
+    const onset = Number(note.onset);
+    const stringNum = Number(note.string);
+    if (!Number.isFinite(onset) || !Number.isFinite(stringNum)) return 0;
+
+    const chord = (measureNotes || [])
+      .filter(n => Math.abs(Number(n.onset) - onset) < 0.00001 && Number.isFinite(Number(n.string)))
+      .sort((a, b) => direction === 'down'
+        ? Number(b.string) - Number(a.string)
+        : Number(a.string) - Number(b.string));
+    if (chord.length <= 1) return 0;
+
+    const rank = chord.findIndex(n => Number(n.string) === stringNum && Number(n.pitch) === Number(note.pitch));
+    if (rank <= 0) return 0;
+    const step = note?.rasgueado
+      ? Math.min(0.012, secPerBeat * 0.025)
+      : Math.min(0.018, secPerBeat * 0.035);
+    return rank * step;
+  }
+
+  _noteAttacks(note, when, duration, secPerBeat) {
+    if (!note.tremolo_picking) return [{ when, duration }];
+    const interval = Math.max(0.045, secPerBeat / 4);
+    const count = Math.max(2, Math.floor(duration / interval));
+    const attacks = [];
+    for (let i = 0; i < count; i += 1) {
+      const attackWhen = when + i * interval;
+      const remaining = duration - i * interval;
+      if (remaining <= 0.02) break;
+      attacks.push({
+        when: attackWhen,
+        duration: Math.max(0.03, Math.min(interval * 0.82, remaining)),
+      });
+    }
+    return attacks;
+  }
+
+  _ensurePitchBendRange(channel) {
+    if (!this._spessa || !Number.isInteger(channel)) return;
+    if (this._pitchBendRangeChannels.has(channel)) return;
+    try {
+      this._spessa.setPitchBendRange(channel, this._pitchBendRangeSemitones);
+      this._sendPitchWheel(channel, 0, this._audioCtx?.currentTime ?? 0);
+      this._pitchBendRangeChannels.add(channel);
+    } catch (_) {
+      // Pitch bend is expressive sugar: scheduling notes must never depend on it.
+    }
+  }
+
+  _resetPitchBends() {
+    if (!this._spessa) return;
+    const now = this._audioCtx?.currentTime ?? 0;
+    this._sendPitchWheel(0, 0, now);
+    for (const ch of this._secondaryChannels) {
+      if (Number.isInteger(ch.midiChannel)) this._sendPitchWheel(ch.midiChannel, 0, now);
+    }
+    for (const ch of this._pitchBendRangeChannels) {
+      if (Number.isInteger(ch)) this._sendPitchWheel(ch, 0, now);
+    }
+  }
+
+  _sendPitchWheel(channel, semitones, time) {
+    if (!this._spessa) return;
+    const range = Math.max(1, this._pitchBendRangeSemitones);
+    const clamped = Math.max(-range, Math.min(range, Number(semitones) || 0));
+    const normalized = clamped / range;
+    const value = Math.max(0, Math.min(16383, Math.round(8192 + normalized * 8191)));
+    const lsb = value & 0x7f;
+    const msb = (value >> 7) & 0x7f;
+    try {
+      this._spessa.pitchWheel(channel, lsb, msb, { time });
+    } catch (_) {
+      // Some fallback or older synth builds may not support scheduled pitch wheel.
+    }
+  }
+
+  _pitchSamplesForNote(note, measureNotes, startTime, durationSec) {
+    const hasBend = Number.isFinite(Number(note.bend_value));
+    const hasSlide = !!note.slide_type || note.articulation === 'slide';
+    const hasVibrato = note.articulation === 'vibrato'
+      || note.articulation === 'wide_vibrato'
+      || note.vibrato_wide;
+    if (!hasBend && !hasSlide && !hasVibrato) return [];
+
+    const duration = Math.max(0.04, durationSec);
+    const points = this._basePitchPoints(note, measureNotes);
+    const evalBase = (frac) => this._interpolatedPitch(points, frac);
+    const samples = [];
+
+    if (hasVibrato) {
+      const amp = (note.vibrato_wide || note.articulation === 'wide_vibrato') ? 0.45 : 0.22;
+      const rateHz = note.vibrato_wide ? 5.3 : 6.2;
+      const startFrac = Math.min(0.35, 0.12 / duration);
+      const sampleCount = Math.max(3, Math.ceil(duration / 0.045));
+      for (let i = 0; i <= sampleCount; i += 1) {
+        const frac = i / sampleCount;
+        const vib = frac < startFrac
+          ? 0
+          : Math.sin((frac - startFrac) * duration * rateHz * Math.PI * 2) * amp;
+        samples.push({ time: startTime + frac * duration, semitones: evalBase(frac) + vib });
+      }
+    } else {
+      for (const point of points) {
+        samples.push({ time: startTime + point.frac * duration, semitones: point.semitones });
+      }
+    }
+
+    samples.push({ time: startTime + duration + 0.012, semitones: 0 });
+    return samples;
+  }
+
+  _basePitchPoints(note, measureNotes) {
+    const points = [{ frac: 0, semitones: 0 }];
+    const bendValue = Number(note.bend_value);
+    if (Number.isFinite(bendValue) && Math.abs(bendValue) > 0.001) {
+      const type = String(note.bend_type || 'normal');
+      if (type === 'release') {
+        points.push({ frac: 0, semitones: bendValue }, { frac: 0.68, semitones: 0 });
+      } else if (type === 'pre_bend') {
+        points.push({ frac: 0, semitones: bendValue }, { frac: 0.9, semitones: bendValue });
+      } else if (type === 'pre_bend_release') {
+        points.push({ frac: 0, semitones: bendValue }, { frac: 0.78, semitones: 0 });
+      } else {
+        points.push({ frac: 0.34, semitones: bendValue }, { frac: 0.9, semitones: bendValue });
+      }
+    }
+
+    const slideType = note.slide_type || (note.articulation === 'slide' ? 'shift' : null);
+    if (slideType) {
+      const target = this._slideTargetSemitones(note, measureNotes, slideType);
+      if (target !== null) {
+        if (slideType === 'slide_in_above' || slideType === 'slide_in_below') {
+          points.push({ frac: 0, semitones: target }, { frac: 0.22, semitones: 0 });
+        } else if (slideType === 'slide_out_up' || slideType === 'slide_out_down') {
+          points.push({ frac: 0.2, semitones: 0 }, { frac: 0.85, semitones: target });
+        } else {
+          points.push({ frac: 0.08, semitones: 0 }, { frac: 0.82, semitones: target });
+        }
+      }
+    }
+    return points.sort((a, b) => a.frac - b.frac);
+  }
+
+  _slideTargetSemitones(note, measureNotes, slideType) {
+    if (slideType === 'slide_in_above') return 2;
+    if (slideType === 'slide_in_below') return -2;
+    if (slideType === 'slide_out_up') return 2;
+    if (slideType === 'slide_out_down') return -2;
+
+    const onset = Number(note.onset);
+    const stringNum = Number(note.string);
+    const pitch = Number(note.pitch);
+    if (!Number.isFinite(onset) || !Number.isFinite(stringNum) || !Number.isFinite(pitch)) {
+      return null;
+    }
+    const next = (measureNotes || [])
+      .filter(n => Number(n.onset) > onset + 0.00001 && Number(n.string) === stringNum)
+      .sort((a, b) => Number(a.onset) - Number(b.onset))[0];
+    if (!next || !Number.isFinite(Number(next.pitch))) return null;
+    return Number(next.pitch) - pitch;
+  }
+
+  _interpolatedPitch(points, frac) {
+    if (!points.length) return 0;
+    let prev = points[0];
+    for (const next of points.slice(1)) {
+      if (frac <= next.frac) {
+        const span = Math.max(0.0001, next.frac - prev.frac);
+        const t = Math.max(0, Math.min(1, (frac - prev.frac) / span));
+        return prev.semitones + (next.semitones - prev.semitones) * t;
+      }
+      prev = next;
+    }
+    return prev.semitones;
+  }
+
+  _schedulePitchAutomation(channel, note, measureNotes, when, duration) {
+    if (!this._spessa) return;
+    const samples = this._pitchSamplesForNote(note, measureNotes, when, duration);
+    if (!samples.length) return;
+    this._ensurePitchBendRange(channel);
+    this._sendPitchWheel(channel, 0, Math.max(0, when - 0.004));
+    for (const sample of samples) {
+      this._sendPitchWheel(channel, sample.semitones, sample.time);
+    }
+  }
+
+  _hasPitchExpression(note) {
+    return Number.isFinite(Number(note?.bend_value))
+      || !!note?.slide_type
+      || note?.articulation === 'slide'
+      || note?.articulation === 'vibrato'
+      || note?.articulation === 'wide_vibrato'
+      || !!note?.vibrato_wide;
+  }
+
+  _createPitchChannelAllocator(baseChannel, midiProgram, volume) {
+    const reserved = new Set([0, 9, baseChannel]);
+    for (const ch of this._secondaryChannels) {
+      if (Number.isInteger(ch.midiChannel)) reserved.add(ch.midiChannel);
+    }
+    const pool = [];
+    for (let ch = 1; ch <= 15; ch += 1) {
+      if (!reserved.has(ch)) pool.push(ch);
+    }
+    const busyUntil = new Map();
+    const resolvedProgram = this._resolveProgram(midiProgram);
+    const level = Math.max(0, Math.min(127, Math.round((volume ?? 0.8) * 127)));
+
+    return (note, measureNotes, when, duration) => {
+      if (!this._hasPitchExpression(note)) return baseChannel;
+      const sameOnset = (measureNotes || [])
+        .filter(n => Math.abs(Number(n.onset) - Number(note.onset)) < 0.00001);
+      if (sameOnset.length <= 1) return baseChannel;
+
+      const free = pool.find(ch => (busyUntil.get(ch) ?? 0) <= when - 0.002);
+      if (!Number.isInteger(free)) return null;
+      busyUntil.set(free, when + duration + 0.05);
+      try {
+        this._spessa.programChange(free, resolvedProgram);
+        this._spessa.controllerChange(free, 7, level);
+      } catch (_) {
+        // A failed auxiliary channel should play normally, without pitch automation.
+        return null;
+      }
+      this._ensurePitchBendRange(free);
+      return free;
+    };
+  }
+
   /**
    * Read a fetch Response to an ArrayBuffer while reporting download progress via
    * onSynthProgress(frac, loadedMB, totalMB). Falls back to a plain read (with an
@@ -1100,17 +1384,29 @@ export class PlaybackEngine {
         const measureOnset = this._measureOnsetBeats(measureIdx);
         const secPerBeat = this._secPerBeat;
         const now = this._audioCtx.currentTime;
+        const pitchChannelFor = this._createPitchChannelAllocator(
+          0, this._midiProgram, this._primaryVolume,
+        );
         for (const note of notes) {
           const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-          const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
-          const velocity = this._dynamicToVelocity(note.dynamic);
+          const playbackPitch = this._playbackPitch(note);
+          const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
+          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+          const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
+          const pitchChannel = pitchChannelFor(note, notes, when, expr.duration);
+          const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : 0;
+          if (Number.isInteger(pitchChannel)) {
+            this._schedulePitchAutomation(pitchChannel, note, notes, when, expr.duration);
+          }
           // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
           // (debug, startTime) pair. Passing a boolean makes the lib do
           // `'time' in false` and throw on every note → total silence.
-          this._spessa.noteOn(0, note.pitch, velocity, { time: when });
-          this._spessa.noteOff(0, note.pitch, false, { time: when + duration });
+          for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {
+            this._spessa.noteOn(playChannel, playbackPitch, velocity, { time: attack.when });
+            this._spessa.noteOff(playChannel, playbackPitch, false, { time: attack.when + attack.duration });
+          }
         }
       } else if (this._synth) {
         // soundfont-player fallback
@@ -1120,10 +1416,14 @@ export class PlaybackEngine {
         for (const note of notes) {
           const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-          const duration = Math.max(0.08, note.duration * secPerBeat - 0.025);
-          const gain = this._dynamicToVelocity(note.dynamic) / 127;
-          this._synth.play(note.pitch, when, { duration, gain });
+          const playbackPitch = this._playbackPitch(note);
+          const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
+          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+          const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * expr.velocityScale);
+          for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {
+            this._synth.play(playbackPitch, attack.when, { duration: attack.duration, gain });
+          }
         }
       } else if (this._synthLoading) {
         // SpessaSynth (SF2) is still loading: stay silent for this measure instead
@@ -1169,14 +1469,26 @@ export class PlaybackEngine {
     const chNow = this._audioCtx.currentTime;
 
     if (this._spessa) {
+      const pitchChannelFor = this._createPitchChannelAllocator(
+        ch.midiChannel, ch.midiProgram, ch.gain,
+      );
       for (const note of chNotes) {
         const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
         if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-        const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-        const duration = Math.max(0.08, note.duration * chSpb - 0.025);
-        const velocity = Math.min(127, Math.round(this._dynamicToVelocity(note.dynamic) * ch.gain));
-        this._spessa.noteOn(ch.midiChannel, note.pitch, velocity, { time: when });
-        this._spessa.noteOff(ch.midiChannel, note.pitch, false, { time: when + duration });
+        const playbackPitch = this._playbackPitch(note);
+        const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
+        const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+        const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
+        const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * ch.gain * expr.velocityScale);
+        const pitchChannel = pitchChannelFor(note, chNotes, when, expr.duration);
+        const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : ch.midiChannel;
+        if (Number.isInteger(pitchChannel)) {
+          this._schedulePitchAutomation(pitchChannel, note, chNotes, when, expr.duration);
+        }
+        for (const attack of this._noteAttacks(note, when, expr.duration, chSpb)) {
+          this._spessa.noteOn(playChannel, playbackPitch, velocity, { time: attack.when });
+          this._spessa.noteOff(playChannel, playbackPitch, false, { time: attack.when + attack.duration });
+        }
       }
       return;
     }
@@ -1184,10 +1496,14 @@ export class PlaybackEngine {
     for (const note of chNotes) {
       const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
       if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
-      const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec);
-      const duration = Math.max(0.08, note.duration * chSpb - 0.025);
-      const gain = (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain;
-      ch.synth.play(note.pitch, when, { duration, gain });
+      const playbackPitch = this._playbackPitch(note);
+      const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
+      const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+      const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
+      const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain * expr.velocityScale);
+      for (const attack of this._noteAttacks(note, when, expr.duration, chSpb)) {
+        ch.synth.play(playbackPitch, attack.when, { duration: attack.duration, gain });
+      }
     }
   }
 
@@ -1203,9 +1519,14 @@ export class PlaybackEngine {
 
     for (const note of notes) {
       const beatInMeasure = note.onset - measureOnset;
-      const delay = offsetSec + beatInMeasure * secPerBeat;
-      const durSec = note.duration * secPerBeat;
-      this._scheduleNote(note.pitch, now + delay, durSec);
+      const playbackPitch = this._playbackPitch(note);
+      const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
+      const delay = offsetSec + beatInMeasure * secPerBeat + strumOffset;
+      const expr = this._expressionForNote(note, note.duration * secPerBeat);
+      const pitchSamples = this._pitchSamplesForNote(note, notes, now + delay, expr.duration);
+      for (const attack of this._noteAttacks(note, now + delay, expr.duration, secPerBeat)) {
+        this._scheduleNote(playbackPitch, attack.when, attack.duration, pitchSamples);
+      }
     }
   }
 
@@ -1214,7 +1535,7 @@ export class PlaybackEngine {
    * Multiple sine harmonics with individual decay rates approximate
    * the bright attack and natural decay of a plucked guitar string.
    */
-  _scheduleNote(pitch, startTime, durationSec) {
+  _scheduleNote(pitch, startTime, durationSec, pitchSamples = []) {
     if (!this._audioCtx) return;
     const ctx = this._audioCtx;
     const freq = 440 * Math.pow(2, (pitch - 69) / 12);
@@ -1261,6 +1582,17 @@ export class PlaybackEngine {
 
       const gain = ctx.createGain();
       const decayEnd = startTime + Math.max(0.15, Math.min(durationSec * decayMul, 3.0));
+      const relevantPitchSamples = pitchSamples
+        .filter(sample => sample.time >= startTime - 0.001 && sample.time <= decayEnd + 0.001)
+        .sort((a, b) => a.time - b.time);
+      if (relevantPitchSamples.length) {
+        const firstSemi = relevantPitchSamples[0].semitones || 0;
+        osc.frequency.setValueAtTime(harmFreq * Math.pow(2, firstSemi / 12), startTime);
+        for (const sample of relevantPitchSamples) {
+          const nextFreq = harmFreq * Math.pow(2, (sample.semitones || 0) / 12);
+          osc.frequency.linearRampToValueAtTime(nextFreq, Math.max(startTime, sample.time));
+        }
+      }
 
       gain.gain.setValueAtTime(0, startTime);
       gain.gain.linearRampToValueAtTime(ampRel * 0.9, startTime + attackDur);

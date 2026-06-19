@@ -666,9 +666,18 @@ class AnimationMain {
     if (r.skinMat) thumb.tipCap.material = r.skinMat;   // thumb tip = skin, not a role colour
   }
   _placeFinger(main, name, fret, corde, yLift = 0) {
-    const r = this.r, d = main.doigt(name);
-    // yLift > 0 → fold to HOVER this far above the string (not pressing).
-    const T = new THREE.Vector3(r._pressX(fret), STRING_SURFACE + yLift, r._stringZAt(corde));
+    const r = this.r;
+    // yLift > 0 means fold to hover this far above the string.
+    return this._placeFingerTo(main, name, new THREE.Vector3(
+      r._pressX(fret),
+      STRING_SURFACE + yLift,
+      r._stringZAt(corde),
+    ));
+  }
+  _placeFingerTo(main, name, target) {
+    const r = this.r;
+    const d = main.doigt(name);
+    const T = target;
     main.node.updateMatrixWorld(true);
     const mcp = d.mcpWorld();
     // R10: the proximal phalanx "points" toward the fret, capped at 45° (no roll).
@@ -854,6 +863,11 @@ class Hand3DRenderer {
     this.anim = new AnimationMain(this, this.main);
     this._impactHalos = [];
     this._activePressKeys = new Set();
+    this._lastUpdateMs = 0;
+    this._fingerMotion = {};
+    for (const f of FINGER_ORDER) {
+      this._fingerMotion[f] = { x: null, y: null, z: null, role: "idle" };
+    }
     this._haloGroup = new THREE.Group();
     this.scene.add(this._haloGroup);
 
@@ -2107,6 +2121,11 @@ class Hand3DRenderer {
   update(kin) {
     if (this.disposed || !kin) return;
     this._lastKin = kin;   // dev hook: the grip verifier reads active fingers/targets
+    const nowMs = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    this._updateDt = this._lastUpdateMs > 0
+      ? Math.min(0.05, Math.max(0.001, (nowMs - this._lastUpdateMs) / 1000))
+      : 1 / 60;
+    this._lastUpdateMs = nowMs;
     try {
       if (this._rigMode === "articulated") {
         this._updateArticulated(kin);
@@ -2176,11 +2195,11 @@ class Hand3DRenderer {
     // R11: fold all fingers; if any can't reach (even with its 45° point), move
     // the WRIST one step (within R10 limits) and RE-FOLD EVERY finger — the
     // wrist is the outer loop, the fingers fully depend on it.
-    let unreachable = this._foldAllFingers(kin);
+    let unreachable = this._foldAllFingers(kin, true);
     let tries = 0;
     while (unreachable.length && tries < WRIST_COMP_TRIES) {
       if (!this._nudgeWrist(kin, unreachable)) break;       // no in-limit step helps
-      unreachable = this._foldAllFingers(kin);
+      unreachable = this._foldAllFingers(kin, false);
       tries++;
     }
     this._lastUnreachable = unreachable;
@@ -2190,7 +2209,7 @@ class Hand3DRenderer {
 
   /* Fold every finger to its target string (R9: index->pinky, each kept from
      crossing the previous via its target X).  Returns the unreachable list. */
-  _foldAllFingers(kin) {
+  _foldAllFingers(kin, animateTargets = true) {
     const m = this.main, a = this.anim;
     m.node.updateMatrixWorld(true);
     const unreachable = [];
@@ -2203,20 +2222,67 @@ class Hand3DRenderer {
       if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
         // Pressing (RED) or held-down/soon-used (BLUE): fold to contact.  R9
         // no-cross is preserved by fret-ordered targets + the 45° point cap.
-        const res = a._placeFinger(m, f, fg.fret, str);
+        const target = this._animatedFingerTarget(f, {
+          x: this._pressX(fg.fret),
+          y: STRING_SURFACE,
+          z: this._stringZAt(str),
+          role,
+        }, animateTargets);
+        const res = a._placeFingerTo(m, f, target);
         if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
         prevX = Math.max(prevX, d.tipWorld().x);
       } else if (fg && fg.fret > 0 && str != null) {
         // Ready/hover (GREEN): fold to HOVER just above its string — a natural
         // median curl, not a finger sticking up or a tight claw.
-        a._placeFinger(m, f, fg.fret, str, HOVER_GAP);
+        const target = this._animatedFingerTarget(f, {
+          x: this._pressX(fg.fret),
+          y: STRING_SURFACE + HOVER_GAP,
+          z: this._stringZAt(str),
+          role,
+        }, animateTargets);
+        a._placeFingerTo(m, f, target);
       } else {
         // Idle (GREEN), no target: a median resting curl + a slight natural fan.
+        this._resetFingerMotion(f);
         d.setYaw(REST_SPLAY[f] || 0); d.relax(IDLE_CURL);
       }
       d.setRole(role);
     }
     return unreachable;
+  }
+
+  _resetFingerMotion(f) {
+    const motion = this._fingerMotion && this._fingerMotion[f];
+    if (!motion) return;
+    motion.x = null;
+    motion.y = null;
+    motion.z = null;
+    motion.role = "idle";
+  }
+
+  _animatedFingerTarget(f, target, animateTargets) {
+    if (!animateTargets) return new THREE.Vector3(target.x, target.y, target.z);
+    const motion = this._fingerMotion[f];
+    if (!motion || motion.x == null || motion.y == null || motion.z == null) {
+      if (motion) {
+        motion.x = target.x;
+        motion.y = target.y;
+        motion.z = target.z;
+        motion.role = target.role;
+      }
+      return new THREE.Vector3(target.x, target.y, target.z);
+    }
+
+    const dt = this._updateDt || (1 / 60);
+    const tau = target.role === "active" ? 0.045
+      : target.role === "planted" ? 0.06
+      : 0.075;
+    const k = Math.min(1, 1 - Math.exp(-dt / tau));
+    motion.x += (target.x - motion.x) * k;
+    motion.y += (target.y - motion.y) * k;
+    motion.z += (target.z - motion.z) * k;
+    motion.role = target.role;
+    return new THREE.Vector3(motion.x, motion.y, motion.z);
   }
 
   /* R11 wrist compensation: try one bounded step on each wrist DOF (flex, dev,
@@ -2249,7 +2315,7 @@ class Hand3DRenderer {
     let bestMove = null, bestGap = gap();
     for (const mv of moves) {
       restore(); mv(); m.node.updateMatrixWorld(true);
-      this._foldAllFingers(kin);
+      this._foldAllFingers(kin, false);
       const g = gap();
       if (g < bestGap - 1e-3) { bestGap = g; bestMove = mv; }
     }

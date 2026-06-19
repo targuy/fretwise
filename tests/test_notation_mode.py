@@ -65,18 +65,18 @@ class TestHasStandard:
 
 class TestSystemHeightForMode:
     def test_standard_only(self) -> None:
-        assert system_height_for_mode("standard") == 80.0
+        assert system_height_for_mode("standard") == 96.0
 
     @pytest.mark.parametrize("mode", ["tablature", "tablature_rhythm"])
     def test_tab_modes(self, mode: str) -> None:
         assert system_height_for_mode(mode) == 130.0
 
     def test_standard_tablature_default(self) -> None:
-        assert system_height_for_mode("standard_tablature") == 168.0
+        assert system_height_for_mode("standard_tablature") == 190.0
 
     def test_unknown_mode_uses_default(self) -> None:
         # Defensive: unknown strings fall through to the standard_tablature height.
-        assert system_height_for_mode("anything-else") == 168.0
+        assert system_height_for_mode("anything-else") == 190.0
 
 
 class TestModeMutualExclusion:

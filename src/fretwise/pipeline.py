@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from fretwise.biomechanics import BiomechanicalReport, validate_fingering_results
 from fretwise.generator import StateGenerator
-from fretwise.models import FingeringResult, NoteEvent
+from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
 from fretwise.scoring import (
@@ -31,6 +31,8 @@ from fretwise.scoring import (
     resolve_sedentary_fingers,
 )
 from fretwise.segmentation import Position, segment_into_positions
+
+_UNFINGERABLE_SOURCE_COST = 1_000_000.0
 
 
 @dataclass(frozen=True)
@@ -69,6 +71,20 @@ def _state_signature(results: list[FingeringResult]) -> tuple[tuple[int, int, st
             result.state.hand_position,
         )
         for result in results
+    )
+
+
+def _fallback_state_for_unfingerable_source_note(note: NoteEvent) -> FingeringState | None:
+    """Keep source-tab notes visible when no generated state is valid."""
+    if note.string_hint is None or note.fret_hint is None:
+        return None
+    fret = int(note.fret_hint)
+    finger = Finger.OPEN if fret == 0 else Finger.INDEX
+    return FingeringState(
+        string_num=int(note.string_hint),
+        fret=fret,
+        finger=finger,
+        hand_position=max(1, fret),
     )
 
 
@@ -148,11 +164,23 @@ def run_pipeline(
     all_results: list[FingeringResult] = []
     total_valid = 0
     total_dropped = 0
+    total_source_unfingerable = 0
 
     for voice_idx in sorted(voices.keys()):
         voice_events = voices[voice_idx]
         state_lists = generator.states_for_sequence(voice_events)
-        valid_pairs = [(e, sl) for e, sl in zip(voice_events, state_lists) if sl]
+        valid_pairs: list[tuple[NoteEvent, list[FingeringState]]] = []
+        fallback_event_ids: set[int] = set()
+        for event, states in zip(voice_events, state_lists):
+            if states:
+                valid_pairs.append((event, states))
+                continue
+            fallback = _fallback_state_for_unfingerable_source_note(event)
+            if fallback is None:
+                continue
+            valid_pairs.append((event, [fallback]))
+            fallback_event_ids.add(id(event))
+            total_source_unfingerable += 1
         total_valid += len(valid_pairs)
         total_dropped += len(voice_events) - len(valid_pairs)
 
@@ -204,6 +232,9 @@ def run_pipeline(
         if chord_finger_classifier is not None:
             results = resolve_chord_learned_fingers(results, chord_finger_classifier)
         results = resolve_section_consistency(results)
+        for result in results:
+            if id(result.note_event) in fallback_event_ids:
+                result.cost = max(result.cost, _UNFINGERABLE_SOURCE_COST)
         all_results.extend(results)
 
     # Sort by onset then voice for stable, predictable ordering.
@@ -269,6 +300,7 @@ def run_pipeline(
         "valid_states": total_valid,
         "viterbi": len(all_results),
         "dropped": total_dropped,
+        "source_unfingerable": total_source_unfingerable,
         **pw_stats,
     }
     return all_results, stats

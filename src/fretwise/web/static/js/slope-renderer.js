@@ -21,9 +21,10 @@ const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
 const MIN_CIRCLE_PAD_PX = 5;
 const MEASURE_NOTE_PAD_PX = 7;
-const MIN_FRAME_MS = 1000 / 24;
-const HIGH_QUALITY_FRAME_MS = 1000 / 42;
-const LOW_QUALITY_FRAME_MS = 1000 / 18;
+const TARGET_FRAME_MS = 1000 / 60;
+const MIN_ACCEPTABLE_FRAME_MS = 1000 / 50;
+const HIGH_QUALITY_FRAME_MS = 1000 / 60;
+const LOW_QUALITY_FRAME_MS = 1000 / 42;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const STRING_OPEN_MIDI = {
   1: 64, // high E
@@ -70,6 +71,12 @@ export class SlopeRenderer {
     this._hitFlashes = [];
     this.notes = this._applyStringCollisionGuard(this.results);
     this.chordEvents = this._buildChordEvents();
+    this._totalBeatsValue = this._computeTotalBeats();
+    this._measureBoundaryBeatsValue = this._computeMeasureBoundaryBeats();
+    this._geometry = null;
+    this._geometryKey = '';
+    this._frameGeometry = null;
+    this._frameVisibleBoundaries = null;
     this.canvas.__fretwiseSlopeRenderer = this;
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
@@ -89,7 +96,7 @@ export class SlopeRenderer {
       quality: this._quality,
       dpr: this.dpr,
       lastRenderMs: Math.round(this._lastRenderMs * 10) / 10,
-      targetMinFps: 24,
+      targetMinFps: 50,
       animationRunning: !!this._raf,
     };
   }
@@ -101,6 +108,9 @@ export class SlopeRenderer {
     this.canvas.width = Math.max(1, Math.floor(rect.width * this.dpr));
     this.canvas.height = Math.max(1, Math.floor(rect.height * this.dpr));
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    this.ctx.imageSmoothingEnabled = false;
+    this._geometry = null;
+    this._geometryKey = '';
     this._invalidateStaticCache();
     this.render();
   }
@@ -127,9 +137,9 @@ export class SlopeRenderer {
 
   _renderDpr() {
     const device = window.devicePixelRatio || 1;
-    if (this._quality >= 2) return 1;
-    if (this._quality === 1) return Math.min(1.25, device);
-    return Math.min(1.6, device);
+    if (this._quality >= 2) return Math.min(1.5, device);
+    if (this._quality === 1) return Math.min(2, device);
+    return Math.min(3, device);
   }
 
   _invalidateStaticCache() {
@@ -153,13 +163,13 @@ export class SlopeRenderer {
     this._raf = null;
     if (!this.visible) return;
 
-    const frameGap = this._lastFrameTs ? ts - this._lastFrameTs : MIN_FRAME_MS;
+    const frameGap = this._lastFrameTs ? ts - this._lastFrameTs : TARGET_FRAME_MS;
     this._lastFrameTs = ts;
     const started = performance.now();
     const previousBeat = this.currentBeat;
     if (this.playback) this._syncFromSeconds(this.playback.getCurrentTimeSec(), this.playback);
     else this._syncFromSeconds(this._lastSeconds, null);
-    if (this.playback?.isPlaying && frameGap > MIN_FRAME_MS * 0.92) {
+    if (this.playback?.isPlaying && frameGap > TARGET_FRAME_MS * 0.82) {
       this._captureCrossedHits(previousBeat, this.currentBeat);
     }
     this.render();
@@ -172,7 +182,7 @@ export class SlopeRenderer {
   }
 
   _updateAdaptiveQuality(frameGap, renderMs) {
-    if (frameGap > MIN_FRAME_MS || renderMs > HIGH_QUALITY_FRAME_MS) {
+    if (frameGap > MIN_ACCEPTABLE_FRAME_MS || renderMs > HIGH_QUALITY_FRAME_MS) {
       this._slowFrames += 1;
       this._fastFrames = 0;
     } else {
@@ -219,17 +229,22 @@ export class SlopeRenderer {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
     if (!w || !h) return;
+    this._beginFrameCaches();
     this._drawBackground(w, h);
-    this._drawStrings();
     this._drawMeasureBars();
     for (const note of this._visibleNotesForFrame()) this._drawNoteBar(note);
     for (const chord of this._visibleChordsForFrame()) this._drawChordLabel(chord);
     this._drawHitFlashes();
     this._drawNowPulse();
     this._drawTempoHeart();
+    this._endFrameCaches();
   }
 
   _totalBeats() {
+    return this._totalBeatsValue || this._computeTotalBeats();
+  }
+
+  _computeTotalBeats() {
     const maxNote = this.notes.reduce((mx, n) => Math.max(mx, n.onset + n.duration), 0);
     const measureBeats = Array.isArray(this.data.measure_beats)
       ? this.data.measure_beats.reduce((sum, b) => sum + (Number(b) || 0), 0)
@@ -317,9 +332,22 @@ export class SlopeRenderer {
     return Math.max(lo, Math.min(hi, v));
   }
 
+  _beginFrameCaches() {
+    this._frameGeometry = this._foldGeometry();
+    this._frameVisibleBoundaries = this._computeVisibleMeasureBoundaryBeats();
+  }
+
+  _endFrameCaches() {
+    this._frameGeometry = null;
+    this._frameVisibleBoundaries = null;
+  }
+
   _foldGeometry() {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
+    const key = `${Math.round(w)}:${Math.round(h)}`;
+    if (this._frameGeometry) return this._frameGeometry;
+    if (this._geometry && this._geometryKey === key) return this._geometry;
     const marginX = Math.max(70, Math.min(120, w * 0.055));
     const spacing = Math.max(30, Math.min(44, h * 0.052, w * 0.024));
     const spread = spacing * 5;
@@ -336,7 +364,7 @@ export class SlopeRenderer {
     const topLen = Math.max(1, bendX - farX);
     const pastLen = (PAST_BEATS / FUTURE_BEATS) * (bottomLen + arcLen + topLen);
 
-    return {
+    const geometry = {
       w,
       h,
       spacing,
@@ -355,6 +383,9 @@ export class SlopeRenderer {
       pastLen,
       totalLen: bottomLen + arcLen + topLen,
     };
+    this._geometry = geometry;
+    this._geometryKey = key;
+    return geometry;
   }
 
   _stringOffset(stringNum) {
@@ -458,6 +489,7 @@ export class SlopeRenderer {
     ctx.stroke();
     ctx.restore();
 
+    this._drawStrings(ctx);
     this._drawStringLabels(ctx);
   }
 
@@ -475,8 +507,7 @@ export class SlopeRenderer {
     ctx.restore();
   }
 
-  _drawStrings() {
-    const ctx = this.ctx;
+  _drawStrings(ctx = this.ctx) {
     for (let stringNum = 6; stringNum >= 1; stringNum -= 1) {
       const start = this._lanePoint(stringNum, 0);
       const end = this._lanePoint(stringNum, 1);
@@ -496,6 +527,10 @@ export class SlopeRenderer {
   }
 
   _measureBoundaryBeats() {
+    return this._measureBoundaryBeatsValue || this._computeMeasureBoundaryBeats();
+  }
+
+  _computeMeasureBoundaryBeats() {
     const totalBeats = this._totalBeats();
     const measureBeats = Array.isArray(this.data.measure_beats)
       ? this.data.measure_beats.map((b) => Number(b) || 0).filter((b) => b > 0)
@@ -568,6 +603,11 @@ export class SlopeRenderer {
   }
 
   _visibleMeasureBoundaryBeats() {
+    if (this._frameVisibleBoundaries) return this._frameVisibleBoundaries;
+    return this._computeVisibleMeasureBoundaryBeats();
+  }
+
+  _computeVisibleMeasureBoundaryBeats() {
     const totalBeats = this._totalBeats();
     const boundaries = this._measureBoundaryBeats();
     const minBeat = this.currentBeat - PAST_BEATS - MEASURE_BEATS;
@@ -648,11 +688,17 @@ export class SlopeRenderer {
     }
     visible.sort((a, b) => a.string - b.string || a.onset - b.onset);
     const gapBeats = this._minimumGapBeats();
+    const byString = new Map();
     for (const note of visible) {
-      const next = visible.find((candidate) => (
-        candidate.string === note.string && candidate.onset > note.onset
-      ));
-      if (next) {
+      const notesOnString = byString.get(note.string) || [];
+      notesOnString.push(note);
+      byString.set(note.string, notesOnString);
+    }
+    for (const notesOnString of byString.values()) {
+      notesOnString.sort((a, b) => a.onset - b.onset);
+      for (let i = 0; i < notesOnString.length - 1; i += 1) {
+        const note = notesOnString[i];
+        const next = notesOnString[i + 1];
         const maxDuration = Math.max(0.05, next.onset - note.onset - gapBeats);
         note.duration = Math.min(note.duration, maxDuration);
       }

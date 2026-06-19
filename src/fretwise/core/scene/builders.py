@@ -71,6 +71,7 @@ _REST_GAP_BREAK = _SCENE_CFG.rest_gap_break
 _TAB_SPAN_PAD = _SCENE_CFG.tab_span_pad
 _BEAM_GAP = _SCENE_CFG.beam_gap
 _FLAG_STACK_SPACING = _SCENE_CFG.flag_stack_spacing
+_STANDARD_BEAM_THICKNESS = 2.5
 _TAB_RHYTHM_BEAM_THICKNESS = _SCENE_CFG.tab_rhythm_beam_thickness
 _TAB_RHYTHM_BEAM_GAP = _SCENE_CFG.tab_rhythm_beam_gap
 _TAB_RHYTHM_FLAG_SPACING = _SCENE_CFG.tab_rhythm_flag_spacing
@@ -586,9 +587,15 @@ def layout_to_render_scene(
                                 fallback_pitch=pitch,
                             )
                             onset_key = round(event_layout.onset, 6)
+                            tuplet = tuplet_by_onset.get(onset_key)
                             display_duration = rhythm_duration_by_onset_voice.get(
                                 (onset_key, voice_number),
                                 event_layout.duration,
+                            )
+                            notated_display_duration = _notated_duration(
+                                display_duration,
+                                tuplet[0] if tuplet else None,
+                                tuplet[1] if tuplet else None,
                             )
                             chord_offset = notehead_offset_by_event_id.get(
                                 event_layout.event_id, 0.0
@@ -684,10 +691,15 @@ def layout_to_render_scene(
                                         "event_id": event_layout.event_id,
                                         "onset": event_layout.onset,
                                         "duration": display_duration,
+                                        "notated_duration": notated_display_duration,
                                         "pitch_notated": pitch,
-                                        "filled": _is_filled_notehead(display_duration),
-                                        "duration_class": _duration_class(display_duration),
-                                        "dot_count": _dot_count(display_duration),
+                                        "filled": _is_filled_notehead(
+                                            notated_display_duration
+                                        ),
+                                        "duration_class": _duration_class(
+                                            notated_display_duration
+                                        ),
+                                        "dot_count": _dot_count(notated_display_duration),
                                         "on_staff_line": "true"
                                         if diatonic_step % 2 == 0
                                         else "false",
@@ -734,7 +746,7 @@ def layout_to_render_scene(
                                 (
                                     note_x,
                                     event_layout.onset,
-                                    event_layout.duration,
+                                    display_duration,
                                     note_y,
                                     stem_direction,
                                 )
@@ -1303,38 +1315,82 @@ def _tuplet_bracket_runs(
     group: list[tuple[float, float, float]],
     tuplet_by_onset: dict[float, tuple[int, int]],
 ) -> list[tuple[float, float, int]]:
-    """Find contiguous runs of same-tuplet notes within a beam group.
+    """Find complete same-ratio tuplet windows within a rhythm group.
 
-    Returns a list of (x0, x1, tuplet_number) for each run of ≥2 consecutive
-    notes sharing the same non-trivial tuplet ratio.  This handles the common
-    case where a beam group mixes tuplet notes and regular notes (e.g. 3 triplet
-    16ths followed by a regular 8th in the same beat).
+    A bracket is emitted only when the real duration covered by the run matches
+    the tuplet time span from the source rhythm.  For example, a triplet made of
+    ``1/3 + 1/6 + 1/3 + 1/6`` beats has notated values
+    ``1/2 + 1/4 + 1/2 + 1/4``; the largest notated unit is an eighth, so the
+    3:2 bracket must cover ``2 * 1/2 == 1`` real beat.
     """
     results: list[tuple[float, float, int]] = []
-    run_start: int | None = None
+    run: list[tuple[float, float, float]] = []
     run_tup: tuple[int, int] | None = None
+    prev_end: float | None = None
 
-    def _flush(end_idx: int) -> None:
-        nonlocal run_start, run_tup
-        if run_start is not None and end_idx - run_start >= 2:
-            results.append((group[run_start][0], group[end_idx - 1][0], run_tup[0]))  # type: ignore[index]
-        run_start = None
+    def _flush() -> None:
+        nonlocal run, run_tup, prev_end
+        _append_complete_tuplet_windows(results, run, run_tup)
+        run = []
         run_tup = None
+        prev_end = None
 
-    for idx, (x, onset, _dur) in enumerate(group):
+    for x, onset, duration in group:
         tup = tuplet_by_onset.get(round(onset, 6))
-        if tup is not None:
-            if tup == run_tup:
-                pass  # extend current run
-            else:
-                _flush(idx)
-                run_start = idx
-                run_tup = tup
-        else:
-            _flush(idx)
+        has_gap = prev_end is not None and onset - prev_end >= _REST_GAP_BREAK
+        if tup is None:
+            _flush()
+            continue
+        if has_gap:
+            _flush()
+        if run_tup is not None and tup != run_tup:
+            _flush()
+        run_tup = tup
+        run.append((x, onset, duration))
+        prev_end = onset + duration
 
-    _flush(len(group))
+    _flush()
     return results
+
+
+def _append_complete_tuplet_windows(
+    results: list[tuple[float, float, int]],
+    run: list[tuple[float, float, float]],
+    run_tup: tuple[int, int] | None,
+) -> None:
+    if run_tup is None or len(run) < 2:
+        return
+    actual, normal = run_tup
+    if actual <= 0 or normal <= 0:
+        return
+
+    group: list[tuple[float, float, float]] = []
+    notated_total = 0.0
+    for item in run:
+        x, onset, duration = item
+        if not group:
+            notated_total = 0.0
+        group.append(item)
+        notated_total += _notated_duration(duration, actual, normal)
+        unit = _complete_tuplet_base_unit(notated_total, actual)
+        if unit is not None:
+            expected_span = normal * unit
+            span = onset + duration - group[0][1]
+            if len(group) >= 2 and abs(span - expected_span) <= max(
+                1e-4, expected_span * 1e-4
+            ):
+                results.append((group[0][0], x, actual))
+            group = []
+            notated_total = 0.0
+
+
+def _complete_tuplet_base_unit(notated_total: float, actual: int) -> float | None:
+    """Return the notated base unit when a tuplet window is complete."""
+    unit = notated_total / actual
+    for candidate in (0.125, 0.25, 0.5, 1.0, 2.0, 4.0):
+        if abs(unit - candidate) <= 1e-4:
+            return candidate
+    return None
 
 
 def _rhythm_duration_by_onset_voice(events: list[object]) -> dict[tuple[float, int], float]:
@@ -1601,20 +1657,25 @@ def _append_standard_rhythm(
         else:
             extents_by_key[key] = (note_y, note_y)
     collapsed_events = _collapse_standard_rhythm_events(events)
-    up_note_ys = [
-        note_y
-        for _x, _onset, _duration, note_y, direction in collapsed_events
+    up_outer_note_ys = [
+        min_y
+        for (_onset, direction), (min_y, _max_y) in extents_by_key.items()
         if direction == "up"
     ]
-    down_note_ys = [
-        note_y
-        for _x, _onset, _duration, note_y, direction in collapsed_events
+    down_outer_note_ys = [
+        max_y
+        for (_onset, direction), (_min_y, max_y) in extents_by_key.items()
         if direction == "down"
     ]
-    anchor_up_target = min((y - 22.0 for y in up_note_ys), default=stem_top_y)
-    anchor_down_target = max((y + 22.0 for y in down_note_ys), default=stem_bottom_y)
-    anchor_up = min(stem_top_y, max(anchor_up_target, stem_top_y))
-    anchor_down = max(stem_bottom_y, min(anchor_down_target, stem_bottom_y))
+    beam_note_clearance = max(staff_spacing, outer_note_extension)
+    beam_bar_clearance = beam_note_clearance + _STANDARD_BEAM_THICKNESS
+    anchor_up_target = min((y - beam_bar_clearance for y in up_outer_note_ys), default=stem_top_y)
+    anchor_down_target = max(
+        (y + beam_bar_clearance for y in down_outer_note_ys),
+        default=stem_bottom_y,
+    )
+    anchor_up = min(stem_top_y, anchor_up_target)
+    anchor_down = max(stem_bottom_y, anchor_down_target)
     for x, onset, duration, note_y, stem_direction in sorted(
         collapsed_events, key=lambda item: (item[1], item[0])
     ):
@@ -1706,6 +1767,13 @@ def _append_standard_rhythm(
                 "note_y": note_y,
                 "y0": stem_y0,
                 "y1": stem_y1,
+                "min_y": min_y,
+                "max_y": max_y,
+                "beam_clear_y": (
+                    max_y + beam_bar_clearance
+                    if stem_direction == "down"
+                    else min_y - beam_bar_clearance
+                ),
                 "flag_count": _flag_count(_ndur) if base_dur < 1.0 else 0,
             }
         )
@@ -1753,7 +1821,7 @@ def _append_standard_rhythm(
                 max_stem_length=beamed_max_stem_length,
             )
             for resolved_group_stems, resolved_entries in resolved_groups:
-                _draw_single_beam_group(
+                _beam_line = _draw_single_beam_group(
                     layer,
                     group=resolved_group_stems,
                     group_entries=resolved_entries,
@@ -1766,8 +1834,17 @@ def _append_standard_rhythm(
                     beamed_keys=beamed_keys,
                 )
                 if tuplet_by_onset:
+                    if _beam_line is not None:
+                        _line_y0, _line_y1 = _beam_line
+                        _beam_edge_y = min(_line_y0, _line_y1) if direction == "up" else max(
+                            _line_y0, _line_y1
+                        )
+                    else:
+                        _beam_edge_y = anchor_up if direction == "up" else anchor_down
                     _bracket_y = (
-                        anchor_up - 6.0 if direction == "up" else anchor_down + 8.0
+                        max(_beam_edge_y - 7.0, stem_top_y - 0.8 * staff_spacing)
+                        if direction == "up"
+                        else _beam_edge_y + 8.0
                     )
                     for _bx0, _bx1, _bta in _tuplet_bracket_runs(
                         resolved_group_stems, tuplet_by_onset
@@ -1786,6 +1863,44 @@ def _append_standard_rhythm(
                                 metadata={"direction": direction, "style": "standard"},
                             )
                         )
+
+    if tuplet_by_onset:
+        for direction in ("up", "down"):
+            standalone_entries = [
+                entry
+                for entry in stem_entries
+                if str(entry["direction"]) == direction
+                and (round(float(entry["onset"]), 6), direction) not in beamed_keys
+                and tuplet_by_onset.get(round(float(entry["onset"]), 6)) is not None
+            ]
+            if len(standalone_entries) < 2:
+                continue
+            standalone_stems = [
+                (float(entry["x"]), float(entry["onset"]), float(entry["duration"]))
+                for entry in sorted(standalone_entries, key=lambda item: float(item["onset"]))
+            ]
+            if direction == "up":
+                bracket_y = max(
+                    min(float(entry["y1"]) for entry in standalone_entries) - 7.0,
+                    stem_top_y - 0.8 * staff_spacing,
+                )
+            else:
+                bracket_y = max(float(entry["y1"]) for entry in standalone_entries) + 8.0
+            for x0, x1, number in _tuplet_bracket_runs(standalone_stems, tuplet_by_onset):
+                layer.recipe_instances.append(
+                    RecipeInstance(
+                        recipe_id="tuplet_bracket",
+                        params={
+                            "x0": x0,
+                            "x1": x1,
+                            "y": bracket_y,
+                            "number": number,
+                            "direction": direction,
+                            "style": "standard",
+                        },
+                        metadata={"direction": direction, "style": "standard"},
+                    )
+                )
 
     for entry in stem_entries:
         onset = float(entry["onset"])
@@ -2073,7 +2188,9 @@ def _resolve_beam_crossing(
     for i, entry in enumerate(group_entries):
         entry_x = float(entry["x"])
         beam_y = _beam_y_at_x(entry_x, x0=group_x0, x1=group_x1, y0=line_y0, y1=line_y1)
-        chord_tip_y = float(entry["y1"])  # pre-computed chord-aware stem tip
+        chord_tip_y = float(
+            entry.get("beam_clear_y", entry["y1"])
+        )  # chord-aware beam clearance line
         is_interior = 0 < i < (len(group_entries) - 1)
         if direction == "down" and beam_y < chord_tip_y - 1.0 and is_interior:
             split_idx = i
@@ -2125,10 +2242,10 @@ def _draw_single_beam_group(
     max_stem_length: float,
     flag_by_onset: dict[float, int],
     beamed_keys: set[tuple[float, str]],
-) -> None:
+) -> tuple[float, float] | None:
     """Compute the final beam line for a group and emit beam + stem updates."""
     if len(group_entries) < 2:
-        return
+        return None
     line_y0, line_y1 = _beam_line_for_group(
         group_entries,
         direction=direction,
@@ -2164,7 +2281,7 @@ def _draw_single_beam_group(
                 "y0": line_y0,
                 "y1": line_y1,
                 "level": 1,
-                "thickness": 2.5,
+                "thickness": _STANDARD_BEAM_THICKNESS,
                 "gap": _BEAM_GAP,
                 "direction": direction,
             },
@@ -2182,12 +2299,13 @@ def _draw_single_beam_group(
                     "y0": seg_y0,
                     "y1": seg_y1,
                     "level": level,
-                    "thickness": 2.5,
+                    "thickness": _STANDARD_BEAM_THICKNESS,
                     "gap": _BEAM_GAP,
                     "direction": direction,
                 },
             )
         )
+    return (line_y0, line_y1)
 
 
 def _beam_anchor_y(
@@ -2245,13 +2363,17 @@ def _beam_line_for_group(
             # Beam must clear the ENTIRE chord extent (entry["y1"]), not just
             # stem_y0 + min_stem_length; the chord's lowest note may be much
             # further below the topmost notehead.
-            required_y = max(note_side_y + min_stem_length, stem_extent_y)
+            beam_clear_y = float(entry.get("beam_clear_y", stem_extent_y))
+            required_y = max(note_side_y + min_stem_length, stem_extent_y, beam_clear_y)
             low_shift = max(low_shift, required_y - beam_y)
-            high_shift = min(high_shift, note_side_y + max_stem_length - beam_y)
+            far_limit_y = max(note_side_y + max_stem_length, stem_extent_y, beam_clear_y)
+            high_shift = min(high_shift, far_limit_y - beam_y)
         else:
             # Symmetric for up-stems: beam must be above the topmost chord note.
-            required_y = min(note_side_y - min_stem_length, stem_extent_y)
-            low_shift = max(low_shift, note_side_y - max_stem_length - beam_y)
+            beam_clear_y = float(entry.get("beam_clear_y", stem_extent_y))
+            required_y = min(note_side_y - min_stem_length, stem_extent_y, beam_clear_y)
+            far_limit_y = min(note_side_y - max_stem_length, stem_extent_y, beam_clear_y)
+            low_shift = max(low_shift, far_limit_y - beam_y)
             high_shift = min(high_shift, required_y - beam_y)
 
     if low_shift <= high_shift:
@@ -2670,7 +2792,10 @@ def _secondary_beam_segments(
     *,
     flag_by_onset: dict[float, int],
 ) -> list[tuple[int, float, float]]:
-    max_level = max((flag_by_onset.get(onset, 0) for _x, onset, _dur in group), default=0)
+    max_level = max(
+        (_flag_count_for_onset(flag_by_onset, onset) for _x, onset, _dur in group),
+        default=0,
+    )
     if max_level < 2:
         return []
 
@@ -2679,7 +2804,7 @@ def _secondary_beam_segments(
         qualifying: list[int] = [
             idx
             for idx, (_x, onset, _dur) in enumerate(group)
-            if flag_by_onset.get(onset, 0) >= level
+            if _flag_count_for_onset(flag_by_onset, onset) >= level
         ]
         if not qualifying:
             continue
@@ -2690,35 +2815,38 @@ def _secondary_beam_segments(
                 if len(run) >= 2:
                     segments.append((level, group[run[0]][0], group[run[-1]][0]))
                 elif len(run) == 1:
-                    solo = run[0]
-                    if solo == 0 and len(group) > 1:
-                        x0 = group[solo][0]
-                        x1 = min(group[solo + 1][0] - 0.5, x0 + _SECONDARY_BEAM_HOOK_LEN)
-                        if x1 > x0:
-                            segments.append((level, x0, x1))
-                    elif solo == len(group) - 1 and len(group) > 1:
-                        x1 = group[solo][0]
-                        x0 = max(group[solo - 1][0] + 0.5, x1 - _SECONDARY_BEAM_HOOK_LEN)
-                        if x1 > x0:
-                            segments.append((level, x0, x1))
+                    segment = _isolated_secondary_beamlet(group, run[0])
+                    if segment is not None:
+                        segments.append((level, segment[0], segment[1]))
                 run = []
             run.append(idx)
 
         if len(run) >= 2:
             segments.append((level, group[run[0]][0], group[run[-1]][0]))
         elif len(run) == 1:
-            solo = run[0]
-            if solo == 0 and len(group) > 1:
-                x0 = group[solo][0]
-                x1 = min(group[solo + 1][0] - 0.5, x0 + _SECONDARY_BEAM_HOOK_LEN)
-                if x1 > x0:
-                    segments.append((level, x0, x1))
-            elif solo == len(group) - 1 and len(group) > 1:
-                x1 = group[solo][0]
-                x0 = max(group[solo - 1][0] + 0.5, x1 - _SECONDARY_BEAM_HOOK_LEN)
-                if x1 > x0:
-                    segments.append((level, x0, x1))
+            segment = _isolated_secondary_beamlet(group, run[0])
+            if segment is not None:
+                segments.append((level, segment[0], segment[1]))
     return segments
+
+
+def _flag_count_for_onset(flag_by_onset: dict[float, int], onset: float) -> int:
+    return flag_by_onset.get(onset, flag_by_onset.get(round(onset, 6), 0))
+
+
+def _isolated_secondary_beamlet(
+    group: list[tuple[float, float, float]],
+    solo: int,
+) -> tuple[float, float] | None:
+    """Return a short secondary beamlet for an isolated flagged note."""
+    if len(group) < 2:
+        return None
+    x = group[solo][0]
+    if solo < len(group) - 1:
+        x1 = min(group[solo + 1][0] - 0.5, x + _SECONDARY_BEAM_HOOK_LEN)
+        return (x, x1) if x1 > x else None
+    x0 = max(group[solo - 1][0] + 0.5, x - _SECONDARY_BEAM_HOOK_LEN)
+    return (x0, x) if x > x0 else None
 
 
 def _emit_standalone_tuplet_brackets(

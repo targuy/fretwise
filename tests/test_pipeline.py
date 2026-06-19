@@ -61,6 +61,11 @@ class _StubGenerator:
         return [[FingeringState(3, 5, Finger.INDEX, 5)] for _ in notes]
 
 
+class _EmptyGenerator:
+    def states_for_sequence(self, notes: list[NoteEvent]) -> list[list[FingeringState]]:
+        return [[] for _ in notes]
+
+
 class _StubOptimizer:
     cost_fn = None  # public API expected by pipeline
 
@@ -132,6 +137,31 @@ def test_run_pipeline_with_guard_report_preserves_results_and_stats() -> None:
     assert payload.stats["parsed"] == 1
     assert payload.biomechanical_report.checked_notes == 1
     assert payload.biomechanical_report.is_clean
+
+
+def test_run_pipeline_keeps_unfingerable_source_tab_note_for_review() -> None:
+    event = NoteEvent(
+        pitch=90,
+        onset=0.0,
+        duration=1.0,
+        tempo=120.0,
+        articulation=Articulation.NORMAL,
+        dynamic=Dynamic.MF,
+        string_hint=1,
+        fret_hint=30,
+    )
+
+    payload = run_pipeline_with_guard_report(
+        [event],
+        _EmptyGenerator(),  # type: ignore[arg-type]
+        _StubOptimizer(),  # type: ignore[arg-type]
+    )
+
+    assert len(payload.results) == 1
+    assert payload.results[0].state.fret == 30
+    assert payload.stats["dropped"] == 0
+    assert payload.stats["source_unfingerable"] == 1
+    assert payload.biomechanical_report.fatal_count >= 1
 
 
 def test_run_pipeline_final_chord_guards_repair_duplicate_finger() -> None:

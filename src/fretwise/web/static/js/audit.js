@@ -104,12 +104,8 @@ export function renderAuditBanner(audit, opts = {}) {
     }
   }
 
-  // Default: mask all bad movements.
-  for (const m of movements) {
-    if (m.verdict === 'bad') {
-      _addRangeToMask(m.span.measure_start, m.span.measure_end);
-    }
-  }
+  // Default: keep bad movements visible. Impossible notes are colored red by
+  // the renderer; masking remains an explicit user choice from the details row.
 
   const details = document.getElementById('audit-details');
   if (details) {
@@ -192,7 +188,7 @@ function _buildBadToggle(span) {
   label.className = 'audit-mvt-toggle';
   const cb = document.createElement('input');
   cb.type = 'checkbox';
-  cb.checked = false;            // default: fingerings hidden on bad movements
+  cb.checked = true;             // default: fingerings visible; red marks impossible notes
   const txt = document.createElement('span');
   txt.textContent = 'Afficher les doigtés';
   label.appendChild(cb);

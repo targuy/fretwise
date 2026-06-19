@@ -346,16 +346,16 @@ def _draw_tuplet_bracket(
         font_name = "Times-BoldItalic"
         font_size = 10.0
         text_half_w = 5.8
-        # In scene coords Y increases downward (same as SVG).  "down" means the bracket
-        # is placed below the beam line (hooks open downward, away from the staff).
-        hook_y1 = y + 4.2 if direction == "down" else y - 4.2
+        # Direction names the side where the number sits. Hooks open toward the
+        # notes: top-side brackets point down; bottom-side brackets point up.
+        hook_y1 = y - 4.2 if direction == "down" else y + 4.2
         line_width = 1.1
     else:
         margin = 2.5
         font_name = "Times-Italic"
         font_size = 8.0
         text_half_w = 4.2
-        hook_y1 = y + 3.0 if direction == "down" else y - 3.0
+        hook_y1 = y + 3.0 if direction == "up" else y - 3.0
         line_width = 0.8
 
     bx0 = x0 - margin

@@ -333,10 +333,9 @@ def _render_tablature_rhythm_tuplet_bracket(
     text_half_w = 5.8
 
     hook_h = 4.2
-    # Hooks point away from the beam: when the bracket is below the beam
-    # (direction=="up"), hooks open downward (+y); above (direction=="down"),
-    # hooks open upward (-y).
-    tick_y1 = y + hook_h if direction == "down" else y - hook_h
+    # Direction names the side where the number sits. Hooks open toward the
+    # notes: top-side brackets point down; bottom-side brackets point up.
+    tick_y1 = y - hook_h if direction == "down" else y + hook_h
 
     stroke = 'stroke="black" stroke-width="1.1" fill="none" stroke-linecap="round"'
     out: list[str] = []
@@ -375,10 +374,9 @@ def _render_standard_tuplet_bracket(
 
     text_half_w = 4.2
     hook_h = 3.0
-    # In SVG Y increases downward. "up" means bracket is above the notes (stems-up):
-    # hooks point upward = smaller y.  "down" means bracket is below the notes: hooks
-    # point downward = larger y.
-    hook_y1 = y - hook_h if direction == "up" else y + hook_h
+    # Direction names the side where the number sits. Hooks open toward the
+    # notes: top-side brackets point down; bottom-side brackets point up.
+    hook_y1 = y + hook_h if direction == "up" else y - hook_h
     stroke = 'stroke="black" stroke-width="0.8" fill="none" stroke-linecap="round"'
     out: list[str] = []
 
