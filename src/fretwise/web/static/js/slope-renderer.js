@@ -20,6 +20,7 @@ const PAST_BEATS = 0.75;
 const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
 const MIN_CIRCLE_PAD_PX = 5;
+const MEASURE_NOTE_PAD_PX = 7;
 const MIN_FRAME_MS = 1000 / 24;
 const HIGH_QUALITY_FRAME_MS = 1000 / 42;
 const LOW_QUALITY_FRAME_MS = 1000 / 18;
@@ -516,23 +517,15 @@ export class SlopeRenderer {
   }
 
   _drawMeasureBars() {
-    const totalBeats = this._totalBeats();
-    const boundaries = this._measureBoundaryBeats();
-    const minBeat = this.currentBeat - PAST_BEATS;
-    const maxBeat = this.currentBeat + FUTURE_BEATS * 1.08;
     const ctx = this.ctx;
     ctx.save();
-    ctx.strokeStyle = 'rgba(0,0,0,0.82)';
-    ctx.lineWidth = 1.15;
+    ctx.strokeStyle = 'rgba(255,255,255,0.86)';
+    ctx.lineWidth = 1.05;
     ctx.shadowBlur = 0;
 
-    for (let repeat = -1; repeat <= 1; repeat += 1) {
-      for (const boundary of boundaries) {
-        const beat = boundary + repeat * totalBeats;
-        if (beat < minBeat || beat > maxBeat) continue;
-        if (Math.abs(beat - this.currentBeat) < 0.015) continue;
-        this._strokeStringCrossbar(ctx, this._depthForBeat(beat), 0.62);
-      }
+    for (const beat of this._visibleMeasureBoundaryBeats()) {
+      if (Math.abs(beat - this.currentBeat) < 0.015) continue;
+      this._strokeStringCrossbar(ctx, this._depthForBeat(beat), 0);
     }
     ctx.restore();
   }
@@ -569,9 +562,57 @@ export class SlopeRenderer {
     return Math.max(10, Math.min(16, this._laneSpacing() * 0.36));
   }
 
+  _pixelBeats(px) {
+    const g = this._foldGeometry();
+    return (px / Math.max(1, g.totalLen)) * FUTURE_BEATS;
+  }
+
+  _visibleMeasureBoundaryBeats() {
+    const totalBeats = this._totalBeats();
+    const boundaries = this._measureBoundaryBeats();
+    const minBeat = this.currentBeat - PAST_BEATS - MEASURE_BEATS;
+    const maxBeat = this.currentBeat + FUTURE_BEATS * 1.12 + MEASURE_BEATS;
+    const visible = new Map();
+    for (let repeat = -1; repeat <= 1; repeat += 1) {
+      for (const boundary of boundaries) {
+        const beat = boundary + repeat * totalBeats;
+        if (beat >= minBeat && beat <= maxBeat) visible.set(beat.toFixed(6), beat);
+      }
+    }
+    return Array.from(visible.values()).sort((a, b) => a - b);
+  }
+
+  _distanceToMeasureBoundaryBeats(beat) {
+    let best = Infinity;
+    for (const boundary of this._visibleMeasureBoundaryBeats()) {
+      if (Math.abs(boundary - this.currentBeat) < 0.015) continue;
+      best = Math.min(best, Math.abs(boundary - beat));
+    }
+    return best;
+  }
+
+  _noteBeatSegments(note) {
+    const start = Number(note.onset);
+    const end = start + Number(note.duration || 0);
+    if (!(end > start)) return [];
+    const pad = this._pixelBeats(MEASURE_NOTE_PAD_PX);
+    const boundaries = this._visibleMeasureBoundaryBeats()
+      .filter((beat) => beat > start + pad && beat < end - pad);
+    let cursor = start;
+    const segments = [];
+    for (const boundary of boundaries) {
+      const leftEnd = boundary - pad;
+      if (leftEnd - cursor > 0.025) segments.push([cursor, leftEnd]);
+      cursor = boundary + pad;
+    }
+    if (end - cursor > 0.025) segments.push([cursor, end]);
+    return segments;
+  }
+
   _markReadableLabels(visible) {
     const radius = this._circleRadius();
     const minDistance = radius * 2 + MIN_CIRCLE_PAD_PX;
+    const measurePadBeats = this._pixelBeats(radius + MEASURE_NOTE_PAD_PX);
     const byString = new Map();
     for (const note of visible.sort((a, b) => a.onset - b.onset || a.string - b.string)) {
       const startDepth = this._depthForBeat(note.onset);
@@ -584,10 +625,12 @@ export class SlopeRenderer {
       const point = this._lanePoint(note.string, labelDepth);
       note._labelPoint = point;
       note._labelDepth = labelDepth;
+      const labelBeat = this.currentBeat + labelDepth * FUTURE_BEATS;
+      const clearsMeasure = this._distanceToMeasureBoundaryBeats(labelBeat) >= measurePadBeats;
       const prev = byString.get(note.string);
       const farEnough = !prev || Math.hypot(point.x - prev.x, point.y - prev.y) >= minDistance;
-      note.showLabel = farEnough;
-      if (farEnough) byString.set(note.string, point);
+      note.showLabel = farEnough && clearsMeasure;
+      if (note.showLabel) byString.set(note.string, point);
     }
     return visible;
   }
@@ -710,11 +753,18 @@ export class SlopeRenderer {
     const active = note.onset <= now && now <= note.onset + note.duration;
     const vibration = active ? 1 + 0.16 * Math.sin(performance.now() / 34) : 1;
     const minDepth = -PAST_BEATS / FUTURE_BEATS;
-    const aDepth = Math.max(minDepth, Math.min(1.08, startDepth));
-    const bDepth = Math.max(0, Math.min(1.08, endDepth));
+    const rawADepth = Math.max(minDepth, Math.min(1.08, startDepth));
+    const rawBDepth = Math.max(0, Math.min(1.08, endDepth));
     const meta = FINGER_META[String(note.finger || '').toLowerCase()] || FINGER_META.open;
     const ctx = this.ctx;
     const tubeWidth = Math.max(8, Math.min(14, this._laneSpacing() * 0.34)) * vibration;
+    const segments = this._noteBeatSegments(note)
+      .map(([from, to]) => [
+        this._clamp(this._depthForBeat(from), minDepth, 1.08),
+        this._clamp(this._depthForBeat(to), minDepth, 1.08),
+      ])
+      .filter(([fromDepth, toDepth]) => toDepth > minDepth && fromDepth < 1.08);
+    if (!segments.length) return;
 
     ctx.save();
     ctx.lineCap = 'round';
@@ -725,28 +775,37 @@ export class SlopeRenderer {
     ctx.lineWidth = tubeWidth * 1.45;
     ctx.globalAlpha = active ? 0.34 : 0.18;
     if (this._quality < 2 || active) {
-      ctx.beginPath();
-      this._traceDepthPath(ctx, note.string, aDepth, bDepth);
-      ctx.stroke();
+      for (const [aDepth, bDepth] of segments) {
+        ctx.beginPath();
+        this._traceDepthPath(ctx, note.string, aDepth, bDepth);
+        ctx.stroke();
+      }
     }
 
     ctx.globalAlpha = 0.92;
     ctx.shadowBlur = this._quality >= 2 ? 0 : active ? 16 * vibration : 9;
     ctx.strokeStyle = meta.color;
     ctx.lineWidth = tubeWidth;
-    ctx.beginPath();
-    this._traceDepthPath(ctx, note.string, aDepth, bDepth);
-    ctx.stroke();
+    for (const [aDepth, bDepth] of segments) {
+      ctx.beginPath();
+      this._traceDepthPath(ctx, note.string, aDepth, bDepth);
+      ctx.stroke();
+    }
 
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.50;
     ctx.strokeStyle = 'rgba(255,255,255,0.76)';
     ctx.lineWidth = Math.max(3, tubeWidth * 0.16);
-    ctx.beginPath();
-    this._traceDepthPath(ctx, note.string, aDepth, bDepth);
-    ctx.stroke();
+    for (const [aDepth, bDepth] of segments) {
+      ctx.beginPath();
+      this._traceDepthPath(ctx, note.string, aDepth, bDepth);
+      ctx.stroke();
+    }
 
-    const labelPoint = note._labelPoint || this._lanePoint(note.string, this._clamp((aDepth + bDepth) / 2, minDepth, 1.06));
+    const labelPoint = note._labelPoint || this._lanePoint(
+      note.string,
+      this._clamp((rawADepth + rawBDepth) / 2, minDepth, 1.06),
+    );
     const labelRadius = this._circleRadius();
     if (note.showLabel !== false) {
       ctx.globalAlpha = 1;
@@ -819,9 +878,9 @@ export class SlopeRenderer {
     ctx.lineWidth = Math.max(3.2, g.spacing * 0.13);
     ctx.shadowColor = 'rgba(31,143,255,0.75)';
     ctx.shadowBlur = this._quality >= 2 ? 0 : 12;
-    this._strokeStringCrossbar(ctx, 0, 0.78);
+    this._strokeStringCrossbar(ctx, 0, 0);
     ctx.translate(5, 0);
-    this._strokeStringCrossbar(ctx, 0, 0.78);
+    this._strokeStringCrossbar(ctx, 0, 0);
     ctx.restore();
   }
 
