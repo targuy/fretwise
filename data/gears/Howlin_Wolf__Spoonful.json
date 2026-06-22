@@ -1,0 +1,1141 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 587,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Howlin_Wolf__Spoonful.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Howlin' Wolf",
+    "title": "Spoonful",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "delta blues",
+      "electric blues"
+    ],
+    "confidence": "high",
+    "rationale": "Howlin' Wolf is a foundational artist of electric Chicago Blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty blues rock tone with a touch of overdriven crunch and raw grit.",
+      "signatureElements": [
+        "Bluesy rhythm playing",
+        "Gritty mid-range focus",
+        "Slightly dirty clean/edge-of-breakup sound",
+        "Controlled fuzz texture (if needed for accents)"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation with natural tube breakup character",
+        "Basic EQ shaping to emphasize mids"
+      ],
+      "avoid": [
+        "High gain metal tones",
+        "Bright, scooped modern rock sounds",
+        "Excessive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "raw Chicago blues amp breakup with gritty midrange",
+      "mustHave": [
+        "dirty small-amp crunch",
+        "dry mono feel",
+        "strong mids",
+        "light compression"
+      ],
+      "avoid": [
+        "metal gain",
+        "scooped tone",
+        "chorus",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "P-90 or single-coil",
+        "small combo",
+        "tweed/Fender/Valco-style breakup",
+        "12\" speaker"
+      ],
+      "corrections": [
+        "drop overdrive-pedal framing",
+        "use amp breakup, not modern crunch",
+        "keep any fuzz only as slight edge"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "raw Chicago blues amp breakup with gritty midrange",
+    "mustHave": [
+      "dirty small-amp crunch",
+      "dry mono feel",
+      "strong mids",
+      "light compression"
+    ],
+    "avoid": [
+      "metal gain",
+      "scooped tone",
+      "chorus",
+      "lush reverb"
+    ],
+    "gearClues": [
+      "P-90 or single-coil",
+      "small combo",
+      "tweed/Fender/Valco-style breakup",
+      "12\" speaker"
+    ],
+    "corrections": [
+      "drop overdrive-pedal framing",
+      "use amp breakup, not modern crunch",
+      "keep any fuzz only as slight edge"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-range breakup and dry tone.",
+          "bestMatchSummary": "A classic Chicago blues setup using a small British combo amp model (UK 45) with light compression and an OD pedal to achieve raw, gritty midrange breakup, paired with a vintage cabinet simulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide subtle grit and midrange boost without modern crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its vintage, non-metal breakup character, mimicking a light overdriven tube sound.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more modern option, but still suitable for blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain stage clean to rely on amp breakup and OD pedal for tone.",
+              "matchQuality": "exact",
+              "gap": "The verdict specifies using amp breakup rather than modern crunch or heavy fuzz. Keeping this module bypassed is key.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the small combo amp breakup and strong midrange characteristic of Chicago blues.",
+              "matchQuality": "close",
+              "gap": "The UK 45 model is ideal for vintage, mid-focused British/American style breakups.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic vintage British cabinet sound and speaker character.",
+              "matchQuality": "close",
+              "gap": "This IR complements the UK 45 amp model for a cohesive vintage blues tone.",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "A more aggressive alternative if more bite was needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Midrange": "+4 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Sculpt the tone further by emphasizing the midrange and slightly rolling off excessive bass.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments to meet the 'strong mids' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect needed; focus is on raw amp tone.",
+              "matchQuality": "exact",
+              "gap": "The verdict does not call for a filter sweep or wah pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding lush or distracting.",
+              "matchQuality": "close",
+              "gap": "A minimal delay is used to add dimension, avoiding the 'lush reverb' trap. Settings are kept very low.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space without sounding overly lush or artificial.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen over Plate/Spring to maintain the vintage, dry feel while adding necessary ambience.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative for subtle room tone."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "Standard final volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is blues/rock, requiring a guitar rig. The setup focuses on vintage tube breakup and midrange punch to emulate the raw Chicago sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the cabinet IR with one that better simulates a single-coil/P-90 speaker character for authentic Chicago blues grit.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "single-coil 12\" speaker IR",
+              "reason": "Better captures the P-90/single-coil sound and vintage grit required for Chicago blues.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased authenticity in midrange bite and single-coil character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Howlin' Wolf - Spoonful - Valeton GP-180",
+        "song": {
+          "artist": "Howlin' Wolf",
+          "title": "Spoonful",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "raw Chicago blues amp breakup with gritty midrange",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic Chicago blues setup using a small British combo amp model (UK 45) with light compression and an OD pedal to achieve raw, gritty midrange breakup, paired with a vintage cabinet simulation.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide subtle grit and midrange boost without modern crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its vintage, non-metal breakup character, mimicking a light overdriven tube sound.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more modern option, but still suitable for blues."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain stage clean to rely on amp breakup and OD pedal for tone.",
+            "matchQuality": "exact",
+            "gap": "The verdict specifies using amp breakup rather than modern crunch or heavy fuzz. Keeping this module bypassed is key.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the small combo amp breakup and strong midrange characteristic of Chicago blues.",
+            "matchQuality": "close",
+            "gap": "The UK 45 model is ideal for vintage, mid-focused British/American style breakups.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a more American tone was desired."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic vintage British cabinet sound and speaker character.",
+            "matchQuality": "close",
+            "gap": "This IR complements the UK 45 amp model for a cohesive vintage blues tone.",
+            "alternatives": [
+              {
+                "model": "Mess 4x12",
+                "reason": "A more aggressive alternative if more bite was needed."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-3 dB",
+              "Midrange": "+4 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Sculpt the tone further by emphasizing the midrange and slightly rolling off excessive bass.",
+            "matchQuality": "close",
+            "gap": "Used for surgical EQ adjustments to meet the 'strong mids' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah effect needed; focus is on raw amp tone.",
+            "matchQuality": "exact",
+            "gap": "The verdict does not call for a filter sweep or wah pedal.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle rhythmic depth without sounding lush or distracting.",
+            "matchQuality": "close",
+            "gap": "A minimal delay is used to add dimension, avoiding the 'lush reverb' trap. Settings are kept very low.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined echo was preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide a subtle sense of space without sounding overly lush or artificial.",
+            "matchQuality": "close",
+            "gap": "Room reverb is chosen over Plate/Spring to maintain the vintage, dry feel while adding necessary ambience.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A slightly brighter alternative for subtle room tone."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "Standard final volume control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "raw Chicago blues amp breakup with gritty midrange",
+          "toneProfile": "raw Chicago blues amp breakup with gritty midrange",
+          "idealSignalChain": "P-90 or single-coil | small combo | tweed/Fender/Valco-style breakup | 12\" speaker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "P-90 or single-coil",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tweed/Fender/Valco-style breakup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12\" speaker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "dirty small-amp crunch",
+            "dry mono feel",
+            "strong mids",
+            "light compression"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-range breakup and dry tone.",
+          "bestMatchSummary": "A classic Chicago blues setup using a small British combo amp model (UK 45) with light compression and an OD pedal to achieve raw, gritty midrange breakup, paired with a vintage cabinet simulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide subtle grit and midrange boost without modern crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its vintage, non-metal breakup character, mimicking a light overdriven tube sound.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more modern option, but still suitable for blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain stage clean to rely on amp breakup and OD pedal for tone.",
+              "matchQuality": "exact",
+              "gap": "The verdict specifies using amp breakup rather than modern crunch or heavy fuzz. Keeping this module bypassed is key.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the small combo amp breakup and strong midrange characteristic of Chicago blues.",
+              "matchQuality": "close",
+              "gap": "The UK 45 model is ideal for vintage, mid-focused British/American style breakups.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic vintage British cabinet sound and speaker character.",
+              "matchQuality": "close",
+              "gap": "This IR complements the UK 45 amp model for a cohesive vintage blues tone.",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "A more aggressive alternative if more bite was needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Midrange": "+4 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Sculpt the tone further by emphasizing the midrange and slightly rolling off excessive bass.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments to meet the 'strong mids' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect needed; focus is on raw amp tone.",
+              "matchQuality": "exact",
+              "gap": "The verdict does not call for a filter sweep or wah pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding lush or distracting.",
+              "matchQuality": "close",
+              "gap": "A minimal delay is used to add dimension, avoiding the 'lush reverb' trap. Settings are kept very low.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space without sounding overly lush or artificial.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen over Plate/Spring to maintain the vintage, dry feel while adding necessary ambience.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative for subtle room tone."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "Standard final volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the cabinet IR with one that better simulates a single-coil/P-90 speaker character for authentic Chicago blues grit.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "single-coil 12\" speaker IR",
+              "reason": "Better captures the P-90/single-coil sound and vintage grit required for Chicago blues.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased authenticity in midrange bite and single-coil character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop overdrive-pedal framing",
+          "use amp breakup, not modern crunch",
+          "keep any fuzz only as slight edge"
+        ],
+        "warnings": [
+          "The source material is blues/rock, requiring a guitar rig. The setup focuses on vintage tube breakup and midrange punch to emulate the raw Chicago sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.614,
+      "prompt_chars": 989,
+      "response_chars": 556,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 135,
+        "total_duration": 10600458400,
+        "prompt_eval_duration": 458809000,
+        "eval_duration": 2855406000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.95,
+      "prompt_chars": 5479,
+      "response_chars": 542,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1668
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 35.155,
+      "prompt_chars": 3611,
+      "response_chars": 6168,
+      "usage": {
+        "prompt_eval_count": 1220,
+        "eval_count": 1705,
+        "total_duration": 35130548500,
+        "prompt_eval_duration": 527884000,
+        "eval_duration": 34267892000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.228,
+      "prompt_chars": 8354,
+      "response_chars": 631,
+      "usage": {
+        "prompt_eval_count": 2282,
+        "eval_count": 164,
+        "total_duration": 4212180400,
+        "prompt_eval_duration": 899242000,
+        "eval_duration": 2961589000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.719,
+      "prompt_chars": 2903,
+      "response_chars": 169,
+      "usage": {
+        "prompt_eval_count": 930,
+        "eval_count": 44,
+        "total_duration": 8700030500,
+        "prompt_eval_duration": 849482000,
+        "eval_duration": 825231000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Howlin' Wolf",
+      "title": "Spoonful",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Howlin' Wolf - Spoonful - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "raw Chicago blues amp breakup with gritty midrange",
+      "signalChainSummary": "A classic Chicago blues setup using a small British combo amp model (UK 45) with light compression and an OD pedal to achieve raw, gritty midrange breakup, paired with a vintage cabinet simulation.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide subtle grit and midrange boost without modern crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its vintage, non-metal breakup character, mimicking a light overdriven tube sound.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more modern option, but still suitable for blues."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain stage clean to rely on amp breakup and OD pedal for tone.",
+          "matchQuality": "exact",
+          "gap": "The verdict specifies using amp breakup rather than modern crunch or heavy fuzz. Keeping this module bypassed is key.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the small combo amp breakup and strong midrange characteristic of Chicago blues.",
+          "matchQuality": "close",
+          "gap": "The UK 45 model is ideal for vintage, mid-focused British/American style breakups.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a more American tone was desired."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic vintage British cabinet sound and speaker character.",
+          "matchQuality": "close",
+          "gap": "This IR complements the UK 45 amp model for a cohesive vintage blues tone.",
+          "alternatives": [
+            {
+              "model": "Mess 4x12",
+              "reason": "A more aggressive alternative if more bite was needed."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-3 dB",
+            "Midrange": "+4 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Sculpt the tone further by emphasizing the midrange and slightly rolling off excessive bass.",
+          "matchQuality": "close",
+          "gap": "Used for surgical EQ adjustments to meet the 'strong mids' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah effect needed; focus is on raw amp tone.",
+          "matchQuality": "exact",
+          "gap": "The verdict does not call for a filter sweep or wah pedal.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle rhythmic depth without sounding lush or distracting.",
+          "matchQuality": "close",
+          "gap": "A minimal delay is used to add dimension, avoiding the 'lush reverb' trap. Settings are kept very low.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined echo was preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide a subtle sense of space without sounding overly lush or artificial.",
+          "matchQuality": "close",
+          "gap": "Room reverb is chosen over Plate/Spring to maintain the vintage, dry feel while adding necessary ambience.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly brighter alternative for subtle room tone."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "Standard final volume control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "raw Chicago blues amp breakup with gritty midrange",
+      "mustHave": [
+        "dirty small-amp crunch",
+        "dry mono feel",
+        "strong mids",
+        "light compression"
+      ],
+      "avoid": [
+        "metal gain",
+        "scooped tone",
+        "chorus",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "P-90 or single-coil",
+        "small combo",
+        "tweed/Fender/Valco-style breakup",
+        "12\" speaker"
+      ],
+      "corrections": [
+        "drop overdrive-pedal framing",
+        "use amp breakup, not modern crunch",
+        "keep any fuzz only as slight edge"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "delta blues",
+        "electric blues"
+      ],
+      "targetTone": "raw Chicago blues amp breakup with gritty midrange",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the cabinet IR with one that better simulates a single-coil/P-90 speaker character for authentic Chicago blues grit.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "single-coil 12\" speaker IR",
+          "reason": "Better captures the P-90/single-coil sound and vintage grit required for Chicago blues.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased authenticity in midrange bite and single-coil character.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 587,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

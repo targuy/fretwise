@@ -1,0 +1,937 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 42,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Alice_in_Chains__Angry_Chair.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Alice in Chains",
+    "title": "Angry Chair",
+    "album": "",
+    "year": null,
+    "genre": "grunge"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, heavily saturated grunge/metal tone with thick low end and mid-range grit.",
+      "signatureElements": [
+        "Fuzz (or heavy distortion)",
+        "Crunch (for rhythm parts)",
+        "Low-mid emphasis",
+        "Delay",
+        "Reverb"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Big Muff style)",
+        "Distortion/Fuzz unit",
+        "Amp simulation with scooped mids and aggressive low end"
+      ],
+      "avoid": [
+        "Bright clean tones",
+        "Overly modulated sounds",
+        "Thin, brittle distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal heavy fuzz-crunch grunge with thick low mids",
+      "mustHave": [
+        "fuzzy sustain",
+        "gritty crunch",
+        "low-mid shove",
+        "slight amp breakup"
+      ],
+      "avoid": [
+        "delay",
+        "reverb",
+        "bright clean",
+        "thin fizz"
+      ],
+      "gearClues": [
+        "Muff-style fuzz",
+        "dark humbucker guitar",
+        "Marshall-ish or fuzzed amp"
+      ],
+      "corrections": [
+        "drop delay",
+        "drop reverb",
+        "fuzz first, not generic distortion"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal heavy fuzz-crunch grunge with thick low mids",
+    "mustHave": [
+      "fuzzy sustain",
+      "gritty crunch",
+      "low-mid shove",
+      "slight amp breakup"
+    ],
+    "avoid": [
+      "delay",
+      "reverb",
+      "bright clean",
+      "thin fizz"
+    ],
+    "gearClues": [
+      "Muff-style fuzz",
+      "dark humbucker guitar",
+      "Marshall-ish or fuzzed amp"
+    ],
+    "corrections": [
+      "drop delay",
+      "drop reverb",
+      "fuzz first, not generic distortion"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on thick, dark fuzz and mid-heavy crunch suitable for grunge/sludge rock.",
+          "bestMatchSummary": "A fuzzy signal chain starting with a Muff-style fuzz, followed by an OD boost to shape the mids, driving a British high-gain amp model (UK 45) into a robust cabinet (UK Vintage 4x12).",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in heavy fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/fuzz",
+              "module": "DST",
+              "model": "Muff-style",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "50%",
+                "Volume": "80%"
+              },
+              "purpose": "Provide the core fuzzy sustain and dark, thick texture required for grunge.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "85%"
+              },
+              "purpose": "Shove the low-mids and increase overall output volume for maximum crunch.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a mid-hump pedal (like an EQ boost) is necessary to achieve the 'low-mid shove' without dedicated EQ placement here.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "5.0",
+                "Midrange": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the Marshall-ish high-gain breakup and classic rock tone foundation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a robust, classic British cabinet sound to complement the high-gain amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing low-mids and cutting excessive high frequencies to achieve a darker sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%",
+                "Mix": "0%"
+              },
+              "purpose": "Placeholder block. Modulation is avoided per the 'avoid' list.",
+              "matchQuality": "N/A",
+              "gap": "The Chorus module is included as a required modulation slot, but disabled to meet the tone requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is grunge/sludge rock, requiring a very thick, dark fuzz tone. The signal chain prioritizes the Muff-style fuzz and mid-boost to achieve this 'low-mid shove' effect.",
+          "Delay and Reverb are explicitly avoided per the musical verdict, so these modules are omitted or disabled."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for darker, thicker cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dark/sludge 4x12 IR",
+              "reason": "Enhance the dark, thick low-mids required for grunge tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased girth and darkness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Alice in Chains - Angry Chair - Valeton GP-180",
+        "song": {
+          "artist": "Alice in Chains",
+          "title": "Angry Chair",
+          "album": "",
+          "year": null,
+          "genre": "grunge"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal heavy fuzz-crunch grunge with thick low mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A fuzzy signal chain starting with a Muff-style fuzz, followed by an OD boost to shape the mids, driving a British high-gain amp model (UK 45) into a robust cabinet (UK Vintage 4x12).",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in heavy fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/fuzz",
+            "module": "DST",
+            "model": "Muff-style",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "50%",
+              "Volume": "80%"
+            },
+            "purpose": "Provide the core fuzzy sustain and dark, thick texture required for grunge.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "85%"
+            },
+            "purpose": "Shove the low-mids and increase overall output volume for maximum crunch.",
+            "matchQuality": "close",
+            "gap": "Using Boost to simulate a mid-hump pedal (like an EQ boost) is necessary to achieve the 'low-mid shove' without dedicated EQ placement here.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "5.0",
+              "Midrange": "7.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Simulate the Marshall-ish high-gain breakup and classic rock tone foundation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a robust, classic British cabinet sound to complement the high-gain amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-3 dB",
+              "Mid": "+4 dB",
+              "High": "-2 dB"
+            },
+            "purpose": "Sculpt the tone by emphasizing low-mids and cutting excessive high frequencies to achieve a darker sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0 Hz",
+              "Depth": "0%",
+              "Mix": "0%"
+            },
+            "purpose": "Placeholder block. Modulation is avoided per the 'avoid' list.",
+            "matchQuality": "N/A",
+            "gap": "The Chorus module is included as a required modulation slot, but disabled to meet the tone requirements.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal heavy fuzz-crunch grunge with thick low mids",
+          "toneProfile": "nasal heavy fuzz-crunch grunge with thick low mids",
+          "idealSignalChain": "Muff-style fuzz | dark humbucker guitar | Marshall-ish or fuzzed amp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Muff-style fuzz",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "dark humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-ish or fuzzed amp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy sustain",
+            "gritty crunch",
+            "low-mid shove",
+            "slight amp breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on thick, dark fuzz and mid-heavy crunch suitable for grunge/sludge rock.",
+          "bestMatchSummary": "A fuzzy signal chain starting with a Muff-style fuzz, followed by an OD boost to shape the mids, driving a British high-gain amp model (UK 45) into a robust cabinet (UK Vintage 4x12).",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in heavy fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/fuzz",
+              "module": "DST",
+              "model": "Muff-style",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "50%",
+                "Volume": "80%"
+              },
+              "purpose": "Provide the core fuzzy sustain and dark, thick texture required for grunge.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "85%"
+              },
+              "purpose": "Shove the low-mids and increase overall output volume for maximum crunch.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a mid-hump pedal (like an EQ boost) is necessary to achieve the 'low-mid shove' without dedicated EQ placement here.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "5.0",
+                "Midrange": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the Marshall-ish high-gain breakup and classic rock tone foundation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a robust, classic British cabinet sound to complement the high-gain amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing low-mids and cutting excessive high frequencies to achieve a darker sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%",
+                "Mix": "0%"
+              },
+              "purpose": "Placeholder block. Modulation is avoided per the 'avoid' list.",
+              "matchQuality": "N/A",
+              "gap": "The Chorus module is included as a required modulation slot, but disabled to meet the tone requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for darker, thicker cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dark/sludge 4x12 IR",
+              "reason": "Enhance the dark, thick low-mids required for grunge tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased girth and darkness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop delay",
+          "drop reverb",
+          "fuzz first, not generic distortion"
+        ],
+        "warnings": [
+          "The source material is grunge/sludge rock, requiring a very thick, dark fuzz tone. The signal chain prioritizes the Muff-style fuzz and mid-boost to achieve this 'low-mid shove' effect.",
+          "Delay and Reverb are explicitly avoided per the musical verdict, so these modules are omitted or disabled."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.392,
+      "prompt_chars": 980,
+      "response_chars": 484,
+      "usage": {
+        "prompt_eval_count": 315,
+        "eval_count": 122,
+        "total_duration": 1374814500,
+        "prompt_eval_duration": 64557000,
+        "eval_duration": 945309000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.455,
+      "prompt_chars": 5402,
+      "response_chars": 474,
+      "usage": {
+        "input_tokens": 1504,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 131,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1635
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 20.811,
+      "prompt_chars": 3472,
+      "response_chars": 4508,
+      "usage": {
+        "prompt_eval_count": 1166,
+        "eval_count": 1322,
+        "total_duration": 20796468200,
+        "prompt_eval_duration": 239510000,
+        "eval_duration": 20137195000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.296,
+      "prompt_chars": 6514,
+      "response_chars": 479,
+      "usage": {
+        "prompt_eval_count": 1873,
+        "eval_count": 137,
+        "total_duration": 2289951000,
+        "prompt_eval_duration": 481362000,
+        "eval_duration": 1355315000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.884,
+      "prompt_chars": 2615,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 853,
+        "eval_count": 48,
+        "total_duration": 880352200,
+        "prompt_eval_duration": 102201000,
+        "eval_duration": 364887000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Alice in Chains",
+      "title": "Angry Chair",
+      "album": "",
+      "year": null,
+      "genre": "grunge"
+    },
+    "rig": {
+      "rigName": "Alice in Chains - Angry Chair - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal heavy fuzz-crunch grunge with thick low mids",
+      "signalChainSummary": "A fuzzy signal chain starting with a Muff-style fuzz, followed by an OD boost to shape the mids, driving a British high-gain amp model (UK 45) into a robust cabinet (UK Vintage 4x12).",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in heavy fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/fuzz",
+          "module": "DST",
+          "model": "Muff-style",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "50%",
+            "Volume": "80%"
+          },
+          "purpose": "Provide the core fuzzy sustain and dark, thick texture required for grunge.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "85%"
+          },
+          "purpose": "Shove the low-mids and increase overall output volume for maximum crunch.",
+          "matchQuality": "close",
+          "gap": "Using Boost to simulate a mid-hump pedal (like an EQ boost) is necessary to achieve the 'low-mid shove' without dedicated EQ placement here.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "5.0",
+            "Midrange": "7.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Simulate the Marshall-ish high-gain breakup and classic rock tone foundation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a robust, classic British cabinet sound to complement the high-gain amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-3 dB",
+            "Mid": "+4 dB",
+            "High": "-2 dB"
+          },
+          "purpose": "Sculpt the tone by emphasizing low-mids and cutting excessive high frequencies to achieve a darker sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0 Hz",
+            "Depth": "0%",
+            "Mix": "0%"
+          },
+          "purpose": "Placeholder block. Modulation is avoided per the 'avoid' list.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus module is included as a required modulation slot, but disabled to meet the tone requirements.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal heavy fuzz-crunch grunge with thick low mids",
+      "mustHave": [
+        "fuzzy sustain",
+        "gritty crunch",
+        "low-mid shove",
+        "slight amp breakup"
+      ],
+      "avoid": [
+        "delay",
+        "reverb",
+        "bright clean",
+        "thin fizz"
+      ],
+      "gearClues": [
+        "Muff-style fuzz",
+        "dark humbucker guitar",
+        "Marshall-ish or fuzzed amp"
+      ],
+      "corrections": [
+        "drop delay",
+        "drop reverb",
+        "fuzz first, not generic distortion"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "grunge",
+      "styleTags": [
+        "alternative rock",
+        "heavy metal"
+      ],
+      "targetTone": "nasal heavy fuzz-crunch grunge with thick low mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for darker, thicker cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "dark/sludge 4x12 IR",
+          "reason": "Enhance the dark, thick low-mids required for grunge tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased girth and darkness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 42,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "grunge",
+    "subgenres": [
+      "alternative rock",
+      "heavy metal"
+    ],
+    "confidence": "high",
+    "rationale": "The artist, song title, and tone profile all strongly point to the grunge genre."
+  }
+}

@@ -1,0 +1,1121 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 956,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Muddy_Waters__Mannish_Boy.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Muddy Waters",
+    "title": "Mannish Boy",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "delta blues",
+      "electric blues"
+    ],
+    "confidence": "high",
+    "rationale": "Muddy Waters is a foundational artist of electric Chicago and Delta Blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor blues, raw and gritty",
+      "signatureElements": [
+        "overdriven crunch",
+        "thick mid-range fuzz/distortion",
+        "bluesy wah sweeps",
+        "vintage tube amp warmth (think Fender Deluxe or Marshall Plexi)"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer variant)",
+        "Fuzz box (for grit)",
+        "Wah pedal"
+      ],
+      "avoid": [
+        "digital clean tones",
+        "modern scooped distortion",
+        "heavy modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty blues amp grind with raw mic'd room edge",
+      "mustHave": [
+        "loose overdrive",
+        "dirty vintage amp",
+        "mid-forward bark",
+        "roomy live blues feel"
+      ],
+      "avoid": [
+        "wah sweeps",
+        "fuzz-heavy",
+        "modern distortion",
+        "clean polish"
+      ],
+      "gearClues": [
+        "small combo",
+        "tube amp",
+        "single coils or P90"
+      ],
+      "corrections": [
+        "remove E minor",
+        "drop wah/fuzz as core",
+        "aim for raw blues vocal backing guitar"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty blues amp grind with raw mic'd room edge",
+    "mustHave": [
+      "loose overdrive",
+      "dirty vintage amp",
+      "mid-forward bark",
+      "roomy live blues feel"
+    ],
+    "avoid": [
+      "wah sweeps",
+      "fuzz-heavy",
+      "modern distortion",
+      "clean polish"
+    ],
+    "gearClues": [
+      "small combo",
+      "tube amp",
+      "single coils or P90"
+    ],
+    "corrections": [
+      "remove E minor",
+      "drop wah/fuzz as core",
+      "aim for raw blues vocal backing guitar"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-heavy blues tones using classic tube amp models and moderate overdrive.",
+          "bestMatchSummary": "A raw, dirty blues tone achieved with a mild boost/overdrive into a British combo amplifier (UK 45 or UK 50), paired with a vintage cabinet and subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in dirty blues recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide loose, natural overdrive and grit without sounding like modern distortion.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Also suitable for blues tones."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD and amp saturation for grit.",
+              "matchQuality": "perfect",
+              "gap": "The primary gain should come from the preamp/amp stage, not a dedicated pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a classic British combo amp known for its mid-forward bark and vintage character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A close alternative with similar British voicing."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound required for blues grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "+2",
+                "Treble": "+1"
+              },
+              "purpose": "Slightly boost the mids to enhance the 'mid-forward bark' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid wah sweeps as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "The module is bypassed entirely to meet the 'avoid' criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep modulation minimal or off to maintain a raw, vintage feel.",
+              "matchQuality": "close",
+              "gap": "No specific modulation was requested; keeping it off is the best choice for rawness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle depth and space without distracting from the raw blues feel.",
+              "matchQuality": "close",
+              "gap": "A very subtle delay is used to provide 'roomy live blues feel' without sounding modern or polished.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Provide the required 'raw mic'd room edge' and overall live blues ambience.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic electric blues, requiring a vintage and raw tone. The chain prioritizes tube amp saturation (UK 45) over modern digital effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture a vintage, raw mic'd room sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 or single-mic cab IR",
+              "reason": "The current IR is too clean; needs more grit and vintage character for raw blues.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and dirty edge",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Muddy Waters - Mannish Boy - Valeton GP-180",
+        "song": {
+          "artist": "Muddy Waters",
+          "title": "Mannish Boy",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty blues amp grind with raw mic'd room edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A raw, dirty blues tone achieved with a mild boost/overdrive into a British combo amplifier (UK 45 or UK 50), paired with a vintage cabinet and subtle room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in dirty blues recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide loose, natural overdrive and grit without sounding like modern distortion.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Also suitable for blues tones."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the distortion section clean to rely on the Green OD and amp saturation for grit.",
+            "matchQuality": "perfect",
+            "gap": "The primary gain should come from the preamp/amp stage, not a dedicated pedal.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate a classic British combo amp known for its mid-forward bark and vintage character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A close alternative with similar British voicing."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound required for blues grit.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1",
+              "Mid": "+2",
+              "Treble": "+1"
+            },
+            "purpose": "Slightly boost the mids to enhance the 'mid-forward bark' and cut through the mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid wah sweeps as per the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "The module is bypassed entirely to meet the 'avoid' criteria.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep modulation minimal or off to maintain a raw, vintage feel.",
+            "matchQuality": "close",
+            "gap": "No specific modulation was requested; keeping it off is the best choice for rawness.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "2"
+            },
+            "purpose": "Add subtle depth and space without distracting from the raw blues feel.",
+            "matchQuality": "close",
+            "gap": "A very subtle delay is used to provide 'roomy live blues feel' without sounding modern or polished.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "3"
+            },
+            "purpose": "Provide the required 'raw mic'd room edge' and overall live blues ambience.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment for optimal mix balance.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty blues amp grind with raw mic'd room edge",
+          "toneProfile": "dirty blues amp grind with raw mic'd room edge",
+          "idealSignalChain": "small combo | tube amp | single coils or P90",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tube amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils or P90",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "loose overdrive",
+            "dirty vintage amp",
+            "mid-forward bark",
+            "roomy live blues feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-heavy blues tones using classic tube amp models and moderate overdrive.",
+          "bestMatchSummary": "A raw, dirty blues tone achieved with a mild boost/overdrive into a British combo amplifier (UK 45 or UK 50), paired with a vintage cabinet and subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in dirty blues recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide loose, natural overdrive and grit without sounding like modern distortion.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Also suitable for blues tones."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD and amp saturation for grit.",
+              "matchQuality": "perfect",
+              "gap": "The primary gain should come from the preamp/amp stage, not a dedicated pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a classic British combo amp known for its mid-forward bark and vintage character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A close alternative with similar British voicing."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound required for blues grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "+2",
+                "Treble": "+1"
+              },
+              "purpose": "Slightly boost the mids to enhance the 'mid-forward bark' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid wah sweeps as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "The module is bypassed entirely to meet the 'avoid' criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep modulation minimal or off to maintain a raw, vintage feel.",
+              "matchQuality": "close",
+              "gap": "No specific modulation was requested; keeping it off is the best choice for rawness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle depth and space without distracting from the raw blues feel.",
+              "matchQuality": "close",
+              "gap": "A very subtle delay is used to provide 'roomy live blues feel' without sounding modern or polished.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Provide the required 'raw mic'd room edge' and overall live blues ambience.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture a vintage, raw mic'd room sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 or single-mic cab IR",
+              "reason": "The current IR is too clean; needs more grit and vintage character for raw blues.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and dirty edge",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove E minor",
+          "drop wah/fuzz as core",
+          "aim for raw blues vocal backing guitar"
+        ],
+        "warnings": [
+          "The source material is classic electric blues, requiring a vintage and raw tone. The chain prioritizes tube amp saturation (UK 45) over modern digital effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.388,
+      "prompt_chars": 992,
+      "response_chars": 441,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 115,
+        "total_duration": 25385991800,
+        "prompt_eval_duration": 323146000,
+        "eval_duration": 1391669000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.659,
+      "prompt_chars": 5367,
+      "response_chars": 493,
+      "usage": {
+        "input_tokens": 1504,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1636
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 42.465,
+      "prompt_chars": 3558,
+      "response_chars": 5698,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1613,
+        "total_duration": 42442938200,
+        "prompt_eval_duration": 408192000,
+        "eval_duration": 28247976000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.091,
+      "prompt_chars": 7825,
+      "response_chars": 546,
+      "usage": {
+        "prompt_eval_count": 2173,
+        "eval_count": 150,
+        "total_duration": 4085734400,
+        "prompt_eval_duration": 372448000,
+        "eval_duration": 3226292000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.001,
+      "prompt_chars": 2888,
+      "response_chars": 179,
+      "usage": {
+        "prompt_eval_count": 925,
+        "eval_count": 45,
+        "total_duration": 13978341400,
+        "prompt_eval_duration": 670584000,
+        "eval_duration": 806691000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Muddy Waters",
+      "title": "Mannish Boy",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Muddy Waters - Mannish Boy - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty blues amp grind with raw mic'd room edge",
+      "signalChainSummary": "A raw, dirty blues tone achieved with a mild boost/overdrive into a British combo amplifier (UK 45 or UK 50), paired with a vintage cabinet and subtle room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in dirty blues recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide loose, natural overdrive and grit without sounding like modern distortion.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Also suitable for blues tones."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the distortion section clean to rely on the Green OD and amp saturation for grit.",
+          "matchQuality": "exact",
+          "gap": "The primary gain should come from the preamp/amp stage, not a dedicated pedal.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate a classic British combo amp known for its mid-forward bark and vintage character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A close alternative with similar British voicing."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound required for blues grit.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1",
+            "Mid": "+2",
+            "Treble": "+1"
+          },
+          "purpose": "Slightly boost the mids to enhance the 'mid-forward bark' and cut through the mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid wah sweeps as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "The module is bypassed entirely to meet the 'avoid' criteria.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep modulation minimal or off to maintain a raw, vintage feel.",
+          "matchQuality": "close",
+          "gap": "No specific modulation was requested; keeping it off is the best choice for rawness.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "2"
+          },
+          "purpose": "Add subtle depth and space without distracting from the raw blues feel.",
+          "matchQuality": "close",
+          "gap": "A very subtle delay is used to provide 'roomy live blues feel' without sounding modern or polished.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "3"
+          },
+          "purpose": "Provide the required 'raw mic'd room edge' and overall live blues ambience.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment for optimal mix balance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty blues amp grind with raw mic'd room edge",
+      "mustHave": [
+        "loose overdrive",
+        "dirty vintage amp",
+        "mid-forward bark",
+        "roomy live blues feel"
+      ],
+      "avoid": [
+        "wah sweeps",
+        "fuzz-heavy",
+        "modern distortion",
+        "clean polish"
+      ],
+      "gearClues": [
+        "small combo",
+        "tube amp",
+        "single coils or P90"
+      ],
+      "corrections": [
+        "remove E minor",
+        "drop wah/fuzz as core",
+        "aim for raw blues vocal backing guitar"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "delta blues",
+        "electric blues"
+      ],
+      "targetTone": "dirty blues amp grind with raw mic'd room edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture a vintage, raw mic'd room sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 or single-mic cab IR",
+          "reason": "The current IR is too clean; needs more grit and vintage character for raw blues.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and dirty edge",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 956,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

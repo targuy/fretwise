@@ -1,0 +1,987 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 28,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Alain_Bashung__Gaby.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Alain Bashung",
+    "title": "Gaby",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly dirty clean tone with pronounced chorus and delay.",
+      "signatureElements": [
+        "Chorus modulation",
+        "Delay repeats (dotted eighth)",
+        "Clean/crunch blend",
+        "Warm mid-range focus"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (Chorus/Vibrato)",
+        "Digital Delay unit",
+        "Low-gain overdrive or boost"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "Bright, scooped tones"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "chorus-soaked mid-gain pop rock clean with delay",
+      "mustHave": [
+        "chorus modulation",
+        "slightly dirty clean",
+        "warm mids",
+        "delay repeats"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "scooped bright tone",
+        "thick distortion"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "chorus pedal",
+        "digital delay",
+        "clean amp"
+      ],
+      "corrections": [
+        "drop dotted-eighth if not audible",
+        "keep gain light",
+        "favor chorus texture over drive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "chorus-soaked mid-gain pop rock clean with delay",
+    "mustHave": [
+      "chorus modulation",
+      "slightly dirty clean",
+      "warm mids",
+      "delay repeats"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "scooped bright tone",
+      "thick distortion"
+    ],
+    "gearClues": [
+      "single-coil or humbucker electric",
+      "chorus pedal",
+      "digital delay",
+      "clean amp"
+    ],
+    "corrections": [
+      "drop dotted-eighth if not audible",
+      "keep gain light",
+      "favor chorus texture over drive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chorus-driven tones with warm mids and delay.",
+          "bestMatchSummary": "A classic pop/rock chain utilizing a light boost for warmth, Chorus modulation for texture, a clean British amp model (UK 50) for vintage character, and Digital Delay for space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3 dB",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Slightly lift the mids and add subtle warmth before the amp.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general tone shaping, simulating a mild EQ boost to enhance mid-range presence as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Medium",
+                "Depth": "High",
+                "Feedback": "Medium"
+              },
+              "purpose": "Provide the required chorus texture and watery sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The 'None' setting is used to bypass any drive stage, ensuring maximum cleanliness for the pop-rock sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3-4",
+                "Treble": "Mid",
+                "Bass": "High"
+              },
+              "purpose": "Provide a vintage, warm British clean tone suitable for pop/rock.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is chosen for its classic, non-aggressive voicing that complements the chorus effect.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic, balanced British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 offers the necessary vintage character without being overly bright or dark.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "-1 dB"
+              },
+              "purpose": "Enhance the warm mid-range presence as required by the verdict.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "4",
+                "Mix": "3"
+              },
+              "purpose": "Add the required space and echo repeats to the clean tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle natural room ambience to glue the sound together.",
+              "matchQuality": "close",
+              "gap": "Room reverb is preferred over Plate/Spring for a more organic, pop-rock feel.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (pop rock), so the rig focuses on achieving a highly textured and clean electric guitar imitation suitable for melodic accompaniment."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage, warm British sound required for pop-rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (British style)",
+              "reason": "Enhance the classic, warm vintage British tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more authentic clean sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Alain Bashung - Gaby - Valeton GP-180",
+        "song": {
+          "artist": "Alain Bashung",
+          "title": "Gaby",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "chorus-soaked mid-gain pop rock clean with delay",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic pop/rock chain utilizing a light boost for warmth, Chorus modulation for texture, a clean British amp model (UK 50) for vintage character, and Digital Delay for space.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3 dB",
+              "Tone": "Mid-boost"
+            },
+            "purpose": "Slightly lift the mids and add subtle warmth before the amp.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used for general tone shaping, simulating a mild EQ boost to enhance mid-range presence as requested.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Medium",
+              "Depth": "High",
+              "Feedback": "Medium"
+            },
+            "purpose": "Provide the required chorus texture and watery sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and avoid heavy distortion.",
+            "matchQuality": "exact",
+            "gap": "The 'None' setting is used to bypass any drive stage, ensuring maximum cleanliness for the pop-rock sound.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "3-4",
+              "Treble": "Mid",
+              "Bass": "High"
+            },
+            "purpose": "Provide a vintage, warm British clean tone suitable for pop/rock.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is chosen for its classic, non-aggressive voicing that complements the chorus effect.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a classic, balanced British cabinet sound.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 offers the necessary vintage character without being overly bright or dark.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "-1 dB"
+            },
+            "purpose": "Enhance the warm mid-range presence as required by the verdict.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "4",
+              "Mix": "3"
+            },
+            "purpose": "Add the required space and echo repeats to the clean tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5 s",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle natural room ambience to glue the sound together.",
+            "matchQuality": "close",
+            "gap": "Room reverb is preferred over Plate/Spring for a more organic, pop-rock feel.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "chorus-soaked mid-gain pop rock clean with delay",
+          "toneProfile": "chorus-soaked mid-gain pop rock clean with delay",
+          "idealSignalChain": "single-coil or humbucker electric | chorus pedal | digital delay | clean amp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "digital delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus modulation",
+            "slightly dirty clean",
+            "warm mids",
+            "delay repeats"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chorus-driven tones with warm mids and delay.",
+          "bestMatchSummary": "A classic pop/rock chain utilizing a light boost for warmth, Chorus modulation for texture, a clean British amp model (UK 50) for vintage character, and Digital Delay for space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3 dB",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Slightly lift the mids and add subtle warmth before the amp.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general tone shaping, simulating a mild EQ boost to enhance mid-range presence as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Medium",
+                "Depth": "High",
+                "Feedback": "Medium"
+              },
+              "purpose": "Provide the required chorus texture and watery sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The 'None' setting is used to bypass any drive stage, ensuring maximum cleanliness for the pop-rock sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3-4",
+                "Treble": "Mid",
+                "Bass": "High"
+              },
+              "purpose": "Provide a vintage, warm British clean tone suitable for pop/rock.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is chosen for its classic, non-aggressive voicing that complements the chorus effect.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic, balanced British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 offers the necessary vintage character without being overly bright or dark.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "-1 dB"
+              },
+              "purpose": "Enhance the warm mid-range presence as required by the verdict.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "4",
+                "Mix": "3"
+              },
+              "purpose": "Add the required space and echo repeats to the clean tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle natural room ambience to glue the sound together.",
+              "matchQuality": "close",
+              "gap": "Room reverb is preferred over Plate/Spring for a more organic, pop-rock feel.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage, warm British sound required for pop-rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (British style)",
+              "reason": "Enhance the classic, warm vintage British tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more authentic clean sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop dotted-eighth if not audible",
+          "keep gain light",
+          "favor chorus texture over drive"
+        ],
+        "warnings": [
+          "The source material is non-guitar (pop rock), so the rig focuses on achieving a highly textured and clean electric guitar imitation suitable for melodic accompaniment."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.91,
+      "prompt_chars": 971,
+      "response_chars": 415,
+      "usage": {
+        "prompt_eval_count": 316,
+        "eval_count": 102,
+        "total_duration": 1885995500,
+        "prompt_eval_duration": 142753000,
+        "eval_duration": 1294315000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.75,
+      "prompt_chars": 5318,
+      "response_chars": 516,
+      "usage": {
+        "input_tokens": 1486,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 135,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1621
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 28.646,
+      "prompt_chars": 3505,
+      "response_chars": 4799,
+      "usage": {
+        "prompt_eval_count": 1167,
+        "eval_count": 1357,
+        "total_duration": 28632312200,
+        "prompt_eval_duration": 353254000,
+        "eval_duration": 27866121000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 4.169,
+      "prompt_chars": 6860,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 1909,
+        "eval_count": 150,
+        "total_duration": 4143726600,
+        "prompt_eval_duration": 492117000,
+        "eval_duration": 3254759000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.907,
+      "prompt_chars": 2733,
+      "response_chars": 181,
+      "usage": {
+        "prompt_eval_count": 853,
+        "eval_count": 48,
+        "total_duration": 893079200,
+        "prompt_eval_duration": 101581000,
+        "eval_duration": 364526000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Alain Bashung",
+      "title": "Gaby",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Alain Bashung - Gaby - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "chorus-soaked mid-gain pop rock clean with delay",
+      "signalChainSummary": "A classic pop/rock chain utilizing a light boost for warmth, Chorus modulation for texture, a clean British amp model (UK 50) for vintage character, and Digital Delay for space.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3 dB",
+            "Tone": "Mid-boost"
+          },
+          "purpose": "Slightly lift the mids and add subtle warmth before the amp.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used for general tone shaping, simulating a mild EQ boost to enhance mid-range presence as requested.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Medium",
+            "Depth": "High",
+            "Feedback": "Medium"
+          },
+          "purpose": "Provide the required chorus texture and watery sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and avoid heavy distortion.",
+          "matchQuality": "exact",
+          "gap": "The 'None' setting is used to bypass any drive stage, ensuring maximum cleanliness for the pop-rock sound.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "3-4",
+            "Treble": "Mid",
+            "Bass": "High"
+          },
+          "purpose": "Provide a vintage, warm British clean tone suitable for pop/rock.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is chosen for its classic, non-aggressive voicing that complements the chorus effect.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a classic, balanced British cabinet sound.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 offers the necessary vintage character without being overly bright or dark.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "-1 dB"
+          },
+          "purpose": "Enhance the warm mid-range presence as required by the verdict.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "4",
+            "Mix": "3"
+          },
+          "purpose": "Add the required space and echo repeats to the clean tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5 s",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle natural room ambience to glue the sound together.",
+          "matchQuality": "close",
+          "gap": "Room reverb is preferred over Plate/Spring for a more organic, pop-rock feel.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "chorus-soaked mid-gain pop rock clean with delay",
+      "mustHave": [
+        "chorus modulation",
+        "slightly dirty clean",
+        "warm mids",
+        "delay repeats"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "scooped bright tone",
+        "thick distortion"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "chorus pedal",
+        "digital delay",
+        "clean amp"
+      ],
+      "corrections": [
+        "drop dotted-eighth if not audible",
+        "keep gain light",
+        "favor chorus texture over drive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "french pop",
+        "new wave"
+      ],
+      "targetTone": "chorus-soaked mid-gain pop rock clean with delay",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the vintage, warm British sound required for pop-rock.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x12 IR (British style)",
+          "reason": "Enhance the classic, warm vintage British tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more authentic clean sound",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 28,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "french pop",
+      "new wave"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre is plausible and matches the chorus-soaked, clean tone profile."
+  }
+}

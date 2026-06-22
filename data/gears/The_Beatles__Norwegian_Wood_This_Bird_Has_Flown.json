@@ -1,0 +1,1090 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1465,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__Norwegian_Wood_This_Bird_Has_Flown.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "Norwegian Wood (This Bird Has Flown)",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "british beat",
+      "acoustic",
+      "psychedelic"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a foundational piece of folk-influenced British Invasion pop."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Fingerpicked, slightly melancholic folk sound; clean to lightly overdriven acoustic/electric tone.",
+      "signatureElements": [
+        "fingerpicking arpeggios",
+        "jangly high-end clarity",
+        "subtle reverb/delay wash",
+        "acoustic guitar texture"
+      ],
+      "gearHypotheses": [
+        "Clean amp simulation (e.g., Fender Twin/Jazzmaster)",
+        "Light chorus or vibrato modulation",
+        "Plate reverb with moderate decay"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Crunch overdrive",
+        "Wah pedal sweeps",
+        "High gain fuzz"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "Nylon-string / acoustic-style fingerpicked folk guitar",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "soft percussive pluck",
+        "bright intimate top",
+        "dry or lightly roomed"
+      ],
+      "avoid": [
+        "electric jangly chorus",
+        "delay wash",
+        "heavy drive",
+        "fuzz"
+      ],
+      "gearClues": [
+        "nylon or acoustic sim",
+        "close-mic clean tone",
+        "small room"
+      ],
+      "corrections": [
+        "Remove electric amp assumptions",
+        "Remove chorus/delay",
+        "Aim for acoustic, not overdriven clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "Nylon-string / acoustic-style fingerpicked folk guitar",
+    "mustHave": [
+      "fingerpicked arpeggios",
+      "soft percussive pluck",
+      "bright intimate top",
+      "dry or lightly roomed"
+    ],
+    "avoid": [
+      "electric jangly chorus",
+      "delay wash",
+      "heavy drive",
+      "fuzz"
+    ],
+    "gearClues": [
+      "nylon or acoustic sim",
+      "close-mic clean tone",
+      "small room"
+    ],
+    "corrections": [
+      "Remove electric amp assumptions",
+      "Remove chorus/delay",
+      "Aim for acoustic, not overdriven clean"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Clean, Bright, Intimate)",
+          "bestMatchSummary": "The chain focuses on a clean, bright, and intimate acoustic simulation using compression for warmth, followed by a low-gain clean amp model paired with a small cab and room reverb to capture the delicate fingerpicked folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking plucks.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out dynamics and add warmth to the plucked notes (acoustic simulation).",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic preamp is missing, but Comp helps achieve a consistent, warm tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and non-driven.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Bass": "-1",
+                "Mid": "0"
+              },
+              "purpose": "Provide a clean, articulate, and bright foundation suitable for folk/fingerpicking.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is generally used for cleaner tones, but lacks specific acoustic modeling. Settings are adjusted to maximize clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a small, intimate recording environment suitable for close-mic acoustic sounds.",
+              "matchQuality": "close",
+              "gap": "No dedicated 'acoustic' cab is available; the US 2x12 provides necessary clarity and size simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high-end sparkle and brightness required for nylon/acoustic strings.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ is missing, so general tone shaping is used to enhance clarity and air.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone pure and uncolored by wah effects.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'jangly chorus' sound specified in the verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle space and depth without creating a 'delay wash'. Low mix is key.",
+              "matchQuality": "close",
+              "gap": "The verdict advises against delay, but a minimal setting is used to simulate the 'small room' ambience if needed. Mix kept very low.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Simulate the 'small room' environment and add natural air to the sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Control overall output level for optimal performance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/folk, requiring an acoustic simulation. The GP-180 is a multi-effects unit designed for electric guitar, so the tone relies heavily on clean amp models (US Deluxe) and EQ shaping to mimic nylon string clarity.",
+          "Delay and Chorus modules were disabled or used minimally because the musical verdict explicitly warned against 'delay wash' and 'jangly chorus'."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace general IR with a dedicated acoustic/room mic simulation to enhance nylon string realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic intimacy and clarity",
+              "recommendedAsset": "close-mic room IR (e.g., Neumann U47 or small DI)",
+              "reason": "The US 2x12 is too 'electric' for nylon strings; needs a more intimate, close-miced sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - Norwegian Wood (This Bird Has Flown) - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "Norwegian Wood (This Bird Has Flown)",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "Nylon-string / acoustic-style fingerpicked folk guitar",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "The chain focuses on a clean, bright, and intimate acoustic simulation using compression for warmth, followed by a low-gain clean amp model paired with a small cab and room reverb to capture the delicate fingerpicked folk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and fingerpicking plucks.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out dynamics and add warmth to the plucked notes (acoustic simulation).",
+            "matchQuality": "close",
+            "gap": "A dedicated acoustic preamp is missing, but Comp helps achieve a consistent, warm tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone completely clean and non-driven.",
+            "matchQuality": "exact",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2",
+              "Bass": "-1",
+              "Mid": "0"
+            },
+            "purpose": "Provide a clean, articulate, and bright foundation suitable for folk/fingerpicking.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is generally used for cleaner tones, but lacks specific acoustic modeling. Settings are adjusted to maximize clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate a small, intimate recording environment suitable for close-mic acoustic sounds.",
+            "matchQuality": "close",
+            "gap": "No dedicated 'acoustic' cab is available; the US 2x12 provides necessary clarity and size simulation.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Boost the high-end sparkle and brightness required for nylon/acoustic strings.",
+            "matchQuality": "close",
+            "gap": "A dedicated acoustic EQ is missing, so general tone shaping is used to enhance clarity and air.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone pure and uncolored by wah effects.",
+            "matchQuality": "exact",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid the 'jangly chorus' sound specified in the verdict.",
+            "matchQuality": "exact",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Provide subtle space and depth without creating a 'delay wash'. Low mix is key.",
+            "matchQuality": "close",
+            "gap": "The verdict advises against delay, but a minimal setting is used to simulate the 'small room' ambience if needed. Mix kept very low.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Simulate the 'small room' environment and add natural air to the sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "70%"
+            },
+            "purpose": "Control overall output level for optimal performance.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "Nylon-string / acoustic-style fingerpicked folk guitar",
+          "toneProfile": "Nylon-string / acoustic-style fingerpicked folk guitar",
+          "idealSignalChain": "nylon or acoustic sim | close-mic clean tone | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "nylon or acoustic sim",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close-mic clean tone",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fingerpicked arpeggios",
+            "soft percussive pluck",
+            "bright intimate top",
+            "dry or lightly roomed"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Clean, Bright, Intimate)",
+          "bestMatchSummary": "The chain focuses on a clean, bright, and intimate acoustic simulation using compression for warmth, followed by a low-gain clean amp model paired with a small cab and room reverb to capture the delicate fingerpicked folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking plucks.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out dynamics and add warmth to the plucked notes (acoustic simulation).",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic preamp is missing, but Comp helps achieve a consistent, warm tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and non-driven.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Bass": "-1",
+                "Mid": "0"
+              },
+              "purpose": "Provide a clean, articulate, and bright foundation suitable for folk/fingerpicking.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is generally used for cleaner tones, but lacks specific acoustic modeling. Settings are adjusted to maximize clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a small, intimate recording environment suitable for close-mic acoustic sounds.",
+              "matchQuality": "close",
+              "gap": "No dedicated 'acoustic' cab is available; the US 2x12 provides necessary clarity and size simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high-end sparkle and brightness required for nylon/acoustic strings.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ is missing, so general tone shaping is used to enhance clarity and air.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone pure and uncolored by wah effects.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'jangly chorus' sound specified in the verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle space and depth without creating a 'delay wash'. Low mix is key.",
+              "matchQuality": "close",
+              "gap": "The verdict advises against delay, but a minimal setting is used to simulate the 'small room' ambience if needed. Mix kept very low.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Simulate the 'small room' environment and add natural air to the sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Control overall output level for optimal performance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace general IR with a dedicated acoustic/room mic simulation to enhance nylon string realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic intimacy and clarity",
+              "recommendedAsset": "close-mic room IR (e.g., Neumann U47 or small DI)",
+              "reason": "The US 2x12 is too 'electric' for nylon strings; needs a more intimate, close-miced sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "Remove electric amp assumptions",
+          "Remove chorus/delay",
+          "Aim for acoustic, not overdriven clean"
+        ],
+        "warnings": [
+          "The source material is acoustic/folk, requiring an acoustic simulation. The GP-180 is a multi-effects unit designed for electric guitar, so the tone relies heavily on clean amp models (US Deluxe) and EQ shaping to mimic nylon string clarity.",
+          "Delay and Chorus modules were disabled or used minimally because the musical verdict explicitly warned against 'delay wash' and 'jangly chorus'."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.573,
+      "prompt_chars": 1016,
+      "response_chars": 508,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 121,
+        "total_duration": 10504934700,
+        "prompt_eval_duration": 371101000,
+        "eval_duration": 2404562000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.812,
+      "prompt_chars": 5464,
+      "response_chars": 541,
+      "usage": {
+        "input_tokens": 1519,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1660
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 47.004,
+      "prompt_chars": 3630,
+      "response_chars": 5895,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1638,
+        "total_duration": 46986708200,
+        "prompt_eval_duration": 442148000,
+        "eval_duration": 30998237000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.76,
+      "prompt_chars": 8078,
+      "response_chars": 585,
+      "usage": {
+        "prompt_eval_count": 2210,
+        "eval_count": 161,
+        "total_duration": 4741741200,
+        "prompt_eval_duration": 477006000,
+        "eval_duration": 3740765000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.241,
+      "prompt_chars": 2984,
+      "response_chars": 192,
+      "usage": {
+        "prompt_eval_count": 923,
+        "eval_count": 49,
+        "total_duration": 9223482300,
+        "prompt_eval_duration": 250294000,
+        "eval_duration": 967891000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "Norwegian Wood (This Bird Has Flown)",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "The Beatles - Norwegian Wood (This Bird Has Flown) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "Nylon-string / acoustic-style fingerpicked folk guitar",
+      "signalChainSummary": "The chain focuses on a clean, bright, and intimate acoustic simulation using compression for warmth, followed by a low-gain clean amp model paired with a small cab and room reverb to capture the delicate fingerpicked folk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and fingerpicking plucks.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out dynamics and add warmth to the plucked notes (acoustic simulation).",
+          "matchQuality": "close",
+          "gap": "A dedicated acoustic preamp is missing, but Comp helps achieve a consistent, warm tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone completely clean and non-driven.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2",
+            "Bass": "-1",
+            "Mid": "0"
+          },
+          "purpose": "Provide a clean, articulate, and bright foundation suitable for folk/fingerpicking.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is generally used for cleaner tones, but lacks specific acoustic modeling. Settings are adjusted to maximize clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate a small, intimate recording environment suitable for close-mic acoustic sounds.",
+          "matchQuality": "close",
+          "gap": "No dedicated 'acoustic' cab is available; the US 2x12 provides necessary clarity and size simulation.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Boost the high-end sparkle and brightness required for nylon/acoustic strings.",
+          "matchQuality": "close",
+          "gap": "A dedicated acoustic EQ is missing, so general tone shaping is used to enhance clarity and air.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone pure and uncolored by wah effects.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid the 'jangly chorus' sound specified in the verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Provide subtle space and depth without creating a 'delay wash'. Low mix is key.",
+          "matchQuality": "close",
+          "gap": "The verdict advises against delay, but a minimal setting is used to simulate the 'small room' ambience if needed. Mix kept very low.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Simulate the 'small room' environment and add natural air to the sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "70%"
+          },
+          "purpose": "Control overall output level for optimal performance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "Nylon-string / acoustic-style fingerpicked folk guitar",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "soft percussive pluck",
+        "bright intimate top",
+        "dry or lightly roomed"
+      ],
+      "avoid": [
+        "electric jangly chorus",
+        "delay wash",
+        "heavy drive",
+        "fuzz"
+      ],
+      "gearClues": [
+        "nylon or acoustic sim",
+        "close-mic clean tone",
+        "small room"
+      ],
+      "corrections": [
+        "Remove electric amp assumptions",
+        "Remove chorus/delay",
+        "Aim for acoustic, not overdriven clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "british beat",
+        "acoustic",
+        "psychedelic"
+      ],
+      "targetTone": "Nylon-string / acoustic-style fingerpicked folk guitar",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace general IR with a dedicated acoustic/room mic simulation to enhance nylon string realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic intimacy and clarity",
+          "recommendedAsset": "close-mic room IR (e.g., Neumann U47 or small DI)",
+          "reason": "The US 2x12 is too 'electric' for nylon strings; needs a more intimate, close-miced sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and warmth",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1465,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

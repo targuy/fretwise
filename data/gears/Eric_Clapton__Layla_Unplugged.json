@@ -1,0 +1,1019 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 416,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Eric_Clapton__Layla_Unplugged.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Eric Clapton",
+    "title": "Layla (Unplugged)",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "acoustic",
+      "fingerpicking"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a famous acoustic blues performance by Eric Clapton."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven acoustic/electric tone with natural sustain and clarity.",
+      "signatureElements": [
+        "clean",
+        "subtle reverb",
+        "natural compression",
+        "acoustic-electric feel"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating a Fender or Vox clean platform",
+        "EQ adjustments for warmth (mid-low boost)",
+        "Delay (slapback) for space"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "crunch",
+        "distortion",
+        "modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm unplugged acoustic-electric strum with room and natural sustain",
+      "mustHave": [
+        "acoustic guitar tone",
+        "clear pick attack",
+        "warm low mids",
+        "light room reverb",
+        "natural compression"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "electric crunch",
+        "chorus",
+        "slapback delay"
+      ],
+      "gearClues": [
+        "acoustic model or piezo DI",
+        "clean preamp",
+        "small room verb",
+        "FRFR"
+      ],
+      "corrections": [
+        "drop electric-amp framing",
+        "drop slapback delay",
+        "keep it mostly dry and intimate"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm unplugged acoustic-electric strum with room and natural sustain",
+    "mustHave": [
+      "acoustic guitar tone",
+      "clear pick attack",
+      "warm low mids",
+      "light room reverb",
+      "natural compression"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "electric crunch",
+      "chorus",
+      "slapback delay"
+    ],
+    "gearClues": [
+      "acoustic model or piezo DI",
+      "clean preamp",
+      "small room verb",
+      "FRFR"
+    ],
+    "corrections": [
+      "drop electric-amp framing",
+      "drop slapback delay",
+      "keep it mostly dry and intimate"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for acoustic emulation and intimate performance.",
+          "bestMatchSummary": "A clean signal chain using compression and a classic British amp model (UK 50) paired with a room simulation to achieve the required warm, unplugged strumming tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick attack transients.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide natural compression and sustain for the acoustic-electric strumming feel.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for 'natural sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid any electric crunch or heavy fuzz.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used to bypass drive stages entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Mid": "+3",
+                "Bass": "+1"
+              },
+              "purpose": "Simulate the warm, classic British clean tone required for unplugged material.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for vintage clean tones; true acoustic DI modeling might be missing.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "crossover/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the low mids and warmth while maintaining clarity for strumming.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ would be ideal, but Guitar EQ 1 allows targeted frequency shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah stage to maintain a natural, uncolored tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the 'avoid' list and maintain intimacy.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid noticeable delay effects to keep the sound dry and intimate.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add light room reverb for natural ambiance and space without sounding artificial.",
+              "matchQuality": "perfect",
+              "gap": "None. Directly addresses the 'light room reverb' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level control for the FRFR system.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The GP-180 is an electric guitar modeler; while it can emulate clean tones, achieving a perfect acoustic DI sound requires dedicated modeling or physical pickup simulation not fully available in the compact catalog.",
+          "All bypass modules (DST, WAH, DLY) are set to 'None' and inactive to strictly adhere to the 'avoid' list."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Focus on dedicated acoustic modeling or a clean DI path for better realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic/DI Tone",
+              "recommendedAsset": "acoustic-electric IR (e.g., piezo mic)",
+              "reason": "Improve the core sound by simulating an acoustic pickup or DI signal for better realism.",
+              "replacesBlockOrder": 4,
+              "whenToUse": "Always",
+              "expectedGain": "Increased naturalness and clarity in strumming.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Eric Clapton - Layla (Unplugged) - Valeton GP-180",
+        "song": {
+          "artist": "Eric Clapton",
+          "title": "Layla (Unplugged)",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm unplugged acoustic-electric strum with room and natural sustain",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A clean signal chain using compression and a classic British amp model (UK 50) paired with a room simulation to achieve the required warm, unplugged strumming tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and pick attack transients.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide natural compression and sustain for the acoustic-electric strumming feel.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for 'natural sustain' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and avoid any electric crunch or heavy fuzz.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The 'None' setting is used to bypass drive stages entirely.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2",
+              "Mid": "+3",
+              "Bass": "+1"
+            },
+            "purpose": "Simulate the warm, classic British clean tone required for unplugged material.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is a good proxy for vintage clean tones; true acoustic DI modeling might be missing.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "crossover/EQ",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Boost the low mids and warmth while maintaining clarity for strumming.",
+            "matchQuality": "close",
+            "gap": "A dedicated acoustic EQ would be ideal, but Guitar EQ 1 allows targeted frequency shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass the wah stage to maintain a natural, uncolored tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The 'None' setting is used for bypass.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects as per the 'avoid' list and maintain intimacy.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The 'None' setting is used for bypass.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid noticeable delay effects to keep the sound dry and intimate.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The 'None' setting is used for bypass.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add light room reverb for natural ambiance and space without sounding artificial.",
+            "matchQuality": "perfect",
+            "gap": "None. Directly addresses the 'light room reverb' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "75%"
+            },
+            "purpose": "Final output level control for the FRFR system.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm unplugged acoustic-electric strum with room and natural sustain",
+          "toneProfile": "warm unplugged acoustic-electric strum with room and natural sustain",
+          "idealSignalChain": "acoustic model or piezo DI | clean preamp | small room verb | FRFR",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic model or piezo DI",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean preamp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room verb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "FRFR",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar tone",
+            "clear pick attack",
+            "warm low mids",
+            "light room reverb",
+            "natural compression"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for acoustic emulation and intimate performance.",
+          "bestMatchSummary": "A clean signal chain using compression and a classic British amp model (UK 50) paired with a room simulation to achieve the required warm, unplugged strumming tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick attack transients.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide natural compression and sustain for the acoustic-electric strumming feel.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for 'natural sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid any electric crunch or heavy fuzz.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used to bypass drive stages entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Mid": "+3",
+                "Bass": "+1"
+              },
+              "purpose": "Simulate the warm, classic British clean tone required for unplugged material.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for vintage clean tones; true acoustic DI modeling might be missing.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "crossover/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the low mids and warmth while maintaining clarity for strumming.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ would be ideal, but Guitar EQ 1 allows targeted frequency shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah stage to maintain a natural, uncolored tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the 'avoid' list and maintain intimacy.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid noticeable delay effects to keep the sound dry and intimate.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The 'None' setting is used for bypass.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add light room reverb for natural ambiance and space without sounding artificial.",
+              "matchQuality": "perfect",
+              "gap": "None. Directly addresses the 'light room reverb' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level control for the FRFR system.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Focus on dedicated acoustic modeling or a clean DI path for better realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic/DI Tone",
+              "recommendedAsset": "acoustic-electric IR (e.g., piezo mic)",
+              "reason": "Improve the core sound by simulating an acoustic pickup or DI signal for better realism.",
+              "replacesBlockOrder": 4,
+              "whenToUse": "Always",
+              "expectedGain": "Increased naturalness and clarity in strumming.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "drop electric-amp framing",
+          "drop slapback delay",
+          "keep it mostly dry and intimate"
+        ],
+        "warnings": [
+          "The GP-180 is an electric guitar modeler; while it can emulate clean tones, achieving a perfect acoustic DI sound requires dedicated modeling or physical pickup simulation not fully available in the compact catalog.",
+          "All bypass modules (DST, WAH, DLY) are set to 'None' and inactive to strictly adhere to the 'avoid' list."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.556,
+      "prompt_chars": 998,
+      "response_chars": 444,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 104,
+        "total_duration": 12536999200,
+        "prompt_eval_duration": 128258000,
+        "eval_duration": 703008000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.098,
+      "prompt_chars": 5382,
+      "response_chars": 553,
+      "usage": {
+        "input_tokens": 1500,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1642
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 10.192,
+      "prompt_chars": 3638,
+      "response_chars": 5298,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1471,
+        "total_duration": 10172143500,
+        "prompt_eval_duration": 129370000,
+        "eval_duration": 9618056000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.534,
+      "prompt_chars": 7453,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 2043,
+        "eval_count": 145,
+        "total_duration": 1501823700,
+        "prompt_eval_duration": 173382000,
+        "eval_duration": 958962000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.2,
+      "prompt_chars": 2828,
+      "response_chars": 165,
+      "usage": {
+        "prompt_eval_count": 875,
+        "eval_count": 43,
+        "total_duration": 12197699400,
+        "prompt_eval_duration": 166967000,
+        "eval_duration": 298203000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Eric Clapton",
+      "title": "Layla (Unplugged)",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Eric Clapton - Layla (Unplugged) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm unplugged acoustic-electric strum with room and natural sustain",
+      "signalChainSummary": "A clean signal chain using compression and a classic British amp model (UK 50) paired with a room simulation to achieve the required warm, unplugged strumming tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and pick attack transients.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide natural compression and sustain for the acoustic-electric strumming feel.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for 'natural sustain' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and avoid any electric crunch or heavy fuzz.",
+          "matchQuality": "exact",
+          "gap": "N/A. The 'None' setting is used to bypass drive stages entirely.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2",
+            "Mid": "+3",
+            "Bass": "+1"
+          },
+          "purpose": "Simulate the warm, classic British clean tone required for unplugged material.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is a good proxy for vintage clean tones; true acoustic DI modeling might be missing.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "crossover/EQ",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Boost the low mids and warmth while maintaining clarity for strumming.",
+          "matchQuality": "close",
+          "gap": "A dedicated acoustic EQ would be ideal, but Guitar EQ 1 allows targeted frequency shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass the wah stage to maintain a natural, uncolored tone.",
+          "matchQuality": "exact",
+          "gap": "N/A. The 'None' setting is used for bypass.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects as per the 'avoid' list and maintain intimacy.",
+          "matchQuality": "exact",
+          "gap": "N/A. The 'None' setting is used for bypass.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid noticeable delay effects to keep the sound dry and intimate.",
+          "matchQuality": "exact",
+          "gap": "N/A. The 'None' setting is used for bypass.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add light room reverb for natural ambiance and space without sounding artificial.",
+          "matchQuality": "exact",
+          "gap": "None. Directly addresses the 'light room reverb' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "75%"
+          },
+          "purpose": "Final output level control for the FRFR system.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm unplugged acoustic-electric strum with room and natural sustain",
+      "mustHave": [
+        "acoustic guitar tone",
+        "clear pick attack",
+        "warm low mids",
+        "light room reverb",
+        "natural compression"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "electric crunch",
+        "chorus",
+        "slapback delay"
+      ],
+      "gearClues": [
+        "acoustic model or piezo DI",
+        "clean preamp",
+        "small room verb",
+        "FRFR"
+      ],
+      "corrections": [
+        "drop electric-amp framing",
+        "drop slapback delay",
+        "keep it mostly dry and intimate"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "acoustic",
+        "fingerpicking"
+      ],
+      "targetTone": "warm unplugged acoustic-electric strum with room and natural sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Focus on dedicated acoustic modeling or a clean DI path for better realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic/DI Tone",
+          "recommendedAsset": "acoustic-electric IR (e.g., piezo mic)",
+          "reason": "Improve the core sound by simulating an acoustic pickup or DI signal for better realism.",
+          "replacesBlockOrder": 4,
+          "whenToUse": "Always",
+          "expectedGain": "Increased naturalness and clarity in strumming.",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 416,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

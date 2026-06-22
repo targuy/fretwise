@@ -1,0 +1,1149 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 807,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Led_Zeppelin__Communication_Breakdown.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Led Zeppelin",
+    "title": "Communication Breakdown",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "Led Zeppelin's early work is foundational hard rock, characterized by blues and raw energy."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, aggressive crunch with pronounced bite and mid-range focus.",
+      "signatureElements": [
+        "Crunch/Overdrive (high gain setting)",
+        "Slight fuzz character for aggression",
+        "Punchy attack focused on the low-mids",
+        "Bright treble cut to prevent harshness"
+      ],
+      "gearHypotheses": [
+        "High-gain British style amp simulation (Marshall JTM/Plexi family)",
+        "Mid-scooped EQ curve with strong presence boost",
+        "Overdrive pedal emulation for initial grit and bite"
+      ],
+      "avoid": [
+        "Excessive clean reverb or delay tails",
+        "Deep, muddy low end that loses definition",
+        "Thin, scooped mid-range sound"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright raw Marshall crunch with tight attack",
+      "mustHave": [
+        "aggressive riff bite",
+        "upper-mid snarl",
+        "tight low end",
+        "dry mono feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy reverb",
+        "delay",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "Marshall Plexi/JTM",
+        "4x12",
+        "bridge humbucker or P-90"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "raise upper mids",
+        "keep it dry",
+        "less gain than modern high gain"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright raw Marshall crunch with tight attack",
+    "mustHave": [
+      "aggressive riff bite",
+      "upper-mid snarl",
+      "tight low end",
+      "dry mono feel"
+    ],
+    "avoid": [
+      "fuzz",
+      "heavy reverb",
+      "delay",
+      "scooped mids"
+    ],
+    "gearClues": [
+      "Marshall Plexi/JTM",
+      "4x12",
+      "bridge humbucker or P-90"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "raise upper mids",
+      "keep it dry",
+      "less gain than modern high gain"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock tone emulation focusing on Marshall Plexi characteristics.",
+          "bestMatchSummary": "A tight, bright signal chain using a Green OD boost and the UK 45 amp model with a vintage British cabinet to achieve raw, upper-mid focused crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary grit and upper-mid bite characteristic of Plexi/JTM amps.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative for general crunch, but Green OD is better for the specific upper-mid snarl."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp model provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The signal chain relies heavily on the PRE stage for gain structure, making a separate DST module redundant.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the bright, raw sound of a Marshall Plexi/JTM amplifier.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable for classic rock, but UK 45 is often cited for the specific bright bite needed here."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary upper-mid punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A good alternative, but UK Vintage 4x12 better captures the Plexi character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize upper mids and maintain tight low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Not required for this riff-heavy, aggressive tone.",
+              "matchQuality": "none",
+              "gap": "The target sound is pure crunch, making a wah pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects to keep the tone raw and focused on riff bite.",
+              "matchQuality": "none",
+              "gap": "The target sound is aggressive and dry; chorus would muddy the attack.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay as per the 'avoid' list and to maintain a dry mono feel.",
+              "matchQuality": "none",
+              "gap": "The focus is on tight riffing, not atmospheric effects.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal, natural room ambience without sounding like heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The verdict specifies 'keep it dry,' so the mix must be kept very low to avoid excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too much sheen/sustain for this raw, aggressive tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Ensure the signal is maximized for maximum impact and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone requires careful EQing to ensure the upper-mids are boosted enough without sounding shrill, which is critical for 'upper-mid snarl'."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and tightness by swapping the current IR for a more aggressive, focused 4x12 model.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall Greenback or Celestion Vintage 30 (if available)",
+              "reason": "Enhance the raw Plexi bite and upper-mid focus, making the tone tighter.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and snarl",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Led Zeppelin - Communication Breakdown - Valeton GP-180",
+        "song": {
+          "artist": "Led Zeppelin",
+          "title": "Communication Breakdown",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright raw Marshall crunch with tight attack",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight, bright signal chain using a Green OD boost and the UK 45 amp model with a vintage British cabinet to achieve raw, upper-mid focused crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from aggressive riffing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "40%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the necessary grit and upper-mid bite characteristic of Plexi/JTM amps.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good alternative for general crunch, but Green OD is better for the specific upper-mid snarl."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD and amp model provide sufficient crunch.",
+            "matchQuality": "none",
+            "gap": "The signal chain relies heavily on the PRE stage for gain structure, making a separate DST module redundant.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Emulate the bright, raw sound of a Marshall Plexi/JTM amplifier.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also suitable for classic rock, but UK 45 is often cited for the specific bright bite needed here."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet tone and necessary upper-mid punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "A good alternative, but UK Vintage 4x12 better captures the Plexi character."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-2 dB",
+              "Mid Boost": "+3 dB",
+              "Treble Boost": "+2 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize upper mids and maintain tight low end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Not required for this riff-heavy, aggressive tone.",
+            "matchQuality": "none",
+            "gap": "The target sound is pure crunch, making a wah pedal unnecessary.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects to keep the tone raw and focused on riff bite.",
+            "matchQuality": "none",
+            "gap": "The target sound is aggressive and dry; chorus would muddy the attack.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay as per the 'avoid' list and to maintain a dry mono feel.",
+            "matchQuality": "none",
+            "gap": "The focus is on tight riffing, not atmospheric effects.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add minimal, natural room ambience without sounding like heavy reverb.",
+            "matchQuality": "close",
+            "gap": "The verdict specifies 'keep it dry,' so the mix must be kept very low to avoid excessive wash.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too much sheen/sustain for this raw, aggressive tone."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Ensure the signal is maximized for maximum impact and punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright raw Marshall crunch with tight attack",
+          "toneProfile": "bright raw Marshall crunch with tight attack",
+          "idealSignalChain": "Marshall Plexi/JTM | 4x12 | bridge humbucker or P-90",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall Plexi/JTM",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker or P-90",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "aggressive riff bite",
+            "upper-mid snarl",
+            "tight low end",
+            "dry mono feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock tone emulation focusing on Marshall Plexi characteristics.",
+          "bestMatchSummary": "A tight, bright signal chain using a Green OD boost and the UK 45 amp model with a vintage British cabinet to achieve raw, upper-mid focused crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary grit and upper-mid bite characteristic of Plexi/JTM amps.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative for general crunch, but Green OD is better for the specific upper-mid snarl."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp model provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The signal chain relies heavily on the PRE stage for gain structure, making a separate DST module redundant.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the bright, raw sound of a Marshall Plexi/JTM amplifier.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable for classic rock, but UK 45 is often cited for the specific bright bite needed here."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary upper-mid punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A good alternative, but UK Vintage 4x12 better captures the Plexi character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize upper mids and maintain tight low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Not required for this riff-heavy, aggressive tone.",
+              "matchQuality": "none",
+              "gap": "The target sound is pure crunch, making a wah pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects to keep the tone raw and focused on riff bite.",
+              "matchQuality": "none",
+              "gap": "The target sound is aggressive and dry; chorus would muddy the attack.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay as per the 'avoid' list and to maintain a dry mono feel.",
+              "matchQuality": "none",
+              "gap": "The focus is on tight riffing, not atmospheric effects.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal, natural room ambience without sounding like heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The verdict specifies 'keep it dry,' so the mix must be kept very low to avoid excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too much sheen/sustain for this raw, aggressive tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Ensure the signal is maximized for maximum impact and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and tightness by swapping the current IR for a more aggressive, focused 4x12 model.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall Greenback or Celestion Vintage 30 (if available)",
+              "reason": "Enhance the raw Plexi bite and upper-mid focus, making the tone tighter.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and snarl",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "raise upper mids",
+          "keep it dry",
+          "less gain than modern high gain"
+        ],
+        "warnings": [
+          "The tone requires careful EQing to ensure the upper-mids are boosted enough without sounding shrill, which is critical for 'upper-mid snarl'."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.022,
+      "prompt_chars": 1004,
+      "response_chars": 621,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 148,
+        "total_duration": 11996368300,
+        "prompt_eval_duration": 751208000,
+        "eval_duration": 3173623000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.024,
+      "prompt_chars": 5559,
+      "response_chars": 470,
+      "usage": {
+        "input_tokens": 1533,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 51.37,
+      "prompt_chars": 3554,
+      "response_chars": 6122,
+      "usage": {
+        "prompt_eval_count": 1205,
+        "eval_count": 1743,
+        "total_duration": 51362419800,
+        "prompt_eval_duration": 614929000,
+        "eval_duration": 34066802000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.654,
+      "prompt_chars": 8257,
+      "response_chars": 596,
+      "usage": {
+        "prompt_eval_count": 2305,
+        "eval_count": 161,
+        "total_duration": 4629373300,
+        "prompt_eval_duration": 884251000,
+        "eval_duration": 3233938000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 13.007,
+      "prompt_chars": 2941,
+      "response_chars": 197,
+      "usage": {
+        "prompt_eval_count": 956,
+        "eval_count": 51,
+        "total_duration": 13002684800,
+        "prompt_eval_duration": 925676000,
+        "eval_duration": 965768000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Led Zeppelin",
+      "title": "Communication Breakdown",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Led Zeppelin - Communication Breakdown - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright raw Marshall crunch with tight attack",
+      "signalChainSummary": "A tight, bright signal chain using a Green OD boost and the UK 45 amp model with a vintage British cabinet to achieve raw, upper-mid focused crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from aggressive riffing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "40%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the necessary grit and upper-mid bite characteristic of Plexi/JTM amps.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good alternative for general crunch, but Green OD is better for the specific upper-mid snarl."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD and amp model provide sufficient crunch.",
+          "matchQuality": "fallback",
+          "gap": "The signal chain relies heavily on the PRE stage for gain structure, making a separate DST module redundant.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Emulate the bright, raw sound of a Marshall Plexi/JTM amplifier.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also suitable for classic rock, but UK 45 is often cited for the specific bright bite needed here."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet tone and necessary upper-mid punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "A good alternative, but UK Vintage 4x12 better captures the Plexi character."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-2 dB",
+            "Mid Boost": "+3 dB",
+            "Treble Boost": "+2 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize upper mids and maintain tight low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Not required for this riff-heavy, aggressive tone.",
+          "matchQuality": "fallback",
+          "gap": "The target sound is pure crunch, making a wah pedal unnecessary.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects to keep the tone raw and focused on riff bite.",
+          "matchQuality": "fallback",
+          "gap": "The target sound is aggressive and dry; chorus would muddy the attack.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay as per the 'avoid' list and to maintain a dry mono feel.",
+          "matchQuality": "fallback",
+          "gap": "The focus is on tight riffing, not atmospheric effects.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add minimal, natural room ambience without sounding like heavy reverb.",
+          "matchQuality": "close",
+          "gap": "The verdict specifies 'keep it dry,' so the mix must be kept very low to avoid excessive wash.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too much sheen/sustain for this raw, aggressive tone."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Ensure the signal is maximized for maximum impact and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright raw Marshall crunch with tight attack",
+      "mustHave": [
+        "aggressive riff bite",
+        "upper-mid snarl",
+        "tight low end",
+        "dry mono feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy reverb",
+        "delay",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "Marshall Plexi/JTM",
+        "4x12",
+        "bridge humbucker or P-90"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "raise upper mids",
+        "keep it dry",
+        "less gain than modern high gain"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "blues-rock"
+      ],
+      "targetTone": "bright raw Marshall crunch with tight attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and tightness by swapping the current IR for a more aggressive, focused 4x12 model.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall Greenback or Celestion Vintage 30 (if available)",
+          "reason": "Enhance the raw Plexi bite and upper-mid focus, making the tone tighter.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and snarl",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 807,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,985 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 221,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Carole_King__I_Feel_The_Earth_Move.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Carole King",
+    "title": "I Feel The Earth Move",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "folk pop",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Carole King's style is classic folk/pop, fitting the bright rhythm tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly compressed clean tone with subtle chorus and delay.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Delay (slapback or dotted eighth)",
+        "Clean amp simulation (e.g., Fender Twin style)",
+        "Subtle reverb"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (Chorus/Tremolo)",
+        "Digital Delay unit",
+        "High-quality clean preamp model"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Fuzz",
+        "Crunch",
+        "Overdrive (unless very subtle)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright dry piano-like electric rhythm with light edge-of-breakup",
+      "mustHave": [
+        "tight attack",
+        "clean to slight grit",
+        "percussive chord stabs",
+        "very little ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "slapback delay",
+        "heavy reverb",
+        "fuzzy drive"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coils",
+        "small room",
+        "light compression"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "keep it drier",
+        "add slight bite"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright dry piano-like electric rhythm with light edge-of-breakup",
+    "mustHave": [
+      "tight attack",
+      "clean to slight grit",
+      "percussive chord stabs",
+      "very little ambience"
+    ],
+    "avoid": [
+      "chorus",
+      "slapback delay",
+      "heavy reverb",
+      "fuzzy drive"
+    ],
+    "gearClues": [
+      "Fender-style clean amp",
+      "single-coils",
+      "small room",
+      "light compression"
+    ],
+    "corrections": [
+      "remove chorus",
+      "remove delay",
+      "keep it drier",
+      "add slight bite"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is piano/vocal-centric, so the rig focuses on a bright, clean, rhythm tone with light breakup, mimicking an electric piano or lightly overdriven acoustic sound.",
+          "bestMatchSummary": "Clean signal chain using compression and a Fender-style amp (US Deluxe) for brightness, followed by minimal EQ shaping and a small room simulation to achieve a dry, percussive, yet slightly gritty rhythm tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight transients for percussive stabs.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide consistent volume and enhance the 'tight attack' required for percussive chord stabs.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for piano-like rhythmic consistency.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Introduce a light, subtle grit and 'edge-of-breakup' without sounding fuzzy or muddy.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the slight bite/grit of an electric piano sound. A dedicated clean boost might be better, but this provides necessary saturation.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If more warmth was desired, Blues OD could substitute."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Middle": "6",
+                "Bass": "5"
+              },
+              "purpose": "Select a bright, clean, Fender-style amp tone suitable for the 'Fender-style clean amp' clue.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal choice for bright, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, compact sound profile of a Fender-style amp and provide clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for US Deluxe tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Shape the tone to emphasize brightness and 'slight bite' while keeping the low end controlled for percussive stabs.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a small amount of natural ambience ('small room' clue) without adding heavy reverb or excessive wash.",
+              "matchQuality": "close",
+              "gap": "The 'Room' module is the best choice for controlled, non-washy ambience. Settings are kept low to meet the 'very little ambience' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a more metallic room sound was desired."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is piano/vocal-centric, so the rig simulates an electric rhythm tone rather than a true acoustic or electric piano sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the default cabinet IR to enhance clarity and bite for percussive, bright tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the 'bite' and clarity needed for percussive, piano-like stabs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased definition and attack",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Carole King - I Feel The Earth Move - Valeton GP-180",
+        "song": {
+          "artist": "Carole King",
+          "title": "I Feel The Earth Move",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright dry piano-like electric rhythm with light edge-of-breakup",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Clean signal chain using compression and a Fender-style amp (US Deluxe) for brightness, followed by minimal EQ shaping and a small room simulation to achieve a dry, percussive, yet slightly gritty rhythm tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight transients for percussive stabs.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide consistent volume and enhance the 'tight attack' required for percussive chord stabs.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for piano-like rhythmic consistency.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "2.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Introduce a light, subtle grit and 'edge-of-breakup' without sounding fuzzy or muddy.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate the slight bite/grit of an electric piano sound. A dedicated clean boost might be better, but this provides necessary saturation.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "If more warmth was desired, Blues OD could substitute."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Middle": "6",
+              "Bass": "5"
+            },
+            "purpose": "Select a bright, clean, Fender-style amp tone suitable for the 'Fender-style clean amp' clue.",
+            "matchQuality": "perfect",
+            "gap": "None. Ideal choice for bright, non-aggressive tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the bright, compact sound profile of a Fender-style amp and provide clarity.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard pairing for US Deluxe tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Shape the tone to emphasize brightness and 'slight bite' while keeping the low end controlled for percussive stabs.",
+            "matchQuality": "perfect",
+            "gap": "None. Used for surgical tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "ambience/reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a small amount of natural ambience ('small room' clue) without adding heavy reverb or excessive wash.",
+            "matchQuality": "close",
+            "gap": "The 'Room' module is the best choice for controlled, non-washy ambience. Settings are kept low to meet the 'very little ambience' requirement.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could be used if a more metallic room sound was desired."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright dry piano-like electric rhythm with light edge-of-breakup",
+          "toneProfile": "bright dry piano-like electric rhythm with light edge-of-breakup",
+          "idealSignalChain": "Fender-style clean amp | single-coils | small room | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight attack",
+            "clean to slight grit",
+            "percussive chord stabs",
+            "very little ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is piano/vocal-centric, so the rig focuses on a bright, clean, rhythm tone with light breakup, mimicking an electric piano or lightly overdriven acoustic sound.",
+          "bestMatchSummary": "Clean signal chain using compression and a Fender-style amp (US Deluxe) for brightness, followed by minimal EQ shaping and a small room simulation to achieve a dry, percussive, yet slightly gritty rhythm tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight transients for percussive stabs.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide consistent volume and enhance the 'tight attack' required for percussive chord stabs.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for piano-like rhythmic consistency.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Introduce a light, subtle grit and 'edge-of-breakup' without sounding fuzzy or muddy.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the slight bite/grit of an electric piano sound. A dedicated clean boost might be better, but this provides necessary saturation.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If more warmth was desired, Blues OD could substitute."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Middle": "6",
+                "Bass": "5"
+              },
+              "purpose": "Select a bright, clean, Fender-style amp tone suitable for the 'Fender-style clean amp' clue.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal choice for bright, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, compact sound profile of a Fender-style amp and provide clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for US Deluxe tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Shape the tone to emphasize brightness and 'slight bite' while keeping the low end controlled for percussive stabs.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a small amount of natural ambience ('small room' clue) without adding heavy reverb or excessive wash.",
+              "matchQuality": "close",
+              "gap": "The 'Room' module is the best choice for controlled, non-washy ambience. Settings are kept low to meet the 'very little ambience' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a more metallic room sound was desired."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the default cabinet IR to enhance clarity and bite for percussive, bright tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the 'bite' and clarity needed for percussive, piano-like stabs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased definition and attack",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "remove delay",
+          "keep it drier",
+          "add slight bite"
+        ],
+        "warnings": [
+          "The source material is piano/vocal-centric, so the rig simulates an electric rhythm tone rather than a true acoustic or electric piano sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 15.023,
+      "prompt_chars": 1001,
+      "response_chars": 459,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 116,
+        "total_duration": 15019500800,
+        "prompt_eval_duration": 232446000,
+        "eval_duration": 2113422000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.68,
+      "prompt_chars": 5400,
+      "response_chars": 519,
+      "usage": {
+        "input_tokens": 1505,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 136,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1641
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 25.757,
+      "prompt_chars": 3607,
+      "response_chars": 5183,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1444,
+        "total_duration": 25725295800,
+        "prompt_eval_duration": 316287000,
+        "eval_duration": 24945063000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.971,
+      "prompt_chars": 7289,
+      "response_chars": 562,
+      "usage": {
+        "prompt_eval_count": 2016,
+        "eval_count": 161,
+        "total_duration": 3965769100,
+        "prompt_eval_duration": 454225000,
+        "eval_duration": 3083936000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.267,
+      "prompt_chars": 2704,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 858,
+        "eval_count": 51,
+        "total_duration": 13249754200,
+        "prompt_eval_duration": 313037000,
+        "eval_duration": 965449000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Carole King",
+      "title": "I Feel The Earth Move",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Carole King - I Feel The Earth Move - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright dry piano-like electric rhythm with light edge-of-breakup",
+      "signalChainSummary": "Clean signal chain using compression and a Fender-style amp (US Deluxe) for brightness, followed by minimal EQ shaping and a small room simulation to achieve a dry, percussive, yet slightly gritty rhythm tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight transients for percussive stabs.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide consistent volume and enhance the 'tight attack' required for percussive chord stabs.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for piano-like rhythmic consistency.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "2.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Introduce a light, subtle grit and 'edge-of-breakup' without sounding fuzzy or muddy.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate the slight bite/grit of an electric piano sound. A dedicated clean boost might be better, but this provides necessary saturation.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "If more warmth was desired, Blues OD could substitute."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Middle": "6",
+            "Bass": "5"
+          },
+          "purpose": "Select a bright, clean, Fender-style amp tone suitable for the 'Fender-style clean amp' clue.",
+          "matchQuality": "exact",
+          "gap": "None. Ideal choice for bright, non-aggressive tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the bright, compact sound profile of a Fender-style amp and provide clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Standard pairing for US Deluxe tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Shape the tone to emphasize brightness and 'slight bite' while keeping the low end controlled for percussive stabs.",
+          "matchQuality": "exact",
+          "gap": "None. Used for surgical tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a small amount of natural ambience ('small room' clue) without adding heavy reverb or excessive wash.",
+          "matchQuality": "close",
+          "gap": "The 'Room' module is the best choice for controlled, non-washy ambience. Settings are kept low to meet the 'very little ambience' requirement.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could be used if a more metallic room sound was desired."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright dry piano-like electric rhythm with light edge-of-breakup",
+      "mustHave": [
+        "tight attack",
+        "clean to slight grit",
+        "percussive chord stabs",
+        "very little ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "slapback delay",
+        "heavy reverb",
+        "fuzzy drive"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coils",
+        "small room",
+        "light compression"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "keep it drier",
+        "add slight bite"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "folk pop",
+        "singer-songwriter"
+      ],
+      "targetTone": "bright dry piano-like electric rhythm with light edge-of-breakup",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the default cabinet IR to enhance clarity and bite for percussive, bright tones.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+          "reason": "Enhance the 'bite' and clarity needed for percussive, piano-like stabs.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased definition and attack",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 221,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

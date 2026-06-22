@@ -1,0 +1,1176 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 406,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Elvis_Presley__Jailhouse_Rock.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Elvis Presley",
+    "title": "Jailhouse Rock",
+    "album": "",
+    "year": null,
+    "genre": "rockabilly"
+  },
+  "genreClassification": {
+    "genre": "rockabilly",
+    "subgenres": [
+      "rock and roll",
+      "50s music"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a definitive rockabilly classic, supported by the 50s tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, punchy rock tone with a slight grit and pronounced mid-range bite.",
+      "signatureElements": [
+        "Punchy rhythm strumming",
+        "Rockabilly energy",
+        "Slight overdrive/crunch"
+      ],
+      "gearHypotheses": [
+        "Modeling amp (for clean headroom)",
+        "Overdrive pedal (for grit)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep modulation",
+        "Ambient delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 50s rockabilly crunch with slapback snap",
+      "mustHave": [
+        "tight pick attack",
+        "light tube grit",
+        "springy room",
+        "fast rhythm strum"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "modern high gain",
+        "lush chorus",
+        "long delay"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "slapback echo",
+        "1x12 or 2x10 cab"
+      ],
+      "corrections": [
+        "drop mid-gain",
+        "add 50s slapback",
+        "make it brighter and thinner"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 50s rockabilly crunch with slapback snap",
+    "mustHave": [
+      "tight pick attack",
+      "light tube grit",
+      "springy room",
+      "fast rhythm strum"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "modern high gain",
+      "lush chorus",
+      "long delay"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "small combo amp",
+      "slapback echo",
+      "1x12 or 2x10 cab"
+    ],
+    "corrections": [
+      "drop mid-gain",
+      "add 50s slapback",
+      "make it brighter and thinner"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, bright tones and snappy dynamics.",
+          "bestMatchSummary": "A clean, punchy signal chain using a light overdrive for grit, followed by an AC30-style amp simulation, and finished with slapback echo to capture the classic 50s rockabilly sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light tube grit and punch for the rockabilly crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate a mild, vintage overdrive rather than a dedicated clean boost.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Similar light grit, but Blues OD often has better mid-range punch for 50s rock."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to keep the tone clean and focused on natural guitar dynamics.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the bright, articulate sound of a small combo amp suitable for 50s rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is chosen for its classic British chime and brightness, fitting the era's clean punch.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative, but AC30 often provides a slightly brighter, more 'jangly' sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balanced, vintage character.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If a more American/greener tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+4"
+              },
+              "purpose": "Brighten the tone and emphasize the mid-high frequencies for a thinner, punchier sound.",
+              "matchQuality": "close",
+              "gap": "Used to manually adjust the frequency response to achieve the 'brighter and thinner' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah needed for this specific rockabilly style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid lush chorus as per the 'avoid' list.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Provide the essential snappy slapback echo characteristic of 50s rock and roll.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "Too long and complex for the desired vintage snap."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "3"
+              },
+              "purpose": "Add a subtle 'springy room' ambience without sounding overly lush or modern.",
+              "matchQuality": "close",
+              "gap": "The Room reverb provides enough space without the decay of Plate, and is better than Spring for this specific vintage feel.",
+              "alternatives": [
+                {
+                  "model": "Spring",
+                  "reason": "A viable alternative, but Room often gives a slightly more open, less metallic sound."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rockabilly track, requiring vintage tone emulation. The chain prioritizes brightness and punch over modern gain or complex effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, more American-voiced speaker to better match the small combo amp and 50s rockabilly aesthetic.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "American Deluxe 1x12 or 2x10 IR",
+              "reason": "The current UK 4x12 is too large and British for the small combo/50s sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After initial preset testing",
+              "expectedGain": "Tighter, punchier mid-range focus",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Elvis Presley - Jailhouse Rock - Valeton GP-180",
+        "song": {
+          "artist": "Elvis Presley",
+          "title": "Jailhouse Rock",
+          "album": "",
+          "year": null,
+          "genre": "rockabilly"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 50s rockabilly crunch with slapback snap",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, punchy signal chain using a light overdrive for grit, followed by an AC30-style amp simulation, and finished with slapback echo to capture the classic 50s rockabilly sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and maintain tight rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide light tube grit and punch for the rockabilly crunch.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used to simulate a mild, vintage overdrive rather than a dedicated clean boost.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Similar light grit, but Blues OD often has better mid-range punch for 50s rock."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass to keep the tone clean and focused on natural guitar dynamics.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the bright, articulate sound of a small combo amp suitable for 50s rock.",
+            "matchQuality": "close",
+            "gap": "The AC30 TB is chosen for its classic British chime and brightness, fitting the era's clean punch.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative, but AC30 often provides a slightly brighter, more 'jangly' sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is selected for its balanced, vintage character.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "If a more American/greener tone was desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+4"
+            },
+            "purpose": "Brighten the tone and emphasize the mid-high frequencies for a thinner, punchier sound.",
+            "matchQuality": "close",
+            "gap": "Used to manually adjust the frequency response to achieve the 'brighter and thinner' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No wah needed for this specific rockabilly style.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid lush chorus as per the 'avoid' list.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Provide the essential snappy slapback echo characteristic of 50s rock and roll.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Digital Delay",
+                "reason": "Too long and complex for the desired vintage snap."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "3"
+            },
+            "purpose": "Add a subtle 'springy room' ambience without sounding overly lush or modern.",
+            "matchQuality": "close",
+            "gap": "The Room reverb provides enough space without the decay of Plate, and is better than Spring for this specific vintage feel.",
+            "alternatives": [
+              {
+                "model": "Spring",
+                "reason": "A viable alternative, but Room often gives a slightly more open, less metallic sound."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 50s rockabilly crunch with slapback snap",
+          "toneProfile": "bright 50s rockabilly crunch with slapback snap",
+          "idealSignalChain": "single-coil guitar | small combo amp | slapback echo | 1x12 or 2x10 cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "slapback echo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x10 cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight pick attack",
+            "light tube grit",
+            "springy room",
+            "fast rhythm strum"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, bright tones and snappy dynamics.",
+          "bestMatchSummary": "A clean, punchy signal chain using a light overdrive for grit, followed by an AC30-style amp simulation, and finished with slapback echo to capture the classic 50s rockabilly sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light tube grit and punch for the rockabilly crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate a mild, vintage overdrive rather than a dedicated clean boost.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Similar light grit, but Blues OD often has better mid-range punch for 50s rock."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to keep the tone clean and focused on natural guitar dynamics.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the bright, articulate sound of a small combo amp suitable for 50s rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is chosen for its classic British chime and brightness, fitting the era's clean punch.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative, but AC30 often provides a slightly brighter, more 'jangly' sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balanced, vintage character.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If a more American/greener tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+4"
+              },
+              "purpose": "Brighten the tone and emphasize the mid-high frequencies for a thinner, punchier sound.",
+              "matchQuality": "close",
+              "gap": "Used to manually adjust the frequency response to achieve the 'brighter and thinner' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah needed for this specific rockabilly style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid lush chorus as per the 'avoid' list.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Provide the essential snappy slapback echo characteristic of 50s rock and roll.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "Too long and complex for the desired vintage snap."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "3"
+              },
+              "purpose": "Add a subtle 'springy room' ambience without sounding overly lush or modern.",
+              "matchQuality": "close",
+              "gap": "The Room reverb provides enough space without the decay of Plate, and is better than Spring for this specific vintage feel.",
+              "alternatives": [
+                {
+                  "model": "Spring",
+                  "reason": "A viable alternative, but Room often gives a slightly more open, less metallic sound."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, more American-voiced speaker to better match the small combo amp and 50s rockabilly aesthetic.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "American Deluxe 1x12 or 2x10 IR",
+              "reason": "The current UK 4x12 is too large and British for the small combo/50s sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After initial preset testing",
+              "expectedGain": "Tighter, punchier mid-range focus",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "assumptions": [
+          "drop mid-gain",
+          "add 50s slapback",
+          "make it brighter and thinner"
+        ],
+        "warnings": [
+          "The source material is a classic rockabilly track, requiring vintage tone emulation. The chain prioritizes brightness and punch over modern gain or complex effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.495,
+      "prompt_chars": 996,
+      "response_chars": 362,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 93,
+        "total_duration": 12473946800,
+        "prompt_eval_duration": 126615000,
+        "eval_duration": 610329000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.753,
+      "prompt_chars": 5280,
+      "response_chars": 495,
+      "usage": {
+        "input_tokens": 1479,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1621
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.134,
+      "prompt_chars": 3571,
+      "response_chars": 6176,
+      "usage": {
+        "prompt_eval_count": 1217,
+        "eval_count": 1738,
+        "total_duration": 12116917700,
+        "prompt_eval_duration": 129747999,
+        "eval_duration": 11619192000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.883,
+      "prompt_chars": 8342,
+      "response_chars": 609,
+      "usage": {
+        "prompt_eval_count": 2311,
+        "eval_count": 174,
+        "total_duration": 1849808500,
+        "prompt_eval_duration": 198582000,
+        "eval_duration": 1177513000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.325,
+      "prompt_chars": 2852,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 924,
+        "eval_count": 56,
+        "total_duration": 12311173000,
+        "prompt_eval_duration": 164134000,
+        "eval_duration": 364625000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Elvis Presley",
+      "title": "Jailhouse Rock",
+      "album": "",
+      "year": null,
+      "genre": "rockabilly"
+    },
+    "rig": {
+      "rigName": "Elvis Presley - Jailhouse Rock - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 50s rockabilly crunch with slapback snap",
+      "signalChainSummary": "A clean, punchy signal chain using a light overdrive for grit, followed by an AC30-style amp simulation, and finished with slapback echo to capture the classic 50s rockabilly sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and maintain tight rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide light tube grit and punch for the rockabilly crunch.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used to simulate a mild, vintage overdrive rather than a dedicated clean boost.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Similar light grit, but Blues OD often has better mid-range punch for 50s rock."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass to keep the tone clean and focused on natural guitar dynamics.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the bright, articulate sound of a small combo amp suitable for 50s rock.",
+          "matchQuality": "close",
+          "gap": "The AC30 TB is chosen for its classic British chime and brightness, fitting the era's clean punch.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative, but AC30 often provides a slightly brighter, more 'jangly' sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is selected for its balanced, vintage character.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "If a more American/greener tone was desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+4"
+          },
+          "purpose": "Brighten the tone and emphasize the mid-high frequencies for a thinner, punchier sound.",
+          "matchQuality": "close",
+          "gap": "Used to manually adjust the frequency response to achieve the 'brighter and thinner' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No wah needed for this specific rockabilly style.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid lush chorus as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Provide the essential snappy slapback echo characteristic of 50s rock and roll.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Digital Delay",
+              "reason": "Too long and complex for the desired vintage snap."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "3"
+          },
+          "purpose": "Add a subtle 'springy room' ambience without sounding overly lush or modern.",
+          "matchQuality": "close",
+          "gap": "The Room reverb provides enough space without the decay of Plate, and is better than Spring for this specific vintage feel.",
+          "alternatives": [
+            {
+              "model": "Spring",
+              "reason": "A viable alternative, but Room often gives a slightly more open, less metallic sound."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 50s rockabilly crunch with slapback snap",
+      "mustHave": [
+        "tight pick attack",
+        "light tube grit",
+        "springy room",
+        "fast rhythm strum"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "modern high gain",
+        "lush chorus",
+        "long delay"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "slapback echo",
+        "1x12 or 2x10 cab"
+      ],
+      "corrections": [
+        "drop mid-gain",
+        "add 50s slapback",
+        "make it brighter and thinner"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rockabilly",
+      "styleTags": [
+        "rock and roll",
+        "50s music"
+      ],
+      "targetTone": "bright 50s rockabilly crunch with slapback snap",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current cabinet IR with a smaller, more American-voiced speaker to better match the small combo amp and 50s rockabilly aesthetic.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "American Deluxe 1x12 or 2x10 IR",
+          "reason": "The current UK 4x12 is too large and British for the small combo/50s sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After initial preset testing",
+          "expectedGain": "Tighter, punchier mid-range focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 406,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,998 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1591,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Rolling_Stones__Gimme_Shelter.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Rolling Stones",
+    "title": "Gimme Shelter",
+    "album": "",
+    "year": null,
+    "genre": "psychedelic rock"
+  },
+  "genreClassification": {
+    "genre": "psychedelic rock",
+    "subgenres": [
+      "blues rock",
+      "garage rock",
+      "rock and roll"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of raw, gritty psychedelic blues-rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, gritty, slightly overdriven blues rock tone with a prominent mid-range bite.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture (for grit)",
+        "Warm reverb",
+        "Delay (subtle)"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (Marshall/Vox family)",
+        "Mid-scooped EQ curve",
+        "Tube emulation with natural breakup"
+      ],
+      "avoid": [
+        "High gain modern metal tones",
+        "Bright, scooped clean tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "distorted female-vocal lead with dirty fuzz edge",
+      "mustHave": [
+        "fuzzy sustain",
+        "raw mid bite",
+        "slight breakup",
+        "dark texture"
+      ],
+      "avoid": [
+        "generic blues rock crunch",
+        "warm reverb",
+        "delay",
+        "modern metal gain"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "british amp",
+        "smallish combo or cranked stack"
+      ],
+      "corrections": [
+        "remove delay",
+        "remove warm reverb",
+        "push fuzz over overdrive",
+        "keep it raw and edgy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "distorted female-vocal lead with dirty fuzz edge",
+    "mustHave": [
+      "fuzzy sustain",
+      "raw mid bite",
+      "slight breakup",
+      "dark texture"
+    ],
+    "avoid": [
+      "generic blues rock crunch",
+      "warm reverb",
+      "delay",
+      "modern metal gain"
+    ],
+    "gearClues": [
+      "fuzz pedal",
+      "british amp",
+      "smallish combo or cranked stack"
+    ],
+    "corrections": [
+      "remove delay",
+      "remove warm reverb",
+      "push fuzz over overdrive",
+      "keep it raw and edgy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, dark fuzz and mid-range aggression suitable for a gritty vocal accompaniment.",
+          "bestMatchSummary": "A fuzzy, aggressive signal chain using Fuzz/Distortion into a British amp model (UK 45 or UK 50) with minimal clean effects to maintain grit and bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a raw signal edge.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Provide initial grit and mid-range bite before the main fuzz stage.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a dirty, raw boost/overdrive character rather than pure clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Deliver the core fuzzy sustain and dark texture required for the song's atmosphere.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Optional filter sweep for added texture (kept inactive to maintain raw sound).",
+              "matchQuality": "close",
+              "gap": "The V-Wah is generally used for funk/rock, but its ability to shape the mid-range can add grit without sounding too clean.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a cranked British combo amp for raw power and mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound to complement the UK 45 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "EQ/mod",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mid-range frequencies to enhance 'raw mid bite' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle, dark ambient space without the warmth or length of traditional reverb.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is chosen over Plate/Spring to provide a natural, non-washy ambience that supports the gritty texture.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level control to ensure the fuzzy signal is audible and aggressive.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is primarily vocal/rhythmic, so this rig focuses on creating a dark, fuzzy accompaniment texture rather than a lead melody."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the default cabinet IR with a darker, more aggressive British speaker to enhance the raw mid-range bite and dark texture.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dark/dirty 4x12 IR (e.g., dirty tweed or old tube)",
+              "reason": "Enhance the raw, gritty mid-range and dark texture required for 'Gimme Shelter'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased grit and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Rolling Stones - Gimme Shelter - Valeton GP-180",
+        "song": {
+          "artist": "The Rolling Stones",
+          "title": "Gimme Shelter",
+          "album": "",
+          "year": null,
+          "genre": "psychedelic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "distorted female-vocal lead with dirty fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A fuzzy, aggressive signal chain using Fuzz/Distortion into a British amp model (UK 45 or UK 50) with minimal clean effects to maintain grit and bite.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a raw signal edge.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Provide initial grit and mid-range bite before the main fuzz stage.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here to simulate a dirty, raw boost/overdrive character rather than pure clean tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "7",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Deliver the core fuzzy sustain and dark texture required for the song's atmosphere.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Cutoff": "500 Hz"
+            },
+            "purpose": "Optional filter sweep for added texture (kept inactive to maintain raw sound).",
+            "matchQuality": "close",
+            "gap": "The V-Wah is generally used for funk/rock, but its ability to shape the mid-range can add grit without sounding too clean.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amp",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate a cranked British combo amp for raw power and mid-range punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound to complement the UK 45 amp model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "EQ/mod",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the mid-range frequencies to enhance 'raw mid bite' and cut through the mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add a subtle, dark ambient space without the warmth or length of traditional reverb.",
+            "matchQuality": "close",
+            "gap": "The 'Room' setting is chosen over Plate/Spring to provide a natural, non-washy ambience that supports the gritty texture.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "10"
+            },
+            "purpose": "Final output level control to ensure the fuzzy signal is audible and aggressive.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "distorted female-vocal lead with dirty fuzz edge",
+          "toneProfile": "distorted female-vocal lead with dirty fuzz edge",
+          "idealSignalChain": "fuzz pedal | british amp | smallish combo or cranked stack",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "british amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "smallish combo or cranked stack",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy sustain",
+            "raw mid bite",
+            "slight breakup",
+            "dark texture"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, dark fuzz and mid-range aggression suitable for a gritty vocal accompaniment.",
+          "bestMatchSummary": "A fuzzy, aggressive signal chain using Fuzz/Distortion into a British amp model (UK 45 or UK 50) with minimal clean effects to maintain grit and bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a raw signal edge.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Provide initial grit and mid-range bite before the main fuzz stage.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a dirty, raw boost/overdrive character rather than pure clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Deliver the core fuzzy sustain and dark texture required for the song's atmosphere.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Optional filter sweep for added texture (kept inactive to maintain raw sound).",
+              "matchQuality": "close",
+              "gap": "The V-Wah is generally used for funk/rock, but its ability to shape the mid-range can add grit without sounding too clean.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a cranked British combo amp for raw power and mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound to complement the UK 45 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "EQ/mod",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mid-range frequencies to enhance 'raw mid bite' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle, dark ambient space without the warmth or length of traditional reverb.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is chosen over Plate/Spring to provide a natural, non-washy ambience that supports the gritty texture.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level control to ensure the fuzzy signal is audible and aggressive.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the default cabinet IR with a darker, more aggressive British speaker to enhance the raw mid-range bite and dark texture.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dark/dirty 4x12 IR (e.g., dirty tweed or old tube)",
+              "reason": "Enhance the raw, gritty mid-range and dark texture required for 'Gimme Shelter'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased grit and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove delay",
+          "remove warm reverb",
+          "push fuzz over overdrive",
+          "keep it raw and edgy"
+        ],
+        "warnings": [
+          "The source material is primarily vocal/rhythmic, so this rig focuses on creating a dark, fuzzy accompaniment texture rather than a lead melody."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.253,
+      "prompt_chars": 1000,
+      "response_chars": 457,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 113,
+        "total_duration": 10228531200,
+        "prompt_eval_duration": 753094000,
+        "eval_duration": 2441883000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.817,
+      "prompt_chars": 5385,
+      "response_chars": 504,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1639
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 43.235,
+      "prompt_chars": 3584,
+      "response_chars": 4757,
+      "usage": {
+        "prompt_eval_count": 1202,
+        "eval_count": 1373,
+        "total_duration": 43210853000,
+        "prompt_eval_duration": 649779000,
+        "eval_duration": 27141097000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.367,
+      "prompt_chars": 6846,
+      "response_chars": 588,
+      "usage": {
+        "prompt_eval_count": 1932,
+        "eval_count": 160,
+        "total_duration": 4340673100,
+        "prompt_eval_duration": 752787000,
+        "eval_duration": 3145987000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 18.318,
+      "prompt_chars": 2633,
+      "response_chars": 197,
+      "usage": {
+        "prompt_eval_count": 843,
+        "eval_count": 53,
+        "total_duration": 18302852600,
+        "prompt_eval_duration": 427074000,
+        "eval_duration": 875100000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Rolling Stones",
+      "title": "Gimme Shelter",
+      "album": "",
+      "year": null,
+      "genre": "psychedelic rock"
+    },
+    "rig": {
+      "rigName": "The Rolling Stones - Gimme Shelter - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "distorted female-vocal lead with dirty fuzz edge",
+      "signalChainSummary": "A fuzzy, aggressive signal chain using Fuzz/Distortion into a British amp model (UK 45 or UK 50) with minimal clean effects to maintain grit and bite.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a raw signal edge.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Provide initial grit and mid-range bite before the main fuzz stage.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here to simulate a dirty, raw boost/overdrive character rather than pure clean tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "7",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Deliver the core fuzzy sustain and dark texture required for the song's atmosphere.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Cutoff": "500 Hz"
+          },
+          "purpose": "Optional filter sweep for added texture (kept inactive to maintain raw sound).",
+          "matchQuality": "close",
+          "gap": "The V-Wah is generally used for funk/rock, but its ability to shape the mid-range can add grit without sounding too clean.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amp",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate a cranked British combo amp for raw power and mid-range punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound to complement the UK 45 amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "EQ/mod",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the mid-range frequencies to enhance 'raw mid bite' and cut through the mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add a subtle, dark ambient space without the warmth or length of traditional reverb.",
+          "matchQuality": "close",
+          "gap": "The 'Room' setting is chosen over Plate/Spring to provide a natural, non-washy ambience that supports the gritty texture.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "10"
+          },
+          "purpose": "Final output level control to ensure the fuzzy signal is audible and aggressive.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "distorted female-vocal lead with dirty fuzz edge",
+      "mustHave": [
+        "fuzzy sustain",
+        "raw mid bite",
+        "slight breakup",
+        "dark texture"
+      ],
+      "avoid": [
+        "generic blues rock crunch",
+        "warm reverb",
+        "delay",
+        "modern metal gain"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "british amp",
+        "smallish combo or cranked stack"
+      ],
+      "corrections": [
+        "remove delay",
+        "remove warm reverb",
+        "push fuzz over overdrive",
+        "keep it raw and edgy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "psychedelic rock",
+      "styleTags": [
+        "blues rock",
+        "garage rock",
+        "rock and roll"
+      ],
+      "targetTone": "distorted female-vocal lead with dirty fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the default cabinet IR with a darker, more aggressive British speaker to enhance the raw mid-range bite and dark texture.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "dark/dirty 4x12 IR (e.g., dirty tweed or old tube)",
+          "reason": "Enhance the raw, gritty mid-range and dark texture required for 'Gimme Shelter'.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased grit and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1591,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

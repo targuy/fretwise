@@ -1,0 +1,1174 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 901,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Maneskin__Beggin.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Måneskin",
+    "title": "Beggin'",
+    "album": "",
+    "year": null,
+    "genre": "rock"
+  },
+  "genreClassification": {
+    "genre": "rock",
+    "subgenres": [
+      "punk rock",
+      "garage rock",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "The retro, crunchy tone and artist suggest a modern take on classic rock/punk."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Punchy, aggressive rock tone with a slight vintage grit.",
+      "signatureElements": [
+        "Crunch/Overdrive (main rhythm)",
+        "Slight fuzz texture on leads",
+        "Mid-scooped EQ for aggression",
+        "Tight attack and decay"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer style)",
+        "British-style amp simulation (Marshall/Vox family)"
+      ],
+      "avoid": [
+        "Too much clean reverb",
+        "Thin, scooped modern metal tones",
+        "Overly modulated sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "Punchy retro rock crunch with slight fuzz grit",
+      "mustHave": [
+        "tight palm-muted attack",
+        "dirty rhythm crunch",
+        "slight fuzz on leads",
+        "raw vintage edge",
+        "short room only"
+      ],
+      "avoid": [
+        "modern metal scoop",
+        "heavy reverb",
+        "chorus",
+        "polished clean tone"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "Vox-ish chime possible",
+        "4x12 cab",
+        "overdrive or fuzz pedal"
+      ],
+      "corrections": [
+        "remove mid-scooped EQ",
+        "name the retro grit more clearly",
+        "keep fuzz subtle but audible"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "Punchy retro rock crunch with slight fuzz grit",
+    "mustHave": [
+      "tight palm-muted attack",
+      "dirty rhythm crunch",
+      "slight fuzz on leads",
+      "raw vintage edge",
+      "short room only"
+    ],
+    "avoid": [
+      "modern metal scoop",
+      "heavy reverb",
+      "chorus",
+      "polished clean tone"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "Vox-ish chime possible",
+      "4x12 cab",
+      "overdrive or fuzz pedal"
+    ],
+    "corrections": [
+      "remove mid-scooped EQ",
+      "name the retro grit more clearly",
+      "keep fuzz subtle but audible"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage British rock tones (Marshall/Vox) with grit and punch.",
+          "bestMatchSummary": "A crunchy, retro British rhythm tone using an OD pedal for bite, followed by a classic Marshall-style amp model, paired with a 4x12 cabinet, finished with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary punchy retro crunch and bite for rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative, but Green OD better captures the raw British grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required subtle fuzz grit for leads and dirty rhythm accents.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is more of a boost/overdrive, but it provides the necessary vintage texture without sounding overly modern or scooped.",
+              "alternatives": [
+                {
+                  "model": "Fuzz",
+                  "reason": "Too aggressive for the overall tone; keep the fuzz subtle."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Middle": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall-style British rock amp tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 is often cited for that specific punchy rhythm sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound matching the amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Correct the tone by boosting mids and slightly reducing bass to maintain clarity and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this specific rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the delay clean and subtle to focus on rhythm.",
+              "matchQuality": "close",
+              "gap": "Not essential for the core tone, but available if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the required short room ambience without sounding heavy or washed out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this raw vintage rock sound."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a modern rock song, so the tone aims for classic vintage grit rather than perfect replication."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the IR.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Vintage 4x12 (UK)",
+              "reason": "Enhance vintage British rock grit and tightness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Måneskin - Beggin' - Valeton GP-180",
+        "song": {
+          "artist": "Måneskin",
+          "title": "Beggin'",
+          "album": "",
+          "year": null,
+          "genre": "rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "Punchy retro rock crunch with slight fuzz grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A crunchy, retro British rhythm tone using an OD pedal for bite, followed by a classic Marshall-style amp model, paired with a 4x12 cabinet, finished with subtle room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary punchy retro crunch and bite for rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good alternative, but Green OD better captures the raw British grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "2.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add the required subtle fuzz grit for leads and dirty rhythm accents.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is more of a boost/overdrive, but it provides the necessary vintage texture without sounding overly modern or scooped.",
+            "alternatives": [
+              {
+                "model": "Fuzz",
+                "reason": "Too aggressive for the overall tone; keep the fuzz subtle."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Middle": "6",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall-style British rock amp tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also suitable, but UK 45 is often cited for that specific punchy rhythm sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound matching the amp model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Correct the tone by boosting mids and slightly reducing bass to maintain clarity and punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed for this specific rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus as per the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the delay clean and subtle to focus on rhythm.",
+            "matchQuality": "close",
+            "gap": "Not essential for the core tone, but available if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide the required short room ambience without sounding heavy or washed out.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too bright and artificial for this raw vintage rock sound."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "Punchy retro rock crunch with slight fuzz grit",
+          "toneProfile": "Punchy retro rock crunch with slight fuzz grit",
+          "idealSignalChain": "Marshall-style amp | Vox-ish chime possible | 4x12 cab | overdrive or fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox-ish chime possible",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "overdrive or fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-muted attack",
+            "dirty rhythm crunch",
+            "slight fuzz on leads",
+            "raw vintage edge",
+            "short room only"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage British rock tones (Marshall/Vox) with grit and punch.",
+          "bestMatchSummary": "A crunchy, retro British rhythm tone using an OD pedal for bite, followed by a classic Marshall-style amp model, paired with a 4x12 cabinet, finished with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary punchy retro crunch and bite for rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative, but Green OD better captures the raw British grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required subtle fuzz grit for leads and dirty rhythm accents.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is more of a boost/overdrive, but it provides the necessary vintage texture without sounding overly modern or scooped.",
+              "alternatives": [
+                {
+                  "model": "Fuzz",
+                  "reason": "Too aggressive for the overall tone; keep the fuzz subtle."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Middle": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall-style British rock amp tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 is often cited for that specific punchy rhythm sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound matching the amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Correct the tone by boosting mids and slightly reducing bass to maintain clarity and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this specific rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the delay clean and subtle to focus on rhythm.",
+              "matchQuality": "close",
+              "gap": "Not essential for the core tone, but available if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the required short room ambience without sounding heavy or washed out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this raw vintage rock sound."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the IR.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Vintage 4x12 (UK)",
+              "reason": "Enhance vintage British rock grit and tightness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove mid-scooped EQ",
+          "name the retro grit more clearly",
+          "keep fuzz subtle but audible"
+        ],
+        "warnings": [
+          "The source material is a modern rock song, so the tone aims for classic vintage grit rather than perfect replication."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.342,
+      "prompt_chars": 985,
+      "response_chars": 474,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 118,
+        "total_duration": 10326915700,
+        "prompt_eval_duration": 670228000,
+        "eval_duration": 2251070000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.698,
+      "prompt_chars": 5387,
+      "response_chars": 570,
+      "usage": {
+        "input_tokens": 1505,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 148,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 46.72,
+      "prompt_chars": 3642,
+      "response_chars": 5791,
+      "usage": {
+        "prompt_eval_count": 1223,
+        "eval_count": 1673,
+        "total_duration": 46692372800,
+        "prompt_eval_duration": 451205000,
+        "eval_duration": 28948399000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.28,
+      "prompt_chars": 8026,
+      "response_chars": 468,
+      "usage": {
+        "prompt_eval_count": 2253,
+        "eval_count": 126,
+        "total_duration": 5270166600,
+        "prompt_eval_duration": 447873000,
+        "eval_duration": 4316544000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.921,
+      "prompt_chars": 3019,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 976,
+        "eval_count": 52,
+        "total_duration": 12900236200,
+        "prompt_eval_duration": 833525000,
+        "eval_duration": 952292000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Måneskin",
+      "title": "Beggin'",
+      "album": "",
+      "year": null,
+      "genre": "rock"
+    },
+    "rig": {
+      "rigName": "Måneskin - Beggin' - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "Punchy retro rock crunch with slight fuzz grit",
+      "signalChainSummary": "A crunchy, retro British rhythm tone using an OD pedal for bite, followed by a classic Marshall-style amp model, paired with a 4x12 cabinet, finished with subtle room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary punchy retro crunch and bite for rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good alternative, but Green OD better captures the raw British grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "2.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add the required subtle fuzz grit for leads and dirty rhythm accents.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is more of a boost/overdrive, but it provides the necessary vintage texture without sounding overly modern or scooped.",
+          "alternatives": [
+            {
+              "model": "Fuzz",
+              "reason": "Too aggressive for the overall tone; keep the fuzz subtle."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Middle": "6",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall-style British rock amp tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also suitable, but UK 45 is often cited for that specific punchy rhythm sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound matching the amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Correct the tone by boosting mids and slightly reducing bass to maintain clarity and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed for this specific rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the delay clean and subtle to focus on rhythm.",
+          "matchQuality": "close",
+          "gap": "Not essential for the core tone, but available if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide the required short room ambience without sounding heavy or washed out.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too bright and artificial for this raw vintage rock sound."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "Punchy retro rock crunch with slight fuzz grit",
+      "mustHave": [
+        "tight palm-muted attack",
+        "dirty rhythm crunch",
+        "slight fuzz on leads",
+        "raw vintage edge",
+        "short room only"
+      ],
+      "avoid": [
+        "modern metal scoop",
+        "heavy reverb",
+        "chorus",
+        "polished clean tone"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "Vox-ish chime possible",
+        "4x12 cab",
+        "overdrive or fuzz pedal"
+      ],
+      "corrections": [
+        "remove mid-scooped EQ",
+        "name the retro grit more clearly",
+        "keep fuzz subtle but audible"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock",
+      "styleTags": [
+        "punk rock",
+        "garage rock",
+        "pop punk"
+      ],
+      "targetTone": "Punchy retro rock crunch with slight fuzz grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall punch by swapping the IR.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism/Punch",
+          "recommendedAsset": "Vintage 4x12 (UK)",
+          "reason": "Enhance vintage British rock grit and tightness.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased punch and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 901,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1069 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1104,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Pink_Floyd__The_Great_Gig_In_The_Sky.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [
+      "gearClues missing"
+    ],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Pink Floyd",
+    "title": "The Great Gig In The Sky",
+    "album": "",
+    "year": null,
+    "genre": "progressive rock"
+  },
+  "genreClassification": {
+    "genre": "progressive rock",
+    "subgenres": [
+      "art rock",
+      "psychedelic rock",
+      "atmospheric"
+    ],
+    "confidence": "high",
+    "rationale": "Pink Floyd's work is foundational to progressive and psychedelic rock genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Ambient, ethereal, reverb-drenched vocal pads (played on guitar)",
+      "signatureElements": [
+        "heavy reverb",
+        "delay (long repeats)",
+        "modulation (chorus/flanger)",
+        "clean tone",
+        "ambient textures"
+      ],
+      "gearHypotheses": [
+        "Plate Reverb simulation",
+        "Chorus effect",
+        "Delay unit (ping pong or dotted eighth)"
+      ],
+      "avoid": [
+        "distortion",
+        "fuzz",
+        "crunch",
+        "aggressive attack"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "non-guitar vocal-only ambience",
+      "mustHave": [
+        "vocal pads",
+        "no guitar part",
+        "reverb wash"
+      ],
+      "avoid": [
+        "guitar rig build",
+        "amp modeling",
+        "distortion",
+        "fuzz"
+      ],
+      "gearClues": [],
+      "corrections": [
+        "track is essentially vocal, not guitar"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "signature part is vocal, not guitar",
+      "GP-180 guitar preset would be wrong instrument family",
+      "iconic track has no decisive guitar texture to imitate"
+    ],
+    "forcedEscalationReasons": [
+      "gearClues missing"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "non-guitar vocal showcase",
+    "mustHave": [
+      "no guitar part exists",
+      "vocal-only track"
+    ],
+    "avoid": [
+      "guitar rig generation",
+      "amp modeling",
+      "effects chain"
+    ],
+    "gearClues": [],
+    "corrections": [
+      "track features Clare Torry vocals only",
+      "no Gilmour guitar on this song",
+      "wrong track for guitar preset"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "non-guitar vocal showcase",
+    "mustHave": [
+      "no guitar part exists",
+      "vocal-only track"
+    ],
+    "avoid": [
+      "guitar rig generation",
+      "amp modeling",
+      "effects chain"
+    ],
+    "gearClues": [],
+    "corrections": [
+      "track features Clare Torry vocals only",
+      "no Gilmour guitar on this song",
+      "wrong track for guitar preset"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is a vocal showcase (Pink Floyd's 'The Great Gig In The Sky'), this rig will be designed to imitate an ethereal, atmospheric background texture suitable for ambient vocals, rather than mimicking a specific lead guitar part. We prioritize clean tones and spacious effects.",
+          "bestMatchSummary": "A highly atmospheric, reverb-drenched signal chain using a clean preamp (US Deluxe) combined with chorus, delay, and heavy reverb to create an ethereal wash of sound supporting the vocal performance.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the source material.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1",
+                "Level": "60%"
+              },
+              "purpose": "Smooth out the signal and add gentle sustain to mimic vocal warmth.",
+              "matchQuality": "close",
+              "gap": "The primary role is supporting vocals, so compression is used gently rather than for aggressive tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the distortion stage to maintain a clean, ethereal tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "5/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide a clean, open, and non-aggressive foundation suitable for ambient textures.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean tone profile, fitting the spacious nature of the song.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and open cabinet sound that complements the clean US Deluxe tone.",
+              "matchQuality": "close",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add a subtle, swirling movement to the signal, enhancing the ethereal and spacious quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here for texture rather than rhythmic effect.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and high end to give the ambient texture body without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal shaping rather than aggressive EQing.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "3",
+                "Mix": "35%"
+              },
+              "purpose": "Create a sense of vast space and echo, crucial for the ambient feel.",
+              "matchQuality": "close",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "4s",
+                "Mix": "50%"
+              },
+              "purpose": "Provide a massive, enveloping sense of space and atmosphere.",
+              "matchQuality": "close",
+              "gap": "Plate reverb is excellent for large, open spaces, fitting the song's mood.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Overall level control to ensure the ambient texture sits correctly beneath the vocals.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a vocal showcase, not a guitar performance. This rig generates an ambient texture to support the vocals, rather than mimicking a specific lead part."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current IR is adequate for clean tones but could be enhanced with a more open, spacious cabinet to better support the ethereal vocal texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Ambient space/Vocal wash",
+              "recommendedAsset": "Large Hall or Open Air IR",
+              "reason": "Enhance sense of vastness and openness for ambient vocals.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased spaciousness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Pink Floyd - The Great Gig In The Sky - Valeton GP-180",
+        "song": {
+          "artist": "Pink Floyd",
+          "title": "The Great Gig In The Sky",
+          "album": "",
+          "year": null,
+          "genre": "progressive rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "non-guitar vocal showcase",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A highly atmospheric, reverb-drenched signal chain using a clean preamp (US Deluxe) combined with chorus, delay, and heavy reverb to create an ethereal wash of sound supporting the vocal performance.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any unwanted hum or noise from the source material.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30 dB",
+              "Ratio": "4:1",
+              "Level": "60%"
+            },
+            "purpose": "Smooth out the signal and add gentle sustain to mimic vocal warmth.",
+            "matchQuality": "close",
+            "gap": "The primary role is supporting vocals, so compression is used gently rather than for aggressive tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass the distortion stage to maintain a clean, ethereal tone.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "5/10",
+              "Bass": "4/10"
+            },
+            "purpose": "Provide a clean, open, and non-aggressive foundation suitable for ambient textures.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its classic clean tone profile, fitting the spacious nature of the song.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and open cabinet sound that complements the clean US Deluxe tone.",
+            "matchQuality": "close",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "40%",
+              "Mix": "50%"
+            },
+            "purpose": "Add a subtle, swirling movement to the signal, enhancing the ethereal and spacious quality.",
+            "matchQuality": "close",
+            "gap": "Chorus is used here for texture rather than rhythmic effect.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Mid Cut": "-1 dB",
+              "Treble Boost": "+1 dB"
+            },
+            "purpose": "Slightly boost the low-mids and high end to give the ambient texture body without sounding muddy.",
+            "matchQuality": "close",
+            "gap": "Used for subtle tonal shaping rather than aggressive EQing.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "400 ms",
+              "Feedback": "3",
+              "Mix": "35%"
+            },
+            "purpose": "Create a sense of vast space and echo, crucial for the ambient feel.",
+            "matchQuality": "close",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "4s",
+              "Mix": "50%"
+            },
+            "purpose": "Provide a massive, enveloping sense of space and atmosphere.",
+            "matchQuality": "close",
+            "gap": "Plate reverb is excellent for large, open spaces, fitting the song's mood.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume",
+            "module": "VOL",
+            "active": true,
+            "settings": {
+              "Level": "7/10"
+            },
+            "purpose": "Overall level control to ensure the ambient texture sits correctly beneath the vocals.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": [],
+            "model": "None"
+          }
+        ],
+        "general": {
+          "targetSound": "non-guitar vocal showcase",
+          "toneProfile": "non-guitar vocal showcase",
+          "idealSignalChain": "no guitar part exists | vocal-only track",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "no guitar part exists",
+              "reason": "claude musical verdict"
+            },
+            {
+              "role": "signature",
+              "model": "vocal-only track",
+              "reason": "claude musical verdict"
+            }
+          ],
+          "productionNotes": [
+            "no guitar part exists",
+            "vocal-only track"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is a vocal showcase (Pink Floyd's 'The Great Gig In The Sky'), this rig will be designed to imitate an ethereal, atmospheric background texture suitable for ambient vocals, rather than mimicking a specific lead guitar part. We prioritize clean tones and spacious effects.",
+          "bestMatchSummary": "A highly atmospheric, reverb-drenched signal chain using a clean preamp (US Deluxe) combined with chorus, delay, and heavy reverb to create an ethereal wash of sound supporting the vocal performance.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the source material.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1",
+                "Level": "60%"
+              },
+              "purpose": "Smooth out the signal and add gentle sustain to mimic vocal warmth.",
+              "matchQuality": "close",
+              "gap": "The primary role is supporting vocals, so compression is used gently rather than for aggressive tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the distortion stage to maintain a clean, ethereal tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "5/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide a clean, open, and non-aggressive foundation suitable for ambient textures.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean tone profile, fitting the spacious nature of the song.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and open cabinet sound that complements the clean US Deluxe tone.",
+              "matchQuality": "close",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add a subtle, swirling movement to the signal, enhancing the ethereal and spacious quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here for texture rather than rhythmic effect.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and high end to give the ambient texture body without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal shaping rather than aggressive EQing.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "3",
+                "Mix": "35%"
+              },
+              "purpose": "Create a sense of vast space and echo, crucial for the ambient feel.",
+              "matchQuality": "close",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "4s",
+                "Mix": "50%"
+              },
+              "purpose": "Provide a massive, enveloping sense of space and atmosphere.",
+              "matchQuality": "close",
+              "gap": "Plate reverb is excellent for large, open spaces, fitting the song's mood.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Overall level control to ensure the ambient texture sits correctly beneath the vocals.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current IR is adequate for clean tones but could be enhanced with a more open, spacious cabinet to better support the ethereal vocal texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Ambient space/Vocal wash",
+              "recommendedAsset": "Large Hall or Open Air IR",
+              "reason": "Enhance sense of vastness and openness for ambient vocals.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased spaciousness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "track features Clare Torry vocals only",
+          "no Gilmour guitar on this song",
+          "wrong track for guitar preset"
+        ],
+        "warnings": [
+          "The source material is a vocal showcase, not a guitar performance. This rig generates an ambient texture to support the vocals, rather than mimicking a specific lead part."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.745,
+      "prompt_chars": 1003,
+      "response_chars": 403,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 102,
+        "total_duration": 10723962300,
+        "prompt_eval_duration": 483270000,
+        "eval_duration": 2210908000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.514,
+      "prompt_chars": 5352,
+      "response_chars": 495,
+      "usage": {
+        "input_tokens": 1498,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1628
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 3.51,
+      "prompt_chars": 4701,
+      "response_chars": 435,
+      "usage": {
+        "input_tokens": 1402,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 152,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 30.295,
+      "prompt_chars": 3432,
+      "response_chars": 5453,
+      "usage": {
+        "prompt_eval_count": 1156,
+        "eval_count": 1516,
+        "total_duration": 30264907400,
+        "prompt_eval_duration": 538370000,
+        "eval_duration": 29265378000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.352,
+      "prompt_chars": 7414,
+      "response_chars": 565,
+      "usage": {
+        "prompt_eval_count": 2029,
+        "eval_count": 145,
+        "total_duration": 20332566100,
+        "prompt_eval_duration": 907506000,
+        "eval_duration": 2817220000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.133,
+      "prompt_chars": 2608,
+      "response_chars": 207,
+      "usage": {
+        "prompt_eval_count": 812,
+        "eval_count": 50,
+        "total_duration": 9110952700,
+        "prompt_eval_duration": 459600000,
+        "eval_duration": 833762000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Pink Floyd",
+      "title": "The Great Gig In The Sky",
+      "album": "",
+      "year": null,
+      "genre": "progressive rock"
+    },
+    "rig": {
+      "rigName": "Pink Floyd - The Great Gig In The Sky - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "non-guitar vocal showcase",
+      "signalChainSummary": "A highly atmospheric, reverb-drenched signal chain using a clean preamp (US Deluxe) combined with chorus, delay, and heavy reverb to create an ethereal wash of sound supporting the vocal performance.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any unwanted hum or noise from the source material.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30 dB",
+            "Ratio": "4:1",
+            "Level": "60%"
+          },
+          "purpose": "Smooth out the signal and add gentle sustain to mimic vocal warmth.",
+          "matchQuality": "close",
+          "gap": "The primary role is supporting vocals, so compression is used gently rather than for aggressive tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass the distortion stage to maintain a clean, ethereal tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "5/10",
+            "Bass": "4/10"
+          },
+          "purpose": "Provide a clean, open, and non-aggressive foundation suitable for ambient textures.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its classic clean tone profile, fitting the spacious nature of the song.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and open cabinet sound that complements the clean US Deluxe tone.",
+          "matchQuality": "close",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "40%",
+            "Mix": "50%"
+          },
+          "purpose": "Add a subtle, swirling movement to the signal, enhancing the ethereal and spacious quality.",
+          "matchQuality": "close",
+          "gap": "Chorus is used here for texture rather than rhythmic effect.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Mid Cut": "-1 dB",
+            "Treble Boost": "+1 dB"
+          },
+          "purpose": "Slightly boost the low-mids and high end to give the ambient texture body without sounding muddy.",
+          "matchQuality": "close",
+          "gap": "Used for subtle tonal shaping rather than aggressive EQing.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "400 ms",
+            "Feedback": "3",
+            "Mix": "35%"
+          },
+          "purpose": "Create a sense of vast space and echo, crucial for the ambient feel.",
+          "matchQuality": "close",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "4s",
+            "Mix": "50%"
+          },
+          "purpose": "Provide a massive, enveloping sense of space and atmosphere.",
+          "matchQuality": "close",
+          "gap": "Plate reverb is excellent for large, open spaces, fitting the song's mood.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "7/10"
+          },
+          "purpose": "Overall level control to ensure the ambient texture sits correctly beneath the vocals.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "non-guitar vocal showcase",
+      "mustHave": [
+        "no guitar part exists",
+        "vocal-only track"
+      ],
+      "avoid": [
+        "guitar rig generation",
+        "amp modeling",
+        "effects chain"
+      ],
+      "gearClues": [],
+      "corrections": [
+        "track features Clare Torry vocals only",
+        "no Gilmour guitar on this song",
+        "wrong track for guitar preset"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "progressive rock",
+      "styleTags": [
+        "art rock",
+        "psychedelic rock",
+        "atmospheric"
+      ],
+      "targetTone": "non-guitar vocal showcase",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current IR is adequate for clean tones but could be enhanced with a more open, spacious cabinet to better support the ethereal vocal texture.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Ambient space/Vocal wash",
+          "recommendedAsset": "Large Hall or Open Air IR",
+          "reason": "Enhance sense of vastness and openness for ambient vocals.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased spaciousness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1104,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

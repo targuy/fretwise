@@ -1,0 +1,1065 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1452,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__Eight_Days_A_Week.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "Eight Days A Week",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "british pop",
+      "merseybeat"
+    ],
+    "confidence": "high",
+    "rationale": "The Beatles' early sound is classic Merseybeat/Pop Rock, matching the jangle tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, clean pop rock with slight grit",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "slight chorus/modulation",
+        "bright treble"
+      ],
+      "gearHypotheses": [
+        "Clean Fender-style amp model (e.g., Twin Reverb)",
+        "Light compression for sustain",
+        "Chorus or vibrato effect"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion",
+        "Overdriven crunch",
+        "Wah pedal"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly clean Vox pop-rock with slight compression",
+      "mustHave": [
+        "bright clean guitar",
+        "jangly top end",
+        "light compression",
+        "short room or plate",
+        "tight rhythm attack"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy fuzz",
+        "wah",
+        "dark scoop",
+        "big drive"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "single coils",
+        "Vox AC30",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "drop chorus/modulation",
+        "lean Vox, not Fender Twin",
+        "keep it mostly clean",
+        "add jangle over grit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly clean Vox pop-rock with slight compression",
+    "mustHave": [
+      "bright clean guitar",
+      "jangly top end",
+      "light compression",
+      "short room or plate",
+      "tight rhythm attack"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy fuzz",
+      "wah",
+      "dark scoop",
+      "big drive"
+    ],
+    "gearClues": [
+      "Rickenbacker-style jangle",
+      "single coils",
+      "Vox AC30",
+      "2x12 open-back",
+      "light compression"
+    ],
+    "corrections": [
+      "drop chorus/modulation",
+      "lean Vox, not Fender Twin",
+      "keep it mostly clean",
+      "add jangle over grit"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean British tones (Vox AC30 style) with compression and room ambience to achieve the jangly pop sound.",
+          "bestMatchSummary": "A clean signal chain utilizing a Boost/OD for light compression, followed by an AC30-style amp model, paired with a 2x12 cabinet and Room reverb for bright, articulate jangle.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "50%",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression and sustain for a tight rhythm attack.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "20%",
+                "Tone": "70%"
+              },
+              "purpose": "Add subtle lift and brightness without adding noticeable grit.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated clean OD to maintain maximum clarity and jangle.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could provide slight warmth, but might muddy the bright top end."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "45%"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-back sound suitable for pop and jangly tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the high-end sparkle and cut any unnecessary low-mid muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder for modulation (though discouraged), kept off to avoid unwanted effects.",
+              "matchQuality": "N/A",
+              "gap": "The verdict explicitly advises avoiding chorus, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding overly wet or dark.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could work, but Room reverb better captures the natural acoustic feel needed for pop."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional delay for added dimension; kept off to maintain focus on clean rhythm.",
+              "matchQuality": "N/A",
+              "gap": "Not required by the verdict, but included as a standard module slot.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic pop-rock (The Beatles), which requires a bright, articulate tone. The chain prioritizes clean British tones (AC30) and compression to achieve the 'jangly' sound while avoiding heavy grit or modulation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade cabinet IR for better vintage pop-rock articulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 open back IR",
+              "reason": "Enhance the classic, bright jangle of Vox AC30/Rickenbacker tones.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage pop character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - Eight Days A Week - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "Eight Days A Week",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly clean Vox pop-rock with slight compression",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain utilizing a Boost/OD for light compression, followed by an AC30-style amp model, paired with a 2x12 cabinet and Room reverb for bright, articulate jangle.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "50%",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide light compression and sustain for a tight rhythm attack.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "20%",
+              "Tone": "70%"
+            },
+            "purpose": "Add subtle lift and brightness without adding noticeable grit.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated clean OD to maintain maximum clarity and jangle.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Could provide slight warmth, but might muddy the bright top end."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "35%",
+              "Treble": "75%",
+              "Midrange": "60%",
+              "Bass": "45%"
+            },
+            "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, open-back sound suitable for pop and jangly tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the high-end sparkle and cut any unnecessary low-mid muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Placeholder for modulation (though discouraged), kept off to avoid unwanted effects.",
+            "matchQuality": "N/A",
+            "gap": "The verdict explicitly advises avoiding chorus, so this module is included but deactivated.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a subtle sense of space and depth without sounding overly wet or dark.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could work, but Room reverb better captures the natural acoustic feel needed for pop."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300ms",
+              "Feedback": "2"
+            },
+            "purpose": "Optional delay for added dimension; kept off to maintain focus on clean rhythm.",
+            "matchQuality": "N/A",
+            "gap": "Not required by the verdict, but included as a standard module slot.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly clean Vox pop-rock with slight compression",
+          "toneProfile": "jangly clean Vox pop-rock with slight compression",
+          "idealSignalChain": "Rickenbacker-style jangle | single coils | Vox AC30 | 2x12 open-back | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rickenbacker-style jangle",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 open-back",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright clean guitar",
+            "jangly top end",
+            "light compression",
+            "short room or plate",
+            "tight rhythm attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean British tones (Vox AC30 style) with compression and room ambience to achieve the jangly pop sound.",
+          "bestMatchSummary": "A clean signal chain utilizing a Boost/OD for light compression, followed by an AC30-style amp model, paired with a 2x12 cabinet and Room reverb for bright, articulate jangle.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "50%",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression and sustain for a tight rhythm attack.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "20%",
+                "Tone": "70%"
+              },
+              "purpose": "Add subtle lift and brightness without adding noticeable grit.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated clean OD to maintain maximum clarity and jangle.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could provide slight warmth, but might muddy the bright top end."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "45%"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-back sound suitable for pop and jangly tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the high-end sparkle and cut any unnecessary low-mid muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder for modulation (though discouraged), kept off to avoid unwanted effects.",
+              "matchQuality": "N/A",
+              "gap": "The verdict explicitly advises avoiding chorus, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding overly wet or dark.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could work, but Room reverb better captures the natural acoustic feel needed for pop."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional delay for added dimension; kept off to maintain focus on clean rhythm.",
+              "matchQuality": "N/A",
+              "gap": "Not required by the verdict, but included as a standard module slot.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade cabinet IR for better vintage pop-rock articulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 open back IR",
+              "reason": "Enhance the classic, bright jangle of Vox AC30/Rickenbacker tones.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage pop character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/modulation",
+          "lean Vox, not Fender Twin",
+          "keep it mostly clean",
+          "add jangle over grit"
+        ],
+        "warnings": [
+          "The source material is classic pop-rock (The Beatles), which requires a bright, articulate tone. The chain prioritizes clean British tones (AC30) and compression to achieve the 'jangly' sound while avoiding heavy grit or modulation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.255,
+      "prompt_chars": 997,
+      "response_chars": 372,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 98,
+        "total_duration": 10242382800,
+        "prompt_eval_duration": 417063000,
+        "eval_duration": 1884087000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.938,
+      "prompt_chars": 5309,
+      "response_chars": 571,
+      "usage": {
+        "input_tokens": 1487,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 150,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1637
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 30.575,
+      "prompt_chars": 3676,
+      "response_chars": 5157,
+      "usage": {
+        "prompt_eval_count": 1237,
+        "eval_count": 1479,
+        "total_duration": 30555798200,
+        "prompt_eval_duration": 511294000,
+        "eval_duration": 29589362000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.935,
+      "prompt_chars": 7360,
+      "response_chars": 521,
+      "usage": {
+        "prompt_eval_count": 2073,
+        "eval_count": 144,
+        "total_duration": 4928760400,
+        "prompt_eval_duration": 851949000,
+        "eval_duration": 3639450000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.409,
+      "prompt_chars": 2831,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 915,
+        "eval_count": 53,
+        "total_duration": 11405053800,
+        "prompt_eval_duration": 852933000,
+        "eval_duration": 998428000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "Eight Days A Week",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Beatles - Eight Days A Week - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly clean Vox pop-rock with slight compression",
+      "signalChainSummary": "A clean signal chain utilizing a Boost/OD for light compression, followed by an AC30-style amp model, paired with a 2x12 cabinet and Room reverb for bright, articulate jangle.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "50%",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide light compression and sustain for a tight rhythm attack.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "20%",
+            "Tone": "70%"
+          },
+          "purpose": "Add subtle lift and brightness without adding noticeable grit.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated clean OD to maintain maximum clarity and jangle.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Could provide slight warmth, but might muddy the bright top end."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "35%",
+            "Treble": "75%",
+            "Midrange": "60%",
+            "Bass": "45%"
+          },
+          "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, open-back sound suitable for pop and jangly tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the high-end sparkle and cut any unnecessary low-mid muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Placeholder for modulation (though discouraged), kept off to avoid unwanted effects.",
+          "matchQuality": "fallback",
+          "gap": "The verdict explicitly advises avoiding chorus, so this module is included but deactivated.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a subtle sense of space and depth without sounding overly wet or dark.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could work, but Room reverb better captures the natural acoustic feel needed for pop."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300ms",
+            "Feedback": "2"
+          },
+          "purpose": "Optional delay for added dimension; kept off to maintain focus on clean rhythm.",
+          "matchQuality": "fallback",
+          "gap": "Not required by the verdict, but included as a standard module slot.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly clean Vox pop-rock with slight compression",
+      "mustHave": [
+        "bright clean guitar",
+        "jangly top end",
+        "light compression",
+        "short room or plate",
+        "tight rhythm attack"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy fuzz",
+        "wah",
+        "dark scoop",
+        "big drive"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "single coils",
+        "Vox AC30",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "drop chorus/modulation",
+        "lean Vox, not Fender Twin",
+        "keep it mostly clean",
+        "add jangle over grit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "british pop",
+        "merseybeat"
+      ],
+      "targetTone": "jangly clean Vox pop-rock with slight compression",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade cabinet IR for better vintage pop-rock articulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 open back IR",
+          "reason": "Enhance the classic, bright jangle of Vox AC30/Rickenbacker tones.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage pop character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1452,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

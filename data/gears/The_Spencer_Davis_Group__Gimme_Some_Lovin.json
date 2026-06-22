@@ -1,0 +1,953 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1613,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Spencer_Davis_Group__Gimme_Some_Lovin.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Spencer Davis Group",
+    "title": "Gimme Some Lovin'",
+    "album": "",
+    "year": null,
+    "genre": "mod rock"
+  },
+  "genreClassification": {
+    "genre": "mod rock",
+    "subgenres": [
+      "r&b",
+      "british pop",
+      "pop rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic British R&B/Mod Rock, matching the Vox-style tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy rhythm rock tone (early 60s British Invasion)",
+      "signatureElements": [
+        "Crunch/light overdrive",
+        "Punchy attack",
+        "Mid-focused EQ curve",
+        "Clean headroom"
+      ],
+      "gearHypotheses": [
+        "British single-coil guitar sound",
+        "Vox AC30 style emulation",
+        "Early Marshall Plexi style amp model"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep modulation (chorus)",
+        "Modern scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Vox-style British R&B crunch",
+      "mustHave": [
+        "punchy attack",
+        "slight edge-of-breakup",
+        "upper-mid bite",
+        "tight clean-ish rhythm"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "chorus",
+        "scooped mids",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox AC30",
+        "small to mid cab"
+      ],
+      "corrections": [
+        "lean more Vox chime than Plexi crunch",
+        "keep it cleaner and brighter"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Vox-style British R&B crunch",
+    "mustHave": [
+      "punchy attack",
+      "slight edge-of-breakup",
+      "upper-mid bite",
+      "tight clean-ish rhythm"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "chorus",
+      "scooped mids",
+      "modern high gain"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Vox AC30",
+      "small to mid cab"
+    ],
+    "corrections": [
+      "lean more Vox chime than Plexi crunch",
+      "keep it cleaner and brighter"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British tones (Vox/AC30 style) with controlled breakup for R&B rhythm.",
+          "bestMatchSummary": "A clean-to-crunch signal chain utilizing a Boost and the AC30 TB model into a suitable 4x12 cabinet to capture the bright, upper-mid focused sound of classic British R&B.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide punchy attack and slight initial drive to push the amp into desired breakup.",
+              "matchQuality": "close",
+              "gap": "Using Boost for controlled gain lift rather than a dedicated OD pedal, matching the 'cleaner' requirement.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Green OD",
+                  "reason": "A Green OD could also provide bright breakup but might be too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a very subtle drive if needed; the Boost should handle most of the breakup.",
+              "matchQuality": "none",
+              "gap": "The target tone requires minimal distortion (edge-of-breakup), making dedicated DST modules unnecessary and potentially muddying the chime.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, chimey Vox AC30 sound characteristic of classic British R&B.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "While 'Vox' cabs are ideal, UK Vintage 4x12 is the closest available option for a bright, articulate British sound.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK Basket 4x12",
+                  "reason": "Could also work but might be slightly darker."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and brightness while keeping the low end tight.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list and keep the tone dry and punchy.",
+              "matchQuality": "none",
+              "gap": "The Chorus module is available but explicitly avoided by the musical verdict to maintain a tight rhythm sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "Low"
+              },
+              "purpose": "Keep the sound focused and rhythm-oriented; delay is unnecessary.",
+              "matchQuality": "none",
+              "gap": "No specific ambience or time effect was requested, keeping the signal chain clean for maximum punch.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic R&B track. The rig focuses on capturing the bright, articulate chime of a Vox AC30 style tone rather than replicating specific vintage gear models."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a more authentic, bright British voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 style 4x12 IR",
+              "reason": "Enhance chime and upper-mid bite specific to Vox tones.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Spencer Davis Group - Gimme Some Lovin' - Valeton GP-180",
+        "song": {
+          "artist": "The Spencer Davis Group",
+          "title": "Gimme Some Lovin'",
+          "album": "",
+          "year": null,
+          "genre": "mod rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Vox-style British R&B crunch",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A clean-to-crunch signal chain utilizing a Boost and the AC30 TB model into a suitable 4x12 cabinet to capture the bright, upper-mid focused sound of classic British R&B.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Bright"
+            },
+            "purpose": "Provide punchy attack and slight initial drive to push the amp into desired breakup.",
+            "matchQuality": "close",
+            "gap": "Using Boost for controlled gain lift rather than a dedicated OD pedal, matching the 'cleaner' requirement.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Green OD",
+                "reason": "A Green OD could also provide bright breakup but might be too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a very subtle drive if needed; the Boost should handle most of the breakup.",
+            "matchQuality": "none",
+            "gap": "The target tone requires minimal distortion (edge-of-breakup), making dedicated DST modules unnecessary and potentially muddying the chime.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, chimey Vox AC30 sound characteristic of classic British R&B.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+            "matchQuality": "close",
+            "gap": "While 'Vox' cabs are ideal, UK Vintage 4x12 is the closest available option for a bright, articulate British sound.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "UK Basket 4x12",
+                "reason": "Could also work but might be slightly darker."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+4 dB"
+            },
+            "purpose": "Enhance the upper-mid bite and brightness while keeping the low end tight.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus as per the 'avoid' list and keep the tone dry and punchy.",
+            "matchQuality": "none",
+            "gap": "The Chorus module is available but explicitly avoided by the musical verdict to maintain a tight rhythm sound.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "Low"
+            },
+            "purpose": "Keep the sound focused and rhythm-oriented; delay is unnecessary.",
+            "matchQuality": "none",
+            "gap": "No specific ambience or time effect was requested, keeping the signal chain clean for maximum punch.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Vox-style British R&B crunch",
+          "toneProfile": "bright Vox-style British R&B crunch",
+          "idealSignalChain": "single-coil guitar | Vox AC30 | small to mid cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small to mid cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "punchy attack",
+            "slight edge-of-breakup",
+            "upper-mid bite",
+            "tight clean-ish rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British tones (Vox/AC30 style) with controlled breakup for R&B rhythm.",
+          "bestMatchSummary": "A clean-to-crunch signal chain utilizing a Boost and the AC30 TB model into a suitable 4x12 cabinet to capture the bright, upper-mid focused sound of classic British R&B.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide punchy attack and slight initial drive to push the amp into desired breakup.",
+              "matchQuality": "close",
+              "gap": "Using Boost for controlled gain lift rather than a dedicated OD pedal, matching the 'cleaner' requirement.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Green OD",
+                  "reason": "A Green OD could also provide bright breakup but might be too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a very subtle drive if needed; the Boost should handle most of the breakup.",
+              "matchQuality": "none",
+              "gap": "The target tone requires minimal distortion (edge-of-breakup), making dedicated DST modules unnecessary and potentially muddying the chime.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, chimey Vox AC30 sound characteristic of classic British R&B.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "While 'Vox' cabs are ideal, UK Vintage 4x12 is the closest available option for a bright, articulate British sound.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK Basket 4x12",
+                  "reason": "Could also work but might be slightly darker."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and brightness while keeping the low end tight.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list and keep the tone dry and punchy.",
+              "matchQuality": "none",
+              "gap": "The Chorus module is available but explicitly avoided by the musical verdict to maintain a tight rhythm sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "Low"
+              },
+              "purpose": "Keep the sound focused and rhythm-oriented; delay is unnecessary.",
+              "matchQuality": "none",
+              "gap": "No specific ambience or time effect was requested, keeping the signal chain clean for maximum punch.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a more authentic, bright British voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 style 4x12 IR",
+              "reason": "Enhance chime and upper-mid bite specific to Vox tones.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "lean more Vox chime than Plexi crunch",
+          "keep it cleaner and brighter"
+        ],
+        "warnings": [
+          "The source material is a classic R&B track. The rig focuses on capturing the bright, articulate chime of a Vox AC30 style tone rather than replicating specific vintage gear models."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.619,
+      "prompt_chars": 1009,
+      "response_chars": 408,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 104,
+        "total_duration": 9601708700,
+        "prompt_eval_duration": 280707000,
+        "eval_duration": 1810492000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.778,
+      "prompt_chars": 5351,
+      "response_chars": 470,
+      "usage": {
+        "input_tokens": 1495,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1627
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.572,
+      "prompt_chars": 3545,
+      "response_chars": 4957,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1385,
+        "total_duration": 23555236100,
+        "prompt_eval_duration": 358071000,
+        "eval_duration": 22714094000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.329,
+      "prompt_chars": 6989,
+      "response_chars": 544,
+      "usage": {
+        "prompt_eval_count": 1946,
+        "eval_count": 150,
+        "total_duration": 4320889800,
+        "prompt_eval_duration": 341335000,
+        "eval_duration": 3558811000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 15.402,
+      "prompt_chars": 2625,
+      "response_chars": 213,
+      "usage": {
+        "prompt_eval_count": 849,
+        "eval_count": 77,
+        "total_duration": 15383079700,
+        "prompt_eval_duration": 869209000,
+        "eval_duration": 1198536000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Spencer Davis Group",
+      "title": "Gimme Some Lovin'",
+      "album": "",
+      "year": null,
+      "genre": "mod rock"
+    },
+    "rig": {
+      "rigName": "The Spencer Davis Group - Gimme Some Lovin' - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Vox-style British R&B crunch",
+      "signalChainSummary": "A clean-to-crunch signal chain utilizing a Boost and the AC30 TB model into a suitable 4x12 cabinet to capture the bright, upper-mid focused sound of classic British R&B.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Bright"
+          },
+          "purpose": "Provide punchy attack and slight initial drive to push the amp into desired breakup.",
+          "matchQuality": "close",
+          "gap": "Using Boost for controlled gain lift rather than a dedicated OD pedal, matching the 'cleaner' requirement.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "A Green OD could also provide bright breakup but might be too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a very subtle drive if needed; the Boost should handle most of the breakup.",
+          "matchQuality": "fallback",
+          "gap": "The target tone requires minimal distortion (edge-of-breakup), making dedicated DST modules unnecessary and potentially muddying the chime.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, chimey Vox AC30 sound characteristic of classic British R&B.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+          "matchQuality": "close",
+          "gap": "While 'Vox' cabs are ideal, UK Vintage 4x12 is the closest available option for a bright, articulate British sound.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "Could also work but might be slightly darker."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+4 dB"
+          },
+          "purpose": "Enhance the upper-mid bite and brightness while keeping the low end tight.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus as per the 'avoid' list and keep the tone dry and punchy.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus module is available but explicitly avoided by the musical verdict to maintain a tight rhythm sound.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "Low"
+          },
+          "purpose": "Keep the sound focused and rhythm-oriented; delay is unnecessary.",
+          "matchQuality": "fallback",
+          "gap": "No specific ambience or time effect was requested, keeping the signal chain clean for maximum punch.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Vox-style British R&B crunch",
+      "mustHave": [
+        "punchy attack",
+        "slight edge-of-breakup",
+        "upper-mid bite",
+        "tight clean-ish rhythm"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "chorus",
+        "scooped mids",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox AC30",
+        "small to mid cab"
+      ],
+      "corrections": [
+        "lean more Vox chime than Plexi crunch",
+        "keep it cleaner and brighter"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "mod rock",
+      "styleTags": [
+        "r&b",
+        "british pop",
+        "pop rock"
+      ],
+      "targetTone": "bright Vox-style British R&B crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a more authentic, bright British voicing.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vox AC30 style 4x12 IR",
+          "reason": "Enhance chime and upper-mid bite specific to Vox tones.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1613,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

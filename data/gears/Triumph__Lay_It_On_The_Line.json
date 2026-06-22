@@ -1,0 +1,1080 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1692,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Triumph__Lay_It_On_The_Line.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Triumph",
+    "title": "Lay It On The Line",
+    "album": "",
+    "year": null,
+    "genre": "arena rock"
+  },
+  "genreClassification": {
+    "genre": "arena rock",
+    "subgenres": [
+      "hard rock",
+      "80s pop-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The '80s arena crunch' and 'stacked rock crunch' point directly to this genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with slight grit and punch.",
+      "signatureElements": [
+        "Mid-range focus",
+        "Slight overdrive/crunch",
+        "Punchy attack"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation (British or American rock profile)"
+      ],
+      "avoid": [
+        "Excessive fuzz",
+        "Thin clean tones",
+        "High gain metal sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s arena crunch with upper-mid bite",
+      "mustHave": [
+        "tight palm-mute punch",
+        "bright lead bite",
+        "compressed sustain",
+        "stacked rock crunch"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "clean twang"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot-rodded British amp",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "add more upper-mid bite",
+        "lean 80s arena sheen",
+        "keep drive tight, not fuzzy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s arena crunch with upper-mid bite",
+    "mustHave": [
+      "tight palm-mute punch",
+      "bright lead bite",
+      "compressed sustain",
+      "stacked rock crunch"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "clean twang"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or hot-rodded British amp",
+      "4x12 cab",
+      "humbucker bridge"
+    ],
+    "corrections": [
+      "add more upper-mid bite",
+      "lean 80s arena sheen",
+      "keep drive tight, not fuzzy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British rock tones (Plexi/Marshall style) with high upper-mids and tight compression, suitable for 80s arena rock.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Boost/OD pedal into the UK 45 or UK 50 amp model, paired with the UK Vintage 4x12 cab. Chorus adds necessary 80s sheen, while EQ boosts upper-mids for bite and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for high-gain rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide tight, controlled boost for lead lines and punchy rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None. Boost is ideal for adding focused drive without excessive fuzz.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Good alternative, but 'Boost' offers a tighter, more controlled punch suitable for the specified 'tight palm-mute'."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add stacked rock crunch and grit without entering fuzzy territory.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is chosen for its aggressive, tight mid-range bite, mimicking the punch of 80s arena rock. A dedicated Plexi model would be ideal but is not available.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "More general distortion; RAT offers more focused upper-mid aggression."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/sheen",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "5",
+                "Mix": "4"
+              },
+              "purpose": "Add the necessary 80s arena sheen and width to lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None. Chorus is essential for achieving the '80s arena' sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Presence": "6"
+              },
+              "purpose": "Simulate the bright, punchy sound of a Marshall Plexi/British amp head.",
+              "matchQuality": "perfect",
+              "gap": "None. The UK 45 is the best model for classic British rock tones.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also excellent, but the UK 45 often provides a slightly brighter, more aggressive bite suitable for this specific 'upper-mid bite' requirement."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet tone and necessary upper-mid punch.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the 'Marshall/Plexi' clue perfectly.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization (EQ)",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+2"
+              },
+              "purpose": "Boost the upper-mids and high frequencies to achieve maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Targeted EQ boost is crucial for achieving 'upper-mid bite'.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle depth and space without muddying the tight rhythm tone.",
+              "matchQuality": "close",
+              "gap": "A short, clean delay adds necessary 'arena sheen' without distracting from the core crunch.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm and vintage; Digital Delay provides a cleaner, more modern 80s echo."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Provide a subtle sense of space and 'arena' scale.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is versatile for rock settings.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track, requiring high gain and aggressive tones. The chain prioritizes punch and bite over pure sustain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance upper-mid clarity and vintage British rock character.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance upper-mid bite and vintage British rock character beyond the default 'UK Vintage 4x12'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Triumph - Lay It On The Line - Valeton GP-180",
+        "song": {
+          "artist": "Triumph",
+          "title": "Lay It On The Line",
+          "album": "",
+          "year": null,
+          "genre": "arena rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s arena crunch with upper-mid bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A compressed signal chain utilizing a Boost/OD pedal into the UK 45 or UK 50 amp model, paired with the UK Vintage 4x12 cab. Chorus adds necessary 80s sheen, while EQ boosts upper-mids for bite and punch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for high-gain rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide tight, controlled boost for lead lines and punchy rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None. Boost is ideal for adding focused drive without excessive fuzz.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Good alternative, but 'Boost' offers a tighter, more controlled punch suitable for the specified 'tight palm-mute'."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "5",
+              "Tone": "6",
+              "Output": "7"
+            },
+            "purpose": "Add stacked rock crunch and grit without entering fuzzy territory.",
+            "matchQuality": "close",
+            "gap": "The RAT-style is chosen for its aggressive, tight mid-range bite, mimicking the punch of 80s arena rock. A dedicated Plexi model would be ideal but is not available.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "More general distortion; RAT offers more focused upper-mid aggression."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "modulation/sheen",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3",
+              "Depth": "5",
+              "Mix": "4"
+            },
+            "purpose": "Add the necessary 80s arena sheen and width to lead lines.",
+            "matchQuality": "perfect",
+            "gap": "None. Chorus is essential for achieving the '80s arena' sound.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Presence": "6"
+            },
+            "purpose": "Simulate the bright, punchy sound of a Marshall Plexi/British amp head.",
+            "matchQuality": "perfect",
+            "gap": "None. The UK 45 is the best model for classic British rock tones.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also excellent, but the UK 45 often provides a slightly brighter, more aggressive bite suitable for this specific 'upper-mid bite' requirement."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet tone and necessary upper-mid punch.",
+            "matchQuality": "perfect",
+            "gap": "None. Matches the 'Marshall/Plexi' clue perfectly.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization (EQ)",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "+3",
+              "High": "+2"
+            },
+            "purpose": "Boost the upper-mids and high frequencies to achieve maximum bite and clarity.",
+            "matchQuality": "perfect",
+            "gap": "None. Targeted EQ boost is crucial for achieving 'upper-mid bite'.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "2"
+            },
+            "purpose": "Add subtle depth and space without muddying the tight rhythm tone.",
+            "matchQuality": "close",
+            "gap": "A short, clean delay adds necessary 'arena sheen' without distracting from the core crunch.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Too warm and vintage; Digital Delay provides a cleaner, more modern 80s echo."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "3"
+            },
+            "purpose": "Provide a subtle sense of space and 'arena' scale.",
+            "matchQuality": "perfect",
+            "gap": "None. Room reverb is versatile for rock settings.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s arena crunch with upper-mid bite",
+          "toneProfile": "bright 80s arena crunch with upper-mid bite",
+          "idealSignalChain": "Marshall/Plexi or hot-rodded British amp | 4x12 cab | humbucker bridge",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or hot-rodded British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-mute punch",
+            "bright lead bite",
+            "compressed sustain",
+            "stacked rock crunch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British rock tones (Plexi/Marshall style) with high upper-mids and tight compression, suitable for 80s arena rock.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Boost/OD pedal into the UK 45 or UK 50 amp model, paired with the UK Vintage 4x12 cab. Chorus adds necessary 80s sheen, while EQ boosts upper-mids for bite and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for high-gain rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide tight, controlled boost for lead lines and punchy rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None. Boost is ideal for adding focused drive without excessive fuzz.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Good alternative, but 'Boost' offers a tighter, more controlled punch suitable for the specified 'tight palm-mute'."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add stacked rock crunch and grit without entering fuzzy territory.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is chosen for its aggressive, tight mid-range bite, mimicking the punch of 80s arena rock. A dedicated Plexi model would be ideal but is not available.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "More general distortion; RAT offers more focused upper-mid aggression."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/sheen",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "5",
+                "Mix": "4"
+              },
+              "purpose": "Add the necessary 80s arena sheen and width to lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None. Chorus is essential for achieving the '80s arena' sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Presence": "6"
+              },
+              "purpose": "Simulate the bright, punchy sound of a Marshall Plexi/British amp head.",
+              "matchQuality": "perfect",
+              "gap": "None. The UK 45 is the best model for classic British rock tones.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also excellent, but the UK 45 often provides a slightly brighter, more aggressive bite suitable for this specific 'upper-mid bite' requirement."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet tone and necessary upper-mid punch.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the 'Marshall/Plexi' clue perfectly.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization (EQ)",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+2"
+              },
+              "purpose": "Boost the upper-mids and high frequencies to achieve maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Targeted EQ boost is crucial for achieving 'upper-mid bite'.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle depth and space without muddying the tight rhythm tone.",
+              "matchQuality": "close",
+              "gap": "A short, clean delay adds necessary 'arena sheen' without distracting from the core crunch.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm and vintage; Digital Delay provides a cleaner, more modern 80s echo."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Provide a subtle sense of space and 'arena' scale.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is versatile for rock settings.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance upper-mid clarity and vintage British rock character.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance upper-mid bite and vintage British rock character beyond the default 'UK Vintage 4x12'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "add more upper-mid bite",
+          "lean 80s arena sheen",
+          "keep drive tight, not fuzzy"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track, requiring high gain and aggressive tones. The chain prioritizes punch and bite over pure sustain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.532,
+      "prompt_chars": 994,
+      "response_chars": 379,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 98,
+        "total_duration": 9505604400,
+        "prompt_eval_duration": 214808000,
+        "eval_duration": 1872292000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.531,
+      "prompt_chars": 5295,
+      "response_chars": 491,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1619
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.563,
+      "prompt_chars": 3551,
+      "response_chars": 5911,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1658,
+        "total_duration": 32556741400,
+        "prompt_eval_duration": 231099000,
+        "eval_duration": 31894894000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.945,
+      "prompt_chars": 8015,
+      "response_chars": 609,
+      "usage": {
+        "prompt_eval_count": 2226,
+        "eval_count": 169,
+        "total_duration": 16922088300,
+        "prompt_eval_duration": 329653000,
+        "eval_duration": 1207630000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 26.754,
+      "prompt_chars": 2718,
+      "response_chars": 184,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 56,
+        "total_duration": 26727256600,
+        "prompt_eval_duration": 201298000,
+        "eval_duration": 397245000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Triumph",
+      "title": "Lay It On The Line",
+      "album": "",
+      "year": null,
+      "genre": "arena rock"
+    },
+    "rig": {
+      "rigName": "Triumph - Lay It On The Line - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s arena crunch with upper-mid bite",
+      "signalChainSummary": "A compressed signal chain utilizing a Boost/OD pedal into the UK 45 or UK 50 amp model, paired with the UK Vintage 4x12 cab. Chorus adds necessary 80s sheen, while EQ boosts upper-mids for bite and punch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for high-gain rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide tight, controlled boost for lead lines and punchy rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None. Boost is ideal for adding focused drive without excessive fuzz.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Good alternative, but 'Boost' offers a tighter, more controlled punch suitable for the specified 'tight palm-mute'."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "5",
+            "Tone": "6",
+            "Output": "7"
+          },
+          "purpose": "Add stacked rock crunch and grit without entering fuzzy territory.",
+          "matchQuality": "close",
+          "gap": "The RAT-style is chosen for its aggressive, tight mid-range bite, mimicking the punch of 80s arena rock. A dedicated Plexi model would be ideal but is not available.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "More general distortion; RAT offers more focused upper-mid aggression."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "modulation/sheen",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3",
+            "Depth": "5",
+            "Mix": "4"
+          },
+          "purpose": "Add the necessary 80s arena sheen and width to lead lines.",
+          "matchQuality": "exact",
+          "gap": "None. Chorus is essential for achieving the '80s arena' sound.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Presence": "6"
+          },
+          "purpose": "Simulate the bright, punchy sound of a Marshall Plexi/British amp head.",
+          "matchQuality": "exact",
+          "gap": "None. The UK 45 is the best model for classic British rock tones.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also excellent, but the UK 45 often provides a slightly brighter, more aggressive bite suitable for this specific 'upper-mid bite' requirement."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet tone and necessary upper-mid punch.",
+          "matchQuality": "exact",
+          "gap": "None. Matches the 'Marshall/Plexi' clue perfectly.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization (EQ)",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "+3",
+            "High": "+2"
+          },
+          "purpose": "Boost the upper-mids and high frequencies to achieve maximum bite and clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Targeted EQ boost is crucial for achieving 'upper-mid bite'.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "2"
+          },
+          "purpose": "Add subtle depth and space without muddying the tight rhythm tone.",
+          "matchQuality": "close",
+          "gap": "A short, clean delay adds necessary 'arena sheen' without distracting from the core crunch.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Too warm and vintage; Digital Delay provides a cleaner, more modern 80s echo."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "3"
+          },
+          "purpose": "Provide a subtle sense of space and 'arena' scale.",
+          "matchQuality": "exact",
+          "gap": "None. Room reverb is versatile for rock settings.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s arena crunch with upper-mid bite",
+      "mustHave": [
+        "tight palm-mute punch",
+        "bright lead bite",
+        "compressed sustain",
+        "stacked rock crunch"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "clean twang"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot-rodded British amp",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "add more upper-mid bite",
+        "lean 80s arena sheen",
+        "keep drive tight, not fuzzy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "arena rock",
+      "styleTags": [
+        "hard rock",
+        "80s pop-rock"
+      ],
+      "targetTone": "bright 80s arena crunch with upper-mid bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to enhance upper-mid clarity and vintage British rock character.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 UK IR (e.g., Celestion Greenback/V30 style)",
+          "reason": "Enhance upper-mid bite and vintage British rock character beyond the default 'UK Vintage 4x12'.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and punch in the high end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1692,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

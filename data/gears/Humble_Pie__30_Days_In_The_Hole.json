@@ -1,0 +1,1049 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 594,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Humble_Pie__30_Days_In_The_Hole.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Humble Pie",
+    "title": "30 Days In The Hole",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "british rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "Humble Pie is a foundational band in the blues-rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty blues rock tone with a touch of bite and sustain.",
+      "signatureElements": [
+        "Crunch overdrive (mid-focused)",
+        "Slight fuzz/grit texture",
+        "Punchy bass response",
+        "Warm mid-range focus"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal simulation (e.g., Tube Screamer style) for grit",
+        "Amp model simulating a British tweed or early Marshall stack",
+        "Cabinet simulation with medium voicing"
+      ],
+      "avoid": [
+        "High-gain metal saturation",
+        "Thin, scooped tones",
+        "Excessive digital delay/reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty British blues-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "raspy edge",
+        "thick mids",
+        "sustain",
+        "small-room dryness"
+      ],
+      "avoid": [
+        "Tube Screamer-polish",
+        "metal gain",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "Plexi/early Marshall",
+        "4x12",
+        "humbucker"
+      ],
+      "corrections": [
+        "push fuzzier than overdrive",
+        "less warm blues, more ragged bite"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty British blues-rock crunch with slight fuzz bite",
+    "mustHave": [
+      "raspy edge",
+      "thick mids",
+      "sustain",
+      "small-room dryness"
+    ],
+    "avoid": [
+      "Tube Screamer-polish",
+      "metal gain",
+      "scooped clean"
+    ],
+    "gearClues": [
+      "Plexi/early Marshall",
+      "4x12",
+      "humbucker"
+    ],
+    "corrections": [
+      "push fuzzier than overdrive",
+      "less warm blues, more ragged bite"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British blues/rock tones, prioritizing mid-range punch and grit over pure clean headroom.",
+          "bestMatchSummary": "A gritty, midrange-focused chain using a Blues OD boost into an AC30-style amp, paired with a UK Vintage 4x12 cabinet for classic British rock bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in dirty blues tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial dirty boost and midrange grit (replacing a Plexi/early Marshall feel).",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate an early, slightly dirtier British overdrive rather than a pure Tube Screamer tone.",
+              "alternatives": [
+                "Blues OD (if more clean boost is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add the required 'fuzzier than overdrive' bite and ragged edge without sounding like modern metal gain.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a mid-focused, aggressive grit that pushes past simple OD into fuzz territory.",
+              "alternatives": [
+                "Fuzz (if more psychedelic texture is desired)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British tone (Plexi/Marshall) with strong midrange presence.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 45 (if a slightly more aggressive, punchy sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and required '4x12' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 30 4x12 (if a slightly different voicing is desired)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing thick mids and slightly rolling off extreme bass/treble for focus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%"
+              },
+              "purpose": "Optional subtle thickening and movement for sustain (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary, but can add dimension to sustained notes.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'small-room dryness' and natural ambience.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more metallic decay is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional rhythmic echo for added depth (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not essential for the core tone, but useful for fills.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is blues-rock, requiring a focus on grit and midrange punch. The chain prioritizes British amp models (AC30) and mid-boosters (Green OD/RAT-style)."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage, ragged bite of British blues-rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the vintage, ragged bite and mid-focus required for blues-rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and grit",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Humble Pie - 30 Days In The Hole - Valeton GP-180",
+        "song": {
+          "artist": "Humble Pie",
+          "title": "30 Days In The Hole",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty British blues-rock crunch with slight fuzz bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gritty, midrange-focused chain using a Blues OD boost into an AC30-style amp, paired with a UK Vintage 4x12 cabinet for classic British rock bite.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and stray noise inherent in dirty blues tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial dirty boost and midrange grit (replacing a Plexi/early Marshall feel).",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate an early, slightly dirtier British overdrive rather than a pure Tube Screamer tone.",
+            "alternatives": [
+              "Blues OD (if more clean boost is needed)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "5",
+              "Tone": "6",
+              "Output": "7"
+            },
+            "purpose": "Add the required 'fuzzier than overdrive' bite and ragged edge without sounding like modern metal gain.",
+            "matchQuality": "close",
+            "gap": "The RAT-style provides a mid-focused, aggressive grit that pushes past simple OD into fuzz territory.",
+            "alternatives": [
+              "Fuzz (if more psychedelic texture is desired)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the classic British tone (Plexi/Marshall) with strong midrange presence.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "UK 45 (if a slightly more aggressive, punchy sound is preferred)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and required '4x12' character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "UK 30 4x12 (if a slightly different voicing is desired)"
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Sculpt the tone by emphasizing thick mids and slightly rolling off extreme bass/treble for focus.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%"
+            },
+            "purpose": "Optional subtle thickening and movement for sustain (kept off by default).",
+            "matchQuality": "close",
+            "gap": "Not strictly necessary, but can add dimension to sustained notes.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'small-room dryness' and natural ambience.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "Plate (if a more metallic decay is desired)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Optional rhythmic echo for added depth (kept off by default).",
+            "matchQuality": "close",
+            "gap": "Not essential for the core tone, but useful for fills.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty British blues-rock crunch with slight fuzz bite",
+          "toneProfile": "dirty British blues-rock crunch with slight fuzz bite",
+          "idealSignalChain": "Plexi/early Marshall | 4x12 | humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/early Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "raspy edge",
+            "thick mids",
+            "sustain",
+            "small-room dryness"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British blues/rock tones, prioritizing mid-range punch and grit over pure clean headroom.",
+          "bestMatchSummary": "A gritty, midrange-focused chain using a Blues OD boost into an AC30-style amp, paired with a UK Vintage 4x12 cabinet for classic British rock bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in dirty blues tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial dirty boost and midrange grit (replacing a Plexi/early Marshall feel).",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate an early, slightly dirtier British overdrive rather than a pure Tube Screamer tone.",
+              "alternatives": [
+                "Blues OD (if more clean boost is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add the required 'fuzzier than overdrive' bite and ragged edge without sounding like modern metal gain.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a mid-focused, aggressive grit that pushes past simple OD into fuzz territory.",
+              "alternatives": [
+                "Fuzz (if more psychedelic texture is desired)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British tone (Plexi/Marshall) with strong midrange presence.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 45 (if a slightly more aggressive, punchy sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and required '4x12' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 30 4x12 (if a slightly different voicing is desired)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing thick mids and slightly rolling off extreme bass/treble for focus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%"
+              },
+              "purpose": "Optional subtle thickening and movement for sustain (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary, but can add dimension to sustained notes.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'small-room dryness' and natural ambience.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more metallic decay is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional rhythmic echo for added depth (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not essential for the core tone, but useful for fills.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage, ragged bite of British blues-rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the vintage, ragged bite and mid-focus required for blues-rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and grit",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "push fuzzier than overdrive",
+          "less warm blues, more ragged bite"
+        ],
+        "warnings": [
+          "The source material is blues-rock, requiring a focus on grit and midrange punch. The chain prioritizes British amp models (AC30) and mid-boosters (Green OD/RAT-style)."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.432,
+      "prompt_chars": 998,
+      "response_chars": 530,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 129,
+        "total_duration": 10413090300,
+        "prompt_eval_duration": 329288000,
+        "eval_duration": 2459047000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.566,
+      "prompt_chars": 5462,
+      "response_chars": 446,
+      "usage": {
+        "input_tokens": 1520,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 127,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1647
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 30.921,
+      "prompt_chars": 3503,
+      "response_chars": 5278,
+      "usage": {
+        "prompt_eval_count": 1192,
+        "eval_count": 1527,
+        "total_duration": 30915302000,
+        "prompt_eval_duration": 515846000,
+        "eval_duration": 29890586000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.139,
+      "prompt_chars": 7310,
+      "response_chars": 539,
+      "usage": {
+        "prompt_eval_count": 2076,
+        "eval_count": 150,
+        "total_duration": 4115102600,
+        "prompt_eval_duration": 838531000,
+        "eval_duration": 2920649000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.687,
+      "prompt_chars": 2633,
+      "response_chars": 167,
+      "usage": {
+        "prompt_eval_count": 864,
+        "eval_count": 46,
+        "total_duration": 12667759300,
+        "prompt_eval_duration": 402640000,
+        "eval_duration": 776312000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Humble Pie",
+      "title": "30 Days In The Hole",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "Humble Pie - 30 Days In The Hole - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty British blues-rock crunch with slight fuzz bite",
+      "signalChainSummary": "A gritty, midrange-focused chain using a Blues OD boost into an AC30-style amp, paired with a UK Vintage 4x12 cabinet for classic British rock bite.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and stray noise inherent in dirty blues tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial dirty boost and midrange grit (replacing a Plexi/early Marshall feel).",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate an early, slightly dirtier British overdrive rather than a pure Tube Screamer tone.",
+          "alternatives": [
+            {
+              "model": "Blues OD (if more clean boost is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "5",
+            "Tone": "6",
+            "Output": "7"
+          },
+          "purpose": "Add the required 'fuzzier than overdrive' bite and ragged edge without sounding like modern metal gain.",
+          "matchQuality": "close",
+          "gap": "The RAT-style provides a mid-focused, aggressive grit that pushes past simple OD into fuzz territory.",
+          "alternatives": [
+            {
+              "model": "Fuzz (if more psychedelic texture is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the classic British tone (Plexi/Marshall) with strong midrange presence.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45 (if a slightly more aggressive, punchy sound is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and required '4x12' character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 30 4x12 (if a slightly different voicing is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Sculpt the tone by emphasizing thick mids and slightly rolling off extreme bass/treble for focus.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%"
+          },
+          "purpose": "Optional subtle thickening and movement for sustain (kept off by default).",
+          "matchQuality": "close",
+          "gap": "Not strictly necessary, but can add dimension to sustained notes.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'small-room dryness' and natural ambience.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate (if a more metallic decay is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Optional rhythmic echo for added depth (kept off by default).",
+          "matchQuality": "close",
+          "gap": "Not essential for the core tone, but useful for fills.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty British blues-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "raspy edge",
+        "thick mids",
+        "sustain",
+        "small-room dryness"
+      ],
+      "avoid": [
+        "Tube Screamer-polish",
+        "metal gain",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "Plexi/early Marshall",
+        "4x12",
+        "humbucker"
+      ],
+      "corrections": [
+        "push fuzzier than overdrive",
+        "less warm blues, more ragged bite"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "british rock",
+        "classic rock"
+      ],
+      "targetTone": "dirty British blues-rock crunch with slight fuzz bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the vintage, ragged bite of British blues-rock.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 IR (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the vintage, ragged bite and mid-focus required for blues-rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and grit",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 594,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

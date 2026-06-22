@@ -1,0 +1,1026 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 2,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\311__Beautiful_Disaster.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "311",
+    "title": "Beautiful Disaster",
+    "album": "",
+    "year": null,
+    "genre": "nu metal"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and pronounced mid-range punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Punchy bass response",
+        "Rock rhythm feel"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "Amp simulation with scooped mids capability (for contrast)"
+      ],
+      "avoid": [
+        "Clean tones (unless for specific verses)",
+        "Excessive modulation (chorus/flanger)",
+        "Extreme high-end sparkle"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick mid-gain alt rock crunch with slight fuzz grit",
+      "mustHave": [
+        "slight fuzz edge",
+        "mid punch",
+        "tight crunch",
+        "solid low end"
+      ],
+      "avoid": [
+        "clean edge only",
+        "chorus",
+        "flanger",
+        "sparkly top"
+      ],
+      "gearClues": [
+        "hot humbucker",
+        "overdrive",
+        "small fuzz",
+        "Marshall-like crunch"
+      ],
+      "corrections": [
+        "drop Tube Screamer emphasis",
+        "keep fuzz texture explicit",
+        "avoid scooped mids"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick mid-gain alt rock crunch with slight fuzz grit",
+    "mustHave": [
+      "slight fuzz edge",
+      "mid punch",
+      "tight crunch",
+      "solid low end"
+    ],
+    "avoid": [
+      "clean edge only",
+      "chorus",
+      "flanger",
+      "sparkly top"
+    ],
+    "gearClues": [
+      "hot humbucker",
+      "overdrive",
+      "small fuzz",
+      "Marshall-like crunch"
+    ],
+    "corrections": [
+      "drop Tube Screamer emphasis",
+      "keep fuzz texture explicit",
+      "avoid scooped mids"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-gain, tight crunch with explicit fuzz texture.",
+          "bestMatchSummary": "A high-gain alt rock chain using an OD boost for mid punch, followed by a classic British amp model and cabinet to deliver thick, crunchy tones with controlled low end.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from the high-gain signal.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.5"
+              },
+              "purpose": "Simulate the Tube Screamer emphasis for mid-punch and tight compression.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to achieve the necessary mid-hump and tightening effect.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "A slightly dirtier alternative if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "6.0"
+              },
+              "purpose": "Introduce the required slight fuzz edge and texture without overwhelming the mid-punch.",
+              "matchQuality": "close",
+              "gap": "The 'Red Haze' provides a versatile, slightly fuzzy grit that complements the alt rock sound better than pure distortion.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Fuzz",
+                  "reason": "Use if the fuzz needs to be more aggressive and vintage."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Midrange": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall-like crunch and solid mid-gain foundation.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive alternative if the crunch needs to be sharper."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Deliver the classic British tone and solid low-mid punch required for alt rock.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "+2.0",
+                "Treble": "-1.5"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and tightening up the low end to achieve 'mid punch'.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.0",
+                "Mix": "1.5"
+              },
+              "purpose": "Add subtle depth and space without distracting from the core crunchy rhythm tone.",
+              "matchQuality": "close",
+              "gap": "Delay is used sparingly to add dimension, as per the 'avoid chorus' rule, but it enhances the overall soundscape.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Tape"
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "1.0"
+              },
+              "purpose": "Provide a natural room ambience to glue the thick alt-rock sound together.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (Alt Rock/Post-Grunge), so the rig focuses on replicating a thick, aggressive rhythm guitar tone suitable for 311's style."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and low-end definition to solidify the alt-rock crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-quality 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-punch and definition for alt-rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Tighter low end, clearer mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "311 - Beautiful Disaster - Valeton GP-180",
+        "song": {
+          "artist": "311",
+          "title": "Beautiful Disaster",
+          "album": "",
+          "year": null,
+          "genre": "nu metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick mid-gain alt rock crunch with slight fuzz grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain alt rock chain using an OD boost for mid punch, followed by a classic British amp model and cabinet to deliver thick, crunchy tones with controlled low end.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from the high-gain signal.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Tone": "5.5"
+            },
+            "purpose": "Simulate the Tube Screamer emphasis for mid-punch and tight compression.",
+            "matchQuality": "close",
+            "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to achieve the necessary mid-hump and tightening effect.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "A slightly dirtier alternative if more grit is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "4.0",
+              "Tone": "6.0"
+            },
+            "purpose": "Introduce the required slight fuzz edge and texture without overwhelming the mid-punch.",
+            "matchQuality": "close",
+            "gap": "The 'Red Haze' provides a versatile, slightly fuzzy grit that complements the alt rock sound better than pure distortion.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Fuzz",
+                "reason": "Use if the fuzz needs to be more aggressive and vintage."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7.0",
+              "Midrange": "7.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Provide the classic Marshall-like crunch and solid mid-gain foundation.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 45",
+                "reason": "A slightly more aggressive alternative if the crunch needs to be sharper."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Deliver the classic British tone and solid low-mid punch required for alt rock.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1.0",
+              "Midrange": "+2.0",
+              "Treble": "-1.5"
+            },
+            "purpose": "Sculpt the tone by emphasizing mids and tightening up the low end to achieve 'mid punch'.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2.0",
+              "Mix": "1.5"
+            },
+            "purpose": "Add subtle depth and space without distracting from the core crunchy rhythm tone.",
+            "matchQuality": "close",
+            "gap": "Delay is used sparingly to add dimension, as per the 'avoid chorus' rule, but it enhances the overall soundscape.",
+            "alternatives": [
+              {
+                "module": "EQ/MOD/DLY/RVB/VOL",
+                "model": "Tape"
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "1.0"
+            },
+            "purpose": "Provide a natural room ambience to glue the thick alt-rock sound together.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick mid-gain alt rock crunch with slight fuzz grit",
+          "toneProfile": "thick mid-gain alt rock crunch with slight fuzz grit",
+          "idealSignalChain": "hot humbucker | overdrive | small fuzz | Marshall-like crunch",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "hot humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "overdrive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small fuzz",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-like crunch",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "slight fuzz edge",
+            "mid punch",
+            "tight crunch",
+            "solid low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-gain, tight crunch with explicit fuzz texture.",
+          "bestMatchSummary": "A high-gain alt rock chain using an OD boost for mid punch, followed by a classic British amp model and cabinet to deliver thick, crunchy tones with controlled low end.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from the high-gain signal.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.5"
+              },
+              "purpose": "Simulate the Tube Screamer emphasis for mid-punch and tight compression.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to achieve the necessary mid-hump and tightening effect.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "A slightly dirtier alternative if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "6.0"
+              },
+              "purpose": "Introduce the required slight fuzz edge and texture without overwhelming the mid-punch.",
+              "matchQuality": "close",
+              "gap": "The 'Red Haze' provides a versatile, slightly fuzzy grit that complements the alt rock sound better than pure distortion.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Fuzz",
+                  "reason": "Use if the fuzz needs to be more aggressive and vintage."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Midrange": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall-like crunch and solid mid-gain foundation.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive alternative if the crunch needs to be sharper."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Deliver the classic British tone and solid low-mid punch required for alt rock.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "+2.0",
+                "Treble": "-1.5"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and tightening up the low end to achieve 'mid punch'.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.0",
+                "Mix": "1.5"
+              },
+              "purpose": "Add subtle depth and space without distracting from the core crunchy rhythm tone.",
+              "matchQuality": "close",
+              "gap": "Delay is used sparingly to add dimension, as per the 'avoid chorus' rule, but it enhances the overall soundscape.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Tape"
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "1.0"
+              },
+              "purpose": "Provide a natural room ambience to glue the thick alt-rock sound together.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and low-end definition to solidify the alt-rock crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-quality 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-punch and definition for alt-rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Tighter low end, clearer mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Tube Screamer emphasis",
+          "keep fuzz texture explicit",
+          "avoid scooped mids"
+        ],
+        "warnings": [
+          "The source material is non-guitar (Alt Rock/Post-Grunge), so the rig focuses on replicating a thick, aggressive rhythm guitar tone suitable for 311's style."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.439,
+      "prompt_chars": 975,
+      "response_chars": 512,
+      "usage": {
+        "prompt_eval_count": 315,
+        "eval_count": 127,
+        "total_duration": 1418318800,
+        "prompt_eval_duration": 64791000,
+        "eval_duration": 970635000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.46,
+      "prompt_chars": 5413,
+      "response_chars": 485,
+      "usage": {
+        "input_tokens": 1501,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1631
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.458,
+      "prompt_chars": 3485,
+      "response_chars": 5099,
+      "usage": {
+        "prompt_eval_count": 1166,
+        "eval_count": 1477,
+        "total_duration": 12440797800,
+        "prompt_eval_duration": 228580000,
+        "eval_duration": 11669323000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.835,
+      "prompt_chars": 7160,
+      "response_chars": 519,
+      "usage": {
+        "prompt_eval_count": 2028,
+        "eval_count": 150,
+        "total_duration": 1820569500,
+        "prompt_eval_duration": 197210000,
+        "eval_duration": 1178790000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.887,
+      "prompt_chars": 2612,
+      "response_chars": 183,
+      "usage": {
+        "prompt_eval_count": 836,
+        "eval_count": 52,
+        "total_duration": 872170800,
+        "prompt_eval_duration": 101758000,
+        "eval_duration": 393458000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "311",
+      "title": "Beautiful Disaster",
+      "album": "",
+      "year": null,
+      "genre": "nu metal"
+    },
+    "rig": {
+      "rigName": "311 - Beautiful Disaster - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick mid-gain alt rock crunch with slight fuzz grit",
+      "signalChainSummary": "A high-gain alt rock chain using an OD boost for mid punch, followed by a classic British amp model and cabinet to deliver thick, crunchy tones with controlled low end.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from the high-gain signal.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Tone": "5.5"
+          },
+          "purpose": "Simulate the Tube Screamer emphasis for mid-punch and tight compression.",
+          "matchQuality": "close",
+          "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to achieve the necessary mid-hump and tightening effect.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A slightly dirtier alternative if more grit is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "4.0",
+            "Tone": "6.0"
+          },
+          "purpose": "Introduce the required slight fuzz edge and texture without overwhelming the mid-punch.",
+          "matchQuality": "close",
+          "gap": "The 'Red Haze' provides a versatile, slightly fuzzy grit that complements the alt rock sound better than pure distortion.",
+          "alternatives": [
+            {
+              "model": "Fuzz",
+              "reason": "Use if the fuzz needs to be more aggressive and vintage."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7.0",
+            "Midrange": "7.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Provide the classic Marshall-like crunch and solid mid-gain foundation.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A slightly more aggressive alternative if the crunch needs to be sharper."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Deliver the classic British tone and solid low-mid punch required for alt rock.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1.0",
+            "Midrange": "+2.0",
+            "Treble": "-1.5"
+          },
+          "purpose": "Sculpt the tone by emphasizing mids and tightening up the low end to achieve 'mid punch'.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2.0",
+            "Mix": "1.5"
+          },
+          "purpose": "Add subtle depth and space without distracting from the core crunchy rhythm tone.",
+          "matchQuality": "close",
+          "gap": "Delay is used sparingly to add dimension, as per the 'avoid chorus' rule, but it enhances the overall soundscape.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "1.0"
+          },
+          "purpose": "Provide a natural room ambience to glue the thick alt-rock sound together.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick mid-gain alt rock crunch with slight fuzz grit",
+      "mustHave": [
+        "slight fuzz edge",
+        "mid punch",
+        "tight crunch",
+        "solid low end"
+      ],
+      "avoid": [
+        "clean edge only",
+        "chorus",
+        "flanger",
+        "sparkly top"
+      ],
+      "gearClues": [
+        "hot humbucker",
+        "overdrive",
+        "small fuzz",
+        "Marshall-like crunch"
+      ],
+      "corrections": [
+        "drop Tube Screamer emphasis",
+        "keep fuzz texture explicit",
+        "avoid scooped mids"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "nu metal",
+      "styleTags": [
+        "alt rock",
+        "rap-rock"
+      ],
+      "targetTone": "thick mid-gain alt rock crunch with slight fuzz grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and low-end definition to solidify the alt-rock crunch.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-quality 4x12 IR (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance mid-punch and definition for alt-rock crunch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Tighter low end, clearer mids",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 2,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "nu metal",
+    "subgenres": [
+      "alt rock",
+      "rap-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist 311 and the source genre 'nu metal' strongly suggest this classification."
+  }
+}

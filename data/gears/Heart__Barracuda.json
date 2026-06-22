@@ -1,0 +1,1172 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 573,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Heart__Barracuda.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Heart",
+    "title": "Barracuda",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Heart's 'Barracuda' is a quintessential example of 80s hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, biting crunch with a slight fuzz edge; bright and aggressive.",
+      "signatureElements": [
+        "Crunch",
+        "Wah pedal sweep (optional)",
+        "Slight chorus/vibrato modulation",
+        "Bright treble focus",
+        "Overdriven amp tone"
+      ],
+      "gearHypotheses": [
+        "Modeling Amp: Fender Twin Reverb style clean base",
+        "Drive: Tube Screamer or similar mid-hump overdrive",
+        "Cab Simulation: Bright 2x12 or 4x10 (Celestion Greenback/V30)",
+        "Effects: Wah pedal, Chorus"
+      ],
+      "avoid": [
+        "Heavy distortion (metal/hard rock)",
+        "Deep bass tones",
+        "Clean arpeggios"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+      "mustHave": [
+        "wah sweep",
+        "aggressive pick attack",
+        "bright upper mids",
+        "tight overdrive",
+        "riff punch"
+      ],
+      "avoid": [
+        "chorus",
+        "clean arpeggios",
+        "heavy metal gain",
+        "dark bassy tone"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop chorus",
+        "raise wah to required",
+        "lean more Marshall than Twin"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+    "mustHave": [
+      "wah sweep",
+      "aggressive pick attack",
+      "bright upper mids",
+      "tight overdrive",
+      "riff punch"
+    ],
+    "avoid": [
+      "chorus",
+      "clean arpeggios",
+      "heavy metal gain",
+      "dark bassy tone"
+    ],
+    "gearClues": [
+      "humbucker guitar",
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "wah pedal"
+    ],
+    "corrections": [
+      "drop chorus",
+      "raise wah to required",
+      "lean more Marshall than Twin"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Hard Rock/Classic Rock tone with aggressive wah and tight overdrive.",
+          "bestMatchSummary": "Gate 1 -> Boost (OD 9) -> V-Wah -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-gain boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide aggressive pick attack and tighten the initial signal.",
+              "matchQuality": "close",
+              "gap": "Using Boost for pre-gain aggression, as OD 9 might be too muddy before wah/distortion.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "Good general overdrive, but may lose bite compared to a clean boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Range": "Wide",
+                "Resonance Peak": "High"
+              },
+              "purpose": "Achieve the required bright wah bite for the riff.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "60%"
+              },
+              "purpose": "Provide tight, biting distortion and fuzz edge without heavy metal gain.",
+              "matchQuality": "close",
+              "gap": "RAT-style is excellent for aggressive rock tones; Muff-style might be too dark/thick.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Distortion",
+                  "reason": "A safe alternative, but RAT-style better captures the biting aggression."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%"
+              },
+              "purpose": "Simulate the Marshall/Plexi style amp head for classic hard rock punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic Marshall-era 4x12 cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Mid Boost": "+4 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Enhance the bright upper mids and overall punch required for the riff.",
+              "matchQuality": "perfect",
+              "gap": "Using EQ 2 to fine-tune specific frequency ranges, focusing on mid-range bite.",
+              "alternatives": [
+                {
+                  "module": "EQ",
+                  "model": "Guitar EQ 1",
+                  "reason": "Good alternative, but EQ 2 offers more precise control for the required upper mids."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle depth and space to the riff without distracting from the core tone.",
+              "matchQuality": "close",
+              "gap": "Delay is used here for ambience, as a dedicated reverb might muddy the tight rock sound.",
+              "alternatives": [
+                {
+                  "module": "DLY",
+                  "model": "Tape",
+                  "reason": "A warmer alternative, but Digital Delay offers more precise control over rhythmic repeats."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a subtle sense of space and dimension to the overall mix.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen for its natural, non-metallic decay, fitting the classic rock context.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "More controlled and bright than Room, but less natural sounding."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control/mastering",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock riff. The rig prioritizes aggressive, biting tones (RAT-style/UK 45) and uses the V-Wah to achieve the required 'wah bite' over pure clean tone.",
+          "Due to the nature of the genre, compression was avoided in favor of pre-gain boost and distortion for maximum punch and attack."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to enhance upper mids and bite for the hard rock riff.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance upper mids and bite for the hard rock riff.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and aggression",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Heart - Barracuda - Valeton GP-180",
+        "song": {
+          "artist": "Heart",
+          "title": "Barracuda",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate 1 -> Boost (OD 9) -> V-Wah -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "pre-gain boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%"
+            },
+            "purpose": "Provide aggressive pick attack and tighten the initial signal.",
+            "matchQuality": "close",
+            "gap": "Using Boost for pre-gain aggression, as OD 9 might be too muddy before wah/distortion.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "Good general overdrive, but may lose bite compared to a clean boost."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Sweep Range": "Wide",
+              "Resonance Peak": "High"
+            },
+            "purpose": "Achieve the required bright wah bite for the riff.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "60%"
+            },
+            "purpose": "Provide tight, biting distortion and fuzz edge without heavy metal gain.",
+            "matchQuality": "close",
+            "gap": "RAT-style is excellent for aggressive rock tones; Muff-style might be too dark/thick.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Distortion",
+                "reason": "A safe alternative, but RAT-style better captures the biting aggression."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%"
+            },
+            "purpose": "Simulate the Marshall/Plexi style amp head for classic hard rock punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic Marshall-era 4x12 cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Mid Boost": "+4 dB",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Enhance the bright upper mids and overall punch required for the riff.",
+            "matchQuality": "perfect",
+            "gap": "Using EQ 2 to fine-tune specific frequency ranges, focusing on mid-range bite.",
+            "alternatives": [
+              {
+                "module": "EQ",
+                "model": "Guitar EQ 1",
+                "reason": "Good alternative, but EQ 2 offers more precise control for the required upper mids."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle depth and space to the riff without distracting from the core tone.",
+            "matchQuality": "close",
+            "gap": "Delay is used here for ambience, as a dedicated reverb might muddy the tight rock sound.",
+            "alternatives": [
+              {
+                "module": "DLY",
+                "model": "Tape",
+                "reason": "A warmer alternative, but Digital Delay offers more precise control over rhythmic repeats."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/space",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide a subtle sense of space and dimension to the overall mix.",
+            "matchQuality": "close",
+            "gap": "Room reverb is chosen for its natural, non-metallic decay, fitting the classic rock context.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate",
+                "reason": "More controlled and bright than Room, but less natural sounding."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control/mastering",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+          "toneProfile": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+          "idealSignalChain": "humbucker guitar | Marshall/Plexi style amp | 4x12 cab | wah pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "wah sweep",
+            "aggressive pick attack",
+            "bright upper mids",
+            "tight overdrive",
+            "riff punch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Hard Rock/Classic Rock tone with aggressive wah and tight overdrive.",
+          "bestMatchSummary": "Gate 1 -> Boost (OD 9) -> V-Wah -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-gain boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide aggressive pick attack and tighten the initial signal.",
+              "matchQuality": "close",
+              "gap": "Using Boost for pre-gain aggression, as OD 9 might be too muddy before wah/distortion.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "Good general overdrive, but may lose bite compared to a clean boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Range": "Wide",
+                "Resonance Peak": "High"
+              },
+              "purpose": "Achieve the required bright wah bite for the riff.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "60%"
+              },
+              "purpose": "Provide tight, biting distortion and fuzz edge without heavy metal gain.",
+              "matchQuality": "close",
+              "gap": "RAT-style is excellent for aggressive rock tones; Muff-style might be too dark/thick.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Distortion",
+                  "reason": "A safe alternative, but RAT-style better captures the biting aggression."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%"
+              },
+              "purpose": "Simulate the Marshall/Plexi style amp head for classic hard rock punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic Marshall-era 4x12 cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Mid Boost": "+4 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Enhance the bright upper mids and overall punch required for the riff.",
+              "matchQuality": "perfect",
+              "gap": "Using EQ 2 to fine-tune specific frequency ranges, focusing on mid-range bite.",
+              "alternatives": [
+                {
+                  "module": "EQ",
+                  "model": "Guitar EQ 1",
+                  "reason": "Good alternative, but EQ 2 offers more precise control for the required upper mids."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle depth and space to the riff without distracting from the core tone.",
+              "matchQuality": "close",
+              "gap": "Delay is used here for ambience, as a dedicated reverb might muddy the tight rock sound.",
+              "alternatives": [
+                {
+                  "module": "DLY",
+                  "model": "Tape",
+                  "reason": "A warmer alternative, but Digital Delay offers more precise control over rhythmic repeats."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a subtle sense of space and dimension to the overall mix.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen for its natural, non-metallic decay, fitting the classic rock context.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "More controlled and bright than Room, but less natural sounding."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control/mastering",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to enhance upper mids and bite for the hard rock riff.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance upper mids and bite for the hard rock riff.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and aggression",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "raise wah to required",
+          "lean more Marshall than Twin"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock riff. The rig prioritizes aggressive, biting tones (RAT-style/UK 45) and uses the V-Wah to achieve the required 'wah bite' over pure clean tone.",
+          "Due to the nature of the genre, compression was avoided in favor of pre-gain boost and distortion for maximum punch and attack."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.591,
+      "prompt_chars": 983,
+      "response_chars": 565,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 153,
+        "total_duration": 10572645300,
+        "prompt_eval_duration": 581307000,
+        "eval_duration": 2694307000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.927,
+      "prompt_chars": 5494,
+      "response_chars": 529,
+      "usage": {
+        "input_tokens": 1538,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1679
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 44.805,
+      "prompt_chars": 3599,
+      "response_chars": 6216,
+      "usage": {
+        "prompt_eval_count": 1214,
+        "eval_count": 1752,
+        "total_duration": 44798971900,
+        "prompt_eval_duration": 246573000,
+        "eval_duration": 31318882000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.085,
+      "prompt_chars": 8406,
+      "response_chars": 521,
+      "usage": {
+        "prompt_eval_count": 2323,
+        "eval_count": 150,
+        "total_duration": 4079463000,
+        "prompt_eval_duration": 570056000,
+        "eval_duration": 3102598000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.376,
+      "prompt_chars": 2829,
+      "response_chars": 171,
+      "usage": {
+        "prompt_eval_count": 909,
+        "eval_count": 51,
+        "total_duration": 8352095500,
+        "prompt_eval_duration": 426540000,
+        "eval_duration": 836665000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Heart",
+      "title": "Barracuda",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Heart - Barracuda - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+      "signalChainSummary": "Gate 1 -> Boost (OD 9) -> V-Wah -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "pre-gain boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%"
+          },
+          "purpose": "Provide aggressive pick attack and tighten the initial signal.",
+          "matchQuality": "close",
+          "gap": "Using Boost for pre-gain aggression, as OD 9 might be too muddy before wah/distortion.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Good general overdrive, but may lose bite compared to a clean boost."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Sweep Range": "Wide",
+            "Resonance Peak": "High"
+          },
+          "purpose": "Achieve the required bright wah bite for the riff.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "60%"
+          },
+          "purpose": "Provide tight, biting distortion and fuzz edge without heavy metal gain.",
+          "matchQuality": "close",
+          "gap": "RAT-style is excellent for aggressive rock tones; Muff-style might be too dark/thick.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A safe alternative, but RAT-style better captures the biting aggression."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%"
+          },
+          "purpose": "Simulate the Marshall/Plexi style amp head for classic hard rock punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic Marshall-era 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Mid Boost": "+4 dB",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Enhance the bright upper mids and overall punch required for the riff.",
+          "matchQuality": "exact",
+          "gap": "Using EQ 2 to fine-tune specific frequency ranges, focusing on mid-range bite.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "Good alternative, but EQ 2 offers more precise control for the required upper mids."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle depth and space to the riff without distracting from the core tone.",
+          "matchQuality": "close",
+          "gap": "Delay is used here for ambience, as a dedicated reverb might muddy the tight rock sound.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "A warmer alternative, but Digital Delay offers more precise control over rhythmic repeats."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/space",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide a subtle sense of space and dimension to the overall mix.",
+          "matchQuality": "close",
+          "gap": "Room reverb is chosen for its natural, non-metallic decay, fitting the classic rock context.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "More controlled and bright than Room, but less natural sounding."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control/mastering",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+      "mustHave": [
+        "wah sweep",
+        "aggressive pick attack",
+        "bright upper mids",
+        "tight overdrive",
+        "riff punch"
+      ],
+      "avoid": [
+        "chorus",
+        "clean arpeggios",
+        "heavy metal gain",
+        "dark bassy tone"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop chorus",
+        "raise wah to required",
+        "lean more Marshall than Twin"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "bright biting hard-rock riff with wah bite and slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to enhance upper mids and bite for the hard rock riff.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance upper mids and bite for the hard rock riff.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and aggression",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 573,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

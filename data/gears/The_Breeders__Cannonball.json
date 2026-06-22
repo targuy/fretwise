@@ -1,0 +1,980 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1483,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Breeders__Cannonball.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Breeders",
+    "title": "Cannonball",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "indie rock",
+      "alt-rock",
+      "jangle pop"
+    ],
+    "confidence": "high",
+    "rationale": "The Breeders' sound is classic alt-rock, matching the fuzzy/chorus tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "jangly, slightly dirty indie rock pop",
+      "signatureElements": [
+        "chorus/phaser modulation",
+        "light fuzz/crunch",
+        "bright treble focus",
+        "reverb tail"
+      ],
+      "gearHypotheses": [
+        "modulation pedal (Chorus/Phaser)",
+        "low-gain overdrive/fuzz",
+        "spring reverb unit"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "scooped mids",
+        "deep delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright fuzzy alt-rock crunch with chorusy shimmer",
+      "mustHave": [
+        "light fuzz crunch",
+        "bright top end",
+        "chorus/modulation",
+        "short reverb"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "deep delay",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "single-coil style guitar",
+        "fuzz pedal",
+        "chorus pedal",
+        "spring reverb",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop phaser unless needed",
+        "push fuzz over generic overdrive",
+        "keep it punchy, not washed out"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright fuzzy alt-rock crunch with chorusy shimmer",
+    "mustHave": [
+      "light fuzz crunch",
+      "bright top end",
+      "chorus/modulation",
+      "short reverb"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "deep delay",
+      "scooped mids"
+    ],
+    "gearClues": [
+      "single-coil style guitar",
+      "fuzz pedal",
+      "chorus pedal",
+      "spring reverb",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "drop phaser unless needed",
+      "push fuzz over generic overdrive",
+      "keep it punchy, not washed out"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, punchy alt-rock fuzz tone with modulation.",
+          "bestMatchSummary": "Gate 1 -> Red Haze (Fuzz) -> Green OD (Boost/Crunch) -> UK SLP (Amp) -> UK Vintage 4x12 (Cab) -> Chorus (Modulation) -> Plate (Reverb) -> Guitar EQ 1",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide the required light fuzz crunch and bright top end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Add punchy mid-range crunch and boost the signal before the amp.",
+              "matchQuality": "close",
+              "gap": "Using Green OD for a versatile, non-scooping overdrive to complement the fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide punchy mids but might be too warm."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "5.5",
+                "Treble": "6.0",
+                "Mid": "5.5",
+                "Bass": "5.0"
+              },
+              "purpose": "Simulate a bright, punchy British rock tone suitable for alt-rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, bright British rock cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Mix": "60%"
+              },
+              "purpose": "Add the required chorusy shimmer and modulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a short, shimmering reverb tail without washing out the fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+3 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize brightness and punchy top end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is alt-rock, which requires a versatile fuzz/crunch tone. The chain prioritizes brightness and punchiness over deep saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, fuzzy alt-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance brightness and punch for fuzz tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Breeders - Cannonball - Valeton GP-180",
+        "song": {
+          "artist": "The Breeders",
+          "title": "Cannonball",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright fuzzy alt-rock crunch with chorusy shimmer",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate 1 -> Red Haze (Fuzz) -> Green OD (Boost/Crunch) -> UK SLP (Amp) -> UK Vintage 4x12 (Cab) -> Chorus (Modulation) -> Plate (Reverb) -> Guitar EQ 1",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain fuzz noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "40%",
+              "Tone": "75%",
+              "Level": "60%"
+            },
+            "purpose": "Provide the required light fuzz crunch and bright top end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Add punchy mid-range crunch and boost the signal before the amp.",
+            "matchQuality": "close",
+            "gap": "Using Green OD for a versatile, non-scooping overdrive to complement the fuzz.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Could also provide punchy mids but might be too warm."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "5.5",
+              "Treble": "6.0",
+              "Mid": "5.5",
+              "Bass": "5.0"
+            },
+            "purpose": "Simulate a bright, punchy British rock tone suitable for alt-rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic, bright British rock cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "40%",
+              "Mix": "60%"
+            },
+            "purpose": "Add the required chorusy shimmer and modulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a short, shimmering reverb tail without washing out the fuzz.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Mid Cut": "-1 dB",
+              "Treble Boost": "+3 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize brightness and punchy top end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright fuzzy alt-rock crunch with chorusy shimmer",
+          "toneProfile": "bright fuzzy alt-rock crunch with chorusy shimmer",
+          "idealSignalChain": "single-coil style guitar | fuzz pedal | chorus pedal | spring reverb | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil style guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "light fuzz crunch",
+            "bright top end",
+            "chorus/modulation",
+            "short reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, punchy alt-rock fuzz tone with modulation.",
+          "bestMatchSummary": "Gate 1 -> Red Haze (Fuzz) -> Green OD (Boost/Crunch) -> UK SLP (Amp) -> UK Vintage 4x12 (Cab) -> Chorus (Modulation) -> Plate (Reverb) -> Guitar EQ 1",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide the required light fuzz crunch and bright top end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Add punchy mid-range crunch and boost the signal before the amp.",
+              "matchQuality": "close",
+              "gap": "Using Green OD for a versatile, non-scooping overdrive to complement the fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide punchy mids but might be too warm."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "5.5",
+                "Treble": "6.0",
+                "Mid": "5.5",
+                "Bass": "5.0"
+              },
+              "purpose": "Simulate a bright, punchy British rock tone suitable for alt-rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, bright British rock cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Mix": "60%"
+              },
+              "purpose": "Add the required chorusy shimmer and modulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a short, shimmering reverb tail without washing out the fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+3 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize brightness and punchy top end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, fuzzy alt-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance brightness and punch for fuzz tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop phaser unless needed",
+          "push fuzz over generic overdrive",
+          "keep it punchy, not washed out"
+        ],
+        "warnings": [
+          "The source material is alt-rock, which requires a versatile fuzz/crunch tone. The chain prioritizes brightness and punchiness over deep saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.409,
+      "prompt_chars": 991,
+      "response_chars": 353,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 94,
+        "total_duration": 9406930000,
+        "prompt_eval_duration": 416736000,
+        "eval_duration": 1341914000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.484,
+      "prompt_chars": 5278,
+      "response_chars": 526,
+      "usage": {
+        "input_tokens": 1484,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1628
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.344,
+      "prompt_chars": 3597,
+      "response_chars": 4160,
+      "usage": {
+        "prompt_eval_count": 1213,
+        "eval_count": 1254,
+        "total_duration": 20338672100,
+        "prompt_eval_duration": 293045000,
+        "eval_duration": 19709331000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 2.549,
+      "prompt_chars": 6248,
+      "response_chars": 486,
+      "usage": {
+        "prompt_eval_count": 1824,
+        "eval_count": 132,
+        "total_duration": 2532988800,
+        "prompt_eval_duration": 316972000,
+        "eval_duration": 1868244000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.295,
+      "prompt_chars": 2567,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 836,
+        "eval_count": 58,
+        "total_duration": 29267155100,
+        "prompt_eval_duration": 582600000,
+        "eval_duration": 752323000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Breeders",
+      "title": "Cannonball",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "The Breeders - Cannonball - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright fuzzy alt-rock crunch with chorusy shimmer",
+      "signalChainSummary": "Gate 1 -> Red Haze (Fuzz) -> Green OD (Boost/Crunch) -> UK SLP (Amp) -> UK Vintage 4x12 (Cab) -> Chorus (Modulation) -> Plate (Reverb) -> Guitar EQ 1",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain fuzz noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "40%",
+            "Tone": "75%",
+            "Level": "60%"
+          },
+          "purpose": "Provide the required light fuzz crunch and bright top end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Add punchy mid-range crunch and boost the signal before the amp.",
+          "matchQuality": "close",
+          "gap": "Using Green OD for a versatile, non-scooping overdrive to complement the fuzz.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Could also provide punchy mids but might be too warm."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "5.5",
+            "Treble": "6.0",
+            "Mid": "5.5",
+            "Bass": "5.0"
+          },
+          "purpose": "Simulate a bright, punchy British rock tone suitable for alt-rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic, bright British rock cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "40%",
+            "Mix": "60%"
+          },
+          "purpose": "Add the required chorusy shimmer and modulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a short, shimmering reverb tail without washing out the fuzz.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Mid Cut": "-1 dB",
+            "Treble Boost": "+3 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize brightness and punchy top end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright fuzzy alt-rock crunch with chorusy shimmer",
+      "mustHave": [
+        "light fuzz crunch",
+        "bright top end",
+        "chorus/modulation",
+        "short reverb"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "deep delay",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "single-coil style guitar",
+        "fuzz pedal",
+        "chorus pedal",
+        "spring reverb",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop phaser unless needed",
+        "push fuzz over generic overdrive",
+        "keep it punchy, not washed out"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "indie rock",
+        "alt-rock",
+        "jangle pop"
+      ],
+      "targetTone": "bright fuzzy alt-rock crunch with chorusy shimmer",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the bright, fuzzy alt-rock sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance brightness and punch for fuzz tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity/punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1483,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

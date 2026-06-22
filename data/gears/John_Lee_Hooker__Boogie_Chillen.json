@@ -1,0 +1,1147 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 731,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\John_Lee_Hooker__Boogie_Chillen.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "John Lee Hooker",
+    "title": "Boogie Chillen'",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "boogie",
+      "electric blues"
+    ],
+    "confidence": "high",
+    "rationale": "John Lee Hooker is a foundational artist of the boogie electric blues genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Gritty, overdriven boogie blues",
+      "signatureElements": [
+        "Fuzz/Overdrive (raw)",
+        "Slide guitar texture",
+        "Simple, repetitive rhythm"
+      ],
+      "gearHypotheses": [
+        "Low-gain tube amp simulation (e.g., Fender Deluxe style)",
+        "Wah pedal (optional)"
+      ],
+      "avoid": [
+        "High-gain metal tones",
+        "Complex modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "raw electric blues boogie with dirty amp edge",
+      "mustHave": [
+        "single-note boogie riff",
+        "dry room sound",
+        "loose breakup",
+        "nasal mid grit"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "slide",
+        "metal gain",
+        "lush effects"
+      ],
+      "gearClues": [
+        "small tube combo",
+        "single coil or P-90",
+        "1x12 or 2x10",
+        "minimal pedals"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop slide",
+        "favor amp breakup over distortion"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "raw electric blues boogie with dirty amp edge",
+    "mustHave": [
+      "single-note boogie riff",
+      "dry room sound",
+      "loose breakup",
+      "nasal mid grit"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "slide",
+      "metal gain",
+      "lush effects"
+    ],
+    "gearClues": [
+      "small tube combo",
+      "single coil or P-90",
+      "1x12 or 2x10",
+      "minimal pedals"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "drop slide",
+      "favor amp breakup over distortion"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage tube breakup and mid-range grit, avoiding modern digital effects.",
+          "bestMatchSummary": "A classic blues boogie tone achieved using a low-wattage British amp model (UK 45/50) combined with natural overdrive for loose breakup, paired with a dry cabinet and minimal modulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in raw blues recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary loose breakup and nasal mid grit characteristic of early boogie blues.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly more aggressive, vintage tube feel without excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative if the desired grit leans slightly cleaner."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain stage clean to favor amp breakup over dedicated distortion units.",
+              "matchQuality": "exact",
+              "gap": "The 'None' setting is used intentionally to rely solely on the preamp and amplifier stages for grit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a low-wattage British combo amp (like the AC30/Vox style) known for natural, gritty breakup and mid-focus.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for classic blues tones; it provides the necessary tube saturation without sounding overly modern or compressed.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A viable alternative if a slightly more aggressive, punchy sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "While the source suggests smaller cabs (1x12/2x10), the UK Vintage 4x12 is the best available option to capture the desired vintage, open-air blues sound.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If a more American, tweed-era tone was required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Boost the nasal mid-range grit and cut excessive low end, focusing on the core boogie riff frequencies.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone toward the required 'nasal mid grit' that might be missing from the amp simulation alone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Disabled. Modulation effects are avoided to maintain the raw, dry feel of classic boogie.",
+              "matchQuality": "exact",
+              "gap": "None. The module is included but deactivated as per the 'avoid' list and tone requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle depth and space without sounding overly processed or lush.",
+              "matchQuality": "close",
+              "gap": "A minimal delay is used to simulate the 'dry room sound' requirement, keeping the effect very subtle.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'dry room sound' ambience without adding excessive wash or lushness.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring as it provides a natural, non-metallic sense of space suitable for blues boogie.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly brighter, more defined room reflection was desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the raw tone is audible and balanced.",
+              "matchQuality": "exact",
+              "gap": "None. Standard master control block.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (John Lee Hooker) is a classic blues recording, requiring vintage tube emulation and minimal digital processing to maintain authenticity."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the large 4x12 for a smaller, more period-appropriate speaker simulation (e.g., 2x10 or 1x12) to better match the source's small combo/P-90 clue.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small vintage speaker IR (e.g., 2x10)",
+              "reason": "Better matches the sound of a small combo amp and P-90/single coil.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More focused, less open-air tone",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "medium",
+          "needsReview": true
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "John Lee Hooker - Boogie Chillen' - Valeton GP-180",
+        "song": {
+          "artist": "John Lee Hooker",
+          "title": "Boogie Chillen'",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "raw electric blues boogie with dirty amp edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic blues boogie tone achieved using a low-wattage British amp model (UK 45/50) combined with natural overdrive for loose breakup, paired with a dry cabinet and minimal modulation.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise inherent in raw blues recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary loose breakup and nasal mid grit characteristic of early boogie blues.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD for a slightly more aggressive, vintage tube feel without excessive coloration.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good alternative if the desired grit leans slightly cleaner."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain stage clean to favor amp breakup over dedicated distortion units.",
+            "matchQuality": "exact",
+            "gap": "The 'None' setting is used intentionally to rely solely on the preamp and amplifier stages for grit.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate a low-wattage British combo amp (like the AC30/Vox style) known for natural, gritty breakup and mid-focus.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is ideal for classic blues tones; it provides the necessary tube saturation without sounding overly modern or compressed.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A viable alternative if a slightly more aggressive, punchy sound is desired."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+            "matchQuality": "close",
+            "gap": "While the source suggests smaller cabs (1x12/2x10), the UK Vintage 4x12 is the best available option to capture the desired vintage, open-air blues sound.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "If a more American, tweed-era tone was required."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+1"
+            },
+            "purpose": "Boost the nasal mid-range grit and cut excessive low end, focusing on the core boogie riff frequencies.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the tone toward the required 'nasal mid grit' that might be missing from the amp simulation alone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Disabled. Modulation effects are avoided to maintain the raw, dry feel of classic boogie.",
+            "matchQuality": "exact",
+            "gap": "None. The module is included but deactivated as per the 'avoid' list and tone requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "1"
+            },
+            "purpose": "Add subtle depth and space without sounding overly processed or lush.",
+            "matchQuality": "close",
+            "gap": "A minimal delay is used to simulate the 'dry room sound' requirement, keeping the effect very subtle.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined ambience was preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'dry room sound' ambience without adding excessive wash or lushness.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is chosen over Plate/Spring as it provides a natural, non-metallic sense of space suitable for blues boogie.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly brighter, more defined room reflection was desired."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment to ensure the raw tone is audible and balanced.",
+            "matchQuality": "exact",
+            "gap": "None. Standard master control block.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "raw electric blues boogie with dirty amp edge",
+          "toneProfile": "raw electric blues boogie with dirty amp edge",
+          "idealSignalChain": "small tube combo | single coil or P-90 | 1x12 or 2x10 | minimal pedals",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coil or P-90",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x10",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal pedals",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "single-note boogie riff",
+            "dry room sound",
+            "loose breakup",
+            "nasal mid grit"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage tube breakup and mid-range grit, avoiding modern digital effects.",
+          "bestMatchSummary": "A classic blues boogie tone achieved using a low-wattage British amp model (UK 45/50) combined with natural overdrive for loose breakup, paired with a dry cabinet and minimal modulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in raw blues recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary loose breakup and nasal mid grit characteristic of early boogie blues.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly more aggressive, vintage tube feel without excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative if the desired grit leans slightly cleaner."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain stage clean to favor amp breakup over dedicated distortion units.",
+              "matchQuality": "exact",
+              "gap": "The 'None' setting is used intentionally to rely solely on the preamp and amplifier stages for grit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate a low-wattage British combo amp (like the AC30/Vox style) known for natural, gritty breakup and mid-focus.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for classic blues tones; it provides the necessary tube saturation without sounding overly modern or compressed.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A viable alternative if a slightly more aggressive, punchy sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "While the source suggests smaller cabs (1x12/2x10), the UK Vintage 4x12 is the best available option to capture the desired vintage, open-air blues sound.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If a more American, tweed-era tone was required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Boost the nasal mid-range grit and cut excessive low end, focusing on the core boogie riff frequencies.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone toward the required 'nasal mid grit' that might be missing from the amp simulation alone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Disabled. Modulation effects are avoided to maintain the raw, dry feel of classic boogie.",
+              "matchQuality": "exact",
+              "gap": "None. The module is included but deactivated as per the 'avoid' list and tone requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle depth and space without sounding overly processed or lush.",
+              "matchQuality": "close",
+              "gap": "A minimal delay is used to simulate the 'dry room sound' requirement, keeping the effect very subtle.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'dry room sound' ambience without adding excessive wash or lushness.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring as it provides a natural, non-metallic sense of space suitable for blues boogie.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly brighter, more defined room reflection was desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the raw tone is audible and balanced.",
+              "matchQuality": "exact",
+              "gap": "None. Standard master control block.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the large 4x12 for a smaller, more period-appropriate speaker simulation (e.g., 2x10 or 1x12) to better match the source's small combo/P-90 clue.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small vintage speaker IR (e.g., 2x10)",
+              "reason": "Better matches the sound of a small combo amp and P-90/single coil.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More focused, less open-air tone",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "medium",
+          "needsReview": true
+        },
+        "assumptions": [
+          "drop fuzz",
+          "drop slide",
+          "favor amp breakup over distortion"
+        ],
+        "warnings": [
+          "The source material (John Lee Hooker) is a classic blues recording, requiring vintage tube emulation and minimal digital processing to maintain authenticity."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.191,
+      "prompt_chars": 999,
+      "response_chars": 341,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 89,
+        "total_duration": 9175024700,
+        "prompt_eval_duration": 473802000,
+        "eval_duration": 1325955000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.731,
+      "prompt_chars": 5256,
+      "response_chars": 478,
+      "usage": {
+        "input_tokens": 1475,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1609
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.404,
+      "prompt_chars": 3564,
+      "response_chars": 6594,
+      "usage": {
+        "prompt_eval_count": 1212,
+        "eval_count": 1774,
+        "total_duration": 32396246000,
+        "prompt_eval_duration": 146374000,
+        "eval_duration": 31892209000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.585,
+      "prompt_chars": 8733,
+      "response_chars": 646,
+      "usage": {
+        "prompt_eval_count": 2343,
+        "eval_count": 196,
+        "total_duration": 4547355100,
+        "prompt_eval_duration": 389472000,
+        "eval_duration": 3617874000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.725,
+      "prompt_chars": 2799,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 891,
+        "eval_count": 46,
+        "total_duration": 9718477800,
+        "prompt_eval_duration": 387280000,
+        "eval_duration": 765532000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "John Lee Hooker",
+      "title": "Boogie Chillen'",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "John Lee Hooker - Boogie Chillen' - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "raw electric blues boogie with dirty amp edge",
+      "signalChainSummary": "A classic blues boogie tone achieved using a low-wattage British amp model (UK 45/50) combined with natural overdrive for loose breakup, paired with a dry cabinet and minimal modulation.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise inherent in raw blues recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary loose breakup and nasal mid grit characteristic of early boogie blues.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD for a slightly more aggressive, vintage tube feel without excessive coloration.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good alternative if the desired grit leans slightly cleaner."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain stage clean to favor amp breakup over dedicated distortion units.",
+          "matchQuality": "exact",
+          "gap": "The 'None' setting is used intentionally to rely solely on the preamp and amplifier stages for grit.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate a low-wattage British combo amp (like the AC30/Vox style) known for natural, gritty breakup and mid-focus.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is ideal for classic blues tones; it provides the necessary tube saturation without sounding overly modern or compressed.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A viable alternative if a slightly more aggressive, punchy sound is desired."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+          "matchQuality": "close",
+          "gap": "While the source suggests smaller cabs (1x12/2x10), the UK Vintage 4x12 is the best available option to capture the desired vintage, open-air blues sound.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "If a more American, tweed-era tone was required."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+1"
+          },
+          "purpose": "Boost the nasal mid-range grit and cut excessive low end, focusing on the core boogie riff frequencies.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the tone toward the required 'nasal mid grit' that might be missing from the amp simulation alone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Disabled. Modulation effects are avoided to maintain the raw, dry feel of classic boogie.",
+          "matchQuality": "exact",
+          "gap": "None. The module is included but deactivated as per the 'avoid' list and tone requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "1"
+          },
+          "purpose": "Add subtle depth and space without sounding overly processed or lush.",
+          "matchQuality": "close",
+          "gap": "A minimal delay is used to simulate the 'dry room sound' requirement, keeping the effect very subtle.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined ambience was preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'dry room sound' ambience without adding excessive wash or lushness.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is chosen over Plate/Spring as it provides a natural, non-metallic sense of space suitable for blues boogie.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly brighter, more defined room reflection was desired."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment to ensure the raw tone is audible and balanced.",
+          "matchQuality": "exact",
+          "gap": "None. Standard master control block.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "raw electric blues boogie with dirty amp edge",
+      "mustHave": [
+        "single-note boogie riff",
+        "dry room sound",
+        "loose breakup",
+        "nasal mid grit"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "slide",
+        "metal gain",
+        "lush effects"
+      ],
+      "gearClues": [
+        "small tube combo",
+        "single coil or P-90",
+        "1x12 or 2x10",
+        "minimal pedals"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop slide",
+        "favor amp breakup over distortion"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "boogie",
+        "electric blues"
+      ],
+      "targetTone": "raw electric blues boogie with dirty amp edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the large 4x12 for a smaller, more period-appropriate speaker simulation (e.g., 2x10 or 1x12) to better match the source's small combo/P-90 clue.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "small vintage speaker IR (e.g., 2x10)",
+          "reason": "Better matches the sound of a small combo amp and P-90/single coil.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More focused, less open-air tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 731,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

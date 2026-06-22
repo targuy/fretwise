@@ -1,0 +1,1095 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 855,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Luke_Combs__Beautiful_Crazy_tab.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Luke Combs",
+    "title": "Beautiful Crazy (tab)",
+    "album": "",
+    "year": null,
+    "genre": "country pop"
+  },
+  "genreClassification": {
+    "genre": "country pop",
+    "subgenres": [
+      "country"
+    ],
+    "confidence": "high",
+    "rationale": "Luke Combs is a prominent artist in the modern country pop genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy country rock tone with clear definition and warmth.",
+      "signatureElements": [
+        "Clean arpeggios/fingerpicking (acoustic feel)",
+        "Subtle crunch/grit on strummed chords",
+        "Warm mid-range focus",
+        "Slight compression for consistency"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating a Fender Twin or Deluxe Reverb",
+        "Overdrive pedal (e.g., Tube Screamer style) used as a boost/mid-hump",
+        "Chorus or light modulation effect for texture"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High gain distortion",
+        "Aggressive scooped mids",
+        "Wah sweeps"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean country-pop acoustic-like electric with light edge",
+      "mustHave": [
+        "picked arpeggios",
+        "warm clean dynamics",
+        "slight compression",
+        "very light grit on strums"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "chorus",
+        "fuzz",
+        "wah",
+        "big drive"
+      ],
+      "gearClues": [
+        "Fender clean",
+        "acoustic-sim electric",
+        "light comp",
+        "frfr"
+      ],
+      "corrections": [
+        "drop chorus",
+        "lean cleaner",
+        "keep picked notes upfront"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean country-pop acoustic-like electric with light edge",
+    "mustHave": [
+      "picked arpeggios",
+      "warm clean dynamics",
+      "slight compression",
+      "very light grit on strums"
+    ],
+    "avoid": [
+      "heavy crunch",
+      "chorus",
+      "fuzz",
+      "wah",
+      "big drive"
+    ],
+    "gearClues": [
+      "Fender clean",
+      "acoustic-sim electric",
+      "light comp",
+      "frfr"
+    ],
+    "corrections": [
+      "drop chorus",
+      "lean cleaner",
+      "keep picked notes upfront"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, warm tones and acoustic emulation while maintaining light grit for country pop feel.",
+          "bestMatchSummary": "A clean signal chain using compression and a Fender-style amp (US Deluxe) with minimal effects to emphasize picked arpeggios and warm dynamics.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for delicate arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide slight compression to smooth dynamics and keep picked notes upfront.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/grit",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Introduce very light grit and warmth without heavy crunch, suitable for country-pop edge.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate a gentle breakup/edge rather than pure clean tone.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Slightly more aggressive, but still usable for light grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the warm, clean tone of a Fender-style amplifier.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound suitable for clean electric arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids/highs to enhance pick clarity and definition.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle thickening (kept off by default to avoid the 'chorus' avoidance list).",
+              "matchQuality": "close",
+              "gap": "The Chorus module is available but should be kept inactive or used extremely subtly, as per the 'avoid chorus' instruction.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space to the arpeggios without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A very light delay is used for ambience, avoiding heavy echo effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural, warm room ambience to ground the clean tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is country-pop, requiring a clean and articulate tone. The Chorus module was included but set to inactive/minimal use due to the 'avoid chorus' instruction."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation and warmth.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage Fender)",
+              "reason": "Enhance the warm, articulate sound needed for country arpeggios.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Luke Combs - Beautiful Crazy (tab) - Valeton GP-180",
+        "song": {
+          "artist": "Luke Combs",
+          "title": "Beautiful Crazy (tab)",
+          "album": "",
+          "year": null,
+          "genre": "country pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean country-pop acoustic-like electric with light edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain using compression and a Fender-style amp (US Deluxe) with minimal effects to emphasize picked arpeggios and warm dynamics.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain clarity for delicate arpeggios.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide slight compression to smooth dynamics and keep picked notes upfront.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/grit",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Introduce very light grit and warmth without heavy crunch, suitable for country-pop edge.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used to simulate a gentle breakup/edge rather than pure clean tone.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Slightly more aggressive, but still usable for light grit."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Treble": "65%",
+              "Mid": "70%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the warm, clean tone of a Fender-style amplifier.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound suitable for clean electric arpeggios.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slightly scoop the low end and boost mids/highs to enhance pick clarity and definition.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Optional subtle thickening (kept off by default to avoid the 'chorus' avoidance list).",
+            "matchQuality": "close",
+            "gap": "The Chorus module is available but should be kept inactive or used extremely subtly, as per the 'avoid chorus' instruction.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle depth and space to the arpeggios without sounding distracting.",
+            "matchQuality": "close",
+            "gap": "A very light delay is used for ambience, avoiding heavy echo effects.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a natural, warm room ambience to ground the clean tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean country-pop acoustic-like electric with light edge",
+          "toneProfile": "clean country-pop acoustic-like electric with light edge",
+          "idealSignalChain": "Fender clean | acoustic-sim electric | light comp | frfr",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender clean",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "acoustic-sim electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light comp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "frfr",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "picked arpeggios",
+            "warm clean dynamics",
+            "slight compression",
+            "very light grit on strums"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, warm tones and acoustic emulation while maintaining light grit for country pop feel.",
+          "bestMatchSummary": "A clean signal chain using compression and a Fender-style amp (US Deluxe) with minimal effects to emphasize picked arpeggios and warm dynamics.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for delicate arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide slight compression to smooth dynamics and keep picked notes upfront.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/grit",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Introduce very light grit and warmth without heavy crunch, suitable for country-pop edge.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate a gentle breakup/edge rather than pure clean tone.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Slightly more aggressive, but still usable for light grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the warm, clean tone of a Fender-style amplifier.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound suitable for clean electric arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids/highs to enhance pick clarity and definition.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle thickening (kept off by default to avoid the 'chorus' avoidance list).",
+              "matchQuality": "close",
+              "gap": "The Chorus module is available but should be kept inactive or used extremely subtly, as per the 'avoid chorus' instruction.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space to the arpeggios without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A very light delay is used for ambience, avoiding heavy echo effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural, warm room ambience to ground the clean tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation and warmth.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage Fender)",
+              "reason": "Enhance the warm, articulate sound needed for country arpeggios.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "lean cleaner",
+          "keep picked notes upfront"
+        ],
+        "warnings": [
+          "The source material is country-pop, requiring a clean and articulate tone. The Chorus module was included but set to inactive/minimal use due to the 'avoid chorus' instruction."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.44,
+      "prompt_chars": 1000,
+      "response_chars": 584,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 142,
+        "total_duration": 10413895000,
+        "prompt_eval_duration": 345422000,
+        "eval_duration": 2143225000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.239,
+      "prompt_chars": 5524,
+      "response_chars": 487,
+      "usage": {
+        "input_tokens": 1535,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 129,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1664
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 28.286,
+      "prompt_chars": 3574,
+      "response_chars": 5387,
+      "usage": {
+        "prompt_eval_count": 1205,
+        "eval_count": 1533,
+        "total_duration": 28278509900,
+        "prompt_eval_duration": 316111000,
+        "eval_duration": 27538069000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.018,
+      "prompt_chars": 7512,
+      "response_chars": 520,
+      "usage": {
+        "prompt_eval_count": 2095,
+        "eval_count": 138,
+        "total_duration": 4998571100,
+        "prompt_eval_duration": 359054000,
+        "eval_duration": 4140203999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.399,
+      "prompt_chars": 2772,
+      "response_chars": 154,
+      "usage": {
+        "prompt_eval_count": 874,
+        "eval_count": 40,
+        "total_duration": 14370911200,
+        "prompt_eval_duration": 558177000,
+        "eval_duration": 742854000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Luke Combs",
+      "title": "Beautiful Crazy (tab)",
+      "album": "",
+      "year": null,
+      "genre": "country pop"
+    },
+    "rig": {
+      "rigName": "Luke Combs - Beautiful Crazy (tab) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean country-pop acoustic-like electric with light edge",
+      "signalChainSummary": "A clean signal chain using compression and a Fender-style amp (US Deluxe) with minimal effects to emphasize picked arpeggios and warm dynamics.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain clarity for delicate arpeggios.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide slight compression to smooth dynamics and keep picked notes upfront.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/grit",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Introduce very light grit and warmth without heavy crunch, suitable for country-pop edge.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used to simulate a gentle breakup/edge rather than pure clean tone.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Slightly more aggressive, but still usable for light grit."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Treble": "65%",
+            "Mid": "70%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the warm, clean tone of a Fender-style amplifier.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound suitable for clean electric arpeggios.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slightly scoop the low end and boost mids/highs to enhance pick clarity and definition.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Optional subtle thickening (kept off by default to avoid the 'chorus' avoidance list).",
+          "matchQuality": "close",
+          "gap": "The Chorus module is available but should be kept inactive or used extremely subtly, as per the 'avoid chorus' instruction.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle depth and space to the arpeggios without sounding distracting.",
+          "matchQuality": "close",
+          "gap": "A very light delay is used for ambience, avoiding heavy echo effects.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a natural, warm room ambience to ground the clean tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean country-pop acoustic-like electric with light edge",
+      "mustHave": [
+        "picked arpeggios",
+        "warm clean dynamics",
+        "slight compression",
+        "very light grit on strums"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "chorus",
+        "fuzz",
+        "wah",
+        "big drive"
+      ],
+      "gearClues": [
+        "Fender clean",
+        "acoustic-sim electric",
+        "light comp",
+        "frfr"
+      ],
+      "corrections": [
+        "drop chorus",
+        "lean cleaner",
+        "keep picked notes upfront"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "country pop",
+      "styleTags": [
+        "country"
+      ],
+      "targetTone": "clean country-pop acoustic-like electric with light edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for better articulation and warmth.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage Fender)",
+          "reason": "Enhance the warm, articulate sound needed for country arpeggios.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and warmth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 855,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,963 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1641,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Who__I_Can_See_For_Miles.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Who",
+    "title": "I Can See For Miles",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "british pop",
+      "60s",
+      "mod"
+    ],
+    "confidence": "high",
+    "rationale": "The Who's sound is classic British mod/pop-rock, matching the 60s tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly overdriven British rock crunch",
+      "signatureElements": [
+        "Crunch",
+        "Slight fuzz/grit",
+        "Punchy midrange",
+        "British rock tone (Marshall style)"
+      ],
+      "gearHypotheses": [
+        "Amp simulation: Marshall Plexi or JTM 21v",
+        "Drive: Tube Screamer type boost (for grit)",
+        "EQ: Mid-scoop for punch, slight treble lift"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Clean delay/reverb wash",
+        "High gain metal tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly bright British pop-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "bright top end",
+        "tight punchy crunch",
+        "slight fuzz/grit",
+        "clear riff attack",
+        "dry 60s production"
+      ],
+      "avoid": [
+        "metal gain",
+        "scooped modern crunch",
+        "washy delay",
+        "heavy distortion"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "single-coil or bright humbucker",
+        "Marshall/Plexi edge",
+        "small-to-mid cab"
+      ],
+      "corrections": [
+        "push brighter than mid-gain",
+        "keep fuzz subtle but audible",
+        "avoid Tube Screamer-driven overdrive",
+        "less scoop, more chime"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly bright British pop-rock crunch with slight fuzz edge",
+    "mustHave": [
+      "bright top end",
+      "tight punchy crunch",
+      "slight fuzz/grit",
+      "clear riff attack",
+      "dry 60s production"
+    ],
+    "avoid": [
+      "metal gain",
+      "scooped modern crunch",
+      "washy delay",
+      "heavy distortion"
+    ],
+    "gearClues": [
+      "Rickenbacker-style jangle",
+      "single-coil or bright humbucker",
+      "Marshall/Plexi edge",
+      "small-to-mid cab"
+    ],
+    "corrections": [
+      "push brighter than mid-gain",
+      "keep fuzz subtle but audible",
+      "avoid Tube Screamer-driven overdrive",
+      "less scoop, more chime"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British tones using classic Marshall/Plexi emulation and subtle fuzz.",
+          "bestMatchSummary": "A clean-boosted signal chain utilizing a Green OD for initial grit, followed by the UK 45 amp model to capture the bright, punchy Plexi sound. A Chorus adds necessary jangle, while the US Vintage 2x12 cab keeps the tone focused and bright.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight riff definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial subtle grit and punchy crunch required for the 60s sound without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to better emulate a slightly dirtier, less scooped Plexi edge. This provides the 'fuzz edge' subtly.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "3",
+                "Feedback": "2"
+              },
+              "purpose": "Add the necessary 'jangle' and width characteristic of Rickenbacker-style pop-rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Introduce the required subtle fuzz/grit layer without overwhelming the clean attack or adding metal gain.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is used sparingly (low drive) to provide a vintage, slightly woolly grit that complements the Green OD's punchiness.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the bright, punchy Plexi/Marshall sound required for classic British pop-rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Keep the overall tone focused, bright, and articulate, matching the small-to-mid cab clue.",
+              "matchQuality": "close",
+              "gap": "While UK Vintage 4x12 is an option, US 2x12 better maintains the 'chime' and brightness needed for this specific genre/era.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high end and clarity (chime) while slightly reducing low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle, dry room ambience to ground the tone without sounding washy or modern.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is pop-rock/R&B, not strictly guitar-focused. The rig prioritizes bright chime and punch over heavy rock saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to enhance the vintage British pop-rock chime and clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Vox)",
+              "reason": "Enhance bright, articulate 'chime' needed for Rickenbacker-style pop.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage sparkle.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Who - I Can See For Miles - Valeton GP-180",
+        "song": {
+          "artist": "The Who",
+          "title": "I Can See For Miles",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly bright British pop-rock crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean-boosted signal chain utilizing a Green OD for initial grit, followed by the UK 45 amp model to capture the bright, punchy Plexi sound. A Chorus adds necessary jangle, while the US Vintage 2x12 cab keeps the tone focused and bright.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight riff definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial subtle grit and punchy crunch required for the 60s sound without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to better emulate a slightly dirtier, less scooped Plexi edge. This provides the 'fuzz edge' subtly.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "3",
+              "Feedback": "2"
+            },
+            "purpose": "Add the necessary 'jangle' and width characteristic of Rickenbacker-style pop-rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Introduce the required subtle fuzz/grit layer without overwhelming the clean attack or adding metal gain.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is used sparingly (low drive) to provide a vintage, slightly woolly grit that complements the Green OD's punchiness.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Emulate the bright, punchy Plexi/Marshall sound required for classic British pop-rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Keep the overall tone focused, bright, and articulate, matching the small-to-mid cab clue.",
+            "matchQuality": "close",
+            "gap": "While UK Vintage 4x12 is an option, US 2x12 better maintains the 'chime' and brightness needed for this specific genre/era.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Boost the high end and clarity (chime) while slightly reducing low-end muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a subtle, dry room ambience to ground the tone without sounding washy or modern.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly bright British pop-rock crunch with slight fuzz edge",
+          "toneProfile": "jangly bright British pop-rock crunch with slight fuzz edge",
+          "idealSignalChain": "Rickenbacker-style jangle | single-coil or bright humbucker | Marshall/Plexi edge | small-to-mid cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rickenbacker-style jangle",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or bright humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi edge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small-to-mid cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright top end",
+            "tight punchy crunch",
+            "slight fuzz/grit",
+            "clear riff attack",
+            "dry 60s production"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British tones using classic Marshall/Plexi emulation and subtle fuzz.",
+          "bestMatchSummary": "A clean-boosted signal chain utilizing a Green OD for initial grit, followed by the UK 45 amp model to capture the bright, punchy Plexi sound. A Chorus adds necessary jangle, while the US Vintage 2x12 cab keeps the tone focused and bright.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight riff definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial subtle grit and punchy crunch required for the 60s sound without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to better emulate a slightly dirtier, less scooped Plexi edge. This provides the 'fuzz edge' subtly.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "3",
+                "Feedback": "2"
+              },
+              "purpose": "Add the necessary 'jangle' and width characteristic of Rickenbacker-style pop-rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Introduce the required subtle fuzz/grit layer without overwhelming the clean attack or adding metal gain.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is used sparingly (low drive) to provide a vintage, slightly woolly grit that complements the Green OD's punchiness.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the bright, punchy Plexi/Marshall sound required for classic British pop-rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Keep the overall tone focused, bright, and articulate, matching the small-to-mid cab clue.",
+              "matchQuality": "close",
+              "gap": "While UK Vintage 4x12 is an option, US 2x12 better maintains the 'chime' and brightness needed for this specific genre/era.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high end and clarity (chime) while slightly reducing low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle, dry room ambience to ground the tone without sounding washy or modern.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to enhance the vintage British pop-rock chime and clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Vox)",
+              "reason": "Enhance bright, articulate 'chime' needed for Rickenbacker-style pop.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage sparkle.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "push brighter than mid-gain",
+          "keep fuzz subtle but audible",
+          "avoid Tube Screamer-driven overdrive",
+          "less scoop, more chime"
+        ],
+        "warnings": [
+          "The source material is pop-rock/R&B, not strictly guitar-focused. The rig prioritizes bright chime and punch over heavy rock saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.404,
+      "prompt_chars": 995,
+      "response_chars": 440,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 119,
+        "total_duration": 10401724900,
+        "prompt_eval_duration": 210487000,
+        "eval_duration": 1819915000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.094,
+      "prompt_chars": 5369,
+      "response_chars": 632,
+      "usage": {
+        "input_tokens": 1505,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 166,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1671
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.077,
+      "prompt_chars": 3721,
+      "response_chars": 4659,
+      "usage": {
+        "prompt_eval_count": 1248,
+        "eval_count": 1346,
+        "total_duration": 23068977500,
+        "prompt_eval_duration": 632429000,
+        "eval_duration": 21848099000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.259,
+      "prompt_chars": 6861,
+      "response_chars": 550,
+      "usage": {
+        "prompt_eval_count": 1951,
+        "eval_count": 152,
+        "total_duration": 4236284800,
+        "prompt_eval_duration": 641138000,
+        "eval_duration": 3010543000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.531,
+      "prompt_chars": 2794,
+      "response_chars": 183,
+      "usage": {
+        "prompt_eval_count": 878,
+        "eval_count": 59,
+        "total_duration": 14526592900,
+        "prompt_eval_duration": 400254000,
+        "eval_duration": 918603000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Who",
+      "title": "I Can See For Miles",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Who - I Can See For Miles - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly bright British pop-rock crunch with slight fuzz edge",
+      "signalChainSummary": "A clean-boosted signal chain utilizing a Green OD for initial grit, followed by the UK 45 amp model to capture the bright, punchy Plexi sound. A Chorus adds necessary jangle, while the US Vintage 2x12 cab keeps the tone focused and bright.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight riff definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial subtle grit and punchy crunch required for the 60s sound without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to better emulate a slightly dirtier, less scooped Plexi edge. This provides the 'fuzz edge' subtly.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "3",
+            "Feedback": "2"
+          },
+          "purpose": "Add the necessary 'jangle' and width characteristic of Rickenbacker-style pop-rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Introduce the required subtle fuzz/grit layer without overwhelming the clean attack or adding metal gain.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is used sparingly (low drive) to provide a vintage, slightly woolly grit that complements the Green OD's punchiness.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Emulate the bright, punchy Plexi/Marshall sound required for classic British pop-rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Keep the overall tone focused, bright, and articulate, matching the small-to-mid cab clue.",
+          "matchQuality": "close",
+          "gap": "While UK Vintage 4x12 is an option, US 2x12 better maintains the 'chime' and brightness needed for this specific genre/era.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Boost the high end and clarity (chime) while slightly reducing low-end muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a subtle, dry room ambience to ground the tone without sounding washy or modern.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly bright British pop-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "bright top end",
+        "tight punchy crunch",
+        "slight fuzz/grit",
+        "clear riff attack",
+        "dry 60s production"
+      ],
+      "avoid": [
+        "metal gain",
+        "scooped modern crunch",
+        "washy delay",
+        "heavy distortion"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "single-coil or bright humbucker",
+        "Marshall/Plexi edge",
+        "small-to-mid cab"
+      ],
+      "corrections": [
+        "push brighter than mid-gain",
+        "keep fuzz subtle but audible",
+        "avoid Tube Screamer-driven overdrive",
+        "less scoop, more chime"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "british pop",
+        "60s",
+        "mod"
+      ],
+      "targetTone": "jangly bright British pop-rock crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to enhance the vintage British pop-rock chime and clarity.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Vox)",
+          "reason": "Enhance bright, articulate 'chime' needed for Rickenbacker-style pop.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage sparkle.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1641,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

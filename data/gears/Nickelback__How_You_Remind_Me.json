@@ -1,0 +1,1087 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 989,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Nickelback__How_You_Remind_Me.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Nickelback",
+    "title": "How You Remind Me",
+    "album": "",
+    "year": null,
+    "genre": "post-grunge"
+  },
+  "genreClassification": {
+    "genre": "post-grunge",
+    "subgenres": [
+      "alt rock",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "Nickelback's sound is characteristic of post-grunge and modern hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with scooped mids and aggressive attack.",
+      "signatureElements": [
+        "Crunch/Overdrive (main rhythm)",
+        "Slight fuzz for thickness on power chords",
+        "Clean arpeggios (intro/breakdown)"
+      ],
+      "gearHypotheses": [
+        "High-gain amp model (Brit Plexi or US Recto style)",
+        "Mid-scooping EQ pedal/amp setting",
+        "Chorus/Flanger (for texture variation)"
+      ],
+      "avoid": [
+        "Deep, warm tube saturation (too vintage)",
+        "Heavy modulation (e.g., vibrato)",
+        "Overly bright clean tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry mid-gain alt-rock crunch with tight upper mids",
+      "mustHave": [
+        "palm-muted power chords",
+        "slight fizz/edge",
+        "clean arpeggio intro",
+        "tight attack"
+      ],
+      "avoid": [
+        "scooped mids",
+        "fuzz",
+        "chorus",
+        "flanger",
+        "vintage warm saturation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or modded Brit amp",
+        "4x12 cab",
+        "medium-output humbucker",
+        "light compression"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop scoop",
+        "avoid modulation",
+        "keep it drier and tighter"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry mid-gain alt-rock crunch with tight upper mids",
+    "mustHave": [
+      "palm-muted power chords",
+      "slight fizz/edge",
+      "clean arpeggio intro",
+      "tight attack"
+    ],
+    "avoid": [
+      "scooped mids",
+      "fuzz",
+      "chorus",
+      "flanger",
+      "vintage warm saturation"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or modded Brit amp",
+      "4x12 cab",
+      "medium-output humbucker",
+      "light compression"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "drop scoop",
+      "avoid modulation",
+      "keep it drier and tighter"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, mid-focused alt-rock crunch using British amp models and light compression.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Green OD boost for initial punch, followed by the UK 50/UK Vintage 4x12 combination to achieve the required dry, aggressive, mid-forward rock tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up signal and tighten the overall tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial punch and slight grit for the tight attack required in alt-rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general boost/overdrive to simulate light compression and edge, fulfilling the 'slight fizz/edge' requirement without sounding like traditional fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp gain will provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The target tone is 'mid-gain' alt-rock crunch, which is best achieved by relying on the preamp/amp section rather than a dedicated high-gain pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the required British Plexi-style amp tone, providing mid-focus and tightness.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic Brit rock tones; careful EQing of mids is crucial to avoid scoop while maintaining punch.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A slightly more modern, aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound required for alt-rock crunch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-3 dB",
+                "Mid Boost": "+4 dB",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Aggressively boost the upper mids and tighten the low end to achieve 'tight upper mids' and avoid scoop.",
+              "matchQuality": "close",
+              "gap": "This EQ is critical for fulfilling the specific tonal requirement of 'tight upper mids' which often requires surgical boosting in this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; the focus is on dry crunch and power chords.",
+              "matchQuality": "none",
+              "gap": "The verdict explicitly avoids modulation effects like chorus/flanger, making a WAH pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Minimal delay for subtle depth on arpeggios (optional). Kept low to maintain tightness.",
+              "matchQuality": "close",
+              "gap": "Delay is optional, but a minimal setting can enhance the 'clean arpeggio intro' without compromising the dry punch of the main riffing.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding overly wet or vintage.",
+              "matchQuality": "close",
+              "gap": "A small amount of room reverb is used to give the tone body, but kept low (10% mix) to maintain the required 'dry' feel.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a highly processed alt-rock track. This rig focuses on achieving the aggressive, mid-forward crunch required for power chords and riffs, prioritizing tightness over vintage warmth."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, modern 4x12 that better captures the punch and upper-mid focus of alt-rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Modern British 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance the aggressive, tight upper mids and punch required for alt-rock power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and bite in the high mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Nickelback - How You Remind Me - Valeton GP-180",
+        "song": {
+          "artist": "Nickelback",
+          "title": "How You Remind Me",
+          "album": "",
+          "year": null,
+          "genre": "post-grunge"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry mid-gain alt-rock crunch with tight upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A compressed signal chain utilizing a Green OD boost for initial punch, followed by the UK 50/UK Vintage 4x12 combination to achieve the required dry, aggressive, mid-forward rock tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up signal and tighten the overall tone.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide initial punch and slight grit for the tight attack required in alt-rock.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used as a general boost/overdrive to simulate light compression and edge, fulfilling the 'slight fizz/edge' requirement without sounding like traditional fuzz.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly warmer alternative if more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD and amp gain will provide sufficient crunch.",
+            "matchQuality": "none",
+            "gap": "The target tone is 'mid-gain' alt-rock crunch, which is best achieved by relying on the preamp/amp section rather than a dedicated high-gain pedal.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6/10",
+              "Treble": "7/10",
+              "Midrange": "8/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the required British Plexi-style amp tone, providing mid-focus and tightness.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is a good proxy for classic Brit rock tones; careful EQing of mids is crucial to avoid scoop while maintaining punch.",
+            "alternatives": [
+              {
+                "model": "UK SLP",
+                "reason": "A slightly more modern, aggressive alternative."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound required for alt-rock crunch.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-3 dB",
+              "Mid Boost": "+4 dB",
+              "Treble Cut": "-2 dB"
+            },
+            "purpose": "Aggressively boost the upper mids and tighten the low end to achieve 'tight upper mids' and avoid scoop.",
+            "matchQuality": "close",
+            "gap": "This EQ is critical for fulfilling the specific tonal requirement of 'tight upper mids' which often requires surgical boosting in this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; the focus is on dry crunch and power chords.",
+            "matchQuality": "none",
+            "gap": "The verdict explicitly avoids modulation effects like chorus/flanger, making a WAH pedal unnecessary.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Minimal delay for subtle depth on arpeggios (optional). Kept low to maintain tightness.",
+            "matchQuality": "close",
+            "gap": "Delay is optional, but a minimal setting can enhance the 'clean arpeggio intro' without compromising the dry punch of the main riffing.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and dimension without sounding overly wet or vintage.",
+            "matchQuality": "close",
+            "gap": "A small amount of room reverb is used to give the tone body, but kept low (10% mix) to maintain the required 'dry' feel.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "none",
+            "gap": "Standard final stage volume control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry mid-gain alt-rock crunch with tight upper mids",
+          "toneProfile": "dry mid-gain alt-rock crunch with tight upper mids",
+          "idealSignalChain": "Marshall/Plexi or modded Brit amp | 4x12 cab | medium-output humbucker | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or modded Brit amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "medium-output humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "palm-muted power chords",
+            "slight fizz/edge",
+            "clean arpeggio intro",
+            "tight attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, mid-focused alt-rock crunch using British amp models and light compression.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Green OD boost for initial punch, followed by the UK 50/UK Vintage 4x12 combination to achieve the required dry, aggressive, mid-forward rock tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up signal and tighten the overall tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial punch and slight grit for the tight attack required in alt-rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general boost/overdrive to simulate light compression and edge, fulfilling the 'slight fizz/edge' requirement without sounding like traditional fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp gain will provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The target tone is 'mid-gain' alt-rock crunch, which is best achieved by relying on the preamp/amp section rather than a dedicated high-gain pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the required British Plexi-style amp tone, providing mid-focus and tightness.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic Brit rock tones; careful EQing of mids is crucial to avoid scoop while maintaining punch.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A slightly more modern, aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound required for alt-rock crunch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-3 dB",
+                "Mid Boost": "+4 dB",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Aggressively boost the upper mids and tighten the low end to achieve 'tight upper mids' and avoid scoop.",
+              "matchQuality": "close",
+              "gap": "This EQ is critical for fulfilling the specific tonal requirement of 'tight upper mids' which often requires surgical boosting in this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; the focus is on dry crunch and power chords.",
+              "matchQuality": "none",
+              "gap": "The verdict explicitly avoids modulation effects like chorus/flanger, making a WAH pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Minimal delay for subtle depth on arpeggios (optional). Kept low to maintain tightness.",
+              "matchQuality": "close",
+              "gap": "Delay is optional, but a minimal setting can enhance the 'clean arpeggio intro' without compromising the dry punch of the main riffing.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding overly wet or vintage.",
+              "matchQuality": "close",
+              "gap": "A small amount of room reverb is used to give the tone body, but kept low (10% mix) to maintain the required 'dry' feel.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, modern 4x12 that better captures the punch and upper-mid focus of alt-rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Modern British 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance the aggressive, tight upper mids and punch required for alt-rock power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and bite in the high mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "drop scoop",
+          "avoid modulation",
+          "keep it drier and tighter"
+        ],
+        "warnings": [
+          "The source material is a highly processed alt-rock track. This rig focuses on achieving the aggressive, mid-forward crunch required for power chords and riffs, prioritizing tightness over vintage warmth."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.045,
+      "prompt_chars": 996,
+      "response_chars": 520,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 137,
+        "total_duration": 11042129300,
+        "prompt_eval_duration": 280194000,
+        "eval_duration": 2528454000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.674,
+      "prompt_chars": 5444,
+      "response_chars": 541,
+      "usage": {
+        "input_tokens": 1523,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 149,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1672
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.314,
+      "prompt_chars": 3631,
+      "response_chars": 6095,
+      "usage": {
+        "prompt_eval_count": 1229,
+        "eval_count": 1687,
+        "total_duration": 32280929900,
+        "prompt_eval_duration": 519856000,
+        "eval_duration": 31214757000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.926,
+      "prompt_chars": 8271,
+      "response_chars": 654,
+      "usage": {
+        "prompt_eval_count": 2273,
+        "eval_count": 176,
+        "total_duration": 4917976200,
+        "prompt_eval_duration": 370325000,
+        "eval_duration": 4039785000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.892,
+      "prompt_chars": 2847,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 913,
+        "eval_count": 49,
+        "total_duration": 10888854100,
+        "prompt_eval_duration": 261601999,
+        "eval_duration": 1213486000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Nickelback",
+      "title": "How You Remind Me",
+      "album": "",
+      "year": null,
+      "genre": "post-grunge"
+    },
+    "rig": {
+      "rigName": "Nickelback - How You Remind Me - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry mid-gain alt-rock crunch with tight upper mids",
+      "signalChainSummary": "A compressed signal chain utilizing a Green OD boost for initial punch, followed by the UK 50/UK Vintage 4x12 combination to achieve the required dry, aggressive, mid-forward rock tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up signal and tighten the overall tone.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide initial punch and slight grit for the tight attack required in alt-rock.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used as a general boost/overdrive to simulate light compression and edge, fulfilling the 'slight fizz/edge' requirement without sounding like traditional fuzz.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly warmer alternative if more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD and amp gain will provide sufficient crunch.",
+          "matchQuality": "fallback",
+          "gap": "The target tone is 'mid-gain' alt-rock crunch, which is best achieved by relying on the preamp/amp section rather than a dedicated high-gain pedal.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6/10",
+            "Treble": "7/10",
+            "Midrange": "8/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the required British Plexi-style amp tone, providing mid-focus and tightness.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is a good proxy for classic Brit rock tones; careful EQing of mids is crucial to avoid scoop while maintaining punch.",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "A slightly more modern, aggressive alternative."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound required for alt-rock crunch.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-3 dB",
+            "Mid Boost": "+4 dB",
+            "Treble Cut": "-2 dB"
+          },
+          "purpose": "Aggressively boost the upper mids and tighten the low end to achieve 'tight upper mids' and avoid scoop.",
+          "matchQuality": "close",
+          "gap": "This EQ is critical for fulfilling the specific tonal requirement of 'tight upper mids' which often requires surgical boosting in this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; the focus is on dry crunch and power chords.",
+          "matchQuality": "fallback",
+          "gap": "The verdict explicitly avoids modulation effects like chorus/flanger, making a WAH pedal unnecessary.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Minimal delay for subtle depth on arpeggios (optional). Kept low to maintain tightness.",
+          "matchQuality": "close",
+          "gap": "Delay is optional, but a minimal setting can enhance the 'clean arpeggio intro' without compromising the dry punch of the main riffing.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and dimension without sounding overly wet or vintage.",
+          "matchQuality": "close",
+          "gap": "A small amount of room reverb is used to give the tone body, but kept low (10% mix) to maintain the required 'dry' feel.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "fallback",
+          "gap": "Standard final stage volume control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry mid-gain alt-rock crunch with tight upper mids",
+      "mustHave": [
+        "palm-muted power chords",
+        "slight fizz/edge",
+        "clean arpeggio intro",
+        "tight attack"
+      ],
+      "avoid": [
+        "scooped mids",
+        "fuzz",
+        "chorus",
+        "flanger",
+        "vintage warm saturation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or modded Brit amp",
+        "4x12 cab",
+        "medium-output humbucker",
+        "light compression"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop scoop",
+        "avoid modulation",
+        "keep it drier and tighter"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-grunge",
+      "styleTags": [
+        "alt rock",
+        "hard rock"
+      ],
+      "targetTone": "dry mid-gain alt-rock crunch with tight upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, modern 4x12 that better captures the punch and upper-mid focus of alt-rock.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism/Punch",
+          "recommendedAsset": "Modern British 4x12 IR (e.g., Brit Cab)",
+          "reason": "Enhance the aggressive, tight upper mids and punch required for alt-rock power chords.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and bite in the high mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 989,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

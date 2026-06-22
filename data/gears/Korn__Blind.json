@@ -1,0 +1,1142 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 794,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Korn__Blind.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Korn",
+    "title": "Blind",
+    "album": "",
+    "year": null,
+    "genre": "nu metal"
+  },
+  "genreClassification": {
+    "genre": "nu metal",
+    "subgenres": [
+      "metalcore",
+      "alt rock",
+      "heavy metal"
+    ],
+    "confidence": "high",
+    "rationale": "Korn's style is defined by nu-metal, characterized by detuned chugs and aggressive tones."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Heavy, saturated fuzz/crunch with deep low end and mid-range punch.",
+      "signatureElements": [
+        "Fuzz (heavy saturation)",
+        "Crunch (mid-scoop for rhythm)",
+        "Low-end focus",
+        "Aggressive attack"
+      ],
+      "gearHypotheses": [
+        "High-gain preamp simulation (e.g., Mesa Boogie or Marshall style)",
+        "Overdrive/Fuzz pedal emulation",
+        "Cabinet modeling with deep bass response"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Bright, airy modulation effects",
+        "Thin, scooped mid-range"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal detuned nu-metal crunch with tight low end",
+      "mustHave": [
+        "dropped tuning",
+        "dry palm-mute chug",
+        "nasal upper mids",
+        "tight bass",
+        "aggressive pick attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "airy chorus",
+        "reverb wash",
+        "classic rock crunch"
+      ],
+      "gearClues": [
+        "7-string or downtuned guitar",
+        "Mesa/Peavey high gain",
+        "4x12 cab",
+        "modern tight gate"
+      ],
+      "corrections": [
+        "replace fuzz with tight distorted crunch",
+        "add detuned chug emphasis",
+        "keep it dry and percussive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal detuned nu-metal crunch with tight low end",
+    "mustHave": [
+      "dropped tuning",
+      "dry palm-mute chug",
+      "nasal upper mids",
+      "tight bass",
+      "aggressive pick attack"
+    ],
+    "avoid": [
+      "fuzz",
+      "airy chorus",
+      "reverb wash",
+      "classic rock crunch"
+    ],
+    "gearClues": [
+      "7-string or downtuned guitar",
+      "Mesa/Peavey high gain",
+      "4x12 cab",
+      "modern tight gate"
+    ],
+    "corrections": [
+      "replace fuzz with tight distorted crunch",
+      "add detuned chug emphasis",
+      "keep it dry and percussive"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain modern metal tones using the Recti model and aggressive compression/gate settings.",
+          "bestMatchSummary": "A highly compressed signal chain featuring a Boost for attack, Distortion for heavy gain, followed by the Recti amp model into a 4x12 cab, finished with minimal modulation and tight noise gating to achieve a modern nu-metal chug.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 3",
+              "active": true,
+              "settings": {
+                "Threshold": "-50 dB",
+                "Release": "Fast"
+              },
+              "purpose": "Aggressively gate the signal to eliminate unwanted noise and maintain tight palm-muted chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3-5 dB",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Increase the perceived attack and punch of the pick strokes for aggressive articulation.",
+              "matchQuality": "close",
+              "gap": "No specific boost model is required, but Boost provides necessary transient enhancement.",
+              "alternatives": [
+                {
+                  "module": "OD 9",
+                  "model": "OD 9",
+                  "reason": "Could provide a slight mid-hump if the Boost isn't aggressive enough."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Mid-focused",
+                "Level": "Medium"
+              },
+              "purpose": "Provide the necessary high gain and saturated crunch for nu-metal chugging without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is used as a general high-gain dirt pedal, simulating modern metal saturation.",
+              "alternatives": [
+                {
+                  "module": "RAT-style",
+                  "model": "RAT-style",
+                  "reason": "Could provide aggressive gain but might be too mid-scooped for the desired 'nasal' tone."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "EQ": "Aggressive lows/mids",
+                "Presence": "Medium"
+              },
+              "purpose": "Simulate the high-gain, tight, and aggressive tone associated with modern metal genres.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Tightened lows"
+              },
+              "purpose": "Provide a solid, punchy foundation that complements the Recti model while maintaining clarity for detuned chugs.",
+              "matchQuality": "close",
+              "gap": "While 'Mess 4x12' might be more modern, UK Vintage 4x12 is chosen for its reliable punch and availability.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Mess 4x12",
+                  "reason": "A better alternative if available, as it often has a more modern voicing."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "Nasal upper mids (800-1.5 kHz)",
+                "High Cut": "Avoid excessive airiness"
+              },
+              "purpose": "Sculpt the tone to emphasize the required 'nasal upper mids' and maintain tight, focused low end.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Kept inactive and set to minimal parameters. Only used if a slight width is needed during non-chugging parts.",
+              "matchQuality": "n/a",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time element",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Kept inactive and set to minimal parameters. The focus must remain on dry, percussive attack.",
+              "matchQuality": "n/a",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/room simulation",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (10-20%)",
+                "Decay Time": "Short"
+              },
+              "purpose": "Provide minimal, natural room ambience without adding a 'wash' or sounding airy.",
+              "matchQuality": "close",
+              "gap": "The goal is percussive dryness; this setting must be kept very low to avoid washing out the chug.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a heavy metal track. The resulting tone prioritizes tightness and aggression over natural warmth or classic rock tones.",
+          "All modulation (Chorus/Tremolo) and delay effects are disabled or set to minimal levels to maintain the required dry, percussive chug."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for modern tightness and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Mess 4x12",
+              "reason": "Better voicing for modern, tight nu-metal chugs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and tightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Korn - Blind - Valeton GP-180",
+        "song": {
+          "artist": "Korn",
+          "title": "Blind",
+          "album": "",
+          "year": null,
+          "genre": "nu metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal detuned nu-metal crunch with tight low end",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A highly compressed signal chain featuring a Boost for attack, Distortion for heavy gain, followed by the Recti amp model into a 4x12 cab, finished with minimal modulation and tight noise gating to achieve a modern nu-metal chug.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 3",
+            "active": true,
+            "settings": {
+              "Threshold": "-50 dB",
+              "Release": "Fast"
+            },
+            "purpose": "Aggressively gate the signal to eliminate unwanted noise and maintain tight palm-muted chugs.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/attack",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3-5 dB",
+              "Tone": "Mid-boost"
+            },
+            "purpose": "Increase the perceived attack and punch of the pick strokes for aggressive articulation.",
+            "matchQuality": "close",
+            "gap": "No specific boost model is required, but Boost provides necessary transient enhancement.",
+            "alternatives": [
+              {
+                "module": "OD 9",
+                "model": "OD 9",
+                "reason": "Could provide a slight mid-hump if the Boost isn't aggressive enough."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "High",
+              "Tone": "Mid-focused",
+              "Level": "Medium"
+            },
+            "purpose": "Provide the necessary high gain and saturated crunch for nu-metal chugging without sounding overly fuzzy.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is used as a general high-gain dirt pedal, simulating modern metal saturation.",
+            "alternatives": [
+              {
+                "module": "RAT-style",
+                "model": "RAT-style",
+                "reason": "Could provide aggressive gain but might be too mid-scooped for the desired 'nasal' tone."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "Recti",
+            "active": true,
+            "settings": {
+              "Gain": "High",
+              "EQ": "Aggressive lows/mids",
+              "Presence": "Medium"
+            },
+            "purpose": "Simulate the high-gain, tight, and aggressive tone associated with modern metal genres.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "EQ": "Tightened lows"
+            },
+            "purpose": "Provide a solid, punchy foundation that complements the Recti model while maintaining clarity for detuned chugs.",
+            "matchQuality": "close",
+            "gap": "While 'Mess 4x12' might be more modern, UK Vintage 4x12 is chosen for its reliable punch and availability.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "Mess 4x12",
+                "reason": "A better alternative if available, as it often has a more modern voicing."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "Mid Boost": "Nasal upper mids (800-1.5 kHz)",
+              "High Cut": "Avoid excessive airiness"
+            },
+            "purpose": "Sculpt the tone to emphasize the required 'nasal upper mids' and maintain tight, focused low end.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Kept inactive and set to minimal parameters. Only used if a slight width is needed during non-chugging parts.",
+            "matchQuality": "n/a",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time element",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "Off",
+              "Feedback": "Low"
+            },
+            "purpose": "Kept inactive and set to minimal parameters. The focus must remain on dry, percussive attack.",
+            "matchQuality": "n/a",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "ambience/room simulation",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "Low (10-20%)",
+              "Decay Time": "Short"
+            },
+            "purpose": "Provide minimal, natural room ambience without adding a 'wash' or sounding airy.",
+            "matchQuality": "close",
+            "gap": "The goal is percussive dryness; this setting must be kept very low to avoid washing out the chug.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity Gain"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal detuned nu-metal crunch with tight low end",
+          "toneProfile": "nasal detuned nu-metal crunch with tight low end",
+          "idealSignalChain": "7-string or downtuned guitar | Mesa/Peavey high gain | 4x12 cab | modern tight gate",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "7-string or downtuned guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Mesa/Peavey high gain",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "modern tight gate",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "dropped tuning",
+            "dry palm-mute chug",
+            "nasal upper mids",
+            "tight bass",
+            "aggressive pick attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain modern metal tones using the Recti model and aggressive compression/gate settings.",
+          "bestMatchSummary": "A highly compressed signal chain featuring a Boost for attack, Distortion for heavy gain, followed by the Recti amp model into a 4x12 cab, finished with minimal modulation and tight noise gating to achieve a modern nu-metal chug.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 3",
+              "active": true,
+              "settings": {
+                "Threshold": "-50 dB",
+                "Release": "Fast"
+              },
+              "purpose": "Aggressively gate the signal to eliminate unwanted noise and maintain tight palm-muted chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3-5 dB",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Increase the perceived attack and punch of the pick strokes for aggressive articulation.",
+              "matchQuality": "close",
+              "gap": "No specific boost model is required, but Boost provides necessary transient enhancement.",
+              "alternatives": [
+                {
+                  "module": "OD 9",
+                  "model": "OD 9",
+                  "reason": "Could provide a slight mid-hump if the Boost isn't aggressive enough."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Mid-focused",
+                "Level": "Medium"
+              },
+              "purpose": "Provide the necessary high gain and saturated crunch for nu-metal chugging without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is used as a general high-gain dirt pedal, simulating modern metal saturation.",
+              "alternatives": [
+                {
+                  "module": "RAT-style",
+                  "model": "RAT-style",
+                  "reason": "Could provide aggressive gain but might be too mid-scooped for the desired 'nasal' tone."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "EQ": "Aggressive lows/mids",
+                "Presence": "Medium"
+              },
+              "purpose": "Simulate the high-gain, tight, and aggressive tone associated with modern metal genres.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Tightened lows"
+              },
+              "purpose": "Provide a solid, punchy foundation that complements the Recti model while maintaining clarity for detuned chugs.",
+              "matchQuality": "close",
+              "gap": "While 'Mess 4x12' might be more modern, UK Vintage 4x12 is chosen for its reliable punch and availability.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Mess 4x12",
+                  "reason": "A better alternative if available, as it often has a more modern voicing."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "Nasal upper mids (800-1.5 kHz)",
+                "High Cut": "Avoid excessive airiness"
+              },
+              "purpose": "Sculpt the tone to emphasize the required 'nasal upper mids' and maintain tight, focused low end.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Kept inactive and set to minimal parameters. Only used if a slight width is needed during non-chugging parts.",
+              "matchQuality": "n/a",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time element",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Kept inactive and set to minimal parameters. The focus must remain on dry, percussive attack.",
+              "matchQuality": "n/a",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/room simulation",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (10-20%)",
+                "Decay Time": "Short"
+              },
+              "purpose": "Provide minimal, natural room ambience without adding a 'wash' or sounding airy.",
+              "matchQuality": "close",
+              "gap": "The goal is percussive dryness; this setting must be kept very low to avoid washing out the chug.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for modern tightness and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Mess 4x12",
+              "reason": "Better voicing for modern, tight nu-metal chugs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and tightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace fuzz with tight distorted crunch",
+          "add detuned chug emphasis",
+          "keep it dry and percussive"
+        ],
+        "warnings": [
+          "The source material is a heavy metal track. The resulting tone prioritizes tightness and aggression over natural warmth or classic rock tones.",
+          "All modulation (Chorus/Tremolo) and delay effects are disabled or set to minimal levels to maintain the required dry, percussive chug."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.26,
+      "prompt_chars": 978,
+      "response_chars": 483,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 122,
+        "total_duration": 12257921000,
+        "prompt_eval_duration": 277537000,
+        "eval_duration": 2574133000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.937,
+      "prompt_chars": 5395,
+      "response_chars": 560,
+      "usage": {
+        "input_tokens": 1504,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 154,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 49.512,
+      "prompt_chars": 3625,
+      "response_chars": 6446,
+      "usage": {
+        "prompt_eval_count": 1227,
+        "eval_count": 1773,
+        "total_duration": 49503786300,
+        "prompt_eval_duration": 438844000,
+        "eval_duration": 34875294000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.123,
+      "prompt_chars": 8646,
+      "response_chars": 465,
+      "usage": {
+        "prompt_eval_count": 2357,
+        "eval_count": 129,
+        "total_duration": 20116808200,
+        "prompt_eval_duration": 312740000,
+        "eval_duration": 2697364000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.911,
+      "prompt_chars": 2972,
+      "response_chars": 204,
+      "usage": {
+        "prompt_eval_count": 922,
+        "eval_count": 58,
+        "total_duration": 9890086100,
+        "prompt_eval_duration": 269981000,
+        "eval_duration": 542532000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Korn",
+      "title": "Blind",
+      "album": "",
+      "year": null,
+      "genre": "nu metal"
+    },
+    "rig": {
+      "rigName": "Korn - Blind - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal detuned nu-metal crunch with tight low end",
+      "signalChainSummary": "A highly compressed signal chain featuring a Boost for attack, Distortion for heavy gain, followed by the Recti amp model into a 4x12 cab, finished with minimal modulation and tight noise gating to achieve a modern nu-metal chug.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 3",
+          "active": true,
+          "settings": {
+            "Threshold": "-50 dB",
+            "Release": "Fast"
+          },
+          "purpose": "Aggressively gate the signal to eliminate unwanted noise and maintain tight palm-muted chugs.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/attack",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3-5 dB",
+            "Tone": "Mid-boost"
+          },
+          "purpose": "Increase the perceived attack and punch of the pick strokes for aggressive articulation.",
+          "matchQuality": "close",
+          "gap": "No specific boost model is required, but Boost provides necessary transient enhancement.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Could provide a slight mid-hump if the Boost isn't aggressive enough."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "High",
+            "Tone": "Mid-focused",
+            "Level": "Medium"
+          },
+          "purpose": "Provide the necessary high gain and saturated crunch for nu-metal chugging without sounding overly fuzzy.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is used as a general high-gain dirt pedal, simulating modern metal saturation.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could provide aggressive gain but might be too mid-scooped for the desired 'nasal' tone."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "Recti",
+          "active": true,
+          "settings": {
+            "Gain": "High",
+            "EQ": "Aggressive lows/mids",
+            "Presence": "Medium"
+          },
+          "purpose": "Simulate the high-gain, tight, and aggressive tone associated with modern metal genres.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "EQ": "Tightened lows"
+          },
+          "purpose": "Provide a solid, punchy foundation that complements the Recti model while maintaining clarity for detuned chugs.",
+          "matchQuality": "close",
+          "gap": "While 'Mess 4x12' might be more modern, UK Vintage 4x12 is chosen for its reliable punch and availability.",
+          "alternatives": [
+            {
+              "model": "Mess 4x12",
+              "reason": "A better alternative if available, as it often has a more modern voicing."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "Mid Boost": "Nasal upper mids (800-1.5 kHz)",
+            "High Cut": "Avoid excessive airiness"
+          },
+          "purpose": "Sculpt the tone to emphasize the required 'nasal upper mids' and maintain tight, focused low end.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Kept inactive and set to minimal parameters. Only used if a slight width is needed during non-chugging parts.",
+          "matchQuality": "fallback",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time element",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "Off",
+            "Feedback": "Low"
+          },
+          "purpose": "Kept inactive and set to minimal parameters. The focus must remain on dry, percussive attack.",
+          "matchQuality": "fallback",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "ambience/room simulation",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "Low (10-20%)",
+            "Decay Time": "Short"
+          },
+          "purpose": "Provide minimal, natural room ambience without adding a 'wash' or sounding airy.",
+          "matchQuality": "close",
+          "gap": "The goal is percussive dryness; this setting must be kept very low to avoid washing out the chug.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity Gain"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal detuned nu-metal crunch with tight low end",
+      "mustHave": [
+        "dropped tuning",
+        "dry palm-mute chug",
+        "nasal upper mids",
+        "tight bass",
+        "aggressive pick attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "airy chorus",
+        "reverb wash",
+        "classic rock crunch"
+      ],
+      "gearClues": [
+        "7-string or downtuned guitar",
+        "Mesa/Peavey high gain",
+        "4x12 cab",
+        "modern tight gate"
+      ],
+      "corrections": [
+        "replace fuzz with tight distorted crunch",
+        "add detuned chug emphasis",
+        "keep it dry and percussive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "nu metal",
+      "styleTags": [
+        "metalcore",
+        "alt rock",
+        "heavy metal"
+      ],
+      "targetTone": "nasal detuned nu-metal crunch with tight low end",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for modern tightness and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Mess 4x12",
+          "reason": "Better voicing for modern, tight nu-metal chugs.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and tightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 794,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

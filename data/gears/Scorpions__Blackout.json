@@ -1,0 +1,1141 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1228,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Scorpions__Blackout.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Scorpions",
+    "title": "Blackout",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "arena rock",
+      "80s rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "Scorpions' 'Blackout' is a quintessential example of 80s hard rock/arena rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and pronounced mid-range punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Punchy bass response",
+        "Rock reverb"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive",
+        "British Plexi or Marshall style amp model",
+        "Wah pedal for rhythmic accents"
+      ],
+      "avoid": [
+        "High-gain metal saturation",
+        "Clean jazz tones",
+        "Excessive modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "aggressive Marshall hard-rock crunch with biting mids",
+      "mustHave": [
+        "tight crunchy gain",
+        "bright upper mids",
+        "raw 80s rock bite",
+        "strong palm-mute punch"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "polished metal gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "maybe light wah"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop reverb",
+        "push harder rock crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "aggressive Marshall hard-rock crunch with biting mids",
+    "mustHave": [
+      "tight crunchy gain",
+      "bright upper mids",
+      "raw 80s rock bite",
+      "strong palm-mute punch"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "flanger",
+      "polished metal gain"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12 cab",
+      "humbucker bridge",
+      "maybe light wah"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "drop reverb",
+      "push harder rock crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic hard rock tones (AC/DC, 80s) using Marshall-style amps and high gain preamps.",
+          "bestMatchSummary": "A tight, aggressive signal chain built around a British Plexi/Marshall style amp simulation, utilizing an OD boost for punch and a powerful distortion stage to achieve the required hard rock crunch and biting mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-hump and extra punch for palm-muting.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general boost/mid scoop, approximating the role of an Overdrive pedal in this context.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A more direct choice for classic rock overdrive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "60%",
+                "Tone": "55%",
+                "Output": "75%"
+              },
+              "purpose": "Establish the core aggressive hard rock crunch and bite.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a gritty, mid-focused distortion that fits the 'raw 80s rock bite' requirement better than pure fuzz or Muff.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general high-gain option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Marshall/Plexi tone and provide high-gain headroom.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic British rock voicing, fitting the Plexi requirement.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Another strong Marshall alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the required classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Enhance the biting upper mids and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone for maximum mid-focus, compensating for potential amp/cab limitations.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "15%"
+              },
+              "purpose": "Added for subtle movement if the tone feels too static (though generally avoided per instructions).",
+              "matchQuality": "far",
+              "gap": "The Chorus is kept inactive/low to avoid sounding 'polished' or losing the raw bite, but it is available if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle rhythmic depth without washing out the aggressive tone.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, as reverb was explicitly dropped.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide minimal natural room ambience without sounding overly polished or wet.",
+              "matchQuality": "close",
+              "gap": "Used only for subtle space, respecting the 'drop reverb' instruction by keeping the mix low.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is hard rock, requiring high gain. The signal chain uses multiple drive stages (Green OD + RAT-style) to ensure sufficient crunch and punch for aggressive playing.",
+          "Reverb was minimized significantly (Room at 10% mix) to adhere to the 'drop reverb' instruction while still providing necessary ambience."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the raw, aggressive 80s hard rock bite missing in the current cab simulation.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Scorpions - Blackout - Valeton GP-180",
+        "song": {
+          "artist": "Scorpions",
+          "title": "Blackout",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "aggressive Marshall hard-rock crunch with biting mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive signal chain built around a British Plexi/Marshall style amp simulation, utilizing an OD boost for punch and a powerful distortion stage to achieve the required hard rock crunch and biting mids.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide mid-hump and extra punch for palm-muting.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used as a general boost/mid scoop, approximating the role of an Overdrive pedal in this context.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A more direct choice for classic rock overdrive."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "60%",
+              "Tone": "55%",
+              "Output": "75%"
+            },
+            "purpose": "Establish the core aggressive hard rock crunch and bite.",
+            "matchQuality": "close",
+            "gap": "The RAT-style provides a gritty, mid-focused distortion that fits the 'raw 80s rock bite' requirement better than pure fuzz or Muff.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A more general high-gain option."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "65%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the Marshall/Plexi tone and provide high-gain headroom.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is chosen for its classic British rock voicing, fitting the Plexi requirement.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Another strong Marshall alternative."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the required classic British 4x12 cabinet sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-3 dB",
+              "Mid": "+4 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Enhance the biting upper mids and cut unnecessary low-end mud.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the tone for maximum mid-focus, compensating for potential amp/cab limitations.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%",
+              "Mix": "15%"
+            },
+            "purpose": "Added for subtle movement if the tone feels too static (though generally avoided per instructions).",
+            "matchQuality": "far",
+            "gap": "The Chorus is kept inactive/low to avoid sounding 'polished' or losing the raw bite, but it is available if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle rhythmic depth without washing out the aggressive tone.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add dimension, as reverb was explicitly dropped.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide minimal natural room ambience without sounding overly polished or wet.",
+            "matchQuality": "close",
+            "gap": "Used only for subtle space, respecting the 'drop reverb' instruction by keeping the mix low.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "aggressive Marshall hard-rock crunch with biting mids",
+          "toneProfile": "aggressive Marshall hard-rock crunch with biting mids",
+          "idealSignalChain": "Marshall/Plexi | 4x12 cab | humbucker bridge | maybe light wah",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "maybe light wah",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight crunchy gain",
+            "bright upper mids",
+            "raw 80s rock bite",
+            "strong palm-mute punch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic hard rock tones (AC/DC, 80s) using Marshall-style amps and high gain preamps.",
+          "bestMatchSummary": "A tight, aggressive signal chain built around a British Plexi/Marshall style amp simulation, utilizing an OD boost for punch and a powerful distortion stage to achieve the required hard rock crunch and biting mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-hump and extra punch for palm-muting.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general boost/mid scoop, approximating the role of an Overdrive pedal in this context.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A more direct choice for classic rock overdrive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "60%",
+                "Tone": "55%",
+                "Output": "75%"
+              },
+              "purpose": "Establish the core aggressive hard rock crunch and bite.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a gritty, mid-focused distortion that fits the 'raw 80s rock bite' requirement better than pure fuzz or Muff.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general high-gain option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Marshall/Plexi tone and provide high-gain headroom.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic British rock voicing, fitting the Plexi requirement.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Another strong Marshall alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the required classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Enhance the biting upper mids and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone for maximum mid-focus, compensating for potential amp/cab limitations.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "15%"
+              },
+              "purpose": "Added for subtle movement if the tone feels too static (though generally avoided per instructions).",
+              "matchQuality": "far",
+              "gap": "The Chorus is kept inactive/low to avoid sounding 'polished' or losing the raw bite, but it is available if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle rhythmic depth without washing out the aggressive tone.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, as reverb was explicitly dropped.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide minimal natural room ambience without sounding overly polished or wet.",
+              "matchQuality": "close",
+              "gap": "Used only for subtle space, respecting the 'drop reverb' instruction by keeping the mix low.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the raw, aggressive 80s hard rock bite missing in the current cab simulation.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "drop reverb",
+          "push harder rock crunch"
+        ],
+        "warnings": [
+          "The source material is hard rock, requiring high gain. The signal chain uses multiple drive stages (Green OD + RAT-style) to ensure sufficient crunch and punch for aggressive playing.",
+          "Reverb was minimized significantly (Room at 10% mix) to adhere to the 'drop reverb' instruction while still providing necessary ambience."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.187,
+      "prompt_chars": 986,
+      "response_chars": 476,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 119,
+        "total_duration": 10162969300,
+        "prompt_eval_duration": 826365000,
+        "eval_duration": 1999796000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.294,
+      "prompt_chars": 5396,
+      "response_chars": 480,
+      "usage": {
+        "input_tokens": 1504,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1637
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 48.811,
+      "prompt_chars": 3546,
+      "response_chars": 6162,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1721,
+        "total_duration": 48781757100,
+        "prompt_eval_duration": 451941000,
+        "eval_duration": 34372745000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.888,
+      "prompt_chars": 8283,
+      "response_chars": 509,
+      "usage": {
+        "prompt_eval_count": 2282,
+        "eval_count": 136,
+        "total_duration": 18860631900,
+        "prompt_eval_duration": 587818000,
+        "eval_duration": 2682385000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.005,
+      "prompt_chars": 2838,
+      "response_chars": 196,
+      "usage": {
+        "prompt_eval_count": 882,
+        "eval_count": 60,
+        "total_duration": 8951980400,
+        "prompt_eval_duration": 360510000,
+        "eval_duration": 811543000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Scorpions",
+      "title": "Blackout",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Scorpions - Blackout - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "aggressive Marshall hard-rock crunch with biting mids",
+      "signalChainSummary": "A tight, aggressive signal chain built around a British Plexi/Marshall style amp simulation, utilizing an OD boost for punch and a powerful distortion stage to achieve the required hard rock crunch and biting mids.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide mid-hump and extra punch for palm-muting.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used as a general boost/mid scoop, approximating the role of an Overdrive pedal in this context.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A more direct choice for classic rock overdrive."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "60%",
+            "Tone": "55%",
+            "Output": "75%"
+          },
+          "purpose": "Establish the core aggressive hard rock crunch and bite.",
+          "matchQuality": "close",
+          "gap": "The RAT-style provides a gritty, mid-focused distortion that fits the 'raw 80s rock bite' requirement better than pure fuzz or Muff.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A more general high-gain option."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "65%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the Marshall/Plexi tone and provide high-gain headroom.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is chosen for its classic British rock voicing, fitting the Plexi requirement.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Another strong Marshall alternative."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the required classic British 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-3 dB",
+            "Mid": "+4 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Enhance the biting upper mids and cut unnecessary low-end mud.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the tone for maximum mid-focus, compensating for potential amp/cab limitations.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%",
+            "Mix": "15%"
+          },
+          "purpose": "Added for subtle movement if the tone feels too static (though generally avoided per instructions).",
+          "matchQuality": "fallback",
+          "gap": "The Chorus is kept inactive/low to avoid sounding 'polished' or losing the raw bite, but it is available if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle rhythmic depth without washing out the aggressive tone.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add dimension, as reverb was explicitly dropped.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide minimal natural room ambience without sounding overly polished or wet.",
+          "matchQuality": "close",
+          "gap": "Used only for subtle space, respecting the 'drop reverb' instruction by keeping the mix low.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "aggressive Marshall hard-rock crunch with biting mids",
+      "mustHave": [
+        "tight crunchy gain",
+        "bright upper mids",
+        "raw 80s rock bite",
+        "strong palm-mute punch"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "polished metal gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "maybe light wah"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop reverb",
+        "push harder rock crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "arena rock",
+        "80s rock",
+        "classic rock"
+      ],
+      "targetTone": "aggressive Marshall hard-rock crunch with biting mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance the raw, aggressive 80s hard rock bite missing in the current cab simulation.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased punch and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1228,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

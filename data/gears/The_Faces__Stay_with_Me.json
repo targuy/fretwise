@@ -1,0 +1,1140 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1540,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Faces__Stay_with_Me.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Faces",
+    "title": "Stay with Me",
+    "album": "",
+    "year": null,
+    "genre": "british rock"
+  },
+  "genreClassification": {
+    "genre": "british rock",
+    "subgenres": [
+      "classic rock",
+      "r&b",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The Faces are classic British rock artists known for raw, bluesy pub rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues rock tone",
+      "signatureElements": [
+        "Crunch overdrive (low gain)",
+        "Mid-focused EQ curve",
+        "Slight spring reverb/plate delay"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style pedal (for grit)",
+        "British single-coil amp model (e.g., AC30 type)",
+        "Cabinet simulation with medium bass response"
+      ],
+      "avoid": [
+        "High-gain distortion",
+        "Bright, scooped mids",
+        "Digital chorus or flanger"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+      "mustHave": [
+        "raw rhythm crunch",
+        "bright upper mids",
+        "slight hair, not smooth blues overdrive",
+        "dry-ish 70s rock feel"
+      ],
+      "avoid": [
+        "warm generic blues tone",
+        "tube screamer smoothness",
+        "chorus",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "Plexi/Marshall type",
+        "2x12 or 4x12",
+        "bridge humbucker or hot single-coil"
+      ],
+      "corrections": [
+        "Drop AC30 guess",
+        "Drop spring/plate delay",
+        "Push more raw bar-band crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+    "mustHave": [
+      "raw rhythm crunch",
+      "bright upper mids",
+      "slight hair, not smooth blues overdrive",
+      "dry-ish 70s rock feel"
+    ],
+    "avoid": [
+      "warm generic blues tone",
+      "tube screamer smoothness",
+      "chorus",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "Plexi/Marshall type",
+      "2x12 or 4x12",
+      "bridge humbucker or hot single-coil"
+    ],
+    "corrections": [
+      "Drop AC30 guess",
+      "Drop spring/plate delay",
+      "Push more raw bar-band crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-pushed British crunch using classic Marshall/Plexi emulation.",
+          "bestMatchSummary": "A punchy, aggressive rhythm tone built around a UK 45 or UK 50 amp model, paired with a vintage British cabinet and slight compression for bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide raw, mid-pushed crunch and bite (Plexi/Marshall style).",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate the aggressive breakup of a Plexi or early Marshall without needing a dedicated model.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but still provides good crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier passages or extra grit (currently bypassed).",
+              "matchQuality": "far",
+              "gap": "The primary crunch is handled by the Green OD. This slot remains open for added aggression if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the raw, mid-focused British rock sound (Plexi/Marshall).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if the UK 50 is too clean."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the upper mids and overall punchiness.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping to emphasize the 'raw' mid-range bite.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Minimal delay for subtle depth (optional).",
+              "matchQuality": "close",
+              "gap": "Kept minimal to maintain the dry 70s bar-band feel.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without sounding overly wet or modern.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to provide depth, avoiding the 'heavy reverb' trap.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a slightly brighter room tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring an aggressive, mid-pushed British tone. The Green OD and UK 50 combination are chosen to emulate the raw breakup of Plexi/Marshall amps.",
+          "Reverb (Room) and Delay (Digital Delay) are kept low or bypassed to maintain the desired 'dry-ish 70s rock feel'."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for more aggressive, mid-focused British crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/Aggression",
+              "recommendedAsset": "UK 4x12 (Celestion Greenback or similar)",
+              "reason": "Enhance the raw, biting upper mids and aggressive breakup required for Faces' sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Faces - Stay with Me - Valeton GP-180",
+        "song": {
+          "artist": "The Faces",
+          "title": "Stay with Me",
+          "album": "",
+          "year": null,
+          "genre": "british rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A punchy, aggressive rhythm tone built around a UK 45 or UK 50 amp model, paired with a vintage British cabinet and slight compression for bite.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide raw, mid-pushed crunch and bite (Plexi/Marshall style).",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to emulate the aggressive breakup of a Plexi or early Marshall without needing a dedicated model.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly warmer, but still provides good crunch."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {},
+            "purpose": "Reserved for heavier passages or extra grit (currently bypassed).",
+            "matchQuality": "far",
+            "gap": "The primary crunch is handled by the Green OD. This slot remains open for added aggression if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the raw, mid-focused British rock sound (Plexi/Marshall).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative if the UK 50 is too clean."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "High Boost": "3 dB",
+              "Mid Scoop": "-2 dB"
+            },
+            "purpose": "Fine-tune the upper mids and overall punchiness.",
+            "matchQuality": "close",
+            "gap": "Used for surgical tone shaping to emphasize the 'raw' mid-range bite.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed for this rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects as per the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Minimal delay for subtle depth (optional).",
+            "matchQuality": "close",
+            "gap": "Kept minimal to maintain the dry 70s bar-band feel.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space without sounding overly wet or modern.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to provide depth, avoiding the 'heavy reverb' trap.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could be used if a slightly brighter room tone is desired."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+          "toneProfile": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+          "idealSignalChain": "Plexi/Marshall type | 2x12 or 4x12 | bridge humbucker or hot single-coil",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall type",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker or hot single-coil",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "raw rhythm crunch",
+            "bright upper mids",
+            "slight hair, not smooth blues overdrive",
+            "dry-ish 70s rock feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-pushed British crunch using classic Marshall/Plexi emulation.",
+          "bestMatchSummary": "A punchy, aggressive rhythm tone built around a UK 45 or UK 50 amp model, paired with a vintage British cabinet and slight compression for bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide raw, mid-pushed crunch and bite (Plexi/Marshall style).",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate the aggressive breakup of a Plexi or early Marshall without needing a dedicated model.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but still provides good crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier passages or extra grit (currently bypassed).",
+              "matchQuality": "far",
+              "gap": "The primary crunch is handled by the Green OD. This slot remains open for added aggression if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the raw, mid-focused British rock sound (Plexi/Marshall).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if the UK 50 is too clean."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the upper mids and overall punchiness.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping to emphasize the 'raw' mid-range bite.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Minimal delay for subtle depth (optional).",
+              "matchQuality": "close",
+              "gap": "Kept minimal to maintain the dry 70s bar-band feel.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without sounding overly wet or modern.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to provide depth, avoiding the 'heavy reverb' trap.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a slightly brighter room tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for more aggressive, mid-focused British crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/Aggression",
+              "recommendedAsset": "UK 4x12 (Celestion Greenback or similar)",
+              "reason": "Enhance the raw, biting upper mids and aggressive breakup required for Faces' sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Drop AC30 guess",
+          "Drop spring/plate delay",
+          "Push more raw bar-band crunch"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring an aggressive, mid-pushed British tone. The Green OD and UK 50 combination are chosen to emulate the raw breakup of Plexi/Marshall amps.",
+          "Reverb (Room) and Delay (Digital Delay) are kept low or bypassed to maintain the desired 'dry-ish 70s rock feel'."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.665,
+      "prompt_chars": 990,
+      "response_chars": 438,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 109,
+        "total_duration": 10661604100,
+        "prompt_eval_duration": 673502000,
+        "eval_duration": 2428940000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.968,
+      "prompt_chars": 5360,
+      "response_chars": 575,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 160,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 48.632,
+      "prompt_chars": 3638,
+      "response_chars": 5774,
+      "usage": {
+        "prompt_eval_count": 1234,
+        "eval_count": 1681,
+        "total_duration": 48599179800,
+        "prompt_eval_duration": 613352000,
+        "eval_duration": 32559817000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.142,
+      "prompt_chars": 7991,
+      "response_chars": 524,
+      "usage": {
+        "prompt_eval_count": 2272,
+        "eval_count": 141,
+        "total_duration": 4135503100,
+        "prompt_eval_duration": 878185000,
+        "eval_duration": 2817097000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.502,
+      "prompt_chars": 2936,
+      "response_chars": 190,
+      "usage": {
+        "prompt_eval_count": 949,
+        "eval_count": 54,
+        "total_duration": 12477390500,
+        "prompt_eval_duration": 453816000,
+        "eval_duration": 913038000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Faces",
+      "title": "Stay with Me",
+      "album": "",
+      "year": null,
+      "genre": "british rock"
+    },
+    "rig": {
+      "rigName": "The Faces - Stay with Me - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+      "signalChainSummary": "A punchy, aggressive rhythm tone built around a UK 45 or UK 50 amp model, paired with a vintage British cabinet and slight compression for bite.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide raw, mid-pushed crunch and bite (Plexi/Marshall style).",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to emulate the aggressive breakup of a Plexi or early Marshall without needing a dedicated model.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly warmer, but still provides good crunch."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {},
+          "purpose": "Reserved for heavier passages or extra grit (currently bypassed).",
+          "matchQuality": "fallback",
+          "gap": "The primary crunch is handled by the Green OD. This slot remains open for added aggression if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the raw, mid-focused British rock sound (Plexi/Marshall).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative if the UK 50 is too clean."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "High Boost": "3 dB",
+            "Mid Scoop": "-2 dB"
+          },
+          "purpose": "Fine-tune the upper mids and overall punchiness.",
+          "matchQuality": "close",
+          "gap": "Used for surgical tone shaping to emphasize the 'raw' mid-range bite.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed for this rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Minimal delay for subtle depth (optional).",
+          "matchQuality": "close",
+          "gap": "Kept minimal to maintain the dry 70s bar-band feel.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space without sounding overly wet or modern.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to provide depth, avoiding the 'heavy reverb' trap.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could be used if a slightly brighter room tone is desired."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+      "mustHave": [
+        "raw rhythm crunch",
+        "bright upper mids",
+        "slight hair, not smooth blues overdrive",
+        "dry-ish 70s rock feel"
+      ],
+      "avoid": [
+        "warm generic blues tone",
+        "tube screamer smoothness",
+        "chorus",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "Plexi/Marshall type",
+        "2x12 or 4x12",
+        "bridge humbucker or hot single-coil"
+      ],
+      "corrections": [
+        "Drop AC30 guess",
+        "Drop spring/plate delay",
+        "Push more raw bar-band crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "british rock",
+      "styleTags": [
+        "classic rock",
+        "r&b",
+        "blues-rock"
+      ],
+      "targetTone": "ragged mid-pushed British crunch with slight edge-of-breakup bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for more aggressive, mid-focused British crunch.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism/Aggression",
+          "recommendedAsset": "UK 4x12 (Celestion Greenback or similar)",
+          "reason": "Enhance the raw, biting upper mids and aggressive breakup required for Faces' sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased bite and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1540,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

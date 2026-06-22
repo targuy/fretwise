@@ -1,0 +1,1069 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1566,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Mamas_and_The_Papas__California_Dreamin.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Mamas and The Papas",
+    "title": "California Dreamin'",
+    "album": "",
+    "year": null,
+    "genre": "folk pop"
+  },
+  "genreClassification": {
+    "genre": "folk pop",
+    "subgenres": [
+      "folk"
+    ],
+    "confidence": "high",
+    "rationale": "The Mamas and The Papas are foundational artists in the folk-pop genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Fingerpicked, clean acoustic/electric sound with subtle reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "acoustic-electric tone",
+        "fingerpicking"
+      ],
+      "gearHypotheses": [
+        "Clean amp simulation (e.g., Fender Twin)",
+        "Plate Reverb",
+        "Tape Delay"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Wah",
+        "Distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright fingerpicked 60s acoustic-pop with dry room",
+      "mustHave": [
+        "fingerpicked arpeggio",
+        "acoustic-like clean tone",
+        "bright top end",
+        "light room"
+      ],
+      "avoid": [
+        "delay",
+        "heavy reverb",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "clean combo",
+        "small room"
+      ],
+      "corrections": [
+        "drop delay",
+        "keep reverb very light",
+        "favor acoustic/clean over electric"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright fingerpicked 60s acoustic-pop with dry room",
+    "mustHave": [
+      "fingerpicked arpeggio",
+      "acoustic-like clean tone",
+      "bright top end",
+      "light room"
+    ],
+    "avoid": [
+      "delay",
+      "heavy reverb",
+      "fuzz",
+      "crunch"
+    ],
+    "gearClues": [
+      "acoustic guitar",
+      "clean combo",
+      "small room"
+    ],
+    "corrections": [
+      "drop delay",
+      "keep reverb very light",
+      "favor acoustic/clean over electric"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Emulating the bright, clean, fingerpicked sound of 60s acoustic pop using an electric guitar setup.",
+          "bestMatchSummary": "A pristine signal chain featuring a boost for clarity, followed by a classic clean amp model (US Deluxe) and a small cab/IR, enhanced with Chorus and light Room reverb to capture the bright, airy feel of the era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/clarity",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide gentle lift and clarity for arpeggiated picking.",
+              "matchQuality": "close",
+              "gap": "A dedicated clean boost would be ideal, but Boost serves the function well.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "Compression could also smooth out dynamics for fingerpicking."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and uncolored.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "High",
+                "Midrange": "Medium"
+              },
+              "purpose": "Simulate the clean, bright sound of a classic combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is excellent for clean tones, mimicking vintage Fender-style clarity.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for bright, clean sounds."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, bright, and compact sound profile.",
+              "matchQuality": "close",
+              "gap": "A smaller cab is needed to keep the tone intimate and non-overpowering.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Foxy 2x12",
+                  "reason": "Another good option for a compact, bright sound."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright top end and cut excessive low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the required 'bright' acoustic pop tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/air",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle width and airiness characteristic of 60s pop production.",
+              "matchQuality": "close",
+              "gap": "Chorus adds necessary movement without sounding modern or distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide a light, natural room ambience without heavy wash.",
+              "matchQuality": "close",
+              "gap": "The 'light room' requirement is met by keeping the mix low and decay short.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "Could also work, but Room feels more natural for this genre."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/vocal, so the tone is an emulation using an electric guitar setup. The goal is to capture the bright, clean texture rather than replicating the physical sound of nylon strings."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Refine the cabinet/IR for a more intimate and acoustic-like feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small, vintage room IR (e.g., 1x8 or small combo)",
+              "reason": "A smaller/vintage cab will better emulate the intimate sound of a recording studio and acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More focused, less aggressive tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Mamas and The Papas - California Dreamin' - Valeton GP-180",
+        "song": {
+          "artist": "The Mamas and The Papas",
+          "title": "California Dreamin'",
+          "album": "",
+          "year": null,
+          "genre": "folk pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright fingerpicked 60s acoustic-pop with dry room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A pristine signal chain featuring a boost for clarity, followed by a classic clean amp model (US Deluxe) and a small cab/IR, enhanced with Chorus and light Room reverb to capture the bright, airy feel of the era.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and fingerpicking transients.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/clarity",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Bright"
+            },
+            "purpose": "Provide gentle lift and clarity for arpeggiated picking.",
+            "matchQuality": "close",
+            "gap": "A dedicated clean boost would be ideal, but Boost serves the function well.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Comp",
+                "reason": "Compression could also smooth out dynamics for fingerpicking."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone completely clean and uncolored.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "High",
+              "Midrange": "Medium"
+            },
+            "purpose": "Simulate the clean, bright sound of a classic combo amplifier.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is excellent for clean tones, mimicking vintage Fender-style clarity.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "Silver Twin",
+                "reason": "Also suitable for bright, clean sounds."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, bright, and compact sound profile.",
+            "matchQuality": "close",
+            "gap": "A smaller cab is needed to keep the tone intimate and non-overpowering.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "Foxy 2x12",
+                "reason": "Another good option for a compact, bright sound."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the bright top end and cut excessive low-end mud.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the required 'bright' acoustic pop tone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/air",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle width and airiness characteristic of 60s pop production.",
+            "matchQuality": "close",
+            "gap": "Chorus adds necessary movement without sounding modern or distracting.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide a light, natural room ambience without heavy wash.",
+            "matchQuality": "close",
+            "gap": "The 'light room' requirement is met by keeping the mix low and decay short.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate",
+                "reason": "Could also work, but Room feels more natural for this genre."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright fingerpicked 60s acoustic-pop with dry room",
+          "toneProfile": "bright fingerpicked 60s acoustic-pop with dry room",
+          "idealSignalChain": "acoustic guitar | clean combo | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fingerpicked arpeggio",
+            "acoustic-like clean tone",
+            "bright top end",
+            "light room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Emulating the bright, clean, fingerpicked sound of 60s acoustic pop using an electric guitar setup.",
+          "bestMatchSummary": "A pristine signal chain featuring a boost for clarity, followed by a classic clean amp model (US Deluxe) and a small cab/IR, enhanced with Chorus and light Room reverb to capture the bright, airy feel of the era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/clarity",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide gentle lift and clarity for arpeggiated picking.",
+              "matchQuality": "close",
+              "gap": "A dedicated clean boost would be ideal, but Boost serves the function well.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "Compression could also smooth out dynamics for fingerpicking."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and uncolored.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "High",
+                "Midrange": "Medium"
+              },
+              "purpose": "Simulate the clean, bright sound of a classic combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is excellent for clean tones, mimicking vintage Fender-style clarity.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for bright, clean sounds."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, bright, and compact sound profile.",
+              "matchQuality": "close",
+              "gap": "A smaller cab is needed to keep the tone intimate and non-overpowering.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Foxy 2x12",
+                  "reason": "Another good option for a compact, bright sound."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright top end and cut excessive low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the required 'bright' acoustic pop tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/air",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle width and airiness characteristic of 60s pop production.",
+              "matchQuality": "close",
+              "gap": "Chorus adds necessary movement without sounding modern or distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide a light, natural room ambience without heavy wash.",
+              "matchQuality": "close",
+              "gap": "The 'light room' requirement is met by keeping the mix low and decay short.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "Could also work, but Room feels more natural for this genre."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Refine the cabinet/IR for a more intimate and acoustic-like feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small, vintage room IR (e.g., 1x8 or small combo)",
+              "reason": "A smaller/vintage cab will better emulate the intimate sound of a recording studio and acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More focused, less aggressive tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop delay",
+          "keep reverb very light",
+          "favor acoustic/clean over electric"
+        ],
+        "warnings": [
+          "The source material is acoustic/vocal, so the tone is an emulation using an electric guitar setup. The goal is to capture the bright, clean texture rather than replicating the physical sound of nylon strings."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.31,
+      "prompt_chars": 1011,
+      "response_chars": 351,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 94,
+        "total_duration": 10283518500,
+        "prompt_eval_duration": 945958000,
+        "eval_duration": 1716161000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.002,
+      "prompt_chars": 5308,
+      "response_chars": 466,
+      "usage": {
+        "input_tokens": 1488,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 126,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1614
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.743,
+      "prompt_chars": 3550,
+      "response_chars": 5436,
+      "usage": {
+        "prompt_eval_count": 1197,
+        "eval_count": 1509,
+        "total_duration": 29729909100,
+        "prompt_eval_duration": 229934000,
+        "eval_duration": 29114918000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.474,
+      "prompt_chars": 7531,
+      "response_chars": 578,
+      "usage": {
+        "prompt_eval_count": 2063,
+        "eval_count": 157,
+        "total_duration": 19469387000,
+        "prompt_eval_duration": 530452000,
+        "eval_duration": 3060208000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.426,
+      "prompt_chars": 2714,
+      "response_chars": 154,
+      "usage": {
+        "prompt_eval_count": 848,
+        "eval_count": 44,
+        "total_duration": 8409596600,
+        "prompt_eval_duration": 245060000,
+        "eval_duration": 419144000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Mamas and The Papas",
+      "title": "California Dreamin'",
+      "album": "",
+      "year": null,
+      "genre": "folk pop"
+    },
+    "rig": {
+      "rigName": "The Mamas and The Papas - California Dreamin' - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright fingerpicked 60s acoustic-pop with dry room",
+      "signalChainSummary": "A pristine signal chain featuring a boost for clarity, followed by a classic clean amp model (US Deluxe) and a small cab/IR, enhanced with Chorus and light Room reverb to capture the bright, airy feel of the era.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and fingerpicking transients.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/clarity",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Bright"
+          },
+          "purpose": "Provide gentle lift and clarity for arpeggiated picking.",
+          "matchQuality": "close",
+          "gap": "A dedicated clean boost would be ideal, but Boost serves the function well.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Compression could also smooth out dynamics for fingerpicking."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone completely clean and uncolored.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "High",
+            "Midrange": "Medium"
+          },
+          "purpose": "Simulate the clean, bright sound of a classic combo amplifier.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is excellent for clean tones, mimicking vintage Fender-style clarity.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable for bright, clean sounds."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, bright, and compact sound profile.",
+          "matchQuality": "close",
+          "gap": "A smaller cab is needed to keep the tone intimate and non-overpowering.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": "Another good option for a compact, bright sound."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the bright top end and cut excessive low-end mud.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the required 'bright' acoustic pop tone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/air",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle width and airiness characteristic of 60s pop production.",
+          "matchQuality": "close",
+          "gap": "Chorus adds necessary movement without sounding modern or distracting.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide a light, natural room ambience without heavy wash.",
+          "matchQuality": "close",
+          "gap": "The 'light room' requirement is met by keeping the mix low and decay short.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could also work, but Room feels more natural for this genre."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright fingerpicked 60s acoustic-pop with dry room",
+      "mustHave": [
+        "fingerpicked arpeggio",
+        "acoustic-like clean tone",
+        "bright top end",
+        "light room"
+      ],
+      "avoid": [
+        "delay",
+        "heavy reverb",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "clean combo",
+        "small room"
+      ],
+      "corrections": [
+        "drop delay",
+        "keep reverb very light",
+        "favor acoustic/clean over electric"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk pop",
+      "styleTags": [
+        "folk"
+      ],
+      "targetTone": "bright fingerpicked 60s acoustic-pop with dry room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Refine the cabinet/IR for a more intimate and acoustic-like feel.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "small, vintage room IR (e.g., 1x8 or small combo)",
+          "reason": "A smaller/vintage cab will better emulate the intimate sound of a recording studio and acoustic source.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More focused, less aggressive tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1566,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,991 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 551,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Green_Day__Warning.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Green Day",
+    "title": "Warning",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "pop punk",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Green Day is a foundational band in the pop-punk and alternative rock genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, aggressive punk rock tone with a biting mid-range and controlled grit.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slightly scooped mids for punchy rhythm guitar sound",
+        "Fast attack response",
+        "Punk rock aggression"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Klon or Tube Screamer style) into a clean, bright amp model.",
+        "Amp/Cab: Fender Twin Reverb or Vox AC30 emulation for clarity and bite."
+      ],
+      "avoid": [
+        "Excessive fuzz",
+        "Dark, muddy tones",
+        "Heavy modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry bright punk crunch with tight low end",
+      "mustHave": [
+        "fast attack",
+        "mid bite",
+        "tight rhythm chug",
+        "low fizz",
+        "dry mix"
+      ],
+      "avoid": [
+        "fender clean",
+        "vox chime",
+        "heavy fuzz",
+        "scooped metal tone",
+        "lush modulation"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Vox/Fender",
+        "keep gain moderate",
+        "make it drier"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry bright punk crunch with tight low end",
+    "mustHave": [
+      "fast attack",
+      "mid bite",
+      "tight rhythm chug",
+      "low fizz",
+      "dry mix"
+    ],
+    "avoid": [
+      "fender clean",
+      "vox chime",
+      "heavy fuzz",
+      "scooped metal tone",
+      "lush modulation"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "4x12 cab",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop Vox/Fender",
+      "keep gain moderate",
+      "make it drier"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk tone emulation, focusing on bright, mid-forward crunch.",
+          "bestMatchSummary": "A tight, aggressive punk sound achieved using a British amp model (UK 45) combined with an OD boost for bite and a clean cab simulation to maintain clarity and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain punk rhythm playing and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary mid-bite and crunchy attack required for punk rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD or OD 9 to achieve a slightly brighter, more aggressive crunch suitable for pop-punk without sounding too dirty.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could provide similar grit but might be too round."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "55%",
+                "Output": "60%"
+              },
+              "purpose": "Add tight low fizz and aggressive crunch without resorting to heavy fuzz or scooped metal tones.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a classic, biting punk distortion that is more focused than general Distortion, helping achieve the 'crunch' feel while keeping the tone defined.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "Might be too generic and lack the specific bite of the RAT."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the Marshall-style amp and provide the necessary British punch and mid-focus for punk rock.",
+              "matchQuality": "perfect",
+              "gap": "None. This is the ideal choice for classic UK punk/rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet sound and maintain clarity in the high end.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing with UK 45 for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-bite and tighten the low end without losing punch.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tonal shaping after the main gain stages.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Disabled. Modulation was explicitly avoided to keep the tone dry and aggressive.",
+              "matchQuality": "N/A",
+              "gap": "None. The module is included but deactivated as per the 'avoid' list.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Disabled. Keeping the mix dry and focused on rhythm crunch.",
+              "matchQuality": "N/A",
+              "gap": "None. The module is included but deactivated to maintain a tight, non-ambient punk sound.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (Green Day's 'Warning') is highly aggressive pop-punk/rock. This rig focuses on maximizing mid-range bite and tightness using classic British rock tones, which should translate well to the required dry punk crunch."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic Marshall-style punch and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (e.g., BritCab)",
+              "reason": "Enhance the classic British amp/cab synergy for better mid-range punch and definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Green Day - Warning - Valeton GP-180",
+        "song": {
+          "artist": "Green Day",
+          "title": "Warning",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry bright punk crunch with tight low end",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive punk sound achieved using a British amp model (UK 45) combined with an OD boost for bite and a clean cab simulation to maintain clarity and punch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain punk rhythm playing and eliminate hum.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for aggressive rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the necessary mid-bite and crunchy attack required for punk rhythm guitar.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD or OD 9 to achieve a slightly brighter, more aggressive crunch suitable for pop-punk without sounding too dirty.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Could provide similar grit but might be too round."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "40%",
+              "Tone": "55%",
+              "Output": "60%"
+            },
+            "purpose": "Add tight low fizz and aggressive crunch without resorting to heavy fuzz or scooped metal tones.",
+            "matchQuality": "close",
+            "gap": "The RAT-style provides a classic, biting punk distortion that is more focused than general Distortion, helping achieve the 'crunch' feel while keeping the tone defined.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "Might be too generic and lack the specific bite of the RAT."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Emulate the Marshall-style amp and provide the necessary British punch and mid-focus for punk rock.",
+            "matchQuality": "perfect",
+            "gap": "None. This is the ideal choice for classic UK punk/rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the classic Marshall-style cabinet sound and maintain clarity in the high end.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard pairing with UK 45 for this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize mid-bite and tighten the low end without losing punch.",
+            "matchQuality": "perfect",
+            "gap": "None. Used for surgical tonal shaping after the main gain stages.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0 Hz",
+              "Depth": "0%"
+            },
+            "purpose": "Disabled. Modulation was explicitly avoided to keep the tone dry and aggressive.",
+            "matchQuality": "N/A",
+            "gap": "None. The module is included but deactivated as per the 'avoid' list.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0 ms",
+              "Feedback": "0%"
+            },
+            "purpose": "Disabled. Keeping the mix dry and focused on rhythm crunch.",
+            "matchQuality": "N/A",
+            "gap": "None. The module is included but deactivated to maintain a tight, non-ambient punk sound.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry bright punk crunch with tight low end",
+          "toneProfile": "dry bright punk crunch with tight low end",
+          "idealSignalChain": "Marshall-style amp | 4x12 cab | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fast attack",
+            "mid bite",
+            "tight rhythm chug",
+            "low fizz",
+            "dry mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk tone emulation, focusing on bright, mid-forward crunch.",
+          "bestMatchSummary": "A tight, aggressive punk sound achieved using a British amp model (UK 45) combined with an OD boost for bite and a clean cab simulation to maintain clarity and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain punk rhythm playing and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary mid-bite and crunchy attack required for punk rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD or OD 9 to achieve a slightly brighter, more aggressive crunch suitable for pop-punk without sounding too dirty.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could provide similar grit but might be too round."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "55%",
+                "Output": "60%"
+              },
+              "purpose": "Add tight low fizz and aggressive crunch without resorting to heavy fuzz or scooped metal tones.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a classic, biting punk distortion that is more focused than general Distortion, helping achieve the 'crunch' feel while keeping the tone defined.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "Might be too generic and lack the specific bite of the RAT."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the Marshall-style amp and provide the necessary British punch and mid-focus for punk rock.",
+              "matchQuality": "perfect",
+              "gap": "None. This is the ideal choice for classic UK punk/rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet sound and maintain clarity in the high end.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing with UK 45 for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-bite and tighten the low end without losing punch.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tonal shaping after the main gain stages.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Disabled. Modulation was explicitly avoided to keep the tone dry and aggressive.",
+              "matchQuality": "N/A",
+              "gap": "None. The module is included but deactivated as per the 'avoid' list.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Disabled. Keeping the mix dry and focused on rhythm crunch.",
+              "matchQuality": "N/A",
+              "gap": "None. The module is included but deactivated to maintain a tight, non-ambient punk sound.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic Marshall-style punch and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (e.g., BritCab)",
+              "reason": "Enhance the classic British amp/cab synergy for better mid-range punch and definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Vox/Fender",
+          "keep gain moderate",
+          "make it drier"
+        ],
+        "warnings": [
+          "The source material (Green Day's 'Warning') is highly aggressive pop-punk/rock. This rig focuses on maximizing mid-range bite and tightness using classic British rock tones, which should translate well to the required dry punk crunch."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.991,
+      "prompt_chars": 985,
+      "response_chars": 541,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 136,
+        "total_duration": 9963626300,
+        "prompt_eval_duration": 329106000,
+        "eval_duration": 2145129000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.626,
+      "prompt_chars": 5454,
+      "response_chars": 468,
+      "usage": {
+        "input_tokens": 1519,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 131,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1650
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.011,
+      "prompt_chars": 3540,
+      "response_chars": 5210,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1428,
+        "total_duration": 38003899100,
+        "prompt_eval_duration": 764710000,
+        "eval_duration": 22379921000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.934,
+      "prompt_chars": 7251,
+      "response_chars": 552,
+      "usage": {
+        "prompt_eval_count": 1988,
+        "eval_count": 149,
+        "total_duration": 3913073100,
+        "prompt_eval_duration": 529929999,
+        "eval_duration": 2992328000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.858,
+      "prompt_chars": 2533,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 805,
+        "eval_count": 48,
+        "total_duration": 10850362500,
+        "prompt_eval_duration": 260499000,
+        "eval_duration": 501150000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Green Day",
+      "title": "Warning",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Green Day - Warning - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry bright punk crunch with tight low end",
+      "signalChainSummary": "A tight, aggressive punk sound achieved using a British amp model (UK 45) combined with an OD boost for bite and a clean cab simulation to maintain clarity and punch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain punk rhythm playing and eliminate hum.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for aggressive rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the necessary mid-bite and crunchy attack required for punk rhythm guitar.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD or OD 9 to achieve a slightly brighter, more aggressive crunch suitable for pop-punk without sounding too dirty.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Could provide similar grit but might be too round."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "40%",
+            "Tone": "55%",
+            "Output": "60%"
+          },
+          "purpose": "Add tight low fizz and aggressive crunch without resorting to heavy fuzz or scooped metal tones.",
+          "matchQuality": "close",
+          "gap": "The RAT-style provides a classic, biting punk distortion that is more focused than general Distortion, helping achieve the 'crunch' feel while keeping the tone defined.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "Might be too generic and lack the specific bite of the RAT."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Emulate the Marshall-style amp and provide the necessary British punch and mid-focus for punk rock.",
+          "matchQuality": "exact",
+          "gap": "None. This is the ideal choice for classic UK punk/rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the classic Marshall-style cabinet sound and maintain clarity in the high end.",
+          "matchQuality": "exact",
+          "gap": "None. Standard pairing with UK 45 for this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize mid-bite and tighten the low end without losing punch.",
+          "matchQuality": "exact",
+          "gap": "None. Used for surgical tonal shaping after the main gain stages.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0 Hz",
+            "Depth": "0%"
+          },
+          "purpose": "Disabled. Modulation was explicitly avoided to keep the tone dry and aggressive.",
+          "matchQuality": "fallback",
+          "gap": "None. The module is included but deactivated as per the 'avoid' list.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0 ms",
+            "Feedback": "0%"
+          },
+          "purpose": "Disabled. Keeping the mix dry and focused on rhythm crunch.",
+          "matchQuality": "fallback",
+          "gap": "None. The module is included but deactivated to maintain a tight, non-ambient punk sound.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry bright punk crunch with tight low end",
+      "mustHave": [
+        "fast attack",
+        "mid bite",
+        "tight rhythm chug",
+        "low fizz",
+        "dry mix"
+      ],
+      "avoid": [
+        "fender clean",
+        "vox chime",
+        "heavy fuzz",
+        "scooped metal tone",
+        "lush modulation"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Vox/Fender",
+        "keep gain moderate",
+        "make it drier"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "pop punk",
+        "alternative rock"
+      ],
+      "targetTone": "dry bright punk crunch with tight low end",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a more authentic Marshall-style punch and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 IR (e.g., BritCab)",
+          "reason": "Enhance the classic British amp/cab synergy for better mid-range punch and definition.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 551,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

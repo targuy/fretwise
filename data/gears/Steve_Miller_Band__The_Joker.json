@@ -1,0 +1,1099 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1310,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Steve_Miller_Band__The_Joker.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Steve Miller Band",
+    "title": "The Joker",
+    "album": "",
+    "year": null,
+    "genre": "rock and roll"
+  },
+  "genreClassification": {
+    "genre": "rock and roll",
+    "subgenres": [
+      "classic rock",
+      "pop rock",
+      "blues"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic 70s rock track with blues influences, matching the clean jangly tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty blues rock tone with pronounced mid-range punch and a touch of vintage grit.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz character (for warmth)",
+        "Clean chime for verses",
+        "Wah pedal sweeps"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (TS808 or similar)",
+        "British Plexi/Marshall style amp model",
+        "Spring reverb simulation"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Modern digital delay tails",
+        "Extreme scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+      "mustHave": [
+        "clean verse chime",
+        "light edge-of-breakup",
+        "nasal harmonica-like lead",
+        "dry 70s feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah sweeps",
+        "heavy crunch",
+        "modern delay"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender clean amp",
+        "light compression",
+        "small room"
+      ],
+      "corrections": [
+        "remove fuzz",
+        "remove wah",
+        "lower gain a lot",
+        "add jangly clean rhythm"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+    "mustHave": [
+      "clean verse chime",
+      "light edge-of-breakup",
+      "nasal harmonica-like lead",
+      "dry 70s feel"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah sweeps",
+      "heavy crunch",
+      "modern delay"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Vox/Fender clean amp",
+      "light compression",
+      "small room"
+    ],
+    "corrections": [
+      "remove fuzz",
+      "remove wah",
+      "lower gain a lot",
+      "add jangly clean rhythm"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chimey tones with vintage American voicing.",
+          "bestMatchSummary": "A classic 70s Fender/Vox-style chain: light compression for punch, a subtle OD boost for edge, and a clean US Deluxe amp paired with the US 2x12 cab to achieve a jangly, dry sound suitable for rhythm and lead textures.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add punch and sustain for the clean rhythm parts.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light edge-of-breakup and grit without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate the gentle breakup of a vintage Fender amp, avoiding modern distortion tones.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could also provide clean boost but might be too bright."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the clean, chimey voicing of a Vox/Fender-style amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused, and vintage American cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Slightly boost the mids and highs to enhance the jangly chime and nasal lead character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle movement and width to the clean rhythm parts without sounding modern.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to enhance the 'jangly' quality, mimicking vintage chorus effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Create a small room ambience to ground the sound and give it a dry 70s feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "N/A"
+              },
+              "purpose": "Disabled as per 'avoid' list (modern delay).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock song, but the rig focuses on clean, vintage American tones (Fender/Vox) to match the 'jangly' and 'dry 70s feel' specified in the verdict."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better vintage room realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 (e.g., Fender Twin)",
+              "reason": "Enhance the dry, small-room vintage American voicing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic room tone and chime.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Steve Miller Band - The Joker - Valeton GP-180",
+        "song": {
+          "artist": "Steve Miller Band",
+          "title": "The Joker",
+          "album": "",
+          "year": null,
+          "genre": "rock and roll"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A classic 70s Fender/Vox-style chain: light compression for punch, a subtle OD boost for edge, and a clean US Deluxe amp paired with the US 2x12 cab to achieve a jangly, dry sound suitable for rhythm and lead textures.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Add punch and sustain for the clean rhythm parts.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light edge-of-breakup and grit without heavy crunch.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used to simulate the gentle breakup of a vintage Fender amp, avoiding modern distortion tones.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Could also provide clean boost but might be too bright."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Treble": "65%",
+              "Mid": "70%",
+              "Bass": "55%"
+            },
+            "purpose": "Simulate the clean, chimey voicing of a Vox/Fender-style amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, focused, and vintage American cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Slightly boost the mids and highs to enhance the jangly chime and nasal lead character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%",
+              "Mix": "40%"
+            },
+            "purpose": "Add subtle movement and width to the clean rhythm parts without sounding modern.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to enhance the 'jangly' quality, mimicking vintage chorus effects.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Create a small room ambience to ground the sound and give it a dry 70s feel.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "N/A"
+            },
+            "purpose": "Disabled as per 'avoid' list (modern delay).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+          "toneProfile": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+          "idealSignalChain": "single-coil guitar | Vox/Fender clean amp | light compression | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Fender clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean verse chime",
+            "light edge-of-breakup",
+            "nasal harmonica-like lead",
+            "dry 70s feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chimey tones with vintage American voicing.",
+          "bestMatchSummary": "A classic 70s Fender/Vox-style chain: light compression for punch, a subtle OD boost for edge, and a clean US Deluxe amp paired with the US 2x12 cab to achieve a jangly, dry sound suitable for rhythm and lead textures.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add punch and sustain for the clean rhythm parts.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light edge-of-breakup and grit without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate the gentle breakup of a vintage Fender amp, avoiding modern distortion tones.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could also provide clean boost but might be too bright."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the clean, chimey voicing of a Vox/Fender-style amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused, and vintage American cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Slightly boost the mids and highs to enhance the jangly chime and nasal lead character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle movement and width to the clean rhythm parts without sounding modern.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to enhance the 'jangly' quality, mimicking vintage chorus effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Create a small room ambience to ground the sound and give it a dry 70s feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "N/A"
+              },
+              "purpose": "Disabled as per 'avoid' list (modern delay).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better vintage room realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 (e.g., Fender Twin)",
+              "reason": "Enhance the dry, small-room vintage American voicing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic room tone and chime.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove fuzz",
+          "remove wah",
+          "lower gain a lot",
+          "add jangly clean rhythm"
+        ],
+        "warnings": [
+          "The source material is a classic rock song, but the rig focuses on clean, vintage American tones (Fender/Vox) to match the 'jangly' and 'dry 70s feel' specified in the verdict."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.145,
+      "prompt_chars": 995,
+      "response_chars": 510,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 121,
+        "total_duration": 11094124500,
+        "prompt_eval_duration": 521530999,
+        "eval_duration": 2092446000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.893,
+      "prompt_chars": 5439,
+      "response_chars": 533,
+      "usage": {
+        "input_tokens": 1508,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 145,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.821,
+      "prompt_chars": 3615,
+      "response_chars": 5222,
+      "usage": {
+        "prompt_eval_count": 1221,
+        "eval_count": 1533,
+        "total_duration": 27804081600,
+        "prompt_eval_duration": 804927000,
+        "eval_duration": 26351253000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 6.314,
+      "prompt_chars": 7388,
+      "response_chars": 498,
+      "usage": {
+        "prompt_eval_count": 2111,
+        "eval_count": 144,
+        "total_duration": 6308809900,
+        "prompt_eval_duration": 877662000,
+        "eval_duration": 4815099000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.897,
+      "prompt_chars": 2919,
+      "response_chars": 208,
+      "usage": {
+        "prompt_eval_count": 922,
+        "eval_count": 58,
+        "total_duration": 10892754500,
+        "prompt_eval_duration": 399787000,
+        "eval_duration": 1225360000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Steve Miller Band",
+      "title": "The Joker",
+      "album": "",
+      "year": null,
+      "genre": "rock and roll"
+    },
+    "rig": {
+      "rigName": "Steve Miller Band - The Joker - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+      "signalChainSummary": "A classic 70s Fender/Vox-style chain: light compression for punch, a subtle OD boost for edge, and a clean US Deluxe amp paired with the US 2x12 cab to achieve a jangly, dry sound suitable for rhythm and lead textures.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Add punch and sustain for the clean rhythm parts.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light edge-of-breakup and grit without heavy crunch.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used to simulate the gentle breakup of a vintage Fender amp, avoiding modern distortion tones.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Could also provide clean boost but might be too bright."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Treble": "65%",
+            "Mid": "70%",
+            "Bass": "55%"
+          },
+          "purpose": "Simulate the clean, chimey voicing of a Vox/Fender-style amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, focused, and vintage American cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Slightly boost the mids and highs to enhance the jangly chime and nasal lead character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%",
+            "Mix": "40%"
+          },
+          "purpose": "Add subtle movement and width to the clean rhythm parts without sounding modern.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to enhance the 'jangly' quality, mimicking vintage chorus effects.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Create a small room ambience to ground the sound and give it a dry 70s feel.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "N/A"
+          },
+          "purpose": "Disabled as per 'avoid' list (modern delay).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+      "mustHave": [
+        "clean verse chime",
+        "light edge-of-breakup",
+        "nasal harmonica-like lead",
+        "dry 70s feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah sweeps",
+        "heavy crunch",
+        "modern delay"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender clean amp",
+        "light compression",
+        "small room"
+      ],
+      "corrections": [
+        "remove fuzz",
+        "remove wah",
+        "lower gain a lot",
+        "add jangly clean rhythm"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock and roll",
+      "styleTags": [
+        "classic rock",
+        "pop rock",
+        "blues"
+      ],
+      "targetTone": "clean jangly rhythm with light breakup and a thin kazoo-like lead texture",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better vintage room realism.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x12 (e.g., Fender Twin)",
+          "reason": "Enhance the dry, small-room vintage American voicing.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More authentic room tone and chime.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1310,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

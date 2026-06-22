@@ -1,0 +1,1182 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1161,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rainbow__Gates_Of_Babylon.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rainbow",
+    "title": "Gates Of Babylon",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic hard rock, characterized by fuzz and wah tones."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive hard rock/metal tone with a pronounced mid-range bite and tight low end.",
+      "signatureElements": [
+        "Fuzz (for opening riff)",
+        "Crunch (main rhythm parts)",
+        "Wah pedal sweeps",
+        "Delay (for atmospheric sections)",
+        "Overdriven amp/cab family"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "Noise gate",
+        "Chorus or Flanger (modulation effect)"
+      ],
+      "avoid": [
+        "Clean, ambient tones",
+        "Deep bass sludge",
+        "Excessive reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal hard-rock fuzz with mid bite and wah lead",
+      "mustHave": [
+        "fuzzed riff",
+        "wah sweeps",
+        "tight midrange",
+        "sustaining lead",
+        "dry 70s rock"
+      ],
+      "avoid": [
+        "generic metal",
+        "smooth overdrive",
+        "big reverb",
+        "chorus"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall/Plexi",
+        "4x12",
+        "wah",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "add wah as core",
+        "make fuzz distinct from crunch",
+        "drop chorus/flanger",
+        "keep delay light"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal hard-rock fuzz with mid bite and wah lead",
+    "mustHave": [
+      "fuzzed riff",
+      "wah sweeps",
+      "tight midrange",
+      "sustaining lead",
+      "dry 70s rock"
+    ],
+    "avoid": [
+      "generic metal",
+      "smooth overdrive",
+      "big reverb",
+      "chorus"
+    ],
+    "gearClues": [
+      "humbucker guitar",
+      "Marshall/Plexi",
+      "4x12",
+      "wah",
+      "fuzz pedal"
+    ],
+    "corrections": [
+      "add wah as core",
+      "make fuzz distinct from crunch",
+      "drop chorus/flanger",
+      "keep delay light"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 70s hard rock tones, emphasizing fuzz and wah while maintaining midrange punch.",
+          "bestMatchSummary": "A high-gain signal chain featuring a Fuzz distortion for thick riffs, followed by an OD boost/wah for lead work, powered through a UK 45 amp model to capture the Plexi sound, finished with minimal reverb and delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Slightly boost the signal before fuzz/wah to ensure clarity and punch.",
+              "matchQuality": "close",
+              "gap": "Using Boost as a general tone shaper since no specific pre-gain is required.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "For more sustain, but Boost maintains the aggressive edge needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the thick, saturated fuzz required for the main riffs.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Could work, but 'Fuzz' is more archetypal for 70s hard rock fuzz."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "300 Hz",
+                "Resonance": "7"
+              },
+              "purpose": "Implement the core wah sweeps for lead lines and solos.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound associated with 70s hard rock.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "Too clean; UK 45 provides the necessary grit."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and punch.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Enhance the tight midrange bite and cut excessive low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the required 'mid bite' that is crucial for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add a subtle sense of space without sounding overly ambient.",
+              "matchQuality": "close",
+              "gap": "Keeping the delay light as requested, avoiding big reverb/ambience.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm; Digital Delay offers more precise control for a tight 70s sound."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide minimal natural room ambience to ground the tone.",
+              "matchQuality": "close",
+              "gap": "Using Room for a subtle, non-washy ambiance, avoiding big reverb as requested.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this specific hard rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track, requiring high-gain modeling. The signal chain prioritizes aggressive fuzz and midrange punch over clean tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, gritty sound of 70s hard rock Marshall stacks.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Vintage)",
+              "reason": "Enhance Plexi grit and punch for classic 70s sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased vintage authenticity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rainbow - Gates Of Babylon - Valeton GP-180",
+        "song": {
+          "artist": "Rainbow",
+          "title": "Gates Of Babylon",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal hard-rock fuzz with mid bite and wah lead",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain signal chain featuring a Fuzz distortion for thick riffs, followed by an OD boost/wah for lead work, powered through a UK 45 amp model to capture the Plexi sound, finished with minimal reverb and delay.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6"
+            },
+            "purpose": "Slightly boost the signal before fuzz/wah to ensure clarity and punch.",
+            "matchQuality": "close",
+            "gap": "Using Boost as a general tone shaper since no specific pre-gain is required.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "For more sustain, but Boost maintains the aggressive edge needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "7",
+              "Tone": "6",
+              "Output": "5"
+            },
+            "purpose": "Provide the thick, saturated fuzz required for the main riffs.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Could work, but 'Fuzz' is more archetypal for 70s hard rock fuzz."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "300 Hz",
+              "Resonance": "7"
+            },
+            "purpose": "Implement the core wah sweeps for lead lines and solos.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi sound associated with 70s hard rock.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK SLP",
+                "reason": "Too clean; UK 45 provides the necessary grit."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet tone and punch.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+1"
+            },
+            "purpose": "Enhance the tight midrange bite and cut excessive low-end mud.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the required 'mid bite' that is crucial for this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "2"
+            },
+            "purpose": "Add a subtle sense of space without sounding overly ambient.",
+            "matchQuality": "close",
+            "gap": "Keeping the delay light as requested, avoiding big reverb/ambience.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Too warm; Digital Delay offers more precise control for a tight 70s sound."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide minimal natural room ambience to ground the tone.",
+            "matchQuality": "close",
+            "gap": "Using Room for a subtle, non-washy ambiance, avoiding big reverb as requested.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too bright and artificial for this specific hard rock context."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal hard-rock fuzz with mid bite and wah lead",
+          "toneProfile": "nasal hard-rock fuzz with mid bite and wah lead",
+          "idealSignalChain": "humbucker guitar | Marshall/Plexi | 4x12 | wah | fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzed riff",
+            "wah sweeps",
+            "tight midrange",
+            "sustaining lead",
+            "dry 70s rock"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 70s hard rock tones, emphasizing fuzz and wah while maintaining midrange punch.",
+          "bestMatchSummary": "A high-gain signal chain featuring a Fuzz distortion for thick riffs, followed by an OD boost/wah for lead work, powered through a UK 45 amp model to capture the Plexi sound, finished with minimal reverb and delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Slightly boost the signal before fuzz/wah to ensure clarity and punch.",
+              "matchQuality": "close",
+              "gap": "Using Boost as a general tone shaper since no specific pre-gain is required.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "For more sustain, but Boost maintains the aggressive edge needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the thick, saturated fuzz required for the main riffs.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Could work, but 'Fuzz' is more archetypal for 70s hard rock fuzz."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "300 Hz",
+                "Resonance": "7"
+              },
+              "purpose": "Implement the core wah sweeps for lead lines and solos.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound associated with 70s hard rock.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "Too clean; UK 45 provides the necessary grit."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and punch.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Enhance the tight midrange bite and cut excessive low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the required 'mid bite' that is crucial for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add a subtle sense of space without sounding overly ambient.",
+              "matchQuality": "close",
+              "gap": "Keeping the delay light as requested, avoiding big reverb/ambience.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm; Digital Delay offers more precise control for a tight 70s sound."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide minimal natural room ambience to ground the tone.",
+              "matchQuality": "close",
+              "gap": "Using Room for a subtle, non-washy ambiance, avoiding big reverb as requested.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this specific hard rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, gritty sound of 70s hard rock Marshall stacks.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Vintage)",
+              "reason": "Enhance Plexi grit and punch for classic 70s sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased vintage authenticity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "add wah as core",
+          "make fuzz distinct from crunch",
+          "drop chorus/flanger",
+          "keep delay light"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track, requiring high-gain modeling. The signal chain prioritizes aggressive fuzz and midrange punch over clean tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.911,
+      "prompt_chars": 992,
+      "response_chars": 508,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 128,
+        "total_duration": 10888017100,
+        "prompt_eval_duration": 667831000,
+        "eval_duration": 2501424000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.015,
+      "prompt_chars": 5440,
+      "response_chars": 515,
+      "usage": {
+        "input_tokens": 1519,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 147,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1666
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 46.305,
+      "prompt_chars": 3604,
+      "response_chars": 5813,
+      "usage": {
+        "prompt_eval_count": 1225,
+        "eval_count": 1658,
+        "total_duration": 46291507100,
+        "prompt_eval_duration": 390684000,
+        "eval_duration": 31954020000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.599,
+      "prompt_chars": 8004,
+      "response_chars": 506,
+      "usage": {
+        "prompt_eval_count": 2240,
+        "eval_count": 140,
+        "total_duration": 5580736600,
+        "prompt_eval_duration": 427741000,
+        "eval_duration": 4542271000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.628,
+      "prompt_chars": 2841,
+      "response_chars": 173,
+      "usage": {
+        "prompt_eval_count": 912,
+        "eval_count": 46,
+        "total_duration": 13604047000,
+        "prompt_eval_duration": 457772000,
+        "eval_duration": 893115000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rainbow",
+      "title": "Gates Of Babylon",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Rainbow - Gates Of Babylon - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal hard-rock fuzz with mid bite and wah lead",
+      "signalChainSummary": "A high-gain signal chain featuring a Fuzz distortion for thick riffs, followed by an OD boost/wah for lead work, powered through a UK 45 amp model to capture the Plexi sound, finished with minimal reverb and delay.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6"
+          },
+          "purpose": "Slightly boost the signal before fuzz/wah to ensure clarity and punch.",
+          "matchQuality": "close",
+          "gap": "Using Boost as a general tone shaper since no specific pre-gain is required.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "For more sustain, but Boost maintains the aggressive edge needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "7",
+            "Tone": "6",
+            "Output": "5"
+          },
+          "purpose": "Provide the thick, saturated fuzz required for the main riffs.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Could work, but 'Fuzz' is more archetypal for 70s hard rock fuzz."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "300 Hz",
+            "Resonance": "7"
+          },
+          "purpose": "Implement the core wah sweeps for lead lines and solos.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi sound associated with 70s hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "Too clean; UK 45 provides the necessary grit."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet tone and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+1"
+          },
+          "purpose": "Enhance the tight midrange bite and cut excessive low-end mud.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the required 'mid bite' that is crucial for this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "2"
+          },
+          "purpose": "Add a subtle sense of space without sounding overly ambient.",
+          "matchQuality": "close",
+          "gap": "Keeping the delay light as requested, avoiding big reverb/ambience.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Too warm; Digital Delay offers more precise control for a tight 70s sound."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide minimal natural room ambience to ground the tone.",
+          "matchQuality": "close",
+          "gap": "Using Room for a subtle, non-washy ambiance, avoiding big reverb as requested.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too bright and artificial for this specific hard rock context."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal hard-rock fuzz with mid bite and wah lead",
+      "mustHave": [
+        "fuzzed riff",
+        "wah sweeps",
+        "tight midrange",
+        "sustaining lead",
+        "dry 70s rock"
+      ],
+      "avoid": [
+        "generic metal",
+        "smooth overdrive",
+        "big reverb",
+        "chorus"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall/Plexi",
+        "4x12",
+        "wah",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "add wah as core",
+        "make fuzz distinct from crunch",
+        "drop chorus/flanger",
+        "keep delay light"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "nasal hard-rock fuzz with mid bite and wah lead",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the raw, gritty sound of 70s hard rock Marshall stacks.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Vintage)",
+          "reason": "Enhance Plexi grit and punch for classic 70s sound.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased vintage authenticity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1161,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

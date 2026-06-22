@@ -1,0 +1,1059 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 549,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Green_Day__Holiday.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Green Day",
+    "title": "Holiday",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "pop punk",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Green Day's 'Holiday' is a quintessential example of high-energy pop-punk."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy punk rock rhythm tone (think early 2000s pop-punk)",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-scooped)",
+        "Punchy attack",
+        "Fast palm muting articulation",
+        "Treble emphasis"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "British style amp simulation (Marshall JCM family)",
+        "Bright, articulate cabinet simulation"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep saturation/distortion",
+        "Warm vintage tones",
+        "Wah effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight mid-scooped punk crunch with bright attack",
+      "mustHave": [
+        "tight palm mutes",
+        "fast downstroke bite",
+        "dry rhythm crunch",
+        "upper-mid bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "lush chorus",
+        "big reverb"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "Tube Screamer-style boost"
+      ],
+      "corrections": [
+        "add sharper guitar edge",
+        "keep bass low but not modern metal",
+        "avoid over-thick gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight mid-scooped punk crunch with bright attack",
+    "mustHave": [
+      "tight palm mutes",
+      "fast downstroke bite",
+      "dry rhythm crunch",
+      "upper-mid bite"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "lush chorus",
+      "big reverb"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "4x12 cab",
+      "bridge humbucker",
+      "Tube Screamer-style boost"
+    ],
+    "corrections": [
+      "add sharper guitar edge",
+      "keep bass low but not modern metal",
+      "avoid over-thick gain"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk rhythm tone, emphasizing mid-range punch and tight attack.",
+          "bestMatchSummary": "A classic punk crunch setup using a Boost for bite, followed by an aggressive Marshall-style amp model (UK 45) and a standard 4x12 cabinet, keeping effects minimal to maintain tightness.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in punk rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Simulate the Tube Screamer-style boost for upper-mid bite and tight attack.",
+              "matchQuality": "close",
+              "gap": "The Boost model is used as a general overdrive/boost, approximating the classic TS sound needed for punk crunch.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Boost and Amp model will provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The target tone is 'crunch' rather than heavy distortion, so this module is bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.5",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall-style punk crunch and upper-mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 50 (if a slightly more aggressive tone is needed)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone with a classic British 4x12 cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "3 dB @ 500 Hz",
+                "High Shelf": "2 dB @ 6 kHz"
+              },
+              "purpose": "Sculpt the mid-scooped punk crunch and enhance upper-mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'Wah' sound as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids wah effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid lush chorus effects as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids modulation effects like Chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambience to keep the sound full without being 'big reverb'.",
+              "matchQuality": "close",
+              "gap": "The verdict advises avoiding 'big reverb', so settings are kept low and controlled.",
+              "alternatives": [
+                "Plate (if a slightly brighter room feel is desired)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is punk/pop-punk, requiring a tight, aggressive rhythm tone. The setup prioritizes mid-range punch and controlled gain over massive saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and bite in punk contexts.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+              "reason": "Enhance punch and definition needed for tight punk rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Green Day - Holiday - Valeton GP-180",
+        "song": {
+          "artist": "Green Day",
+          "title": "Holiday",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight mid-scooped punk crunch with bright attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic punk crunch setup using a Boost for bite, followed by an aggressive Marshall-style amp model (UK 45) and a standard 4x12 cabinet, keeping effects minimal to maintain tightness.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum inherent in punk rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Simulate the Tube Screamer-style boost for upper-mid bite and tight attack.",
+            "matchQuality": "close",
+            "gap": "The Boost model is used as a general overdrive/boost, approximating the classic TS sound needed for punk crunch.",
+            "alternatives": [
+              "OD 9 (if more grit is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Boost and Amp model will provide sufficient crunch.",
+            "matchQuality": "none",
+            "gap": "The target tone is 'crunch' rather than heavy distortion, so this module is bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.5",
+              "Midrange": "8.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Provide the classic Marshall-style punk crunch and upper-mid bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "UK 50 (if a slightly more aggressive tone is needed)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Ground the tone with a classic British 4x12 cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "Mid Boost": "3 dB @ 500 Hz",
+              "High Shelf": "2 dB @ 6 kHz"
+            },
+            "purpose": "Sculpt the mid-scooped punk crunch and enhance upper-mid bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid the 'Wah' sound as per the musical verdict.",
+            "matchQuality": "none",
+            "gap": "The target tone explicitly avoids wah effects.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid lush chorus effects as per the musical verdict.",
+            "matchQuality": "none",
+            "gap": "The target tone explicitly avoids modulation effects like Chorus.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add minimal ambience to keep the sound full without being 'big reverb'.",
+            "matchQuality": "close",
+            "gap": "The verdict advises avoiding 'big reverb', so settings are kept low and controlled.",
+            "alternatives": [
+              "Plate (if a slightly brighter room feel is desired)"
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight mid-scooped punk crunch with bright attack",
+          "toneProfile": "tight mid-scooped punk crunch with bright attack",
+          "idealSignalChain": "Marshall-style amp | 4x12 cab | bridge humbucker | Tube Screamer-style boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer-style boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm mutes",
+            "fast downstroke bite",
+            "dry rhythm crunch",
+            "upper-mid bite"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk rhythm tone, emphasizing mid-range punch and tight attack.",
+          "bestMatchSummary": "A classic punk crunch setup using a Boost for bite, followed by an aggressive Marshall-style amp model (UK 45) and a standard 4x12 cabinet, keeping effects minimal to maintain tightness.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in punk rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Simulate the Tube Screamer-style boost for upper-mid bite and tight attack.",
+              "matchQuality": "close",
+              "gap": "The Boost model is used as a general overdrive/boost, approximating the classic TS sound needed for punk crunch.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Boost and Amp model will provide sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The target tone is 'crunch' rather than heavy distortion, so this module is bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.5",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall-style punk crunch and upper-mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 50 (if a slightly more aggressive tone is needed)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone with a classic British 4x12 cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "3 dB @ 500 Hz",
+                "High Shelf": "2 dB @ 6 kHz"
+              },
+              "purpose": "Sculpt the mid-scooped punk crunch and enhance upper-mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'Wah' sound as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids wah effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid lush chorus effects as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids modulation effects like Chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambience to keep the sound full without being 'big reverb'.",
+              "matchQuality": "close",
+              "gap": "The verdict advises avoiding 'big reverb', so settings are kept low and controlled.",
+              "alternatives": [
+                "Plate (if a slightly brighter room feel is desired)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and bite in punk contexts.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+              "reason": "Enhance punch and definition needed for tight punk rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "add sharper guitar edge",
+          "keep bass low but not modern metal",
+          "avoid over-thick gain"
+        ],
+        "warnings": [
+          "The source material is punk/pop-punk, requiring a tight, aggressive rhythm tone. The setup prioritizes mid-range punch and controlled gain over massive saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.928,
+      "prompt_chars": 985,
+      "response_chars": 489,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 122,
+        "total_duration": 9921671300,
+        "prompt_eval_duration": 296795000,
+        "eval_duration": 1921230000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.875,
+      "prompt_chars": 5422,
+      "response_chars": 509,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1647
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 39.491,
+      "prompt_chars": 3574,
+      "response_chars": 5189,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1493,
+        "total_duration": 39469836700,
+        "prompt_eval_duration": 246509000,
+        "eval_duration": 24436019000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.152,
+      "prompt_chars": 7292,
+      "response_chars": 519,
+      "usage": {
+        "prompt_eval_count": 2059,
+        "eval_count": 142,
+        "total_duration": 4147320200,
+        "prompt_eval_duration": 311044000,
+        "eval_duration": 3420561000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.037,
+      "prompt_chars": 2797,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 893,
+        "eval_count": 51,
+        "total_duration": 9009653800,
+        "prompt_eval_duration": 283549000,
+        "eval_duration": 657073000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Green Day",
+      "title": "Holiday",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Green Day - Holiday - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight mid-scooped punk crunch with bright attack",
+      "signalChainSummary": "A classic punk crunch setup using a Boost for bite, followed by an aggressive Marshall-style amp model (UK 45) and a standard 4x12 cabinet, keeping effects minimal to maintain tightness.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum inherent in punk rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Simulate the Tube Screamer-style boost for upper-mid bite and tight attack.",
+          "matchQuality": "close",
+          "gap": "The Boost model is used as a general overdrive/boost, approximating the classic TS sound needed for punk crunch.",
+          "alternatives": [
+            {
+              "model": "OD 9 (if more grit is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Boost and Amp model will provide sufficient crunch.",
+          "matchQuality": "fallback",
+          "gap": "The target tone is 'crunch' rather than heavy distortion, so this module is bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.5",
+            "Midrange": "8.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Provide the classic Marshall-style punk crunch and upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50 (if a slightly more aggressive tone is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Ground the tone with a classic British 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "Mid Boost": "3 dB @ 500 Hz",
+            "High Shelf": "2 dB @ 6 kHz"
+          },
+          "purpose": "Sculpt the mid-scooped punk crunch and enhance upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid the 'Wah' sound as per the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The target tone explicitly avoids wah effects.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid lush chorus effects as per the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The target tone explicitly avoids modulation effects like Chorus.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add minimal ambience to keep the sound full without being 'big reverb'.",
+          "matchQuality": "close",
+          "gap": "The verdict advises avoiding 'big reverb', so settings are kept low and controlled.",
+          "alternatives": [
+            {
+              "model": "Plate (if a slightly brighter room feel is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight mid-scooped punk crunch with bright attack",
+      "mustHave": [
+        "tight palm mutes",
+        "fast downstroke bite",
+        "dry rhythm crunch",
+        "upper-mid bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "lush chorus",
+        "big reverb"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "Tube Screamer-style boost"
+      ],
+      "corrections": [
+        "add sharper guitar edge",
+        "keep bass low but not modern metal",
+        "avoid over-thick gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "pop punk",
+        "alternative rock"
+      ],
+      "targetTone": "tight mid-scooped punk crunch with bright attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better realism and bite in punk contexts.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+          "reason": "Enhance punch and definition needed for tight punk rhythm.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 549,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

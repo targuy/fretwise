@@ -1,0 +1,1120 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 486,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Freddie_King__Hide_Away.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Freddie King",
+    "title": "Hide Away",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "electric blues",
+      "classic blues"
+    ],
+    "confidence": "high",
+    "rationale": "Freddie King is a foundational figure in electric and classic blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bluesy, warm, slightly overdriven lead tone",
+      "signatureElements": [
+        "smooth sustain",
+        "mid-focused crunch",
+        "subtle vibrato/tremolo",
+        "vintage tube amp feel"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation with spring reverb and mild breakup",
+        "Wah pedal for expressive fills"
+      ],
+      "avoid": [
+        "harsh digital distortion",
+        "extreme scooped mids",
+        "modern high-gain metal tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright cranked tweed/low-gain blues lead with slapback",
+      "mustHave": [
+        "singing sustain",
+        "slight grit",
+        "snappy attack",
+        "light spring reverb",
+        "small-room amp feel"
+      ],
+      "avoid": [
+        "Tube Screamer push",
+        "modern overdrive",
+        "heavy wah",
+        "high gain",
+        "dark muffled tone"
+      ],
+      "gearClues": [
+        "Strat or Tele bridge pickup",
+        "tweed combo",
+        "small 1x12",
+        "slapback echo"
+      ],
+      "corrections": [
+        "drop the Tube Screamer assumption",
+        "add brighter tweed bite",
+        "keep effects sparse",
+        "wah is optional, not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright cranked tweed/low-gain blues lead with slapback",
+    "mustHave": [
+      "singing sustain",
+      "slight grit",
+      "snappy attack",
+      "light spring reverb",
+      "small-room amp feel"
+    ],
+    "avoid": [
+      "Tube Screamer push",
+      "modern overdrive",
+      "heavy wah",
+      "high gain",
+      "dark muffled tone"
+    ],
+    "gearClues": [
+      "Strat or Tele bridge pickup",
+      "tweed combo",
+      "small 1x12",
+      "slapback echo"
+    ],
+    "corrections": [
+      "drop the Tube Screamer assumption",
+      "add brighter tweed bite",
+      "keep effects sparse",
+      "wah is optional, not core"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic blues tones, prioritizing bright, low-gain tweed emulation and slapback echo.",
+          "bestMatchSummary": "A clean signal chain using a light boost/OD for grit, followed by the US Deluxe amp model with a small cab, enhanced by Chorus for bite, and finished with Slapback delay and Spring reverb to capture the classic blues sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide slight grit and boost the signal for snappy attack without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate a light, vintage overdrive/grit suitable for tweed tones, avoiding modern high-gain sounds.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the sound of a small-room, bright tweed combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is ideal for clean, articulate blues tones and capturing the 'small room' feel.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if a slightly more open/clean sound is preferred."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, bright cabinet (like a 1x12 or 2x12 tweed setup).",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides the necessary brightness and compact feel.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "Another good option for a small, bright cabinet."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "modulation/EQ",
+              "module": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle movement and bite to the tone, enhancing the 'singing sustain' quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here to add dimension without sounding overly processed, supporting the blues lead role.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "If more tonal shaping (e.g., boosting upper mids) is needed instead of movement."
+                }
+              ],
+              "model": "None"
+            },
+            {
+              "order": 6,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Crucial for achieving the classic blues 'slapback echo' effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3s"
+              },
+              "purpose": "Provide a light, vintage room ambiance and complement the tweed sound.",
+              "matchQuality": "close",
+              "gap": "Spring reverb is perfect for classic blues/rock tones.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A slightly more natural ambient choice."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "pre-output EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Midrange": "3",
+                "Treble": "4"
+              },
+              "purpose": "Fine-tune the overall tone, slightly emphasizing upper mids for bite and clarity.",
+              "matchQuality": "close",
+              "gap": "Used as a final polish EQ to ensure the 'bright cranked' character is maintained.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic blues guitar performance. The rig focuses on emulating vintage, low-gain tweed tones rather than modern high-gain sounds."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, compact sound of a classic tweed combo.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Tweed/Small Combo Cabinet realism",
+              "recommendedAsset": "vintage 1x12 or 2x12 tweed IR",
+              "reason": "The current US 2x12 is generic; a specific vintage tweed IR will enhance the desired bright, small-room bite.",
+              "replacesBlockOrder": 4,
+              "whenToUse": "Always for this tone",
+              "expectedGain": "Increased authenticity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Freddie King - Hide Away - Valeton GP-180",
+        "song": {
+          "artist": "Freddie King",
+          "title": "Hide Away",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright cranked tweed/low-gain blues lead with slapback",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain using a light boost/OD for grit, followed by the US Deluxe amp model with a small cab, enhanced by Chorus for bite, and finished with Slapback delay and Spring reverb to capture the classic blues sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide slight grit and boost the signal for snappy attack without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to emulate a light, vintage overdrive/grit suitable for tweed tones, avoiding modern high-gain sounds.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive alternative if more grit is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Emulate the sound of a small-room, bright tweed combo amplifier.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is ideal for clean, articulate blues tones and capturing the 'small room' feel.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "A good alternative if a slightly more open/clean sound is preferred."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate the sound of a small, bright cabinet (like a 1x12 or 2x12 tweed setup).",
+            "matchQuality": "close",
+            "gap": "The US 2x12 provides the necessary brightness and compact feel.",
+            "alternatives": [
+              {
+                "model": "Foxy 2x12",
+                "reason": "Another good option for a small, bright cabinet."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "modulation/EQ",
+            "module": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3",
+              "Depth": "4",
+              "Mix": "2"
+            },
+            "purpose": "Add subtle movement and bite to the tone, enhancing the 'singing sustain' quality.",
+            "matchQuality": "close",
+            "gap": "Chorus is used sparingly here to add dimension without sounding overly processed, supporting the blues lead role.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 1",
+                "reason": "If more tonal shaping (e.g., boosting upper mids) is needed instead of movement."
+              }
+            ],
+            "model": "None"
+          },
+          {
+            "order": 6,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2",
+              "Level": "3"
+            },
+            "purpose": "Crucial for achieving the classic blues 'slapback echo' effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "3s"
+            },
+            "purpose": "Provide a light, vintage room ambiance and complement the tweed sound.",
+            "matchQuality": "close",
+            "gap": "Spring reverb is perfect for classic blues/rock tones.",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "A slightly more natural ambient choice."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "pre-output EQ/Tone Shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1",
+              "Midrange": "3",
+              "Treble": "4"
+            },
+            "purpose": "Fine-tune the overall tone, slightly emphasizing upper mids for bite and clarity.",
+            "matchQuality": "close",
+            "gap": "Used as a final polish EQ to ensure the 'bright cranked' character is maintained.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [],
+            "model": "None"
+          }
+        ],
+        "general": {
+          "targetSound": "bright cranked tweed/low-gain blues lead with slapback",
+          "toneProfile": "bright cranked tweed/low-gain blues lead with slapback",
+          "idealSignalChain": "Strat or Tele bridge pickup | tweed combo | small 1x12 | slapback echo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat or Tele bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tweed combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small 1x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "slapback echo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "singing sustain",
+            "slight grit",
+            "snappy attack",
+            "light spring reverb",
+            "small-room amp feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic blues tones, prioritizing bright, low-gain tweed emulation and slapback echo.",
+          "bestMatchSummary": "A clean signal chain using a light boost/OD for grit, followed by the US Deluxe amp model with a small cab, enhanced by Chorus for bite, and finished with Slapback delay and Spring reverb to capture the classic blues sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide slight grit and boost the signal for snappy attack without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate a light, vintage overdrive/grit suitable for tweed tones, avoiding modern high-gain sounds.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the sound of a small-room, bright tweed combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is ideal for clean, articulate blues tones and capturing the 'small room' feel.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if a slightly more open/clean sound is preferred."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, bright cabinet (like a 1x12 or 2x12 tweed setup).",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides the necessary brightness and compact feel.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "Another good option for a small, bright cabinet."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "modulation/EQ",
+              "module": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle movement and bite to the tone, enhancing the 'singing sustain' quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here to add dimension without sounding overly processed, supporting the blues lead role.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "If more tonal shaping (e.g., boosting upper mids) is needed instead of movement."
+                }
+              ],
+              "model": "None"
+            },
+            {
+              "order": 6,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Crucial for achieving the classic blues 'slapback echo' effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3s"
+              },
+              "purpose": "Provide a light, vintage room ambiance and complement the tweed sound.",
+              "matchQuality": "close",
+              "gap": "Spring reverb is perfect for classic blues/rock tones.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A slightly more natural ambient choice."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "pre-output EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Midrange": "3",
+                "Treble": "4"
+              },
+              "purpose": "Fine-tune the overall tone, slightly emphasizing upper mids for bite and clarity.",
+              "matchQuality": "close",
+              "gap": "Used as a final polish EQ to ensure the 'bright cranked' character is maintained.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, compact sound of a classic tweed combo.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Tweed/Small Combo Cabinet realism",
+              "recommendedAsset": "vintage 1x12 or 2x12 tweed IR",
+              "reason": "The current US 2x12 is generic; a specific vintage tweed IR will enhance the desired bright, small-room bite.",
+              "replacesBlockOrder": 4,
+              "whenToUse": "Always for this tone",
+              "expectedGain": "Increased authenticity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop the Tube Screamer assumption",
+          "add brighter tweed bite",
+          "keep effects sparse",
+          "wah is optional, not core"
+        ],
+        "warnings": [
+          "The source material is a classic blues guitar performance. The rig focuses on emulating vintage, low-gain tweed tones rather than modern high-gain sounds."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.218,
+      "prompt_chars": 990,
+      "response_chars": 447,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 111,
+        "total_duration": 9193066600,
+        "prompt_eval_duration": 168714000,
+        "eval_duration": 1935576000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.35,
+      "prompt_chars": 5371,
+      "response_chars": 591,
+      "usage": {
+        "input_tokens": 1501,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 160,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1661
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 28.216,
+      "prompt_chars": 3682,
+      "response_chars": 5680,
+      "usage": {
+        "prompt_eval_count": 1236,
+        "eval_count": 1582,
+        "total_duration": 28199419000,
+        "prompt_eval_duration": 242565000,
+        "eval_duration": 27534126000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.159,
+      "prompt_chars": 7917,
+      "response_chars": 605,
+      "usage": {
+        "prompt_eval_count": 2175,
+        "eval_count": 163,
+        "total_duration": 4130166700,
+        "prompt_eval_duration": 416676000,
+        "eval_duration": 3237832000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.692,
+      "prompt_chars": 2840,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 888,
+        "eval_count": 44,
+        "total_duration": 23687819300,
+        "prompt_eval_duration": 162381000,
+        "eval_duration": 292716000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Freddie King",
+      "title": "Hide Away",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Freddie King - Hide Away - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright cranked tweed/low-gain blues lead with slapback",
+      "signalChainSummary": "A clean signal chain using a light boost/OD for grit, followed by the US Deluxe amp model with a small cab, enhanced by Chorus for bite, and finished with Slapback delay and Spring reverb to capture the classic blues sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide slight grit and boost the signal for snappy attack without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to emulate a light, vintage overdrive/grit suitable for tweed tones, avoiding modern high-gain sounds.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive alternative if more grit is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Emulate the sound of a small-room, bright tweed combo amplifier.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is ideal for clean, articulate blues tones and capturing the 'small room' feel.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A good alternative if a slightly more open/clean sound is preferred."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate the sound of a small, bright cabinet (like a 1x12 or 2x12 tweed setup).",
+          "matchQuality": "close",
+          "gap": "The US 2x12 provides the necessary brightness and compact feel.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": "Another good option for a small, bright cabinet."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "modulation/EQ",
+          "module": "PRE",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Rate": "3",
+            "Depth": "4",
+            "Mix": "2"
+          },
+          "purpose": "Add subtle movement and bite to the tone, enhancing the 'singing sustain' quality.",
+          "matchQuality": "close",
+          "gap": "Chorus is used sparingly here to add dimension without sounding overly processed, supporting the blues lead role.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "If more tonal shaping (e.g., boosting upper mids) is needed instead of movement."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2",
+            "Level": "3"
+          },
+          "purpose": "Crucial for achieving the classic blues 'slapback echo' effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "3s"
+          },
+          "purpose": "Provide a light, vintage room ambiance and complement the tweed sound.",
+          "matchQuality": "close",
+          "gap": "Spring reverb is perfect for classic blues/rock tones.",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "A slightly more natural ambient choice."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "pre-output EQ/Tone Shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1",
+            "Midrange": "3",
+            "Treble": "4"
+          },
+          "purpose": "Fine-tune the overall tone, slightly emphasizing upper mids for bite and clarity.",
+          "matchQuality": "close",
+          "gap": "Used as a final polish EQ to ensure the 'bright cranked' character is maintained.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright cranked tweed/low-gain blues lead with slapback",
+      "mustHave": [
+        "singing sustain",
+        "slight grit",
+        "snappy attack",
+        "light spring reverb",
+        "small-room amp feel"
+      ],
+      "avoid": [
+        "Tube Screamer push",
+        "modern overdrive",
+        "heavy wah",
+        "high gain",
+        "dark muffled tone"
+      ],
+      "gearClues": [
+        "Strat or Tele bridge pickup",
+        "tweed combo",
+        "small 1x12",
+        "slapback echo"
+      ],
+      "corrections": [
+        "drop the Tube Screamer assumption",
+        "add brighter tweed bite",
+        "keep effects sparse",
+        "wah is optional, not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "electric blues",
+        "classic blues"
+      ],
+      "targetTone": "bright cranked tweed/low-gain blues lead with slapback",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the bright, compact sound of a classic tweed combo.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Tweed/Small Combo Cabinet realism",
+          "recommendedAsset": "vintage 1x12 or 2x12 tweed IR",
+          "reason": "The current US 2x12 is generic; a specific vintage tweed IR will enhance the desired bright, small-room bite.",
+          "replacesBlockOrder": 4,
+          "whenToUse": "Always for this tone",
+          "expectedGain": "Increased authenticity and brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 486,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

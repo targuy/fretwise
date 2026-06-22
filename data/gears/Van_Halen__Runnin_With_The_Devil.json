@@ -1,0 +1,1064 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1720,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Van_Halen__Runnin_With_The_Devil.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Van Halen",
+    "title": "Runnin' With The Devil",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Van Halen's style is foundational hard rock, characterized by powerful riffs and Marshall tones."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High gain, aggressive crunch with pronounced mid-range bite and slight fuzz character.",
+      "signatureElements": [
+        "aggressive rhythm riffing",
+        "mid-scooped lead lines",
+        "tight palm muting",
+        "fuzz/crunch blend"
+      ],
+      "gearHypotheses": [
+        "high-gain amp model (Marshall JCM800 style)",
+        "overdrive pedal (Tube Screamer style) for tightening",
+        "chorus or flanger for texture"
+      ],
+      "avoid": [
+        "excessive clean reverb",
+        "smooth modulation effects",
+        "low gain settings"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry brown Marshall crunch with bite",
+      "mustHave": [
+        "raw riff crunch",
+        "upper-mid grind",
+        "tight low end",
+        "little ambience"
+      ],
+      "avoid": [
+        "high gain",
+        "fuzz",
+        "chorus",
+        "flanger",
+        "scooped leads"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "Plexi/JTM feel",
+        "4x12 cab",
+        "passive humbuckers"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop chorus/flanger",
+        "avoid JCM800 gain"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry brown Marshall crunch with bite",
+    "mustHave": [
+      "raw riff crunch",
+      "upper-mid grind",
+      "tight low end",
+      "little ambience"
+    ],
+    "avoid": [
+      "high gain",
+      "fuzz",
+      "chorus",
+      "flanger",
+      "scooped leads"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "Plexi/JTM feel",
+      "4x12 cab",
+      "passive humbuckers"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "drop chorus/flanger",
+      "avoid JCM800 gain"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock/Hard Rock tone emulation, focusing on Marshall Plexi grit.",
+          "bestMatchSummary": "A tight, crunchy signal chain using a British amp model (UK 45) combined with a classic cabinet and light compression for raw riff power.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and excessive noise from high-gain riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Slight boost to tighten the low end and enhance riff punch.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD for a clean, focused push.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A slightly dirtier option if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the necessary raw crunch and upper-mid grind without excessive fuzz.",
+              "matchQuality": "close",
+              "gap": "The RAT is chosen for its aggressive, mid-focused bite suitable for Van Halen's style.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general purpose distortion if the RAT sounds too biting."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JTM sound required for the era and tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Fine-tune the tone to emphasize upper mids and tighten the low end.",
+              "matchQuality": "close",
+              "gap": "Using a dedicated EQ block for surgical tone shaping after the amp/cab stage.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; focus on raw crunch.",
+              "matchQuality": "perfect",
+              "gap": "The musical verdict explicitly avoids complex modulation effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "1"
+              },
+              "purpose": "Add minimal ambience and depth without sounding overly processed.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to meet the 'little ambience' requirement, avoiding heavy reverb.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A subtle Room reverb could also work if delay is too noticeable."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Provide a subtle sense of space and depth.",
+              "matchQuality": "close",
+              "gap": "Kept very low to avoid muddying the raw riff tone.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic hard rock, requiring a high-powered and aggressive signal chain. The settings are optimized for maximum punch and mid-range bite."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, biting Marshall Plexi sound required for Van Halen's riffing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic British crunch and upper-mid bite missing from the current IR.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Van Halen - Runnin' With The Devil - Valeton GP-180",
+        "song": {
+          "artist": "Van Halen",
+          "title": "Runnin' With The Devil",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry brown Marshall crunch with bite",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight, crunchy signal chain using a British amp model (UK 45) combined with a classic cabinet and light compression for raw riff power.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and excessive noise from high-gain riffing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Slight boost to tighten the low end and enhance riff punch.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of OD for a clean, focused push.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A slightly dirtier option if more grit is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Output": "5"
+            },
+            "purpose": "Provide the necessary raw crunch and upper-mid grind without excessive fuzz.",
+            "matchQuality": "close",
+            "gap": "The RAT is chosen for its aggressive, mid-focused bite suitable for Van Halen's style.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A more general purpose distortion if the RAT sounds too biting."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "7",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the classic Marshall Plexi/JTM sound required for the era and tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet tone and necessary punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Fine-tune the tone to emphasize upper mids and tighten the low end.",
+            "matchQuality": "close",
+            "gap": "Using a dedicated EQ block for surgical tone shaping after the amp/cab stage.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; focus on raw crunch.",
+            "matchQuality": "perfect",
+            "gap": "The musical verdict explicitly avoids complex modulation effects.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "1"
+            },
+            "purpose": "Add minimal ambience and depth without sounding overly processed.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to meet the 'little ambience' requirement, avoiding heavy reverb.",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "A subtle Room reverb could also work if delay is too noticeable."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2s"
+            },
+            "purpose": "Provide a subtle sense of space and depth.",
+            "matchQuality": "close",
+            "gap": "Kept very low to avoid muddying the raw riff tone.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry brown Marshall crunch with bite",
+          "toneProfile": "dry brown Marshall crunch with bite",
+          "idealSignalChain": "Marshall-style amp | Plexi/JTM feel | 4x12 cab | passive humbuckers",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Plexi/JTM feel",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "passive humbuckers",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "raw riff crunch",
+            "upper-mid grind",
+            "tight low end",
+            "little ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock/Hard Rock tone emulation, focusing on Marshall Plexi grit.",
+          "bestMatchSummary": "A tight, crunchy signal chain using a British amp model (UK 45) combined with a classic cabinet and light compression for raw riff power.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and excessive noise from high-gain riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Slight boost to tighten the low end and enhance riff punch.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD for a clean, focused push.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A slightly dirtier option if more grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the necessary raw crunch and upper-mid grind without excessive fuzz.",
+              "matchQuality": "close",
+              "gap": "The RAT is chosen for its aggressive, mid-focused bite suitable for Van Halen's style.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general purpose distortion if the RAT sounds too biting."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JTM sound required for the era and tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Fine-tune the tone to emphasize upper mids and tighten the low end.",
+              "matchQuality": "close",
+              "gap": "Using a dedicated EQ block for surgical tone shaping after the amp/cab stage.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; focus on raw crunch.",
+              "matchQuality": "perfect",
+              "gap": "The musical verdict explicitly avoids complex modulation effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "1"
+              },
+              "purpose": "Add minimal ambience and depth without sounding overly processed.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to meet the 'little ambience' requirement, avoiding heavy reverb.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A subtle Room reverb could also work if delay is too noticeable."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Provide a subtle sense of space and depth.",
+              "matchQuality": "close",
+              "gap": "Kept very low to avoid muddying the raw riff tone.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, biting Marshall Plexi sound required for Van Halen's riffing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic British crunch and upper-mid bite missing from the current IR.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "drop chorus/flanger",
+          "avoid JCM800 gain"
+        ],
+        "warnings": [
+          "The source material is classic hard rock, requiring a high-powered and aggressive signal chain. The settings are optimized for maximum punch and mid-range bite."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.092,
+      "prompt_chars": 1000,
+      "response_chars": 489,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 121,
+        "total_duration": 10088506100,
+        "prompt_eval_duration": 251258000,
+        "eval_duration": 2002489000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.781,
+      "prompt_chars": 5423,
+      "response_chars": 457,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1643
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.371,
+      "prompt_chars": 3544,
+      "response_chars": 5139,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1455,
+        "total_duration": 32346446000,
+        "prompt_eval_duration": 402591000,
+        "eval_duration": 31439623000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.195,
+      "prompt_chars": 7218,
+      "response_chars": 557,
+      "usage": {
+        "prompt_eval_count": 2027,
+        "eval_count": 149,
+        "total_duration": 4171819200,
+        "prompt_eval_duration": 357161000,
+        "eval_duration": 3286129000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 28.73,
+      "prompt_chars": 2623,
+      "response_chars": 202,
+      "usage": {
+        "prompt_eval_count": 857,
+        "eval_count": 51,
+        "total_duration": 28704508100,
+        "prompt_eval_duration": 576891000,
+        "eval_duration": 598271000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Van Halen",
+      "title": "Runnin' With The Devil",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Van Halen - Runnin' With The Devil - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry brown Marshall crunch with bite",
+      "signalChainSummary": "A tight, crunchy signal chain using a British amp model (UK 45) combined with a classic cabinet and light compression for raw riff power.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and excessive noise from high-gain riffing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Slight boost to tighten the low end and enhance riff punch.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of OD for a clean, focused push.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A slightly dirtier option if more grit is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Output": "5"
+          },
+          "purpose": "Provide the necessary raw crunch and upper-mid grind without excessive fuzz.",
+          "matchQuality": "close",
+          "gap": "The RAT is chosen for its aggressive, mid-focused bite suitable for Van Halen's style.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A more general purpose distortion if the RAT sounds too biting."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "7",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the classic Marshall Plexi/JTM sound required for the era and tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet tone and necessary punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Fine-tune the tone to emphasize upper mids and tighten the low end.",
+          "matchQuality": "close",
+          "gap": "Using a dedicated EQ block for surgical tone shaping after the amp/cab stage.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; focus on raw crunch.",
+          "matchQuality": "exact",
+          "gap": "The musical verdict explicitly avoids complex modulation effects.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "1"
+          },
+          "purpose": "Add minimal ambience and depth without sounding overly processed.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to meet the 'little ambience' requirement, avoiding heavy reverb.",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "A subtle Room reverb could also work if delay is too noticeable."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2s"
+          },
+          "purpose": "Provide a subtle sense of space and depth.",
+          "matchQuality": "close",
+          "gap": "Kept very low to avoid muddying the raw riff tone.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry brown Marshall crunch with bite",
+      "mustHave": [
+        "raw riff crunch",
+        "upper-mid grind",
+        "tight low end",
+        "little ambience"
+      ],
+      "avoid": [
+        "high gain",
+        "fuzz",
+        "chorus",
+        "flanger",
+        "scooped leads"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "Plexi/JTM feel",
+        "4x12 cab",
+        "passive humbuckers"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop chorus/flanger",
+        "avoid JCM800 gain"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "dry brown Marshall crunch with bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the raw, biting Marshall Plexi sound required for Van Halen's riffing.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (UK)",
+          "reason": "Enhance the classic British crunch and upper-mid bite missing from the current IR.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and punch in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1720,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

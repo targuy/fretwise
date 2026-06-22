@@ -1,0 +1,1030 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 897,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Matmatah__L_apologie.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Matmatah",
+    "title": "L'apologie",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "indie folk",
+      "americana",
+      "acoustic pop"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and clean, chorus-heavy tone suggest a blend of Americana and indie folk."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with pronounced chorus and delay.",
+      "signatureElements": [
+        "Chorus modulation (key element)",
+        "Delay (dotted eighth notes)",
+        "Clean/Crunch amp simulation (e.g., Fender Twin style)",
+        "Reverb"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (Chorus/Vibrato)",
+        "Digital Delay unit",
+        "Amp simulator with clean headroom"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "High gain saturation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright chorus clean with light edge-of-breakup",
+      "mustHave": [
+        "chorus modulation",
+        "clean headroom",
+        "light crunch",
+        "short delay"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "washed reverb"
+      ],
+      "gearClues": [
+        "strat or tele",
+        "single coils",
+        "Fender clean",
+        "stereo chorus",
+        "digital delay"
+      ],
+      "corrections": [
+        "drop dotted eighth specificity",
+        "tone is less wet",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright chorus clean with light edge-of-breakup",
+    "mustHave": [
+      "chorus modulation",
+      "clean headroom",
+      "light crunch",
+      "short delay"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "high gain",
+      "washed reverb"
+    ],
+    "gearClues": [
+      "strat or tele",
+      "single coils",
+      "Fender clean",
+      "stereo chorus",
+      "digital delay"
+    ],
+    "corrections": [
+      "drop dotted eighth specificity",
+      "tone is less wet",
+      "keep reverb minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with chorus and light breakup.",
+          "bestMatchSummary": "A classic Fender-style chain using Chorus for modulation, a Boost/OD for gentle crunch, and the US Deluxe amp paired with a 2x12 cab to achieve a bright, clean headroom sound suitable for fingerpicked arpeggios.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide light edge-of-breakup and gentle drive for the 'light crunch' requirement.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD pedal to keep the breakup subtle, matching the clean headroom goal.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "A slightly more colored alternative if the boost is too transparent."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "5",
+                "Feedback": "3"
+              },
+              "purpose": "Achieve the required 'stereo chorus modulation' for a bright, shimmering sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The light crunch is handled by the Boost pedal.",
+              "matchQuality": "exact",
+              "gap": "The required drive level is too low for dedicated distortion models.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "5"
+              },
+              "purpose": "Provide clean headroom and a bright, Fender-esque tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, single-coil sound and complement the US Deluxe amp.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "2",
+                "Mid": "6",
+                "Treble": "7"
+              },
+              "purpose": "Brighten the tone and emphasize the high end for clarity in arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Provide the required 'short delay' effect without being overly wet.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambience ('keep reverb minimal') without washing out the clean tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (likely acoustic/vocal arrangement). The rig is built to imitate a bright, clean electric guitar arpeggio style.",
+          "The 'Boost' pedal is used as the primary light crunch source because dedicated OD pedals might introduce too much color or gain for the required clean headroom."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more vintage, single-coil focused option.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR",
+              "reason": "Enhance single-coil brightness and vintage character.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Matmatah - L'apologie - Valeton GP-180",
+        "song": {
+          "artist": "Matmatah",
+          "title": "L'apologie",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright chorus clean with light edge-of-breakup",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic Fender-style chain using Chorus for modulation, a Boost/OD for gentle crunch, and the US Deluxe amp paired with a 2x12 cab to achieve a bright, clean headroom sound suitable for fingerpicked arpeggios.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "5"
+            },
+            "purpose": "Provide light edge-of-breakup and gentle drive for the 'light crunch' requirement.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated OD pedal to keep the breakup subtle, matching the clean headroom goal.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "A slightly more colored alternative if the boost is too transparent."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "5",
+              "Feedback": "3"
+            },
+            "purpose": "Achieve the required 'stereo chorus modulation' for a bright, shimmering sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The light crunch is handled by the Boost pedal.",
+            "matchQuality": "exact",
+            "gap": "The required drive level is too low for dedicated distortion models.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Mid": "5",
+              "Bass": "5"
+            },
+            "purpose": "Provide clean headroom and a bright, Fender-esque tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the bright, single-coil sound and complement the US Deluxe amp.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "2",
+              "Mid": "6",
+              "Treble": "7"
+            },
+            "purpose": "Brighten the tone and emphasize the high end for clarity in arpeggios.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "3"
+            },
+            "purpose": "Provide the required 'short delay' effect without being overly wet.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add minimal ambience ('keep reverb minimal') without washing out the clean tone.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright chorus clean with light edge-of-breakup",
+          "toneProfile": "bright chorus clean with light edge-of-breakup",
+          "idealSignalChain": "strat or tele | single coils | Fender clean | stereo chorus | digital delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "strat or tele",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender clean",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "stereo chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "digital delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus modulation",
+            "clean headroom",
+            "light crunch",
+            "short delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with chorus and light breakup.",
+          "bestMatchSummary": "A classic Fender-style chain using Chorus for modulation, a Boost/OD for gentle crunch, and the US Deluxe amp paired with a 2x12 cab to achieve a bright, clean headroom sound suitable for fingerpicked arpeggios.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide light edge-of-breakup and gentle drive for the 'light crunch' requirement.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD pedal to keep the breakup subtle, matching the clean headroom goal.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "A slightly more colored alternative if the boost is too transparent."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "5",
+                "Feedback": "3"
+              },
+              "purpose": "Achieve the required 'stereo chorus modulation' for a bright, shimmering sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The light crunch is handled by the Boost pedal.",
+              "matchQuality": "exact",
+              "gap": "The required drive level is too low for dedicated distortion models.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "5"
+              },
+              "purpose": "Provide clean headroom and a bright, Fender-esque tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, single-coil sound and complement the US Deluxe amp.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "2",
+                "Mid": "6",
+                "Treble": "7"
+              },
+              "purpose": "Brighten the tone and emphasize the high end for clarity in arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Provide the required 'short delay' effect without being overly wet.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambience ('keep reverb minimal') without washing out the clean tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more vintage, single-coil focused option.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR",
+              "reason": "Enhance single-coil brightness and vintage character.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop dotted eighth specificity",
+          "tone is less wet",
+          "keep reverb minimal"
+        ],
+        "warnings": [
+          "The source material is non-guitar (likely acoustic/vocal arrangement). The rig is built to imitate a bright, clean electric guitar arpeggio style.",
+          "The 'Boost' pedal is used as the primary light crunch source because dedicated OD pedals might introduce too much color or gain for the required clean headroom."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.973,
+      "prompt_chars": 987,
+      "response_chars": 452,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 108,
+        "total_duration": 10950751000,
+        "prompt_eval_duration": 760951000,
+        "eval_duration": 2348615000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.896,
+      "prompt_chars": 5373,
+      "response_chars": 481,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 125,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1622
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 42.798,
+      "prompt_chars": 3548,
+      "response_chars": 4852,
+      "usage": {
+        "prompt_eval_count": 1195,
+        "eval_count": 1383,
+        "total_duration": 42789604200,
+        "prompt_eval_duration": 630306000,
+        "eval_duration": 27198661000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.101,
+      "prompt_chars": 6917,
+      "response_chars": 548,
+      "usage": {
+        "prompt_eval_count": 1935,
+        "eval_count": 143,
+        "total_duration": 4093843000,
+        "prompt_eval_duration": 756983000,
+        "eval_duration": 2805794000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.698,
+      "prompt_chars": 2665,
+      "response_chars": 229,
+      "usage": {
+        "prompt_eval_count": 838,
+        "eval_count": 74,
+        "total_duration": 11693960100,
+        "prompt_eval_duration": 415467000,
+        "eval_duration": 1218571000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Matmatah",
+      "title": "L'apologie",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "Matmatah - L'apologie - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright chorus clean with light edge-of-breakup",
+      "signalChainSummary": "A classic Fender-style chain using Chorus for modulation, a Boost/OD for gentle crunch, and the US Deluxe amp paired with a 2x12 cab to achieve a bright, clean headroom sound suitable for fingerpicked arpeggios.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "5"
+          },
+          "purpose": "Provide light edge-of-breakup and gentle drive for the 'light crunch' requirement.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated OD pedal to keep the breakup subtle, matching the clean headroom goal.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "A slightly more colored alternative if the boost is too transparent."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "5",
+            "Feedback": "3"
+          },
+          "purpose": "Achieve the required 'stereo chorus modulation' for a bright, shimmering sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The light crunch is handled by the Boost pedal.",
+          "matchQuality": "exact",
+          "gap": "The required drive level is too low for dedicated distortion models.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Mid": "5",
+            "Bass": "5"
+          },
+          "purpose": "Provide clean headroom and a bright, Fender-esque tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the bright, single-coil sound and complement the US Deluxe amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "2",
+            "Mid": "6",
+            "Treble": "7"
+          },
+          "purpose": "Brighten the tone and emphasize the high end for clarity in arpeggios.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "3"
+          },
+          "purpose": "Provide the required 'short delay' effect without being overly wet.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add minimal ambience ('keep reverb minimal') without washing out the clean tone.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright chorus clean with light edge-of-breakup",
+      "mustHave": [
+        "chorus modulation",
+        "clean headroom",
+        "light crunch",
+        "short delay"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "washed reverb"
+      ],
+      "gearClues": [
+        "strat or tele",
+        "single coils",
+        "Fender clean",
+        "stereo chorus",
+        "digital delay"
+      ],
+      "corrections": [
+        "drop dotted eighth specificity",
+        "tone is less wet",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "indie folk",
+        "americana",
+        "acoustic pop"
+      ],
+      "targetTone": "bright chorus clean with light edge-of-breakup",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more vintage, single-coil focused option.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage Fender 2x12 IR",
+          "reason": "Enhance single-coil brightness and vintage character.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity/definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 897,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

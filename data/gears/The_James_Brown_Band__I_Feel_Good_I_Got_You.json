@@ -1,0 +1,1121 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1545,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_James_Brown_Band__I_Feel_Good_I_Got_You.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The James Brown Band",
+    "title": "I Feel Good (I Got You)",
+    "album": "",
+    "year": null,
+    "genre": "funk"
+  },
+  "genreClassification": {
+    "genre": "funk",
+    "subgenres": [
+      "soul",
+      "r&b"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic James Brown track, defining the genre of funk and soul."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Punchy, mid-focused funk rhythm tone",
+      "signatureElements": [
+        "tight palm-muting",
+        "percussive attack",
+        "slight chorus/vibrato modulation",
+        "clean to light crunch"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Fender Deluxe Reverb style)",
+        "Wah pedal for rhythmic accents",
+        "Compressor for sustain and punch"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Ambient delay tails",
+        "Bright, scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight bright funk clean with sharp attack",
+      "mustHave": [
+        "clean clipped rhythm",
+        "percussive stabs",
+        "strong mid bite",
+        "dry short room"
+      ],
+      "avoid": [
+        "chorus",
+        "vibrato",
+        "heavy crunch",
+        "long delay"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coils",
+        "light compressor"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "drop wah",
+        "stay cleaner than light crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight bright funk clean with sharp attack",
+    "mustHave": [
+      "clean clipped rhythm",
+      "percussive stabs",
+      "strong mid bite",
+      "dry short room"
+    ],
+    "avoid": [
+      "chorus",
+      "vibrato",
+      "heavy crunch",
+      "long delay"
+    ],
+    "gearClues": [
+      "Fender-style clean amp",
+      "single-coils",
+      "light compressor"
+    ],
+    "corrections": [
+      "drop chorus/vibrato",
+      "drop wah",
+      "stay cleaner than light crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean tones with punchy compression and mid-focused amps.",
+          "bestMatchSummary": "A tight, compressed signal chain using a light boost/compressor, followed by a Fender-style clean amp (US Deluxe), emphasizing the upper mids for that classic funk bite. Minimal effects are used to maintain dryness and clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Sustain": "High"
+              },
+              "purpose": "Provide the required 'sharp attack' and smooth out dynamics for percussive stabs.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Give the signal extra punch and help cut through the mix without adding grit.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated clean boost pedal to keep the tone transparent.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could add too much color, potentially muddying the tight funk sound."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on natural guitar dynamics.",
+              "matchQuality": "perfect",
+              "gap": "The genre requires minimal distortion; keeping this module bypassed is key.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the Fender-style clean amp and provide strong mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, articulate sound suitable for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "4 kHz",
+                "High Shelf": "6 dB"
+              },
+              "purpose": "Sculpt the frequency response to enhance the 'strong mid bite' and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the wah effect as per instructions and maintain a clean tone.",
+              "matchQuality": "perfect",
+              "gap": "The genre requires direct, punchy rhythm playing without filtering effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "modulation/time",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, dry room ambience as requested, keeping the sound tight and non-washy.",
+              "matchQuality": "perfect",
+              "gap": "Using Room for minimal space without adding noticeable reverb tails or wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might be too bright or artificial for the vintage funk sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "delay/time",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid long delay effects to maintain the percussive and dry nature of the funk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "The 'percussive stabs' mandate a very dry signal path.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic funk/R&B track, requiring extremely tight and percussive tones. The rig prioritizes compression and mid-range EQ to achieve the 'sharp attack' while keeping all effects (Chorus, Wah, long delay) minimal or bypassed."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better funk articulation and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Funk/R&B 2x12 (e.g., Ampeg or Fender style)",
+              "reason": "Enhance the percussive, mid-focused punch required for funk.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The James Brown Band - I Feel Good (I Got You) - Valeton GP-180",
+        "song": {
+          "artist": "The James Brown Band",
+          "title": "I Feel Good (I Got You)",
+          "album": "",
+          "year": null,
+          "genre": "funk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight bright funk clean with sharp attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, compressed signal chain using a light boost/compressor, followed by a Fender-style clean amp (US Deluxe), emphasizing the upper mids for that classic funk bite. Minimal effects are used to maintain dryness and clarity.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Sustain": "High"
+            },
+            "purpose": "Provide the required 'sharp attack' and smooth out dynamics for percussive stabs.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Give the signal extra punch and help cut through the mix without adding grit.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated clean boost pedal to keep the tone transparent.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Could add too much color, potentially muddying the tight funk sound."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and focused on natural guitar dynamics.",
+            "matchQuality": "perfect",
+            "gap": "The genre requires minimal distortion; keeping this module bypassed is key.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the Fender-style clean amp and provide strong mid bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, articulate sound suitable for funk rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "Mid Boost": "4 kHz",
+              "High Shelf": "6 dB"
+            },
+            "purpose": "Sculpt the frequency response to enhance the 'strong mid bite' and clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid the wah effect as per instructions and maintain a clean tone.",
+            "matchQuality": "perfect",
+            "gap": "The genre requires direct, punchy rhythm playing without filtering effects.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "modulation/time",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle, dry room ambience as requested, keeping the sound tight and non-washy.",
+            "matchQuality": "perfect",
+            "gap": "Using Room for minimal space without adding noticeable reverb tails or wash.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might be too bright or artificial for the vintage funk sound."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "delay/time",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid long delay effects to maintain the percussive and dry nature of the funk rhythm.",
+            "matchQuality": "perfect",
+            "gap": "The 'percussive stabs' mandate a very dry signal path.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight bright funk clean with sharp attack",
+          "toneProfile": "tight bright funk clean with sharp attack",
+          "idealSignalChain": "Fender-style clean amp | single-coils | light compressor",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compressor",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean clipped rhythm",
+            "percussive stabs",
+            "strong mid bite",
+            "dry short room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean tones with punchy compression and mid-focused amps.",
+          "bestMatchSummary": "A tight, compressed signal chain using a light boost/compressor, followed by a Fender-style clean amp (US Deluxe), emphasizing the upper mids for that classic funk bite. Minimal effects are used to maintain dryness and clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Sustain": "High"
+              },
+              "purpose": "Provide the required 'sharp attack' and smooth out dynamics for percussive stabs.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Give the signal extra punch and help cut through the mix without adding grit.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated clean boost pedal to keep the tone transparent.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could add too much color, potentially muddying the tight funk sound."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on natural guitar dynamics.",
+              "matchQuality": "perfect",
+              "gap": "The genre requires minimal distortion; keeping this module bypassed is key.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the Fender-style clean amp and provide strong mid bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, articulate sound suitable for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "4 kHz",
+                "High Shelf": "6 dB"
+              },
+              "purpose": "Sculpt the frequency response to enhance the 'strong mid bite' and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the wah effect as per instructions and maintain a clean tone.",
+              "matchQuality": "perfect",
+              "gap": "The genre requires direct, punchy rhythm playing without filtering effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "modulation/time",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, dry room ambience as requested, keeping the sound tight and non-washy.",
+              "matchQuality": "perfect",
+              "gap": "Using Room for minimal space without adding noticeable reverb tails or wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might be too bright or artificial for the vintage funk sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "delay/time",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid long delay effects to maintain the percussive and dry nature of the funk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "The 'percussive stabs' mandate a very dry signal path.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better funk articulation and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Funk/R&B 2x12 (e.g., Ampeg or Fender style)",
+              "reason": "Enhance the percussive, mid-focused punch required for funk.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/vibrato",
+          "drop wah",
+          "stay cleaner than light crunch"
+        ],
+        "warnings": [
+          "The source material is a classic funk/R&B track, requiring extremely tight and percussive tones. The rig prioritizes compression and mid-range EQ to achieve the 'sharp attack' while keeping all effects (Chorus, Wah, long delay) minimal or bypassed."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.421,
+      "prompt_chars": 1012,
+      "response_chars": 434,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 111,
+        "total_duration": 10393955200,
+        "prompt_eval_duration": 202162000,
+        "eval_duration": 1840899000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.688,
+      "prompt_chars": 5380,
+      "response_chars": 466,
+      "usage": {
+        "input_tokens": 1501,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 124,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1625
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 44.125,
+      "prompt_chars": 3551,
+      "response_chars": 5928,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1671,
+        "total_duration": 44099207100,
+        "prompt_eval_duration": 437277000,
+        "eval_duration": 28925360000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.523,
+      "prompt_chars": 8048,
+      "response_chars": 525,
+      "usage": {
+        "prompt_eval_count": 2229,
+        "eval_count": 151,
+        "total_duration": 4499900300,
+        "prompt_eval_duration": 428088000,
+        "eval_duration": 3615385000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.741,
+      "prompt_chars": 2956,
+      "response_chars": 163,
+      "usage": {
+        "prompt_eval_count": 945,
+        "eval_count": 48,
+        "total_duration": 8718771400,
+        "prompt_eval_duration": 261216000,
+        "eval_duration": 1099640000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The James Brown Band",
+      "title": "I Feel Good (I Got You)",
+      "album": "",
+      "year": null,
+      "genre": "funk"
+    },
+    "rig": {
+      "rigName": "The James Brown Band - I Feel Good (I Got You) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight bright funk clean with sharp attack",
+      "signalChainSummary": "A tight, compressed signal chain using a light boost/compressor, followed by a Fender-style clean amp (US Deluxe), emphasizing the upper mids for that classic funk bite. Minimal effects are used to maintain dryness and clarity.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Sustain": "High"
+          },
+          "purpose": "Provide the required 'sharp attack' and smooth out dynamics for percussive stabs.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Give the signal extra punch and help cut through the mix without adding grit.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated clean boost pedal to keep the tone transparent.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Could add too much color, potentially muddying the tight funk sound."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and focused on natural guitar dynamics.",
+          "matchQuality": "exact",
+          "gap": "The genre requires minimal distortion; keeping this module bypassed is key.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the Fender-style clean amp and provide strong mid bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, articulate sound suitable for funk rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "Mid Boost": "4 kHz",
+            "High Shelf": "6 dB"
+          },
+          "purpose": "Sculpt the frequency response to enhance the 'strong mid bite' and clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid the wah effect as per instructions and maintain a clean tone.",
+          "matchQuality": "exact",
+          "gap": "The genre requires direct, punchy rhythm playing without filtering effects.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "modulation/time",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle, dry room ambience as requested, keeping the sound tight and non-washy.",
+          "matchQuality": "exact",
+          "gap": "Using Room for minimal space without adding noticeable reverb tails or wash.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might be too bright or artificial for the vintage funk sound."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "delay/time",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid long delay effects to maintain the percussive and dry nature of the funk rhythm.",
+          "matchQuality": "exact",
+          "gap": "The 'percussive stabs' mandate a very dry signal path.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight bright funk clean with sharp attack",
+      "mustHave": [
+        "clean clipped rhythm",
+        "percussive stabs",
+        "strong mid bite",
+        "dry short room"
+      ],
+      "avoid": [
+        "chorus",
+        "vibrato",
+        "heavy crunch",
+        "long delay"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coils",
+        "light compressor"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "drop wah",
+        "stay cleaner than light crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "funk",
+      "styleTags": [
+        "soul",
+        "r&b"
+      ],
+      "targetTone": "tight bright funk clean with sharp attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better funk articulation and punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Funk/R&B 2x12 (e.g., Ampeg or Fender style)",
+          "reason": "Enhance the percussive, mid-focused punch required for funk.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and bite in the upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1545,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

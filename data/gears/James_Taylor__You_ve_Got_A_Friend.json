@@ -1,0 +1,1031 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 662,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\James_Taylor__You_ve_Got_A_Friend.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "James Taylor",
+    "title": "You've Got A Friend",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "singer-songwriter",
+      "acoustic"
+    ],
+    "confidence": "high",
+    "rationale": "James Taylor is a classic folk/singer-songwriter artist known for acoustic material."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, fingerpicked acoustic pop tone",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "acoustic simulation",
+        "vintage tube amp"
+      ],
+      "gearHypotheses": [
+        "Clean/Pop Amp Model (e.g., Fender Twin)",
+        "Plate Reverb",
+        "Tape Delay"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Distortion",
+        "Wah"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "warm acoustic folk guitar with intimate fingerpicking",
+      "mustHave": [
+        "acoustic-leaning attack",
+        "dry intimate close mic",
+        "fingerpicked string detail"
+      ],
+      "avoid": [
+        "electric amp sheen",
+        "delay",
+        "plate reverb",
+        "fuzz",
+        "wah"
+      ],
+      "gearClues": [
+        "acoustic sim",
+        "piezo-like top end",
+        "light room only"
+      ],
+      "corrections": [
+        "remove delay",
+        "remove plate reverb",
+        "avoid vintage tube amp"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "likely acoustic guitar context",
+      "draft adds wrong electric-amp effects",
+      "signature recorded texture is uncertain"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "warm fingerpicked acoustic folk guitar",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "dry intimate close-mic character",
+      "fingerpicked string clarity"
+    ],
+    "avoid": [
+      "electric amp modeling",
+      "delay",
+      "plate reverb",
+      "overdrive or distortion"
+    ],
+    "gearClues": [
+      "acoustic sim or piezo preset",
+      "minimal room ambience only",
+      "no electric amp chain"
+    ],
+    "corrections": [
+      "remove vintage tube amp suggestion",
+      "remove tape delay and plate reverb",
+      "prioritize acoustic sim over electric clean"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "finalVerdict": {
+    "targetTone": "warm fingerpicked acoustic folk guitar",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "dry intimate close-mic character",
+      "fingerpicked string clarity"
+    ],
+    "avoid": [
+      "electric amp modeling",
+      "delay",
+      "plate reverb",
+      "overdrive or distortion"
+    ],
+    "gearClues": [
+      "acoustic sim or piezo preset",
+      "minimal room ambience only",
+      "no electric amp chain"
+    ],
+    "corrections": [
+      "remove vintage tube amp suggestion",
+      "remove tape delay and plate reverb",
+      "prioritize acoustic sim over electric clean"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize acoustic simulation and clean, intimate tones.",
+          "bestMatchSummary": "Acoustic/clean folk tone using a gentle compression, minimal boost, and focusing on clarity through the US Deluxe amp model with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out dynamics and enhance fingerpicked clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic/folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0 dB"
+              },
+              "purpose": "Used sparingly for subtle tone shaping or volume lift (kept off by default).",
+              "matchQuality": "close",
+              "gap": "The Boost module is generally used for noticeable gain; keeping it inactive maintains the intimate, dry feel.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all distortion to maintain acoustic purity.",
+              "matchQuality": "perfect",
+              "gap": "The 'None' setting is used to explicitly bypass the drive section, fulfilling the 'avoid overdrive or distortion' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "4/10",
+                "Midrange": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Provides a clean, warm, and articulate tone suitable for folk music.",
+              "matchQuality": "perfect",
+              "gap": "The US Deluxe is the best choice among available amps for a non-aggressive, clear sound.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates a close-mic'd, intimate sound source.",
+              "matchQuality": "perfect",
+              "gap": "Matches the 'dry intimate close-mic character' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly boosts the fundamental frequencies to enhance string clarity and warmth.",
+              "matchQuality": "perfect",
+              "gap": "Used for subtle tonal shaping without adding noticeable effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adds minimal, natural room ambience without sounding like a large hall or artificial delay.",
+              "matchQuality": "perfect",
+              "gap": "The 'Room' reverb is the most subtle choice to meet the 'minimal room ambience only' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk, requiring an acoustic simulation. Since the GP-180 is primarily designed for electric guitar modeling, the 'acoustic sim or piezo preset' must be manually loaded and utilized to achieve the desired tone.",
+          "All effects (Delay, Plate Reverb) were explicitly avoided as per the musical verdict."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage mic capsule to enhance intimate, dry folk clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Intimate Acoustic Clarity",
+              "recommendedAsset": "Vintage Condenser Mic IR (e.g., Neumann U47 or Telefunken)",
+              "reason": "Enhance the close-mic, dry character required for folk fingerpicking.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "James Taylor - You've Got A Friend - Valeton GP-180",
+        "song": {
+          "artist": "James Taylor",
+          "title": "You've Got A Friend",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm fingerpicked acoustic folk guitar",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "Acoustic/clean folk tone using a gentle compression, minimal boost, and focusing on clarity through the US Deluxe amp model with subtle room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out dynamics and enhance fingerpicked clarity.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for acoustic/folk tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": false,
+            "settings": {
+              "Gain": "0 dB"
+            },
+            "purpose": "Used sparingly for subtle tone shaping or volume lift (kept off by default).",
+            "matchQuality": "close",
+            "gap": "The Boost module is generally used for noticeable gain; keeping it inactive maintains the intimate, dry feel.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid all distortion to maintain acoustic purity.",
+            "matchQuality": "perfect",
+            "gap": "The 'None' setting is used to explicitly bypass the drive section, fulfilling the 'avoid overdrive or distortion' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "4/10",
+              "Midrange": "6/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Provides a clean, warm, and articulate tone suitable for folk music.",
+            "matchQuality": "perfect",
+            "gap": "The US Deluxe is the best choice among available amps for a non-aggressive, clear sound.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulates a close-mic'd, intimate sound source.",
+            "matchQuality": "perfect",
+            "gap": "Matches the 'dry intimate close-mic character' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slightly boosts the fundamental frequencies to enhance string clarity and warmth.",
+            "matchQuality": "perfect",
+            "gap": "Used for subtle tonal shaping without adding noticeable effects.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Adds minimal, natural room ambience without sounding like a large hall or artificial delay.",
+            "matchQuality": "perfect",
+            "gap": "The 'Room' reverb is the most subtle choice to meet the 'minimal room ambience only' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm fingerpicked acoustic folk guitar",
+          "toneProfile": "warm fingerpicked acoustic folk guitar",
+          "idealSignalChain": "acoustic sim or piezo preset | minimal room ambience only | no electric amp chain",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic sim or piezo preset",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal room ambience only",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "no electric amp chain",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation",
+            "dry intimate close-mic character",
+            "fingerpicked string clarity"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize acoustic simulation and clean, intimate tones.",
+          "bestMatchSummary": "Acoustic/clean folk tone using a gentle compression, minimal boost, and focusing on clarity through the US Deluxe amp model with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out dynamics and enhance fingerpicked clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic/folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0 dB"
+              },
+              "purpose": "Used sparingly for subtle tone shaping or volume lift (kept off by default).",
+              "matchQuality": "close",
+              "gap": "The Boost module is generally used for noticeable gain; keeping it inactive maintains the intimate, dry feel.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all distortion to maintain acoustic purity.",
+              "matchQuality": "perfect",
+              "gap": "The 'None' setting is used to explicitly bypass the drive section, fulfilling the 'avoid overdrive or distortion' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "4/10",
+                "Midrange": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Provides a clean, warm, and articulate tone suitable for folk music.",
+              "matchQuality": "perfect",
+              "gap": "The US Deluxe is the best choice among available amps for a non-aggressive, clear sound.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates a close-mic'd, intimate sound source.",
+              "matchQuality": "perfect",
+              "gap": "Matches the 'dry intimate close-mic character' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly boosts the fundamental frequencies to enhance string clarity and warmth.",
+              "matchQuality": "perfect",
+              "gap": "Used for subtle tonal shaping without adding noticeable effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adds minimal, natural room ambience without sounding like a large hall or artificial delay.",
+              "matchQuality": "perfect",
+              "gap": "The 'Room' reverb is the most subtle choice to meet the 'minimal room ambience only' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage mic capsule to enhance intimate, dry folk clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Intimate Acoustic Clarity",
+              "recommendedAsset": "Vintage Condenser Mic IR (e.g., Neumann U47 or Telefunken)",
+              "reason": "Enhance the close-mic, dry character required for folk fingerpicking.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove vintage tube amp suggestion",
+          "remove tape delay and plate reverb",
+          "prioritize acoustic sim over electric clean"
+        ],
+        "warnings": [
+          "The source material is acoustic folk, requiring an acoustic simulation. Since the GP-180 is primarily designed for electric guitar modeling, the 'acoustic sim or piezo preset' must be manually loaded and utilized to achieve the desired tone.",
+          "All effects (Delay, Plate Reverb) were explicitly avoided as per the musical verdict."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.697,
+      "prompt_chars": 1000,
+      "response_chars": 313,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 89,
+        "total_duration": 9681357800,
+        "prompt_eval_duration": 347984000,
+        "eval_duration": 1409647000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.985,
+      "prompt_chars": 5259,
+      "response_chars": 594,
+      "usage": {
+        "input_tokens": 1479,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 147,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1626
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 3.769,
+      "prompt_chars": 4702,
+      "response_chars": 643,
+      "usage": {
+        "input_tokens": 1398,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 199,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.935,
+      "prompt_chars": 3649,
+      "response_chars": 5098,
+      "usage": {
+        "prompt_eval_count": 1199,
+        "eval_count": 1412,
+        "total_duration": 25913272600,
+        "prompt_eval_duration": 208525000,
+        "eval_duration": 25276507000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.502,
+      "prompt_chars": 7248,
+      "response_chars": 626,
+      "usage": {
+        "prompt_eval_count": 1968,
+        "eval_count": 163,
+        "total_duration": 5482398500,
+        "prompt_eval_duration": 317059000,
+        "eval_duration": 4743544000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.174,
+      "prompt_chars": 2764,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 849,
+        "eval_count": 47,
+        "total_duration": 9145005100,
+        "prompt_eval_duration": 247653000,
+        "eval_duration": 967620000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "James Taylor",
+      "title": "You've Got A Friend",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "James Taylor - You've Got A Friend - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm fingerpicked acoustic folk guitar",
+      "signalChainSummary": "Acoustic/clean folk tone using a gentle compression, minimal boost, and focusing on clarity through the US Deluxe amp model with subtle room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out dynamics and enhance fingerpicked clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for acoustic/folk tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": false,
+          "settings": {
+            "Gain": "0 dB"
+          },
+          "purpose": "Used sparingly for subtle tone shaping or volume lift (kept off by default).",
+          "matchQuality": "close",
+          "gap": "The Boost module is generally used for noticeable gain; keeping it inactive maintains the intimate, dry feel.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid all distortion to maintain acoustic purity.",
+          "matchQuality": "exact",
+          "gap": "The 'None' setting is used to explicitly bypass the drive section, fulfilling the 'avoid overdrive or distortion' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "4/10",
+            "Midrange": "6/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Provides a clean, warm, and articulate tone suitable for folk music.",
+          "matchQuality": "exact",
+          "gap": "The US Deluxe is the best choice among available amps for a non-aggressive, clear sound.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulates a close-mic'd, intimate sound source.",
+          "matchQuality": "exact",
+          "gap": "Matches the 'dry intimate close-mic character' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slightly boosts the fundamental frequencies to enhance string clarity and warmth.",
+          "matchQuality": "exact",
+          "gap": "Used for subtle tonal shaping without adding noticeable effects.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Adds minimal, natural room ambience without sounding like a large hall or artificial delay.",
+          "matchQuality": "exact",
+          "gap": "The 'Room' reverb is the most subtle choice to meet the 'minimal room ambience only' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm fingerpicked acoustic folk guitar",
+      "mustHave": [
+        "acoustic guitar simulation",
+        "dry intimate close-mic character",
+        "fingerpicked string clarity"
+      ],
+      "avoid": [
+        "electric amp modeling",
+        "delay",
+        "plate reverb",
+        "overdrive or distortion"
+      ],
+      "gearClues": [
+        "acoustic sim or piezo preset",
+        "minimal room ambience only",
+        "no electric amp chain"
+      ],
+      "corrections": [
+        "remove vintage tube amp suggestion",
+        "remove tape delay and plate reverb",
+        "prioritize acoustic sim over electric clean"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "singer-songwriter",
+        "acoustic"
+      ],
+      "targetTone": "warm fingerpicked acoustic folk guitar",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage mic capsule to enhance intimate, dry folk clarity.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Intimate Acoustic Clarity",
+          "recommendedAsset": "Vintage Condenser Mic IR (e.g., Neumann U47 or Telefunken)",
+          "reason": "Enhance the close-mic, dry character required for folk fingerpicking.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased realism and warmth in the high end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 662,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

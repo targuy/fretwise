@@ -1,0 +1,1108 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 225,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Cat_Stevens__Morning_Has_Broken.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [
+      "targetTone is too short"
+    ],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Cat Stevens",
+    "title": "Morning Has Broken",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "singer-songwriter",
+      "acoustic"
+    ],
+    "confidence": "high",
+    "rationale": "Cat Stevens' 'Morning Has Broken' is a classic example of folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, fingerpicked acoustic folk sound",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "acoustic simulation",
+        "warm EQ"
+      ],
+      "gearHypotheses": [
+        "Clean/Ambient delay pedal (e.g., Memory Man)",
+        "Reverb unit (Plate or Spring)"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Wah",
+        "Distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "n/a",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked"
+      ],
+      "avoid": [
+        "electric amp tone",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "steel-string acoustic",
+        "close-mic folk"
+      ],
+      "corrections": [
+        "likely non-electric context",
+        "need exact guitar part"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "possible non-electric or acoustic-only track",
+      "draft is generic and may mislead GP-180 toward wrong family",
+      "title may be piano/voice-led with unclear guitar signature"
+    ],
+    "forcedEscalationReasons": [
+      "targetTone is too short"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "No electric guitar in original recording",
+    "mustHave": [
+      "acoustic piano",
+      "fingerpicked steel-string acoustic",
+      "close-mic folk production"
+    ],
+    "avoid": [
+      "electric amp simulation",
+      "overdrive",
+      "fuzz",
+      "chorus",
+      "delay"
+    ],
+    "gearClues": [
+      "1971 studio acoustic guitar",
+      "Rick Wakeman piano feature",
+      "no electric guitar present"
+    ],
+    "corrections": [
+      "Track is piano and acoustic guitar only",
+      "No electric guitar tone exists to emulate",
+      "GP-180 acoustic sim inappropriate for this context"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "No electric guitar in original recording",
+    "mustHave": [
+      "acoustic piano",
+      "fingerpicked steel-string acoustic",
+      "close-mic folk production"
+    ],
+    "avoid": [
+      "electric amp simulation",
+      "overdrive",
+      "fuzz",
+      "chorus",
+      "delay"
+    ],
+    "gearClues": [
+      "1971 studio acoustic guitar",
+      "Rick Wakeman piano feature",
+      "no electric guitar present"
+    ],
+    "corrections": [
+      "Track is piano and acoustic guitar only",
+      "No electric guitar tone exists to emulate",
+      "GP-180 acoustic sim inappropriate for this context"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic/piano, we will aim for a clean, fingerpicked folk sound using an acoustic simulation approach (Comp + US Deluxe) and focus on natural room ambiance.",
+          "bestMatchSummary": "A gentle, highly controlled signal chain emphasizing clarity and warmth, simulating a close-mic acoustic guitar performance suitable for folk arrangements. The core tone uses compression and the US Deluxe amp model with minimal effects.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background hum or noise inherent in the recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean folk tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics of fingerpicked acoustic guitar playing, providing consistent volume and warmth.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a polished, studio-quality folk sound.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion or grit is required for this clean folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Bass": "6",
+                "Midrange": "4"
+              },
+              "purpose": "Provide a clean, articulate, and warm foundation suitable for acoustic guitar emulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is an electric amp model. While it provides the necessary clarity, true acoustic simulation would require dedicated modeling or a specific 'Acoustic' setting not available in the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, intimate studio recording setup.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is an electric cabinet. We use it for its clean voicing and size to maintain intimacy, but dedicated acoustic IRs would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Midrange Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to enhance the natural resonance and body of the acoustic guitar sound.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or wah effects are appropriate for this genre.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus effects are too distracting and artificial for the delicate folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Excessive delay would disrupt the natural flow of fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix Level": "30%"
+              },
+              "purpose": "Add a subtle sense of space and natural room ambiance, mimicking close-mic folk production.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for adding depth without sounding artificial.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard master control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic piano and fingerpicked steel-string guitar, with no electric guitar tone present. The resulting rig emulates the *feel* of a clean folk performance using an electric signal chain (US Deluxe/US 2x12) as the closest approximation available in the catalog.",
+          "Avoid using any effects that add artificial movement or grit (Chorus, Delay, Overdrive)."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace electric cabinet simulation with a dedicated acoustic IR to enhance realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic room/studio IR (e.g., Neve 1073 or small studio mic)",
+              "reason": "The current electric cabinet is inappropriate for acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and natural tone.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Cat Stevens - Morning Has Broken - Valeton GP-180",
+        "song": {
+          "artist": "Cat Stevens",
+          "title": "Morning Has Broken",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "No electric guitar in original recording",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gentle, highly controlled signal chain emphasizing clarity and warmth, simulating a close-mic acoustic guitar performance suitable for folk arrangements. The core tone uses compression and the US Deluxe amp model with minimal effects.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any background hum or noise inherent in the recording.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean folk tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out the dynamics of fingerpicked acoustic guitar playing, providing consistent volume and warmth.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for achieving a polished, studio-quality folk sound.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No distortion or grit is required for this clean folk tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "5",
+              "Bass": "6",
+              "Midrange": "4"
+            },
+            "purpose": "Provide a clean, articulate, and warm foundation suitable for acoustic guitar emulation.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is an electric amp model. While it provides the necessary clarity, true acoustic simulation would require dedicated modeling or a specific 'Acoustic' setting not available in the catalog.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate the sound of a small, intimate studio recording setup.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is an electric cabinet. We use it for its clean voicing and size to maintain intimacy, but dedicated acoustic IRs would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Midrange Cut": "-1 dB",
+              "Treble Boost": "+1 dB"
+            },
+            "purpose": "Fine-tune the frequency response to enhance the natural resonance and body of the acoustic guitar sound.",
+            "matchQuality": "perfect",
+            "gap": "None. Used for surgical tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No filtering or wah effects are appropriate for this genre.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Chorus effects are too distracting and artificial for the delicate folk tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Excessive delay would disrupt the natural flow of fingerpicking.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix Level": "30%"
+            },
+            "purpose": "Add a subtle sense of space and natural room ambiance, mimicking close-mic folk production.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for adding depth without sounding artificial.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard master control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "No electric guitar in original recording",
+          "toneProfile": "No electric guitar in original recording",
+          "idealSignalChain": "1971 studio acoustic guitar | Rick Wakeman piano feature | no electric guitar present",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "1971 studio acoustic guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Rick Wakeman piano feature",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "no electric guitar present",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic piano",
+            "fingerpicked steel-string acoustic",
+            "close-mic folk production"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic/piano, we will aim for a clean, fingerpicked folk sound using an acoustic simulation approach (Comp + US Deluxe) and focus on natural room ambiance.",
+          "bestMatchSummary": "A gentle, highly controlled signal chain emphasizing clarity and warmth, simulating a close-mic acoustic guitar performance suitable for folk arrangements. The core tone uses compression and the US Deluxe amp model with minimal effects.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background hum or noise inherent in the recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean folk tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics of fingerpicked acoustic guitar playing, providing consistent volume and warmth.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a polished, studio-quality folk sound.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion or grit is required for this clean folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Bass": "6",
+                "Midrange": "4"
+              },
+              "purpose": "Provide a clean, articulate, and warm foundation suitable for acoustic guitar emulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is an electric amp model. While it provides the necessary clarity, true acoustic simulation would require dedicated modeling or a specific 'Acoustic' setting not available in the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, intimate studio recording setup.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is an electric cabinet. We use it for its clean voicing and size to maintain intimacy, but dedicated acoustic IRs would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Midrange Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to enhance the natural resonance and body of the acoustic guitar sound.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or wah effects are appropriate for this genre.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus effects are too distracting and artificial for the delicate folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Excessive delay would disrupt the natural flow of fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix Level": "30%"
+              },
+              "purpose": "Add a subtle sense of space and natural room ambiance, mimicking close-mic folk production.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for adding depth without sounding artificial.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard master control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace electric cabinet simulation with a dedicated acoustic IR to enhance realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic room/studio IR (e.g., Neve 1073 or small studio mic)",
+              "reason": "The current electric cabinet is inappropriate for acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and natural tone.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "Track is piano and acoustic guitar only",
+          "No electric guitar tone exists to emulate",
+          "GP-180 acoustic sim inappropriate for this context"
+        ],
+        "warnings": [
+          "The source material is acoustic piano and fingerpicked steel-string guitar, with no electric guitar tone present. The resulting rig emulates the *feel* of a clean folk performance using an electric signal chain (US Deluxe/US 2x12) as the closest approximation available in the catalog.",
+          "Avoid using any effects that add artificial movement or grit (Chorus, Delay, Overdrive)."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 14.22,
+      "prompt_chars": 998,
+      "response_chars": 314,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 89,
+        "total_duration": 14203753500,
+        "prompt_eval_duration": 222466000,
+        "eval_duration": 1648810000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.887,
+      "prompt_chars": 5252,
+      "response_chars": 511,
+      "usage": {
+        "input_tokens": 1476,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1608
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.818,
+      "prompt_chars": 4639,
+      "response_chars": 649,
+      "usage": {
+        "input_tokens": 1393,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 206,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 27.693,
+      "prompt_chars": 3655,
+      "response_chars": 6043,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1638,
+        "total_duration": 27685451900,
+        "prompt_eval_duration": 309656000,
+        "eval_duration": 26923819000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.113,
+      "prompt_chars": 8241,
+      "response_chars": 553,
+      "usage": {
+        "prompt_eval_count": 2205,
+        "eval_count": 143,
+        "total_duration": 3105940800,
+        "prompt_eval_duration": 520397000,
+        "eval_duration": 2102368000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.012,
+      "prompt_chars": 3005,
+      "response_chars": 173,
+      "usage": {
+        "prompt_eval_count": 913,
+        "eval_count": 47,
+        "total_duration": 13007831100,
+        "prompt_eval_duration": 308801000,
+        "eval_duration": 560845000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Cat Stevens",
+      "title": "Morning Has Broken",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Cat Stevens - Morning Has Broken - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "No electric guitar in original recording",
+      "signalChainSummary": "A gentle, highly controlled signal chain emphasizing clarity and warmth, simulating a close-mic acoustic guitar performance suitable for folk arrangements. The core tone uses compression and the US Deluxe amp model with minimal effects.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any background hum or noise inherent in the recording.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean folk tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out the dynamics of fingerpicked acoustic guitar playing, providing consistent volume and warmth.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for achieving a polished, studio-quality folk sound.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No distortion or grit is required for this clean folk tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "5",
+            "Bass": "6",
+            "Midrange": "4"
+          },
+          "purpose": "Provide a clean, articulate, and warm foundation suitable for acoustic guitar emulation.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is an electric amp model. While it provides the necessary clarity, true acoustic simulation would require dedicated modeling or a specific 'Acoustic' setting not available in the catalog.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate the sound of a small, intimate studio recording setup.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is an electric cabinet. We use it for its clean voicing and size to maintain intimacy, but dedicated acoustic IRs would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Midrange Cut": "-1 dB",
+            "Treble Boost": "+1 dB"
+          },
+          "purpose": "Fine-tune the frequency response to enhance the natural resonance and body of the acoustic guitar sound.",
+          "matchQuality": "exact",
+          "gap": "None. Used for surgical tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No filtering or wah effects are appropriate for this genre.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Chorus effects are too distracting and artificial for the delicate folk tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Excessive delay would disrupt the natural flow of fingerpicking.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix Level": "30%"
+          },
+          "purpose": "Add a subtle sense of space and natural room ambiance, mimicking close-mic folk production.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for adding depth without sounding artificial.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None. Standard master control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "No electric guitar in original recording",
+      "mustHave": [
+        "acoustic piano",
+        "fingerpicked steel-string acoustic",
+        "close-mic folk production"
+      ],
+      "avoid": [
+        "electric amp simulation",
+        "overdrive",
+        "fuzz",
+        "chorus",
+        "delay"
+      ],
+      "gearClues": [
+        "1971 studio acoustic guitar",
+        "Rick Wakeman piano feature",
+        "no electric guitar present"
+      ],
+      "corrections": [
+        "Track is piano and acoustic guitar only",
+        "No electric guitar tone exists to emulate",
+        "GP-180 acoustic sim inappropriate for this context"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "singer-songwriter",
+        "acoustic"
+      ],
+      "targetTone": "No electric guitar in original recording",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace electric cabinet simulation with a dedicated acoustic IR to enhance realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Acoustic room/studio IR (e.g., Neve 1073 or small studio mic)",
+          "reason": "The current electric cabinet is inappropriate for acoustic source.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and natural tone.",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 225,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

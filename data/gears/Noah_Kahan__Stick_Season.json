@@ -1,0 +1,1139 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1009,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Noah_Kahan__Stick_Season.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Noah Kahan",
+    "title": "Stick Season",
+    "album": "",
+    "year": null,
+    "genre": "folk pop"
+  },
+  "genreClassification": {
+    "genre": "folk pop",
+    "subgenres": [
+      "indie folk",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Noah Kahan's style is characterized by intimate, acoustic-driven folk pop."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven acoustic/electric tone with noticeable depth and natural reverb.",
+      "signatureElements": [
+        "Acoustic strumming rhythm",
+        "Subtle overdrive (crunch)",
+        "Natural room reverb",
+        "Fingerpicked elements"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating a vintage tube sound (e.g., Fender Twin or Vox AC30 family)",
+        "Clean/mild crunch preamp section",
+        "High-quality digital reverb unit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion pedal sounds",
+        "Aggressive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "dry acoustic-folk strum with intimate vocal bed",
+      "mustHave": [
+        "acoustic guitar",
+        "dry close-mic strum",
+        "light fingerpick",
+        "no electric crunch"
+      ],
+      "avoid": [
+        "overdrive",
+        "amp break-up",
+        "big reverb",
+        "chorus",
+        "fuzz"
+      ],
+      "gearClues": [
+        "acoustic DI",
+        "small room",
+        "flat EQ"
+      ],
+      "corrections": [
+        "treat as acoustic-led track",
+        "remove electric overdrive",
+        "keep ambience minimal"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title is iconic and draft is generic",
+      "instrument context likely wrong for GP-180 electric rig",
+      "draft adds overdrive/reverb that may mislead the target family"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "dry acoustic strum, intimate folk vocal bed",
+    "mustHave": [
+      "acoustic guitar texture",
+      "close-mic dry strum",
+      "no electric gain or crunch"
+    ],
+    "avoid": [
+      "overdrive",
+      "amp breakup",
+      "reverb",
+      "chorus",
+      "electric distortion"
+    ],
+    "gearClues": [
+      "acoustic DI or piezo sim",
+      "flat EQ",
+      "minimal room ambience"
+    ],
+    "corrections": [
+      "remove electric overdrive entirely",
+      "treat as acoustic-led folk track",
+      "no tube amp modeling needed"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "dry acoustic strum, intimate folk vocal bed",
+    "mustHave": [
+      "acoustic guitar texture",
+      "close-mic dry strum",
+      "no electric gain or crunch"
+    ],
+    "avoid": [
+      "overdrive",
+      "amp breakup",
+      "reverb",
+      "chorus",
+      "electric distortion"
+    ],
+    "gearClues": [
+      "acoustic DI or piezo sim",
+      "flat EQ",
+      "minimal room ambience"
+    ],
+    "corrections": [
+      "remove electric overdrive entirely",
+      "treat as acoustic-led folk track",
+      "no tube amp modeling needed"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "Simulates a close-mic, dry acoustic strumming sound using clean preamps and minimal cabinet coloration.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Gentle compression to even out strumming dynamics and add warmth.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated acoustic preamp/DI sim, but Comp is the best clean option available.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No gain or crunch is desired.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Midrange": "Flat",
+                "Bass": "-1"
+              },
+              "purpose": "Provides a clean, non-breakup tone suitable for acoustic emulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its clean headroom and lack of aggressive breakup compared to tube models.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close-mic",
+                "EQ Curve": "Flat"
+              },
+              "purpose": "Simulates a close-miked, dry acoustic sound source.",
+              "matchQuality": "close",
+              "gap": "A dedicated DI/acoustic cab would be better, but US 2x12 provides the necessary clean character and size.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "Flat",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slight tonal shaping to enhance the strumming clarity without adding color.",
+              "matchQuality": "close",
+              "gap": "The goal is flat EQ, but slight boosts are used to ensure the acoustic texture cuts through the mix.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or sweeping effects needed.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid chorus or other movement effects.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "1/8 T",
+                "Feedback": "Low",
+                "Mix": "Very Low"
+              },
+              "purpose": "Minimal slapback effect to add subtle depth without sounding like a traditional echo.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal ambience, so the delay settings are kept extremely low and short.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Very Low"
+              },
+              "purpose": "Adds the slightest sense of space (intimate folk vocal bed) without sounding wet or cavernous.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept extremely subtle to avoid muddying the dry acoustic strum.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk, requiring an electric guitar to simulate a dry, close-mic DI sound. The settings prioritize clean headroom and minimal coloration."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic cabinet simulation with a dedicated acoustic/DI IR to achieve a truly dry, close-mic folk sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic DI Cabinet realism",
+              "recommendedAsset": "dedicated Acoustic DI Impulse Response (e.g., Neumann U47 or specific acoustic mic IR)",
+              "reason": "The current US 2x12 is too colored and electric; a dedicated DI/acoustic IR is needed for dry folk texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and dryness",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Noah Kahan - Stick Season - Valeton GP-180",
+        "song": {
+          "artist": "Noah Kahan",
+          "title": "Stick Season",
+          "album": "",
+          "year": null,
+          "genre": "folk pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry acoustic strum, intimate folk vocal bed",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Simulates a close-mic, dry acoustic strumming sound using clean preamps and minimal cabinet coloration.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-10 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Gentle compression to even out strumming dynamics and add warmth.",
+            "matchQuality": "close",
+            "gap": "The ideal choice would be a dedicated acoustic preamp/DI sim, but Comp is the best clean option available.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No gain or crunch is desired.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2",
+              "Midrange": "Flat",
+              "Bass": "-1"
+            },
+            "purpose": "Provides a clean, non-breakup tone suitable for acoustic emulation.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its clean headroom and lack of aggressive breakup compared to tube models.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close-mic",
+              "EQ Curve": "Flat"
+            },
+            "purpose": "Simulates a close-miked, dry acoustic sound source.",
+            "matchQuality": "close",
+            "gap": "A dedicated DI/acoustic cab would be better, but US 2x12 provides the necessary clean character and size.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "Flat",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slight tonal shaping to enhance the strumming clarity without adding color.",
+            "matchQuality": "close",
+            "gap": "The goal is flat EQ, but slight boosts are used to ensure the acoustic texture cuts through the mix.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No filtering or sweeping effects needed.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid chorus or other movement effects.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "1/8 T",
+              "Feedback": "Low",
+              "Mix": "Very Low"
+            },
+            "purpose": "Minimal slapback effect to add subtle depth without sounding like a traditional echo.",
+            "matchQuality": "close",
+            "gap": "The goal is minimal ambience, so the delay settings are kept extremely low and short.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short",
+              "Mix": "Very Low"
+            },
+            "purpose": "Adds the slightest sense of space (intimate folk vocal bed) without sounding wet or cavernous.",
+            "matchQuality": "close",
+            "gap": "The reverb must be kept extremely subtle to avoid muddying the dry acoustic strum.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity Gain"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry acoustic strum, intimate folk vocal bed",
+          "toneProfile": "dry acoustic strum, intimate folk vocal bed",
+          "idealSignalChain": "acoustic DI or piezo sim | flat EQ | minimal room ambience",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic DI or piezo sim",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "flat EQ",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal room ambience",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar texture",
+            "close-mic dry strum",
+            "no electric gain or crunch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "Simulates a close-mic, dry acoustic strumming sound using clean preamps and minimal cabinet coloration.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Gentle compression to even out strumming dynamics and add warmth.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated acoustic preamp/DI sim, but Comp is the best clean option available.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No gain or crunch is desired.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Midrange": "Flat",
+                "Bass": "-1"
+              },
+              "purpose": "Provides a clean, non-breakup tone suitable for acoustic emulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its clean headroom and lack of aggressive breakup compared to tube models.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close-mic",
+                "EQ Curve": "Flat"
+              },
+              "purpose": "Simulates a close-miked, dry acoustic sound source.",
+              "matchQuality": "close",
+              "gap": "A dedicated DI/acoustic cab would be better, but US 2x12 provides the necessary clean character and size.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "Flat",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slight tonal shaping to enhance the strumming clarity without adding color.",
+              "matchQuality": "close",
+              "gap": "The goal is flat EQ, but slight boosts are used to ensure the acoustic texture cuts through the mix.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or sweeping effects needed.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid chorus or other movement effects.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "1/8 T",
+                "Feedback": "Low",
+                "Mix": "Very Low"
+              },
+              "purpose": "Minimal slapback effect to add subtle depth without sounding like a traditional echo.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal ambience, so the delay settings are kept extremely low and short.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Very Low"
+              },
+              "purpose": "Adds the slightest sense of space (intimate folk vocal bed) without sounding wet or cavernous.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept extremely subtle to avoid muddying the dry acoustic strum.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic cabinet simulation with a dedicated acoustic/DI IR to achieve a truly dry, close-mic folk sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic DI Cabinet realism",
+              "recommendedAsset": "dedicated Acoustic DI Impulse Response (e.g., Neumann U47 or specific acoustic mic IR)",
+              "reason": "The current US 2x12 is too colored and electric; a dedicated DI/acoustic IR is needed for dry folk texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and dryness",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "remove electric overdrive entirely",
+          "treat as acoustic-led folk track",
+          "no tube amp modeling needed"
+        ],
+        "warnings": [
+          "The source material is acoustic folk, requiring an electric guitar to simulate a dry, close-mic DI sound. The settings prioritize clean headroom and minimal coloration."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.959,
+      "prompt_chars": 991,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 120,
+        "total_duration": 10936804500,
+        "prompt_eval_duration": 789875000,
+        "eval_duration": 2615673000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.952,
+      "prompt_chars": 5448,
+      "response_chars": 637,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 171,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1682
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 3.51,
+      "prompt_chars": 4943,
+      "response_chars": 589,
+      "usage": {
+        "input_tokens": 1458,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 202,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 43.638,
+      "prompt_chars": 3588,
+      "response_chars": 5538,
+      "usage": {
+        "prompt_eval_count": 1197,
+        "eval_count": 1561,
+        "total_duration": 43612019100,
+        "prompt_eval_duration": 652557000,
+        "eval_duration": 30745833000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.681,
+      "prompt_chars": 7679,
+      "response_chars": 655,
+      "usage": {
+        "prompt_eval_count": 2115,
+        "eval_count": 170,
+        "total_duration": 4675244900,
+        "prompt_eval_duration": 849513000,
+        "eval_duration": 3365689000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.068,
+      "prompt_chars": 2812,
+      "response_chars": 184,
+      "usage": {
+        "prompt_eval_count": 875,
+        "eval_count": 51,
+        "total_duration": 9063589000,
+        "prompt_eval_duration": 404748000,
+        "eval_duration": 852756000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Noah Kahan",
+      "title": "Stick Season",
+      "album": "",
+      "year": null,
+      "genre": "folk pop"
+    },
+    "rig": {
+      "rigName": "Noah Kahan - Stick Season - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry acoustic strum, intimate folk vocal bed",
+      "signalChainSummary": "Simulates a close-mic, dry acoustic strumming sound using clean preamps and minimal cabinet coloration.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-10 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Gentle compression to even out strumming dynamics and add warmth.",
+          "matchQuality": "close",
+          "gap": "The ideal choice would be a dedicated acoustic preamp/DI sim, but Comp is the best clean option available.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No gain or crunch is desired.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2",
+            "Midrange": "Flat",
+            "Bass": "-1"
+          },
+          "purpose": "Provides a clean, non-breakup tone suitable for acoustic emulation.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its clean headroom and lack of aggressive breakup compared to tube models.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close-mic",
+            "EQ Curve": "Flat"
+          },
+          "purpose": "Simulates a close-miked, dry acoustic sound source.",
+          "matchQuality": "close",
+          "gap": "A dedicated DI/acoustic cab would be better, but US 2x12 provides the necessary clean character and size.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "Flat",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slight tonal shaping to enhance the strumming clarity without adding color.",
+          "matchQuality": "close",
+          "gap": "The goal is flat EQ, but slight boosts are used to ensure the acoustic texture cuts through the mix.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No filtering or sweeping effects needed.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid chorus or other movement effects.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "1/8 T",
+            "Feedback": "Low",
+            "Mix": "Very Low"
+          },
+          "purpose": "Minimal slapback effect to add subtle depth without sounding like a traditional echo.",
+          "matchQuality": "close",
+          "gap": "The goal is minimal ambience, so the delay settings are kept extremely low and short.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short",
+            "Mix": "Very Low"
+          },
+          "purpose": "Adds the slightest sense of space (intimate folk vocal bed) without sounding wet or cavernous.",
+          "matchQuality": "close",
+          "gap": "The reverb must be kept extremely subtle to avoid muddying the dry acoustic strum.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity Gain"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry acoustic strum, intimate folk vocal bed",
+      "mustHave": [
+        "acoustic guitar texture",
+        "close-mic dry strum",
+        "no electric gain or crunch"
+      ],
+      "avoid": [
+        "overdrive",
+        "amp breakup",
+        "reverb",
+        "chorus",
+        "electric distortion"
+      ],
+      "gearClues": [
+        "acoustic DI or piezo sim",
+        "flat EQ",
+        "minimal room ambience"
+      ],
+      "corrections": [
+        "remove electric overdrive entirely",
+        "treat as acoustic-led folk track",
+        "no tube amp modeling needed"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk pop",
+      "styleTags": [
+        "indie folk",
+        "singer-songwriter"
+      ],
+      "targetTone": "dry acoustic strum, intimate folk vocal bed",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic cabinet simulation with a dedicated acoustic/DI IR to achieve a truly dry, close-mic folk sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic DI Cabinet realism",
+          "recommendedAsset": "dedicated Acoustic DI Impulse Response (e.g., Neumann U47 or specific acoustic mic IR)",
+          "reason": "The current US 2x12 is too colored and electric; a dedicated DI/acoustic IR is needed for dry folk texture.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and dryness",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1009,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

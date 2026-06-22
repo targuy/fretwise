@@ -1,0 +1,1127 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1231,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Scorpions__Still_Loving_You.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Scorpions",
+    "title": "Still Loving You",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "arena rock",
+      "power ballad",
+      "80s rock"
+    ],
+    "confidence": "high",
+    "rationale": "Scorpions' 'Still Loving You' is a quintessential 80s hard rock power ballad."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven rock ballad tone (think late 80s arena rock)",
+      "signatureElements": [
+        "Sustained clean arpeggios with moderate reverb/delay",
+        "Mid-scooped crunch for verses",
+        "Smooth, singing lead lines"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall JCM family)",
+        "Overdrive pedal simulation (Tube Screamer type) for warmth",
+        "Chorus or Flanger modulation for atmosphere"
+      ],
+      "avoid": [
+        "Aggressive distortion/high gain metal tones",
+        "Bright, brittle clean sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm 80s arena rock ballad crunch with delay and singing sustain",
+      "mustHave": [
+        "clean arpeggios",
+        "wide delay/reverb",
+        "smooth lead sustain",
+        "mild crunchy verses"
+      ],
+      "avoid": [
+        "metal high gain",
+        "bright brittle clean",
+        "heavy scooped metal tone"
+      ],
+      "gearClues": [
+        "Marshall JCM-style amp",
+        "2x12 or 4x12 cab",
+        "humbuckers",
+        "Tube Screamer-style boost",
+        "stereo delay"
+      ],
+      "corrections": [
+        "drop chorus/flanger unless clearly audible",
+        "lean more on delay than modulation",
+        "keep lead smooth, not aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm 80s arena rock ballad crunch with delay and singing sustain",
+    "mustHave": [
+      "clean arpeggios",
+      "wide delay/reverb",
+      "smooth lead sustain",
+      "mild crunchy verses"
+    ],
+    "avoid": [
+      "metal high gain",
+      "bright brittle clean",
+      "heavy scooped metal tone"
+    ],
+    "gearClues": [
+      "Marshall JCM-style amp",
+      "2x12 or 4x12 cab",
+      "humbuckers",
+      "Tube Screamer-style boost",
+      "stereo delay"
+    ],
+    "corrections": [
+      "drop chorus/flanger unless clearly audible",
+      "lean more on delay than modulation",
+      "keep lead smooth, not aggressive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, mid-heavy tones and lush ambience (Delay/Reverb) suitable for 80s ballads.",
+          "bestMatchSummary": "A smooth signal chain utilizing a mild boost and classic British amp voicing (UK SLP/AC30 style) paired with a versatile cab. Emphasis is placed on delay and reverb to achieve the required 'singing sustain' and wide, warm sound characteristic of 80s arena rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide gentle mid-hump and sustain boost for lead lines (Tube Screamer emulation).",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to emulate the mild, non-aggressive push of a Tube Screamer style pedal.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "Slightly more aggressive than pure boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "25%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Provide the mild crunchy texture needed for verses without sounding overly aggressive or metal.",
+              "matchQuality": "close",
+              "gap": "Red Haze offers a versatile, slightly vintage crunch suitable for 80s rock ballads.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style",
+                  "reason": "Might be too aggressive or mid-scooped."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Middle": "70%"
+              },
+              "purpose": "Simulate the warm, mid-focused British tone (JCM/AC30 style) required for arena rock ballads.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic, non-scooped voicing suitable for smooth lead tones.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "AC30 TB",
+                  "reason": "A good alternative, but UK SLP often provides a slightly warmer feel."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and bass to enhance warmth and body in the overall tone.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal shaping, focusing on mid-range fullness rather than drastic changes.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay",
+              "module": "DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Create the wide stereo delay effect crucial for 'singing sustain' and atmosphere.",
+              "matchQuality": "close",
+              "gap": "The Digital Delay is preferred over Tape/Slapback for its ability to create a wider, more pronounced echo suitable for arena rock.",
+              "alternatives": [
+                {
+                  "module": "DLY/RVB/VOL",
+                  "model": "Tape",
+                  "reason": "Might sound too dark or vintage compared to the required modern 80s sheen."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural, spacious ambience to fill out the sound and enhance sustain.",
+              "matchQuality": "close",
+              "gap": "Room reverb provides a warm, non-metallic decay that suits the ballad genre better than Plate or Spring.",
+              "alternatives": [
+                {
+                  "module": "DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "Can sometimes sound too bright or artificial for this specific tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock ballad, requiring careful balance between crunch and clean sustain. The chain prioritizes warmth (UK SLP/Room) and delay over aggressive gain.",
+          "Since the original gear was not specified, the combination of Boost + Red Haze + UK SLP aims to emulate the desired 'Tube Screamer-style boost' into a classic British amp voicing."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better mid-range definition and vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-range punch and vintage character for the ballad crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and warmth in verses.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Scorpions - Still Loving You - Valeton GP-180",
+        "song": {
+          "artist": "Scorpions",
+          "title": "Still Loving You",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm 80s arena rock ballad crunch with delay and singing sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A smooth signal chain utilizing a mild boost and classic British amp voicing (UK SLP/AC30 style) paired with a versatile cab. Emphasis is placed on delay and reverb to achieve the required 'singing sustain' and wide, warm sound characteristic of 80s arena rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide gentle mid-hump and sustain boost for lead lines (Tube Screamer emulation).",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to emulate the mild, non-aggressive push of a Tube Screamer style pedal.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "Slightly more aggressive than pure boost."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/crunch",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "25%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Provide the mild crunchy texture needed for verses without sounding overly aggressive or metal.",
+            "matchQuality": "close",
+            "gap": "Red Haze offers a versatile, slightly vintage crunch suitable for 80s rock ballads.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "RAT-style",
+                "reason": "Might be too aggressive or mid-scooped."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "50%",
+              "Treble": "60%",
+              "Middle": "70%"
+            },
+            "purpose": "Simulate the warm, mid-focused British tone (JCM/AC30 style) required for arena rock ballads.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is chosen for its classic, non-scooped voicing suitable for smooth lead tones.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "AC30 TB",
+                "reason": "A good alternative, but UK SLP often provides a slightly warmer feel."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the mids and bass to enhance warmth and body in the overall tone.",
+            "matchQuality": "close",
+            "gap": "Used for subtle tonal shaping, focusing on mid-range fullness rather than drastic changes.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay",
+            "module": "DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "30%"
+            },
+            "purpose": "Create the wide stereo delay effect crucial for 'singing sustain' and atmosphere.",
+            "matchQuality": "close",
+            "gap": "The Digital Delay is preferred over Tape/Slapback for its ability to create a wider, more pronounced echo suitable for arena rock.",
+            "alternatives": [
+              {
+                "module": "DLY/RVB/VOL",
+                "model": "Tape",
+                "reason": "Might sound too dark or vintage compared to the required modern 80s sheen."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "3.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a natural, spacious ambience to fill out the sound and enhance sustain.",
+            "matchQuality": "close",
+            "gap": "Room reverb provides a warm, non-metallic decay that suits the ballad genre better than Plate or Spring.",
+            "alternatives": [
+              {
+                "module": "DLY/RVB/VOL",
+                "model": "Plate",
+                "reason": "Can sometimes sound too bright or artificial for this specific tone."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm 80s arena rock ballad crunch with delay and singing sustain",
+          "toneProfile": "warm 80s arena rock ballad crunch with delay and singing sustain",
+          "idealSignalChain": "Marshall JCM-style amp | 2x12 or 4x12 cab | humbuckers | Tube Screamer-style boost | stereo delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall JCM-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer-style boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "stereo delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean arpeggios",
+            "wide delay/reverb",
+            "smooth lead sustain",
+            "mild crunchy verses"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, mid-heavy tones and lush ambience (Delay/Reverb) suitable for 80s ballads.",
+          "bestMatchSummary": "A smooth signal chain utilizing a mild boost and classic British amp voicing (UK SLP/AC30 style) paired with a versatile cab. Emphasis is placed on delay and reverb to achieve the required 'singing sustain' and wide, warm sound characteristic of 80s arena rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide gentle mid-hump and sustain boost for lead lines (Tube Screamer emulation).",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to emulate the mild, non-aggressive push of a Tube Screamer style pedal.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "Slightly more aggressive than pure boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "25%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Provide the mild crunchy texture needed for verses without sounding overly aggressive or metal.",
+              "matchQuality": "close",
+              "gap": "Red Haze offers a versatile, slightly vintage crunch suitable for 80s rock ballads.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style",
+                  "reason": "Might be too aggressive or mid-scooped."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Middle": "70%"
+              },
+              "purpose": "Simulate the warm, mid-focused British tone (JCM/AC30 style) required for arena rock ballads.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic, non-scooped voicing suitable for smooth lead tones.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "AC30 TB",
+                  "reason": "A good alternative, but UK SLP often provides a slightly warmer feel."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and bass to enhance warmth and body in the overall tone.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal shaping, focusing on mid-range fullness rather than drastic changes.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay",
+              "module": "DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Create the wide stereo delay effect crucial for 'singing sustain' and atmosphere.",
+              "matchQuality": "close",
+              "gap": "The Digital Delay is preferred over Tape/Slapback for its ability to create a wider, more pronounced echo suitable for arena rock.",
+              "alternatives": [
+                {
+                  "module": "DLY/RVB/VOL",
+                  "model": "Tape",
+                  "reason": "Might sound too dark or vintage compared to the required modern 80s sheen."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural, spacious ambience to fill out the sound and enhance sustain.",
+              "matchQuality": "close",
+              "gap": "Room reverb provides a warm, non-metallic decay that suits the ballad genre better than Plate or Spring.",
+              "alternatives": [
+                {
+                  "module": "DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "Can sometimes sound too bright or artificial for this specific tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better mid-range definition and vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-range punch and vintage character for the ballad crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and warmth in verses.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/flanger unless clearly audible",
+          "lean more on delay than modulation",
+          "keep lead smooth, not aggressive"
+        ],
+        "warnings": [
+          "The source material is a classic rock ballad, requiring careful balance between crunch and clean sustain. The chain prioritizes warmth (UK SLP/Room) and delay over aggressive gain.",
+          "Since the original gear was not specified, the combination of Boost + Red Haze + UK SLP aims to emulate the desired 'Tube Screamer-style boost' into a classic British amp voicing."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.273,
+      "prompt_chars": 994,
+      "response_chars": 524,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 125,
+        "total_duration": 10269635200,
+        "prompt_eval_duration": 460061000,
+        "eval_duration": 2328638000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.057,
+      "prompt_chars": 5440,
+      "response_chars": 607,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 158,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1670
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 50.171,
+      "prompt_chars": 3681,
+      "response_chars": 6300,
+      "usage": {
+        "prompt_eval_count": 1233,
+        "eval_count": 1767,
+        "total_duration": 50138130000,
+        "prompt_eval_duration": 275090000,
+        "eval_duration": 35291948000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.964,
+      "prompt_chars": 8552,
+      "response_chars": 559,
+      "usage": {
+        "prompt_eval_count": 2357,
+        "eval_count": 158,
+        "total_duration": 18940755700,
+        "prompt_eval_duration": 335596000,
+        "eval_duration": 3394614000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.577,
+      "prompt_chars": 2941,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 922,
+        "eval_count": 58,
+        "total_duration": 8556480700,
+        "prompt_eval_duration": 232618000,
+        "eval_duration": 812909000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Scorpions",
+      "title": "Still Loving You",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Scorpions - Still Loving You - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm 80s arena rock ballad crunch with delay and singing sustain",
+      "signalChainSummary": "A smooth signal chain utilizing a mild boost and classic British amp voicing (UK SLP/AC30 style) paired with a versatile cab. Emphasis is placed on delay and reverb to achieve the required 'singing sustain' and wide, warm sound characteristic of 80s arena rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide gentle mid-hump and sustain boost for lead lines (Tube Screamer emulation).",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to emulate the mild, non-aggressive push of a Tube Screamer style pedal.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Slightly more aggressive than pure boost."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/crunch",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "25%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Provide the mild crunchy texture needed for verses without sounding overly aggressive or metal.",
+          "matchQuality": "close",
+          "gap": "Red Haze offers a versatile, slightly vintage crunch suitable for 80s rock ballads.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Might be too aggressive or mid-scooped."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "50%",
+            "Treble": "60%",
+            "Middle": "70%"
+          },
+          "purpose": "Simulate the warm, mid-focused British tone (JCM/AC30 style) required for arena rock ballads.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is chosen for its classic, non-scooped voicing suitable for smooth lead tones.",
+          "alternatives": [
+            {
+              "model": "AC30 TB",
+              "reason": "A good alternative, but UK SLP often provides a slightly warmer feel."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the mids and bass to enhance warmth and body in the overall tone.",
+          "matchQuality": "close",
+          "gap": "Used for subtle tonal shaping, focusing on mid-range fullness rather than drastic changes.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "30%"
+          },
+          "purpose": "Create the wide stereo delay effect crucial for 'singing sustain' and atmosphere.",
+          "matchQuality": "close",
+          "gap": "The Digital Delay is preferred over Tape/Slapback for its ability to create a wider, more pronounced echo suitable for arena rock.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Might sound too dark or vintage compared to the required modern 80s sheen."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "3.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a natural, spacious ambience to fill out the sound and enhance sustain.",
+          "matchQuality": "close",
+          "gap": "Room reverb provides a warm, non-metallic decay that suits the ballad genre better than Plate or Spring.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Can sometimes sound too bright or artificial for this specific tone."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm 80s arena rock ballad crunch with delay and singing sustain",
+      "mustHave": [
+        "clean arpeggios",
+        "wide delay/reverb",
+        "smooth lead sustain",
+        "mild crunchy verses"
+      ],
+      "avoid": [
+        "metal high gain",
+        "bright brittle clean",
+        "heavy scooped metal tone"
+      ],
+      "gearClues": [
+        "Marshall JCM-style amp",
+        "2x12 or 4x12 cab",
+        "humbuckers",
+        "Tube Screamer-style boost",
+        "stereo delay"
+      ],
+      "corrections": [
+        "drop chorus/flanger unless clearly audible",
+        "lean more on delay than modulation",
+        "keep lead smooth, not aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "arena rock",
+        "power ballad",
+        "80s rock"
+      ],
+      "targetTone": "warm 80s arena rock ballad crunch with delay and singing sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better mid-range definition and vintage cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance mid-range punch and vintage character for the ballad crunch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and warmth in verses.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1231,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

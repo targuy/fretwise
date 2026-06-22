@@ -1,0 +1,1069 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1355,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Sum_41__Pieces.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Sum 41",
+    "title": "Pieces",
+    "album": "",
+    "year": null,
+    "genre": "pop punk"
+  },
+  "genreClassification": {
+    "genre": "pop punk",
+    "subgenres": [
+      "emo-pop",
+      "punk rock"
+    ],
+    "confidence": "high",
+    "rationale": "Sum 41 is a classic pop-punk band, and the tone confirms this style."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Aggressive, mid-scooped punk rock crunch",
+      "signatureElements": [
+        "Punk rhythm aggression",
+        "Mid-range focus (punchy)",
+        "Slightly overdriven crunch"
+      ],
+      "gearHypotheses": [
+        "High-gain amp simulation (Brit/US style)",
+        "Overdrive pedal emulation (for grit)",
+        "Cabinet modeling (Punchy, tight)"
+      ],
+      "avoid": [
+        "Excessive fuzz",
+        "Clean delay trails",
+        "Deep modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright emo-pop punk crunch with open chorused clean bits",
+      "mustHave": [
+        "tight power-chord crunch",
+        "bright top end",
+        "clean verse contrast",
+        "light chorus / double-track feel"
+      ],
+      "avoid": [
+        "mid-scooped generic punk",
+        "heavy fuzz",
+        "deep modulation"
+      ],
+      "gearClues": [
+        "Marshall/UK crunch",
+        "2x12 or 4x12",
+        "humbucker electric",
+        "light chorus"
+      ],
+      "corrections": [
+        "less aggressive",
+        "not mid-scooped",
+        "include clean/chorused contrast"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright emo-pop punk crunch with open chorused clean bits",
+    "mustHave": [
+      "tight power-chord crunch",
+      "bright top end",
+      "clean verse contrast",
+      "light chorus / double-track feel"
+    ],
+    "avoid": [
+      "mid-scooped generic punk",
+      "heavy fuzz",
+      "deep modulation"
+    ],
+    "gearClues": [
+      "Marshall/UK crunch",
+      "2x12 or 4x12",
+      "humbucker electric",
+      "light chorus"
+    ],
+    "corrections": [
+      "less aggressive",
+      "not mid-scooped",
+      "include clean/chorused contrast"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize UK British tones (Marshall/Brit) for punk crunch, ensuring clean contrast via Chorus and a bright cab.",
+          "bestMatchSummary": "A punchy signal chain using an OD boost into a classic UK amp model (UK 45 or UK 50) paired with a bright cabinet. Clean sections utilize the chorus effect to achieve the required emo-pop pop feel.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and tighten the overall sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary tight power-chord crunch and bright edge without excessive grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good general choice for punk, but a dedicated British Overdrive (like Blues OD) might be slightly more accurate to Marshall tones. However, Green OD offers better overall tone shaping here.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely solely on the OD and Amp for crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British crunch and bright top end required for pop-punk.",
+              "matchQuality": "close",
+              "gap": "The UK 50 would also work well, but the UK 45 often provides a slightly punchier, more aggressive punk bite.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required British cabinet sound and punchy mid-range response.",
+              "matchQuality": "close",
+              "gap": "The UK 30 4x12 is an alternative, but the Vintage model better captures the classic Marshall/Brit tone needed for this genre.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK 30 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "chorus/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "4",
+                "Mix": "3"
+              },
+              "purpose": "Create the 'light chorus / double-track feel' needed for clean verse contrast.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+1",
+                "Treble": "+3"
+              },
+              "purpose": "Brighten the overall tone and compensate for potential muddiness from the OD/Amp stack.",
+              "matchQuality": "close",
+              "gap": "None, this is a general tonal adjustment block.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle depth and space without sounding overly wet or distracting from the punk energy.",
+              "matchQuality": "close",
+              "gap": "None, Room reverb is ideal for adding natural pop-punk ambience.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is pop-punk, which requires a balance between aggressive crunch and clean clarity. The signal chain prioritizes the UK British tones (UK 45/Green OD) for power chords while using Chorus to achieve the necessary contrast."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and punch by swapping the current IR for a more aggressive, British-voiced model.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance classic Marshall crunch and mid-range punch for pop-punk power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Sum 41 - Pieces - Valeton GP-180",
+        "song": {
+          "artist": "Sum 41",
+          "title": "Pieces",
+          "album": "",
+          "year": null,
+          "genre": "pop punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright emo-pop punk crunch with open chorused clean bits",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A punchy signal chain using an OD boost into a classic UK amp model (UK 45 or UK 50) paired with a bright cabinet. Clean sections utilize the chorus effect to achieve the required emo-pop pop feel.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up background noise and tighten the overall sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary tight power-chord crunch and bright edge without excessive grit.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a good general choice for punk, but a dedicated British Overdrive (like Blues OD) might be slightly more accurate to Marshall tones. However, Green OD offers better overall tone shaping here.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Blues OD"
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the distortion section clean to rely solely on the OD and Amp for crunch.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British crunch and bright top end required for pop-punk.",
+            "matchQuality": "close",
+            "gap": "The UK 50 would also work well, but the UK 45 often provides a slightly punchier, more aggressive punk bite.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 50"
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required British cabinet sound and punchy mid-range response.",
+            "matchQuality": "close",
+            "gap": "The UK 30 4x12 is an alternative, but the Vintage model better captures the classic Marshall/Brit tone needed for this genre.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "UK 30 4x12"
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "chorus/modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "4",
+              "Mix": "3"
+            },
+            "purpose": "Create the 'light chorus / double-track feel' needed for clean verse contrast.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+1",
+              "Treble": "+3"
+            },
+            "purpose": "Brighten the overall tone and compensate for potential muddiness from the OD/Amp stack.",
+            "matchQuality": "close",
+            "gap": "None, this is a general tonal adjustment block.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "2"
+            },
+            "purpose": "Add subtle depth and space without sounding overly wet or distracting from the punk energy.",
+            "matchQuality": "close",
+            "gap": "None, Room reverb is ideal for adding natural pop-punk ambience.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate"
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "10"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright emo-pop punk crunch with open chorused clean bits",
+          "toneProfile": "bright emo-pop punk crunch with open chorused clean bits",
+          "idealSignalChain": "Marshall/UK crunch | 2x12 or 4x12 | humbucker electric | light chorus",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/UK crunch",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight power-chord crunch",
+            "bright top end",
+            "clean verse contrast",
+            "light chorus / double-track feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize UK British tones (Marshall/Brit) for punk crunch, ensuring clean contrast via Chorus and a bright cab.",
+          "bestMatchSummary": "A punchy signal chain using an OD boost into a classic UK amp model (UK 45 or UK 50) paired with a bright cabinet. Clean sections utilize the chorus effect to achieve the required emo-pop pop feel.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and tighten the overall sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary tight power-chord crunch and bright edge without excessive grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good general choice for punk, but a dedicated British Overdrive (like Blues OD) might be slightly more accurate to Marshall tones. However, Green OD offers better overall tone shaping here.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely solely on the OD and Amp for crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British crunch and bright top end required for pop-punk.",
+              "matchQuality": "close",
+              "gap": "The UK 50 would also work well, but the UK 45 often provides a slightly punchier, more aggressive punk bite.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required British cabinet sound and punchy mid-range response.",
+              "matchQuality": "close",
+              "gap": "The UK 30 4x12 is an alternative, but the Vintage model better captures the classic Marshall/Brit tone needed for this genre.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK 30 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "chorus/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "4",
+                "Mix": "3"
+              },
+              "purpose": "Create the 'light chorus / double-track feel' needed for clean verse contrast.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+1",
+                "Treble": "+3"
+              },
+              "purpose": "Brighten the overall tone and compensate for potential muddiness from the OD/Amp stack.",
+              "matchQuality": "close",
+              "gap": "None, this is a general tonal adjustment block.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle depth and space without sounding overly wet or distracting from the punk energy.",
+              "matchQuality": "close",
+              "gap": "None, Room reverb is ideal for adding natural pop-punk ambience.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and punch by swapping the current IR for a more aggressive, British-voiced model.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/Punch",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance classic Marshall crunch and mid-range punch for pop-punk power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "less aggressive",
+          "not mid-scooped",
+          "include clean/chorused contrast"
+        ],
+        "warnings": [
+          "The source material is pop-punk, which requires a balance between aggressive crunch and clean clarity. The signal chain prioritizes the UK British tones (UK 45/Green OD) for power chords while using Chorus to achieve the necessary contrast."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.643,
+      "prompt_chars": 981,
+      "response_chars": 405,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 104,
+        "total_duration": 9617121900,
+        "prompt_eval_duration": 608805000,
+        "eval_duration": 1886220000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.879,
+      "prompt_chars": 5314,
+      "response_chars": 534,
+      "usage": {
+        "input_tokens": 1491,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1632
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 42.556,
+      "prompt_chars": 3588,
+      "response_chars": 5487,
+      "usage": {
+        "prompt_eval_count": 1213,
+        "eval_count": 1549,
+        "total_duration": 42550378500,
+        "prompt_eval_duration": 269617000,
+        "eval_duration": 28433093000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.05,
+      "prompt_chars": 7616,
+      "response_chars": 563,
+      "usage": {
+        "prompt_eval_count": 2119,
+        "eval_count": 150,
+        "total_duration": 5041306900,
+        "prompt_eval_duration": 355195000,
+        "eval_duration": 4186037000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.537,
+      "prompt_chars": 2762,
+      "response_chars": 167,
+      "usage": {
+        "prompt_eval_count": 870,
+        "eval_count": 52,
+        "total_duration": 14519710400,
+        "prompt_eval_duration": 390445000,
+        "eval_duration": 896426000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Sum 41",
+      "title": "Pieces",
+      "album": "",
+      "year": null,
+      "genre": "pop punk"
+    },
+    "rig": {
+      "rigName": "Sum 41 - Pieces - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright emo-pop punk crunch with open chorused clean bits",
+      "signalChainSummary": "A punchy signal chain using an OD boost into a classic UK amp model (UK 45 or UK 50) paired with a bright cabinet. Clean sections utilize the chorus effect to achieve the required emo-pop pop feel.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up background noise and tighten the overall sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary tight power-chord crunch and bright edge without excessive grit.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a good general choice for punk, but a dedicated British Overdrive (like Blues OD) might be slightly more accurate to Marshall tones. However, Green OD offers better overall tone shaping here.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the distortion section clean to rely solely on the OD and Amp for crunch.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British crunch and bright top end required for pop-punk.",
+          "matchQuality": "close",
+          "gap": "The UK 50 would also work well, but the UK 45 often provides a slightly punchier, more aggressive punk bite.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required British cabinet sound and punchy mid-range response.",
+          "matchQuality": "close",
+          "gap": "The UK 30 4x12 is an alternative, but the Vintage model better captures the classic Marshall/Brit tone needed for this genre.",
+          "alternatives": [
+            {
+              "model": "UK 30 4x12",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "chorus/modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "4",
+            "Mix": "3"
+          },
+          "purpose": "Create the 'light chorus / double-track feel' needed for clean verse contrast.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+1",
+            "Treble": "+3"
+          },
+          "purpose": "Brighten the overall tone and compensate for potential muddiness from the OD/Amp stack.",
+          "matchQuality": "close",
+          "gap": "None, this is a general tonal adjustment block.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "2"
+          },
+          "purpose": "Add subtle depth and space without sounding overly wet or distracting from the punk energy.",
+          "matchQuality": "close",
+          "gap": "None, Room reverb is ideal for adding natural pop-punk ambience.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "10"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright emo-pop punk crunch with open chorused clean bits",
+      "mustHave": [
+        "tight power-chord crunch",
+        "bright top end",
+        "clean verse contrast",
+        "light chorus / double-track feel"
+      ],
+      "avoid": [
+        "mid-scooped generic punk",
+        "heavy fuzz",
+        "deep modulation"
+      ],
+      "gearClues": [
+        "Marshall/UK crunch",
+        "2x12 or 4x12",
+        "humbucker electric",
+        "light chorus"
+      ],
+      "corrections": [
+        "less aggressive",
+        "not mid-scooped",
+        "include clean/chorused contrast"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop punk",
+      "styleTags": [
+        "emo-pop",
+        "punk rock"
+      ],
+      "targetTone": "bright emo-pop punk crunch with open chorused clean bits",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and punch by swapping the current IR for a more aggressive, British-voiced model.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism/Punch",
+          "recommendedAsset": "Marshall 4x12 (UK)",
+          "reason": "Enhance classic Marshall crunch and mid-range punch for pop-punk power chords.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased bite and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1355,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

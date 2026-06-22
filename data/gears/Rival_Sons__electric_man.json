@@ -1,0 +1,1084 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1185,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rival_Sons__electric_man.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Rival Sons",
+    "title": "electric man",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "blues rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile and gear clues point directly to classic, crunchy hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor, bluesy rock",
+      "signatureElements": [
+        "crunch",
+        "mid-gain overdrive",
+        "thick rhythm tone",
+        "slight chorus/vibrato"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM family (sim)",
+        "Vox AC30 style amp (sim)"
+      ],
+      "avoid": [
+        "extreme fuzz",
+        "high gain metal tones",
+        "clean arpeggios"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+      "mustHave": [
+        "thick crunchy rhythm",
+        "upper-mid bite",
+        "slight modulation",
+        "fat sustain"
+      ],
+      "avoid": [
+        "generic blues rock",
+        "clean arpeggios",
+        "metal gain",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or JCM",
+        "4x12 cab",
+        "vintage humbucker"
+      ],
+      "corrections": [
+        "remove key label",
+        "push harder classic-rock crunch",
+        "keep subtle chorus/vibrato"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+    "mustHave": [
+      "thick crunchy rhythm",
+      "upper-mid bite",
+      "slight modulation",
+      "fat sustain"
+    ],
+    "avoid": [
+      "generic blues rock",
+      "clean arpeggios",
+      "metal gain",
+      "heavy fuzz"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or JCM",
+      "4x12 cab",
+      "vintage humbucker"
+    ],
+    "corrections": [
+      "remove key label",
+      "push harder classic-rock crunch",
+      "keep subtle chorus/vibrato"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic hard rock tone emulation (Marshall/Plexi era)",
+          "bestMatchSummary": "A classic British high-gain stack simulation using the UK 45 or UK 50 model, paired with a vintage 4x12 cabinet and enhanced by chorus for that late '60s/'70s grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add grit and upper-mid bite for the classic crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a slight boost/overdrive characteristic of Plexi amps, rather than pure dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if the crunch needs to be less aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Used as a secondary gain stage for thickening the rhythm tone (optional/subtle).",
+              "matchQuality": "far",
+              "gap": "The RAT-style is generally too aggressive for this vintage sound; it's kept inactive but available if more bite is needed.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Relying solely on the preamp and amp model gain structure."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JCM era high-gain crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if the tone needs to be slightly more vintage/early."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet voicing and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Add the required subtle modulation and width to the rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the upper-mids and bass for thickness without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "A slight EQ adjustment is necessary to fine-tune the 'upper-mid bite' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle space and depth to the overall mix.",
+              "matchQuality": "close",
+              "gap": "A moderate Room reverb is preferred over Plate/Spring for a vintage, natural feel.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If more sparkle and less room ambiance are desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a hard rock track, so the tone settings are optimized for high-gain rhythm playing. The Chorus setting should be kept subtle to avoid sounding overly '80s."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation with a more vintage, punchy IR to better capture the late 60s/70s hard rock grit.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the vintage punch and upper-mid bite required for late '60s/70s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rival Sons - electric man - Valeton GP-180",
+        "song": {
+          "artist": "Rival Sons",
+          "title": "electric man",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British high-gain stack simulation using the UK 45 or UK 50 model, paired with a vintage 4x12 cabinet and enhanced by chorus for that late '60s/'70s grit.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add grit and upper-mid bite for the classic crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a slight boost/overdrive characteristic of Plexi amps, rather than pure dirt.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly cleaner alternative if the crunch needs to be less aggressive."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {
+              "Drive": "4",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Used as a secondary gain stage for thickening the rhythm tone (optional/subtle).",
+            "matchQuality": "far",
+            "gap": "The RAT-style is generally too aggressive for this vintage sound; it's kept inactive but available if more bite is needed.",
+            "alternatives": [
+              {
+                "model": "None",
+                "reason": "Relying solely on the preamp and amp model gain structure."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the classic Marshall Plexi/JCM era high-gain crunch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative if the tone needs to be slightly more vintage/early."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the classic British cabinet voicing and punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "4",
+              "Feedback": "2"
+            },
+            "purpose": "Add the required subtle modulation and width to the rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the upper-mids and bass for thickness without sounding muddy.",
+            "matchQuality": "close",
+            "gap": "A slight EQ adjustment is necessary to fine-tune the 'upper-mid bite' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle space and depth to the overall mix.",
+            "matchQuality": "close",
+            "gap": "A moderate Room reverb is preferred over Plate/Spring for a vintage, natural feel.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If more sparkle and less room ambiance are desired."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+          "toneProfile": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+          "idealSignalChain": "Marshall/Plexi or JCM | 4x12 cab | vintage humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or JCM",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "vintage humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "thick crunchy rhythm",
+            "upper-mid bite",
+            "slight modulation",
+            "fat sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic hard rock tone emulation (Marshall/Plexi era)",
+          "bestMatchSummary": "A classic British high-gain stack simulation using the UK 45 or UK 50 model, paired with a vintage 4x12 cabinet and enhanced by chorus for that late '60s/'70s grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add grit and upper-mid bite for the classic crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a slight boost/overdrive characteristic of Plexi amps, rather than pure dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if the crunch needs to be less aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Used as a secondary gain stage for thickening the rhythm tone (optional/subtle).",
+              "matchQuality": "far",
+              "gap": "The RAT-style is generally too aggressive for this vintage sound; it's kept inactive but available if more bite is needed.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Relying solely on the preamp and amp model gain structure."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JCM era high-gain crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if the tone needs to be slightly more vintage/early."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet voicing and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Add the required subtle modulation and width to the rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the upper-mids and bass for thickness without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "A slight EQ adjustment is necessary to fine-tune the 'upper-mid bite' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle space and depth to the overall mix.",
+              "matchQuality": "close",
+              "gap": "A moderate Room reverb is preferred over Plate/Spring for a vintage, natural feel.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If more sparkle and less room ambiance are desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation with a more vintage, punchy IR to better capture the late 60s/70s hard rock grit.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the vintage punch and upper-mid bite required for late '60s/70s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove key label",
+          "push harder classic-rock crunch",
+          "keep subtle chorus/vibrato"
+        ],
+        "warnings": [
+          "The source material is a hard rock track, so the tone settings are optimized for high-gain rhythm playing. The Chorus setting should be kept subtle to avoid sounding overly '80s."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.562,
+      "prompt_chars": 991,
+      "response_chars": 311,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 91,
+        "total_duration": 10502783000,
+        "prompt_eval_duration": 480613000,
+        "eval_duration": 1699252000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.735,
+      "prompt_chars": 5230,
+      "response_chars": 514,
+      "usage": {
+        "input_tokens": 1477,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1621
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 30.752,
+      "prompt_chars": 3578,
+      "response_chars": 5366,
+      "usage": {
+        "prompt_eval_count": 1218,
+        "eval_count": 1534,
+        "total_duration": 30730959400,
+        "prompt_eval_duration": 436874000,
+        "eval_duration": 29858287000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.629,
+      "prompt_chars": 7495,
+      "response_chars": 607,
+      "usage": {
+        "prompt_eval_count": 2109,
+        "eval_count": 171,
+        "total_duration": 4607017000,
+        "prompt_eval_duration": 844528000,
+        "eval_duration": 3312868000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.715,
+      "prompt_chars": 2712,
+      "response_chars": 183,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 47,
+        "total_duration": 12710848900,
+        "prompt_eval_duration": 407429000,
+        "eval_duration": 790196000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rival Sons",
+      "title": "electric man",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Rival Sons - electric man - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+      "signalChainSummary": "A classic British high-gain stack simulation using the UK 45 or UK 50 model, paired with a vintage 4x12 cabinet and enhanced by chorus for that late '60s/'70s grit.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add grit and upper-mid bite for the classic crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a slight boost/overdrive characteristic of Plexi amps, rather than pure dirt.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly cleaner alternative if the crunch needs to be less aggressive."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {
+            "Drive": "4",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Used as a secondary gain stage for thickening the rhythm tone (optional/subtle).",
+          "matchQuality": "fallback",
+          "gap": "The RAT-style is generally too aggressive for this vintage sound; it's kept inactive but available if more bite is needed.",
+          "alternatives": [
+            {
+              "model": "None",
+              "reason": "Relying solely on the preamp and amp model gain structure."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the classic Marshall Plexi/JCM era high-gain crunch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative if the tone needs to be slightly more vintage/early."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the classic British cabinet voicing and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "4",
+            "Feedback": "2"
+          },
+          "purpose": "Add the required subtle modulation and width to the rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the upper-mids and bass for thickness without sounding muddy.",
+          "matchQuality": "close",
+          "gap": "A slight EQ adjustment is necessary to fine-tune the 'upper-mid bite' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle space and depth to the overall mix.",
+          "matchQuality": "close",
+          "gap": "A moderate Room reverb is preferred over Plate/Spring for a vintage, natural feel.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If more sparkle and less room ambiance are desired."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+      "mustHave": [
+        "thick crunchy rhythm",
+        "upper-mid bite",
+        "slight modulation",
+        "fat sustain"
+      ],
+      "avoid": [
+        "generic blues rock",
+        "clean arpeggios",
+        "metal gain",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or JCM",
+        "4x12 cab",
+        "vintage humbucker"
+      ],
+      "corrections": [
+        "remove key label",
+        "push harder classic-rock crunch",
+        "keep subtle chorus/vibrato"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "blues rock"
+      ],
+      "targetTone": "thick late-60s/70s hard-rock crunch with slight chorus/vibrato",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet simulation with a more vintage, punchy IR to better capture the late 60s/70s hard rock grit.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+          "reason": "Enhance the vintage punch and upper-mid bite required for late '60s/70s hard rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and definition in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1185,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

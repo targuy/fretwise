@@ -1,0 +1,1137 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1652,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Thin_Lizzy__Jailbreak.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Thin Lizzy",
+    "title": "Jailbreak",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "british rock"
+    ],
+    "confidence": "high",
+    "rationale": "Thin Lizzy's 'Jailbreak' is a classic example of hard rock/proto-metal."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty rock tone with pronounced bite and mid-range focus.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-scooped)",
+        "Slight fuzz character for grit",
+        "Punchy attack",
+        "Bright treble presence"
+      ],
+      "gearHypotheses": [
+        "British style Overdrive pedal (e.g., Tube Screamer variant)",
+        "High-gain amp simulation with mid-focus EQ",
+        "Cabinet modeling emphasizing midrange punch"
+      ],
+      "avoid": [
+        "Excessive low end bloat",
+        "Thin, scooped hi-end",
+        "Overly clean or ambient textures"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Plexi-style hard rock crunch with tight mids",
+      "mustHave": [
+        "sharp pick attack",
+        "upper-mid bite",
+        "dry crunch",
+        "tight bass"
+      ],
+      "avoid": [
+        "fuzzy saturation",
+        "scooped mids",
+        "ambient delay",
+        "clean tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "light OD boost"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "use British crunch, not mid-scooped OD",
+        "keep it dry and punchy"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Plexi-style hard rock crunch with tight mids",
+    "mustHave": [
+      "sharp pick attack",
+      "upper-mid bite",
+      "dry crunch",
+      "tight bass"
+    ],
+    "avoid": [
+      "fuzzy saturation",
+      "scooped mids",
+      "ambient delay",
+      "clean tone"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12 cab",
+      "humbucker bridge",
+      "light OD boost"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "use British crunch, not mid-scooped OD",
+      "keep it dry and punchy"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic British rock tone emulation (Plexi/Marshall style) with focus on mid-range punch and tight, crunchy saturation.",
+          "bestMatchSummary": "The signal chain uses a light OD boost for initial grit, followed by the UK 45 amp model to capture the classic Plexi sound. The US Vintage 4x12 cab provides the necessary British voicing, while EQ adjustments ensure upper-mid bite and tight bass response.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, biting grit and boost the signal into the amp for extra punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Used as a subtle texture layer to enhance the crunch without adding fuzziness.",
+              "matchQuality": "close",
+              "gap": "The primary saturation comes from Green OD and the amp model, but RAT-style can add bite if needed. Keep it mostly off or set low.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Middle": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Plexi/Marshall British rock tone with tight mids and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the characteristic British voicing and punch of a Marshall-style cabinet.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "+3 dB (1 kHz)",
+                "High Cut": "15 kHz"
+              },
+              "purpose": "Sculpt the tone by boosting upper-mids for bite and tightening the low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "100 Hz",
+                "Resonance": "50%"
+              },
+              "purpose": "Placeholder/Optional: V-Wah is available but not needed for this specific tone.",
+              "matchQuality": "N/A",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "10%"
+              },
+              "purpose": "Keep the tone dry and punchy; Chorus is set to minimal/off.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Avoid ambient delay; set to minimal/off.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add minimal space and dimension without sounding ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage British amplification (Plexi/Marshall). The settings prioritize mid-range punch and controlled crunch over deep saturation or ambient effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate British voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance Plexi authenticity and upper-mid bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Thin Lizzy - Jailbreak - Valeton GP-180",
+        "song": {
+          "artist": "Thin Lizzy",
+          "title": "Jailbreak",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Plexi-style hard rock crunch with tight mids",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "The signal chain uses a light OD boost for initial grit, followed by the UK 45 amp model to capture the classic Plexi sound. The US Vintage 4x12 cab provides the necessary British voicing, while EQ adjustments ensure upper-mid bite and tight bass response.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, biting grit and boost the signal into the amp for extra punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {
+              "Drive": "10%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Used as a subtle texture layer to enhance the crunch without adding fuzziness.",
+            "matchQuality": "close",
+            "gap": "The primary saturation comes from Green OD and the amp model, but RAT-style can add bite if needed. Keep it mostly off or set low.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Middle": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Emulate the classic Plexi/Marshall British rock tone with tight mids and punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide the characteristic British voicing and punch of a Marshall-style cabinet.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "Mid Boost": "+3 dB (1 kHz)",
+              "High Cut": "15 kHz"
+            },
+            "purpose": "Sculpt the tone by boosting upper-mids for bite and tightening the low end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Cutoff": "100 Hz",
+              "Resonance": "50%"
+            },
+            "purpose": "Placeholder/Optional: V-Wah is available but not needed for this specific tone.",
+            "matchQuality": "N/A",
+            "gap": "None (Module included as required by chain structure)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%",
+              "Mix": "10%"
+            },
+            "purpose": "Keep the tone dry and punchy; Chorus is set to minimal/off.",
+            "matchQuality": "close",
+            "gap": "None (Module included as required by chain structure)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Avoid ambient delay; set to minimal/off.",
+            "matchQuality": "close",
+            "gap": "None (Module included as required by chain structure)",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Add minimal space and dimension without sounding ambient or muddy.",
+            "matchQuality": "close",
+            "gap": "None (Module included as required by chain structure)",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Plexi-style hard rock crunch with tight mids",
+          "toneProfile": "bright Plexi-style hard rock crunch with tight mids",
+          "idealSignalChain": "Marshall/Plexi | 4x12 cab | humbucker bridge | light OD boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "sharp pick attack",
+            "upper-mid bite",
+            "dry crunch",
+            "tight bass"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic British rock tone emulation (Plexi/Marshall style) with focus on mid-range punch and tight, crunchy saturation.",
+          "bestMatchSummary": "The signal chain uses a light OD boost for initial grit, followed by the UK 45 amp model to capture the classic Plexi sound. The US Vintage 4x12 cab provides the necessary British voicing, while EQ adjustments ensure upper-mid bite and tight bass response.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, biting grit and boost the signal into the amp for extra punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Used as a subtle texture layer to enhance the crunch without adding fuzziness.",
+              "matchQuality": "close",
+              "gap": "The primary saturation comes from Green OD and the amp model, but RAT-style can add bite if needed. Keep it mostly off or set low.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Middle": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Plexi/Marshall British rock tone with tight mids and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the characteristic British voicing and punch of a Marshall-style cabinet.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "+3 dB (1 kHz)",
+                "High Cut": "15 kHz"
+              },
+              "purpose": "Sculpt the tone by boosting upper-mids for bite and tightening the low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "100 Hz",
+                "Resonance": "50%"
+              },
+              "purpose": "Placeholder/Optional: V-Wah is available but not needed for this specific tone.",
+              "matchQuality": "N/A",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "10%"
+              },
+              "purpose": "Keep the tone dry and punchy; Chorus is set to minimal/off.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Avoid ambient delay; set to minimal/off.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add minimal space and dimension without sounding ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "None (Module included as required by chain structure)",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate British voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance Plexi authenticity and upper-mid bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "use British crunch, not mid-scooped OD",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage British amplification (Plexi/Marshall). The settings prioritize mid-range punch and controlled crunch over deep saturation or ambient effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.613,
+      "prompt_chars": 988,
+      "response_chars": 516,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 129,
+        "total_duration": 10609265300,
+        "prompt_eval_duration": 211666000,
+        "eval_duration": 2807734000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.987,
+      "prompt_chars": 5438,
+      "response_chars": 493,
+      "usage": {
+        "input_tokens": 1516,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.263,
+      "prompt_chars": 3561,
+      "response_chars": 5829,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1670,
+        "total_duration": 31233345700,
+        "prompt_eval_duration": 281873000,
+        "eval_duration": 30498251000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.264,
+      "prompt_chars": 7963,
+      "response_chars": 541,
+      "usage": {
+        "prompt_eval_count": 2237,
+        "eval_count": 150,
+        "total_duration": 19259459100,
+        "prompt_eval_duration": 466554000,
+        "eval_duration": 2876405000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.474,
+      "prompt_chars": 2954,
+      "response_chars": 179,
+      "usage": {
+        "prompt_eval_count": 934,
+        "eval_count": 53,
+        "total_duration": 8452828400,
+        "prompt_eval_duration": 285476000,
+        "eval_duration": 648965000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Thin Lizzy",
+      "title": "Jailbreak",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Thin Lizzy - Jailbreak - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Plexi-style hard rock crunch with tight mids",
+      "signalChainSummary": "The signal chain uses a light OD boost for initial grit, followed by the UK 45 amp model to capture the classic Plexi sound. The US Vintage 4x12 cab provides the necessary British voicing, while EQ adjustments ensure upper-mid bite and tight bass response.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, biting grit and boost the signal into the amp for extra punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {
+            "Drive": "10%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Used as a subtle texture layer to enhance the crunch without adding fuzziness.",
+          "matchQuality": "close",
+          "gap": "The primary saturation comes from Green OD and the amp model, but RAT-style can add bite if needed. Keep it mostly off or set low.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Middle": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Emulate the classic Plexi/Marshall British rock tone with tight mids and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide the characteristic British voicing and punch of a Marshall-style cabinet.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "Mid Boost": "+3 dB (1 kHz)",
+            "High Cut": "15 kHz"
+          },
+          "purpose": "Sculpt the tone by boosting upper-mids for bite and tightening the low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Cutoff": "100 Hz",
+            "Resonance": "50%"
+          },
+          "purpose": "Placeholder/Optional: V-Wah is available but not needed for this specific tone.",
+          "matchQuality": "fallback",
+          "gap": "None (Module included as required by chain structure)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%",
+            "Mix": "10%"
+          },
+          "purpose": "Keep the tone dry and punchy; Chorus is set to minimal/off.",
+          "matchQuality": "close",
+          "gap": "None (Module included as required by chain structure)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Avoid ambient delay; set to minimal/off.",
+          "matchQuality": "close",
+          "gap": "None (Module included as required by chain structure)",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Add minimal space and dimension without sounding ambient or muddy.",
+          "matchQuality": "close",
+          "gap": "None (Module included as required by chain structure)",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Plexi-style hard rock crunch with tight mids",
+      "mustHave": [
+        "sharp pick attack",
+        "upper-mid bite",
+        "dry crunch",
+        "tight bass"
+      ],
+      "avoid": [
+        "fuzzy saturation",
+        "scooped mids",
+        "ambient delay",
+        "clean tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "light OD boost"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "use British crunch, not mid-scooped OD",
+        "keep it dry and punchy"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "british rock"
+      ],
+      "targetTone": "bright Plexi-style hard rock crunch with tight mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate British voicing.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance Plexi authenticity and upper-mid bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1652,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

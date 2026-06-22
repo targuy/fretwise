@@ -1,0 +1,1105 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1119,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Prince__Kiss.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Prince",
+    "title": "Kiss",
+    "album": "",
+    "year": null,
+    "genre": "funk"
+  },
+  "genreClassification": {
+    "genre": "funk",
+    "subgenres": [
+      "pop",
+      "disco"
+    ],
+    "confidence": "high",
+    "rationale": "Prince's 'Kiss' is a quintessential funk/pop track, matching the clean, tight tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, punchy funk/pop sound with pronounced slapback echo and clean attack.",
+      "signatureElements": [
+        "Funk rhythm chops",
+        "Slapback delay (key element)",
+        "Clean to slightly crunchy overdrive",
+        "Bright treble focus"
+      ],
+      "gearHypotheses": [
+        "Chorus/Vibrato modulation for texture",
+        "Spring reverb or plate reverb",
+        "Overdrive pedal (low gain, high mid-focus)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion",
+        "Deep ambient delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright clean funk guitar with slapback and slight breakup",
+      "mustHave": [
+        "tight funk chops",
+        "slapback echo",
+        "bright single-coil attack",
+        "clean edge breakup"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big chorus",
+        "deep reverb",
+        "heavy distortion"
+      ],
+      "gearClues": [
+        "Strat or Tele",
+        "clean solid-state or Fender-style amp",
+        "short slapback delay",
+        "light compression"
+      ],
+      "corrections": [
+        "drop mid-gain focus",
+        "remove chorus as default",
+        "keep reverb minimal"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright clean funk guitar with slapback and slight breakup",
+    "mustHave": [
+      "tight funk chops",
+      "slapback echo",
+      "bright single-coil attack",
+      "clean edge breakup"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "big chorus",
+      "deep reverb",
+      "heavy distortion"
+    ],
+    "gearClues": [
+      "Strat or Tele",
+      "clean solid-state or Fender-style amp",
+      "short slapback delay",
+      "light compression"
+    ],
+    "corrections": [
+      "drop mid-gain focus",
+      "remove chorus as default",
+      "keep reverb minimal"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with slapback and light compression.",
+          "bestMatchSummary": "A tight signal chain using a pre-amp boost/comp for attack, followed by a classic Fender-style amp (US Deluxe) and cabinet, finished with minimal reverb and prominent slapback delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight funk rhythm.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the attack and sustain for tight funk chops.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If more aggressive boost is needed, but Comp is better for funk."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on natural edge breakup.",
+              "matchQuality": "perfect",
+              "gap": "The target requires minimal drive; using 'None' ensures maximum clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "7/10",
+                "Midrange": "5/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide the bright, clean, Fender-style solid-state tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative for a similar clean American sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, focused sound of a Fender-style rig.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright single-coil attack and cut unnecessary low end.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ is needed to sculpt the specific funk frequency range.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and punchy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Provide the essential short slapback echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "If a more complex delay is desired, but Slapback is specified."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal natural ambience without muddying the funk clarity.",
+              "matchQuality": "close",
+              "gap": "The target specifies 'minimal reverb'; Room is chosen over Plate/Spring for a subtle, non-muddy space effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The target tone is highly specific (funk/pop), requiring careful EQing to maintain clarity and punch. The 'US Deluxe' amp model provides the necessary clean foundation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a tighter, more focused funk sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "tight 2x12 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the punch and focus required for tight funk chops.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Prince - Kiss - Valeton GP-180",
+        "song": {
+          "artist": "Prince",
+          "title": "Kiss",
+          "album": "",
+          "year": null,
+          "genre": "funk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright clean funk guitar with slapback and slight breakup",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight signal chain using a pre-amp boost/comp for attack, followed by a classic Fender-style amp (US Deluxe) and cabinet, finished with minimal reverb and prominent slapback delay.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight funk rhythm.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Enhance the attack and sustain for tight funk chops.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "If more aggressive boost is needed, but Comp is better for funk."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and focused on natural edge breakup.",
+            "matchQuality": "perfect",
+            "gap": "The target requires minimal drive; using 'None' ensures maximum clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "7/10",
+              "Midrange": "5/10",
+              "Bass": "4/10"
+            },
+            "purpose": "Provide the bright, clean, Fender-style solid-state tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "A good alternative for a similar clean American sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the bright, focused sound of a Fender-style rig.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/Tone Shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the bright single-coil attack and cut unnecessary low end.",
+            "matchQuality": "close",
+            "gap": "A dedicated EQ is needed to sculpt the specific funk frequency range.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; keep the tone direct and punchy.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "DLY",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Provide the essential short slapback echo effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Digital Delay",
+                "reason": "If a more complex delay is desired, but Slapback is specified."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add minimal natural ambience without muddying the funk clarity.",
+            "matchQuality": "close",
+            "gap": "The target specifies 'minimal reverb'; Room is chosen over Plate/Spring for a subtle, non-muddy space effect.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7/10"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright clean funk guitar with slapback and slight breakup",
+          "toneProfile": "bright clean funk guitar with slapback and slight breakup",
+          "idealSignalChain": "Strat or Tele | clean solid-state or Fender-style amp | short slapback delay | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat or Tele",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean solid-state or Fender-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short slapback delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight funk chops",
+            "slapback echo",
+            "bright single-coil attack",
+            "clean edge breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with slapback and light compression.",
+          "bestMatchSummary": "A tight signal chain using a pre-amp boost/comp for attack, followed by a classic Fender-style amp (US Deluxe) and cabinet, finished with minimal reverb and prominent slapback delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight funk rhythm.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the attack and sustain for tight funk chops.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If more aggressive boost is needed, but Comp is better for funk."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on natural edge breakup.",
+              "matchQuality": "perfect",
+              "gap": "The target requires minimal drive; using 'None' ensures maximum clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "7/10",
+                "Midrange": "5/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide the bright, clean, Fender-style solid-state tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative for a similar clean American sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the bright, focused sound of a Fender-style rig.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright single-coil attack and cut unnecessary low end.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ is needed to sculpt the specific funk frequency range.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and punchy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Provide the essential short slapback echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "If a more complex delay is desired, but Slapback is specified."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal natural ambience without muddying the funk clarity.",
+              "matchQuality": "close",
+              "gap": "The target specifies 'minimal reverb'; Room is chosen over Plate/Spring for a subtle, non-muddy space effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a tighter, more focused funk sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "tight 2x12 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the punch and focus required for tight funk chops.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop mid-gain focus",
+          "remove chorus as default",
+          "keep reverb minimal"
+        ],
+        "warnings": [
+          "The target tone is highly specific (funk/pop), requiring careful EQing to maintain clarity and punch. The 'US Deluxe' amp model provides the necessary clean foundation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 28.481,
+      "prompt_chars": 979,
+      "response_chars": 458,
+      "usage": {
+        "prompt_eval_count": 318,
+        "eval_count": 114,
+        "total_duration": 28474547100,
+        "prompt_eval_duration": 308807000,
+        "eval_duration": 1940040000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.738,
+      "prompt_chars": 5371,
+      "response_chars": 544,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1636
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 42.835,
+      "prompt_chars": 3603,
+      "response_chars": 5343,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1527,
+        "total_duration": 42813927700,
+        "prompt_eval_duration": 402792000,
+        "eval_duration": 28332602000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.684,
+      "prompt_chars": 7503,
+      "response_chars": 515,
+      "usage": {
+        "prompt_eval_count": 2088,
+        "eval_count": 141,
+        "total_duration": 4664858600,
+        "prompt_eval_duration": 478756000,
+        "eval_duration": 3758700000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.445,
+      "prompt_chars": 2825,
+      "response_chars": 178,
+      "usage": {
+        "prompt_eval_count": 878,
+        "eval_count": 51,
+        "total_duration": 16421954900,
+        "prompt_eval_duration": 324616000,
+        "eval_duration": 746997000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Prince",
+      "title": "Kiss",
+      "album": "",
+      "year": null,
+      "genre": "funk"
+    },
+    "rig": {
+      "rigName": "Prince - Kiss - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright clean funk guitar with slapback and slight breakup",
+      "signalChainSummary": "A tight signal chain using a pre-amp boost/comp for attack, followed by a classic Fender-style amp (US Deluxe) and cabinet, finished with minimal reverb and prominent slapback delay.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight funk rhythm.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Enhance the attack and sustain for tight funk chops.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "If more aggressive boost is needed, but Comp is better for funk."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and focused on natural edge breakup.",
+          "matchQuality": "exact",
+          "gap": "The target requires minimal drive; using 'None' ensures maximum clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "7/10",
+            "Midrange": "5/10",
+            "Bass": "4/10"
+          },
+          "purpose": "Provide the bright, clean, Fender-style solid-state tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A good alternative for a similar clean American sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the bright, focused sound of a Fender-style rig.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/Tone Shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the bright single-coil attack and cut unnecessary low end.",
+          "matchQuality": "close",
+          "gap": "A dedicated EQ is needed to sculpt the specific funk frequency range.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; keep the tone direct and punchy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Provide the essential short slapback echo effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Digital Delay",
+              "reason": "If a more complex delay is desired, but Slapback is specified."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add minimal natural ambience without muddying the funk clarity.",
+          "matchQuality": "close",
+          "gap": "The target specifies 'minimal reverb'; Room is chosen over Plate/Spring for a subtle, non-muddy space effect.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7/10"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright clean funk guitar with slapback and slight breakup",
+      "mustHave": [
+        "tight funk chops",
+        "slapback echo",
+        "bright single-coil attack",
+        "clean edge breakup"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big chorus",
+        "deep reverb",
+        "heavy distortion"
+      ],
+      "gearClues": [
+        "Strat or Tele",
+        "clean solid-state or Fender-style amp",
+        "short slapback delay",
+        "light compression"
+      ],
+      "corrections": [
+        "drop mid-gain focus",
+        "remove chorus as default",
+        "keep reverb minimal"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "funk",
+      "styleTags": [
+        "pop",
+        "disco"
+      ],
+      "targetTone": "bright clean funk guitar with slapback and slight breakup",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a tighter, more focused funk sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "tight 2x12 IR (e.g., Fender Deluxe)",
+          "reason": "Enhance the punch and focus required for tight funk chops.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1119,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

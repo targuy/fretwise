@@ -1,0 +1,981 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 73,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Audioslave__Be_Yourself.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Audioslave",
+    "title": "Be Yourself",
+    "album": "",
+    "year": null,
+    "genre": "arena rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with noticeable grit and sustain.",
+      "signatureElements": [
+        "Mid-range focus",
+        "Slight fuzz/grit (crunch)",
+        "Moderate delay/reverb for space",
+        "Rock amp character"
+      ],
+      "gearHypotheses": [
+        "Modeling Amp/Cab (e.g., Fender or Marshall style) for core sound",
+        "Delay unit for rhythmic texture",
+        "Reverb for depth"
+      ],
+      "avoid": [
+        "Overly scooped mids",
+        "High-gain metal saturation",
+        "Clean jazz tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry, warm arena rock crunch with controlled sustain",
+      "mustHave": [
+        "mid-forward crunch",
+        "tight low end",
+        "slight edge-of-breakup grit",
+        "short room or light plate",
+        "lead sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "big delay",
+        "washy reverb",
+        "scooped tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "remove noticeable delay",
+        "keep reverb minimal",
+        "lean more dry than gritty"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry, warm arena rock crunch with controlled sustain",
+    "mustHave": [
+      "mid-forward crunch",
+      "tight low end",
+      "slight edge-of-breakup grit",
+      "short room or light plate",
+      "lead sustain"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "big delay",
+      "washy reverb",
+      "scooped tone"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "humbucker bridge"
+    ],
+    "corrections": [
+      "remove noticeable delay",
+      "keep reverb minimal",
+      "lean more dry than gritty"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British rock tones (Plexi/Marshall) with controlled breakup and minimal ambience.",
+          "bestMatchSummary": "A warm, mid-forward signal chain utilizing a Plexi-style preamp, light overdrive for grit, and a UK 4x12 cabinet to achieve an arena rock crunch suitable for lead sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide slight edge-of-breakup grit and mid-forward crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a classic British tube preamp boost, achieving the desired Plexi character without excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar tone but might be slightly too scooped."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain shaping",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on preamp grit rather than heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The Green OD provides sufficient breakup; adding a dedicated DST unit would likely push the sound too far into 'crunch' territory, violating the 'lean more dry than gritty' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi British rock tone.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is the best fit for a vintage, mid-forward British sound required by the 'Marshall/Plexi style' clue.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Might be too aggressive or less versatile than the SLP."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required classic British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range punch and control low end tightness.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments, ensuring the 'mid-forward crunch' is achieved without sounding muddy.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and warmth (light room/plate requirement).",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate or Spring to provide the required 'short room' ambience without sounding washy.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too metallic for this specific arena rock tone."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, so the rig assumes an electric guitar input and focuses on classic rock tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more specific British 4x12 voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the classic Plexi-style British rock tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and bite in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Audioslave - Be Yourself - Valeton GP-180",
+        "song": {
+          "artist": "Audioslave",
+          "title": "Be Yourself",
+          "album": "",
+          "year": null,
+          "genre": "arena rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry, warm arena rock crunch with controlled sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A warm, mid-forward signal chain utilizing a Plexi-style preamp, light overdrive for grit, and a UK 4x12 cabinet to achieve an arena rock crunch suitable for lead sustain.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide slight edge-of-breakup grit and mid-forward crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a classic British tube preamp boost, achieving the desired Plexi character without excessive distortion.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Similar tone but might be slightly too scooped."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain shaping",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and focused on preamp grit rather than heavy distortion.",
+            "matchQuality": "exact",
+            "gap": "The Green OD provides sufficient breakup; adding a dedicated DST unit would likely push the sound too far into 'crunch' territory, violating the 'lean more dry than gritty' rule.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "50%",
+              "Treble": "60%",
+              "Midrange": "70%",
+              "Bass": "55%"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi British rock tone.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is the best fit for a vintage, mid-forward British sound required by the 'Marshall/Plexi style' clue.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Might be too aggressive or less versatile than the SLP."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required classic British 4x12 cabinet voicing.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-2 dB",
+              "Mid Boost": "+3 dB",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize mid-range punch and control low end tightness.",
+            "matchQuality": "close",
+            "gap": "Used for surgical EQ adjustments, ensuring the 'mid-forward crunch' is achieved without sounding muddy.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and warmth (light room/plate requirement).",
+            "matchQuality": "close",
+            "gap": "The Room reverb is preferred over Plate or Spring to provide the required 'short room' ambience without sounding washy.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might sound too metallic for this specific arena rock tone."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry, warm arena rock crunch with controlled sustain",
+          "toneProfile": "dry, warm arena rock crunch with controlled sustain",
+          "idealSignalChain": "Marshall/Plexi style amp | 4x12 cab | humbucker bridge",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward crunch",
+            "tight low end",
+            "slight edge-of-breakup grit",
+            "short room or light plate",
+            "lead sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British rock tones (Plexi/Marshall) with controlled breakup and minimal ambience.",
+          "bestMatchSummary": "A warm, mid-forward signal chain utilizing a Plexi-style preamp, light overdrive for grit, and a UK 4x12 cabinet to achieve an arena rock crunch suitable for lead sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide slight edge-of-breakup grit and mid-forward crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a classic British tube preamp boost, achieving the desired Plexi character without excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar tone but might be slightly too scooped."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain shaping",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and focused on preamp grit rather than heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The Green OD provides sufficient breakup; adding a dedicated DST unit would likely push the sound too far into 'crunch' territory, violating the 'lean more dry than gritty' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi British rock tone.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is the best fit for a vintage, mid-forward British sound required by the 'Marshall/Plexi style' clue.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Might be too aggressive or less versatile than the SLP."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required classic British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range punch and control low end tightness.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments, ensuring the 'mid-forward crunch' is achieved without sounding muddy.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and warmth (light room/plate requirement).",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate or Spring to provide the required 'short room' ambience without sounding washy.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too metallic for this specific arena rock tone."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more specific British 4x12 voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the classic Plexi-style British rock tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and bite in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove noticeable delay",
+          "keep reverb minimal",
+          "lean more dry than gritty"
+        ],
+        "warnings": [
+          "The source material is a rock song, so the rig assumes an electric guitar input and focuses on classic rock tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.992,
+      "prompt_chars": 975,
+      "response_chars": 459,
+      "usage": {
+        "prompt_eval_count": 316,
+        "eval_count": 118,
+        "total_duration": 2988633600,
+        "prompt_eval_duration": 171294000,
+        "eval_duration": 2370822000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.568,
+      "prompt_chars": 5366,
+      "response_chars": 532,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1642
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 30.103,
+      "prompt_chars": 3539,
+      "response_chars": 4983,
+      "usage": {
+        "prompt_eval_count": 1186,
+        "eval_count": 1401,
+        "total_duration": 30093533800,
+        "prompt_eval_duration": 262793000,
+        "eval_duration": 29350296000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.149,
+      "prompt_chars": 7074,
+      "response_chars": 551,
+      "usage": {
+        "prompt_eval_count": 1972,
+        "eval_count": 157,
+        "total_duration": 3142385600,
+        "prompt_eval_duration": 446332000,
+        "eval_duration": 2155174000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.887,
+      "prompt_chars": 2697,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 861,
+        "eval_count": 46,
+        "total_duration": 871645600,
+        "prompt_eval_duration": 102927000,
+        "eval_duration": 348407000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Audioslave",
+      "title": "Be Yourself",
+      "album": "",
+      "year": null,
+      "genre": "arena rock"
+    },
+    "rig": {
+      "rigName": "Audioslave - Be Yourself - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry, warm arena rock crunch with controlled sustain",
+      "signalChainSummary": "A warm, mid-forward signal chain utilizing a Plexi-style preamp, light overdrive for grit, and a UK 4x12 cabinet to achieve an arena rock crunch suitable for lead sustain.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide slight edge-of-breakup grit and mid-forward crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a classic British tube preamp boost, achieving the desired Plexi character without excessive distortion.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Similar tone but might be slightly too scooped."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain shaping",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and focused on preamp grit rather than heavy distortion.",
+          "matchQuality": "exact",
+          "gap": "The Green OD provides sufficient breakup; adding a dedicated DST unit would likely push the sound too far into 'crunch' territory, violating the 'lean more dry than gritty' rule.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "50%",
+            "Treble": "60%",
+            "Midrange": "70%",
+            "Bass": "55%"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi British rock tone.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is the best fit for a vintage, mid-forward British sound required by the 'Marshall/Plexi style' clue.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Might be too aggressive or less versatile than the SLP."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required classic British 4x12 cabinet voicing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-2 dB",
+            "Mid Boost": "+3 dB",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize mid-range punch and control low end tightness.",
+          "matchQuality": "close",
+          "gap": "Used for surgical EQ adjustments, ensuring the 'mid-forward crunch' is achieved without sounding muddy.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and warmth (light room/plate requirement).",
+          "matchQuality": "close",
+          "gap": "The Room reverb is preferred over Plate or Spring to provide the required 'short room' ambience without sounding washy.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might sound too metallic for this specific arena rock tone."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry, warm arena rock crunch with controlled sustain",
+      "mustHave": [
+        "mid-forward crunch",
+        "tight low end",
+        "slight edge-of-breakup grit",
+        "short room or light plate",
+        "lead sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "big delay",
+        "washy reverb",
+        "scooped tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "remove noticeable delay",
+        "keep reverb minimal",
+        "lean more dry than gritty"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "arena rock",
+      "styleTags": [
+        "classic rock",
+        "hard rock"
+      ],
+      "targetTone": "dry, warm arena rock crunch with controlled sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more specific British 4x12 voicing.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the classic Plexi-style British rock tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and bite in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 73,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "arena rock",
+    "subgenres": [
+      "classic rock",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre and tone profile strongly indicate a classic arena rock sound."
+  }
+}

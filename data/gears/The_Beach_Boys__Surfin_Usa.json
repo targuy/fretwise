@@ -1,0 +1,1036 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1442,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beach_Boys__Surfin_Usa.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Beach Boys",
+    "title": "Surfin Usa",
+    "album": "",
+    "year": null,
+    "genre": "surf rock"
+  },
+  "genreClassification": {
+    "genre": "surf rock",
+    "subgenres": [
+      "pop",
+      "instrumental"
+    ],
+    "confidence": "high",
+    "rationale": "The artist, song title, and tone profile strongly indicate surf rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, clean surf rock twang (reverb/delay heavy)",
+      "signatureElements": [
+        "clean",
+        "tremolo",
+        "chorus",
+        "spring reverb",
+        "tape delay"
+      ],
+      "gearHypotheses": [
+        "Chorus effect pedal",
+        "Spring Reverb unit",
+        "Delay unit",
+        "Clean amp model (e.g., Fender Twin)"
+      ],
+      "avoid": [
+        "fuzz",
+        "distortion",
+        "crunch",
+        "overdrive"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright surf instrumental twang with spring reverb",
+      "mustHave": [
+        "clean twang",
+        "spring reverb",
+        "fast picking",
+        "tremolo picking"
+      ],
+      "avoid": [
+        "chorus",
+        "tape delay",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "Strat/Tele single coils",
+        "Fender clean amp",
+        "spring tank",
+        "12-inch combo"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop tape delay",
+        "keep it dry-bright except spring reverb",
+        "favor Fender-style clean"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright surf instrumental twang with spring reverb",
+    "mustHave": [
+      "clean twang",
+      "spring reverb",
+      "fast picking",
+      "tremolo picking"
+    ],
+    "avoid": [
+      "chorus",
+      "tape delay",
+      "fuzz",
+      "crunch"
+    ],
+    "gearClues": [
+      "Strat/Tele single coils",
+      "Fender clean amp",
+      "spring tank",
+      "12-inch combo"
+    ],
+    "corrections": [
+      "drop chorus",
+      "drop tape delay",
+      "keep it dry-bright except spring reverb",
+      "favor Fender-style clean"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with spring reverb and tremolo.",
+          "bestMatchSummary": "A classic surf tone achieved using a clean preamp (US Deluxe), mild compression for sustain, and the US 2x12 cab, topped off with Spring Reverb and Tremolo effects.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Add sustain and smooth out fast picking dynamics.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the slight boost/compression often found in vintage Fender circuits, enhancing the 'twang' without adding grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and bright; no distortion needed.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean sound of a Fender-style combo amp.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound suitable for surf music.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone pure and twangy.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright 'twang' and clarity of the single-coil sound.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to dial in the specific high-end sparkle required for surf music.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "50%",
+                "Rate": "Medium-Fast"
+              },
+              "purpose": "Provide the characteristic tremolo picking effect.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay to maintain the dry, immediate surf sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "30%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Essential component for the classic surf sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a vintage instrumental track. The rig focuses on replicating the bright, clean Fender tone and characteristic reverb/tremolo effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Enhance cabinet realism for better articulation of single-coil twang.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Improve high-end sparkle and articulate the single-coil sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/twang",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beach Boys - Surfin Usa - Valeton GP-180",
+        "song": {
+          "artist": "The Beach Boys",
+          "title": "Surfin Usa",
+          "album": "",
+          "year": null,
+          "genre": "surf rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright surf instrumental twang with spring reverb",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A classic surf tone achieved using a clean preamp (US Deluxe), mild compression for sustain, and the US 2x12 cab, topped off with Spring Reverb and Tremolo effects.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium"
+            },
+            "purpose": "Add sustain and smooth out fast picking dynamics.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used to simulate the slight boost/compression often found in vintage Fender circuits, enhancing the 'twang' without adding grit.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and bright; no distortion needed.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "7",
+              "Midrange": "5",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, clean sound of a Fender-style combo amp.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound suitable for surf music.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; keep the tone pure and twangy.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the bright 'twang' and clarity of the single-coil sound.",
+            "matchQuality": "close",
+            "gap": "Manual EQ adjustment is necessary to dial in the specific high-end sparkle required for surf music.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Tremolo",
+            "active": true,
+            "settings": {
+              "Depth": "50%",
+              "Rate": "Medium-Fast"
+            },
+            "purpose": "Provide the characteristic tremolo picking effect.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay to maintain the dry, immediate surf sound.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "30%",
+              "Decay Time": "2s"
+            },
+            "purpose": "Essential component for the classic surf sound.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright surf instrumental twang with spring reverb",
+          "toneProfile": "bright surf instrumental twang with spring reverb",
+          "idealSignalChain": "Strat/Tele single coils | Fender clean amp | spring tank | 12-inch combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat/Tele single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring tank",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean twang",
+            "spring reverb",
+            "fast picking",
+            "tremolo picking"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with spring reverb and tremolo.",
+          "bestMatchSummary": "A classic surf tone achieved using a clean preamp (US Deluxe), mild compression for sustain, and the US 2x12 cab, topped off with Spring Reverb and Tremolo effects.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Add sustain and smooth out fast picking dynamics.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the slight boost/compression often found in vintage Fender circuits, enhancing the 'twang' without adding grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and bright; no distortion needed.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean sound of a Fender-style combo amp.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound suitable for surf music.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone pure and twangy.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright 'twang' and clarity of the single-coil sound.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to dial in the specific high-end sparkle required for surf music.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "50%",
+                "Rate": "Medium-Fast"
+              },
+              "purpose": "Provide the characteristic tremolo picking effect.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay to maintain the dry, immediate surf sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "30%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Essential component for the classic surf sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Enhance cabinet realism for better articulation of single-coil twang.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Improve high-end sparkle and articulate the single-coil sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/twang",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "drop tape delay",
+          "keep it dry-bright except spring reverb",
+          "favor Fender-style clean"
+        ],
+        "warnings": [
+          "The source material is a vintage instrumental track. The rig focuses on replicating the bright, clean Fender tone and characteristic reverb/tremolo effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.36,
+      "prompt_chars": 993,
+      "response_chars": 348,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 100,
+        "total_duration": 9343632200,
+        "prompt_eval_duration": 324370000,
+        "eval_duration": 1708220000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.953,
+      "prompt_chars": 5293,
+      "response_chars": 500,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1630
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 39.16,
+      "prompt_chars": 3580,
+      "response_chars": 4713,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1369,
+        "total_duration": 39152001800,
+        "prompt_eval_duration": 373649000,
+        "eval_duration": 23404323000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.301,
+      "prompt_chars": 6812,
+      "response_chars": 500,
+      "usage": {
+        "prompt_eval_count": 1934,
+        "eval_count": 135,
+        "total_duration": 3273166000,
+        "prompt_eval_duration": 530687000,
+        "eval_duration": 2208849000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.902,
+      "prompt_chars": 2745,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 869,
+        "eval_count": 46,
+        "total_duration": 18898128100,
+        "prompt_eval_duration": 668514000,
+        "eval_duration": 630745000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beach Boys",
+      "title": "Surfin Usa",
+      "album": "",
+      "year": null,
+      "genre": "surf rock"
+    },
+    "rig": {
+      "rigName": "The Beach Boys - Surfin Usa - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright surf instrumental twang with spring reverb",
+      "signalChainSummary": "A classic surf tone achieved using a clean preamp (US Deluxe), mild compression for sustain, and the US 2x12 cab, topped off with Spring Reverb and Tremolo effects.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium"
+          },
+          "purpose": "Add sustain and smooth out fast picking dynamics.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used to simulate the slight boost/compression often found in vintage Fender circuits, enhancing the 'twang' without adding grit.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and bright; no distortion needed.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "7",
+            "Midrange": "5",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, clean sound of a Fender-style combo amp.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound suitable for surf music.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; keep the tone pure and twangy.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the bright 'twang' and clarity of the single-coil sound.",
+          "matchQuality": "close",
+          "gap": "Manual EQ adjustment is necessary to dial in the specific high-end sparkle required for surf music.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": true,
+          "settings": {
+            "Depth": "50%",
+            "Rate": "Medium-Fast"
+          },
+          "purpose": "Provide the characteristic tremolo picking effect.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay to maintain the dry, immediate surf sound.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "30%",
+            "Decay Time": "2s"
+          },
+          "purpose": "Essential component for the classic surf sound.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright surf instrumental twang with spring reverb",
+      "mustHave": [
+        "clean twang",
+        "spring reverb",
+        "fast picking",
+        "tremolo picking"
+      ],
+      "avoid": [
+        "chorus",
+        "tape delay",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "Strat/Tele single coils",
+        "Fender clean amp",
+        "spring tank",
+        "12-inch combo"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop tape delay",
+        "keep it dry-bright except spring reverb",
+        "favor Fender-style clean"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "surf rock",
+      "styleTags": [
+        "pop",
+        "instrumental"
+      ],
+      "targetTone": "bright surf instrumental twang with spring reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Enhance cabinet realism for better articulation of single-coil twang.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Improve high-end sparkle and articulate the single-coil sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity/twang",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1442,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

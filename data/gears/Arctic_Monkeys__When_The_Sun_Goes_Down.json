@@ -1,0 +1,1058 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 68,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Arctic_Monkeys__When_The_Sun_Goes_Down.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Arctic Monkeys",
+    "title": "When The Sun Goes Down",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rhythm tone with pronounced mid-range bite and a touch of spring reverb.",
+      "signatureElements": [
+        "Crunch/Edge-of-breakup overdrive",
+        "Punchy bass response (mid-scoop)",
+        "Slightly dirty clean tones for verses",
+        "Controlled modulation (chorus or vibrato)"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (e.g., AC30, Tweed)",
+        "Overdrive pedal/amp model with mid-focus EQ",
+        "Spring reverb unit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High gain metal tones",
+        "Bright scooped bass sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+      "mustHave": [
+        "bright crunch",
+        "tight low gain",
+        "clean-to-dirty verse swing",
+        "light room/reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "metal gain",
+        "big scoop"
+      ],
+      "gearClues": [
+        "Tele/Strat",
+        "AC30/Vox",
+        "small combo",
+        "spring/room"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "reduce mid-scoop",
+        "keep it more jangly than crunchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+    "mustHave": [
+      "bright crunch",
+      "tight low gain",
+      "clean-to-dirty verse swing",
+      "light room/reverb"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "metal gain",
+      "big scoop"
+    ],
+    "gearClues": [
+      "Tele/Strat",
+      "AC30/Vox",
+      "small combo",
+      "spring/room"
+    ],
+    "corrections": [
+      "drop chorus/vibrato",
+      "reduce mid-scoop",
+      "keep it more jangly than crunchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward British tones (AC30/Vox style) with controlled breakup and room ambience.",
+          "bestMatchSummary": "A clean signal path utilizing a mild boost and OD pedal to achieve the 'jangly edge-of-breakup' sound, paired with an AC30-style amp simulation and bright cab, finished with subtle reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Slightly push the signal for controlled breakup and brightness.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD to maintain clarity while adding grit.",
+              "alternatives": [
+                {
+                  "model": "Green OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "10 o'clock"
+              },
+              "purpose": "Provide the necessary 'jangly edge-of-breakup' grit without sounding overly distorted.",
+              "matchQuality": "close",
+              "gap": "Red Haze is chosen for its bright, mid-focused breakup character, mimicking classic Vox/AC30 tones.",
+              "alternatives": [
+                {
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, mid-forward sound of a Vox AC30 combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+              "matchQuality": "close",
+              "gap": "While not strictly required by the tone, this cab choice reinforces the desired UK/British rock aesthetic.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the bright mids and cut any excessive low-end rumble.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Optional subtle modulation for added depth (kept off by default per corrections).",
+              "matchQuality": "close",
+              "gap": "The instructions explicitly advise dropping chorus, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add light room ambience to give the sound space without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a modern indie rock track, requiring a bright, articulate tone. The rig prioritizes mid-range punch and controlled breakup over heavy saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the jangly, bright British tone required for Arctic Monkeys.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Brit AC30 4x12 (or similar Vox/AC style)",
+              "reason": "The current UK Vintage cab is too generic; a specific AC30 IR will enhance the desired jangly, bright British tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and mid-focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Arctic Monkeys - When The Sun Goes Down - Valeton GP-180",
+        "song": {
+          "artist": "Arctic Monkeys",
+          "title": "When The Sun Goes Down",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal path utilizing a mild boost and OD pedal to achieve the 'jangly edge-of-breakup' sound, paired with an AC30-style amp simulation and bright cab, finished with subtle reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "12 o'clock"
+            },
+            "purpose": "Slightly push the signal for controlled breakup and brightness.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated OD to maintain clarity while adding grit.",
+            "alternatives": [
+              {
+                "model": "Green OD"
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "10 o'clock"
+            },
+            "purpose": "Provide the necessary 'jangly edge-of-breakup' grit without sounding overly distorted.",
+            "matchQuality": "close",
+            "gap": "Red Haze is chosen for its bright, mid-focused breakup character, mimicking classic Vox/AC30 tones.",
+            "alternatives": [
+              {
+                "model": "Blues OD"
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, mid-forward sound of a Vox AC30 combo.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+            "matchQuality": "close",
+            "gap": "While not strictly required by the tone, this cab choice reinforces the desired UK/British rock aesthetic.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12"
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Enhance the bright mids and cut any excessive low-end rumble.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%"
+            },
+            "purpose": "Optional subtle modulation for added depth (kept off by default per corrections).",
+            "matchQuality": "close",
+            "gap": "The instructions explicitly advise dropping chorus, so this module is included but deactivated.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add light room ambience to give the sound space without sounding muddy.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Plate"
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+          "toneProfile": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+          "idealSignalChain": "Tele/Strat | AC30/Vox | small combo | spring/room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Tele/Strat",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "AC30/Vox",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring/room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright crunch",
+            "tight low gain",
+            "clean-to-dirty verse swing",
+            "light room/reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward British tones (AC30/Vox style) with controlled breakup and room ambience.",
+          "bestMatchSummary": "A clean signal path utilizing a mild boost and OD pedal to achieve the 'jangly edge-of-breakup' sound, paired with an AC30-style amp simulation and bright cab, finished with subtle reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Slightly push the signal for controlled breakup and brightness.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD to maintain clarity while adding grit.",
+              "alternatives": [
+                {
+                  "model": "Green OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "10 o'clock"
+              },
+              "purpose": "Provide the necessary 'jangly edge-of-breakup' grit without sounding overly distorted.",
+              "matchQuality": "close",
+              "gap": "Red Haze is chosen for its bright, mid-focused breakup character, mimicking classic Vox/AC30 tones.",
+              "alternatives": [
+                {
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, mid-forward sound of a Vox AC30 combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+              "matchQuality": "close",
+              "gap": "While not strictly required by the tone, this cab choice reinforces the desired UK/British rock aesthetic.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the bright mids and cut any excessive low-end rumble.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Optional subtle modulation for added depth (kept off by default per corrections).",
+              "matchQuality": "close",
+              "gap": "The instructions explicitly advise dropping chorus, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add light room ambience to give the sound space without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the jangly, bright British tone required for Arctic Monkeys.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Brit AC30 4x12 (or similar Vox/AC style)",
+              "reason": "The current UK Vintage cab is too generic; a specific AC30 IR will enhance the desired jangly, bright British tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and mid-focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/vibrato",
+          "reduce mid-scoop",
+          "keep it more jangly than crunchy"
+        ],
+        "warnings": [
+          "The source material is a modern indie rock track, requiring a bright, articulate tone. The rig prioritizes mid-range punch and controlled breakup over heavy saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.589,
+      "prompt_chars": 990,
+      "response_chars": 540,
+      "usage": {
+        "prompt_eval_count": 317,
+        "eval_count": 139,
+        "total_duration": 3585512300,
+        "prompt_eval_duration": 163168000,
+        "eval_duration": 2933984000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.939,
+      "prompt_chars": 5462,
+      "response_chars": 493,
+      "usage": {
+        "input_tokens": 1521,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1660
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 28.466,
+      "prompt_chars": 3508,
+      "response_chars": 5078,
+      "usage": {
+        "prompt_eval_count": 1184,
+        "eval_count": 1469,
+        "total_duration": 28458196800,
+        "prompt_eval_duration": 345942000,
+        "eval_duration": 27637694000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 4.593,
+      "prompt_chars": 7174,
+      "response_chars": 614,
+      "usage": {
+        "prompt_eval_count": 2038,
+        "eval_count": 166,
+        "total_duration": 4585928400,
+        "prompt_eval_duration": 500404000,
+        "eval_duration": 3638784000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.899,
+      "prompt_chars": 2794,
+      "response_chars": 179,
+      "usage": {
+        "prompt_eval_count": 913,
+        "eval_count": 49,
+        "total_duration": 882887100,
+        "prompt_eval_duration": 110082000,
+        "eval_duration": 368298000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Arctic Monkeys",
+      "title": "When The Sun Goes Down",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "Arctic Monkeys - When The Sun Goes Down - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+      "signalChainSummary": "A clean signal path utilizing a mild boost and OD pedal to achieve the 'jangly edge-of-breakup' sound, paired with an AC30-style amp simulation and bright cab, finished with subtle reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "12 o'clock"
+          },
+          "purpose": "Slightly push the signal for controlled breakup and brightness.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated OD to maintain clarity while adding grit.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "10 o'clock"
+          },
+          "purpose": "Provide the necessary 'jangly edge-of-breakup' grit without sounding overly distorted.",
+          "matchQuality": "close",
+          "gap": "Red Haze is chosen for its bright, mid-focused breakup character, mimicking classic Vox/AC30 tones.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, mid-forward sound of a Vox AC30 combo.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the AC30 simulation.",
+          "matchQuality": "close",
+          "gap": "While not strictly required by the tone, this cab choice reinforces the desired UK/British rock aesthetic.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Enhance the bright mids and cut any excessive low-end rumble.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/delay",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%"
+          },
+          "purpose": "Optional subtle modulation for added depth (kept off by default per corrections).",
+          "matchQuality": "close",
+          "gap": "The instructions explicitly advise dropping chorus, so this module is included but deactivated.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add light room ambience to give the sound space without sounding muddy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+      "mustHave": [
+        "bright crunch",
+        "tight low gain",
+        "clean-to-dirty verse swing",
+        "light room/reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "metal gain",
+        "big scoop"
+      ],
+      "gearClues": [
+        "Tele/Strat",
+        "AC30/Vox",
+        "small combo",
+        "spring/room"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "reduce mid-scoop",
+        "keep it more jangly than crunchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "garage rock",
+        "alt-rock"
+      ],
+      "targetTone": "jangly edge-of-breakup indie rock with bright mids and slight grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the jangly, bright British tone required for Arctic Monkeys.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Brit AC30 4x12 (or similar Vox/AC style)",
+          "reason": "The current UK Vintage cab is too generic; a specific AC30 IR will enhance the desired jangly, bright British tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and mid-focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 68,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "garage rock",
+      "alt-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre and tone profile both point strongly to jangly indie rock."
+  }
+}

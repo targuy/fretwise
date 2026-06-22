@@ -1,0 +1,1110 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 687,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Jimi_Hendrix__Castles_Made_Of_Sand.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Jimi Hendrix",
+    "title": "Castles Made Of Sand",
+    "album": "",
+    "year": null,
+    "genre": "psychedelic rock"
+  },
+  "genreClassification": {
+    "genre": "psychedelic rock",
+    "subgenres": [
+      "blues rock",
+      "jimi hendrix style",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest psychedelic blues-rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Jimi Hendrix 'Electric' sound (fuzzy, bluesy lead)",
+      "signatureElements": [
+        "Fuzz/Overdrive",
+        "Wah pedal sweep",
+        "Delay",
+        "Reverb",
+        "Mid-scooped tone"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive",
+        "Octaver effect",
+        "Spring Reverb simulation",
+        "Chorus modulation"
+      ],
+      "avoid": [
+        "Digital clean tones",
+        "High gain metal sounds",
+        "Bright scooped bass"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm Hendrix clean-crunch with subtle fuzz and short room",
+      "mustHave": [
+        "slight fuzz breakup",
+        "liquid lead sustain",
+        "warm mids",
+        "short room verb",
+        "expressive vibrato"
+      ],
+      "avoid": [
+        "wah sweep",
+        "chorus",
+        "metal gain",
+        "deep delay",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "Strat neck/middle",
+        "Fuzz Face style",
+        "Marshall/Super Lead",
+        "4x12"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop chorus",
+        "reduce delay",
+        "less scooped than draft"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm Hendrix clean-crunch with subtle fuzz and short room",
+    "mustHave": [
+      "slight fuzz breakup",
+      "liquid lead sustain",
+      "warm mids",
+      "short room verb",
+      "expressive vibrato"
+    ],
+    "avoid": [
+      "wah sweep",
+      "chorus",
+      "metal gain",
+      "deep delay",
+      "scooped clean"
+    ],
+    "gearClues": [
+      "Strat neck/middle",
+      "Fuzz Face style",
+      "Marshall/Super Lead",
+      "4x12"
+    ],
+    "corrections": [
+      "drop wah",
+      "drop chorus",
+      "reduce delay",
+      "less scooped than draft"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage British tones (Marshall/Fuzz) with warm mids and controlled breakup.",
+          "bestMatchSummary": "A classic, warm Fender-style clean foundation boosted by a Fuzz/OD stage, running through a Marshall-voiced amp model, finished with room reverb and vibrato.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in vintage-style tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Bright",
+                "Level": "High"
+              },
+              "purpose": "Provide the required 'slight fuzz breakup' and vintage grit (Fuzz Face style).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Good for early British rock, but 'Fuzz' is more direct for the Fuzz Face vibe."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Add subtle harmonic warmth and mid-range punch for the 'warm mids' requirement.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but it helps shape the tone to avoid excessive scoop while maintaining clarity.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Might be too aggressive for the required 'slight' breakup."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Treble": "High",
+                "Midrange": "High",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulate the Marshall/Super Lead tone and provide classic British rock power.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative, but SLP better captures the Super Lead/Marshall vibe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Neutral"
+              },
+              "purpose": "Provide the required '4x12' cabinet voicing for a classic British rock sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize 'warm mids' and maintain fullness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "vibrato/modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "Low",
+                "Rate": "Slow"
+              },
+              "purpose": "Achieve the 'expressive vibrato' required for lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Low"
+              },
+              "purpose": "Add the required 'short room verb' for space and sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Room is better suited for a natural, short ambient decay."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock guitar performance. The rig focuses on vintage British tones (Marshall/Fuzz) to emulate the required sound profile."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and warmth by swapping the default 4x12 IR for a vintage, open-air British cab simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the vintage, open-air feel and warmth of the Marshall tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more articulate high end",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Jimi Hendrix - Castles Made Of Sand - Valeton GP-180",
+        "song": {
+          "artist": "Jimi Hendrix",
+          "title": "Castles Made Of Sand",
+          "album": "",
+          "year": null,
+          "genre": "psychedelic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm Hendrix clean-crunch with subtle fuzz and short room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic, warm Fender-style clean foundation boosted by a Fuzz/OD stage, running through a Marshall-voiced amp model, finished with room reverb and vibrato.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and stray noise inherent in vintage-style tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "Medium",
+              "Tone": "Bright",
+              "Level": "High"
+            },
+            "purpose": "Provide the required 'slight fuzz breakup' and vintage grit (Fuzz Face style).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Good for early British rock, but 'Fuzz' is more direct for the Fuzz Face vibe."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "preamp overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "Low",
+              "Tone": "Medium",
+              "Level": "High"
+            },
+            "purpose": "Add subtle harmonic warmth and mid-range punch for the 'warm mids' requirement.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general boost, but it helps shape the tone to avoid excessive scoop while maintaining clarity.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Might be too aggressive for the required 'slight' breakup."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "Medium",
+              "Treble": "High",
+              "Midrange": "High",
+              "Bass": "Medium"
+            },
+            "purpose": "Simulate the Marshall/Super Lead tone and provide classic British rock power.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative, but SLP better captures the Super Lead/Marshall vibe."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Neutral"
+            },
+            "purpose": "Provide the required '4x12' cabinet voicing for a classic British rock sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize 'warm mids' and maintain fullness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "vibrato/modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Tremolo",
+            "active": true,
+            "settings": {
+              "Depth": "Low",
+              "Rate": "Slow"
+            },
+            "purpose": "Achieve the 'expressive vibrato' required for lead lines.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short",
+              "Mix": "Low"
+            },
+            "purpose": "Add the required 'short room verb' for space and sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Room is better suited for a natural, short ambient decay."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm Hendrix clean-crunch with subtle fuzz and short room",
+          "toneProfile": "warm Hendrix clean-crunch with subtle fuzz and short room",
+          "idealSignalChain": "Strat neck/middle | Fuzz Face style | Marshall/Super Lead | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat neck/middle",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fuzz Face style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Super Lead",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "slight fuzz breakup",
+            "liquid lead sustain",
+            "warm mids",
+            "short room verb",
+            "expressive vibrato"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage British tones (Marshall/Fuzz) with warm mids and controlled breakup.",
+          "bestMatchSummary": "A classic, warm Fender-style clean foundation boosted by a Fuzz/OD stage, running through a Marshall-voiced amp model, finished with room reverb and vibrato.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in vintage-style tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Bright",
+                "Level": "High"
+              },
+              "purpose": "Provide the required 'slight fuzz breakup' and vintage grit (Fuzz Face style).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Good for early British rock, but 'Fuzz' is more direct for the Fuzz Face vibe."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Add subtle harmonic warmth and mid-range punch for the 'warm mids' requirement.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but it helps shape the tone to avoid excessive scoop while maintaining clarity.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Might be too aggressive for the required 'slight' breakup."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Treble": "High",
+                "Midrange": "High",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulate the Marshall/Super Lead tone and provide classic British rock power.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative, but SLP better captures the Super Lead/Marshall vibe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Neutral"
+              },
+              "purpose": "Provide the required '4x12' cabinet voicing for a classic British rock sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize 'warm mids' and maintain fullness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "vibrato/modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "Low",
+                "Rate": "Slow"
+              },
+              "purpose": "Achieve the 'expressive vibrato' required for lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Low"
+              },
+              "purpose": "Add the required 'short room verb' for space and sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Room is better suited for a natural, short ambient decay."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and warmth by swapping the default 4x12 IR for a vintage, open-air British cab simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the vintage, open-air feel and warmth of the Marshall tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more articulate high end",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "assumptions": [
+          "drop wah",
+          "drop chorus",
+          "reduce delay",
+          "less scooped than draft"
+        ],
+        "warnings": [
+          "The source material is a classic rock guitar performance. The rig focuses on vintage British tones (Marshall/Fuzz) to emulate the required sound profile."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.539,
+      "prompt_chars": 1001,
+      "response_chars": 392,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 103,
+        "total_duration": 10512457100,
+        "prompt_eval_duration": 473152000,
+        "eval_duration": 2225656000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.813,
+      "prompt_chars": 5339,
+      "response_chars": 524,
+      "usage": {
+        "input_tokens": 1498,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1641
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 31.092,
+      "prompt_chars": 3626,
+      "response_chars": 5274,
+      "usage": {
+        "prompt_eval_count": 1223,
+        "eval_count": 1516,
+        "total_duration": 31068853100,
+        "prompt_eval_duration": 523847000,
+        "eval_duration": 30089475000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.468,
+      "prompt_chars": 7449,
+      "response_chars": 596,
+      "usage": {
+        "prompt_eval_count": 2096,
+        "eval_count": 171,
+        "total_duration": 4461074300,
+        "prompt_eval_duration": 711451000,
+        "eval_duration": 3159297000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.092,
+      "prompt_chars": 2804,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 900,
+        "eval_count": 52,
+        "total_duration": 11087676100,
+        "prompt_eval_duration": 899339000,
+        "eval_duration": 1012206000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Jimi Hendrix",
+      "title": "Castles Made Of Sand",
+      "album": "",
+      "year": null,
+      "genre": "psychedelic rock"
+    },
+    "rig": {
+      "rigName": "Jimi Hendrix - Castles Made Of Sand - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm Hendrix clean-crunch with subtle fuzz and short room",
+      "signalChainSummary": "A classic, warm Fender-style clean foundation boosted by a Fuzz/OD stage, running through a Marshall-voiced amp model, finished with room reverb and vibrato.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and stray noise inherent in vintage-style tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "Medium",
+            "Tone": "Bright",
+            "Level": "High"
+          },
+          "purpose": "Provide the required 'slight fuzz breakup' and vintage grit (Fuzz Face style).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Good for early British rock, but 'Fuzz' is more direct for the Fuzz Face vibe."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "preamp overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "Low",
+            "Tone": "Medium",
+            "Level": "High"
+          },
+          "purpose": "Add subtle harmonic warmth and mid-range punch for the 'warm mids' requirement.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general boost, but it helps shape the tone to avoid excessive scoop while maintaining clarity.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Might be too aggressive for the required 'slight' breakup."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "Medium",
+            "Treble": "High",
+            "Midrange": "High",
+            "Bass": "Medium"
+          },
+          "purpose": "Simulate the Marshall/Super Lead tone and provide classic British rock power.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative, but SLP better captures the Super Lead/Marshall vibe."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Neutral"
+          },
+          "purpose": "Provide the required '4x12' cabinet voicing for a classic British rock sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize 'warm mids' and maintain fullness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "vibrato/modulation",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": true,
+          "settings": {
+            "Depth": "Low",
+            "Rate": "Slow"
+          },
+          "purpose": "Achieve the 'expressive vibrato' required for lead lines.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short",
+            "Mix": "Low"
+          },
+          "purpose": "Add the required 'short room verb' for space and sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Room is better suited for a natural, short ambient decay."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm Hendrix clean-crunch with subtle fuzz and short room",
+      "mustHave": [
+        "slight fuzz breakup",
+        "liquid lead sustain",
+        "warm mids",
+        "short room verb",
+        "expressive vibrato"
+      ],
+      "avoid": [
+        "wah sweep",
+        "chorus",
+        "metal gain",
+        "deep delay",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "Strat neck/middle",
+        "Fuzz Face style",
+        "Marshall/Super Lead",
+        "4x12"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop chorus",
+        "reduce delay",
+        "less scooped than draft"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "psychedelic rock",
+      "styleTags": [
+        "blues rock",
+        "jimi hendrix style",
+        "classic rock"
+      ],
+      "targetTone": "warm Hendrix clean-crunch with subtle fuzz and short room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and warmth by swapping the default 4x12 IR for a vintage, open-air British cab simulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage British 4x12 IR (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the vintage, open-air feel and warmth of the Marshall tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more articulate high end",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 687,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

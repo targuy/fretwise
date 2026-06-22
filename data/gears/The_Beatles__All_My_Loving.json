@@ -1,0 +1,1125 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1445,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__All_My_Loving.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "All My Loving",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "british pop",
+      "merseybeat",
+      "jangly guitar"
+    ],
+    "confidence": "high",
+    "rationale": "The Beatles' sound is classic Merseybeat/Pop Rock, matching the jangly clean tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, clean pop tone with slight chorus/tremolo modulation.",
+      "signatureElements": [
+        "clean",
+        "chorus",
+        "reverb",
+        "modulation",
+        "bright"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus effect pedal",
+        "Clean amp model (e.g., Fender Twin)"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "distortion",
+        "overdrive"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright jangly clean rhythm with light compression",
+      "mustHave": [
+        "tight clean attack",
+        "bright upper mids",
+        "percussive strum",
+        "slight room"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "clean Vox/Fender",
+        "2x12 or combo"
+      ],
+      "corrections": [
+        "remove chorus",
+        "add jangle",
+        "keep it dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright jangly clean rhythm with light compression",
+    "mustHave": [
+      "tight clean attack",
+      "bright upper mids",
+      "percussive strum",
+      "slight room"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy reverb",
+      "fuzz",
+      "crunch"
+    ],
+    "gearClues": [
+      "Rickenbacker-style jangle",
+      "clean Vox/Fender",
+      "2x12 or combo"
+    ],
+    "corrections": [
+      "remove chorus",
+      "add jangle",
+      "keep it dry"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender/Vox tones with light compression and room ambience.",
+          "bestMatchSummary": "A classic jangly rhythm tone achieved using a Comp boost for attack, followed by a clean British combo amp model (UK 50 or US Deluxe) paired with a bright cab, finished with minimal Room reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Provide tight clean attack and sustain for percussive strumming.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid crunch or fuzz.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean sound of a Vox/Fender combo amp.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is an approximation; US Deluxe or Silver Twin could also work for pure Fender tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Closer to a classic American clean tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate sound suitable for jangly rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "While the UK Vintage 4x12 is used, US 2x12 or Mess 4x12 might better capture the 'Fender' vibe.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "Best for pure Fender/clean tones."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the bright upper mids and jangle characteristic.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and jangly.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list and instructions.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "1"
+              },
+              "purpose": "Add subtle depth and rhythmic definition without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A simpler, less noticeable delay might be better for pure jangly rhythm.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the requested 'slight room' ambience without heavy reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic pop song, requiring a bright, clean tone. The chosen amp (UK 50) and cab are approximations to capture the Vox/Fender jangle sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current UK IR for a US-style 2x12 or Mess 4x12 to better capture the classic Fender/Rickenbacker jangle tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12 IR (or similar)",
+              "reason": "Better captures pure American clean tones and Rickenbacker jangle vibe.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and 'jangly' character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - All My Loving - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "All My Loving",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright jangly clean rhythm with light compression",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic jangly rhythm tone achieved using a Comp boost for attack, followed by a clean British combo amp model (UK 50 or US Deluxe) paired with a bright cab, finished with minimal Room reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium"
+            },
+            "purpose": "Provide tight clean attack and sustain for percussive strumming.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and avoid crunch or fuzz.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, clean sound of a Vox/Fender combo amp.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is an approximation; US Deluxe or Silver Twin could also work for pure Fender tones.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "Closer to a classic American clean tone."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate sound suitable for jangly rhythm guitar.",
+            "matchQuality": "close",
+            "gap": "While the UK Vintage 4x12 is used, US 2x12 or Mess 4x12 might better capture the 'Fender' vibe.",
+            "alternatives": [
+              {
+                "model": "US 2x12",
+                "reason": "Best for pure Fender/clean tones."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+4 dB"
+            },
+            "purpose": "Enhance the bright upper mids and jangle characteristic.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; keep the tone direct and jangly.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus as per the 'avoid' list and instructions.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "1"
+            },
+            "purpose": "Add subtle depth and rhythmic definition without sounding distracting.",
+            "matchQuality": "close",
+            "gap": "A simpler, less noticeable delay might be better for pure jangly rhythm.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide the requested 'slight room' ambience without heavy reverb.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright jangly clean rhythm with light compression",
+          "toneProfile": "bright jangly clean rhythm with light compression",
+          "idealSignalChain": "Rickenbacker-style jangle | clean Vox/Fender | 2x12 or combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rickenbacker-style jangle",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean Vox/Fender",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight clean attack",
+            "bright upper mids",
+            "percussive strum",
+            "slight room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender/Vox tones with light compression and room ambience.",
+          "bestMatchSummary": "A classic jangly rhythm tone achieved using a Comp boost for attack, followed by a clean British combo amp model (UK 50 or US Deluxe) paired with a bright cab, finished with minimal Room reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Provide tight clean attack and sustain for percussive strumming.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid crunch or fuzz.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean sound of a Vox/Fender combo amp.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is an approximation; US Deluxe or Silver Twin could also work for pure Fender tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Closer to a classic American clean tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate sound suitable for jangly rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "While the UK Vintage 4x12 is used, US 2x12 or Mess 4x12 might better capture the 'Fender' vibe.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "Best for pure Fender/clean tones."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the bright upper mids and jangle characteristic.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and jangly.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the 'avoid' list and instructions.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "1"
+              },
+              "purpose": "Add subtle depth and rhythmic definition without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A simpler, less noticeable delay might be better for pure jangly rhythm.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the requested 'slight room' ambience without heavy reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current UK IR for a US-style 2x12 or Mess 4x12 to better capture the classic Fender/Rickenbacker jangle tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12 IR (or similar)",
+              "reason": "Better captures pure American clean tones and Rickenbacker jangle vibe.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and 'jangly' character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "add jangle",
+          "keep it dry"
+        ],
+        "warnings": [
+          "The source material is a classic pop song, requiring a bright, clean tone. The chosen amp (UK 50) and cab are approximations to capture the Vox/Fender jangle sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.7,
+      "prompt_chars": 993,
+      "response_chars": 343,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 93,
+        "total_duration": 9635541700,
+        "prompt_eval_duration": 773760000,
+        "eval_duration": 1540923000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.608,
+      "prompt_chars": 5282,
+      "response_chars": 445,
+      "usage": {
+        "input_tokens": 1482,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 127,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1609
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 30.509,
+      "prompt_chars": 3511,
+      "response_chars": 5468,
+      "usage": {
+        "prompt_eval_count": 1194,
+        "eval_count": 1594,
+        "total_duration": 30488372600,
+        "prompt_eval_duration": 240229000,
+        "eval_duration": 29833190000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 2.245,
+      "prompt_chars": 7548,
+      "response_chars": 611,
+      "usage": {
+        "prompt_eval_count": 2145,
+        "eval_count": 171,
+        "total_duration": 2216327800,
+        "prompt_eval_duration": 284657000,
+        "eval_duration": 1506831000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.155,
+      "prompt_chars": 2807,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 893,
+        "eval_count": 58,
+        "total_duration": 10138061800,
+        "prompt_eval_duration": 425310000,
+        "eval_duration": 1045922000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "All My Loving",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Beatles - All My Loving - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright jangly clean rhythm with light compression",
+      "signalChainSummary": "A classic jangly rhythm tone achieved using a Comp boost for attack, followed by a clean British combo amp model (UK 50 or US Deluxe) paired with a bright cab, finished with minimal Room reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium"
+          },
+          "purpose": "Provide tight clean attack and sustain for percussive strumming.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and avoid crunch or fuzz.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, clean sound of a Vox/Fender combo amp.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is an approximation; US Deluxe or Silver Twin could also work for pure Fender tones.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "Closer to a classic American clean tone."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate sound suitable for jangly rhythm guitar.",
+          "matchQuality": "close",
+          "gap": "While the UK Vintage 4x12 is used, US 2x12 or Mess 4x12 might better capture the 'Fender' vibe.",
+          "alternatives": [
+            {
+              "model": "US 2x12",
+              "reason": "Best for pure Fender/clean tones."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+4 dB"
+          },
+          "purpose": "Enhance the bright upper mids and jangle characteristic.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; keep the tone direct and jangly.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus as per the 'avoid' list and instructions.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "1"
+          },
+          "purpose": "Add subtle depth and rhythmic definition without sounding distracting.",
+          "matchQuality": "close",
+          "gap": "A simpler, less noticeable delay might be better for pure jangly rhythm.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide the requested 'slight room' ambience without heavy reverb.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright jangly clean rhythm with light compression",
+      "mustHave": [
+        "tight clean attack",
+        "bright upper mids",
+        "percussive strum",
+        "slight room"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "Rickenbacker-style jangle",
+        "clean Vox/Fender",
+        "2x12 or combo"
+      ],
+      "corrections": [
+        "remove chorus",
+        "add jangle",
+        "keep it dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "british pop",
+        "merseybeat",
+        "jangly guitar"
+      ],
+      "targetTone": "bright jangly clean rhythm with light compression",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current UK IR for a US-style 2x12 or Mess 4x12 to better capture the classic Fender/Rickenbacker jangle tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "US 2x12 IR (or similar)",
+          "reason": "Better captures pure American clean tones and Rickenbacker jangle vibe.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and 'jangly' character.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1445,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

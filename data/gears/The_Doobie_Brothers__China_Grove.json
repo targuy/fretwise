@@ -1,0 +1,1082 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1513,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Doobie_Brothers__China_Grove.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Doobie Brothers",
+    "title": "China Grove",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "rock and roll",
+      "folk-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The Doobie Brothers are classic pop/folk-rock artists, fitting the jangly tone description."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly overdriven rock tone with a touch of grit.",
+      "signatureElements": [
+        "clean-crunch blend",
+        "mid-range focus",
+        "slight compression",
+        "natural room reverb"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (e.g., AC30/Vox)",
+        "Overdrive pedal emulation (for the crunch)"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "extreme modulation",
+        "dark tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly Vox-style edge-of-breakup rock crunch",
+      "mustHave": [
+        "bright chime",
+        "clean-crunch blend",
+        "tight mid bite",
+        "light compression",
+        "small room"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dark woolly drive",
+        "big delay",
+        "swirly modulation"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single-coils",
+        "12-inch speakers",
+        "light OD"
+      ],
+      "corrections": [
+        "name Vox chime more clearly",
+        "keep reverb subtle",
+        "lean brighter and janglier"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly Vox-style edge-of-breakup rock crunch",
+    "mustHave": [
+      "bright chime",
+      "clean-crunch blend",
+      "tight mid bite",
+      "light compression",
+      "small room"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "dark woolly drive",
+      "big delay",
+      "swirly modulation"
+    ],
+    "gearClues": [
+      "Vox AC30",
+      "single-coils",
+      "12-inch speakers",
+      "light OD"
+    ],
+    "corrections": [
+      "name Vox chime more clearly",
+      "keep reverb subtle",
+      "lean brighter and janglier"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey tones using Vox AC30 emulation and light compression.",
+          "bestMatchSummary": "A clean, jangly signal chain utilizing a Boost/OD for edge-of-breakup grit, followed by the UK 45 amp model and US Vintage 2x12 cab, finished with Chorus and Room reverb to achieve a bright, Vox-style chime.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, bright edge-of-breakup crunch and chime.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar clean boost character."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+              "matchQuality": "none",
+              "gap": "The 'None' module is used to maintain signal integrity and avoid unnecessary coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "If available in the catalog, this would be ideal."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused sound suitable for jangly tones.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its brightness and focus, mimicking the desired Vox character better than larger cabs.",
+              "alternatives": [
+                {
+                  "model": "UK Vintage 4x12",
+                  "reason": "A good alternative if more body is needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the 'tight mid bite' and 'bright chime' required for the jangly sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "25%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle movement and width without sounding 'swirly'.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used sparingly to add dimension, avoiding the full modulation effect that might be too distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle 'small room' ambience without sounding big or wash-out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative if the Room reverb is too dark."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-12 dB"
+              },
+              "purpose": "Apply light compression to smooth dynamics and enhance sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage Vox AC30 tones. The chosen chain prioritizes brightness and mid-range punch over raw power.",
+          "Since the GP-180 does not have a dedicated 'AC30' model, the UK 45 amp combined with EQ shaping is used to achieve the desired chimey character."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for a more authentic Vox AC30 sound and better overall clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Vox AC30 Cabinet realism",
+              "recommendedAsset": "AC30 2x12 IR",
+              "reason": "The US 2x12 is too generic; a dedicated AC30 IR will nail the required chime and vintage tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased authenticity and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Doobie Brothers - China Grove - Valeton GP-180",
+        "song": {
+          "artist": "The Doobie Brothers",
+          "title": "China Grove",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly Vox-style edge-of-breakup rock crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, jangly signal chain utilizing a Boost/OD for edge-of-breakup grit, followed by the UK 45 amp model and US Vintage 2x12 cab, finished with Chorus and Room reverb to achieve a bright, Vox-style chime.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, bright edge-of-breakup crunch and chime.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Similar clean boost character."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+            "matchQuality": "none",
+            "gap": "The 'None' module is used to maintain signal integrity and avoid unnecessary coloration.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6/10",
+              "Treble": "7/10",
+              "Midrange": "8/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "AC30 TB",
+                "reason": "If available in the catalog, this would be ideal."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, focused sound suitable for jangly tones.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its brightness and focus, mimicking the desired Vox character better than larger cabs.",
+            "alternatives": [
+              {
+                "model": "UK Vintage 4x12",
+                "reason": "A good alternative if more body is needed."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+4 dB"
+            },
+            "purpose": "Enhance the 'tight mid bite' and 'bright chime' required for the jangly sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "25%",
+              "Mix": "40%"
+            },
+            "purpose": "Add subtle movement and width without sounding 'swirly'.",
+            "matchQuality": "close",
+            "gap": "The Chorus is used sparingly to add dimension, avoiding the full modulation effect that might be too distracting.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a subtle 'small room' ambience without sounding big or wash-out.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A slightly brighter alternative if the Room reverb is too dark."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "compression/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Threshold": "-12 dB"
+            },
+            "purpose": "Apply light compression to smooth dynamics and enhance sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly Vox-style edge-of-breakup rock crunch",
+          "toneProfile": "jangly Vox-style edge-of-breakup rock crunch",
+          "idealSignalChain": "Vox AC30 | single-coils | 12-inch speakers | light OD",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch speakers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright chime",
+            "clean-crunch blend",
+            "tight mid bite",
+            "light compression",
+            "small room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey tones using Vox AC30 emulation and light compression.",
+          "bestMatchSummary": "A clean, jangly signal chain utilizing a Boost/OD for edge-of-breakup grit, followed by the UK 45 amp model and US Vintage 2x12 cab, finished with Chorus and Room reverb to achieve a bright, Vox-style chime.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, bright edge-of-breakup crunch and chime.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar clean boost character."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+              "matchQuality": "none",
+              "gap": "The 'None' module is used to maintain signal integrity and avoid unnecessary coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "If available in the catalog, this would be ideal."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused sound suitable for jangly tones.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its brightness and focus, mimicking the desired Vox character better than larger cabs.",
+              "alternatives": [
+                {
+                  "model": "UK Vintage 4x12",
+                  "reason": "A good alternative if more body is needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the 'tight mid bite' and 'bright chime' required for the jangly sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "25%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle movement and width without sounding 'swirly'.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used sparingly to add dimension, avoiding the full modulation effect that might be too distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle 'small room' ambience without sounding big or wash-out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative if the Room reverb is too dark."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-12 dB"
+              },
+              "purpose": "Apply light compression to smooth dynamics and enhance sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for a more authentic Vox AC30 sound and better overall clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Vox AC30 Cabinet realism",
+              "recommendedAsset": "AC30 2x12 IR",
+              "reason": "The US 2x12 is too generic; a dedicated AC30 IR will nail the required chime and vintage tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased authenticity and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "name Vox chime more clearly",
+          "keep reverb subtle",
+          "lean brighter and janglier"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage Vox AC30 tones. The chosen chain prioritizes brightness and mid-range punch over raw power.",
+          "Since the GP-180 does not have a dedicated 'AC30' model, the UK 45 amp combined with EQ shaping is used to achieve the desired chimey character."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.063,
+      "prompt_chars": 999,
+      "response_chars": 384,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 99,
+        "total_duration": 9057154900,
+        "prompt_eval_duration": 280082000,
+        "eval_duration": 1409878000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.643,
+      "prompt_chars": 5311,
+      "response_chars": 507,
+      "usage": {
+        "input_tokens": 1484,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1621
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.276,
+      "prompt_chars": 3593,
+      "response_chars": 5390,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1548,
+        "total_duration": 38263657400,
+        "prompt_eval_duration": 243610000,
+        "eval_duration": 24606966000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.993,
+      "prompt_chars": 7528,
+      "response_chars": 541,
+      "usage": {
+        "prompt_eval_count": 2120,
+        "eval_count": 153,
+        "total_duration": 3965366000,
+        "prompt_eval_duration": 345582000,
+        "eval_duration": 3221687000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.078,
+      "prompt_chars": 2717,
+      "response_chars": 196,
+      "usage": {
+        "prompt_eval_count": 872,
+        "eval_count": 54,
+        "total_duration": 13060961500,
+        "prompt_eval_duration": 348766000,
+        "eval_duration": 602389000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Doobie Brothers",
+      "title": "China Grove",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Doobie Brothers - China Grove - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly Vox-style edge-of-breakup rock crunch",
+      "signalChainSummary": "A clean, jangly signal chain utilizing a Boost/OD for edge-of-breakup grit, followed by the UK 45 amp model and US Vintage 2x12 cab, finished with Chorus and Room reverb to achieve a bright, Vox-style chime.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, bright edge-of-breakup crunch and chime.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Similar clean boost character."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+          "matchQuality": "fallback",
+          "gap": "The 'None' module is used to maintain signal integrity and avoid unnecessary coloration.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6/10",
+            "Treble": "7/10",
+            "Midrange": "8/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Emulate the bright, articulate sound of a Vox AC30.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "AC30 TB",
+              "reason": "If available in the catalog, this would be ideal."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, focused sound suitable for jangly tones.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its brightness and focus, mimicking the desired Vox character better than larger cabs.",
+          "alternatives": [
+            {
+              "model": "UK Vintage 4x12",
+              "reason": "A good alternative if more body is needed."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+4 dB"
+          },
+          "purpose": "Enhance the 'tight mid bite' and 'bright chime' required for the jangly sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "25%",
+            "Mix": "40%"
+          },
+          "purpose": "Add subtle movement and width without sounding 'swirly'.",
+          "matchQuality": "close",
+          "gap": "The Chorus is used sparingly to add dimension, avoiding the full modulation effect that might be too distracting.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a subtle 'small room' ambience without sounding big or wash-out.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly brighter alternative if the Room reverb is too dark."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "compression/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Threshold": "-12 dB"
+          },
+          "purpose": "Apply light compression to smooth dynamics and enhance sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly Vox-style edge-of-breakup rock crunch",
+      "mustHave": [
+        "bright chime",
+        "clean-crunch blend",
+        "tight mid bite",
+        "light compression",
+        "small room"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dark woolly drive",
+        "big delay",
+        "swirly modulation"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single-coils",
+        "12-inch speakers",
+        "light OD"
+      ],
+      "corrections": [
+        "name Vox chime more clearly",
+        "keep reverb subtle",
+        "lean brighter and janglier"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "rock and roll",
+        "folk-rock"
+      ],
+      "targetTone": "jangly Vox-style edge-of-breakup rock crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for a more authentic Vox AC30 sound and better overall clarity.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Vox AC30 Cabinet realism",
+          "recommendedAsset": "AC30 2x12 IR",
+          "reason": "The US 2x12 is too generic; a dedicated AC30 IR will nail the required chime and vintage tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased authenticity and clarity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1513,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

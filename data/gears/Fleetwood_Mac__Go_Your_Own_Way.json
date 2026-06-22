@@ -1,0 +1,1124 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 442,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Fleetwood_Mac__Go_Your_Own_Way.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Fleetwood Mac",
+    "title": "Go Your Own Way",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "pop rock",
+      "soft rock"
+    ],
+    "confidence": "high",
+    "rationale": "Fleetwood Mac's 'Go Your Own Way' is a quintessential example of classic pop/rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly compressed rock tone with prominent mid-range bite and controlled sustain.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight chorus or vibrato modulation",
+        "Clean delay for atmosphere",
+        "British tweed amp character"
+      ],
+      "gearHypotheses": [
+        "Vox AC30 style emulation",
+        "Mid-boost overdrive pedal (e.g., Tube Screamer type)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep scooped bass tones",
+        "Modern digital poly-delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Fleetwood Mac crunch with chime and bite",
+      "mustHave": [
+        "tight mid bite",
+        "slight compression",
+        "clean-ish crunch",
+        "bright top end"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "delay",
+        "heavy saturation"
+      ],
+      "gearClues": [
+        "Vox-style combo",
+        "single-coil guitar",
+        "light overdrive"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "avoid tweed phrasing"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Fleetwood Mac crunch with chime and bite",
+    "mustHave": [
+      "tight mid bite",
+      "slight compression",
+      "clean-ish crunch",
+      "bright top end"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "delay",
+      "heavy saturation"
+    ],
+    "gearClues": [
+      "Vox-style combo",
+      "single-coil guitar",
+      "light overdrive"
+    ],
+    "corrections": [
+      "remove chorus",
+      "remove delay",
+      "avoid tweed phrasing"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-focused clean crunch reminiscent of classic British rock tones (Vox/early Britpop). Prioritize clarity and bite over heavy saturation.",
+          "bestMatchSummary": "A tight signal chain using light compression and a Green OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet for bright, articulate crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, mid-focused crunch and bite without heavy saturation (Vox/light overdrive emulation).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the desired 'light overdrive' and 'mid bite'.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient gain for the desired crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox-style combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for the 'Vox-style' clue and required brightness.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a British tone was not specified."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the classic British rock aesthetic.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the 'tight mid bite' and overall brightness while controlling low-end muddiness.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the specific frequency requirements (mid focus, bright top end).",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is required for this specific tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus and delay were explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay was explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and dimension without sounding overly wet or muddy.",
+              "matchQuality": "close",
+              "gap": "A small amount of room reverb adds necessary depth for a professional recording sound.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work, but Room is generally better for natural space."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage British tones (Vox). The chosen chain prioritizes clarity and mid-range bite over modern high gain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, chimey articulation required for classic British rock tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 4x12 IR",
+              "reason": "Better captures the specific chime and bite of a Vox-style combo than the generic UK Vintage 4x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage articulation",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Fleetwood Mac - Go Your Own Way - Valeton GP-180",
+        "song": {
+          "artist": "Fleetwood Mac",
+          "title": "Go Your Own Way",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Fleetwood Mac crunch with chime and bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using light compression and a Green OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet for bright, articulate crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain signal clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, mid-focused crunch and bite without heavy saturation (Vox/light overdrive emulation).",
+            "matchQuality": "close",
+            "gap": "The Green OD is a good proxy for the desired 'light overdrive' and 'mid bite'.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more aggressive, but still suitable."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The Green OD provides sufficient gain for the desired crunch.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%",
+              "Midrange": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Emulate the bright, articulate sound of a Vox-style combo amplifier.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is the best fit for the 'Vox-style' clue and required brightness.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a British tone was not specified."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound matching the classic British rock aesthetic.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Enhance the 'tight mid bite' and overall brightness while controlling low-end muddiness.",
+            "matchQuality": "close",
+            "gap": "Used to fine-tune the specific frequency requirements (mid focus, bright top end).",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No wah effect is required for this specific tone.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Chorus and delay were explicitly avoided.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Delay was explicitly avoided.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add subtle space and dimension without sounding overly wet or muddy.",
+            "matchQuality": "close",
+            "gap": "A small amount of room reverb adds necessary depth for a professional recording sound.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could also work, but Room is generally better for natural space."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Fleetwood Mac crunch with chime and bite",
+          "toneProfile": "bright Fleetwood Mac crunch with chime and bite",
+          "idealSignalChain": "Vox-style combo | single-coil guitar | light overdrive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox-style combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight mid bite",
+            "slight compression",
+            "clean-ish crunch",
+            "bright top end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-focused clean crunch reminiscent of classic British rock tones (Vox/early Britpop). Prioritize clarity and bite over heavy saturation.",
+          "bestMatchSummary": "A tight signal chain using light compression and a Green OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet for bright, articulate crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, mid-focused crunch and bite without heavy saturation (Vox/light overdrive emulation).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the desired 'light overdrive' and 'mid bite'.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient gain for the desired crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the bright, articulate sound of a Vox-style combo amplifier.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for the 'Vox-style' clue and required brightness.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a British tone was not specified."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the classic British rock aesthetic.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the 'tight mid bite' and overall brightness while controlling low-end muddiness.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the specific frequency requirements (mid focus, bright top end).",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is required for this specific tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus and delay were explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay was explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and dimension without sounding overly wet or muddy.",
+              "matchQuality": "close",
+              "gap": "A small amount of room reverb adds necessary depth for a professional recording sound.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work, but Room is generally better for natural space."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the bright, chimey articulation required for classic British rock tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 4x12 IR",
+              "reason": "Better captures the specific chime and bite of a Vox-style combo than the generic UK Vintage 4x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage articulation",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "remove delay",
+          "avoid tweed phrasing"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of vintage British tones (Vox). The chosen chain prioritizes clarity and mid-range bite over modern high gain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.376,
+      "prompt_chars": 997,
+      "response_chars": 473,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 114,
+        "total_duration": 10348709500,
+        "prompt_eval_duration": 453806000,
+        "eval_duration": 1734345000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.615,
+      "prompt_chars": 5398,
+      "response_chars": 451,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 121,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1620
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 41.414,
+      "prompt_chars": 3521,
+      "response_chars": 5803,
+      "usage": {
+        "prompt_eval_count": 1187,
+        "eval_count": 1646,
+        "total_duration": 41382259100,
+        "prompt_eval_duration": 1006927000,
+        "eval_duration": 26746363000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.429,
+      "prompt_chars": 7895,
+      "response_chars": 596,
+      "usage": {
+        "prompt_eval_count": 2190,
+        "eval_count": 158,
+        "total_duration": 4404064600,
+        "prompt_eval_duration": 286742000,
+        "eval_duration": 3712558000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.131,
+      "prompt_chars": 2845,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 901,
+        "eval_count": 53,
+        "total_duration": 9103129200,
+        "prompt_eval_duration": 388123000,
+        "eval_duration": 826604000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Fleetwood Mac",
+      "title": "Go Your Own Way",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Fleetwood Mac - Go Your Own Way - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Fleetwood Mac crunch with chime and bite",
+      "signalChainSummary": "A tight signal chain using light compression and a Green OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet for bright, articulate crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain signal clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, mid-focused crunch and bite without heavy saturation (Vox/light overdrive emulation).",
+          "matchQuality": "close",
+          "gap": "The Green OD is a good proxy for the desired 'light overdrive' and 'mid bite'.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more aggressive, but still suitable."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The Green OD provides sufficient gain for the desired crunch.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%",
+            "Midrange": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Emulate the bright, articulate sound of a Vox-style combo amplifier.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is the best fit for the 'Vox-style' clue and required brightness.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a British tone was not specified."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound matching the classic British rock aesthetic.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Enhance the 'tight mid bite' and overall brightness while controlling low-end muddiness.",
+          "matchQuality": "close",
+          "gap": "Used to fine-tune the specific frequency requirements (mid focus, bright top end).",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No wah effect is required for this specific tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Chorus and delay were explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Delay was explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add subtle space and dimension without sounding overly wet or muddy.",
+          "matchQuality": "close",
+          "gap": "A small amount of room reverb adds necessary depth for a professional recording sound.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could also work, but Room is generally better for natural space."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Fleetwood Mac crunch with chime and bite",
+      "mustHave": [
+        "tight mid bite",
+        "slight compression",
+        "clean-ish crunch",
+        "bright top end"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "delay",
+        "heavy saturation"
+      ],
+      "gearClues": [
+        "Vox-style combo",
+        "single-coil guitar",
+        "light overdrive"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "avoid tweed phrasing"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "pop rock",
+        "soft rock"
+      ],
+      "targetTone": "bright Fleetwood Mac crunch with chime and bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the bright, chimey articulation required for classic British rock tones.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vox AC30 4x12 IR",
+          "reason": "Better captures the specific chime and bite of a Vox-style combo than the generic UK Vintage 4x12.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage articulation",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 442,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

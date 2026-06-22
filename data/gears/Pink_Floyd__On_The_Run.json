@@ -1,0 +1,1094 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1100,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Pink_Floyd__On_The_Run.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Pink Floyd",
+    "title": "On The Run",
+    "album": "",
+    "year": null,
+    "genre": "progressive rock"
+  },
+  "genreClassification": {
+    "genre": "progressive rock",
+    "subgenres": [
+      "psychedelic rock",
+      "art rock"
+    ],
+    "confidence": "high",
+    "rationale": "Pink Floyd's sound is defined by expansive, atmospheric progressive and psychedelic rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty crunch with deep reverb and delay.",
+      "signatureElements": [
+        "Crunch/Edge of Breakup",
+        "Ambient Delay (Tape/Analog)",
+        "Deep Reverb",
+        "Wah Pedal Sweep"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (Marshall/AC30 family)",
+        "Chorus or Flanger modulation effect",
+        "Spring or Plate reverb unit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Overly scooped mids",
+        "Bright, brittle clean tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "synth-sequence texture, not guitar amp tone",
+      "mustHave": [
+        "pulsing arpeggio",
+        "filter sweep",
+        "tape-like motion",
+        "dry electronic attack"
+      ],
+      "avoid": [
+        "guitar crunch",
+        "wah",
+        "deep reverb",
+        "delay",
+        "fuzz"
+      ],
+      "gearClues": [
+        "synth",
+        "sequencer",
+        "filter",
+        "tape echo"
+      ],
+      "corrections": [
+        "not a guitar part",
+        "no amp family target",
+        "no pedalboard rig"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": [
+      "non-guitar track",
+      "draft assumes guitar rig for a synth-led piece",
+      "wrong instrument context would mislead GP-180"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "synth sequence, not guitar-based",
+    "mustHave": [
+      "pulsing arpeggio texture",
+      "filter sweep motion",
+      "dry electronic attack"
+    ],
+    "avoid": [
+      "guitar crunch",
+      "wah",
+      "reverb",
+      "delay",
+      "amp simulation"
+    ],
+    "gearClues": [
+      "VCS3 synth",
+      "sequencer",
+      "Binson Echorec tape echo"
+    ],
+    "corrections": [
+      "no guitar on this track",
+      "synth-led instrumental",
+      "cannot generate guitar rig"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "synth sequence, not guitar-based",
+    "mustHave": [
+      "pulsing arpeggio texture",
+      "filter sweep motion",
+      "dry electronic attack"
+    ],
+    "avoid": [
+      "guitar crunch",
+      "wah",
+      "reverb",
+      "delay",
+      "amp simulation"
+    ],
+    "gearClues": [
+      "VCS3 synth",
+      "sequencer",
+      "Binson Echorec tape echo"
+    ],
+    "corrections": [
+      "no guitar on this track",
+      "synth-led instrumental",
+      "cannot generate guitar rig"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is synth/electronic, the rig will prioritize clean, filtered tones and arpeggiated textures, simulating a playable role (e.g., rhythmic lead lines) while adhering to the 'dry electronic attack' requirement.",
+          "bestMatchSummary": "A highly controlled, clean signal chain using compression and filtering effects (Chorus/Tremolo) into a pristine US Deluxe amp setup, mimicking the pulsing arpeggios and filtered synth movement without traditional guitar crunch or reverb/delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the electronic source simulation.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean signal chains.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Smooth out the signal and provide consistent dynamics necessary for sustained arpeggiated textures.",
+              "matchQuality": "close",
+              "gap": "The source is electronic, but compression helps simulate the controlled attack of a sequencer/synth.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "filter/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "High"
+              },
+              "purpose": "Create the 'filter sweep motion' and pulsing arpeggio texture by modulating pitch slightly.",
+              "matchQuality": "close",
+              "gap": "The source is a synth filter, but Chorus provides the necessary sweeping/pulsing movement required for the target tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The target tone requires a 'dry electronic attack' and explicitly avoids guitar crunch.",
+              "matchQuality": "perfect",
+              "gap": "The source is purely synthetic; no drive or distortion is needed.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Medium",
+                "Bass": "Medium"
+              },
+              "purpose": "Provide a clean, articulate platform for the arpeggios, simulating the dry electronic attack.",
+              "matchQuality": "close",
+              "gap": "The source is not an acoustic amp; US Deluxe provides the cleanest possible tone from the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Maintain a bright and focused sound profile suitable for clean, arpeggiated synth textures.",
+              "matchQuality": "close",
+              "gap": "The source is electronic; US 2x12 provides the necessary clarity and brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Boost": "+2 dB"
+              },
+              "purpose": "Shape the frequency response to emphasize high-end clarity and articulate the arpeggiated notes.",
+              "matchQuality": "close",
+              "gap": "Used for tonal shaping, mimicking EQ adjustments on a synth or sequencer output.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "Medium"
+              },
+              "purpose": "Add subtle rhythmic pulsing to enhance the arpeggiated texture without sounding like a traditional vibrato.",
+              "matchQuality": "close",
+              "gap": "Used as an alternative source of controlled, slow movement (pulsing) to complement the Chorus effect.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Low"
+              },
+              "purpose": "Provide minimal, natural space to keep the sound dry and focused, avoiding excessive reverb/delay.",
+              "matchQuality": "close",
+              "gap": "The source avoids reverb, but a very low mix of Room helps ground the signal without muddying the clean attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is purely electronic (synth/sequencer) and contains no guitar elements. This rig simulates the rhythmic, filtered texture for a playable role (e.g., arpeggiated lead lines).",
+          "Reverb and Delay are explicitly avoided per the musical verdict, so ambience modules (Room) are used with very low settings to maintain clarity."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Focus on maximizing high-end articulation and filtering for the synth/arpeggio texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "High-frequency clarity",
+              "recommendedAsset": "Bright, open 4x12 IR (e.g., Neve or modern clean cab)",
+              "reason": "Maximize articulation for arpeggios and filtered synth tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity/brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Pink Floyd - On The Run - Valeton GP-180",
+        "song": {
+          "artist": "Pink Floyd",
+          "title": "On The Run",
+          "album": "",
+          "year": null,
+          "genre": "progressive rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "synth sequence, not guitar-based",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly controlled, clean signal chain using compression and filtering effects (Chorus/Tremolo) into a pristine US Deluxe amp setup, mimicking the pulsing arpeggios and filtered synth movement without traditional guitar crunch or reverb/delay.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any unwanted hum or noise from the electronic source simulation.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean signal chains.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Smooth out the signal and provide consistent dynamics necessary for sustained arpeggiated textures.",
+            "matchQuality": "close",
+            "gap": "The source is electronic, but compression helps simulate the controlled attack of a sequencer/synth.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "filter/modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Mix": "High"
+            },
+            "purpose": "Create the 'filter sweep motion' and pulsing arpeggio texture by modulating pitch slightly.",
+            "matchQuality": "close",
+            "gap": "The source is a synth filter, but Chorus provides the necessary sweeping/pulsing movement required for the target tone.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The target tone requires a 'dry electronic attack' and explicitly avoids guitar crunch.",
+            "matchQuality": "perfect",
+            "gap": "The source is purely synthetic; no drive or distortion is needed.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "Medium",
+              "Bass": "Medium"
+            },
+            "purpose": "Provide a clean, articulate platform for the arpeggios, simulating the dry electronic attack.",
+            "matchQuality": "close",
+            "gap": "The source is not an acoustic amp; US Deluxe provides the cleanest possible tone from the catalog.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Maintain a bright and focused sound profile suitable for clean, arpeggiated synth textures.",
+            "matchQuality": "close",
+            "gap": "The source is electronic; US 2x12 provides the necessary clarity and brightness.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "High Boost": "+2 dB"
+            },
+            "purpose": "Shape the frequency response to emphasize high-end clarity and articulate the arpeggiated notes.",
+            "matchQuality": "close",
+            "gap": "Used for tonal shaping, mimicking EQ adjustments on a synth or sequencer output.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Tremolo",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low",
+              "Mix": "Medium"
+            },
+            "purpose": "Add subtle rhythmic pulsing to enhance the arpeggiated texture without sounding like a traditional vibrato.",
+            "matchQuality": "close",
+            "gap": "Used as an alternative source of controlled, slow movement (pulsing) to complement the Chorus effect.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "ambience/space",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short",
+              "Mix": "Low"
+            },
+            "purpose": "Provide minimal, natural space to keep the sound dry and focused, avoiding excessive reverb/delay.",
+            "matchQuality": "close",
+            "gap": "The source avoids reverb, but a very low mix of Room helps ground the signal without muddying the clean attack.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "synth sequence, not guitar-based",
+          "toneProfile": "synth sequence, not guitar-based",
+          "idealSignalChain": "VCS3 synth | sequencer | Binson Echorec tape echo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "VCS3 synth",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "sequencer",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Binson Echorec tape echo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "pulsing arpeggio texture",
+            "filter sweep motion",
+            "dry electronic attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is synth/electronic, the rig will prioritize clean, filtered tones and arpeggiated textures, simulating a playable role (e.g., rhythmic lead lines) while adhering to the 'dry electronic attack' requirement.",
+          "bestMatchSummary": "A highly controlled, clean signal chain using compression and filtering effects (Chorus/Tremolo) into a pristine US Deluxe amp setup, mimicking the pulsing arpeggios and filtered synth movement without traditional guitar crunch or reverb/delay.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the electronic source simulation.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean signal chains.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Smooth out the signal and provide consistent dynamics necessary for sustained arpeggiated textures.",
+              "matchQuality": "close",
+              "gap": "The source is electronic, but compression helps simulate the controlled attack of a sequencer/synth.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "filter/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "High"
+              },
+              "purpose": "Create the 'filter sweep motion' and pulsing arpeggio texture by modulating pitch slightly.",
+              "matchQuality": "close",
+              "gap": "The source is a synth filter, but Chorus provides the necessary sweeping/pulsing movement required for the target tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The target tone requires a 'dry electronic attack' and explicitly avoids guitar crunch.",
+              "matchQuality": "perfect",
+              "gap": "The source is purely synthetic; no drive or distortion is needed.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Medium",
+                "Bass": "Medium"
+              },
+              "purpose": "Provide a clean, articulate platform for the arpeggios, simulating the dry electronic attack.",
+              "matchQuality": "close",
+              "gap": "The source is not an acoustic amp; US Deluxe provides the cleanest possible tone from the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Maintain a bright and focused sound profile suitable for clean, arpeggiated synth textures.",
+              "matchQuality": "close",
+              "gap": "The source is electronic; US 2x12 provides the necessary clarity and brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Boost": "+2 dB"
+              },
+              "purpose": "Shape the frequency response to emphasize high-end clarity and articulate the arpeggiated notes.",
+              "matchQuality": "close",
+              "gap": "Used for tonal shaping, mimicking EQ adjustments on a synth or sequencer output.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "Medium"
+              },
+              "purpose": "Add subtle rhythmic pulsing to enhance the arpeggiated texture without sounding like a traditional vibrato.",
+              "matchQuality": "close",
+              "gap": "Used as an alternative source of controlled, slow movement (pulsing) to complement the Chorus effect.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "Low"
+              },
+              "purpose": "Provide minimal, natural space to keep the sound dry and focused, avoiding excessive reverb/delay.",
+              "matchQuality": "close",
+              "gap": "The source avoids reverb, but a very low mix of Room helps ground the signal without muddying the clean attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Focus on maximizing high-end articulation and filtering for the synth/arpeggio texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "High-frequency clarity",
+              "recommendedAsset": "Bright, open 4x12 IR (e.g., Neve or modern clean cab)",
+              "reason": "Maximize articulation for arpeggios and filtered synth tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity/brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "no guitar on this track",
+          "synth-led instrumental",
+          "cannot generate guitar rig"
+        ],
+        "warnings": [
+          "The source material is purely electronic (synth/sequencer) and contains no guitar elements. This rig simulates the rhythmic, filtered texture for a playable role (e.g., arpeggiated lead lines).",
+          "Reverb and Delay are explicitly avoided per the musical verdict, so ambience modules (Room) are used with very low settings to maintain clarity."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.033,
+      "prompt_chars": 989,
+      "response_chars": 438,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 109,
+        "total_duration": 9981399400,
+        "prompt_eval_duration": 282118000,
+        "eval_duration": 1966214000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.257,
+      "prompt_chars": 5361,
+      "response_chars": 566,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 156,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1655
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 5.825,
+      "prompt_chars": 4794,
+      "response_chars": 531,
+      "usage": {
+        "input_tokens": 1446,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 200,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.687,
+      "prompt_chars": 3528,
+      "response_chars": 6183,
+      "usage": {
+        "prompt_eval_count": 1192,
+        "eval_count": 1627,
+        "total_duration": 27646043500,
+        "prompt_eval_duration": 284734000,
+        "eval_duration": 26974682000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 21.157,
+      "prompt_chars": 8242,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 2176,
+        "eval_count": 148,
+        "total_duration": 21148325900,
+        "prompt_eval_duration": 400128000,
+        "eval_duration": 3161489000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.068,
+      "prompt_chars": 2790,
+      "response_chars": 204,
+      "usage": {
+        "prompt_eval_count": 863,
+        "eval_count": 49,
+        "total_duration": 8049285800,
+        "prompt_eval_duration": 224149000,
+        "eval_duration": 362167000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Pink Floyd",
+      "title": "On The Run",
+      "album": "",
+      "year": null,
+      "genre": "progressive rock"
+    },
+    "rig": {
+      "rigName": "Pink Floyd - On The Run - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "synth sequence, not guitar-based",
+      "signalChainSummary": "A highly controlled, clean signal chain using compression and filtering effects (Chorus/Tremolo) into a pristine US Deluxe amp setup, mimicking the pulsing arpeggios and filtered synth movement without traditional guitar crunch or reverb/delay.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any unwanted hum or noise from the electronic source simulation.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean signal chains.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Smooth out the signal and provide consistent dynamics necessary for sustained arpeggiated textures.",
+          "matchQuality": "close",
+          "gap": "The source is electronic, but compression helps simulate the controlled attack of a sequencer/synth.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "filter/modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Mix": "High"
+          },
+          "purpose": "Create the 'filter sweep motion' and pulsing arpeggio texture by modulating pitch slightly.",
+          "matchQuality": "close",
+          "gap": "The source is a synth filter, but Chorus provides the necessary sweeping/pulsing movement required for the target tone.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The target tone requires a 'dry electronic attack' and explicitly avoids guitar crunch.",
+          "matchQuality": "exact",
+          "gap": "The source is purely synthetic; no drive or distortion is needed.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "Medium",
+            "Bass": "Medium"
+          },
+          "purpose": "Provide a clean, articulate platform for the arpeggios, simulating the dry electronic attack.",
+          "matchQuality": "close",
+          "gap": "The source is not an acoustic amp; US Deluxe provides the cleanest possible tone from the catalog.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Maintain a bright and focused sound profile suitable for clean, arpeggiated synth textures.",
+          "matchQuality": "close",
+          "gap": "The source is electronic; US 2x12 provides the necessary clarity and brightness.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "High Boost": "+2 dB"
+          },
+          "purpose": "Shape the frequency response to emphasize high-end clarity and articulate the arpeggiated notes.",
+          "matchQuality": "close",
+          "gap": "Used for tonal shaping, mimicking EQ adjustments on a synth or sequencer output.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low",
+            "Mix": "Medium"
+          },
+          "purpose": "Add subtle rhythmic pulsing to enhance the arpeggiated texture without sounding like a traditional vibrato.",
+          "matchQuality": "close",
+          "gap": "Used as an alternative source of controlled, slow movement (pulsing) to complement the Chorus effect.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "ambience/space",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short",
+            "Mix": "Low"
+          },
+          "purpose": "Provide minimal, natural space to keep the sound dry and focused, avoiding excessive reverb/delay.",
+          "matchQuality": "close",
+          "gap": "The source avoids reverb, but a very low mix of Room helps ground the signal without muddying the clean attack.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "synth sequence, not guitar-based",
+      "mustHave": [
+        "pulsing arpeggio texture",
+        "filter sweep motion",
+        "dry electronic attack"
+      ],
+      "avoid": [
+        "guitar crunch",
+        "wah",
+        "reverb",
+        "delay",
+        "amp simulation"
+      ],
+      "gearClues": [
+        "VCS3 synth",
+        "sequencer",
+        "Binson Echorec tape echo"
+      ],
+      "corrections": [
+        "no guitar on this track",
+        "synth-led instrumental",
+        "cannot generate guitar rig"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "progressive rock",
+      "styleTags": [
+        "psychedelic rock",
+        "art rock"
+      ],
+      "targetTone": "synth sequence, not guitar-based",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Focus on maximizing high-end articulation and filtering for the synth/arpeggio texture.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "High-frequency clarity",
+          "recommendedAsset": "Bright, open 4x12 IR (e.g., Neve or modern clean cab)",
+          "reason": "Maximize articulation for arpeggios and filtered synth tones.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity/brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1100,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

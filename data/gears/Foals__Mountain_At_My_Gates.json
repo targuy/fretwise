@@ -1,0 +1,1106 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 450,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Foals__Mountain_At_My_Gates.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Foals",
+    "title": "Mountain At My Gates",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "alternative rock",
+      "post-punk"
+    ],
+    "confidence": "high",
+    "rationale": "Foals are a foundational band in the indie/alt rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, slightly overdriven rhythm tone with a touch of chorus/modulation.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Mid-scooped crunch (British rock style)",
+        "Slightly dirty clean edge"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/Vox AC30 model)",
+        "Overdrive pedal (for grit and sustain)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep delay trails",
+        "High-gain metal tones"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "chorused edge-of-breakup indie rhythm with bright upper mids",
+      "mustHave": [
+        "chorus/modulation",
+        "tight rhythmic chime",
+        "slight grit",
+        "clean attack",
+        "wide stereo feel"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "big delay tails",
+        "dark muffled crunch"
+      ],
+      "gearClues": [
+        "Vox/AC30 or clean Brit model",
+        "single-coil or split pickup",
+        "2x12 or chimey cab",
+        "light chorus"
+      ],
+      "corrections": [
+        "drop mid-scooped British crunch",
+        "push brighter indie chime",
+        "keep chorus subtle but present"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "chorused edge-of-breakup indie rhythm with bright upper mids",
+    "mustHave": [
+      "chorus/modulation",
+      "tight rhythmic chime",
+      "slight grit",
+      "clean attack",
+      "wide stereo feel"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "metal gain",
+      "big delay tails",
+      "dark muffled crunch"
+    ],
+    "gearClues": [
+      "Vox/AC30 or clean Brit model",
+      "single-coil or split pickup",
+      "2x12 or chimey cab",
+      "light chorus"
+    ],
+    "corrections": [
+      "drop mid-scooped British crunch",
+      "push brighter indie chime",
+      "keep chorus subtle but present"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie/Brit Pop emulation focusing on chime and modulation.",
+          "bestMatchSummary": "A clean, chorus-enhanced signal chain using a British amp model (AC30 TB) paired with bright cab voicing to achieve the required indie rhythm tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Slightly lift the signal and enhance high-end frequencies for chime.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated EQ to maintain clean attack while adding subtle lift.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "For more even sustain, but Boost is better for the 'chime' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on natural amp breakup.",
+              "matchQuality": "exact",
+              "gap": "The tone requires only 'edge-of-breakup' grit, which is best achieved by dialing in the amp model itself rather than using a dedicated pedal.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Green OD",
+                  "reason": "If more defined breakup was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/chorus",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "Medium",
+                "Feedback": "Low"
+              },
+              "purpose": "Provide the required subtle chorus effect and wide stereo feel.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "High",
+                "Midrange": "Medium-High"
+              },
+              "purpose": "Emulate the required clean British tone and chime.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45",
+                  "reason": "A good alternative, but AC30 TB is more associated with the required 'chimey' sound."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Brightened"
+              },
+              "purpose": "Provide a bright, open voicing that supports the indie chime and wide sound.",
+              "matchQuality": "close",
+              "gap": "The 'UK Basket 4x12' might also work for brightness, but Vintage provides better overall clarity.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Mess 4x12",
+                  "reason": "A slightly darker alternative if the tone needs more body."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "+3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the upper mids and high frequencies to achieve 'bright upper mids' without sounding harsh.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "Low"
+              },
+              "purpose": "Add subtle space and width without muddying the tight rhythm feel.",
+              "matchQuality": "close",
+              "gap": "A Plate reverb could also work, but Room provides a more natural, less artificial ambience for indie rock.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "If the song required more defined 'shimmer' or echo."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a modern indie rock track, requiring emulation of specific British clean tones and modulation effects. The rig prioritizes clarity and chime over raw power."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance the bright, open voicing required for indie chime.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright 2x12 or 4x12 IR (e.g., Fender Twin/AC30)",
+              "reason": "Enhance the bright, open voicing and chime required for indie rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and sparkle",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Foals - Mountain At My Gates - Valeton GP-180",
+        "song": {
+          "artist": "Foals",
+          "title": "Mountain At My Gates",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "chorused edge-of-breakup indie rhythm with bright upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, chorus-enhanced signal chain using a British amp model (AC30 TB) paired with bright cab voicing to achieve the required indie rhythm tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Bright"
+            },
+            "purpose": "Slightly lift the signal and enhance high-end frequencies for chime.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated EQ to maintain clean attack while adding subtle lift.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Comp",
+                "reason": "For more even sustain, but Boost is better for the 'chime' requirement."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain clean and focused on natural amp breakup.",
+            "matchQuality": "exact",
+            "gap": "The tone requires only 'edge-of-breakup' grit, which is best achieved by dialing in the amp model itself rather than using a dedicated pedal.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Green OD",
+                "reason": "If more defined breakup was needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "modulation/chorus",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "Medium",
+              "Feedback": "Low"
+            },
+            "purpose": "Provide the required subtle chorus effect and wide stereo feel.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "High",
+              "Midrange": "Medium-High"
+            },
+            "purpose": "Emulate the required clean British tone and chime.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 45",
+                "reason": "A good alternative, but AC30 TB is more associated with the required 'chimey' sound."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Brightened"
+            },
+            "purpose": "Provide a bright, open voicing that supports the indie chime and wide sound.",
+            "matchQuality": "close",
+            "gap": "The 'UK Basket 4x12' might also work for brightness, but Vintage provides better overall clarity.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "Mess 4x12",
+                "reason": "A slightly darker alternative if the tone needs more body."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "High Boost": "+3 dB",
+              "Mid Scoop": "-2 dB"
+            },
+            "purpose": "Fine-tune the upper mids and high frequencies to achieve 'bright upper mids' without sounding harsh.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "Low"
+            },
+            "purpose": "Add subtle space and width without muddying the tight rhythm feel.",
+            "matchQuality": "close",
+            "gap": "A Plate reverb could also work, but Room provides a more natural, less artificial ambience for indie rock.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate",
+                "reason": "If the song required more defined 'shimmer' or echo."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "chorused edge-of-breakup indie rhythm with bright upper mids",
+          "toneProfile": "chorused edge-of-breakup indie rhythm with bright upper mids",
+          "idealSignalChain": "Vox/AC30 or clean Brit model | single-coil or split pickup | 2x12 or chimey cab | light chorus",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox/AC30 or clean Brit model",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or split pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or chimey cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus/modulation",
+            "tight rhythmic chime",
+            "slight grit",
+            "clean attack",
+            "wide stereo feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie/Brit Pop emulation focusing on chime and modulation.",
+          "bestMatchSummary": "A clean, chorus-enhanced signal chain using a British amp model (AC30 TB) paired with bright cab voicing to achieve the required indie rhythm tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Slightly lift the signal and enhance high-end frequencies for chime.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated EQ to maintain clean attack while adding subtle lift.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "For more even sustain, but Boost is better for the 'chime' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on natural amp breakup.",
+              "matchQuality": "exact",
+              "gap": "The tone requires only 'edge-of-breakup' grit, which is best achieved by dialing in the amp model itself rather than using a dedicated pedal.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Green OD",
+                  "reason": "If more defined breakup was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/chorus",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "Medium",
+                "Feedback": "Low"
+              },
+              "purpose": "Provide the required subtle chorus effect and wide stereo feel.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "High",
+                "Midrange": "Medium-High"
+              },
+              "purpose": "Emulate the required clean British tone and chime.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45",
+                  "reason": "A good alternative, but AC30 TB is more associated with the required 'chimey' sound."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Brightened"
+              },
+              "purpose": "Provide a bright, open voicing that supports the indie chime and wide sound.",
+              "matchQuality": "close",
+              "gap": "The 'UK Basket 4x12' might also work for brightness, but Vintage provides better overall clarity.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "Mess 4x12",
+                  "reason": "A slightly darker alternative if the tone needs more body."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "+3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the upper mids and high frequencies to achieve 'bright upper mids' without sounding harsh.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "Low"
+              },
+              "purpose": "Add subtle space and width without muddying the tight rhythm feel.",
+              "matchQuality": "close",
+              "gap": "A Plate reverb could also work, but Room provides a more natural, less artificial ambience for indie rock.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "If the song required more defined 'shimmer' or echo."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance the bright, open voicing required for indie chime.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright 2x12 or 4x12 IR (e.g., Fender Twin/AC30)",
+              "reason": "Enhance the bright, open voicing and chime required for indie rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and sparkle",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop mid-scooped British crunch",
+          "push brighter indie chime",
+          "keep chorus subtle but present"
+        ],
+        "warnings": [
+          "The source material is a modern indie rock track, requiring emulation of specific British clean tones and modulation effects. The rig prioritizes clarity and chime over raw power."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.452,
+      "prompt_chars": 994,
+      "response_chars": 430,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 113,
+        "total_duration": 10435838700,
+        "prompt_eval_duration": 598221000,
+        "eval_duration": 1957363000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.609,
+      "prompt_chars": 5346,
+      "response_chars": 585,
+      "usage": {
+        "input_tokens": 1496,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 155,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1651
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 39.144,
+      "prompt_chars": 3666,
+      "response_chars": 5659,
+      "usage": {
+        "prompt_eval_count": 1229,
+        "eval_count": 1577,
+        "total_duration": 39137624900,
+        "prompt_eval_duration": 247678000,
+        "eval_duration": 27285819000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.798,
+      "prompt_chars": 7884,
+      "response_chars": 556,
+      "usage": {
+        "prompt_eval_count": 2163,
+        "eval_count": 157,
+        "total_duration": 4792795200,
+        "prompt_eval_duration": 467869000,
+        "eval_duration": 3617980000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.977,
+      "prompt_chars": 2816,
+      "response_chars": 168,
+      "usage": {
+        "prompt_eval_count": 880,
+        "eval_count": 48,
+        "total_duration": 9960042500,
+        "prompt_eval_duration": 251003000,
+        "eval_duration": 973216000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Foals",
+      "title": "Mountain At My Gates",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "Foals - Mountain At My Gates - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "chorused edge-of-breakup indie rhythm with bright upper mids",
+      "signalChainSummary": "A clean, chorus-enhanced signal chain using a British amp model (AC30 TB) paired with bright cab voicing to achieve the required indie rhythm tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Bright"
+          },
+          "purpose": "Slightly lift the signal and enhance high-end frequencies for chime.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated EQ to maintain clean attack while adding subtle lift.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "For more even sustain, but Boost is better for the 'chime' requirement."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain clean and focused on natural amp breakup.",
+          "matchQuality": "exact",
+          "gap": "The tone requires only 'edge-of-breakup' grit, which is best achieved by dialing in the amp model itself rather than using a dedicated pedal.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If more defined breakup was needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "Medium",
+            "Feedback": "Low"
+          },
+          "purpose": "Provide the required subtle chorus effect and wide stereo feel.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "High",
+            "Midrange": "Medium-High"
+          },
+          "purpose": "Emulate the required clean British tone and chime.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative, but AC30 TB is more associated with the required 'chimey' sound."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Brightened"
+          },
+          "purpose": "Provide a bright, open voicing that supports the indie chime and wide sound.",
+          "matchQuality": "close",
+          "gap": "The 'UK Basket 4x12' might also work for brightness, but Vintage provides better overall clarity.",
+          "alternatives": [
+            {
+              "model": "Mess 4x12",
+              "reason": "A slightly darker alternative if the tone needs more body."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "High Boost": "+3 dB",
+            "Mid Scoop": "-2 dB"
+          },
+          "purpose": "Fine-tune the upper mids and high frequencies to achieve 'bright upper mids' without sounding harsh.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "Low"
+          },
+          "purpose": "Add subtle space and width without muddying the tight rhythm feel.",
+          "matchQuality": "close",
+          "gap": "A Plate reverb could also work, but Room provides a more natural, less artificial ambience for indie rock.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If the song required more defined 'shimmer' or echo."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "chorused edge-of-breakup indie rhythm with bright upper mids",
+      "mustHave": [
+        "chorus/modulation",
+        "tight rhythmic chime",
+        "slight grit",
+        "clean attack",
+        "wide stereo feel"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "big delay tails",
+        "dark muffled crunch"
+      ],
+      "gearClues": [
+        "Vox/AC30 or clean Brit model",
+        "single-coil or split pickup",
+        "2x12 or chimey cab",
+        "light chorus"
+      ],
+      "corrections": [
+        "drop mid-scooped British crunch",
+        "push brighter indie chime",
+        "keep chorus subtle but present"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "alternative rock",
+        "post-punk"
+      ],
+      "targetTone": "chorused edge-of-breakup indie rhythm with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to enhance the bright, open voicing required for indie chime.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "bright 2x12 or 4x12 IR (e.g., Fender Twin/AC30)",
+          "reason": "Enhance the bright, open voicing and chime required for indie rhythm.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and sparkle",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 450,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

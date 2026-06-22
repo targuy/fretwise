@@ -1,0 +1,1098 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 397,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Editors__Munich.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Editors",
+    "title": "Munich",
+    "album": "",
+    "year": null,
+    "genre": "post-punk"
+  },
+  "genreClassification": {
+    "genre": "post-punk",
+    "subgenres": [
+      "alternative rock",
+      "dark wave"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest the post-punk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, brooding, mid-heavy rock tone with a touch of grit.",
+      "signatureElements": [
+        "Crunchy overdrive for rhythm parts",
+        "Slightly modulated delay/reverb wash",
+        "Punchy bass frequencies (low mids)",
+        "Clean, atmospheric arpeggios"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (Marshall/AC30 family)",
+        "Overdrive pedal with mid-hump (e.g., Tube Screamer type) for grit",
+        "Chorus or Flanger effect for atmosphere"
+      ],
+      "avoid": [
+        "Bright treble spikes",
+        "Excessive digital delay artifacts",
+        "Thin, scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dark post-punk crunch with chorusy ambience",
+      "mustHave": [
+        "mid-heavy grit",
+        "tight rhythmic crunch",
+        "modulated ambience",
+        "clean arpeggio layer"
+      ],
+      "avoid": [
+        "generic rock tone",
+        "scooped mids",
+        "bright spikes",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "Marshall/AC30 type amp",
+        "12-inch cab",
+        "light chorus",
+        "delay/reverb"
+      ],
+      "corrections": [
+        "drop Tube Screamer certainty",
+        "name chorus as likely key texture",
+        "keep delay subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dark post-punk crunch with chorusy ambience",
+    "mustHave": [
+      "mid-heavy grit",
+      "tight rhythmic crunch",
+      "modulated ambience",
+      "clean arpeggio layer"
+    ],
+    "avoid": [
+      "generic rock tone",
+      "scooped mids",
+      "bright spikes",
+      "heavy fuzz"
+    ],
+    "gearClues": [
+      "Marshall/AC30 type amp",
+      "12-inch cab",
+      "light chorus",
+      "delay/reverb"
+    ],
+    "corrections": [
+      "drop Tube Screamer certainty",
+      "name chorus as likely key texture",
+      "keep delay subtle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Post-punk/Alternative rock tone focusing on mid-range grit and modulated ambience.",
+          "bestMatchSummary": "A tight, crunchy signal chain using a British amp model (AC30) combined with an OD boost for mid-heavy grit, followed by Chorus and subtle delay/reverb to achieve the dark, atmospheric post-punk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-heavy grit and tight rhythmic crunch without excessive brightness.",
+              "matchQuality": "close",
+              "gap": "The source suggests a Tube Screamer, but Green OD is the closest available model for controlled, mid-focused boost/grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more open tone than desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "55%",
+                "Output": "60%"
+              },
+              "purpose": "Add foundational crunch and grit for the post-punk texture.",
+              "matchQuality": "close",
+              "gap": "No specific distortion model was requested, but RAT-style provides a tight, aggressive mid-range bite suitable for alternative rock.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "Might be too heavy and lack the necessary tightness."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5.5",
+                "Treble": "6.0",
+                "Midrange": "7.0",
+                "Bass": "5.5"
+              },
+              "purpose": "Simulate the requested Marshall/AC30 type amp tone, emphasizing mids.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the requested British cabinet sound and general warmth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.0 Hz",
+                "Depth": "45%",
+                "Feedback": "20%"
+              },
+              "purpose": "Create the modulated ambience and 'chorusy' texture required for post-punk.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle delay to enhance the atmosphere without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "The requirement is for a subtle delay, and Digital Delay allows precise control over low feedback/mix settings.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Might add too much warmth, detracting from the dark edge."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide general space and ambience to round out the dark post-punk sound.",
+              "matchQuality": "close",
+              "gap": "Room reverb is a versatile choice for adding depth without sounding overly wet or artificial.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes sound too bright for the 'dark' tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the extreme frequencies and boost mids to achieve 'mid-heavy grit' and tightness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is post-punk/alternative rock, requiring a dark, mid-focused tone. The chain prioritizes grit and modulation over sheer volume or brightness."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation to better capture the specific British warmth and bite required for post-punk.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 1x12 or 2x12 IR (e.g., Vox/AC30)",
+              "reason": "The current 4x12 might be too large and bright for the dark, mid-focused post-punk tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Improved tonal focus and warmth in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Editors - Munich - Valeton GP-180",
+        "song": {
+          "artist": "Editors",
+          "title": "Munich",
+          "album": "",
+          "year": null,
+          "genre": "post-punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dark post-punk crunch with chorusy ambience",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, crunchy signal chain using a British amp model (AC30) combined with an OD boost for mid-heavy grit, followed by Chorus and subtle delay/reverb to achieve the dark, atmospheric post-punk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide mid-heavy grit and tight rhythmic crunch without excessive brightness.",
+            "matchQuality": "close",
+            "gap": "The source suggests a Tube Screamer, but Green OD is the closest available model for controlled, mid-focused boost/grit.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more open tone than desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/crunch",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "40%",
+              "Tone": "55%",
+              "Output": "60%"
+            },
+            "purpose": "Add foundational crunch and grit for the post-punk texture.",
+            "matchQuality": "close",
+            "gap": "No specific distortion model was requested, but RAT-style provides a tight, aggressive mid-range bite suitable for alternative rock.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "Might be too heavy and lack the necessary tightness."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5.5",
+              "Treble": "6.0",
+              "Midrange": "7.0",
+              "Bass": "5.5"
+            },
+            "purpose": "Simulate the requested Marshall/AC30 type amp tone, emphasizing mids.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide the requested British cabinet sound and general warmth.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.0 Hz",
+              "Depth": "45%",
+              "Feedback": "20%"
+            },
+            "purpose": "Create the modulated ambience and 'chorusy' texture required for post-punk.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle delay to enhance the atmosphere without sounding distracting.",
+            "matchQuality": "close",
+            "gap": "The requirement is for a subtle delay, and Digital Delay allows precise control over low feedback/mix settings.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Might add too much warmth, detracting from the dark edge."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide general space and ambience to round out the dark post-punk sound.",
+            "matchQuality": "close",
+            "gap": "Room reverb is a versatile choice for adding depth without sounding overly wet or artificial.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Can sometimes sound too bright for the 'dark' tone."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly scoop the extreme frequencies and boost mids to achieve 'mid-heavy grit' and tightness.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dark post-punk crunch with chorusy ambience",
+          "toneProfile": "dark post-punk crunch with chorusy ambience",
+          "idealSignalChain": "Marshall/AC30 type amp | 12-inch cab | light chorus | delay/reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/AC30 type amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "delay/reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-heavy grit",
+            "tight rhythmic crunch",
+            "modulated ambience",
+            "clean arpeggio layer"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Post-punk/Alternative rock tone focusing on mid-range grit and modulated ambience.",
+          "bestMatchSummary": "A tight, crunchy signal chain using a British amp model (AC30) combined with an OD boost for mid-heavy grit, followed by Chorus and subtle delay/reverb to achieve the dark, atmospheric post-punk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-heavy grit and tight rhythmic crunch without excessive brightness.",
+              "matchQuality": "close",
+              "gap": "The source suggests a Tube Screamer, but Green OD is the closest available model for controlled, mid-focused boost/grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more open tone than desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "55%",
+                "Output": "60%"
+              },
+              "purpose": "Add foundational crunch and grit for the post-punk texture.",
+              "matchQuality": "close",
+              "gap": "No specific distortion model was requested, but RAT-style provides a tight, aggressive mid-range bite suitable for alternative rock.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "Might be too heavy and lack the necessary tightness."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5.5",
+                "Treble": "6.0",
+                "Midrange": "7.0",
+                "Bass": "5.5"
+              },
+              "purpose": "Simulate the requested Marshall/AC30 type amp tone, emphasizing mids.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the requested British cabinet sound and general warmth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.0 Hz",
+                "Depth": "45%",
+                "Feedback": "20%"
+              },
+              "purpose": "Create the modulated ambience and 'chorusy' texture required for post-punk.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle delay to enhance the atmosphere without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "The requirement is for a subtle delay, and Digital Delay allows precise control over low feedback/mix settings.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Might add too much warmth, detracting from the dark edge."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide general space and ambience to round out the dark post-punk sound.",
+              "matchQuality": "close",
+              "gap": "Room reverb is a versatile choice for adding depth without sounding overly wet or artificial.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes sound too bright for the 'dark' tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the extreme frequencies and boost mids to achieve 'mid-heavy grit' and tightness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation to better capture the specific British warmth and bite required for post-punk.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 1x12 or 2x12 IR (e.g., Vox/AC30)",
+              "reason": "The current 4x12 might be too large and bright for the dark, mid-focused post-punk tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Improved tonal focus and warmth in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "assumptions": [
+          "drop Tube Screamer certainty",
+          "name chorus as likely key texture",
+          "keep delay subtle"
+        ],
+        "warnings": [
+          "The source material is post-punk/alternative rock, requiring a dark, mid-focused tone. The chain prioritizes grit and modulation over sheer volume or brightness."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.057,
+      "prompt_chars": 982,
+      "response_chars": 549,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 139,
+        "total_duration": 13054193800,
+        "prompt_eval_duration": 130491999,
+        "eval_duration": 970708000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.552,
+      "prompt_chars": 5465,
+      "response_chars": 524,
+      "usage": {
+        "input_tokens": 1524,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 135,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1659
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 10.898,
+      "prompt_chars": 3586,
+      "response_chars": 5648,
+      "usage": {
+        "prompt_eval_count": 1207,
+        "eval_count": 1581,
+        "total_duration": 10865199800,
+        "prompt_eval_duration": 134612000,
+        "eval_duration": 10351286000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.807,
+      "prompt_chars": 7789,
+      "response_chars": 588,
+      "usage": {
+        "prompt_eval_count": 2145,
+        "eval_count": 169,
+        "total_duration": 1785558000,
+        "prompt_eval_duration": 194908000,
+        "eval_duration": 1212416000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.144,
+      "prompt_chars": 2767,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 864,
+        "eval_count": 46,
+        "total_duration": 12140186200,
+        "prompt_eval_duration": 162633000,
+        "eval_duration": 302455000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Editors",
+      "title": "Munich",
+      "album": "",
+      "year": null,
+      "genre": "post-punk"
+    },
+    "rig": {
+      "rigName": "Editors - Munich - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dark post-punk crunch with chorusy ambience",
+      "signalChainSummary": "A tight, crunchy signal chain using a British amp model (AC30) combined with an OD boost for mid-heavy grit, followed by Chorus and subtle delay/reverb to achieve the dark, atmospheric post-punk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide mid-heavy grit and tight rhythmic crunch without excessive brightness.",
+          "matchQuality": "close",
+          "gap": "The source suggests a Tube Screamer, but Green OD is the closest available model for controlled, mid-focused boost/grit.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more open tone than desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/crunch",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "40%",
+            "Tone": "55%",
+            "Output": "60%"
+          },
+          "purpose": "Add foundational crunch and grit for the post-punk texture.",
+          "matchQuality": "close",
+          "gap": "No specific distortion model was requested, but RAT-style provides a tight, aggressive mid-range bite suitable for alternative rock.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "Might be too heavy and lack the necessary tightness."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5.5",
+            "Treble": "6.0",
+            "Midrange": "7.0",
+            "Bass": "5.5"
+          },
+          "purpose": "Simulate the requested Marshall/AC30 type amp tone, emphasizing mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide the requested British cabinet sound and general warmth.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.0 Hz",
+            "Depth": "45%",
+            "Feedback": "20%"
+          },
+          "purpose": "Create the modulated ambience and 'chorusy' texture required for post-punk.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle delay to enhance the atmosphere without sounding distracting.",
+          "matchQuality": "close",
+          "gap": "The requirement is for a subtle delay, and Digital Delay allows precise control over low feedback/mix settings.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Might add too much warmth, detracting from the dark edge."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide general space and ambience to round out the dark post-punk sound.",
+          "matchQuality": "close",
+          "gap": "Room reverb is a versatile choice for adding depth without sounding overly wet or artificial.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Can sometimes sound too bright for the 'dark' tone."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly scoop the extreme frequencies and boost mids to achieve 'mid-heavy grit' and tightness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dark post-punk crunch with chorusy ambience",
+      "mustHave": [
+        "mid-heavy grit",
+        "tight rhythmic crunch",
+        "modulated ambience",
+        "clean arpeggio layer"
+      ],
+      "avoid": [
+        "generic rock tone",
+        "scooped mids",
+        "bright spikes",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "Marshall/AC30 type amp",
+        "12-inch cab",
+        "light chorus",
+        "delay/reverb"
+      ],
+      "corrections": [
+        "drop Tube Screamer certainty",
+        "name chorus as likely key texture",
+        "keep delay subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-punk",
+      "styleTags": [
+        "alternative rock",
+        "dark wave"
+      ],
+      "targetTone": "dark post-punk crunch with chorusy ambience",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet simulation to better capture the specific British warmth and bite required for post-punk.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British 1x12 or 2x12 IR (e.g., Vox/AC30)",
+          "reason": "The current 4x12 might be too large and bright for the dark, mid-focused post-punk tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Improved tonal focus and warmth in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 397,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

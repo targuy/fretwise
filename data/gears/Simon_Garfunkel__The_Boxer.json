@@ -1,0 +1,1041 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1253,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Simon_Garfunkel__The_Boxer.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Simon & Garfunkel",
+    "title": "The Boxer",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "singer-songwriter",
+      "acoustic",
+      "ballad"
+    ],
+    "confidence": "high",
+    "rationale": "Simon & Garfunkel's 'The Boxer' is a classic example of folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly compressed acoustic/electric folk tone with subtle grit.",
+      "signatureElements": [
+        "fingerpicked arpeggios",
+        "subtle chorus or tremolo for atmosphere",
+        "clean-to-slight-crunch breakup (low gain)",
+        "acoustic reverb and delay"
+      ],
+      "gearHypotheses": [
+        "Clean amp model (e.g., Fender Twin/Acoustic Clean) with EQ boost around 100Hz-250Hz.",
+        "Light compression to smooth dynamics.",
+        "Chorus or Tremolo effect for depth."
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Aggressive fuzz",
+        "Bright, brittle high end"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "iconic acoustic folk ballad with clear bass/drum support",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked arpeggios",
+        "dry natural room",
+        "no chorus",
+        "no tremolo"
+      ],
+      "avoid": [
+        "electric crunch",
+        "chorus",
+        "delay",
+        "reverb wash"
+      ],
+      "gearClues": [
+        "acoustic steel-string",
+        "piezo or mic",
+        "room ambience"
+      ],
+      "corrections": [
+        "this is mainly acoustic, not electric",
+        "drop modulation and delay",
+        "keep it dry and natural"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title is iconic and draft is generic",
+      "signature acoustic texture is likely decisive",
+      "draft adds likely wrong electric-style effects"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "dry acoustic steel-string folk ballad",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "fingerpicked clarity",
+      "minimal room ambience",
+      "no modulation"
+    ],
+    "avoid": [
+      "electric crunch",
+      "chorus",
+      "tremolo",
+      "delay",
+      "reverb wash"
+    ],
+    "gearClues": [
+      "acoustic simulator or piezo preset",
+      "natural room only",
+      "compressed dynamics"
+    ],
+    "corrections": [
+      "iconic recording is acoustic not electric",
+      "remove all modulation effects",
+      "keep dry studio character"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "dry acoustic steel-string folk ballad",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "fingerpicked clarity",
+      "minimal room ambience",
+      "no modulation"
+    ],
+    "avoid": [
+      "electric crunch",
+      "chorus",
+      "tremolo",
+      "delay",
+      "reverb wash"
+    ],
+    "gearClues": [
+      "acoustic simulator or piezo preset",
+      "natural room only",
+      "compressed dynamics"
+    ],
+    "corrections": [
+      "iconic recording is acoustic not electric",
+      "remove all modulation effects",
+      "keep dry studio character"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic, we will use a clean signal chain focused on compression and natural tone simulation to mimic fingerpicked clarity, while avoiding any overt 'acoustic' presets that might sound artificial.",
+          "bestMatchSummary": "A highly compressed, clean signal path using an OD pedal for warmth, followed by a low-gain US Deluxe amp model, paired with the US 2x12 cabinet and minimal room reverb to maintain a dry, natural folk ballad tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background noise or hum inherent in the recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Mimic the natural compression of a professional recording setup and enhance fingerpicked clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving the sustained, even dynamics of folk ballads.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Tone": "5"
+              },
+              "purpose": "Provide a subtle lift and warmth to the signal without introducing noticeable grit or distortion.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here as a clean tone enhancer, not for gain. A dedicated EQ might be better, but it serves the function of gentle signal reinforcement.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No grit or crunch is desired for this dry folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the clean, articulate sound of a vintage American amplifier suitable for acoustic accompaniment.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal choice for clear, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and articulate cabinet sound that complements the clean US Deluxe amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the intended American folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost the upper mids/treble to enhance string clarity and definition.",
+              "matchQuality": "perfect",
+              "gap": "None. Fine-tuning for acoustic articulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a minimal, natural room ambience to give the signal depth without creating an artificial 'wash'.",
+              "matchQuality": "close",
+              "gap": "The reverb mix must be kept very low (20%) to avoid sounding like a wash.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic, not electric. This rig uses an electric guitar input and simulates the required clean, fingerpicked tone using compression and low-gain amps to achieve the closest possible result."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage speaker simulation for better string articulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage 2x12 Acoustic IR (e.g., Neodymium)",
+              "reason": "Enhance the natural, woody tone and clarity of acoustic strings.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased articulation and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Simon & Garfunkel - The Boxer - Valeton GP-180",
+        "song": {
+          "artist": "Simon & Garfunkel",
+          "title": "The Boxer",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry acoustic steel-string folk ballad",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A highly compressed, clean signal path using an OD pedal for warmth, followed by a low-gain US Deluxe amp model, paired with the US 2x12 cabinet and minimal room reverb to maintain a dry, natural folk ballad tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any background noise or hum inherent in the recording.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Mimic the natural compression of a professional recording setup and enhance fingerpicked clarity.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for achieving the sustained, even dynamics of folk ballads.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Tone": "5"
+            },
+            "purpose": "Provide a subtle lift and warmth to the signal without introducing noticeable grit or distortion.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used here as a clean tone enhancer, not for gain. A dedicated EQ might be better, but it serves the function of gentle signal reinforcement.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No grit or crunch is desired for this dry folk tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "6",
+              "Midrange": "5",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the clean, articulate sound of a vintage American amplifier suitable for acoustic accompaniment.",
+            "matchQuality": "perfect",
+            "gap": "None. Ideal choice for clear, non-aggressive tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused and articulate cabinet sound that complements the clean US Deluxe amp model.",
+            "matchQuality": "perfect",
+            "gap": "None. Matches the intended American folk tone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slightly scoop the low end and boost the upper mids/treble to enhance string clarity and definition.",
+            "matchQuality": "perfect",
+            "gap": "None. Fine-tuning for acoustic articulation.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a minimal, natural room ambience to give the signal depth without creating an artificial 'wash'.",
+            "matchQuality": "close",
+            "gap": "The reverb mix must be kept very low (20%) to avoid sounding like a wash.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry acoustic steel-string folk ballad",
+          "toneProfile": "dry acoustic steel-string folk ballad",
+          "idealSignalChain": "acoustic simulator or piezo preset | natural room only | compressed dynamics",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic simulator or piezo preset",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "natural room only",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "compressed dynamics",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation",
+            "fingerpicked clarity",
+            "minimal room ambience",
+            "no modulation"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic, we will use a clean signal chain focused on compression and natural tone simulation to mimic fingerpicked clarity, while avoiding any overt 'acoustic' presets that might sound artificial.",
+          "bestMatchSummary": "A highly compressed, clean signal path using an OD pedal for warmth, followed by a low-gain US Deluxe amp model, paired with the US 2x12 cabinet and minimal room reverb to maintain a dry, natural folk ballad tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background noise or hum inherent in the recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Mimic the natural compression of a professional recording setup and enhance fingerpicked clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving the sustained, even dynamics of folk ballads.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Tone": "5"
+              },
+              "purpose": "Provide a subtle lift and warmth to the signal without introducing noticeable grit or distortion.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here as a clean tone enhancer, not for gain. A dedicated EQ might be better, but it serves the function of gentle signal reinforcement.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No grit or crunch is desired for this dry folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the clean, articulate sound of a vintage American amplifier suitable for acoustic accompaniment.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal choice for clear, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and articulate cabinet sound that complements the clean US Deluxe amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the intended American folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost the upper mids/treble to enhance string clarity and definition.",
+              "matchQuality": "perfect",
+              "gap": "None. Fine-tuning for acoustic articulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a minimal, natural room ambience to give the signal depth without creating an artificial 'wash'.",
+              "matchQuality": "close",
+              "gap": "The reverb mix must be kept very low (20%) to avoid sounding like a wash.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage speaker simulation for better string articulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage 2x12 Acoustic IR (e.g., Neodymium)",
+              "reason": "Enhance the natural, woody tone and clarity of acoustic strings.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased articulation and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "iconic recording is acoustic not electric",
+          "remove all modulation effects",
+          "keep dry studio character"
+        ],
+        "warnings": [
+          "The source material is acoustic, not electric. This rig uses an electric guitar input and simulates the required clean, fingerpicked tone using compression and low-gain amps to achieve the closest possible result."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.536,
+      "prompt_chars": 995,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 140,
+        "total_duration": 10531568400,
+        "prompt_eval_duration": 505620000,
+        "eval_duration": 2402286000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.941,
+      "prompt_chars": 5472,
+      "response_chars": 650,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 161,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1683
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 3.761,
+      "prompt_chars": 4980,
+      "response_chars": 614,
+      "usage": {
+        "input_tokens": 1458,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 198,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 36.843,
+      "prompt_chars": 3619,
+      "response_chars": 5323,
+      "usage": {
+        "prompt_eval_count": 1199,
+        "eval_count": 1455,
+        "total_duration": 36823905200,
+        "prompt_eval_duration": 253215000,
+        "eval_duration": 26090456000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.882,
+      "prompt_chars": 7443,
+      "response_chars": 563,
+      "usage": {
+        "prompt_eval_count": 2011,
+        "eval_count": 142,
+        "total_duration": 4874516100,
+        "prompt_eval_duration": 328606000,
+        "eval_duration": 4107291000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.722,
+      "prompt_chars": 2810,
+      "response_chars": 181,
+      "usage": {
+        "prompt_eval_count": 873,
+        "eval_count": 54,
+        "total_duration": 13707287100,
+        "prompt_eval_duration": 373083000,
+        "eval_duration": 1101870000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Simon & Garfunkel",
+      "title": "The Boxer",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Simon & Garfunkel - The Boxer - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry acoustic steel-string folk ballad",
+      "signalChainSummary": "A highly compressed, clean signal path using an OD pedal for warmth, followed by a low-gain US Deluxe amp model, paired with the US 2x12 cabinet and minimal room reverb to maintain a dry, natural folk ballad tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any background noise or hum inherent in the recording.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Mimic the natural compression of a professional recording setup and enhance fingerpicked clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for achieving the sustained, even dynamics of folk ballads.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Tone": "5"
+          },
+          "purpose": "Provide a subtle lift and warmth to the signal without introducing noticeable grit or distortion.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used here as a clean tone enhancer, not for gain. A dedicated EQ might be better, but it serves the function of gentle signal reinforcement.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No grit or crunch is desired for this dry folk tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "6",
+            "Midrange": "5",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the clean, articulate sound of a vintage American amplifier suitable for acoustic accompaniment.",
+          "matchQuality": "exact",
+          "gap": "None. Ideal choice for clear, non-aggressive tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused and articulate cabinet sound that complements the clean US Deluxe amp model.",
+          "matchQuality": "exact",
+          "gap": "None. Matches the intended American folk tone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slightly scoop the low end and boost the upper mids/treble to enhance string clarity and definition.",
+          "matchQuality": "exact",
+          "gap": "None. Fine-tuning for acoustic articulation.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a minimal, natural room ambience to give the signal depth without creating an artificial 'wash'.",
+          "matchQuality": "close",
+          "gap": "The reverb mix must be kept very low (20%) to avoid sounding like a wash.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry acoustic steel-string folk ballad",
+      "mustHave": [
+        "acoustic guitar simulation",
+        "fingerpicked clarity",
+        "minimal room ambience",
+        "no modulation"
+      ],
+      "avoid": [
+        "electric crunch",
+        "chorus",
+        "tremolo",
+        "delay",
+        "reverb wash"
+      ],
+      "gearClues": [
+        "acoustic simulator or piezo preset",
+        "natural room only",
+        "compressed dynamics"
+      ],
+      "corrections": [
+        "iconic recording is acoustic not electric",
+        "remove all modulation effects",
+        "keep dry studio character"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "singer-songwriter",
+        "acoustic",
+        "ballad"
+      ],
+      "targetTone": "dry acoustic steel-string folk ballad",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic cabinet IR with a specialized acoustic/vintage speaker simulation for better string articulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage 2x12 Acoustic IR (e.g., Neodymium)",
+          "reason": "Enhance the natural, woody tone and clarity of acoustic strings.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased articulation and realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1253,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1015 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 101,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Beck__E_Pro.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Beck",
+    "title": "E-Pro",
+    "album": "",
+    "year": null,
+    "genre": "garage rock"
+  },
+  "genreClassification": {
+    "genre": "garage rock",
+    "subgenres": [
+      "indie rock",
+      "fuzz"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile emphasizes fuzz, wah, and a dry punch, characteristic of garage rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly fuzzy crunch with a scooped midrange and pronounced spring reverb.",
+      "signatureElements": [
+        "Crunch/Fuzz blend",
+        "Spring Reverb",
+        "Wah pedal sweep (optional)",
+        "Clean arpeggiation"
+      ],
+      "gearHypotheses": [
+        "Amp: Fender Twin Reverb style clean platform",
+        "Drive: Tube Screamer or similar low-gain boost",
+        "Modulation: Chorus or Tremolo for texture"
+      ],
+      "avoid": [
+        "High-gain metal tones",
+        "Overly bright, brittle cleans",
+        "Heavy distortion/fuzz (unless blended)"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "garage fuzz rock with wah bite and dry punch",
+      "mustHave": [
+        "fuzzy riff attack",
+        "wah filter sweep",
+        "dry tight low end",
+        "slight lo-fi crunch"
+      ],
+      "avoid": [
+        "spring reverb wash",
+        "clean arpeggios",
+        "Tube Screamer polish",
+        "scooped Fender clean"
+      ],
+      "gearClues": [
+        "dirty fuzz pedal",
+        "wah",
+        "short room or dry amp",
+        "small/medium combo"
+      ],
+      "corrections": [
+        "drop spring reverb",
+        "make fuzz the main drive",
+        "prioritize wah on the riff"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "garage fuzz rock with wah bite and dry punch",
+    "mustHave": [
+      "fuzzy riff attack",
+      "wah filter sweep",
+      "dry tight low end",
+      "slight lo-fi crunch"
+    ],
+    "avoid": [
+      "spring reverb wash",
+      "clean arpeggios",
+      "Tube Screamer polish",
+      "scooped Fender clean"
+    ],
+    "gearClues": [
+      "dirty fuzz pedal",
+      "wah",
+      "short room or dry amp",
+      "small/medium combo"
+    ],
+    "corrections": [
+      "drop spring reverb",
+      "make fuzz the main drive",
+      "prioritize wah on the riff"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on fuzz and wah for a garage rock sound, using the Red Haze/Fuzz combination with a punchy British amp.",
+          "bestMatchSummary": "A fuzzy signal chain starting with Fuzz (Red Haze) -> Wah -> OD boost -> UK 45 amp model, paired with a dry room reverb to achieve a tight, garage-rock sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain tight riff definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core fuzzy attack and lo-fi crunch required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah filter sweep",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Mid-range focus",
+                "Resonance": "High"
+              },
+              "purpose": "Implement the required wah filter sweep for rhythmic emphasis.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "preamp boost/punch",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Tone": "50%"
+              },
+              "purpose": "Add dry punch and tighten the low end before the amp stage.",
+              "matchQuality": "close",
+              "gap": "Using a dedicated boost for tightness, as Tube Screamer is avoided.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more mid-range bite was needed."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "60%"
+              },
+              "purpose": "Simulate a small/medium combo amp with punchy British tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Tone": "Balanced"
+              },
+              "purpose": "Provide a classic British cabinet sound to complement the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add slight ambience without the wash of spring reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Pass": "None",
+                "Mid Boost": "+3 dB @ 500 Hz"
+              },
+              "purpose": "Tuck the low end slightly and boost mids for definition and punch.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the aggressive fuzz tone, compensating for potential muddiness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a modern indie/garage rock track, requiring aggressive fuzz and wah tones. The rig prioritizes raw drive over clean articulation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better match the dry, punchy garage rock aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dry 2x12 or 4x12 IR (e.g., Fender Deluxe/Vox AC30 style)",
+              "reason": "The current UK Vintage 4x12 might be too 'British' and lack the dry punch needed for garage rock.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased dryness and bite in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Beck - E-Pro - Valeton GP-180",
+        "song": {
+          "artist": "Beck",
+          "title": "E-Pro",
+          "album": "",
+          "year": null,
+          "genre": "garage rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "garage fuzz rock with wah bite and dry punch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A fuzzy signal chain starting with Fuzz (Red Haze) -> Wah -> OD boost -> UK 45 amp model, paired with a dry room reverb to achieve a tight, garage-rock sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up background noise and maintain tight riff definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "65%",
+              "Level": "80%"
+            },
+            "purpose": "Provide the core fuzzy attack and lo-fi crunch required for garage rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "wah filter sweep",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "Mid-range focus",
+              "Resonance": "High"
+            },
+            "purpose": "Implement the required wah filter sweep for rhythmic emphasis.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "preamp boost/punch",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Tone": "50%"
+            },
+            "purpose": "Add dry punch and tighten the low end before the amp stage.",
+            "matchQuality": "close",
+            "gap": "Using a dedicated boost for tightness, as Tube Screamer is avoided.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If more mid-range bite was needed."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "60%"
+            },
+            "purpose": "Simulate a small/medium combo amp with punchy British tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Tone": "Balanced"
+            },
+            "purpose": "Provide a classic British cabinet sound to complement the UK 45 amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add slight ambience without the wash of spring reverb.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "High Pass": "None",
+              "Mid Boost": "+3 dB @ 500 Hz"
+            },
+            "purpose": "Tuck the low end slightly and boost mids for definition and punch.",
+            "matchQuality": "close",
+            "gap": "Used to fine-tune the aggressive fuzz tone, compensating for potential muddiness.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "garage fuzz rock with wah bite and dry punch",
+          "toneProfile": "garage fuzz rock with wah bite and dry punch",
+          "idealSignalChain": "dirty fuzz pedal | wah | short room or dry amp | small/medium combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "dirty fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short room or dry amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small/medium combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy riff attack",
+            "wah filter sweep",
+            "dry tight low end",
+            "slight lo-fi crunch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on fuzz and wah for a garage rock sound, using the Red Haze/Fuzz combination with a punchy British amp.",
+          "bestMatchSummary": "A fuzzy signal chain starting with Fuzz (Red Haze) -> Wah -> OD boost -> UK 45 amp model, paired with a dry room reverb to achieve a tight, garage-rock sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain tight riff definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core fuzzy attack and lo-fi crunch required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah filter sweep",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Mid-range focus",
+                "Resonance": "High"
+              },
+              "purpose": "Implement the required wah filter sweep for rhythmic emphasis.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "preamp boost/punch",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Tone": "50%"
+              },
+              "purpose": "Add dry punch and tighten the low end before the amp stage.",
+              "matchQuality": "close",
+              "gap": "Using a dedicated boost for tightness, as Tube Screamer is avoided.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more mid-range bite was needed."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "60%"
+              },
+              "purpose": "Simulate a small/medium combo amp with punchy British tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Tone": "Balanced"
+              },
+              "purpose": "Provide a classic British cabinet sound to complement the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add slight ambience without the wash of spring reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Pass": "None",
+                "Mid Boost": "+3 dB @ 500 Hz"
+              },
+              "purpose": "Tuck the low end slightly and boost mids for definition and punch.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the aggressive fuzz tone, compensating for potential muddiness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better match the dry, punchy garage rock aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "dry 2x12 or 4x12 IR (e.g., Fender Deluxe/Vox AC30 style)",
+              "reason": "The current UK Vintage 4x12 might be too 'British' and lack the dry punch needed for garage rock.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased dryness and bite in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop spring reverb",
+          "make fuzz the main drive",
+          "prioritize wah on the riff"
+        ],
+        "warnings": [
+          "The source material is a modern indie/garage rock track, requiring aggressive fuzz and wah tones. The rig prioritizes raw drive over clean articulation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 7.676,
+      "prompt_chars": 978,
+      "response_chars": 514,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 128,
+        "total_duration": 7655546900,
+        "prompt_eval_duration": 139732000,
+        "eval_duration": 1008071000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 3.269,
+      "prompt_chars": 5426,
+      "response_chars": 533,
+      "usage": {
+        "input_tokens": 1513,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.579,
+      "prompt_chars": 3591,
+      "response_chars": 4725,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1373,
+        "total_duration": 11555576600,
+        "prompt_eval_duration": 254192000,
+        "eval_duration": 10918996000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.042,
+      "prompt_chars": 6833,
+      "response_chars": 601,
+      "usage": {
+        "prompt_eval_count": 1941,
+        "eval_count": 174,
+        "total_duration": 2040348800,
+        "prompt_eval_duration": 200505000,
+        "eval_duration": 1384701000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.59,
+      "prompt_chars": 2711,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 863,
+        "eval_count": 51,
+        "total_duration": 12586746400,
+        "prompt_eval_duration": 175949000,
+        "eval_duration": 399389000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Beck",
+      "title": "E-Pro",
+      "album": "",
+      "year": null,
+      "genre": "garage rock"
+    },
+    "rig": {
+      "rigName": "Beck - E-Pro - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "garage fuzz rock with wah bite and dry punch",
+      "signalChainSummary": "A fuzzy signal chain starting with Fuzz (Red Haze) -> Wah -> OD boost -> UK 45 amp model, paired with a dry room reverb to achieve a tight, garage-rock sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up background noise and maintain tight riff definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "65%",
+            "Level": "80%"
+          },
+          "purpose": "Provide the core fuzzy attack and lo-fi crunch required for garage rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "wah filter sweep",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "Mid-range focus",
+            "Resonance": "High"
+          },
+          "purpose": "Implement the required wah filter sweep for rhythmic emphasis.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "preamp boost/punch",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Tone": "50%"
+          },
+          "purpose": "Add dry punch and tighten the low end before the amp stage.",
+          "matchQuality": "close",
+          "gap": "Using a dedicated boost for tightness, as Tube Screamer is avoided.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more mid-range bite was needed."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "60%"
+          },
+          "purpose": "Simulate a small/medium combo amp with punchy British tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Tone": "Balanced"
+          },
+          "purpose": "Provide a classic British cabinet sound to complement the UK 45 amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add slight ambience without the wash of spring reverb.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "High Pass": "None",
+            "Mid Boost": "+3 dB @ 500 Hz"
+          },
+          "purpose": "Tuck the low end slightly and boost mids for definition and punch.",
+          "matchQuality": "close",
+          "gap": "Used to fine-tune the aggressive fuzz tone, compensating for potential muddiness.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "garage fuzz rock with wah bite and dry punch",
+      "mustHave": [
+        "fuzzy riff attack",
+        "wah filter sweep",
+        "dry tight low end",
+        "slight lo-fi crunch"
+      ],
+      "avoid": [
+        "spring reverb wash",
+        "clean arpeggios",
+        "Tube Screamer polish",
+        "scooped Fender clean"
+      ],
+      "gearClues": [
+        "dirty fuzz pedal",
+        "wah",
+        "short room or dry amp",
+        "small/medium combo"
+      ],
+      "corrections": [
+        "drop spring reverb",
+        "make fuzz the main drive",
+        "prioritize wah on the riff"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage rock",
+      "styleTags": [
+        "indie rock",
+        "fuzz"
+      ],
+      "targetTone": "garage fuzz rock with wah bite and dry punch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better match the dry, punchy garage rock aesthetic.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "dry 2x12 or 4x12 IR (e.g., Fender Deluxe/Vox AC30 style)",
+          "reason": "The current UK Vintage 4x12 might be too 'British' and lack the dry punch needed for garage rock.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased dryness and bite in the high end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 101,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

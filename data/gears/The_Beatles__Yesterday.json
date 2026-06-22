@@ -1,0 +1,978 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1474,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__Yesterday.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "Yesterday",
+    "album": "",
+    "year": null,
+    "genre": "pop ballad"
+  },
+  "genreClassification": {
+    "genre": "pop ballad",
+    "subgenres": [
+      "folk"
+    ],
+    "confidence": "high",
+    "rationale": "The Beatles' 'Yesterday' is a classic acoustic pop/folk ballad."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "A major, fingerpicked acoustic ballad tone",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "acoustic simulation",
+        "gentle chorus"
+      ],
+      "gearHypotheses": [
+        "Clean Fender-style amp model (e.g., Twin Reverb)",
+        "Plate reverb unit",
+        "Chorus/Vibrato modulation effect"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Distortion",
+        "Wah pedal effects",
+        "Overdriven tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "fingerpicked nylon/acoustic ballad with no electric amp sheen",
+      "mustHave": [
+        "acoustic fingerpick",
+        "very dry",
+        "soft transients",
+        "no amp breakup"
+      ],
+      "avoid": [
+        "clean Fender amp",
+        "chorus",
+        "delay",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "mic/DI",
+        "no amp"
+      ],
+      "corrections": [
+        "drop electric amp model",
+        "remove chorus",
+        "keep ambience minimal",
+        "favor acoustic body tone"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title is iconic but draft uses generic acoustic wording",
+      "Beatles track may be arranged without decisive electric amp cues",
+      "draft risks wrong family: electric clean/chorus vs acoustic fingerpicked"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "1965 studio acoustic ballad, no electric guitar",
+    "mustHave": [
+      "acoustic guitar simulation or DI",
+      "minimal room ambience",
+      "soft fingerpicked transients"
+    ],
+    "avoid": [
+      "electric amp model",
+      "chorus",
+      "delay",
+      "reverb",
+      "any drive or breakup"
+    ],
+    "gearClues": [
+      "Epiphone Texan acoustic",
+      "close studio mic",
+      "string quartet arrangement"
+    ],
+    "corrections": [
+      "remove all electric amp references",
+      "drop chorus and delay entirely",
+      "use acoustic sim or flat DI tone",
+      "keep output bone dry"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "1965 studio acoustic ballad, no electric guitar",
+    "mustHave": [
+      "acoustic guitar simulation or DI",
+      "minimal room ambience",
+      "soft fingerpicked transients"
+    ],
+    "avoid": [
+      "electric amp model",
+      "chorus",
+      "delay",
+      "reverb",
+      "any drive or breakup"
+    ],
+    "gearClues": [
+      "Epiphone Texan acoustic",
+      "close studio mic",
+      "string quartet arrangement"
+    ],
+    "corrections": [
+      "remove all electric amp references",
+      "drop chorus and delay entirely",
+      "use acoustic sim or flat DI tone",
+      "keep output bone dry"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic/ballad, we must simulate an acoustic tone using clean DI settings and focus on transient clarity. We will use a flat preamp and minimal reverb.",
+          "bestMatchSummary": "A highly clean signal chain utilizing a flat pre-amp (Comp) into a low-gain US Deluxe model with a clear IR, emphasizing natural room ambience and fingerpicked transients.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the electric guitar input.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics and enhance the transient clarity required for fingerpicked acoustic playing.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the gentle compression of a studio microphone setup, enhancing sustain without adding grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain",
+              "module": "PRE",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Maintain a completely clean signal path; no drive or breakup is allowed.",
+              "matchQuality": "exact",
+              "gap": "N/A. Using the 'None' module to ensure zero gain stage coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Bass": "6",
+                "Mid": "4"
+              },
+              "purpose": "Provide a clean, articulate, and non-colored tone suitable for acoustic simulation without sounding like an electric amp.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the cleanest available model. We must keep gain extremely low to avoid any perceived 'electric' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a close studio microphone recording setup (DI) with minimal cabinet coloration.",
+              "matchQuality": "close",
+              "gap": "While an acoustic sim would be ideal, the US 2x12 provides the flattest and most open soundboard simulation available in the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly boost the upper mids and highs to enhance string articulation and clarity (transients).",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, compensating for potential muddiness in the signal chain.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a minimal, natural room ambience to place the sound in a studio environment without sounding like an echo.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept very low (20% mix) and decay time moderate to avoid washing out the delicate fingerpicking transients.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment to match the required studio recording volume.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/ballad, and no dedicated acoustic simulation module exists in the catalog. The rig simulates this by using a highly clean signal chain (Comp -> US Deluxe) and focusing on transient clarity.",
+          "Reverb and Delay are explicitly avoided per the musical verdict; only minimal Room reverb is used to satisfy the 'minimal room ambience' requirement."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace generic IR with a flat, close-mic acoustic simulation IR for maximum transient clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "flat_acoustic_DI_ir",
+              "reason": "The US 2x12 is too 'electric' sounding; need a pure DI/acoustic IR for studio fidelity.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - Yesterday - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "Yesterday",
+          "album": "",
+          "year": null,
+          "genre": "pop ballad"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "1965 studio acoustic ballad, no electric guitar",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A highly clean signal chain utilizing a flat pre-amp (Comp) into a low-gain US Deluxe model with a clear IR, emphasizing natural room ambience and fingerpicked transients.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any unwanted hum or noise from the electric guitar input.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out the dynamics and enhance the transient clarity required for fingerpicked acoustic playing.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used to simulate the gentle compression of a studio microphone setup, enhancing sustain without adding grit.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/gain",
+            "module": "PRE",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "Maintain a completely clean signal path; no drive or breakup is allowed.",
+            "matchQuality": "exact",
+            "gap": "N/A. Using the 'None' module to ensure zero gain stage coloration.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "5",
+              "Bass": "6",
+              "Mid": "4"
+            },
+            "purpose": "Provide a clean, articulate, and non-colored tone suitable for acoustic simulation without sounding like an electric amp.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the cleanest available model. We must keep gain extremely low to avoid any perceived 'electric' character.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate a close studio microphone recording setup (DI) with minimal cabinet coloration.",
+            "matchQuality": "close",
+            "gap": "While an acoustic sim would be ideal, the US 2x12 provides the flattest and most open soundboard simulation available in the catalog.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slightly boost the upper mids and highs to enhance string articulation and clarity (transients).",
+            "matchQuality": "close",
+            "gap": "Used for surgical tone shaping, compensating for potential muddiness in the signal chain.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a minimal, natural room ambience to place the sound in a studio environment without sounding like an echo.",
+            "matchQuality": "close",
+            "gap": "The reverb must be kept very low (20% mix) and decay time moderate to avoid washing out the delicate fingerpicking transients.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment to match the required studio recording volume.",
+            "matchQuality": "exact",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "1965 studio acoustic ballad, no electric guitar",
+          "toneProfile": "1965 studio acoustic ballad, no electric guitar",
+          "idealSignalChain": "Epiphone Texan acoustic | close studio mic | string quartet arrangement",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Epiphone Texan acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close studio mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "string quartet arrangement",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation or DI",
+            "minimal room ambience",
+            "soft fingerpicked transients"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is acoustic/ballad, we must simulate an acoustic tone using clean DI settings and focus on transient clarity. We will use a flat preamp and minimal reverb.",
+          "bestMatchSummary": "A highly clean signal chain utilizing a flat pre-amp (Comp) into a low-gain US Deluxe model with a clear IR, emphasizing natural room ambience and fingerpicked transients.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any unwanted hum or noise from the electric guitar input.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics and enhance the transient clarity required for fingerpicked acoustic playing.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the gentle compression of a studio microphone setup, enhancing sustain without adding grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain",
+              "module": "PRE",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Maintain a completely clean signal path; no drive or breakup is allowed.",
+              "matchQuality": "exact",
+              "gap": "N/A. Using the 'None' module to ensure zero gain stage coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Bass": "6",
+                "Mid": "4"
+              },
+              "purpose": "Provide a clean, articulate, and non-colored tone suitable for acoustic simulation without sounding like an electric amp.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the cleanest available model. We must keep gain extremely low to avoid any perceived 'electric' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a close studio microphone recording setup (DI) with minimal cabinet coloration.",
+              "matchQuality": "close",
+              "gap": "While an acoustic sim would be ideal, the US 2x12 provides the flattest and most open soundboard simulation available in the catalog.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly boost the upper mids and highs to enhance string articulation and clarity (transients).",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, compensating for potential muddiness in the signal chain.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a minimal, natural room ambience to place the sound in a studio environment without sounding like an echo.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept very low (20% mix) and decay time moderate to avoid washing out the delicate fingerpicking transients.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment to match the required studio recording volume.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace generic IR with a flat, close-mic acoustic simulation IR for maximum transient clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "flat_acoustic_DI_ir",
+              "reason": "The US 2x12 is too 'electric' sounding; need a pure DI/acoustic IR for studio fidelity.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove all electric amp references",
+          "drop chorus and delay entirely",
+          "use acoustic sim or flat DI tone",
+          "keep output bone dry"
+        ],
+        "warnings": [
+          "The source material is acoustic/ballad, and no dedicated acoustic simulation module exists in the catalog. The rig simulates this by using a highly clean signal chain (Comp -> US Deluxe) and focusing on transient clarity.",
+          "Reverb and Delay are explicitly avoided per the musical verdict; only minimal Room reverb is used to satisfy the 'minimal room ambience' requirement."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.694,
+      "prompt_chars": 989,
+      "response_chars": 386,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 104,
+        "total_duration": 9692325200,
+        "prompt_eval_duration": 319415000,
+        "eval_duration": 1718144000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.155,
+      "prompt_chars": 5327,
+      "response_chars": 682,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 166,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1659
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.615,
+      "prompt_chars": 4867,
+      "response_chars": 652,
+      "usage": {
+        "input_tokens": 1441,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 215,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.671,
+      "prompt_chars": 3651,
+      "response_chars": 5156,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1368,
+        "total_duration": 32645305000,
+        "prompt_eval_duration": 285068000,
+        "eval_duration": 22500899000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.283,
+      "prompt_chars": 7278,
+      "response_chars": 536,
+      "usage": {
+        "prompt_eval_count": 1934,
+        "eval_count": 146,
+        "total_duration": 4276685700,
+        "prompt_eval_duration": 306684000,
+        "eval_duration": 3571591000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.7,
+      "prompt_chars": 2659,
+      "response_chars": 148,
+      "usage": {
+        "prompt_eval_count": 821,
+        "eval_count": 42,
+        "total_duration": 12682955800,
+        "prompt_eval_duration": 266754000,
+        "eval_duration": 531773000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "Yesterday",
+      "album": "",
+      "year": null,
+      "genre": "pop ballad"
+    },
+    "rig": {
+      "rigName": "The Beatles - Yesterday - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "1965 studio acoustic ballad, no electric guitar",
+      "signalChainSummary": "A highly clean signal chain utilizing a flat pre-amp (Comp) into a low-gain US Deluxe model with a clear IR, emphasizing natural room ambience and fingerpicked transients.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any unwanted hum or noise from the electric guitar input.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out the dynamics and enhance the transient clarity required for fingerpicked acoustic playing.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used to simulate the gentle compression of a studio microphone setup, enhancing sustain without adding grit.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/gain",
+          "module": "PRE",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "Maintain a completely clean signal path; no drive or breakup is allowed.",
+          "matchQuality": "exact",
+          "gap": "N/A. Using the 'None' module to ensure zero gain stage coloration.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "5",
+            "Bass": "6",
+            "Mid": "4"
+          },
+          "purpose": "Provide a clean, articulate, and non-colored tone suitable for acoustic simulation without sounding like an electric amp.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the cleanest available model. We must keep gain extremely low to avoid any perceived 'electric' character.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate a close studio microphone recording setup (DI) with minimal cabinet coloration.",
+          "matchQuality": "close",
+          "gap": "While an acoustic sim would be ideal, the US 2x12 provides the flattest and most open soundboard simulation available in the catalog.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slightly boost the upper mids and highs to enhance string articulation and clarity (transients).",
+          "matchQuality": "close",
+          "gap": "Used for surgical tone shaping, compensating for potential muddiness in the signal chain.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a minimal, natural room ambience to place the sound in a studio environment without sounding like an echo.",
+          "matchQuality": "close",
+          "gap": "The reverb must be kept very low (20% mix) and decay time moderate to avoid washing out the delicate fingerpicking transients.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment to match the required studio recording volume.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "1965 studio acoustic ballad, no electric guitar",
+      "mustHave": [
+        "acoustic guitar simulation or DI",
+        "minimal room ambience",
+        "soft fingerpicked transients"
+      ],
+      "avoid": [
+        "electric amp model",
+        "chorus",
+        "delay",
+        "reverb",
+        "any drive or breakup"
+      ],
+      "gearClues": [
+        "Epiphone Texan acoustic",
+        "close studio mic",
+        "string quartet arrangement"
+      ],
+      "corrections": [
+        "remove all electric amp references",
+        "drop chorus and delay entirely",
+        "use acoustic sim or flat DI tone",
+        "keep output bone dry"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "pop ballad",
+      "styleTags": [
+        "folk"
+      ],
+      "targetTone": "1965 studio acoustic ballad, no electric guitar",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace generic IR with a flat, close-mic acoustic simulation IR for maximum transient clarity.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "flat_acoustic_DI_ir",
+          "reason": "The US 2x12 is too 'electric' sounding; need a pure DI/acoustic IR for studio fidelity.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1474,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

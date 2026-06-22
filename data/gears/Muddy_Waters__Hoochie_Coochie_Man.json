@@ -1,0 +1,1117 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 955,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Muddy_Waters__Hoochie_Coochie_Man.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Muddy Waters",
+    "title": "Hoochie Coochie Man",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "delta blues",
+      "electric blues",
+      "chicago blues"
+    ],
+    "confidence": "high",
+    "rationale": "The artist, song, and tone profile all point directly to classic Chicago electric blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor blues, gritty and raw",
+      "signatureElements": [
+        "overdriven crunch",
+        "mid-focused fuzz/distortion",
+        "bluesy wah pedal use",
+        "vintage tube amp warmth (think Fender Deluxe or Marshall Plexi)"
+      ],
+      "gearHypotheses": [
+        "Overdrive/Distortion Pedal (e.g., Tube Screamer variant)",
+        "Wah Pedal",
+        "Spring Reverb / Delay"
+      ],
+      "avoid": [
+        "digital clean tones",
+        "modern scooped distortion",
+        "heavy modulation (chorus, flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty 60s Chicago blues electric guitar with bite",
+      "mustHave": [
+        "gritty amp break-up",
+        "mid-forward bite",
+        "dry mono feel",
+        "light room/spring"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "chorus",
+        "modern high gain",
+        "clean tone"
+      ],
+      "gearClues": [
+        "single-coil electric",
+        "small tube combo",
+        "tweed/old Fender",
+        "closish mic"
+      ],
+      "corrections": [
+        "drop E minor",
+        "drop fuzz/distortion wording",
+        "no wah unless clearly heard",
+        "keep it raw and dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty 60s Chicago blues electric guitar with bite",
+    "mustHave": [
+      "gritty amp break-up",
+      "mid-forward bite",
+      "dry mono feel",
+      "light room/spring"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "chorus",
+      "modern high gain",
+      "clean tone"
+    ],
+    "gearClues": [
+      "single-coil electric",
+      "small tube combo",
+      "tweed/old Fender",
+      "closish mic"
+    ],
+    "corrections": [
+      "drop E minor",
+      "drop fuzz/distortion wording",
+      "no wah unless clearly heard",
+      "keep it raw and dry"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-range focused breakup and raw tube grit.",
+          "bestMatchSummary": "A classic Chicago blues tone achieved using a British combo amp model (UK 45) for natural break-up, paired with a slight overdrive boost and minimal room ambience to capture the dirty, bite-filled sound of Muddy Waters' era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Add subtle grit and mid-range bite without sounding like modern distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the slight breakup of an old, overdriven tube amp rather than a dedicated dirt pedal.",
+              "alternatives": [
+                "Blues OD (if more warmth is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp breakup will provide sufficient grit.",
+              "matchQuality": "none",
+              "gap": "The 'mustHave' list specifies avoiding fuzz/modern high gain. The natural break-up of the chosen amp model is preferred over a discrete pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Mid": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the sound of a classic British/American combo amp with natural, mid-forward breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its vintage character and ability to provide grit without modern high gain.",
+              "alternatives": [
+                "US Deluxe (if a more Fender/American sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, open-sounding cabinet that complements the vintage amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Mid": "+3.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Enhance the mid-forward bite and cut unnecessary low end, focusing on the 'bite' required for Chicago blues.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the wah effect as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly state to avoid wah unless clearly heard.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly state to avoid chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the sound raw and dry; delay is unnecessary.",
+              "matchQuality": "none",
+              "gap": "The verdict emphasizes a 'dry mono feel'.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth (light room) without washing out the raw tone.",
+              "matchQuality": "close",
+              "gap": "The verdict calls for 'light room/spring'. Room is chosen as it provides more natural ambience than Spring, while keeping the decay short.",
+              "alternatives": [
+                "Spring (if a slightly vintage, metallic reverb is preferred)"
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "none",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone is heavily focused on vintage tube grit and mid-range bite, simulating the raw sound of 60s Chicago blues. The use of Green OD is subtle to enhance breakup rather than adding dirt.",
+          "All effects (Wah, Chorus, Delay) are disabled or minimized to maintain a dry, raw feel as requested."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better vintage realism and bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 tweed/old Fender IR",
+              "reason": "Better captures the specific 'tweed/old Fender' sound clue for Muddy Waters.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage bite and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Muddy Waters - Hoochie Coochie Man - Valeton GP-180",
+        "song": {
+          "artist": "Muddy Waters",
+          "title": "Hoochie Coochie Man",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty 60s Chicago blues electric guitar with bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic Chicago blues tone achieved using a British combo amp model (UK 45) for natural break-up, paired with a slight overdrive boost and minimal room ambience to capture the dirty, bite-filled sound of Muddy Waters' era.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Add subtle grit and mid-range bite without sounding like modern distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate the slight breakup of an old, overdriven tube amp rather than a dedicated dirt pedal.",
+            "alternatives": [
+              "Blues OD (if more warmth is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD and amp breakup will provide sufficient grit.",
+            "matchQuality": "none",
+            "gap": "The 'mustHave' list specifies avoiding fuzz/modern high gain. The natural break-up of the chosen amp model is preferred over a discrete pedal.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.0",
+              "Mid": "8.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Simulate the sound of a classic British/American combo amp with natural, mid-forward breakup.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is chosen for its vintage character and ability to provide grit without modern high gain.",
+            "alternatives": [
+              "US Deluxe (if a more Fender/American sound is preferred)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic, open-sounding cabinet that complements the vintage amp model.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2.0",
+              "Mid": "+3.0",
+              "Treble": "+1.5"
+            },
+            "purpose": "Enhance the mid-forward bite and cut unnecessary low end, focusing on the 'bite' required for Chicago blues.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid the wah effect as per the musical verdict.",
+            "matchQuality": "none",
+            "gap": "The instructions explicitly state to avoid wah unless clearly heard.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus as per the musical verdict.",
+            "matchQuality": "none",
+            "gap": "The instructions explicitly state to avoid chorus.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the sound raw and dry; delay is unnecessary.",
+            "matchQuality": "none",
+            "gap": "The verdict emphasizes a 'dry mono feel'.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and depth (light room) without washing out the raw tone.",
+            "matchQuality": "close",
+            "gap": "The verdict calls for 'light room/spring'. Room is chosen as it provides more natural ambience than Spring, while keeping the decay short.",
+            "alternatives": [
+              "Spring (if a slightly vintage, metallic reverb is preferred)"
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7.5"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "none",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty 60s Chicago blues electric guitar with bite",
+          "toneProfile": "dirty 60s Chicago blues electric guitar with bite",
+          "idealSignalChain": "single-coil electric | small tube combo | tweed/old Fender | closish mic",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tweed/old Fender",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "closish mic",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "gritty amp break-up",
+            "mid-forward bite",
+            "dry mono feel",
+            "light room/spring"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, mid-range focused breakup and raw tube grit.",
+          "bestMatchSummary": "A classic Chicago blues tone achieved using a British combo amp model (UK 45) for natural break-up, paired with a slight overdrive boost and minimal room ambience to capture the dirty, bite-filled sound of Muddy Waters' era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Add subtle grit and mid-range bite without sounding like modern distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the slight breakup of an old, overdriven tube amp rather than a dedicated dirt pedal.",
+              "alternatives": [
+                "Blues OD (if more warmth is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD and amp breakup will provide sufficient grit.",
+              "matchQuality": "none",
+              "gap": "The 'mustHave' list specifies avoiding fuzz/modern high gain. The natural break-up of the chosen amp model is preferred over a discrete pedal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Mid": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the sound of a classic British/American combo amp with natural, mid-forward breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its vintage character and ability to provide grit without modern high gain.",
+              "alternatives": [
+                "US Deluxe (if a more Fender/American sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, open-sounding cabinet that complements the vintage amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Mid": "+3.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Enhance the mid-forward bite and cut unnecessary low end, focusing on the 'bite' required for Chicago blues.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the wah effect as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly state to avoid wah unless clearly heard.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as per the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly state to avoid chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the sound raw and dry; delay is unnecessary.",
+              "matchQuality": "none",
+              "gap": "The verdict emphasizes a 'dry mono feel'.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth (light room) without washing out the raw tone.",
+              "matchQuality": "close",
+              "gap": "The verdict calls for 'light room/spring'. Room is chosen as it provides more natural ambience than Spring, while keeping the decay short.",
+              "alternatives": [
+                "Spring (if a slightly vintage, metallic reverb is preferred)"
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "none",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better vintage realism and bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 tweed/old Fender IR",
+              "reason": "Better captures the specific 'tweed/old Fender' sound clue for Muddy Waters.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage bite and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop E minor",
+          "drop fuzz/distortion wording",
+          "no wah unless clearly heard",
+          "keep it raw and dry"
+        ],
+        "warnings": [
+          "The tone is heavily focused on vintage tube grit and mid-range bite, simulating the raw sound of 60s Chicago blues. The use of Green OD is subtle to enhance breakup rather than adding dirt.",
+          "All effects (Wah, Chorus, Delay) are disabled or minimized to maintain a dry, raw feel as requested."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.456,
+      "prompt_chars": 1000,
+      "response_chars": 454,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 117,
+        "total_duration": 25425125900,
+        "prompt_eval_duration": 391419000,
+        "eval_duration": 1472413000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.285,
+      "prompt_chars": 5388,
+      "response_chars": 529,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 43.795,
+      "prompt_chars": 3623,
+      "response_chars": 5985,
+      "usage": {
+        "prompt_eval_count": 1228,
+        "eval_count": 1676,
+        "total_duration": 43772579200,
+        "prompt_eval_duration": 406951000,
+        "eval_duration": 30625607000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 2.7,
+      "prompt_chars": 8163,
+      "response_chars": 528,
+      "usage": {
+        "prompt_eval_count": 2260,
+        "eval_count": 144,
+        "total_duration": 2669999600,
+        "prompt_eval_duration": 409623000,
+        "eval_duration": 1812529000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.635,
+      "prompt_chars": 2989,
+      "response_chars": 210,
+      "usage": {
+        "prompt_eval_count": 949,
+        "eval_count": 52,
+        "total_duration": 13618942000,
+        "prompt_eval_duration": 403755000,
+        "eval_duration": 1049518000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Muddy Waters",
+      "title": "Hoochie Coochie Man",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Muddy Waters - Hoochie Coochie Man - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty 60s Chicago blues electric guitar with bite",
+      "signalChainSummary": "A classic Chicago blues tone achieved using a British combo amp model (UK 45) for natural break-up, paired with a slight overdrive boost and minimal room ambience to capture the dirty, bite-filled sound of Muddy Waters' era.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Add subtle grit and mid-range bite without sounding like modern distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate the slight breakup of an old, overdriven tube amp rather than a dedicated dirt pedal.",
+          "alternatives": [
+            {
+              "model": "Blues OD (if more warmth is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD and amp breakup will provide sufficient grit.",
+          "matchQuality": "fallback",
+          "gap": "The 'mustHave' list specifies avoiding fuzz/modern high gain. The natural break-up of the chosen amp model is preferred over a discrete pedal.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.0",
+            "Mid": "8.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Simulate the sound of a classic British/American combo amp with natural, mid-forward breakup.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is chosen for its vintage character and ability to provide grit without modern high gain.",
+          "alternatives": [
+            {
+              "model": "US Deluxe (if a more Fender/American sound is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic, open-sounding cabinet that complements the vintage amp model.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2.0",
+            "Mid": "+3.0",
+            "Treble": "+1.5"
+          },
+          "purpose": "Enhance the mid-forward bite and cut unnecessary low end, focusing on the 'bite' required for Chicago blues.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid the wah effect as per the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The instructions explicitly state to avoid wah unless clearly heard.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus as per the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The instructions explicitly state to avoid chorus.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the sound raw and dry; delay is unnecessary.",
+          "matchQuality": "fallback",
+          "gap": "The verdict emphasizes a 'dry mono feel'.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and depth (light room) without washing out the raw tone.",
+          "matchQuality": "close",
+          "gap": "The verdict calls for 'light room/spring'. Room is chosen as it provides more natural ambience than Spring, while keeping the decay short.",
+          "alternatives": [
+            {
+              "model": "Spring (if a slightly vintage, metallic reverb is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7.5"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "fallback",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty 60s Chicago blues electric guitar with bite",
+      "mustHave": [
+        "gritty amp break-up",
+        "mid-forward bite",
+        "dry mono feel",
+        "light room/spring"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "chorus",
+        "modern high gain",
+        "clean tone"
+      ],
+      "gearClues": [
+        "single-coil electric",
+        "small tube combo",
+        "tweed/old Fender",
+        "closish mic"
+      ],
+      "corrections": [
+        "drop E minor",
+        "drop fuzz/distortion wording",
+        "no wah unless clearly heard",
+        "keep it raw and dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "delta blues",
+        "electric blues",
+        "chicago blues"
+      ],
+      "targetTone": "dirty 60s Chicago blues electric guitar with bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better vintage realism and bite.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 tweed/old Fender IR",
+          "reason": "Better captures the specific 'tweed/old Fender' sound clue for Muddy Waters.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased vintage bite and clarity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 955,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

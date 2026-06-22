@@ -1,0 +1,1094 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 109,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bill_Haley__Rock_Around_The_Clock.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bill Haley",
+    "title": "Rock Around The Clock",
+    "album": "",
+    "year": null,
+    "genre": "rock and roll"
+  },
+  "genreClassification": {
+    "genre": "rock and roll",
+    "subgenres": [
+      "early rock",
+      "vintage pop",
+      "rockabilly"
+    ],
+    "confidence": "high",
+    "rationale": "The song is foundational early rock and roll, matching the vintage tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, punchy rock tone (early rockabilly/rock and roll)",
+      "signatureElements": [
+        "Crunch",
+        "Slight fuzz (for grit)",
+        "Punchy attack",
+        "Bright mids"
+      ],
+      "gearHypotheses": [
+        "Fender Twin Reverb style clean boost",
+        "Vox AC30 style crunch amp model",
+        "Early solid-state overdrive pedal"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Deep modulation",
+        "Ambient reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright early rock and roll twang with tight slapback crunch",
+      "mustHave": [
+        "bright attack",
+        "tight low gain crunch",
+        "slapback echo",
+        "dry upfront vocal-era feel"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "fuzz",
+        "deep reverb",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Fender amp",
+        "small combo",
+        "tape slapback"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "add slapback",
+        "keep gain lower",
+        "favor twang over mid-gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright early rock and roll twang with tight slapback crunch",
+    "mustHave": [
+      "bright attack",
+      "tight low gain crunch",
+      "slapback echo",
+      "dry upfront vocal-era feel"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "fuzz",
+      "deep reverb",
+      "modern high gain"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Fender amp",
+      "small combo",
+      "tape slapback"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "add slapback",
+      "keep gain lower",
+      "favor twang over mid-gain"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic Rock/Twang Focus",
+          "bestMatchSummary": "A bright, vintage rock and roll chain using a clean pre-amp (Green OD) for twang, followed by an AC30 model, tight compression, and slapback echo.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in vintage recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the bright, twangy single-coil crunch and bite required for early rock and roll.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if Green OD is too bright, offering a slightly warmer vintage tone."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Tighten the attack and sustain the notes for a punchy, upfront vocal-era feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a very low setting to maintain the clean crunch from Green OD.",
+              "matchQuality": "perfect",
+              "gap": "The goal is 'crunch' not distortion, so keeping this module bypassed/off is key.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Midrange": "6/10"
+              },
+              "purpose": "Simulate the classic British clean-to-crunch sound associated with early rock and roll.",
+              "matchQuality": "close",
+              "gap": "While a Fender amp would be ideal, AC30 provides the necessary bright, articulate tone profile for this era.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If an American clean sound is preferred over British chime."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, articulate cabinet sound that supports the bright twang.",
+              "matchQuality": "close",
+              "gap": "A Fender-style 2x12 would be more accurate, but UK Vintage 4x12 offers sufficient clarity and punch.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, American cabinet sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the wah bypassed to maintain a direct, upfront sound.",
+              "matchQuality": "perfect",
+              "gap": "The target tone does not require a Wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2%",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required tight slapback echo for that vintage vocal-era feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without muddying the bright twang.",
+              "matchQuality": "close",
+              "gap": "The target tone emphasizes 'dry upfront' sound, so reverb must be kept minimal.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is early rock and roll, requiring a vintage, bright tone. The AC30 model was chosen as the closest substitute for the desired Fender/American clean sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, American-voiced 2x12 to better match the single-coil guitar and vintage Fender aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12",
+              "reason": "Better matches the desired American/Fender clean sound profile.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bill Haley - Rock Around The Clock - Valeton GP-180",
+        "song": {
+          "artist": "Bill Haley",
+          "title": "Rock Around The Clock",
+          "album": "",
+          "year": null,
+          "genre": "rock and roll"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright early rock and roll twang with tight slapback crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, vintage rock and roll chain using a clean pre-amp (Green OD) for twang, followed by an AC30 model, tight compression, and slapback echo.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray noise inherent in vintage recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the bright, twangy single-coil crunch and bite required for early rock and roll.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative if Green OD is too bright, offering a slightly warmer vintage tone."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Tighten the attack and sustain the notes for a punchy, upfront vocal-era feel.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a very low setting to maintain the clean crunch from Green OD.",
+            "matchQuality": "perfect",
+            "gap": "The goal is 'crunch' not distortion, so keeping this module bypassed/off is key.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "7/10",
+              "Midrange": "6/10"
+            },
+            "purpose": "Simulate the classic British clean-to-crunch sound associated with early rock and roll.",
+            "matchQuality": "close",
+            "gap": "While a Fender amp would be ideal, AC30 provides the necessary bright, articulate tone profile for this era.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "If an American clean sound is preferred over British chime."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic, articulate cabinet sound that supports the bright twang.",
+            "matchQuality": "close",
+            "gap": "A Fender-style 2x12 would be more accurate, but UK Vintage 4x12 offers sufficient clarity and punch.",
+            "alternatives": [
+              {
+                "model": "US 2x12",
+                "reason": "If a smaller, American cabinet sound is desired."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the wah bypassed to maintain a direct, upfront sound.",
+            "matchQuality": "perfect",
+            "gap": "The target tone does not require a Wah effect.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/echo",
+            "module": "DLY",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2%",
+              "Mix": "30%"
+            },
+            "purpose": "Implement the required tight slapback echo for that vintage vocal-era feel.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space without muddying the bright twang.",
+            "matchQuality": "close",
+            "gap": "The target tone emphasizes 'dry upfront' sound, so reverb must be kept minimal.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright early rock and roll twang with tight slapback crunch",
+          "toneProfile": "bright early rock and roll twang with tight slapback crunch",
+          "idealSignalChain": "single-coil guitar | Fender amp | small combo | tape slapback",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tape slapback",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright attack",
+            "tight low gain crunch",
+            "slapback echo",
+            "dry upfront vocal-era feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic Rock/Twang Focus",
+          "bestMatchSummary": "A bright, vintage rock and roll chain using a clean pre-amp (Green OD) for twang, followed by an AC30 model, tight compression, and slapback echo.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in vintage recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the bright, twangy single-coil crunch and bite required for early rock and roll.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if Green OD is too bright, offering a slightly warmer vintage tone."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Tighten the attack and sustain the notes for a punchy, upfront vocal-era feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a very low setting to maintain the clean crunch from Green OD.",
+              "matchQuality": "perfect",
+              "gap": "The goal is 'crunch' not distortion, so keeping this module bypassed/off is key.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Midrange": "6/10"
+              },
+              "purpose": "Simulate the classic British clean-to-crunch sound associated with early rock and roll.",
+              "matchQuality": "close",
+              "gap": "While a Fender amp would be ideal, AC30 provides the necessary bright, articulate tone profile for this era.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "If an American clean sound is preferred over British chime."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, articulate cabinet sound that supports the bright twang.",
+              "matchQuality": "close",
+              "gap": "A Fender-style 2x12 would be more accurate, but UK Vintage 4x12 offers sufficient clarity and punch.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, American cabinet sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the wah bypassed to maintain a direct, upfront sound.",
+              "matchQuality": "perfect",
+              "gap": "The target tone does not require a Wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2%",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required tight slapback echo for that vintage vocal-era feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without muddying the bright twang.",
+              "matchQuality": "close",
+              "gap": "The target tone emphasizes 'dry upfront' sound, so reverb must be kept minimal.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, American-voiced 2x12 to better match the single-coil guitar and vintage Fender aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12",
+              "reason": "Better matches the desired American/Fender clean sound profile.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "add slapback",
+          "keep gain lower",
+          "favor twang over mid-gain"
+        ],
+        "warnings": [
+          "The source material is early rock and roll, requiring a vintage, bright tone. The AC30 model was chosen as the closest substitute for the desired Fender/American clean sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.965,
+      "prompt_chars": 1000,
+      "response_chars": 390,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 103,
+        "total_duration": 12959971100,
+        "prompt_eval_duration": 140539000,
+        "eval_duration": 805451000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.919,
+      "prompt_chars": 5324,
+      "response_chars": 516,
+      "usage": {
+        "input_tokens": 1490,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1629
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.772,
+      "prompt_chars": 3603,
+      "response_chars": 5520,
+      "usage": {
+        "prompt_eval_count": 1213,
+        "eval_count": 1574,
+        "total_duration": 12764303700,
+        "prompt_eval_duration": 150121000,
+        "eval_duration": 12215533000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.779,
+      "prompt_chars": 7676,
+      "response_chars": 568,
+      "usage": {
+        "prompt_eval_count": 2144,
+        "eval_count": 152,
+        "total_duration": 1760673800,
+        "prompt_eval_duration": 217600000,
+        "eval_duration": 1185215000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.601,
+      "prompt_chars": 2797,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 885,
+        "eval_count": 53,
+        "total_duration": 12577658300,
+        "prompt_eval_duration": 177914000,
+        "eval_duration": 417323000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bill Haley",
+      "title": "Rock Around The Clock",
+      "album": "",
+      "year": null,
+      "genre": "rock and roll"
+    },
+    "rig": {
+      "rigName": "Bill Haley - Rock Around The Clock - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright early rock and roll twang with tight slapback crunch",
+      "signalChainSummary": "A bright, vintage rock and roll chain using a clean pre-amp (Green OD) for twang, followed by an AC30 model, tight compression, and slapback echo.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray noise inherent in vintage recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the bright, twangy single-coil crunch and bite required for early rock and roll.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative if Green OD is too bright, offering a slightly warmer vintage tone."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Tighten the attack and sustain the notes for a punchy, upfront vocal-era feel.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a very low setting to maintain the clean crunch from Green OD.",
+          "matchQuality": "exact",
+          "gap": "The goal is 'crunch' not distortion, so keeping this module bypassed/off is key.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "7/10",
+            "Midrange": "6/10"
+          },
+          "purpose": "Simulate the classic British clean-to-crunch sound associated with early rock and roll.",
+          "matchQuality": "close",
+          "gap": "While a Fender amp would be ideal, AC30 provides the necessary bright, articulate tone profile for this era.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "If an American clean sound is preferred over British chime."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic, articulate cabinet sound that supports the bright twang.",
+          "matchQuality": "close",
+          "gap": "A Fender-style 2x12 would be more accurate, but UK Vintage 4x12 offers sufficient clarity and punch.",
+          "alternatives": [
+            {
+              "model": "US 2x12",
+              "reason": "If a smaller, American cabinet sound is desired."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the wah bypassed to maintain a direct, upfront sound.",
+          "matchQuality": "exact",
+          "gap": "The target tone does not require a Wah effect.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/echo",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2%",
+            "Mix": "30%"
+          },
+          "purpose": "Implement the required tight slapback echo for that vintage vocal-era feel.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space without muddying the bright twang.",
+          "matchQuality": "close",
+          "gap": "The target tone emphasizes 'dry upfront' sound, so reverb must be kept minimal.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright early rock and roll twang with tight slapback crunch",
+      "mustHave": [
+        "bright attack",
+        "tight low gain crunch",
+        "slapback echo",
+        "dry upfront vocal-era feel"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "fuzz",
+        "deep reverb",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Fender amp",
+        "small combo",
+        "tape slapback"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "add slapback",
+        "keep gain lower",
+        "favor twang over mid-gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock and roll",
+      "styleTags": [
+        "early rock",
+        "vintage pop",
+        "rockabilly"
+      ],
+      "targetTone": "bright early rock and roll twang with tight slapback crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current cabinet IR with a smaller, American-voiced 2x12 to better match the single-coil guitar and vintage Fender aesthetic.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "US 2x12",
+          "reason": "Better matches the desired American/Fender clean sound profile.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 109,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

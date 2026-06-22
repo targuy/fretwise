@@ -1,0 +1,1125 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 149,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bob_Dylan__The_Times_They_Are_A_Changin.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bob Dylan",
+    "title": "The Times They Are A-Changin'",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "folk rock",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic folk protest anthem, characterized by acoustic instrumentation."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Acoustic Americana/Folk Ballad Tone",
+      "signatureElements": [
+        "clean",
+        "fingerpicking arpeggios",
+        "subtle reverb",
+        "warm acoustic amp simulation"
+      ],
+      "gearHypotheses": [
+        "Clean Acoustic Model (e.g., Fender PA or similar)",
+        "Light Chorus/Tremolo for texture",
+        "EQ boost around 10kHz for air"
+      ],
+      "avoid": [
+        "Distortion",
+        "Fuzz",
+        "Wah pedal effects",
+        "Overdriven crunch"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "dry strummed acoustic folk",
+      "mustHave": [
+        "acoustic guitar",
+        "dry close mic",
+        "light vocal-bed space",
+        "no electric grit"
+      ],
+      "avoid": [
+        "chorus",
+        "tremolo",
+        "heavy reverb",
+        "distortion",
+        "fuzz"
+      ],
+      "gearClues": [
+        "steel-string acoustic",
+        "small room",
+        "flat EQ"
+      ],
+      "corrections": [
+        "remove electric amp models",
+        "remove chorus/tremolo",
+        "keep it dry and plain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title is iconic but draft is generic",
+      "likely acoustic-only context",
+      "draft adds unsupported electric effects",
+      "GP-180 could build wrong amp/effect family"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "dry acoustic folk vocal accompaniment",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "no electric amp coloration",
+      "minimal room ambience"
+    ],
+    "avoid": [
+      "chorus",
+      "tremolo",
+      "electric overdrive",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "steel-string acoustic",
+      "close mic",
+      "1963 studio recording"
+    ],
+    "corrections": [
+      "remove all electric amp models",
+      "remove chorus and tremolo",
+      "use acoustic sim or flat clean only"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "dry acoustic folk vocal accompaniment",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "no electric amp coloration",
+      "minimal room ambience"
+    ],
+    "avoid": [
+      "chorus",
+      "tremolo",
+      "electric overdrive",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "steel-string acoustic",
+      "close mic",
+      "1963 studio recording"
+    ],
+    "corrections": [
+      "remove all electric amp models",
+      "remove chorus and tremolo",
+      "use acoustic sim or flat clean only"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "A clean, flat signal chain simulating a dry acoustic folk sound using minimal processing and focusing on clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Even out the dynamics of fingerpicked acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the natural compression of a close-mic'd acoustic guitar, as dedicated acoustic preamps are unavailable.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No overdrive or distortion is required for a dry folk sound.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low (2)",
+                "Treble": "Mid-High (6)",
+                "Bass": "Mid (4)",
+                "Presence": "Medium (5)"
+              },
+              "purpose": "Provide a clean, non-colored foundation suitable for acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen as the cleanest available amp model to minimize coloration and mimic a flat recording environment. True acoustic modeling is absent.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a close-mic'd acoustic source.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its clean, articulate tone, best suited for capturing the detail of fingerpicking. A dedicated acoustic IR would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB (Low)",
+                "Mid Cut": "-1 dB (Mids)",
+                "Treble Boost": "+3 dB (High)"
+              },
+              "purpose": "Enhance the clarity and definition of the acoustic guitar's fundamental frequencies.",
+              "matchQuality": "close",
+              "gap": "Manual EQ shaping is necessary to compensate for the lack of a dedicated acoustic tone control, focusing on high-end sparkle and low-mid punch.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or sweeping effects are needed.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus and Tremolo are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Long (300ms)",
+                "Feedback": "Low (2)",
+                "Mix": "Very Low (15%)"
+              },
+              "purpose": "Add subtle depth and space without sounding like a noticeable echo.",
+              "matchQuality": "close",
+              "gap": "Used minimally to simulate the natural decay of sound in a large, non-studio environment, keeping it extremely subtle.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short (1.5s)",
+                "Mix": "Very Low (10%)"
+              },
+              "purpose": "Provide minimal, natural room ambience without sounding artificial or heavy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used with extremely low settings to mimic the subtle reflections of a large hall, adhering to the 'minimal room ambience' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity (0 dB)"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk, requiring an acoustic simulation. Since the GP-180 is primarily designed for electric guitar modeling, this rig uses clean amp models (US Deluxe) and EQ shaping to achieve a flat, non-colored tone that best approximates a close-mic'd steel-string acoustic sound."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic IR with an acoustic or flat recording space simulation to better match the dry, close-mic studio sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic/Studio realism",
+              "recommendedAsset": "Close-Mic Acoustic Room IR (or Flat Studio IR)",
+              "reason": "The current US 2x12 is too 'ampy' for a dry, close-mic studio sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and clarity of the acoustic source.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bob Dylan - The Times They Are A-Changin' - Valeton GP-180",
+        "song": {
+          "artist": "Bob Dylan",
+          "title": "The Times They Are A-Changin'",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry acoustic folk vocal accompaniment",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, flat signal chain simulating a dry acoustic folk sound using minimal processing and focusing on clarity.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Even out the dynamics of fingerpicked acoustic strumming.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used to simulate the natural compression of a close-mic'd acoustic guitar, as dedicated acoustic preamps are unavailable.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No overdrive or distortion is required for a dry folk sound.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low (2)",
+              "Treble": "Mid-High (6)",
+              "Bass": "Mid (4)",
+              "Presence": "Medium (5)"
+            },
+            "purpose": "Provide a clean, non-colored foundation suitable for acoustic simulation.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen as the cleanest available amp model to minimize coloration and mimic a flat recording environment. True acoustic modeling is absent.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate the sound of a close-mic'd acoustic source.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is selected for its clean, articulate tone, best suited for capturing the detail of fingerpicking. A dedicated acoustic IR would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB (Low)",
+              "Mid Cut": "-1 dB (Mids)",
+              "Treble Boost": "+3 dB (High)"
+            },
+            "purpose": "Enhance the clarity and definition of the acoustic guitar's fundamental frequencies.",
+            "matchQuality": "close",
+            "gap": "Manual EQ shaping is necessary to compensate for the lack of a dedicated acoustic tone control, focusing on high-end sparkle and low-mid punch.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No filtering or sweeping effects are needed.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Chorus and Tremolo are explicitly avoided.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "Long (300ms)",
+              "Feedback": "Low (2)",
+              "Mix": "Very Low (15%)"
+            },
+            "purpose": "Add subtle depth and space without sounding like a noticeable echo.",
+            "matchQuality": "close",
+            "gap": "Used minimally to simulate the natural decay of sound in a large, non-studio environment, keeping it extremely subtle.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short (1.5s)",
+              "Mix": "Very Low (10%)"
+            },
+            "purpose": "Provide minimal, natural room ambience without sounding artificial or heavy.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is used with extremely low settings to mimic the subtle reflections of a large hall, adhering to the 'minimal room ambience' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity (0 dB)"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry acoustic folk vocal accompaniment",
+          "toneProfile": "dry acoustic folk vocal accompaniment",
+          "idealSignalChain": "steel-string acoustic | close mic | 1963 studio recording",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "steel-string acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1963 studio recording",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation",
+            "no electric amp coloration",
+            "minimal room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "A clean, flat signal chain simulating a dry acoustic folk sound using minimal processing and focusing on clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Even out the dynamics of fingerpicked acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the natural compression of a close-mic'd acoustic guitar, as dedicated acoustic preamps are unavailable.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No overdrive or distortion is required for a dry folk sound.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low (2)",
+                "Treble": "Mid-High (6)",
+                "Bass": "Mid (4)",
+                "Presence": "Medium (5)"
+              },
+              "purpose": "Provide a clean, non-colored foundation suitable for acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen as the cleanest available amp model to minimize coloration and mimic a flat recording environment. True acoustic modeling is absent.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a close-mic'd acoustic source.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its clean, articulate tone, best suited for capturing the detail of fingerpicking. A dedicated acoustic IR would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB (Low)",
+                "Mid Cut": "-1 dB (Mids)",
+                "Treble Boost": "+3 dB (High)"
+              },
+              "purpose": "Enhance the clarity and definition of the acoustic guitar's fundamental frequencies.",
+              "matchQuality": "close",
+              "gap": "Manual EQ shaping is necessary to compensate for the lack of a dedicated acoustic tone control, focusing on high-end sparkle and low-mid punch.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or sweeping effects are needed.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus and Tremolo are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Long (300ms)",
+                "Feedback": "Low (2)",
+                "Mix": "Very Low (15%)"
+              },
+              "purpose": "Add subtle depth and space without sounding like a noticeable echo.",
+              "matchQuality": "close",
+              "gap": "Used minimally to simulate the natural decay of sound in a large, non-studio environment, keeping it extremely subtle.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short (1.5s)",
+                "Mix": "Very Low (10%)"
+              },
+              "purpose": "Provide minimal, natural room ambience without sounding artificial or heavy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used with extremely low settings to mimic the subtle reflections of a large hall, adhering to the 'minimal room ambience' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity (0 dB)"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic IR with an acoustic or flat recording space simulation to better match the dry, close-mic studio sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic/Studio realism",
+              "recommendedAsset": "Close-Mic Acoustic Room IR (or Flat Studio IR)",
+              "reason": "The current US 2x12 is too 'ampy' for a dry, close-mic studio sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and clarity of the acoustic source.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "remove all electric amp models",
+          "remove chorus and tremolo",
+          "use acoustic sim or flat clean only"
+        ],
+        "warnings": [
+          "The source material is acoustic folk, requiring an acoustic simulation. Since the GP-180 is primarily designed for electric guitar modeling, this rig uses clean amp models (US Deluxe) and EQ shaping to achieve a flat, non-colored tone that best approximates a close-mic'd steel-string acoustic sound."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.929,
+      "prompt_chars": 1007,
+      "response_chars": 400,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 110,
+        "total_duration": 13914470300,
+        "prompt_eval_duration": 139713000,
+        "eval_duration": 869180000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.05,
+      "prompt_chars": 5347,
+      "response_chars": 614,
+      "usage": {
+        "input_tokens": 1502,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 156,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 11.595,
+      "prompt_chars": 4826,
+      "response_chars": 566,
+      "usage": {
+        "input_tokens": 1442,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 187,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 19.822,
+      "prompt_chars": 3579,
+      "response_chars": 6026,
+      "usage": {
+        "prompt_eval_count": 1193,
+        "eval_count": 1673,
+        "total_duration": 19798810500,
+        "prompt_eval_duration": 406457000,
+        "eval_duration": 13249916000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.897,
+      "prompt_chars": 8156,
+      "response_chars": 605,
+      "usage": {
+        "prompt_eval_count": 2223,
+        "eval_count": 163,
+        "total_duration": 1890771200,
+        "prompt_eval_duration": 222868000,
+        "eval_duration": 1289281000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.488,
+      "prompt_chars": 2803,
+      "response_chars": 190,
+      "usage": {
+        "prompt_eval_count": 875,
+        "eval_count": 46,
+        "total_duration": 12482306600,
+        "prompt_eval_duration": 178028000,
+        "eval_duration": 364724000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bob Dylan",
+      "title": "The Times They Are A-Changin'",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Bob Dylan - The Times They Are A-Changin' - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry acoustic folk vocal accompaniment",
+      "signalChainSummary": "A clean, flat signal chain simulating a dry acoustic folk sound using minimal processing and focusing on clarity.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Even out the dynamics of fingerpicked acoustic strumming.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used to simulate the natural compression of a close-mic'd acoustic guitar, as dedicated acoustic preamps are unavailable.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No overdrive or distortion is required for a dry folk sound.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low (2)",
+            "Treble": "Mid-High (6)",
+            "Bass": "Mid (4)",
+            "Presence": "Medium (5)"
+          },
+          "purpose": "Provide a clean, non-colored foundation suitable for acoustic simulation.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen as the cleanest available amp model to minimize coloration and mimic a flat recording environment. True acoustic modeling is absent.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate the sound of a close-mic'd acoustic source.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is selected for its clean, articulate tone, best suited for capturing the detail of fingerpicking. A dedicated acoustic IR would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB (Low)",
+            "Mid Cut": "-1 dB (Mids)",
+            "Treble Boost": "+3 dB (High)"
+          },
+          "purpose": "Enhance the clarity and definition of the acoustic guitar's fundamental frequencies.",
+          "matchQuality": "close",
+          "gap": "Manual EQ shaping is necessary to compensate for the lack of a dedicated acoustic tone control, focusing on high-end sparkle and low-mid punch.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No filtering or sweeping effects are needed.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Chorus and Tremolo are explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "Long (300ms)",
+            "Feedback": "Low (2)",
+            "Mix": "Very Low (15%)"
+          },
+          "purpose": "Add subtle depth and space without sounding like a noticeable echo.",
+          "matchQuality": "close",
+          "gap": "Used minimally to simulate the natural decay of sound in a large, non-studio environment, keeping it extremely subtle.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short (1.5s)",
+            "Mix": "Very Low (10%)"
+          },
+          "purpose": "Provide minimal, natural room ambience without sounding artificial or heavy.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is used with extremely low settings to mimic the subtle reflections of a large hall, adhering to the 'minimal room ambience' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity (0 dB)"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry acoustic folk vocal accompaniment",
+      "mustHave": [
+        "acoustic guitar simulation",
+        "no electric amp coloration",
+        "minimal room ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "tremolo",
+        "electric overdrive",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "steel-string acoustic",
+        "close mic",
+        "1963 studio recording"
+      ],
+      "corrections": [
+        "remove all electric amp models",
+        "remove chorus and tremolo",
+        "use acoustic sim or flat clean only"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "folk rock",
+        "singer-songwriter"
+      ],
+      "targetTone": "dry acoustic folk vocal accompaniment",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic IR with an acoustic or flat recording space simulation to better match the dry, close-mic studio sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic/Studio realism",
+          "recommendedAsset": "Close-Mic Acoustic Room IR (or Flat Studio IR)",
+          "reason": "The current US 2x12 is too 'ampy' for a dry, close-mic studio sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and clarity of the acoustic source.",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 149,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

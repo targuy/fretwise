@@ -1,0 +1,1006 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 72,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Atomic_Rooster__Tomorrow_Night.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Atomic Rooster",
+    "title": "Tomorrow Night",
+    "album": "",
+    "year": null,
+    "genre": "psychedelic rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Minor key, dramatic, slightly psychedelic rock tone",
+      "signatureElements": [
+        "Heavy fuzz/distortion (early 70s proto-metal sound)",
+        "Driving rhythm guitar lines",
+        "Slightly scooped mids with aggressive highs",
+        "Wah pedal sweeps"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Marshall Plexi style)",
+        "Fuzz pedal emulation (Big Muff or similar)",
+        "Chorus/Vibrato modulation effect"
+      ],
+      "avoid": [
+        "Modern digital clean tones",
+        "High-gain scooped metal sounds",
+        "Ambient delay washes"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+      "mustHave": [
+        "fuzz overdrive edge",
+        "wah sweeps",
+        "driving riff attack",
+        "raw mono feel"
+      ],
+      "avoid": [
+        "clean tone",
+        "modern metal scoop",
+        "chorus wash",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "wah",
+        "Plexi/Marshall",
+        "4x12"
+      ],
+      "corrections": [
+        "drop chorus",
+        "use fuzz not generic distortion",
+        "keep wah central"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+    "mustHave": [
+      "fuzz overdrive edge",
+      "wah sweeps",
+      "driving riff attack",
+      "raw mono feel"
+    ],
+    "avoid": [
+      "clean tone",
+      "modern metal scoop",
+      "chorus wash",
+      "ambient delay"
+    ],
+    "gearClues": [
+      "fuzz pedal",
+      "wah",
+      "Plexi/Marshall",
+      "4x12"
+    ],
+    "corrections": [
+      "drop chorus",
+      "use fuzz not generic distortion",
+      "keep wah central"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, aggressive 70s fuzz and British rock tones.",
+          "bestMatchSummary": "A high-gain signal chain utilizing Fuzz/Red Haze for the core tone, followed by a classic UK amp model (UK 45) to capture the Plexi/Marshall feel, finished with Wah and basic modulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and excessive noise inherent in fuzz/high-gain tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the required aggressive fuzz overdrive edge and raw attack.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah/filter sweep",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Type": "Wah",
+                "Frequency": "Center-focused",
+                "Level": "100%"
+              },
+              "purpose": "Implement the mandatory wah sweeps and filter movement.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated Wah module, so 'Boost' is used as a placeholder for an external/simulated wah effect (assuming it can be configured to act as a frequency sweep).",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Mid": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Plexi/Marshall sound and provide classic British rock grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Capture the required raw 4x12 cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids for a nasal, aggressive 70s lead tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": false,
+              "settings": {
+                "Depth": "20%",
+                "Rate": "Slow"
+              },
+              "purpose": "Added modulation for depth, but kept off to avoid washing out the raw fuzz attack.",
+              "matchQuality": "close",
+              "gap": "The source material is very aggressive and dry; Tremolo is optional and should be subtle or bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/room simulation",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "Short"
+              },
+              "purpose": "Provide minimal natural room ambience without adding wash or delay.",
+              "matchQuality": "close",
+              "gap": "The source demands a 'raw mono feel,' so the reverb mix must be kept extremely low to avoid sounding ambient.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The GP-180 lacks a dedicated Wah pedal module. The 'Boost' unit is used as a placeholder, assuming it can be configured to simulate the necessary frequency sweep/wah effect.",
+          "The tone requires extreme raw aggression and minimal ambience; all reverb (Room) and modulation (Tremolo) settings are kept very low or deactivated."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to capture the raw, aggressive 70s British rock sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage UK 4x12 IR (e.g., Marshall/Vox)",
+              "reason": "Enhance the raw, period-accurate grit and punch of a classic British rock cabinet.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Atomic Rooster - Tomorrow Night - Valeton GP-180",
+        "song": {
+          "artist": "Atomic Rooster",
+          "title": "Tomorrow Night",
+          "album": "",
+          "year": null,
+          "genre": "psychedelic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain signal chain utilizing Fuzz/Red Haze for the core tone, followed by a classic UK amp model (UK 45) to capture the Plexi/Marshall feel, finished with Wah and basic modulation.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and excessive noise inherent in fuzz/high-gain tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "65%",
+              "Level": "80%"
+            },
+            "purpose": "Provide the required aggressive fuzz overdrive edge and raw attack.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "wah/filter sweep",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Type": "Wah",
+              "Frequency": "Center-focused",
+              "Level": "100%"
+            },
+            "purpose": "Implement the mandatory wah sweeps and filter movement.",
+            "matchQuality": "close",
+            "gap": "The GP-180 does not have a dedicated Wah module, so 'Boost' is used as a placeholder for an external/simulated wah effect (assuming it can be configured to act as a frequency sweep).",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Mid": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the Plexi/Marshall sound and provide classic British rock grit.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "Close"
+            },
+            "purpose": "Capture the required raw 4x12 cabinet tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly scoop the low end and boost mids for a nasal, aggressive 70s lead tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/vibrato",
+            "module": "MOD",
+            "model": "Tremolo",
+            "active": false,
+            "settings": {
+              "Depth": "20%",
+              "Rate": "Slow"
+            },
+            "purpose": "Added modulation for depth, but kept off to avoid washing out the raw fuzz attack.",
+            "matchQuality": "close",
+            "gap": "The source material is very aggressive and dry; Tremolo is optional and should be subtle or bypassed entirely.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/room simulation",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "Short"
+            },
+            "purpose": "Provide minimal natural room ambience without adding wash or delay.",
+            "matchQuality": "close",
+            "gap": "The source demands a 'raw mono feel,' so the reverb mix must be kept extremely low to avoid sounding ambient.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+          "toneProfile": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+          "idealSignalChain": "fuzz pedal | wah | Plexi/Marshall | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzz overdrive edge",
+            "wah sweeps",
+            "driving riff attack",
+            "raw mono feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, aggressive 70s fuzz and British rock tones.",
+          "bestMatchSummary": "A high-gain signal chain utilizing Fuzz/Red Haze for the core tone, followed by a classic UK amp model (UK 45) to capture the Plexi/Marshall feel, finished with Wah and basic modulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and excessive noise inherent in fuzz/high-gain tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the required aggressive fuzz overdrive edge and raw attack.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah/filter sweep",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Type": "Wah",
+                "Frequency": "Center-focused",
+                "Level": "100%"
+              },
+              "purpose": "Implement the mandatory wah sweeps and filter movement.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated Wah module, so 'Boost' is used as a placeholder for an external/simulated wah effect (assuming it can be configured to act as a frequency sweep).",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Mid": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Plexi/Marshall sound and provide classic British rock grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Capture the required raw 4x12 cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids for a nasal, aggressive 70s lead tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": false,
+              "settings": {
+                "Depth": "20%",
+                "Rate": "Slow"
+              },
+              "purpose": "Added modulation for depth, but kept off to avoid washing out the raw fuzz attack.",
+              "matchQuality": "close",
+              "gap": "The source material is very aggressive and dry; Tremolo is optional and should be subtle or bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/room simulation",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "Short"
+              },
+              "purpose": "Provide minimal natural room ambience without adding wash or delay.",
+              "matchQuality": "close",
+              "gap": "The source demands a 'raw mono feel,' so the reverb mix must be kept extremely low to avoid sounding ambient.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to capture the raw, aggressive 70s British rock sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage UK 4x12 IR (e.g., Marshall/Vox)",
+              "reason": "Enhance the raw, period-accurate grit and punch of a classic British rock cabinet.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "use fuzz not generic distortion",
+          "keep wah central"
+        ],
+        "warnings": [
+          "The GP-180 lacks a dedicated Wah pedal module. The 'Boost' unit is used as a placeholder, assuming it can be configured to simulate the necessary frequency sweep/wah effect.",
+          "The tone requires extreme raw aggression and minimal ambience; all reverb (Room) and modulation (Tremolo) settings are kept very low or deactivated."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.344,
+      "prompt_chars": 982,
+      "response_chars": 526,
+      "usage": {
+        "prompt_eval_count": 314,
+        "eval_count": 127,
+        "total_duration": 3323852800,
+        "prompt_eval_duration": 165121000,
+        "eval_duration": 2687008000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.826,
+      "prompt_chars": 5440,
+      "response_chars": 472,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1644
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 22.736,
+      "prompt_chars": 3479,
+      "response_chars": 5035,
+      "usage": {
+        "prompt_eval_count": 1170,
+        "eval_count": 1437,
+        "total_duration": 22729889900,
+        "prompt_eval_duration": 340584000,
+        "eval_duration": 21920572000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 4.029,
+      "prompt_chars": 7078,
+      "response_chars": 531,
+      "usage": {
+        "prompt_eval_count": 1992,
+        "eval_count": 147,
+        "total_duration": 4007520100,
+        "prompt_eval_duration": 464915000,
+        "eval_duration": 3053757000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.973,
+      "prompt_chars": 2725,
+      "response_chars": 204,
+      "usage": {
+        "prompt_eval_count": 871,
+        "eval_count": 56,
+        "total_duration": 950899000,
+        "prompt_eval_duration": 105941000,
+        "eval_duration": 429462000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Atomic Rooster",
+      "title": "Tomorrow Night",
+      "album": "",
+      "year": null,
+      "genre": "psychedelic rock"
+    },
+    "rig": {
+      "rigName": "Atomic Rooster - Tomorrow Night - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+      "signalChainSummary": "A high-gain signal chain utilizing Fuzz/Red Haze for the core tone, followed by a classic UK amp model (UK 45) to capture the Plexi/Marshall feel, finished with Wah and basic modulation.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and excessive noise inherent in fuzz/high-gain tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "65%",
+            "Level": "80%"
+          },
+          "purpose": "Provide the required aggressive fuzz overdrive edge and raw attack.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "wah/filter sweep",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Type": "Wah",
+            "Frequency": "Center-focused",
+            "Level": "100%"
+          },
+          "purpose": "Implement the mandatory wah sweeps and filter movement.",
+          "matchQuality": "close",
+          "gap": "The GP-180 does not have a dedicated Wah module, so 'Boost' is used as a placeholder for an external/simulated wah effect (assuming it can be configured to act as a frequency sweep).",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Mid": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the Plexi/Marshall sound and provide classic British rock grit.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "Close"
+          },
+          "purpose": "Capture the required raw 4x12 cabinet tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly scoop the low end and boost mids for a nasal, aggressive 70s lead tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/vibrato",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": false,
+          "settings": {
+            "Depth": "20%",
+            "Rate": "Slow"
+          },
+          "purpose": "Added modulation for depth, but kept off to avoid washing out the raw fuzz attack.",
+          "matchQuality": "close",
+          "gap": "The source material is very aggressive and dry; Tremolo is optional and should be subtle or bypassed entirely.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/room simulation",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "Short"
+          },
+          "purpose": "Provide minimal natural room ambience without adding wash or delay.",
+          "matchQuality": "close",
+          "gap": "The source demands a 'raw mono feel,' so the reverb mix must be kept extremely low to avoid sounding ambient.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+      "mustHave": [
+        "fuzz overdrive edge",
+        "wah sweeps",
+        "driving riff attack",
+        "raw mono feel"
+      ],
+      "avoid": [
+        "clean tone",
+        "modern metal scoop",
+        "chorus wash",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "wah",
+        "Plexi/Marshall",
+        "4x12"
+      ],
+      "corrections": [
+        "drop chorus",
+        "use fuzz not generic distortion",
+        "keep wah central"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "psychedelic rock",
+      "styleTags": [
+        "proto-prog",
+        "hard rock",
+        "classic rock"
+      ],
+      "targetTone": "nasal fuzz lead/rhythm with wah and raw 70s drive",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to capture the raw, aggressive 70s British rock sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage UK 4x12 IR (e.g., Marshall/Vox)",
+          "reason": "Enhance the raw, period-accurate grit and punch of a classic British rock cabinet.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 72,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "psychedelic rock",
+    "subgenres": [
+      "proto-prog",
+      "hard rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre and 70s fuzz/wah tone strongly suggest psychedelic hard rock."
+  }
+}

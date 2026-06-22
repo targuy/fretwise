@@ -1,0 +1,1039 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1462,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__Lady_Madonna.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "Lady Madonna",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "british pop",
+      "merseybeat"
+    ],
+    "confidence": "high",
+    "rationale": "The Beatles' 'Lady Madonna' is a classic example of upbeat British Merseybeat/Pop Rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, mid-focused rock tone with a slight vintage grit.",
+      "signatureElements": [
+        "clean/crunch blend",
+        "midrange punch (especially around 1kHz)",
+        "slight compression for fullness",
+        "bright treble edge"
+      ],
+      "gearHypotheses": [
+        "British tweed amp emulation (e.g., AC30 style)",
+        "Light overdrive or boost pedal (for the crunch)"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "deep scooped mids",
+        "overly modern digital reverb/delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+      "mustHave": [
+        "bright chime",
+        "tight clean-crunch",
+        "upper-mid bite",
+        "short room",
+        "rhythmic drive"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "scooped mids",
+        "modern reverb",
+        "thick sustain"
+      ],
+      "gearClues": [
+        "AC30 style",
+        "single-coils or Rickenbacker-style jangle",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "name Vox chime more than generic rock",
+        "keep it fairly dry",
+        "reduce gain to near-clean crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+    "mustHave": [
+      "bright chime",
+      "tight clean-crunch",
+      "upper-mid bite",
+      "short room",
+      "rhythmic drive"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "scooped mids",
+      "modern reverb",
+      "thick sustain"
+    ],
+    "gearClues": [
+      "AC30 style",
+      "single-coils or Rickenbacker-style jangle",
+      "2x12 open-back",
+      "light compression"
+    ],
+    "corrections": [
+      "name Vox chime more than generic rock",
+      "keep it fairly dry",
+      "reduce gain to near-clean crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey clean tones with controlled breakup and room ambience.",
+          "bestMatchSummary": "A classic British rhythm tone using a light boost/OD for bite, followed by an AC30-style amp model, paired with a 2x12 cab, and finished with Chorus and Room reverb to achieve the desired Vox jangle and dryness.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary 'rhythmic drive' and upper-mid bite without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its bright, slightly nasal character, mimicking a light Vox/British clean boost effect.",
+              "alternatives": [
+                "Blues OD (if more grit is needed)",
+                "Boost (for pure volume lift)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass/Placeholder. No heavy distortion needed.",
+              "matchQuality": "none",
+              "gap": "The Green OD handles the necessary crunch; a dedicated DST unit is unnecessary and would muddy the chime.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Emulate the classic British chime and open-back sound associated with Vox amps.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 45 (if a slightly more aggressive tone is desired)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-sounding cabinet image that complements the AC30 tone.",
+              "matchQuality": "close",
+              "gap": "While UK Vintage 4x12 is common for this genre, US 2x12 was selected to match the 'open-back' and brighter chime clue.",
+              "alternatives": [
+                "UK Basket 4x12 (if a more traditional British sound is preferred)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and 'jangly' quality while keeping the tone focused.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to dial in the specific Vox chime character that standard models might miss.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle width and movement to the rhythm parts, enhancing the 'chime' effect.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here not for obvious modulation, but for its ability to widen and brighten the signal subtly, fitting the jangle requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'piano-room dryness' and subtle ambience without sounding modern or thick.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more controlled, less natural decay is acceptable)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Optional: Kept off to maintain the dry, rhythmic focus.",
+              "matchQuality": "none",
+              "gap": "The 'rhythmic drive' and dryness are best achieved without noticeable delay repeats.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig is optimized for a bright, clean-crunch rhythm tone. If the playing style requires heavier lead tones, the Green OD should be replaced with a dedicated distortion unit (e.g., Distortion) and the amp gain increased."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to better capture open-back, British chime tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "UK Open Back 2x12 IR",
+              "reason": "Better captures the desired Vox/open-back sound than US 2x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved chime and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - Lady Madonna - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "Lady Madonna",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British rhythm tone using a light boost/OD for bite, followed by an AC30-style amp model, paired with a 2x12 cab, and finished with Chorus and Room reverb to achieve the desired Vox jangle and dryness.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the necessary 'rhythmic drive' and upper-mid bite without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its bright, slightly nasal character, mimicking a light Vox/British clean boost effect.",
+            "alternatives": [
+              "Blues OD (if more grit is needed)",
+              "Boost (for pure volume lift)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass/Placeholder. No heavy distortion needed.",
+            "matchQuality": "none",
+            "gap": "The Green OD handles the necessary crunch; a dedicated DST unit is unnecessary and would muddy the chime.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Midrange": "6/10",
+              "Bass": "4/10"
+            },
+            "purpose": "Emulate the classic British chime and open-back sound associated with Vox amps.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "UK 45 (if a slightly more aggressive tone is desired)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, open-sounding cabinet image that complements the AC30 tone.",
+            "matchQuality": "close",
+            "gap": "While UK Vintage 4x12 is common for this genre, US 2x12 was selected to match the 'open-back' and brighter chime clue.",
+            "alternatives": [
+              "UK Basket 4x12 (if a more traditional British sound is preferred)"
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+4 dB"
+            },
+            "purpose": "Enhance the upper-mid bite and 'jangly' quality while keeping the tone focused.",
+            "matchQuality": "close",
+            "gap": "Manual EQ adjustment is necessary to dial in the specific Vox chime character that standard models might miss.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%",
+              "Mix": "40%"
+            },
+            "purpose": "Add subtle width and movement to the rhythm parts, enhancing the 'chime' effect.",
+            "matchQuality": "close",
+            "gap": "Chorus is used here not for obvious modulation, but for its ability to widen and brighten the signal subtly, fitting the jangle requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'piano-room dryness' and subtle ambience without sounding modern or thick.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "Plate (if a more controlled, less natural decay is acceptable)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Optional: Kept off to maintain the dry, rhythmic focus.",
+            "matchQuality": "none",
+            "gap": "The 'rhythmic drive' and dryness are best achieved without noticeable delay repeats.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+          "toneProfile": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+          "idealSignalChain": "AC30 style | single-coils or Rickenbacker-style jangle | 2x12 open-back | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "AC30 style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils or Rickenbacker-style jangle",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 open-back",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright chime",
+            "tight clean-crunch",
+            "upper-mid bite",
+            "short room",
+            "rhythmic drive"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey clean tones with controlled breakup and room ambience.",
+          "bestMatchSummary": "A classic British rhythm tone using a light boost/OD for bite, followed by an AC30-style amp model, paired with a 2x12 cab, and finished with Chorus and Room reverb to achieve the desired Vox jangle and dryness.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary 'rhythmic drive' and upper-mid bite without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its bright, slightly nasal character, mimicking a light Vox/British clean boost effect.",
+              "alternatives": [
+                "Blues OD (if more grit is needed)",
+                "Boost (for pure volume lift)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass/Placeholder. No heavy distortion needed.",
+              "matchQuality": "none",
+              "gap": "The Green OD handles the necessary crunch; a dedicated DST unit is unnecessary and would muddy the chime.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Emulate the classic British chime and open-back sound associated with Vox amps.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK 45 (if a slightly more aggressive tone is desired)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-sounding cabinet image that complements the AC30 tone.",
+              "matchQuality": "close",
+              "gap": "While UK Vintage 4x12 is common for this genre, US 2x12 was selected to match the 'open-back' and brighter chime clue.",
+              "alternatives": [
+                "UK Basket 4x12 (if a more traditional British sound is preferred)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and 'jangly' quality while keeping the tone focused.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to dial in the specific Vox chime character that standard models might miss.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "40%"
+              },
+              "purpose": "Add subtle width and movement to the rhythm parts, enhancing the 'chime' effect.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here not for obvious modulation, but for its ability to widen and brighten the signal subtly, fitting the jangle requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'piano-room dryness' and subtle ambience without sounding modern or thick.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more controlled, less natural decay is acceptable)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Optional: Kept off to maintain the dry, rhythmic focus.",
+              "matchQuality": "none",
+              "gap": "The 'rhythmic drive' and dryness are best achieved without noticeable delay repeats.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to better capture open-back, British chime tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "UK Open Back 2x12 IR",
+              "reason": "Better captures the desired Vox/open-back sound than US 2x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved chime and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "name Vox chime more than generic rock",
+          "keep it fairly dry",
+          "reduce gain to near-clean crunch"
+        ],
+        "warnings": [
+          "This rig is optimized for a bright, clean-crunch rhythm tone. If the playing style requires heavier lead tones, the Green OD should be replaced with a dedicated distortion unit (e.g., Distortion) and the amp gain increased."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.891,
+      "prompt_chars": 992,
+      "response_chars": 447,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 112,
+        "total_duration": 10887841300,
+        "prompt_eval_duration": 821532000,
+        "eval_duration": 2444827000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.956,
+      "prompt_chars": 5367,
+      "response_chars": 572,
+      "usage": {
+        "input_tokens": 1498,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 154,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1652
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 46.725,
+      "prompt_chars": 3651,
+      "response_chars": 5505,
+      "usage": {
+        "prompt_eval_count": 1231,
+        "eval_count": 1561,
+        "total_duration": 46699032400,
+        "prompt_eval_duration": 626711000,
+        "eval_duration": 30552050000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.23,
+      "prompt_chars": 7671,
+      "response_chars": 494,
+      "usage": {
+        "prompt_eval_count": 2149,
+        "eval_count": 143,
+        "total_duration": 4212670900,
+        "prompt_eval_duration": 841569000,
+        "eval_duration": 2895366000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.097,
+      "prompt_chars": 2841,
+      "response_chars": 191,
+      "usage": {
+        "prompt_eval_count": 921,
+        "eval_count": 54,
+        "total_duration": 12077410700,
+        "prompt_eval_duration": 450058000,
+        "eval_duration": 890625000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "Lady Madonna",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Beatles - Lady Madonna - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+      "signalChainSummary": "A classic British rhythm tone using a light boost/OD for bite, followed by an AC30-style amp model, paired with a 2x12 cab, and finished with Chorus and Room reverb to achieve the desired Vox jangle and dryness.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the necessary 'rhythmic drive' and upper-mid bite without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its bright, slightly nasal character, mimicking a light Vox/British clean boost effect.",
+          "alternatives": [
+            {
+              "model": "Blues OD (if more grit is needed)",
+              "reason": ""
+            },
+            {
+              "model": "Boost (for pure volume lift)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass/Placeholder. No heavy distortion needed.",
+          "matchQuality": "fallback",
+          "gap": "The Green OD handles the necessary crunch; a dedicated DST unit is unnecessary and would muddy the chime.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Midrange": "6/10",
+            "Bass": "4/10"
+          },
+          "purpose": "Emulate the classic British chime and open-back sound associated with Vox amps.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45 (if a slightly more aggressive tone is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, open-sounding cabinet image that complements the AC30 tone.",
+          "matchQuality": "close",
+          "gap": "While UK Vintage 4x12 is common for this genre, US 2x12 was selected to match the 'open-back' and brighter chime clue.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12 (if a more traditional British sound is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+4 dB"
+          },
+          "purpose": "Enhance the upper-mid bite and 'jangly' quality while keeping the tone focused.",
+          "matchQuality": "close",
+          "gap": "Manual EQ adjustment is necessary to dial in the specific Vox chime character that standard models might miss.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%",
+            "Mix": "40%"
+          },
+          "purpose": "Add subtle width and movement to the rhythm parts, enhancing the 'chime' effect.",
+          "matchQuality": "close",
+          "gap": "Chorus is used here not for obvious modulation, but for its ability to widen and brighten the signal subtly, fitting the jangle requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'piano-room dryness' and subtle ambience without sounding modern or thick.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate (if a more controlled, less natural decay is acceptable)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Optional: Kept off to maintain the dry, rhythmic focus.",
+          "matchQuality": "fallback",
+          "gap": "The 'rhythmic drive' and dryness are best achieved without noticeable delay repeats.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+      "mustHave": [
+        "bright chime",
+        "tight clean-crunch",
+        "upper-mid bite",
+        "short room",
+        "rhythmic drive"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "scooped mids",
+        "modern reverb",
+        "thick sustain"
+      ],
+      "gearClues": [
+        "AC30 style",
+        "single-coils or Rickenbacker-style jangle",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "name Vox chime more than generic rock",
+        "keep it fairly dry",
+        "reduce gain to near-clean crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "british pop",
+        "merseybeat"
+      ],
+      "targetTone": "jangly Vox-style edge-of-breakup rhythm with piano-room dryness",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to better capture open-back, British chime tones.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "UK Open Back 2x12 IR",
+          "reason": "Better captures the desired Vox/open-back sound than US 2x12.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved chime and clarity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1462,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,987 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 92,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bad_Company__Ready_For_Love.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bad Company",
+    "title": "Ready For Love",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with slight grit and bite.",
+      "signatureElements": [
+        "Mid-range punch",
+        "Slight overdrive/crunch",
+        "Rock rhythm feel"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall/Vox)",
+        "Overdrive pedal simulation (Tube Screamer type)"
+      ],
+      "avoid": [
+        "Excessive fuzz",
+        "Clean chime tones",
+        "High gain metal sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly edge-of-breakup British clean-crunch",
+      "mustHave": [
+        "clear picked attack",
+        "light breakup",
+        "bright chime",
+        "tight mids"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "metal gain"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single coils",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "use less drive",
+        "add more chime",
+        "keep it airy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly edge-of-breakup British clean-crunch",
+    "mustHave": [
+      "clear picked attack",
+      "light breakup",
+      "bright chime",
+      "tight mids"
+    ],
+    "avoid": [
+      "heavy crunch",
+      "fuzz",
+      "metal gain"
+    ],
+    "gearClues": [
+      "Vox AC30",
+      "single coils",
+      "2x12 open-back",
+      "light compression"
+    ],
+    "corrections": [
+      "use less drive",
+      "add more chime",
+      "keep it airy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British clean tones, prioritizing chime and clarity over heavy gain.",
+          "bestMatchSummary": "A classic British rhythm tone using light compression, a mild OD boost for edge-of-breakup, and an AC30 model with a 2x12 cabinet to achieve bright, airy, jangly crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Smooth out dynamics and enhance the picked attack for clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, natural breakup and 'edge-of-breakup' grit without heavy crunch.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle saturation if needed (keeping the tone clean).",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Emulate the classic Vox AC30 sound, known for its bright chime and airy quality.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-back sound that complements the AC30's chime and fits the 'single coils/open-back' clue.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its brightness, approximating the desired single-coil, open-back character, though a dedicated Vox cabinet would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1 dB",
+                "Midrange": "+2 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the upper mids and high frequencies to enhance 'chime' and 'bright chime', while keeping the tone tight.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and 'airiness' without muddying the clean tone.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth to the overall sound without sounding overly wet.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track. The rig focuses on achieving a bright, jangly rhythm tone suitable for the specified 'edge-of-breakup' sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic US 2x12 cabinet with a dedicated Vox AC30 IR to maximize the desired British chime and airy quality.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 2x12 IR",
+              "reason": "Enhance authentic British chime and complement the AC30 amp model.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bad Company - Ready For Love - Valeton GP-180",
+        "song": {
+          "artist": "Bad Company",
+          "title": "Ready For Love",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly edge-of-breakup British clean-crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British rhythm tone using light compression, a mild OD boost for edge-of-breakup, and an AC30 model with a 2x12 cabinet to achieve bright, airy, jangly crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and stray noise.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1"
+            },
+            "purpose": "Smooth out dynamics and enhance the picked attack for clarity.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, natural breakup and 'edge-of-breakup' grit without heavy crunch.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use for subtle saturation if needed (keeping the tone clean).",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "7/10",
+              "Midrange": "6/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Emulate the classic Vox AC30 sound, known for its bright chime and airy quality.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, open-back sound that complements the AC30's chime and fits the 'single coils/open-back' clue.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its brightness, approximating the desired single-coil, open-back character, though a dedicated Vox cabinet would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1 dB",
+              "Midrange": "+2 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Boost the upper mids and high frequencies to enhance 'chime' and 'bright chime', while keeping the tone tight.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle movement and 'airiness' without muddying the clean tone.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and depth to the overall sound without sounding overly wet.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly edge-of-breakup British clean-crunch",
+          "toneProfile": "jangly edge-of-breakup British clean-crunch",
+          "idealSignalChain": "Vox AC30 | single coils | 2x12 open-back | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 open-back",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clear picked attack",
+            "light breakup",
+            "bright chime",
+            "tight mids"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British clean tones, prioritizing chime and clarity over heavy gain.",
+          "bestMatchSummary": "A classic British rhythm tone using light compression, a mild OD boost for edge-of-breakup, and an AC30 model with a 2x12 cabinet to achieve bright, airy, jangly crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Smooth out dynamics and enhance the picked attack for clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, natural breakup and 'edge-of-breakup' grit without heavy crunch.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle saturation if needed (keeping the tone clean).",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Emulate the classic Vox AC30 sound, known for its bright chime and airy quality.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open-back sound that complements the AC30's chime and fits the 'single coils/open-back' clue.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its brightness, approximating the desired single-coil, open-back character, though a dedicated Vox cabinet would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1 dB",
+                "Midrange": "+2 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the upper mids and high frequencies to enhance 'chime' and 'bright chime', while keeping the tone tight.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and 'airiness' without muddying the clean tone.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth to the overall sound without sounding overly wet.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic US 2x12 cabinet with a dedicated Vox AC30 IR to maximize the desired British chime and airy quality.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vox AC30 2x12 IR",
+              "reason": "Enhance authentic British chime and complement the AC30 amp model.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "use less drive",
+          "add more chime",
+          "keep it airy"
+        ],
+        "warnings": [
+          "The source material is a classic rock track. The rig focuses on achieving a bright, jangly rhythm tone suitable for the specified 'edge-of-breakup' sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.562,
+      "prompt_chars": 979,
+      "response_chars": 379,
+      "usage": {
+        "prompt_eval_count": 315,
+        "eval_count": 95,
+        "total_duration": 2537543800,
+        "prompt_eval_duration": 165591000,
+        "eval_duration": 1977683000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.985,
+      "prompt_chars": 5278,
+      "response_chars": 432,
+      "usage": {
+        "input_tokens": 1474,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 121,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1595
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 30.476,
+      "prompt_chars": 3429,
+      "response_chars": 4666,
+      "usage": {
+        "prompt_eval_count": 1157,
+        "eval_count": 1391,
+        "total_duration": 30469464900,
+        "prompt_eval_duration": 354886000,
+        "eval_duration": 29684003000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.546,
+      "prompt_chars": 6651,
+      "response_chars": 547,
+      "usage": {
+        "prompt_eval_count": 1933,
+        "eval_count": 149,
+        "total_duration": 3540694700,
+        "prompt_eval_duration": 493113000,
+        "eval_duration": 2554586000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.048,
+      "prompt_chars": 2653,
+      "response_chars": 226,
+      "usage": {
+        "prompt_eval_count": 872,
+        "eval_count": 71,
+        "total_duration": 1044273000,
+        "prompt_eval_duration": 104865000,
+        "eval_duration": 536469000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bad Company",
+      "title": "Ready For Love",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Bad Company - Ready For Love - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly edge-of-breakup British clean-crunch",
+      "signalChainSummary": "A classic British rhythm tone using light compression, a mild OD boost for edge-of-breakup, and an AC30 model with a 2x12 cabinet to achieve bright, airy, jangly crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and stray noise.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1"
+          },
+          "purpose": "Smooth out dynamics and enhance the picked attack for clarity.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, natural breakup and 'edge-of-breakup' grit without heavy crunch.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use for subtle saturation if needed (keeping the tone clean).",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "7/10",
+            "Midrange": "6/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Emulate the classic Vox AC30 sound, known for its bright chime and airy quality.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, open-back sound that complements the AC30's chime and fits the 'single coils/open-back' clue.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its brightness, approximating the desired single-coil, open-back character, though a dedicated Vox cabinet would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1 dB",
+            "Midrange": "+2 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Boost the upper mids and high frequencies to enhance 'chime' and 'bright chime', while keeping the tone tight.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle movement and 'airiness' without muddying the clean tone.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and depth to the overall sound without sounding overly wet.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly edge-of-breakup British clean-crunch",
+      "mustHave": [
+        "clear picked attack",
+        "light breakup",
+        "bright chime",
+        "tight mids"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "metal gain"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single coils",
+        "2x12 open-back",
+        "light compression"
+      ],
+      "corrections": [
+        "use less drive",
+        "add more chime",
+        "keep it airy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "british rock",
+        "hard rock",
+        "blues rock"
+      ],
+      "targetTone": "jangly edge-of-breakup British clean-crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic US 2x12 cabinet with a dedicated Vox AC30 IR to maximize the desired British chime and airy quality.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vox AC30 2x12 IR",
+          "reason": "Enhance authentic British chime and complement the AC30 amp model.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 92,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "british rock",
+      "hard rock",
+      "blues rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and source genre are classic rock, fitting the British crunch tone."
+  }
+}

@@ -1,0 +1,1138 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1005,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Nirvana__Something_In_The_Way.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Nirvana",
+    "title": "Something In The Way",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "grunge",
+      "indie rock"
+    ],
+    "confidence": "high",
+    "rationale": "Nirvana's early work is alternative/grunge, but the song style leans toward intimate indie rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Grunge/Alternative Rock, raw and slightly dirty",
+      "signatureElements": [
+        "crunch",
+        "mild fuzz (or overdriven clean)",
+        "chorus/modulation (subtle)",
+        "vintage amp sound (e.g., Fender Twin/Vox AC30 style)"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (for grit)",
+        "Chorus effect (for texture)",
+        "Amp simulation with spring reverb and mild breakup"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "digital delay (unless subtle)",
+        "clean jazz tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "hushed clean acoustic-like guitar with faint room",
+      "mustHave": [
+        "very soft picking",
+        "dry intimate tone",
+        "no crunch",
+        "no chorus"
+      ],
+      "avoid": [
+        "grunge distortion",
+        "mild fuzz",
+        "chorus/modulation",
+        "vintage amp breakup"
+      ],
+      "gearClues": [
+        "clean amp",
+        "low gain",
+        "small room"
+      ],
+      "corrections": [
+        "avoid electric grunge rig",
+        "treat as sparse clean texture"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "Iconic track with likely nonstandard guitar texture",
+      "Draft misses the decisive hushed clean/acoustic-like feel",
+      "Wrong gain family risk for GP-180"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "hushed clean electric mimicking acoustic fingerpicking",
+    "mustHave": [
+      "pristine clean amp",
+      "very low volume dynamics",
+      "dry intimate room",
+      "no breakup"
+    ],
+    "avoid": [
+      "any overdrive or fuzz",
+      "chorus or modulation",
+      "grunge distortion",
+      "bright Fender scoop"
+    ],
+    "gearClues": [
+      "clean solid-state or jazz amp",
+      "neck pickup soft attack",
+      "minimal reverb"
+    ],
+    "corrections": [
+      "Ollama draft wrong gain family entirely",
+      "no crunch no fuzz no chorus",
+      "track uses clean electric not grunge rig"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "finalVerdict": {
+    "targetTone": "hushed clean electric mimicking acoustic fingerpicking",
+    "mustHave": [
+      "pristine clean amp",
+      "very low volume dynamics",
+      "dry intimate room",
+      "no breakup"
+    ],
+    "avoid": [
+      "any overdrive or fuzz",
+      "chorus or modulation",
+      "grunge distortion",
+      "bright Fender scoop"
+    ],
+    "gearClues": [
+      "clean solid-state or jazz amp",
+      "neck pickup soft attack",
+      "minimal reverb"
+    ],
+    "corrections": [
+      "Ollama draft wrong gain family entirely",
+      "no crunch no fuzz no chorus",
+      "track uses clean electric not grunge rig"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones, mimicking acoustic intimacy while retaining electric warmth.",
+          "bestMatchSummary": "A highly controlled signal chain using a clean preamp (US Deluxe) paired with minimal compression and subtle room ambience to achieve a hushed, fingerpicked sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate background hum and noise inherent in quiet recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and enhance the soft attack of fingerpicked notes.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a consistent, intimate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Ensure zero breakup or grit is introduced into the signal path.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone requires pure clean gain.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp preamp",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+1",
+                "Mid": "0",
+                "Bass": "-1"
+              },
+              "purpose": "Provide a pristine, clean solid-state tone suitable for jazz/clean electric sounds.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for the required 'pristine clean' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Select a bright, articulate cabinet that complements the clean solid-state amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the US Deluxe character.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly tame the low end and scoop the high-mids to enhance intimacy and warmth.",
+              "matchQuality": "close",
+              "gap": "None. Used for subtle tonal shaping required by the 'hushed' verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or wah effect is required for this delicate fingerpicking style.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone must remain pure and uncolored.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all modulation effects (Chorus/Tremolo) as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Modulation would ruin the intimate, dry sound.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding distracting or overly wet.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests 'minimal reverb,' but a very short, low-mix delay can enhance the perceived room size subtly.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "5%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a dry, intimate room ambience without the washiness of plate or spring reverb.",
+              "matchQuality": "perfect",
+              "gap": "The verdict specifies 'minimal reverb,' so settings are kept extremely low to maintain intimacy.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "-3 dB"
+              },
+              "purpose": "Overall master volume control to match the 'very low volume dynamics' requirement.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final output stage adjustment.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (Nirvana, 'Something In The Way' often features acoustic elements). This rig builds a clean electric imitation to capture the required intimate tone while maintaining the versatility of an electric guitar setup."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current IR is solid but could benefit from a more natural, room-mic'd sound to enhance the 'dry intimate room' feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "room-miked jazz cab IR",
+              "reason": "Enhance intimacy and natural room tone for fingerpicking.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Subtle depth increase",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Nirvana - Something In The Way - Valeton GP-180",
+        "song": {
+          "artist": "Nirvana",
+          "title": "Something In The Way",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "hushed clean electric mimicking acoustic fingerpicking",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A highly controlled signal chain using a clean preamp (US Deluxe) paired with minimal compression and subtle room ambience to achieve a hushed, fingerpicked sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Eliminate background hum and noise inherent in quiet recordings.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth dynamics and enhance the soft attack of fingerpicked notes.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for achieving a consistent, intimate sound.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Ensure zero breakup or grit is introduced into the signal path.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The tone requires pure clean gain.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp preamp",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+1",
+              "Mid": "0",
+              "Bass": "-1"
+            },
+            "purpose": "Provide a pristine, clean solid-state tone suitable for jazz/clean electric sounds.",
+            "matchQuality": "perfect",
+            "gap": "None. Best choice for the required 'pristine clean' character.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "Close"
+            },
+            "purpose": "Select a bright, articulate cabinet that complements the clean solid-state amp model.",
+            "matchQuality": "perfect",
+            "gap": "None. Matches the US Deluxe character.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly tame the low end and scoop the high-mids to enhance intimacy and warmth.",
+            "matchQuality": "close",
+            "gap": "None. Used for subtle tonal shaping required by the 'hushed' verdict.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No filtering or wah effect is required for this delicate fingerpicking style.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The tone must remain pure and uncolored.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid all modulation effects (Chorus/Tremolo) as per the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A. Modulation would ruin the intimate, dry sound.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Add a subtle sense of space and depth without sounding distracting or overly wet.",
+            "matchQuality": "close",
+            "gap": "The verdict suggests 'minimal reverb,' but a very short, low-mix delay can enhance the perceived room size subtly.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "5%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide a dry, intimate room ambience without the washiness of plate or spring reverb.",
+            "matchQuality": "perfect",
+            "gap": "The verdict specifies 'minimal reverb,' so settings are kept extremely low to maintain intimacy.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "-3 dB"
+            },
+            "purpose": "Overall master volume control to match the 'very low volume dynamics' requirement.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final output stage adjustment.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "hushed clean electric mimicking acoustic fingerpicking",
+          "toneProfile": "hushed clean electric mimicking acoustic fingerpicking",
+          "idealSignalChain": "clean solid-state or jazz amp | neck pickup soft attack | minimal reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean solid-state or jazz amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "neck pickup soft attack",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "pristine clean amp",
+            "very low volume dynamics",
+            "dry intimate room",
+            "no breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones, mimicking acoustic intimacy while retaining electric warmth.",
+          "bestMatchSummary": "A highly controlled signal chain using a clean preamp (US Deluxe) paired with minimal compression and subtle room ambience to achieve a hushed, fingerpicked sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate background hum and noise inherent in quiet recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and enhance the soft attack of fingerpicked notes.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a consistent, intimate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Ensure zero breakup or grit is introduced into the signal path.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone requires pure clean gain.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp preamp",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+1",
+                "Mid": "0",
+                "Bass": "-1"
+              },
+              "purpose": "Provide a pristine, clean solid-state tone suitable for jazz/clean electric sounds.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for the required 'pristine clean' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Select a bright, articulate cabinet that complements the clean solid-state amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the US Deluxe character.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly tame the low end and scoop the high-mids to enhance intimacy and warmth.",
+              "matchQuality": "close",
+              "gap": "None. Used for subtle tonal shaping required by the 'hushed' verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or wah effect is required for this delicate fingerpicking style.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone must remain pure and uncolored.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all modulation effects (Chorus/Tremolo) as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Modulation would ruin the intimate, dry sound.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding distracting or overly wet.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests 'minimal reverb,' but a very short, low-mix delay can enhance the perceived room size subtly.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "5%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a dry, intimate room ambience without the washiness of plate or spring reverb.",
+              "matchQuality": "perfect",
+              "gap": "The verdict specifies 'minimal reverb,' so settings are kept extremely low to maintain intimacy.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "-3 dB"
+              },
+              "purpose": "Overall master volume control to match the 'very low volume dynamics' requirement.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final output stage adjustment.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current IR is solid but could benefit from a more natural, room-mic'd sound to enhance the 'dry intimate room' feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "room-miked jazz cab IR",
+              "reason": "Enhance intimacy and natural room tone for fingerpicking.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Subtle depth increase",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Ollama draft wrong gain family entirely",
+          "no crunch no fuzz no chorus",
+          "track uses clean electric not grunge rig"
+        ],
+        "warnings": [
+          "The source material is non-guitar (Nirvana, 'Something In The Way' often features acoustic elements). This rig builds a clean electric imitation to capture the required intimate tone while maintaining the versatility of an electric guitar setup."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.045,
+      "prompt_chars": 996,
+      "response_chars": 460,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 116,
+        "total_duration": 11018314400,
+        "prompt_eval_duration": 475071000,
+        "eval_duration": 2454340000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.001,
+      "prompt_chars": 5390,
+      "response_chars": 606,
+      "usage": {
+        "input_tokens": 1507,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 160,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 5.421,
+      "prompt_chars": 4836,
+      "response_chars": 653,
+      "usage": {
+        "input_tokens": 1432,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 219,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 31.905,
+      "prompt_chars": 3657,
+      "response_chars": 5921,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1622,
+        "total_duration": 31899013000,
+        "prompt_eval_duration": 532275999,
+        "eval_duration": 30938759000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.135,
+      "prompt_chars": 8131,
+      "response_chars": 550,
+      "usage": {
+        "prompt_eval_count": 2189,
+        "eval_count": 153,
+        "total_duration": 20129228500,
+        "prompt_eval_duration": 963762000,
+        "eval_duration": 3007459000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.361,
+      "prompt_chars": 2931,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 897,
+        "eval_count": 54,
+        "total_duration": 9356555200,
+        "prompt_eval_duration": 452452000,
+        "eval_duration": 903507000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Nirvana",
+      "title": "Something In The Way",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Nirvana - Something In The Way - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "hushed clean electric mimicking acoustic fingerpicking",
+      "signalChainSummary": "A highly controlled signal chain using a clean preamp (US Deluxe) paired with minimal compression and subtle room ambience to achieve a hushed, fingerpicked sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Eliminate background hum and noise inherent in quiet recordings.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth dynamics and enhance the soft attack of fingerpicked notes.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for achieving a consistent, intimate sound.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Ensure zero breakup or grit is introduced into the signal path.",
+          "matchQuality": "exact",
+          "gap": "N/A. The tone requires pure clean gain.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp preamp",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+1",
+            "Mid": "0",
+            "Bass": "-1"
+          },
+          "purpose": "Provide a pristine, clean solid-state tone suitable for jazz/clean electric sounds.",
+          "matchQuality": "exact",
+          "gap": "None. Best choice for the required 'pristine clean' character.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "Close"
+          },
+          "purpose": "Select a bright, articulate cabinet that complements the clean solid-state amp model.",
+          "matchQuality": "exact",
+          "gap": "None. Matches the US Deluxe character.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly tame the low end and scoop the high-mids to enhance intimacy and warmth.",
+          "matchQuality": "close",
+          "gap": "None. Used for subtle tonal shaping required by the 'hushed' verdict.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No filtering or wah effect is required for this delicate fingerpicking style.",
+          "matchQuality": "exact",
+          "gap": "N/A. The tone must remain pure and uncolored.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid all modulation effects (Chorus/Tremolo) as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A. Modulation would ruin the intimate, dry sound.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Add a subtle sense of space and depth without sounding distracting or overly wet.",
+          "matchQuality": "close",
+          "gap": "The verdict suggests 'minimal reverb,' but a very short, low-mix delay can enhance the perceived room size subtly.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "5%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide a dry, intimate room ambience without the washiness of plate or spring reverb.",
+          "matchQuality": "exact",
+          "gap": "The verdict specifies 'minimal reverb,' so settings are kept extremely low to maintain intimacy.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "-3 dB"
+          },
+          "purpose": "Overall master volume control to match the 'very low volume dynamics' requirement.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final output stage adjustment.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "hushed clean electric mimicking acoustic fingerpicking",
+      "mustHave": [
+        "pristine clean amp",
+        "very low volume dynamics",
+        "dry intimate room",
+        "no breakup"
+      ],
+      "avoid": [
+        "any overdrive or fuzz",
+        "chorus or modulation",
+        "grunge distortion",
+        "bright Fender scoop"
+      ],
+      "gearClues": [
+        "clean solid-state or jazz amp",
+        "neck pickup soft attack",
+        "minimal reverb"
+      ],
+      "corrections": [
+        "Ollama draft wrong gain family entirely",
+        "no crunch no fuzz no chorus",
+        "track uses clean electric not grunge rig"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "grunge",
+        "indie rock"
+      ],
+      "targetTone": "hushed clean electric mimicking acoustic fingerpicking",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current IR is solid but could benefit from a more natural, room-mic'd sound to enhance the 'dry intimate room' feel.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "room-miked jazz cab IR",
+          "reason": "Enhance intimacy and natural room tone for fingerpicking.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Subtle depth increase",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1005,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

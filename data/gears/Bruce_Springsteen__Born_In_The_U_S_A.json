@@ -1,0 +1,1052 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 178,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bruce_Springsteen__Born_In_The_U_S_A.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bruce Springsteen",
+    "title": "Born In The U.S.A.",
+    "album": "",
+    "year": null,
+    "genre": "heartland rock"
+  },
+  "genreClassification": {
+    "genre": "heartland rock",
+    "subgenres": [
+      "rockabilly",
+      "arena rock",
+      "americana"
+    ],
+    "confidence": "high",
+    "rationale": "Bruce Springsteen is a foundational artist of the genre, known for anthemic rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty rock tone with pronounced mid-range punch and bite.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture for grit",
+        "Clean arpeggiation capability",
+        "Punchy bass response"
+      ],
+      "gearHypotheses": [
+        "British style Overdrive pedal (e.g., Tube Screamer variant)",
+        "Amp simulation with mid-scoop option",
+        "Cabinet modeling emphasizing punch"
+      ],
+      "avoid": [
+        "High-gain metal distortion",
+        "Thin, scooped tones",
+        "Excessive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight Springsteen rock crunch with bright bite and dry punch",
+      "mustHave": [
+        "tight driven rhythm",
+        "bright upper mids",
+        "dry attack",
+        "slight edge of breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "mid-scooped",
+        "metal gain",
+        "modulation"
+      ],
+      "gearClues": [
+        "Tele/strat style single-coils",
+        "Marshall/Plexi or Fender pushed",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "keep it more crunch than overdrive",
+        "avoid scoop",
+        "stay dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight Springsteen rock crunch with bright bite and dry punch",
+    "mustHave": [
+      "tight driven rhythm",
+      "bright upper mids",
+      "dry attack",
+      "slight edge of breakup"
+    ],
+    "avoid": [
+      "fuzz",
+      "mid-scooped",
+      "metal gain",
+      "modulation"
+    ],
+    "gearClues": [
+      "Tele/strat style single-coils",
+      "Marshall/Plexi or Fender pushed",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "keep it more crunch than overdrive",
+      "avoid scoop",
+      "stay dry"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock crunch and bright, dry tones.",
+          "bestMatchSummary": "A tight signal chain using a Boost/OD for initial grit, followed by an AC30-style amp simulation and a British 4x12 cabinet to achieve the required punchy, mid-focused Springsteen sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'edge of breakup' and classic rock crunch without excessive fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative for a slightly warmer, less aggressive grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a light boost if needed; keeping the tone focused on OD crunch.",
+              "matchQuality": "perfect",
+              "gap": "The Green OD handles the necessary grit, so no dedicated distortion is required.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British clean/crunch tone (Plexi style) needed for Springsteen's sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A solid alternative if the AC30 character is too pronounced."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and punchy midrange required for the genre.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 30 4x12",
+                  "reason": "A good alternative if a slightly different voicing is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Mid Boost": "+3",
+                "Treble Boost": "+2"
+              },
+              "purpose": "Enhance the bright upper mids and overall punchiness while maintaining dryness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation as per the 'avoid' list and keep the tone dry.",
+              "matchQuality": "perfect",
+              "gap": "The instructions explicitly state to avoid modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle depth and space without sounding overly wet or distracting from the rhythm.",
+              "matchQuality": "close",
+              "gap": "A very minimal delay is used to add 'punch' rather than a noticeable echo, keeping the sound dry.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "If a more natural room ambience is preferred over a subtle slapback effect."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment to ensure the 'dry punch' is maintained.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (Bruce Springsteen) is a full band recording, not solely guitar-focused. This rig provides the best imitation of the required rhythm crunch tone.",
+          "Modulation effects (Chorus/Tremolo) are disabled to adhere strictly to the 'avoid' list and maintain a dry punch."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and vintage British tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK IR",
+              "reason": "Enhance the punchy, classic British sound required for Springsteen's rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bruce Springsteen - Born In The U.S.A. - Valeton GP-180",
+        "song": {
+          "artist": "Bruce Springsteen",
+          "title": "Born In The U.S.A.",
+          "album": "",
+          "year": null,
+          "genre": "heartland rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight Springsteen rock crunch with bright bite and dry punch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using a Boost/OD for initial grit, followed by an AC30-style amp simulation and a British 4x12 cabinet to achieve the required punchy, mid-focused Springsteen sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up background noise and maintain tight rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial 'edge of breakup' and classic rock crunch without excessive fuzz.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative for a slightly warmer, less aggressive grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a light boost if needed; keeping the tone focused on OD crunch.",
+            "matchQuality": "perfect",
+            "gap": "The Green OD handles the necessary grit, so no dedicated distortion is required.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British clean/crunch tone (Plexi style) needed for Springsteen's sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A solid alternative if the AC30 character is too pronounced."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and punchy midrange required for the genre.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 30 4x12",
+                "reason": "A good alternative if a slightly different voicing is desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-1",
+              "Mid Boost": "+3",
+              "Treble Boost": "+2"
+            },
+            "purpose": "Enhance the bright upper mids and overall punchiness while maintaining dryness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation as per the 'avoid' list and keep the tone dry.",
+            "matchQuality": "perfect",
+            "gap": "The instructions explicitly state to avoid modulation.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "1"
+            },
+            "purpose": "Add subtle depth and space without sounding overly wet or distracting from the rhythm.",
+            "matchQuality": "close",
+            "gap": "A very minimal delay is used to add 'punch' rather than a noticeable echo, keeping the sound dry.",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "If a more natural room ambience is preferred over a subtle slapback effect."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "10"
+            },
+            "purpose": "Final output level adjustment to ensure the 'dry punch' is maintained.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight Springsteen rock crunch with bright bite and dry punch",
+          "toneProfile": "tight Springsteen rock crunch with bright bite and dry punch",
+          "idealSignalChain": "Tele/strat style single-coils | Marshall/Plexi or Fender pushed | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Tele/strat style single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or Fender pushed",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight driven rhythm",
+            "bright upper mids",
+            "dry attack",
+            "slight edge of breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock crunch and bright, dry tones.",
+          "bestMatchSummary": "A tight signal chain using a Boost/OD for initial grit, followed by an AC30-style amp simulation and a British 4x12 cabinet to achieve the required punchy, mid-focused Springsteen sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'edge of breakup' and classic rock crunch without excessive fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative for a slightly warmer, less aggressive grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a light boost if needed; keeping the tone focused on OD crunch.",
+              "matchQuality": "perfect",
+              "gap": "The Green OD handles the necessary grit, so no dedicated distortion is required.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British clean/crunch tone (Plexi style) needed for Springsteen's sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A solid alternative if the AC30 character is too pronounced."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and punchy midrange required for the genre.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 30 4x12",
+                  "reason": "A good alternative if a slightly different voicing is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Mid Boost": "+3",
+                "Treble Boost": "+2"
+              },
+              "purpose": "Enhance the bright upper mids and overall punchiness while maintaining dryness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation as per the 'avoid' list and keep the tone dry.",
+              "matchQuality": "perfect",
+              "gap": "The instructions explicitly state to avoid modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle depth and space without sounding overly wet or distracting from the rhythm.",
+              "matchQuality": "close",
+              "gap": "A very minimal delay is used to add 'punch' rather than a noticeable echo, keeping the sound dry.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "If a more natural room ambience is preferred over a subtle slapback effect."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment to ensure the 'dry punch' is maintained.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and vintage British tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK IR",
+              "reason": "Enhance the punchy, classic British sound required for Springsteen's rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "keep it more crunch than overdrive",
+          "avoid scoop",
+          "stay dry"
+        ],
+        "warnings": [
+          "The source material (Bruce Springsteen) is a full band recording, not solely guitar-focused. This rig provides the best imitation of the required rhythm crunch tone.",
+          "Modulation effects (Chorus/Tremolo) are disabled to adhere strictly to the 'avoid' list and maintain a dry punch."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.867,
+      "prompt_chars": 1004,
+      "response_chars": 520,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 125,
+        "total_duration": 12852774400,
+        "prompt_eval_duration": 132568000,
+        "eval_duration": 959791000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.765,
+      "prompt_chars": 5458,
+      "response_chars": 518,
+      "usage": {
+        "input_tokens": 1513,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1656
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.408,
+      "prompt_chars": 3602,
+      "response_chars": 5439,
+      "usage": {
+        "prompt_eval_count": 1219,
+        "eval_count": 1530,
+        "total_duration": 12391273500,
+        "prompt_eval_duration": 144931000,
+        "eval_duration": 11850054000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.715,
+      "prompt_chars": 7578,
+      "response_chars": 516,
+      "usage": {
+        "prompt_eval_count": 2106,
+        "eval_count": 139,
+        "total_duration": 1701897800,
+        "prompt_eval_duration": 220146000,
+        "eval_duration": 1080719000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.579,
+      "prompt_chars": 2810,
+      "response_chars": 209,
+      "usage": {
+        "prompt_eval_count": 905,
+        "eval_count": 54,
+        "total_duration": 12574616800,
+        "prompt_eval_duration": 177935000,
+        "eval_duration": 420836000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bruce Springsteen",
+      "title": "Born In The U.S.A.",
+      "album": "",
+      "year": null,
+      "genre": "heartland rock"
+    },
+    "rig": {
+      "rigName": "Bruce Springsteen - Born In The U.S.A. - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight Springsteen rock crunch with bright bite and dry punch",
+      "signalChainSummary": "A tight signal chain using a Boost/OD for initial grit, followed by an AC30-style amp simulation and a British 4x12 cabinet to achieve the required punchy, mid-focused Springsteen sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up background noise and maintain tight rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial 'edge of breakup' and classic rock crunch without excessive fuzz.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative for a slightly warmer, less aggressive grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a light boost if needed; keeping the tone focused on OD crunch.",
+          "matchQuality": "exact",
+          "gap": "The Green OD handles the necessary grit, so no dedicated distortion is required.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British clean/crunch tone (Plexi style) needed for Springsteen's sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A solid alternative if the AC30 character is too pronounced."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and punchy midrange required for the genre.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 30 4x12",
+              "reason": "A good alternative if a slightly different voicing is desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-1",
+            "Mid Boost": "+3",
+            "Treble Boost": "+2"
+          },
+          "purpose": "Enhance the bright upper mids and overall punchiness while maintaining dryness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation as per the 'avoid' list and keep the tone dry.",
+          "matchQuality": "exact",
+          "gap": "The instructions explicitly state to avoid modulation.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "1"
+          },
+          "purpose": "Add subtle depth and space without sounding overly wet or distracting from the rhythm.",
+          "matchQuality": "close",
+          "gap": "A very minimal delay is used to add 'punch' rather than a noticeable echo, keeping the sound dry.",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "If a more natural room ambience is preferred over a subtle slapback effect."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "10"
+          },
+          "purpose": "Final output level adjustment to ensure the 'dry punch' is maintained.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight Springsteen rock crunch with bright bite and dry punch",
+      "mustHave": [
+        "tight driven rhythm",
+        "bright upper mids",
+        "dry attack",
+        "slight edge of breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "mid-scooped",
+        "metal gain",
+        "modulation"
+      ],
+      "gearClues": [
+        "Tele/strat style single-coils",
+        "Marshall/Plexi or Fender pushed",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "keep it more crunch than overdrive",
+        "avoid scoop",
+        "stay dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "heartland rock",
+      "styleTags": [
+        "rockabilly",
+        "arena rock",
+        "americana"
+      ],
+      "targetTone": "tight Springsteen rock crunch with bright bite and dry punch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and vintage British tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 UK IR",
+          "reason": "Enhance the punchy, classic British sound required for Springsteen's rock crunch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and depth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 178,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1013 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1508,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Cure__Lovesong.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Cure",
+    "title": "Lovesong",
+    "album": "",
+    "year": null,
+    "genre": "post-punk"
+  },
+  "genreClassification": {
+    "genre": "post-punk",
+    "subgenres": [
+      "new wave",
+      "goth rock"
+    ],
+    "confidence": "high",
+    "rationale": "The Cure's sound is foundational to post-punk and new wave genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, chorus-drenched jangle pop with a touch of melancholic reverb.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Clean tone (jangly)",
+        "Delay (slapback or dotted eighth)"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (Chorus/Flanger)",
+        "Spring Reverb unit",
+        "Bright clean amp simulation"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Distortion",
+        "Overdrive"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean chiming chorus guitar with short ambient reverb",
+      "mustHave": [
+        "chorus modulation",
+        "bright clean attack",
+        "jangle articulation",
+        "short reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "heavy delay",
+        "distortion"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "clean amp",
+        "chorus pedal",
+        "light reverb"
+      ],
+      "corrections": [
+        "drop slapback/dotted-eighth delay",
+        "keep it cleaner and less poppy",
+        "favor subtle chorus over heavy modulation"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean chiming chorus guitar with short ambient reverb",
+    "mustHave": [
+      "chorus modulation",
+      "bright clean attack",
+      "jangle articulation",
+      "short reverb"
+    ],
+    "avoid": [
+      "fuzz",
+      "crunch",
+      "heavy delay",
+      "distortion"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "clean amp",
+      "chorus pedal",
+      "light reverb"
+    ],
+    "corrections": [
+      "drop slapback/dotted-eighth delay",
+      "keep it cleaner and less poppy",
+      "favor subtle chorus over heavy modulation"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chimey tones using chorus and bright amps.",
+          "bestMatchSummary": "A pristine signal chain emphasizing clarity and shimmer: Gate -> Boost -> Chorus -> US Deluxe -> UK Vintage 4x12 -> Guitar EQ 1 -> Plate -> Volume.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Slightly lift the signal and enhance high-end clarity for jangle.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a clean boost pedal (e.g., Klon/Transparent).",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Feedback": "Low"
+              },
+              "purpose": "Create the signature chiming, shimmering chorus effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Select a clean, bright amp model (simulating Fender/Twin Reverb tone).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice for this clean sound, but since it's listed under AMP, I will use 'None' here and rely on the dedicated AMP block.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Provide the bright, clean foundation tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Tone": "Bright"
+              },
+              "purpose": "Shape the tone with a classic, articulate cabinet sound.",
+              "matchQuality": "close",
+              "gap": "While US 2x12 might be more accurate for Fender tones, UK Vintage 4x12 offers good clarity and versatility in this context.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Cut": "-3 dB",
+                "Treble Boost": "+4 dB"
+              },
+              "purpose": "Enhance the high-end chime and cut unnecessary low frequencies.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add the required short, ambient shimmer and depth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock/pop song, but the rig focuses on achieving the specific 'chiming chorus' tone rather than replicating vintage gear exactly."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the clean, chimey Fender-style tones.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Fender 2x12 IR",
+              "reason": "Better captures the bright, articulate sound of a single-coil guitar and clean amp.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and chime",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Cure - Lovesong - Valeton GP-180",
+        "song": {
+          "artist": "The Cure",
+          "title": "Lovesong",
+          "album": "",
+          "year": null,
+          "genre": "post-punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean chiming chorus guitar with short ambient reverb",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A pristine signal chain emphasizing clarity and shimmer: Gate -> Boost -> Chorus -> US Deluxe -> UK Vintage 4x12 -> Guitar EQ 1 -> Plate -> Volume.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Bright"
+            },
+            "purpose": "Slightly lift the signal and enhance high-end clarity for jangle.",
+            "matchQuality": "close",
+            "gap": "Using Boost to simulate a clean boost pedal (e.g., Klon/Transparent).",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "WAH",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Feedback": "Low"
+            },
+            "purpose": "Create the signature chiming, shimmering chorus effect.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "High",
+              "Mid": "Medium",
+              "Bass": "Low"
+            },
+            "purpose": "Select a clean, bright amp model (simulating Fender/Twin Reverb tone).",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best choice for this clean sound, but since it's listed under AMP, I will use 'None' here and rely on the dedicated AMP block.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "High",
+              "Mid": "Medium",
+              "Bass": "Low"
+            },
+            "purpose": "Provide the bright, clean foundation tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Tone": "Bright"
+            },
+            "purpose": "Shape the tone with a classic, articulate cabinet sound.",
+            "matchQuality": "close",
+            "gap": "While US 2x12 might be more accurate for Fender tones, UK Vintage 4x12 offers good clarity and versatility in this context.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-2 dB",
+              "Mid Cut": "-3 dB",
+              "Treble Boost": "+4 dB"
+            },
+            "purpose": "Enhance the high-end chime and cut unnecessary low frequencies.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add the required short, ambient shimmer and depth.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean chiming chorus guitar with short ambient reverb",
+          "toneProfile": "clean chiming chorus guitar with short ambient reverb",
+          "idealSignalChain": "single-coil guitar | clean amp | chorus pedal | light reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus modulation",
+            "bright clean attack",
+            "jangle articulation",
+            "short reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, chimey tones using chorus and bright amps.",
+          "bestMatchSummary": "A pristine signal chain emphasizing clarity and shimmer: Gate -> Boost -> Chorus -> US Deluxe -> UK Vintage 4x12 -> Guitar EQ 1 -> Plate -> Volume.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Slightly lift the signal and enhance high-end clarity for jangle.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a clean boost pedal (e.g., Klon/Transparent).",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Feedback": "Low"
+              },
+              "purpose": "Create the signature chiming, shimmering chorus effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Select a clean, bright amp model (simulating Fender/Twin Reverb tone).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice for this clean sound, but since it's listed under AMP, I will use 'None' here and rely on the dedicated AMP block.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Provide the bright, clean foundation tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Tone": "Bright"
+              },
+              "purpose": "Shape the tone with a classic, articulate cabinet sound.",
+              "matchQuality": "close",
+              "gap": "While US 2x12 might be more accurate for Fender tones, UK Vintage 4x12 offers good clarity and versatility in this context.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Cut": "-3 dB",
+                "Treble Boost": "+4 dB"
+              },
+              "purpose": "Enhance the high-end chime and cut unnecessary low frequencies.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add the required short, ambient shimmer and depth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the clean, chimey Fender-style tones.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Fender 2x12 IR",
+              "reason": "Better captures the bright, articulate sound of a single-coil guitar and clean amp.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and chime",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop slapback/dotted-eighth delay",
+          "keep it cleaner and less poppy",
+          "favor subtle chorus over heavy modulation"
+        ],
+        "warnings": [
+          "The source material is a classic rock/pop song, but the rig focuses on achieving the specific 'chiming chorus' tone rather than replicating vintage gear exactly."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.967,
+      "prompt_chars": 985,
+      "response_chars": 388,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 105,
+        "total_duration": 8960586100,
+        "prompt_eval_duration": 289634000,
+        "eval_duration": 1565235000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.68,
+      "prompt_chars": 5307,
+      "response_chars": 525,
+      "usage": {
+        "input_tokens": 1491,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 136,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1627
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.864,
+      "prompt_chars": 3590,
+      "response_chars": 4728,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1383,
+        "total_duration": 25835309300,
+        "prompt_eval_duration": 687353000,
+        "eval_duration": 24798841000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.442,
+      "prompt_chars": 6829,
+      "response_chars": 507,
+      "usage": {
+        "prompt_eval_count": 1941,
+        "eval_count": 137,
+        "total_duration": 3419477300,
+        "prompt_eval_duration": 738124000,
+        "eval_duration": 2228046000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.944,
+      "prompt_chars": 2755,
+      "response_chars": 167,
+      "usage": {
+        "prompt_eval_count": 863,
+        "eval_count": 50,
+        "total_duration": 11923796800,
+        "prompt_eval_duration": 374924000,
+        "eval_duration": 567245000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Cure",
+      "title": "Lovesong",
+      "album": "",
+      "year": null,
+      "genre": "post-punk"
+    },
+    "rig": {
+      "rigName": "The Cure - Lovesong - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean chiming chorus guitar with short ambient reverb",
+      "signalChainSummary": "A pristine signal chain emphasizing clarity and shimmer: Gate -> Boost -> Chorus -> US Deluxe -> UK Vintage 4x12 -> Guitar EQ 1 -> Plate -> Volume.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Bright"
+          },
+          "purpose": "Slightly lift the signal and enhance high-end clarity for jangle.",
+          "matchQuality": "close",
+          "gap": "Using Boost to simulate a clean boost pedal (e.g., Klon/Transparent).",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Feedback": "Low"
+          },
+          "purpose": "Create the signature chiming, shimmering chorus effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "High",
+            "Mid": "Medium",
+            "Bass": "Low"
+          },
+          "purpose": "Select a clean, bright amp model (simulating Fender/Twin Reverb tone).",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best choice for this clean sound, but since it's listed under AMP, I will use 'None' here and rely on the dedicated AMP block.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "High",
+            "Mid": "Medium",
+            "Bass": "Low"
+          },
+          "purpose": "Provide the bright, clean foundation tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Tone": "Bright"
+          },
+          "purpose": "Shape the tone with a classic, articulate cabinet sound.",
+          "matchQuality": "close",
+          "gap": "While US 2x12 might be more accurate for Fender tones, UK Vintage 4x12 offers good clarity and versatility in this context.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-2 dB",
+            "Mid Cut": "-3 dB",
+            "Treble Boost": "+4 dB"
+          },
+          "purpose": "Enhance the high-end chime and cut unnecessary low frequencies.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add the required short, ambient shimmer and depth.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean chiming chorus guitar with short ambient reverb",
+      "mustHave": [
+        "chorus modulation",
+        "bright clean attack",
+        "jangle articulation",
+        "short reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "heavy delay",
+        "distortion"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "clean amp",
+        "chorus pedal",
+        "light reverb"
+      ],
+      "corrections": [
+        "drop slapback/dotted-eighth delay",
+        "keep it cleaner and less poppy",
+        "favor subtle chorus over heavy modulation"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-punk",
+      "styleTags": [
+        "new wave",
+        "goth rock"
+      ],
+      "targetTone": "clean chiming chorus guitar with short ambient reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better match the clean, chimey Fender-style tones.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Fender 2x12 IR",
+          "reason": "Better captures the bright, articulate sound of a single-coil guitar and clean amp.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and chime",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1508,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

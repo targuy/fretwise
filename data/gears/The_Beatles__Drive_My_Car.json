@@ -1,0 +1,1098 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1451,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Beatles__Drive_My_Car.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Beatles",
+    "title": "Drive My Car",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "british pop",
+      "merseybeat"
+    ],
+    "confidence": "high",
+    "rationale": "The Beatles' 'Drive My Car' is a classic example of upbeat, melodic British pop/rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, clean, slightly chorused pop tone",
+      "signatureElements": [
+        "clean",
+        "chorus",
+        "reverb",
+        "delay"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus effect",
+        "Clean amp model (e.g., Fender Twin/Deluxe)"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Overdrive",
+        "Distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Paul-style bassy guitar tone with tight edge",
+      "mustHave": [
+        "clean bite",
+        "slight mid push",
+        "dry presence",
+        "focused low end"
+      ],
+      "avoid": [
+        "chorus",
+        "delay",
+        "lush reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Rick/Paul-style guitar",
+        "bridge pickup",
+        "clean amp",
+        "small room"
+      ],
+      "corrections": [
+        "drop chorus",
+        "keep it mostly dry",
+        "aim for guitar-bass riff clarity"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Paul-style bassy guitar tone with tight edge",
+    "mustHave": [
+      "clean bite",
+      "slight mid push",
+      "dry presence",
+      "focused low end"
+    ],
+    "avoid": [
+      "chorus",
+      "delay",
+      "lush reverb",
+      "fuzz"
+    ],
+    "gearClues": [
+      "Rick/Paul-style guitar",
+      "bridge pickup",
+      "clean amp",
+      "small room"
+    ],
+    "corrections": [
+      "drop chorus",
+      "keep it mostly dry",
+      "aim for guitar-bass riff clarity"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, punchy tones with mid-range emphasis and controlled low end.",
+          "bestMatchSummary": "A bright, clean signal chain utilizing a boost/compressor for bite, followed by a classic British clean amp model (UK 50 or US Deluxe) paired with a focused cabinet to achieve the required Paul McCartney-esque clarity and punchy bass tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add sustain and even out the dynamics for a consistent, punchy tone.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for achieving the 'bite' and controlled low end required for bass-like clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a subtle lift and 'edge' to the signal without adding grit, enhancing clarity.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of an OD pedal keeps the tone clean while providing necessary punch and presence.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No distortion needed; keeping the tone clean and bright.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a classic clean American tone with strong mid-focus and bright bite.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is excellent for the required 'clean bite' and punchy, articulate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a focused, articulate sound that emphasizes the mid-range and keeps the low end controlled.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is compact and punchy, fitting the 'small room' feel while maintaining clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Slightly boost the mids and highs to achieve the 'mid push' and bright presence required.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ is necessary to sculpt the specific Paul-style mid-range focus.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "No modulation effects are desired (avoid chorus).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "No delay effects are desired (keep it dry).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space ('small room') without sounding lush or muddy.",
+              "matchQuality": "close",
+              "gap": "Using Room with low mix settings achieves the 'dry presence' while avoiding excessive reverb.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic pop song, and the tone requires careful balancing to maintain clarity while achieving 'bass-like' punch. The settings prioritize mid-range articulation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better definition and focused low end.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x10 (British)",
+              "reason": "Enhance the punchy, bass-like clarity required for Paul's riffing.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and focus in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Beatles - Drive My Car - Valeton GP-180",
+        "song": {
+          "artist": "The Beatles",
+          "title": "Drive My Car",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Paul-style bassy guitar tone with tight edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, clean signal chain utilizing a boost/compressor for bite, followed by a classic British clean amp model (UK 50 or US Deluxe) paired with a focused cabinet to achieve the required Paul McCartney-esque clarity and punchy bass tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight signal definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30 dB",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Add sustain and even out the dynamics for a consistent, punchy tone.",
+            "matchQuality": "close",
+            "gap": "The Comp module is ideal for achieving the 'bite' and controlled low end required for bass-like clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide a subtle lift and 'edge' to the signal without adding grit, enhancing clarity.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of an OD pedal keeps the tone clean while providing necessary punch and presence.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No distortion needed; keeping the tone clean and bright.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate a classic clean American tone with strong mid-focus and bright bite.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is excellent for the required 'clean bite' and punchy, articulate sound.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a focused, articulate sound that emphasizes the mid-range and keeps the low end controlled.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is compact and punchy, fitting the 'small room' feel while maintaining clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Slightly boost the mids and highs to achieve the 'mid push' and bright presence required.",
+            "matchQuality": "close",
+            "gap": "A dedicated EQ is necessary to sculpt the specific Paul-style mid-range focus.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "No modulation effects are desired (avoid chorus).",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "No delay effects are desired (keep it dry).",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space ('small room') without sounding lush or muddy.",
+            "matchQuality": "close",
+            "gap": "Using Room with low mix settings achieves the 'dry presence' while avoiding excessive reverb.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Paul-style bassy guitar tone with tight edge",
+          "toneProfile": "bright Paul-style bassy guitar tone with tight edge",
+          "idealSignalChain": "Rick/Paul-style guitar | bridge pickup | clean amp | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rick/Paul-style guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean bite",
+            "slight mid push",
+            "dry presence",
+            "focused low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, punchy tones with mid-range emphasis and controlled low end.",
+          "bestMatchSummary": "A bright, clean signal chain utilizing a boost/compressor for bite, followed by a classic British clean amp model (UK 50 or US Deluxe) paired with a focused cabinet to achieve the required Paul McCartney-esque clarity and punchy bass tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add sustain and even out the dynamics for a consistent, punchy tone.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for achieving the 'bite' and controlled low end required for bass-like clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a subtle lift and 'edge' to the signal without adding grit, enhancing clarity.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of an OD pedal keeps the tone clean while providing necessary punch and presence.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No distortion needed; keeping the tone clean and bright.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a classic clean American tone with strong mid-focus and bright bite.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is excellent for the required 'clean bite' and punchy, articulate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a focused, articulate sound that emphasizes the mid-range and keeps the low end controlled.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is compact and punchy, fitting the 'small room' feel while maintaining clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Slightly boost the mids and highs to achieve the 'mid push' and bright presence required.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ is necessary to sculpt the specific Paul-style mid-range focus.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "No modulation effects are desired (avoid chorus).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "No delay effects are desired (keep it dry).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space ('small room') without sounding lush or muddy.",
+              "matchQuality": "close",
+              "gap": "Using Room with low mix settings achieves the 'dry presence' while avoiding excessive reverb.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better definition and focused low end.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x10 (British)",
+              "reason": "Enhance the punchy, bass-like clarity required for Paul's riffing.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and focus in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "keep it mostly dry",
+          "aim for guitar-bass riff clarity"
+        ],
+        "warnings": [
+          "The source material is a classic pop song, and the tone requires careful balancing to maintain clarity while achieving 'bass-like' punch. The settings prioritize mid-range articulation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.158,
+      "prompt_chars": 992,
+      "response_chars": 309,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 90,
+        "total_duration": 10155357800,
+        "prompt_eval_duration": 350135000,
+        "eval_duration": 1782869000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.467,
+      "prompt_chars": 5241,
+      "response_chars": 465,
+      "usage": {
+        "input_tokens": 1475,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 126,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1601
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 34.144,
+      "prompt_chars": 3537,
+      "response_chars": 5684,
+      "usage": {
+        "prompt_eval_count": 1198,
+        "eval_count": 1606,
+        "total_duration": 34124587000,
+        "prompt_eval_duration": 450785000,
+        "eval_duration": 33280903000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.038,
+      "prompt_chars": 7774,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 2161,
+        "eval_count": 149,
+        "total_duration": 4032306900,
+        "prompt_eval_duration": 853385000,
+        "eval_duration": 2679996000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.347,
+      "prompt_chars": 2885,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 909,
+        "eval_count": 54,
+        "total_duration": 9318235400,
+        "prompt_eval_duration": 584508000,
+        "eval_duration": 1237568000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Beatles",
+      "title": "Drive My Car",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "The Beatles - Drive My Car - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Paul-style bassy guitar tone with tight edge",
+      "signalChainSummary": "A bright, clean signal chain utilizing a boost/compressor for bite, followed by a classic British clean amp model (UK 50 or US Deluxe) paired with a focused cabinet to achieve the required Paul McCartney-esque clarity and punchy bass tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight signal definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30 dB",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Add sustain and even out the dynamics for a consistent, punchy tone.",
+          "matchQuality": "close",
+          "gap": "The Comp module is ideal for achieving the 'bite' and controlled low end required for bass-like clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide a subtle lift and 'edge' to the signal without adding grit, enhancing clarity.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of an OD pedal keeps the tone clean while providing necessary punch and presence.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No distortion needed; keeping the tone clean and bright.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate a classic clean American tone with strong mid-focus and bright bite.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is excellent for the required 'clean bite' and punchy, articulate sound.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a focused, articulate sound that emphasizes the mid-range and keeps the low end controlled.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is compact and punchy, fitting the 'small room' feel while maintaining clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Slightly boost the mids and highs to achieve the 'mid push' and bright presence required.",
+          "matchQuality": "close",
+          "gap": "A dedicated EQ is necessary to sculpt the specific Paul-style mid-range focus.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "No modulation effects are desired (avoid chorus).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "No delay effects are desired (keep it dry).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space ('small room') without sounding lush or muddy.",
+          "matchQuality": "close",
+          "gap": "Using Room with low mix settings achieves the 'dry presence' while avoiding excessive reverb.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Paul-style bassy guitar tone with tight edge",
+      "mustHave": [
+        "clean bite",
+        "slight mid push",
+        "dry presence",
+        "focused low end"
+      ],
+      "avoid": [
+        "chorus",
+        "delay",
+        "lush reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Rick/Paul-style guitar",
+        "bridge pickup",
+        "clean amp",
+        "small room"
+      ],
+      "corrections": [
+        "drop chorus",
+        "keep it mostly dry",
+        "aim for guitar-bass riff clarity"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "british pop",
+        "merseybeat"
+      ],
+      "targetTone": "bright Paul-style bassy guitar tone with tight edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better definition and focused low end.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x10 (British)",
+          "reason": "Enhance the punchy, bass-like clarity required for Paul's riffing.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and focus in the low mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1451,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

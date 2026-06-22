@@ -1,0 +1,1092 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 410,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Eric_Clapton__Before_You_Accuse_Me_Acoustic.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Eric Clapton",
+    "title": "Before You Accuse Me (Acoustic)",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "acoustic",
+      "folk"
+    ],
+    "confidence": "high",
+    "rationale": "Clapton's style, especially acoustic tracks, falls squarely into blues and folk genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven acoustic tone with natural sustain and clarity.",
+      "signatureElements": [
+        "Acoustic fingerpicking feel",
+        "Subtle tube warmth (low gain)",
+        "Natural reverb/delay for space"
+      ],
+      "gearHypotheses": [
+        "Clean amp simulation (e.g., Fender Twin/Jazzmaster)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion",
+        "Wah pedal effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry warm acoustic-electric strum with subtle tube edge",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked/strummed clarity",
+        "light warmth",
+        "dry room",
+        "natural sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "heavy delay",
+        "big reverb",
+        "electric crunch"
+      ],
+      "gearClues": [
+        "piezo or mic acoustic",
+        "clean preamp",
+        "small room",
+        "FRFR"
+      ],
+      "corrections": [
+        "drop amp sim focus",
+        "remove delay/reverb emphasis",
+        "keep it acoustic-first"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry warm acoustic-electric strum with subtle tube edge",
+    "mustHave": [
+      "acoustic guitar",
+      "fingerpicked/strummed clarity",
+      "light warmth",
+      "dry room",
+      "natural sustain"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "heavy delay",
+      "big reverb",
+      "electric crunch"
+    ],
+    "gearClues": [
+      "piezo or mic acoustic",
+      "clean preamp",
+      "small room",
+      "FRFR"
+    ],
+    "corrections": [
+      "drop amp sim focus",
+      "remove delay/reverb emphasis",
+      "keep it acoustic-first"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Clean Focus: Prioritize clean preamps, subtle compression, and room ambiance to simulate a warm, dry acoustic sound.",
+          "bestMatchSummary": "The chain uses the US Deluxe for its clean character, Comp for warmth and sustain, and focuses on minimal effects (Chorus/Room) to achieve a natural, fingerpicked acoustic-electric tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add natural sustain and smooth out dynamics for acoustic strumming.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for enhancing the perceived warmth of an acoustic signal.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No grit or overdrive needed for this clean acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Mid": "+1",
+                "Bass": "+1",
+                "Presence": "-1"
+              },
+              "purpose": "Provide a clean, warm, and articulate tone suitable for acoustic-electric simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is typically used for electric guitar. However, its inherent clean character makes it the best choice among available amps to simulate the required 'clean preamp' sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a small, intimate acoustic recording environment.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most appropriate cabinet for a smaller, less aggressive sound than larger cabs.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and bass to enhance body and warmth without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for tonal shaping specific to acoustic strumming.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Wah effects are inappropriate for this natural acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle width and dimension to the strumming pattern without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "Used sparingly. A very gentle chorus can mimic natural room movement or slight detuning, fitting the 'natural sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Heavy delay was explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "25%"
+              },
+              "purpose": "Provide the required 'dry room' ambiance and natural sustain without sounding like a large hall.",
+              "matchQuality": "perfect",
+              "gap": "None. Crucial for setting the intimate, dry acoustic scene.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/fingerpicked, requiring a clean signal chain. The US Deluxe amp and associated modules are chosen to simulate the required 'acoustic-electric' tone, as no dedicated acoustic preamp model is available in the catalog."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current IR with a smaller, more natural cabinet simulation to enhance the dry room feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small acoustic room IR (e.g., vintage mic placement)",
+              "reason": "Enhance intimate, dry room sound and reduce artificial cabinet coloration.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Eric Clapton - Before You Accuse Me (Acoustic) - Valeton GP-180",
+        "song": {
+          "artist": "Eric Clapton",
+          "title": "Before You Accuse Me (Acoustic)",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry warm acoustic-electric strum with subtle tube edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "The chain uses the US Deluxe for its clean character, Comp for warmth and sustain, and focuses on minimal effects (Chorus/Room) to achieve a natural, fingerpicked acoustic-electric tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Add natural sustain and smooth out dynamics for acoustic strumming.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for enhancing the perceived warmth of an acoustic signal.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No grit or overdrive needed for this clean acoustic tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2",
+              "Mid": "+1",
+              "Bass": "+1",
+              "Presence": "-1"
+            },
+            "purpose": "Provide a clean, warm, and articulate tone suitable for acoustic-electric simulation.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is typically used for electric guitar. However, its inherent clean character makes it the best choice among available amps to simulate the required 'clean preamp' sound.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate a small, intimate acoustic recording environment.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is the most appropriate cabinet for a smaller, less aggressive sound than larger cabs.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the low-mids and bass to enhance body and warmth without sounding muddy.",
+            "matchQuality": "perfect",
+            "gap": "None. Used for tonal shaping specific to acoustic strumming.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Wah effects are inappropriate for this natural acoustic tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle width and dimension to the strumming pattern without sounding artificial.",
+            "matchQuality": "close",
+            "gap": "Used sparingly. A very gentle chorus can mimic natural room movement or slight detuning, fitting the 'natural sustain' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Heavy delay was explicitly avoided.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short",
+              "Mix": "25%"
+            },
+            "purpose": "Provide the required 'dry room' ambiance and natural sustain without sounding like a large hall.",
+            "matchQuality": "perfect",
+            "gap": "None. Crucial for setting the intimate, dry acoustic scene.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry warm acoustic-electric strum with subtle tube edge",
+          "toneProfile": "dry warm acoustic-electric strum with subtle tube edge",
+          "idealSignalChain": "piezo or mic acoustic | clean preamp | small room | FRFR",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "piezo or mic acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean preamp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "FRFR",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar",
+            "fingerpicked/strummed clarity",
+            "light warmth",
+            "dry room",
+            "natural sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Clean Focus: Prioritize clean preamps, subtle compression, and room ambiance to simulate a warm, dry acoustic sound.",
+          "bestMatchSummary": "The chain uses the US Deluxe for its clean character, Comp for warmth and sustain, and focuses on minimal effects (Chorus/Room) to achieve a natural, fingerpicked acoustic-electric tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Add natural sustain and smooth out dynamics for acoustic strumming.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for enhancing the perceived warmth of an acoustic signal.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No grit or overdrive needed for this clean acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Mid": "+1",
+                "Bass": "+1",
+                "Presence": "-1"
+              },
+              "purpose": "Provide a clean, warm, and articulate tone suitable for acoustic-electric simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is typically used for electric guitar. However, its inherent clean character makes it the best choice among available amps to simulate the required 'clean preamp' sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate a small, intimate acoustic recording environment.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most appropriate cabinet for a smaller, less aggressive sound than larger cabs.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and bass to enhance body and warmth without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for tonal shaping specific to acoustic strumming.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Wah effects are inappropriate for this natural acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle width and dimension to the strumming pattern without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "Used sparingly. A very gentle chorus can mimic natural room movement or slight detuning, fitting the 'natural sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Heavy delay was explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short",
+                "Mix": "25%"
+              },
+              "purpose": "Provide the required 'dry room' ambiance and natural sustain without sounding like a large hall.",
+              "matchQuality": "perfect",
+              "gap": "None. Crucial for setting the intimate, dry acoustic scene.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current IR with a smaller, more natural cabinet simulation to enhance the dry room feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small acoustic room IR (e.g., vintage mic placement)",
+              "reason": "Enhance intimate, dry room sound and reduce artificial cabinet coloration.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop amp sim focus",
+          "remove delay/reverb emphasis",
+          "keep it acoustic-first"
+        ],
+        "warnings": [
+          "The source material is acoustic/fingerpicked, requiring a clean signal chain. The US Deluxe amp and associated modules are chosen to simulate the required 'acoustic-electric' tone, as no dedicated acoustic preamp model is available in the catalog."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.484,
+      "prompt_chars": 1012,
+      "response_chars": 369,
+      "usage": {
+        "prompt_eval_count": 328,
+        "eval_count": 92,
+        "total_duration": 12456693900,
+        "prompt_eval_duration": 126928000,
+        "eval_duration": 617888000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.724,
+      "prompt_chars": 5297,
+      "response_chars": 518,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 135,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1616
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.098,
+      "prompt_chars": 3624,
+      "response_chars": 5895,
+      "usage": {
+        "prompt_eval_count": 1219,
+        "eval_count": 1614,
+        "total_duration": 11067694700,
+        "prompt_eval_duration": 130334000,
+        "eval_duration": 10562159000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.624,
+      "prompt_chars": 8072,
+      "response_chars": 578,
+      "usage": {
+        "prompt_eval_count": 2190,
+        "eval_count": 149,
+        "total_duration": 1602960300,
+        "prompt_eval_duration": 191194000,
+        "eval_duration": 980363000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.287,
+      "prompt_chars": 2934,
+      "response_chars": 179,
+      "usage": {
+        "prompt_eval_count": 917,
+        "eval_count": 48,
+        "total_duration": 12260916300,
+        "prompt_eval_duration": 163058000,
+        "eval_duration": 316724000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Eric Clapton",
+      "title": "Before You Accuse Me (Acoustic)",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Eric Clapton - Before You Accuse Me (Acoustic) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry warm acoustic-electric strum with subtle tube edge",
+      "signalChainSummary": "The chain uses the US Deluxe for its clean character, Comp for warmth and sustain, and focuses on minimal effects (Chorus/Room) to achieve a natural, fingerpicked acoustic-electric tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Add natural sustain and smooth out dynamics for acoustic strumming.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for enhancing the perceived warmth of an acoustic signal.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No grit or overdrive needed for this clean acoustic tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2",
+            "Mid": "+1",
+            "Bass": "+1",
+            "Presence": "-1"
+          },
+          "purpose": "Provide a clean, warm, and articulate tone suitable for acoustic-electric simulation.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is typically used for electric guitar. However, its inherent clean character makes it the best choice among available amps to simulate the required 'clean preamp' sound.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate a small, intimate acoustic recording environment.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is the most appropriate cabinet for a smaller, less aggressive sound than larger cabs.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the low-mids and bass to enhance body and warmth without sounding muddy.",
+          "matchQuality": "exact",
+          "gap": "None. Used for tonal shaping specific to acoustic strumming.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Wah effects are inappropriate for this natural acoustic tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle width and dimension to the strumming pattern without sounding artificial.",
+          "matchQuality": "close",
+          "gap": "Used sparingly. A very gentle chorus can mimic natural room movement or slight detuning, fitting the 'natural sustain' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Heavy delay was explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short",
+            "Mix": "25%"
+          },
+          "purpose": "Provide the required 'dry room' ambiance and natural sustain without sounding like a large hall.",
+          "matchQuality": "exact",
+          "gap": "None. Crucial for setting the intimate, dry acoustic scene.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry warm acoustic-electric strum with subtle tube edge",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked/strummed clarity",
+        "light warmth",
+        "dry room",
+        "natural sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "heavy delay",
+        "big reverb",
+        "electric crunch"
+      ],
+      "gearClues": [
+        "piezo or mic acoustic",
+        "clean preamp",
+        "small room",
+        "FRFR"
+      ],
+      "corrections": [
+        "drop amp sim focus",
+        "remove delay/reverb emphasis",
+        "keep it acoustic-first"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "acoustic",
+        "folk"
+      ],
+      "targetTone": "dry warm acoustic-electric strum with subtle tube edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current IR with a smaller, more natural cabinet simulation to enhance the dry room feel.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "small acoustic room IR (e.g., vintage mic placement)",
+          "reason": "Enhance intimate, dry room sound and reduce artificial cabinet coloration.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more natural tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 410,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

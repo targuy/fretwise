@@ -1,0 +1,1056 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 249,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Chuck_Berry__Maybellene.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Chuck Berry",
+    "title": "Maybellene",
+    "album": "",
+    "year": null,
+    "genre": "rock and roll"
+  },
+  "genreClassification": {
+    "genre": "rock and roll",
+    "subgenres": [
+      "early rock",
+      "50s music",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a foundational piece of early rock and roll, defining the genre's sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy rock lead tone",
+      "signatureElements": [
+        "twangy rhythm strumming",
+        "blues-rock energy",
+        "clean/crunch blend",
+        "spring reverb"
+      ],
+      "gearHypotheses": [
+        "Fender Twin Reverb style amp model",
+        "Telecaster pickup simulation",
+        "light chorus or vibrato modulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "overdriven distortion",
+        "ambient delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright twangy 50s rock n roll crunch",
+      "mustHave": [
+        "twangy double-stop rhythm",
+        "lean clean-to-edge breakup",
+        "dry mono feel",
+        "fast pick attack"
+      ],
+      "avoid": [
+        "spring reverb wash",
+        "chorus",
+        "heavy fuzz",
+        "modern lead sustain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small Fender combo",
+        "open-back 1x12 or 2x10",
+        "light slapback only if needed"
+      ],
+      "corrections": [
+        "swap lead tone for rhythm twang",
+        "drop chorus/vibrato",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright twangy 50s rock n roll crunch",
+    "mustHave": [
+      "twangy double-stop rhythm",
+      "lean clean-to-edge breakup",
+      "dry mono feel",
+      "fast pick attack"
+    ],
+    "avoid": [
+      "spring reverb wash",
+      "chorus",
+      "heavy fuzz",
+      "modern lead sustain"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "small Fender combo",
+      "open-back 1x12 or 2x10",
+      "light slapback only if needed"
+    ],
+    "corrections": [
+      "swap lead tone for rhythm twang",
+      "drop chorus/vibrato",
+      "keep reverb minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with controlled breakup and minimal ambience.",
+          "bestMatchSummary": "A classic 50s rhythm tone achieved using a clean preamp (US Deluxe) paired with a vintage-voiced amp (UK 45 or US Deluxe), emphasizing twangy single-coil clarity and dry punch. Minimal compression and light delay are used for definition.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise from fast picking.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Slight boost for fast pick attack and definition.",
+              "matchQuality": "close",
+              "gap": "A dedicated 'Twang' or 'Clean Boost' pedal would be ideal, but the general Boost module serves this function well.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Simulate the light breakup of a vintage Fender amp (e.g., Deluxe Reverb) without heavy grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean, non-aggressive character, mimicking early tube overdrive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provides the core clean, bright Fender tone required for 50s rock n roll.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates the sound of a small, bright combo speaker (like a Fender Deluxe).",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the closest available model to a vintage single-cabinet setup.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "0",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the 'twang' and high-end clarity characteristic of single-coil guitars.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Placeholder for potential filter sweeps, but kept inactive to maintain dry rhythm feel.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is included as a standard module, but its function is disabled per the 'dry mono feel' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Level": "2"
+              },
+              "purpose": "Provide a subtle echo effect to enhance the rhythm without sounding wash-y.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5 s",
+                "Mix": "20%"
+              },
+              "purpose": "Add minimal, natural room ambience without the wash of spring or plate reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting is used to provide a subtle sense of space as requested by 'minimal reverb'.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic 50s rock n roll, requiring a bright, clean tone. The US Deluxe amp and Green OD are selected to emulate the sound of vintage Fender combos.",
+          "Slapback delay is used instead of Chorus/Vibrato to maintain the required dry, punchy rhythm feel."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better vintage cabinet realism and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 1x12 or 2x10 IR",
+              "reason": "Improve single-cab punch and vintage feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased definition/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Chuck Berry - Maybellene - Valeton GP-180",
+        "song": {
+          "artist": "Chuck Berry",
+          "title": "Maybellene",
+          "album": "",
+          "year": null,
+          "genre": "rock and roll"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright twangy 50s rock n roll crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic 50s rhythm tone achieved using a clean preamp (US Deluxe) paired with a vintage-voiced amp (UK 45 or US Deluxe), emphasizing twangy single-coil clarity and dry punch. Minimal compression and light delay are used for definition.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise from fast picking.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "7",
+              "Level": "6"
+            },
+            "purpose": "Slight boost for fast pick attack and definition.",
+            "matchQuality": "close",
+            "gap": "A dedicated 'Twang' or 'Clean Boost' pedal would be ideal, but the general Boost module serves this function well.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "7",
+              "Level": "6"
+            },
+            "purpose": "Simulate the light breakup of a vintage Fender amp (e.g., Deluxe Reverb) without heavy grit.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its clean, non-aggressive character, mimicking early tube overdrive.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "4"
+            },
+            "purpose": "Provides the core clean, bright Fender tone required for 50s rock n roll.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulates the sound of a small, bright combo speaker (like a Fender Deluxe).",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is the closest available model to a vintage single-cabinet setup.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "0",
+              "Treble": "+3"
+            },
+            "purpose": "Enhance the 'twang' and high-end clarity characteristic of single-coil guitars.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Cutoff": "500 Hz"
+            },
+            "purpose": "Placeholder for potential filter sweeps, but kept inactive to maintain dry rhythm feel.",
+            "matchQuality": "close",
+            "gap": "The V-Wah is included as a standard module, but its function is disabled per the 'dry mono feel' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Level": "2"
+            },
+            "purpose": "Provide a subtle echo effect to enhance the rhythm without sounding wash-y.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5 s",
+              "Mix": "20%"
+            },
+            "purpose": "Add minimal, natural room ambience without the wash of spring or plate reverb.",
+            "matchQuality": "close",
+            "gap": "The Room setting is used to provide a subtle sense of space as requested by 'minimal reverb'.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright twangy 50s rock n roll crunch",
+          "toneProfile": "bright twangy 50s rock n roll crunch",
+          "idealSignalChain": "single-coil guitar | small Fender combo | open-back 1x12 or 2x10 | light slapback only if needed",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small Fender combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "open-back 1x12 or 2x10",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light slapback only if needed",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "twangy double-stop rhythm",
+            "lean clean-to-edge breakup",
+            "dry mono feel",
+            "fast pick attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean Fender tones with controlled breakup and minimal ambience.",
+          "bestMatchSummary": "A classic 50s rhythm tone achieved using a clean preamp (US Deluxe) paired with a vintage-voiced amp (UK 45 or US Deluxe), emphasizing twangy single-coil clarity and dry punch. Minimal compression and light delay are used for definition.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise from fast picking.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Slight boost for fast pick attack and definition.",
+              "matchQuality": "close",
+              "gap": "A dedicated 'Twang' or 'Clean Boost' pedal would be ideal, but the general Boost module serves this function well.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Simulate the light breakup of a vintage Fender amp (e.g., Deluxe Reverb) without heavy grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean, non-aggressive character, mimicking early tube overdrive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provides the core clean, bright Fender tone required for 50s rock n roll.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates the sound of a small, bright combo speaker (like a Fender Deluxe).",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the closest available model to a vintage single-cabinet setup.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "0",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the 'twang' and high-end clarity characteristic of single-coil guitars.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Placeholder for potential filter sweeps, but kept inactive to maintain dry rhythm feel.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is included as a standard module, but its function is disabled per the 'dry mono feel' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Level": "2"
+              },
+              "purpose": "Provide a subtle echo effect to enhance the rhythm without sounding wash-y.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5 s",
+                "Mix": "20%"
+              },
+              "purpose": "Add minimal, natural room ambience without the wash of spring or plate reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting is used to provide a subtle sense of space as requested by 'minimal reverb'.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better vintage cabinet realism and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 1x12 or 2x10 IR",
+              "reason": "Improve single-cab punch and vintage feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased definition/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap lead tone for rhythm twang",
+          "drop chorus/vibrato",
+          "keep reverb minimal"
+        ],
+        "warnings": [
+          "The source material is classic 50s rock n roll, requiring a bright, clean tone. The US Deluxe amp and Green OD are selected to emulate the sound of vintage Fender combos.",
+          "Slapback delay is used instead of Chorus/Vibrato to maintain the required dry, punchy rhythm feel."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 14.292,
+      "prompt_chars": 990,
+      "response_chars": 374,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 94,
+        "total_duration": 14271460500,
+        "prompt_eval_duration": 201176000,
+        "eval_duration": 1665347000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.792,
+      "prompt_chars": 5298,
+      "response_chars": 546,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 152,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1633
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 29.485,
+      "prompt_chars": 3616,
+      "response_chars": 5499,
+      "usage": {
+        "prompt_eval_count": 1229,
+        "eval_count": 1597,
+        "total_duration": 29478790800,
+        "prompt_eval_duration": 319771000,
+        "eval_duration": 28696904000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.103,
+      "prompt_chars": 7652,
+      "response_chars": 458,
+      "usage": {
+        "prompt_eval_count": 2183,
+        "eval_count": 128,
+        "total_duration": 2091376000,
+        "prompt_eval_duration": 202467000,
+        "eval_duration": 1462974000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.743,
+      "prompt_chars": 2932,
+      "response_chars": 205,
+      "usage": {
+        "prompt_eval_count": 959,
+        "eval_count": 59,
+        "total_duration": 13739403400,
+        "prompt_eval_duration": 321675000,
+        "eval_duration": 1111294000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Chuck Berry",
+      "title": "Maybellene",
+      "album": "",
+      "year": null,
+      "genre": "rock and roll"
+    },
+    "rig": {
+      "rigName": "Chuck Berry - Maybellene - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright twangy 50s rock n roll crunch",
+      "signalChainSummary": "A classic 50s rhythm tone achieved using a clean preamp (US Deluxe) paired with a vintage-voiced amp (UK 45 or US Deluxe), emphasizing twangy single-coil clarity and dry punch. Minimal compression and light delay are used for definition.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise from fast picking.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "7",
+            "Level": "6"
+          },
+          "purpose": "Slight boost for fast pick attack and definition.",
+          "matchQuality": "close",
+          "gap": "A dedicated 'Twang' or 'Clean Boost' pedal would be ideal, but the general Boost module serves this function well.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "7",
+            "Level": "6"
+          },
+          "purpose": "Simulate the light breakup of a vintage Fender amp (e.g., Deluxe Reverb) without heavy grit.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its clean, non-aggressive character, mimicking early tube overdrive.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "4"
+          },
+          "purpose": "Provides the core clean, bright Fender tone required for 50s rock n roll.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulates the sound of a small, bright combo speaker (like a Fender Deluxe).",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is the closest available model to a vintage single-cabinet setup.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "0",
+            "Treble": "+3"
+          },
+          "purpose": "Enhance the 'twang' and high-end clarity characteristic of single-coil guitars.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Cutoff": "500 Hz"
+          },
+          "purpose": "Placeholder for potential filter sweeps, but kept inactive to maintain dry rhythm feel.",
+          "matchQuality": "close",
+          "gap": "The V-Wah is included as a standard module, but its function is disabled per the 'dry mono feel' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Level": "2"
+          },
+          "purpose": "Provide a subtle echo effect to enhance the rhythm without sounding wash-y.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5 s",
+            "Mix": "20%"
+          },
+          "purpose": "Add minimal, natural room ambience without the wash of spring or plate reverb.",
+          "matchQuality": "close",
+          "gap": "The Room setting is used to provide a subtle sense of space as requested by 'minimal reverb'.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright twangy 50s rock n roll crunch",
+      "mustHave": [
+        "twangy double-stop rhythm",
+        "lean clean-to-edge breakup",
+        "dry mono feel",
+        "fast pick attack"
+      ],
+      "avoid": [
+        "spring reverb wash",
+        "chorus",
+        "heavy fuzz",
+        "modern lead sustain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small Fender combo",
+        "open-back 1x12 or 2x10",
+        "light slapback only if needed"
+      ],
+      "corrections": [
+        "swap lead tone for rhythm twang",
+        "drop chorus/vibrato",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock and roll",
+      "styleTags": [
+        "early rock",
+        "50s music",
+        "blues-rock"
+      ],
+      "targetTone": "bright twangy 50s rock n roll crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better vintage cabinet realism and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 1x12 or 2x10 IR",
+          "reason": "Improve single-cab punch and vintage feel.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased definition/punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 249,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

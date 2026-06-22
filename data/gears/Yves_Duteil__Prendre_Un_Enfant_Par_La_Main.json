@@ -1,0 +1,1175 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1765,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Yves_Duteil__Prendre_Un_Enfant_Par_La_Main.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Yves Duteil",
+    "title": "Prendre Un Enfant Par La Main",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "french folk",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The title and soft accompaniment suggest traditional French or European folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with noticeable chorus and delay.",
+      "signatureElements": [
+        "Chorus modulation",
+        "Delay repeats (dotted eighth)",
+        "Clean-ish crunch",
+        "Spring reverb feel"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (Chorus/Vibrato)",
+        "Digital Delay unit",
+        "Overdrive/Acrylic booster (for warmth)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "Aggressive compression"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "clean vocal ballad guitar, subtle room, no obvious modulation",
+      "mustHave": [
+        "soft picked clean guitar",
+        "supporting, not lead",
+        "very light room ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "dotted delay",
+        "crunch",
+        "heavy compression"
+      ],
+      "gearClues": [
+        "likely acoustic or very clean electric",
+        "small amp or direct clean",
+        "no FX-forward rig"
+      ],
+      "corrections": [
+        "remove chorus and delay",
+        "soften to near-clean",
+        "treat as accompaniment"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "ballad likely piano/vocal-dominant",
+      "draft adds signature FX without evidence",
+      "uncertain guitar prominence and texture"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "soft clean accompaniment, minimal FX, vocal support",
+    "mustHave": [
+      "pristine clean tone",
+      "gentle picking dynamics",
+      "subtle room ambience"
+    ],
+    "avoid": [
+      "chorus modulation",
+      "delay repeats",
+      "overdrive or crunch",
+      "compression artifacts"
+    ],
+    "gearClues": [
+      "clean amp or direct",
+      "likely acoustic guitar primary",
+      "electric if present is background"
+    ],
+    "corrections": [
+      "remove chorus entirely",
+      "remove delay entirely",
+      "no overdrive warmth",
+      "treat as sparse accompaniment"
+    ],
+    "confidence": "low",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "soft clean accompaniment, minimal FX, vocal support",
+    "mustHave": [
+      "pristine clean tone",
+      "gentle picking dynamics",
+      "subtle room ambience"
+    ],
+    "avoid": [
+      "chorus modulation",
+      "delay repeats",
+      "overdrive or crunch",
+      "compression artifacts"
+    ],
+    "gearClues": [
+      "clean amp or direct",
+      "likely acoustic guitar primary",
+      "electric if present is background"
+    ],
+    "corrections": [
+      "remove chorus entirely",
+      "remove delay entirely",
+      "no overdrive warmth",
+      "treat as sparse accompaniment"
+    ],
+    "confidence": "low",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones and gentle dynamics, treating the input as sparse accompaniment.",
+          "bestMatchSummary": "A highly clean signal chain using a Fender-style amp (US Deluxe) with minimal pre-gain boost, followed by a clear cab and subtle room reverb to support delicate fingerpicking.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in sparse acoustic/fingerpicking styles.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Threshold": "-15 dB"
+              },
+              "purpose": "Gentle dynamic leveling to ensure consistent volume for delicate picking dynamics without adding noticeable compression artifacts.",
+              "matchQuality": "close",
+              "gap": "The 'no compression artifacts' rule conflicts with using a compressor. Using it gently (low ratio/high threshold) is the best compromise for evenness.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If pure clean signal integrity is paramount, Boost could be used instead of Comp to simply raise volume without shaping dynamics."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass gain stages entirely to maintain a pristine clean tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires zero distortion or crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a classic Fender-style clean amp known for its open, clear tone suitable for accompaniment.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice among available amps for pure, non-aggressive clean tones.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if the tone needs to be slightly more robust than the US Deluxe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a clear, bright cabinet sound that complements the US Deluxe amp model.",
+              "matchQuality": "close",
+              "gap": "None. Standard pairing for clean Fender tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1.5 dB"
+              },
+              "purpose": "Subtly shape the frequency response to enhance clarity and vocal support without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "None. Used for final tone sculpting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah stage as it is not required for a clean accompaniment tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass all modulation effects (Chorus/Tremolo) as they are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass delay effects as they are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Provide subtle room ambience to give the accompaniment depth without sounding wet or distracting.",
+              "matchQuality": "close",
+              "gap": "None. Room reverb is ideal for natural, supportive ambiance.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled and less 'natural' ambience was desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the accompaniment sits perfectly in the mix with the vocals.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is likely acoustic/vocal-centric, requiring a guitar rig to imitate sparse accompaniment. The US Deluxe and Room reverb are chosen to maintain natural warmth and clarity."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for better acoustic support.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance natural, sparse accompaniment sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Yves Duteil - Prendre Un Enfant Par La Main - Valeton GP-180",
+        "song": {
+          "artist": "Yves Duteil",
+          "title": "Prendre Un Enfant Par La Main",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "soft clean accompaniment, minimal FX, vocal support",
+        "status": "draft",
+        "confidence": "low",
+        "signalChainSummary": "A highly clean signal chain using a Fender-style amp (US Deluxe) with minimal pre-gain boost, followed by a clear cab and subtle room reverb to support delicate fingerpicking.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in sparse acoustic/fingerpicking styles.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Threshold": "-15 dB"
+            },
+            "purpose": "Gentle dynamic leveling to ensure consistent volume for delicate picking dynamics without adding noticeable compression artifacts.",
+            "matchQuality": "close",
+            "gap": "The 'no compression artifacts' rule conflicts with using a compressor. Using it gently (low ratio/high threshold) is the best compromise for evenness.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "If pure clean signal integrity is paramount, Boost could be used instead of Comp to simply raise volume without shaping dynamics."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass gain stages entirely to maintain a pristine clean tone.",
+            "matchQuality": "exact",
+            "gap": "N/A. The target requires zero distortion or crunch.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "5",
+              "Midrange": "6",
+              "Bass": "4"
+            },
+            "purpose": "Simulate a classic Fender-style clean amp known for its open, clear tone suitable for accompaniment.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best choice among available amps for pure, non-aggressive clean tones.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "A good alternative if the tone needs to be slightly more robust than the US Deluxe."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a clear, bright cabinet sound that complements the US Deluxe amp model.",
+            "matchQuality": "close",
+            "gap": "None. Standard pairing for clean Fender tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+1.5 dB"
+            },
+            "purpose": "Subtly shape the frequency response to enhance clarity and vocal support without sounding artificial.",
+            "matchQuality": "close",
+            "gap": "None. Used for final tone sculpting.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass the wah stage as it is not required for a clean accompaniment tone.",
+            "matchQuality": "exact",
+            "gap": "N/A. The target requires minimal FX.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass all modulation effects (Chorus/Tremolo) as they are explicitly avoided.",
+            "matchQuality": "exact",
+            "gap": "N/A. The target requires minimal FX.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass delay effects as they are explicitly avoided.",
+            "matchQuality": "exact",
+            "gap": "N/A. The target requires minimal FX.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "2.5s"
+            },
+            "purpose": "Provide subtle room ambience to give the accompaniment depth without sounding wet or distracting.",
+            "matchQuality": "close",
+            "gap": "None. Room reverb is ideal for natural, supportive ambiance.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly more controlled and less 'natural' ambience was desired."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment to ensure the accompaniment sits perfectly in the mix with the vocals.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "soft clean accompaniment, minimal FX, vocal support",
+          "toneProfile": "soft clean accompaniment, minimal FX, vocal support",
+          "idealSignalChain": "clean amp or direct | likely acoustic guitar primary | electric if present is background",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean amp or direct",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "likely acoustic guitar primary",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "electric if present is background",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "pristine clean tone",
+            "gentle picking dynamics",
+            "subtle room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones and gentle dynamics, treating the input as sparse accompaniment.",
+          "bestMatchSummary": "A highly clean signal chain using a Fender-style amp (US Deluxe) with minimal pre-gain boost, followed by a clear cab and subtle room reverb to support delicate fingerpicking.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in sparse acoustic/fingerpicking styles.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Threshold": "-15 dB"
+              },
+              "purpose": "Gentle dynamic leveling to ensure consistent volume for delicate picking dynamics without adding noticeable compression artifacts.",
+              "matchQuality": "close",
+              "gap": "The 'no compression artifacts' rule conflicts with using a compressor. Using it gently (low ratio/high threshold) is the best compromise for evenness.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If pure clean signal integrity is paramount, Boost could be used instead of Comp to simply raise volume without shaping dynamics."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass gain stages entirely to maintain a pristine clean tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires zero distortion or crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a classic Fender-style clean amp known for its open, clear tone suitable for accompaniment.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice among available amps for pure, non-aggressive clean tones.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if the tone needs to be slightly more robust than the US Deluxe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a clear, bright cabinet sound that complements the US Deluxe amp model.",
+              "matchQuality": "close",
+              "gap": "None. Standard pairing for clean Fender tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+1.5 dB"
+              },
+              "purpose": "Subtly shape the frequency response to enhance clarity and vocal support without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "None. Used for final tone sculpting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah stage as it is not required for a clean accompaniment tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass all modulation effects (Chorus/Tremolo) as they are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass delay effects as they are explicitly avoided.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires minimal FX.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Provide subtle room ambience to give the accompaniment depth without sounding wet or distracting.",
+              "matchQuality": "close",
+              "gap": "None. Room reverb is ideal for natural, supportive ambiance.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled and less 'natural' ambience was desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the accompaniment sits perfectly in the mix with the vocals.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for better acoustic support.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance natural, sparse accompaniment sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus entirely",
+          "remove delay entirely",
+          "no overdrive warmth",
+          "treat as sparse accompaniment"
+        ],
+        "warnings": [
+          "The source material is likely acoustic/vocal-centric, requiring a guitar rig to imitate sparse accompaniment. The US Deluxe and Room reverb are chosen to maintain natural warmth and clarity."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.632,
+      "prompt_chars": 1009,
+      "response_chars": 424,
+      "usage": {
+        "prompt_eval_count": 329,
+        "eval_count": 101,
+        "total_duration": 9614840100,
+        "prompt_eval_duration": 465136000,
+        "eval_duration": 2143842000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.359,
+      "prompt_chars": 5367,
+      "response_chars": 649,
+      "usage": {
+        "input_tokens": 1496,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 159,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1655
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.364,
+      "prompt_chars": 4856,
+      "response_chars": 635,
+      "usage": {
+        "input_tokens": 1434,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 200,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 47.679,
+      "prompt_chars": 3652,
+      "response_chars": 6304,
+      "usage": {
+        "prompt_eval_count": 1269,
+        "eval_count": 1684,
+        "total_duration": 31722480800,
+        "prompt_eval_duration": 146217000,
+        "eval_duration": 31210840000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 67 column 8 (char 2266)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 19.032,
+      "prompt_chars": 8525,
+      "response_chars": 470,
+      "usage": {
+        "prompt_eval_count": 2248,
+        "eval_count": 123,
+        "total_duration": 19014630100,
+        "prompt_eval_duration": 962467000,
+        "eval_duration": 2345976000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.239,
+      "prompt_chars": 2923,
+      "response_chars": 190,
+      "usage": {
+        "prompt_eval_count": 897,
+        "eval_count": 45,
+        "total_duration": 9219317900,
+        "prompt_eval_duration": 440154000,
+        "eval_duration": 752091000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Yves Duteil",
+      "title": "Prendre Un Enfant Par La Main",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Yves Duteil - Prendre Un Enfant Par La Main - Valeton GP-180",
+      "status": "draft",
+      "confidence": "low",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "soft clean accompaniment, minimal FX, vocal support",
+      "signalChainSummary": "A highly clean signal chain using a Fender-style amp (US Deluxe) with minimal pre-gain boost, followed by a clear cab and subtle room reverb to support delicate fingerpicking.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in sparse acoustic/fingerpicking styles.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Threshold": "-15 dB"
+          },
+          "purpose": "Gentle dynamic leveling to ensure consistent volume for delicate picking dynamics without adding noticeable compression artifacts.",
+          "matchQuality": "close",
+          "gap": "The 'no compression artifacts' rule conflicts with using a compressor. Using it gently (low ratio/high threshold) is the best compromise for evenness.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "If pure clean signal integrity is paramount, Boost could be used instead of Comp to simply raise volume without shaping dynamics."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass gain stages entirely to maintain a pristine clean tone.",
+          "matchQuality": "exact",
+          "gap": "N/A. The target requires zero distortion or crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "5",
+            "Midrange": "6",
+            "Bass": "4"
+          },
+          "purpose": "Simulate a classic Fender-style clean amp known for its open, clear tone suitable for accompaniment.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best choice among available amps for pure, non-aggressive clean tones.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A good alternative if the tone needs to be slightly more robust than the US Deluxe."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a clear, bright cabinet sound that complements the US Deluxe amp model.",
+          "matchQuality": "close",
+          "gap": "None. Standard pairing for clean Fender tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+1.5 dB"
+          },
+          "purpose": "Subtly shape the frequency response to enhance clarity and vocal support without sounding artificial.",
+          "matchQuality": "close",
+          "gap": "None. Used for final tone sculpting.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass the wah stage as it is not required for a clean accompaniment tone.",
+          "matchQuality": "exact",
+          "gap": "N/A. The target requires minimal FX.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass all modulation effects (Chorus/Tremolo) as they are explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A. The target requires minimal FX.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass delay effects as they are explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A. The target requires minimal FX.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "2.5s"
+          },
+          "purpose": "Provide subtle room ambience to give the accompaniment depth without sounding wet or distracting.",
+          "matchQuality": "close",
+          "gap": "None. Room reverb is ideal for natural, supportive ambiance.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more controlled and less 'natural' ambience was desired."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment to ensure the accompaniment sits perfectly in the mix with the vocals.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "soft clean accompaniment, minimal FX, vocal support",
+      "mustHave": [
+        "pristine clean tone",
+        "gentle picking dynamics",
+        "subtle room ambience"
+      ],
+      "avoid": [
+        "chorus modulation",
+        "delay repeats",
+        "overdrive or crunch",
+        "compression artifacts"
+      ],
+      "gearClues": [
+        "clean amp or direct",
+        "likely acoustic guitar primary",
+        "electric if present is background"
+      ],
+      "corrections": [
+        "remove chorus entirely",
+        "remove delay entirely",
+        "no overdrive warmth",
+        "treat as sparse accompaniment"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "french folk",
+        "singer-songwriter"
+      ],
+      "targetTone": "soft clean accompaniment, minimal FX, vocal support",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for better acoustic support.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance natural, sparse accompaniment sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and depth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1765,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,946 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 642,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Jack_Johnson__Banana_Pancakes.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Jack Johnson",
+    "title": "Banana Pancakes",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "acoustic",
+      "surf folk",
+      "chill"
+    ],
+    "confidence": "high",
+    "rationale": "Jack Johnson's style is known for laid-back, acoustic-driven folk and pop."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with natural reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "light compression"
+      ],
+      "gearHypotheses": [
+        "Modeling amp/cab (e.g., Fender Twin style)",
+        "Chorus or Tremolo for subtle movement"
+      ],
+      "avoid": [
+        "Fuzz",
+        "High gain distortion",
+        "Wah pedal"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm acoustic-strum guitar with slight room",
+      "mustHave": [
+        "acoustic strum feel",
+        "warm mids",
+        "light compression",
+        "short room"
+      ],
+      "avoid": [
+        "fuzz",
+        "high gain",
+        "chorus",
+        "delay"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "piezo or mic blend",
+        "small room"
+      ],
+      "corrections": [
+        "swap electric clean for acoustic texture",
+        "remove delay/chorus",
+        "keep it dry and intimate"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm acoustic-strum guitar with slight room",
+    "mustHave": [
+      "acoustic strum feel",
+      "warm mids",
+      "light compression",
+      "short room"
+    ],
+    "avoid": [
+      "fuzz",
+      "high gain",
+      "chorus",
+      "delay"
+    ],
+    "gearClues": [
+      "acoustic guitar",
+      "piezo or mic blend",
+      "small room"
+    ],
+    "corrections": [
+      "swap electric clean for acoustic texture",
+      "remove delay/chorus",
+      "keep it dry and intimate"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones using compression and a small room simulation to mimic acoustic strumming.",
+          "bestMatchSummary": "A gentle signal chain featuring light compression, followed by a clean pre-amp (US Deluxe) into a vintage British amp model (UK 45), finished with a subtle Room reverb for warmth and space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background noise from the acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-amp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide light compression to smooth out the strumming dynamics and add warmth.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0%",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Used as a clean boost/tone shaper to maintain clarity without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost is used here primarily for its clean signal path and potential tone shaping, rather than actual drive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the clean, warm tones of a vintage American amplifier suitable for acoustic textures.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a focused and intimate cabinet sound suitable for clean acoustic tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the warm mids and body of the acoustic strumming pattern.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%",
+                "Pre-Delay": "30ms"
+              },
+              "purpose": "Add a subtle sense of space and warmth, mimicking the 'small room' clue without sounding like heavy reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/strumming, so the 'Default electric guitar' setting should be adjusted to simulate a nylon or steel-string acoustic pickup for best results."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall warmth by swapping the default IR for an acoustic/vintage speaker simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "acoustic-focused IR (e.g., vintage mic'd PA or small combo)",
+              "reason": "The current US 2x12 is too generic; a specific acoustic IR will enhance the 'small room' and warm tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Jack Johnson - Banana Pancakes - Valeton GP-180",
+        "song": {
+          "artist": "Jack Johnson",
+          "title": "Banana Pancakes",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm acoustic-strum guitar with slight room",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A gentle signal chain featuring light compression, followed by a clean pre-amp (US Deluxe) into a vintage British amp model (UK 45), finished with a subtle Room reverb for warmth and space.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up any background noise from the acoustic strumming.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "pre-amp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide light compression to smooth out the strumming dynamics and add warmth.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": false,
+            "settings": {
+              "Gain": "0%",
+              "Tone": "12 o'clock"
+            },
+            "purpose": "Used as a clean boost/tone shaper to maintain clarity without adding grit.",
+            "matchQuality": "close",
+            "gap": "The Boost is used here primarily for its clean signal path and potential tone shaping, rather than actual drive.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "6/10",
+              "Midrange": "7/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the clean, warm tones of a vintage American amplifier suitable for acoustic textures.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide a focused and intimate cabinet sound suitable for clean acoustic tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Enhance the warm mids and body of the acoustic strumming pattern.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%",
+              "Pre-Delay": "30ms"
+            },
+            "purpose": "Add a subtle sense of space and warmth, mimicking the 'small room' clue without sounding like heavy reverb.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm acoustic-strum guitar with slight room",
+          "toneProfile": "warm acoustic-strum guitar with slight room",
+          "idealSignalChain": "acoustic guitar | piezo or mic blend | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "piezo or mic blend",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic strum feel",
+            "warm mids",
+            "light compression",
+            "short room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones using compression and a small room simulation to mimic acoustic strumming.",
+          "bestMatchSummary": "A gentle signal chain featuring light compression, followed by a clean pre-amp (US Deluxe) into a vintage British amp model (UK 45), finished with a subtle Room reverb for warmth and space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up any background noise from the acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-amp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide light compression to smooth out the strumming dynamics and add warmth.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0%",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Used as a clean boost/tone shaper to maintain clarity without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost is used here primarily for its clean signal path and potential tone shaping, rather than actual drive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the clean, warm tones of a vintage American amplifier suitable for acoustic textures.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a focused and intimate cabinet sound suitable for clean acoustic tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the warm mids and body of the acoustic strumming pattern.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%",
+                "Pre-Delay": "30ms"
+              },
+              "purpose": "Add a subtle sense of space and warmth, mimicking the 'small room' clue without sounding like heavy reverb.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall warmth by swapping the default IR for an acoustic/vintage speaker simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "acoustic-focused IR (e.g., vintage mic'd PA or small combo)",
+              "reason": "The current US 2x12 is too generic; a specific acoustic IR will enhance the 'small room' and warm tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap electric clean for acoustic texture",
+          "remove delay/chorus",
+          "keep it dry and intimate"
+        ],
+        "warnings": [
+          "The source material is acoustic/strumming, so the 'Default electric guitar' setting should be adjusted to simulate a nylon or steel-string acoustic pickup for best results."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.879,
+      "prompt_chars": 996,
+      "response_chars": 342,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 88,
+        "total_duration": 9859115900,
+        "prompt_eval_duration": 700413000,
+        "eval_duration": 1548289000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.507,
+      "prompt_chars": 5266,
+      "response_chars": 464,
+      "usage": {
+        "input_tokens": 1477,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 124,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1601
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 37.069,
+      "prompt_chars": 3533,
+      "response_chars": 4389,
+      "usage": {
+        "prompt_eval_count": 1189,
+        "eval_count": 1271,
+        "total_duration": 37052624700,
+        "prompt_eval_duration": 376737000,
+        "eval_duration": 21791669000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.263,
+      "prompt_chars": 6403,
+      "response_chars": 630,
+      "usage": {
+        "prompt_eval_count": 1817,
+        "eval_count": 166,
+        "total_duration": 4244458100,
+        "prompt_eval_duration": 335290000,
+        "eval_duration": 3521216000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.177,
+      "prompt_chars": 2594,
+      "response_chars": 184,
+      "usage": {
+        "prompt_eval_count": 824,
+        "eval_count": 53,
+        "total_duration": 16150353200,
+        "prompt_eval_duration": 802954000,
+        "eval_duration": 794635000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Jack Johnson",
+      "title": "Banana Pancakes",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "Jack Johnson - Banana Pancakes - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm acoustic-strum guitar with slight room",
+      "signalChainSummary": "A gentle signal chain featuring light compression, followed by a clean pre-amp (US Deluxe) into a vintage British amp model (UK 45), finished with a subtle Room reverb for warmth and space.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up any background noise from the acoustic strumming.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "pre-amp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide light compression to smooth out the strumming dynamics and add warmth.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": false,
+          "settings": {
+            "Gain": "0%",
+            "Tone": "12 o'clock"
+          },
+          "purpose": "Used as a clean boost/tone shaper to maintain clarity without adding grit.",
+          "matchQuality": "close",
+          "gap": "The Boost is used here primarily for its clean signal path and potential tone shaping, rather than actual drive.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "6/10",
+            "Midrange": "7/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the clean, warm tones of a vintage American amplifier suitable for acoustic textures.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide a focused and intimate cabinet sound suitable for clean acoustic tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Enhance the warm mids and body of the acoustic strumming pattern.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%",
+            "Pre-Delay": "30ms"
+          },
+          "purpose": "Add a subtle sense of space and warmth, mimicking the 'small room' clue without sounding like heavy reverb.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm acoustic-strum guitar with slight room",
+      "mustHave": [
+        "acoustic strum feel",
+        "warm mids",
+        "light compression",
+        "short room"
+      ],
+      "avoid": [
+        "fuzz",
+        "high gain",
+        "chorus",
+        "delay"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "piezo or mic blend",
+        "small room"
+      ],
+      "corrections": [
+        "swap electric clean for acoustic texture",
+        "remove delay/chorus",
+        "keep it dry and intimate"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "acoustic",
+        "surf folk",
+        "chill"
+      ],
+      "targetTone": "warm acoustic-strum guitar with slight room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall warmth by swapping the default IR for an acoustic/vintage speaker simulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "acoustic-focused IR (e.g., vintage mic'd PA or small combo)",
+          "reason": "The current US 2x12 is too generic; a specific acoustic IR will enhance the 'small room' and warm tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and warmth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 642,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

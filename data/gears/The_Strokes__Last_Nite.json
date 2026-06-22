@@ -1,0 +1,1060 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1619,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Strokes__Last_Nite.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Strokes",
+    "title": "Last Nite",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "garage rock",
+      "post-punk",
+      "new wave"
+    ],
+    "confidence": "high",
+    "rationale": "The Strokes' sound is foundational to the garage/indie rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, jangly, slightly dirty indie rock tone",
+      "signatureElements": [
+        "clean",
+        "light crunch",
+        "chorus/modulation",
+        "delay",
+        "vintage British amp sound"
+      ],
+      "gearHypotheses": [
+        "Vox AC30 style emulation",
+        "Fuzz (subtle)",
+        "Chorus effect"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "overdrive (too aggressive)",
+        "deep reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry mid-forward garage crunch with edge-of-breakup bite",
+      "mustHave": [
+        "light breakup",
+        "dry mono feel",
+        "mid-forward attack",
+        "tight palm-muted crunch"
+      ],
+      "avoid": [
+        "chorus",
+        "delay",
+        "lush reverb",
+        "fuzzy gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "single-coils or bridge humbucker",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "avoid Vox clean-jangle bias",
+        "lean drier and more aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry mid-forward garage crunch with edge-of-breakup bite",
+    "mustHave": [
+      "light breakup",
+      "dry mono feel",
+      "mid-forward attack",
+      "tight palm-muted crunch"
+    ],
+    "avoid": [
+      "chorus",
+      "delay",
+      "lush reverb",
+      "fuzzy gain"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style",
+      "single-coils or bridge humbucker",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "remove chorus",
+      "remove delay",
+      "avoid Vox clean-jangle bias",
+      "lean drier and more aggressive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on dry, mid-focused British crunch tones (Plexi/Marshall style) with tight gain and minimal ambience.",
+          "bestMatchSummary": "A classic Brit rock setup using a Plexi-style amp model, slight OD boost for bite, and a 4x12 cabinet to achieve the required aggressive, dry, mid-forward garage crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain passages and tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add mid-forward bite and slight breakup to simulate the Plexi crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but its tone profile helps push the mids forward as requested.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if the crunch needs less aggression."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide tight, aggressive gain and mid-range focus without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The RAT is often associated with dirtier tones; careful settings are needed to keep it 'dry' and focused on bite rather than fuzz.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general, controllable distortion option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Boost the mid-range frequencies to achieve the required 'mid-forward attack' and cut low end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "100 Hz"
+              },
+              "purpose": "Included as a potential utility effect for dynamic texture, but kept inactive to maintain the dry tone.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is generally useful for garage rock textures, though it's not strictly necessary for this specific sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal, natural room ambience to prevent the tone from sounding too sterile or overly compressed.",
+              "matchQuality": "close",
+              "gap": "The requirement is 'dry,' so this reverb must be kept extremely low (Mix 10%) and short to avoid lushness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly more controlled, less natural ambience if Room sounds too open."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a guitar track, so no imitation rig was necessary. The focus remains on achieving the specified dry, aggressive garage crunch tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and mid-range punch to achieve a drier, more aggressive Plexi/Marshall sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the dry, mid-forward punch and vintage character of the Plexi tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After setting amp/preamp stages",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Strokes - Last Nite - Valeton GP-180",
+        "song": {
+          "artist": "The Strokes",
+          "title": "Last Nite",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry mid-forward garage crunch with edge-of-breakup bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic Brit rock setup using a Plexi-style amp model, slight OD boost for bite, and a 4x12 cabinet to achieve the required aggressive, dry, mid-forward garage crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain passages and tight palm-muting.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add mid-forward bite and slight breakup to simulate the Plexi crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general boost, but its tone profile helps push the mids forward as requested.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly warmer alternative if the crunch needs less aggression."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide tight, aggressive gain and mid-range focus without sounding overly fuzzy.",
+            "matchQuality": "close",
+            "gap": "The RAT is often associated with dirtier tones; careful settings are needed to keep it 'dry' and focused on bite rather than fuzz.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A more general, controllable distortion option."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British Plexi/Marshall sound required for garage rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet tone and necessary mid-range punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization (EQ)",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Boost the mid-range frequencies to achieve the required 'mid-forward attack' and cut low end muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect (optional)",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "100 Hz"
+            },
+            "purpose": "Included as a potential utility effect for dynamic texture, but kept inactive to maintain the dry tone.",
+            "matchQuality": "close",
+            "gap": "The V-Wah is generally useful for garage rock textures, though it's not strictly necessary for this specific sound.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add minimal, natural room ambience to prevent the tone from sounding too sterile or overly compressed.",
+            "matchQuality": "close",
+            "gap": "The requirement is 'dry,' so this reverb must be kept extremely low (Mix 10%) and short to avoid lushness.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A slightly more controlled, less natural ambience if Room sounds too open."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry mid-forward garage crunch with edge-of-breakup bite",
+          "toneProfile": "dry mid-forward garage crunch with edge-of-breakup bite",
+          "idealSignalChain": "Marshall/Plexi style | single-coils or bridge humbucker | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils or bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "light breakup",
+            "dry mono feel",
+            "mid-forward attack",
+            "tight palm-muted crunch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on dry, mid-focused British crunch tones (Plexi/Marshall style) with tight gain and minimal ambience.",
+          "bestMatchSummary": "A classic Brit rock setup using a Plexi-style amp model, slight OD boost for bite, and a 4x12 cabinet to achieve the required aggressive, dry, mid-forward garage crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain passages and tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add mid-forward bite and slight breakup to simulate the Plexi crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but its tone profile helps push the mids forward as requested.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if the crunch needs less aggression."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide tight, aggressive gain and mid-range focus without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The RAT is often associated with dirtier tones; careful settings are needed to keep it 'dry' and focused on bite rather than fuzz.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general, controllable distortion option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Boost the mid-range frequencies to achieve the required 'mid-forward attack' and cut low end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "100 Hz"
+              },
+              "purpose": "Included as a potential utility effect for dynamic texture, but kept inactive to maintain the dry tone.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is generally useful for garage rock textures, though it's not strictly necessary for this specific sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add minimal, natural room ambience to prevent the tone from sounding too sterile or overly compressed.",
+              "matchQuality": "close",
+              "gap": "The requirement is 'dry,' so this reverb must be kept extremely low (Mix 10%) and short to avoid lushness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly more controlled, less natural ambience if Room sounds too open."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and mid-range punch to achieve a drier, more aggressive Plexi/Marshall sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the dry, mid-forward punch and vintage character of the Plexi tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After setting amp/preamp stages",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "remove delay",
+          "avoid Vox clean-jangle bias",
+          "lean drier and more aggressive"
+        ],
+        "warnings": [
+          "The source material is a guitar track, so no imitation rig was necessary. The focus remains on achieving the specified dry, aggressive garage crunch tone."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.105,
+      "prompt_chars": 989,
+      "response_chars": 351,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 92,
+        "total_duration": 10112132800,
+        "prompt_eval_duration": 210679000,
+        "eval_duration": 1818259000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.817,
+      "prompt_chars": 5280,
+      "response_chars": 521,
+      "usage": {
+        "input_tokens": 1483,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1625
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 26.318,
+      "prompt_chars": 3590,
+      "response_chars": 5456,
+      "usage": {
+        "prompt_eval_count": 1220,
+        "eval_count": 1528,
+        "total_duration": 26293075000,
+        "prompt_eval_duration": 362821000,
+        "eval_duration": 25383431000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.159,
+      "prompt_chars": 7581,
+      "response_chars": 595,
+      "usage": {
+        "prompt_eval_count": 2105,
+        "eval_count": 160,
+        "total_duration": 4135451200,
+        "prompt_eval_duration": 396275000,
+        "eval_duration": 3183856000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.509,
+      "prompt_chars": 2761,
+      "response_chars": 183,
+      "usage": {
+        "prompt_eval_count": 889,
+        "eval_count": 53,
+        "total_duration": 10483422500,
+        "prompt_eval_duration": 419145000,
+        "eval_duration": 1211026000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Strokes",
+      "title": "Last Nite",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "The Strokes - Last Nite - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry mid-forward garage crunch with edge-of-breakup bite",
+      "signalChainSummary": "A classic Brit rock setup using a Plexi-style amp model, slight OD boost for bite, and a 4x12 cabinet to achieve the required aggressive, dry, mid-forward garage crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain passages and tight palm-muting.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add mid-forward bite and slight breakup to simulate the Plexi crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general boost, but its tone profile helps push the mids forward as requested.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly warmer alternative if the crunch needs less aggression."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide tight, aggressive gain and mid-range focus without sounding overly fuzzy.",
+          "matchQuality": "close",
+          "gap": "The RAT is often associated with dirtier tones; careful settings are needed to keep it 'dry' and focused on bite rather than fuzz.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A more general, controllable distortion option."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British Plexi/Marshall sound required for garage rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet tone and necessary mid-range punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization (EQ)",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Boost the mid-range frequencies to achieve the required 'mid-forward attack' and cut low end muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect (optional)",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "100 Hz"
+          },
+          "purpose": "Included as a potential utility effect for dynamic texture, but kept inactive to maintain the dry tone.",
+          "matchQuality": "close",
+          "gap": "The V-Wah is generally useful for garage rock textures, though it's not strictly necessary for this specific sound.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add minimal, natural room ambience to prevent the tone from sounding too sterile or overly compressed.",
+          "matchQuality": "close",
+          "gap": "The requirement is 'dry,' so this reverb must be kept extremely low (Mix 10%) and short to avoid lushness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly more controlled, less natural ambience if Room sounds too open."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry mid-forward garage crunch with edge-of-breakup bite",
+      "mustHave": [
+        "light breakup",
+        "dry mono feel",
+        "mid-forward attack",
+        "tight palm-muted crunch"
+      ],
+      "avoid": [
+        "chorus",
+        "delay",
+        "lush reverb",
+        "fuzzy gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "single-coils or bridge humbucker",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "avoid Vox clean-jangle bias",
+        "lean drier and more aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "garage rock",
+        "post-punk",
+        "new wave"
+      ],
+      "targetTone": "dry mid-forward garage crunch with edge-of-breakup bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and mid-range punch to achieve a drier, more aggressive Plexi/Marshall sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British 4x12 IR (e.g., Celestion Greenback or similar)",
+          "reason": "Enhance the dry, mid-forward punch and vintage character of the Plexi tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After setting amp/preamp stages",
+          "expectedGain": "Increased realism and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1619,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

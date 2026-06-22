@@ -1,0 +1,1040 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 833,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Link_Wray__Rumble.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Link Wray",
+    "title": "Rumble",
+    "album": "",
+    "year": null,
+    "genre": "garage rock"
+  },
+  "genreClassification": {
+    "genre": "garage rock",
+    "subgenres": [
+      "surf rock",
+      "proto-punk"
+    ],
+    "confidence": "high",
+    "rationale": "The raw, fuzzy sound and vintage nature point strongly to garage/surf rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E Minor Pentatonic/Blues Scale, aggressive and raw",
+      "signatureElements": [
+        "Fuzz (heavy)",
+        "Crunch (mid-gain)",
+        "Wah pedal sweep",
+        "Distortion (thick)"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Amp Model (e.g., Fender Deluxe Reverb style)",
+        "High-Gain Fuzz Pedal (e.g., Tone Bender/Big Muff style)",
+        "Wah Pedal"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Modulation effects (chorus, flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal dirty surf fuzz with tremolo-like raw twang",
+      "mustHave": [
+        "fuzzy buzz",
+        "dry mono space",
+        "sharp low-string attack",
+        "primitive raw amp breakup"
+      ],
+      "avoid": [
+        "wah",
+        "generic crunch",
+        "polished distortion",
+        "chorus"
+      ],
+      "gearClues": [
+        "small tweed/valve amp",
+        "single-coil bridge",
+        "fuzz box",
+        "1x12 combo"
+      ],
+      "corrections": [
+        "drop pentatonic/blues wording",
+        "remove wah",
+        "favor fuzz and raw attack over mid-gain crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal dirty surf fuzz with tremolo-like raw twang",
+    "mustHave": [
+      "fuzzy buzz",
+      "dry mono space",
+      "sharp low-string attack",
+      "primitive raw amp breakup"
+    ],
+    "avoid": [
+      "wah",
+      "generic crunch",
+      "polished distortion",
+      "chorus"
+    ],
+    "gearClues": [
+      "small tweed/valve amp",
+      "single-coil bridge",
+      "fuzz box",
+      "1x12 combo"
+    ],
+    "corrections": [
+      "drop pentatonic/blues wording",
+      "remove wah",
+      "favor fuzz and raw attack over mid-gain crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, vintage fuzz and aggressive attack while maintaining a dry, mono sound.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> UK 45 (Tweed) -> UK Vintage 4x12 -> Tremolo -> Delay",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/dirt",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add initial grit and boost the signal into the fuzz/amp.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a raw, slightly dirty pre-gain stage before the main fuzz/distortion.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple boost could also achieve this initial lift."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "8",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core fuzzy buzz and raw texture.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the small tweed/valve amp and raw breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its vintage, mid-gain character suitable for surf rock tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if the tone needs more American tweed warmth."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British vintage cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/tremolo",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "5",
+                "Rate": "4 Hz"
+              },
+              "purpose": "Achieve the required tremolo-like raw twang.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add space and echo to the surf sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "room/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Size": "Medium",
+                "Reverb Mix": "20%"
+              },
+              "purpose": "Provide a dry mono space without sounding overly wet or polished.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to give the 'dry mono space' feel without adding excessive reverb tail.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic surf/rock track, requiring aggressive fuzz and vintage amp tones. The chain prioritizes raw attack over modern polish."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic British cabinet IR with a more open, tweed-style speaker simulation to better capture the raw, vintage surf sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "tweed/open speaker IR (e.g., Fender Tweed)",
+              "reason": "The UK 4x12 is too British; a tweed cab better matches the raw, vintage surf sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More open and nasal tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Link Wray - Rumble - Valeton GP-180",
+        "song": {
+          "artist": "Link Wray",
+          "title": "Rumble",
+          "album": "",
+          "year": null,
+          "genre": "garage rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal dirty surf fuzz with tremolo-like raw twang",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Fuzz -> Boost/OD -> UK 45 (Tweed) -> UK Vintage 4x12 -> Tremolo -> Delay",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain fuzz noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/dirt",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add initial grit and boost the signal into the fuzz/amp.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here to simulate a raw, slightly dirty pre-gain stage before the main fuzz/distortion.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "A simple boost could also achieve this initial lift."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "8",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the core fuzzy buzz and raw texture.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the small tweed/valve amp and raw breakup.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is chosen for its vintage, mid-gain character suitable for surf rock tones.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if the tone needs more American tweed warmth."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British vintage cabinet sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/tremolo",
+            "module": "MOD",
+            "model": "Tremolo",
+            "active": true,
+            "settings": {
+              "Depth": "5",
+              "Rate": "4 Hz"
+            },
+            "purpose": "Achieve the required tremolo-like raw twang.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay/echo",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Add space and echo to the surf sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "room/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Size": "Medium",
+              "Reverb Mix": "20%"
+            },
+            "purpose": "Provide a dry mono space without sounding overly wet or polished.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to give the 'dry mono space' feel without adding excessive reverb tail.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal dirty surf fuzz with tremolo-like raw twang",
+          "toneProfile": "nasal dirty surf fuzz with tremolo-like raw twang",
+          "idealSignalChain": "small tweed/valve amp | single-coil bridge | fuzz box | 1x12 combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small tweed/valve amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz box",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy buzz",
+            "dry mono space",
+            "sharp low-string attack",
+            "primitive raw amp breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, vintage fuzz and aggressive attack while maintaining a dry, mono sound.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> UK 45 (Tweed) -> UK Vintage 4x12 -> Tremolo -> Delay",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/dirt",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add initial grit and boost the signal into the fuzz/amp.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a raw, slightly dirty pre-gain stage before the main fuzz/distortion.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple boost could also achieve this initial lift."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "8",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core fuzzy buzz and raw texture.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the small tweed/valve amp and raw breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its vintage, mid-gain character suitable for surf rock tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if the tone needs more American tweed warmth."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British vintage cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/tremolo",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "5",
+                "Rate": "4 Hz"
+              },
+              "purpose": "Achieve the required tremolo-like raw twang.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add space and echo to the surf sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "room/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Size": "Medium",
+                "Reverb Mix": "20%"
+              },
+              "purpose": "Provide a dry mono space without sounding overly wet or polished.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to give the 'dry mono space' feel without adding excessive reverb tail.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic British cabinet IR with a more open, tweed-style speaker simulation to better capture the raw, vintage surf sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "tweed/open speaker IR (e.g., Fender Tweed)",
+              "reason": "The UK 4x12 is too British; a tweed cab better matches the raw, vintage surf sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More open and nasal tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop pentatonic/blues wording",
+          "remove wah",
+          "favor fuzz and raw attack over mid-gain crunch"
+        ],
+        "warnings": [
+          "The source material is a classic surf/rock track, requiring aggressive fuzz and vintage amp tones. The chain prioritizes raw attack over modern polish."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.714,
+      "prompt_chars": 984,
+      "response_chars": 413,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 118,
+        "total_duration": 10693387200,
+        "prompt_eval_duration": 357069000,
+        "eval_duration": 2019654000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.172,
+      "prompt_chars": 5325,
+      "response_chars": 526,
+      "usage": {
+        "input_tokens": 1507,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1651
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 24.451,
+      "prompt_chars": 3590,
+      "response_chars": 4656,
+      "usage": {
+        "prompt_eval_count": 1213,
+        "eval_count": 1359,
+        "total_duration": 24445497400,
+        "prompt_eval_duration": 396804000,
+        "eval_duration": 23534508000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.817,
+      "prompt_chars": 6771,
+      "response_chars": 610,
+      "usage": {
+        "prompt_eval_count": 1929,
+        "eval_count": 166,
+        "total_duration": 5812087700,
+        "prompt_eval_duration": 416734000,
+        "eval_duration": 4857890000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.753,
+      "prompt_chars": 2606,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 850,
+        "eval_count": 49,
+        "total_duration": 12738326200,
+        "prompt_eval_duration": 539168000,
+        "eval_duration": 1037009000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Link Wray",
+      "title": "Rumble",
+      "album": "",
+      "year": null,
+      "genre": "garage rock"
+    },
+    "rig": {
+      "rigName": "Link Wray - Rumble - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal dirty surf fuzz with tremolo-like raw twang",
+      "signalChainSummary": "Fuzz -> Boost/OD -> UK 45 (Tweed) -> UK Vintage 4x12 -> Tremolo -> Delay",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain fuzz noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/dirt",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add initial grit and boost the signal into the fuzz/amp.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here to simulate a raw, slightly dirty pre-gain stage before the main fuzz/distortion.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "A simple boost could also achieve this initial lift."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "8",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the core fuzzy buzz and raw texture.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the small tweed/valve amp and raw breakup.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is chosen for its vintage, mid-gain character suitable for surf rock tones.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if the tone needs more American tweed warmth."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British vintage cabinet sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/tremolo",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": true,
+          "settings": {
+            "Depth": "5",
+            "Rate": "4 Hz"
+          },
+          "purpose": "Achieve the required tremolo-like raw twang.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay/echo",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Add space and echo to the surf sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "room/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Size": "Medium",
+            "Reverb Mix": "20%"
+          },
+          "purpose": "Provide a dry mono space without sounding overly wet or polished.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to give the 'dry mono space' feel without adding excessive reverb tail.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal dirty surf fuzz with tremolo-like raw twang",
+      "mustHave": [
+        "fuzzy buzz",
+        "dry mono space",
+        "sharp low-string attack",
+        "primitive raw amp breakup"
+      ],
+      "avoid": [
+        "wah",
+        "generic crunch",
+        "polished distortion",
+        "chorus"
+      ],
+      "gearClues": [
+        "small tweed/valve amp",
+        "single-coil bridge",
+        "fuzz box",
+        "1x12 combo"
+      ],
+      "corrections": [
+        "drop pentatonic/blues wording",
+        "remove wah",
+        "favor fuzz and raw attack over mid-gain crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage rock",
+      "styleTags": [
+        "surf rock",
+        "proto-punk"
+      ],
+      "targetTone": "nasal dirty surf fuzz with tremolo-like raw twang",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic British cabinet IR with a more open, tweed-style speaker simulation to better capture the raw, vintage surf sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "tweed/open speaker IR (e.g., Fender Tweed)",
+          "reason": "The UK 4x12 is too British; a tweed cab better matches the raw, vintage surf sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More open and nasal tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 833,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1096 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 148,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bob_Dylan__Mr_Tambourine_Man.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bob Dylan",
+    "title": "Mr. Tambourine Man",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "folk rock",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Dylan's early work is classic folk, characterized by acoustic fingerpicking and dry vocals."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Acoustic/Fingerpicked Folk Ballad Tone",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "fingerpicking arpeggios",
+        "warm tube amp simulation"
+      ],
+      "gearHypotheses": [
+        "Clean Fender-style amp model (e.g., Twin Reverb)",
+        "Plate reverb unit",
+        "Tape delay effect"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Wah",
+        "Distortion",
+        "Overdrive"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "jangle acoustic folk with dry vocal-era clarity",
+      "mustHave": [
+        "acoustic picking",
+        "clean dry texture",
+        "bright string attack"
+      ],
+      "avoid": [
+        "electric amp sheen",
+        "delay",
+        "plate reverb",
+        "fuzz",
+        "overdrive"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "picking pattern",
+        "minimal effects"
+      ],
+      "corrections": [
+        "remove warm tube amp",
+        "remove delay"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "iconic recording but draft is generic",
+      "instrument context likely wrong: acoustic vs electric",
+      "signature production texture may be decisive and omitted"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "acoustic folk fingerpicking, no electric guitar",
+    "mustHave": [
+      "acoustic guitar",
+      "fingerpicked arpeggios",
+      "dry vocal-era clarity"
+    ],
+    "avoid": [
+      "electric amp",
+      "tube warmth",
+      "delay",
+      "reverb",
+      "overdrive"
+    ],
+    "gearClues": [
+      "acoustic guitar recording",
+      "1965 studio folk production",
+      "no electric instrumentation"
+    ],
+    "corrections": [
+      "wrong instrument: acoustic not electric",
+      "remove all amp and effect modeling",
+      "GP-180 cannot replicate acoustic guitar tone"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "acoustic folk fingerpicking, no electric guitar",
+    "mustHave": [
+      "acoustic guitar",
+      "fingerpicked arpeggios",
+      "dry vocal-era clarity"
+    ],
+    "avoid": [
+      "electric amp",
+      "tube warmth",
+      "delay",
+      "reverb",
+      "overdrive"
+    ],
+    "gearClues": [
+      "acoustic guitar recording",
+      "1965 studio folk production",
+      "no electric instrumentation"
+    ],
+    "corrections": [
+      "wrong instrument: acoustic not electric",
+      "remove all amp and effect modeling",
+      "GP-180 cannot replicate acoustic guitar tone"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is purely acoustic folk, we must simulate a clean, dry fingerpicking sound using an electric guitar setup. We will prioritize clarity and minimal coloration.",
+          "bestMatchSummary": "A very clean signal chain utilizing a low-gain preamp (US Deluxe) with minimal effects to mimic the bright, dry tone of 1960s folk recordings.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-40 dB"
+              },
+              "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated clean compressor, but Comp provides necessary dynamic control for folk picking.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Keep the signal path clean and transparent to maintain acoustic clarity.",
+              "matchQuality": "exact",
+              "gap": "N/A. No gain stage is needed for this dry folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "6",
+                "Bass": "5",
+                "Mid": "5"
+              },
+              "purpose": "Simulate the bright, articulate sound of a vintage American clean amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best available model for achieving high clarity and low coloration suitable for folk music.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound that complements the clean US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clarity, mimicking the direct recording of an acoustic source.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the high-end sparkle and articulate the fingerpicked notes without sounding harsh.",
+              "matchQuality": "close",
+              "gap": "A slight boost in treble is crucial to replicate the 'air' of an acoustic recording.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah pedal to maintain a neutral and dry tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass modulation effects to keep the tone dry and natural.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay (optional)",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay to maintain the dry, immediate feel of a vintage folk recording.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb (optional)",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid reverb to maintain the dry, intimate sound of a studio folk recording.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is purely acoustic folk (acoustic guitar/vocals). The GP-180 can only simulate this tone using an electric guitar setup, which inherently involves some degree of electronic coloration and loss of true acoustic warmth.",
+          "All effects (Delay, Reverb, Wah) are disabled to achieve the required dry, vintage clarity."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current setup is fundamentally flawed as it uses an electric guitar model for purely acoustic folk material. The primary improvement must be to bypass the amp/cab simulation entirely and focus on pure tone shaping.",
+          "proposals": [
+            {
+              "priority": "P1",
+              "type": "IR",
+              "target": "Acoustic realism",
+              "recommendedAsset": "High-quality Acoustic IR (e.g., vintage condenser mic)",
+              "reason": "The GP-180 must bypass amp/cab simulation to simulate direct acoustic recording.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Immediately",
+              "expectedGain": "Massive improvement in realism and tone accuracy.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [
+          "The core issue is the instrument mismatch (electric vs. acoustic). The proposed IR change only addresses the output stage; the user must understand that the GP-180 cannot perfectly replicate this sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bob Dylan - Mr. Tambourine Man - Valeton GP-180",
+        "song": {
+          "artist": "Bob Dylan",
+          "title": "Mr. Tambourine Man",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "acoustic folk fingerpicking, no electric guitar",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A very clean signal chain utilizing a low-gain preamp (US Deluxe) with minimal effects to mimic the bright, dry tone of 1960s folk recordings.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in recording.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Threshold": "-40 dB"
+            },
+            "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+            "matchQuality": "close",
+            "gap": "The ideal choice would be a dedicated clean compressor, but Comp provides necessary dynamic control for folk picking.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "Keep the signal path clean and transparent to maintain acoustic clarity.",
+            "matchQuality": "exact",
+            "gap": "N/A. No gain stage is needed for this dry folk tone.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "6",
+              "Bass": "5",
+              "Mid": "5"
+            },
+            "purpose": "Simulate the bright, articulate sound of a vintage American clean amplifier.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best available model for achieving high clarity and low coloration suitable for folk music.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and focused cabinet sound that complements the clean US Deluxe amp.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its clarity, mimicking the direct recording of an acoustic source.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tone shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the high-end sparkle and articulate the fingerpicked notes without sounding harsh.",
+            "matchQuality": "close",
+            "gap": "A slight boost in treble is crucial to replicate the 'air' of an acoustic recording.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter (optional)",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass the wah pedal to maintain a neutral and dry tone.",
+            "matchQuality": "exact",
+            "gap": "N/A. The effect is intentionally bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation (optional)",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass modulation effects to keep the tone dry and natural.",
+            "matchQuality": "exact",
+            "gap": "N/A. The effect is intentionally bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay (optional)",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay to maintain the dry, immediate feel of a vintage folk recording.",
+            "matchQuality": "exact",
+            "gap": "N/A. The effect is intentionally bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb (optional)",
+            "module": "RVB",
+            "model": "Room",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid reverb to maintain the dry, intimate sound of a studio folk recording.",
+            "matchQuality": "exact",
+            "gap": "N/A. The effect is intentionally bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "acoustic folk fingerpicking, no electric guitar",
+          "toneProfile": "acoustic folk fingerpicking, no electric guitar",
+          "idealSignalChain": "acoustic guitar recording | 1965 studio folk production | no electric instrumentation",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic guitar recording",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1965 studio folk production",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "no electric instrumentation",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar",
+            "fingerpicked arpeggios",
+            "dry vocal-era clarity"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is purely acoustic folk, we must simulate a clean, dry fingerpicking sound using an electric guitar setup. We will prioritize clarity and minimal coloration.",
+          "bestMatchSummary": "A very clean signal chain utilizing a low-gain preamp (US Deluxe) with minimal effects to mimic the bright, dry tone of 1960s folk recordings.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in recording.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-40 dB"
+              },
+              "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated clean compressor, but Comp provides necessary dynamic control for folk picking.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Keep the signal path clean and transparent to maintain acoustic clarity.",
+              "matchQuality": "exact",
+              "gap": "N/A. No gain stage is needed for this dry folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "6",
+                "Bass": "5",
+                "Mid": "5"
+              },
+              "purpose": "Simulate the bright, articulate sound of a vintage American clean amplifier.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best available model for achieving high clarity and low coloration suitable for folk music.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound that complements the clean US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clarity, mimicking the direct recording of an acoustic source.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the high-end sparkle and articulate the fingerpicked notes without sounding harsh.",
+              "matchQuality": "close",
+              "gap": "A slight boost in treble is crucial to replicate the 'air' of an acoustic recording.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah pedal to maintain a neutral and dry tone.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass modulation effects to keep the tone dry and natural.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay (optional)",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay to maintain the dry, immediate feel of a vintage folk recording.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb (optional)",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid reverb to maintain the dry, intimate sound of a studio folk recording.",
+              "matchQuality": "exact",
+              "gap": "N/A. The effect is intentionally bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current setup is fundamentally flawed as it uses an electric guitar model for purely acoustic folk material. The primary improvement must be to bypass the amp/cab simulation entirely and focus on pure tone shaping.",
+          "proposals": [
+            {
+              "priority": "P1",
+              "type": "IR",
+              "target": "Acoustic realism",
+              "recommendedAsset": "High-quality Acoustic IR (e.g., vintage condenser mic)",
+              "reason": "The GP-180 must bypass amp/cab simulation to simulate direct acoustic recording.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Immediately",
+              "expectedGain": "Massive improvement in realism and tone accuracy.",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "wrong instrument: acoustic not electric",
+          "remove all amp and effect modeling",
+          "GP-180 cannot replicate acoustic guitar tone"
+        ],
+        "warnings": [
+          "The source material is purely acoustic folk (acoustic guitar/vocals). The GP-180 can only simulate this tone using an electric guitar setup, which inherently involves some degree of electronic coloration and loss of true acoustic warmth.",
+          "All effects (Delay, Reverb, Wah) are disabled to achieve the required dry, vintage clarity.",
+          "The core issue is the instrument mismatch (electric vs. acoustic). The proposed IR change only addresses the output stage; the user must understand that the GP-180 cannot perfectly replicate this sound."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 14.279,
+      "prompt_chars": 996,
+      "response_chars": 361,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 104,
+        "total_duration": 14265336300,
+        "prompt_eval_duration": 198641000,
+        "eval_duration": 840675000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.896,
+      "prompt_chars": 5309,
+      "response_chars": 592,
+      "usage": {
+        "input_tokens": 1495,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1637
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.1,
+      "prompt_chars": 4741,
+      "response_chars": 624,
+      "usage": {
+        "input_tokens": 1408,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 204,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 14.286,
+      "prompt_chars": 3628,
+      "response_chars": 5834,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1582,
+        "total_duration": 14257919600,
+        "prompt_eval_duration": 332184000,
+        "eval_duration": 12486293000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 5.449,
+      "prompt_chars": 7997,
+      "response_chars": 916,
+      "usage": {
+        "prompt_eval_count": 2147,
+        "eval_count": 212,
+        "total_duration": 5428641300,
+        "prompt_eval_duration": 377484000,
+        "eval_duration": 1720597000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 15.04,
+      "prompt_chars": 2943,
+      "response_chars": 196,
+      "usage": {
+        "prompt_eval_count": 910,
+        "eval_count": 50,
+        "total_duration": 15014456300,
+        "prompt_eval_duration": 180818000,
+        "eval_duration": 384900000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bob Dylan",
+      "title": "Mr. Tambourine Man",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Bob Dylan - Mr. Tambourine Man - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "acoustic folk fingerpicking, no electric guitar",
+      "signalChainSummary": "A very clean signal chain utilizing a low-gain preamp (US Deluxe) with minimal effects to mimic the bright, dry tone of 1960s folk recordings.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in recording.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Threshold": "-40 dB"
+          },
+          "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+          "matchQuality": "close",
+          "gap": "The ideal choice would be a dedicated clean compressor, but Comp provides necessary dynamic control for folk picking.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "Keep the signal path clean and transparent to maintain acoustic clarity.",
+          "matchQuality": "exact",
+          "gap": "N/A. No gain stage is needed for this dry folk tone.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "6",
+            "Bass": "5",
+            "Mid": "5"
+          },
+          "purpose": "Simulate the bright, articulate sound of a vintage American clean amplifier.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best available model for achieving high clarity and low coloration suitable for folk music.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and focused cabinet sound that complements the clean US Deluxe amp.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its clarity, mimicking the direct recording of an acoustic source.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tone shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the high-end sparkle and articulate the fingerpicked notes without sounding harsh.",
+          "matchQuality": "close",
+          "gap": "A slight boost in treble is crucial to replicate the 'air' of an acoustic recording.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter (optional)",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass the wah pedal to maintain a neutral and dry tone.",
+          "matchQuality": "exact",
+          "gap": "N/A. The effect is intentionally bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation (optional)",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass modulation effects to keep the tone dry and natural.",
+          "matchQuality": "exact",
+          "gap": "N/A. The effect is intentionally bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay (optional)",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay to maintain the dry, immediate feel of a vintage folk recording.",
+          "matchQuality": "exact",
+          "gap": "N/A. The effect is intentionally bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb (optional)",
+          "module": "RVB",
+          "model": "Room",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid reverb to maintain the dry, intimate sound of a studio folk recording.",
+          "matchQuality": "exact",
+          "gap": "N/A. The effect is intentionally bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "acoustic folk fingerpicking, no electric guitar",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked arpeggios",
+        "dry vocal-era clarity"
+      ],
+      "avoid": [
+        "electric amp",
+        "tube warmth",
+        "delay",
+        "reverb",
+        "overdrive"
+      ],
+      "gearClues": [
+        "acoustic guitar recording",
+        "1965 studio folk production",
+        "no electric instrumentation"
+      ],
+      "corrections": [
+        "wrong instrument: acoustic not electric",
+        "remove all amp and effect modeling",
+        "GP-180 cannot replicate acoustic guitar tone"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "folk rock",
+        "singer-songwriter"
+      ],
+      "targetTone": "acoustic folk fingerpicking, no electric guitar",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current setup is fundamentally flawed as it uses an electric guitar model for purely acoustic folk material. The primary improvement must be to bypass the amp/cab simulation entirely and focus on pure tone shaping.",
+      "proposals": [
+        {
+          "priority": "P1",
+          "type": "IR",
+          "target": "Acoustic realism",
+          "recommendedAsset": "High-quality Acoustic IR (e.g., vintage condenser mic)",
+          "reason": "The GP-180 must bypass amp/cab simulation to simulate direct acoustic recording.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Immediately",
+          "expectedGain": "Massive improvement in realism and tone accuracy.",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 148,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

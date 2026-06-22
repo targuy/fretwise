@@ -1,0 +1,1097 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 506,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Gary_Moore__The_Messiah_Will_Come_Again.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Gary Moore",
+    "title": "The Messiah Will Come Again",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "rock"
+    ],
+    "confidence": "high",
+    "rationale": "Gary Moore is a foundational figure in blues-infused hard rock and fusion."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Blues Rock Lead Tone",
+      "signatureElements": [
+        "crunch",
+        "delay",
+        "reverb",
+        "wah",
+        "overdrive"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM-800 style amp model",
+        "Tube Screamer style overdrive",
+        "Wah pedal simulation"
+      ],
+      "avoid": [
+        "clean arpeggios",
+        "heavy fuzz",
+        "ambient pads"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+      "mustHave": [
+        "long sustain",
+        "singing lead",
+        "wide vibrato",
+        "smooth mid gain",
+        "touch of delay"
+      ],
+      "avoid": [
+        "clean arpeggios",
+        "heavy fuzz",
+        "ambient pads"
+      ],
+      "gearClues": [
+        "Les Paul style humbuckers",
+        "Marshall/Plexi lead",
+        "2x12 or 4x12",
+        "analog delay"
+      ],
+      "corrections": [
+        "drop wah",
+        "avoid JCM-800 edge",
+        "lean warmer than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+    "mustHave": [
+      "long sustain",
+      "singing lead",
+      "wide vibrato",
+      "smooth mid gain",
+      "touch of delay"
+    ],
+    "avoid": [
+      "clean arpeggios",
+      "heavy fuzz",
+      "ambient pads"
+    ],
+    "gearClues": [
+      "Les Paul style humbuckers",
+      "Marshall/Plexi lead",
+      "2x12 or 4x12",
+      "analog delay"
+    ],
+    "corrections": [
+      "drop wah",
+      "avoid JCM-800 edge",
+      "lean warmer than crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on creamy, sustaining lead tones using classic British voicing and moderate gain.",
+          "bestMatchSummary": "A warm, singing signal chain utilizing a Boost/OD for initial drive, followed by an AC30-style amp simulation and a 4x12 cabinet, enhanced with Chorus and Digital Delay for sustain and vibrato.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide initial clean boost and sustain lift for lead lines.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the gentle push needed before a Plexi-style amp, avoiding heavy OD saturation.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more grit than pure boost is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "Low-Medium",
+                "Tone": "Mid-Focused"
+              },
+              "purpose": "Add creamy, singing mid-gain and sustain without heavy fuzz or modern crunch.",
+              "matchQuality": "close",
+              "gap": "Red Haze is chosen for its vintage character, simulating the desired 'creamy drive' while avoiding the harshness of pure distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if Red Haze is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Presence": "Low"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall voicing for a warm, singing lead tone.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is ideal for capturing the 'Plexi' sound and warmth requested, while avoiding the JCM-800 edge.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive British option."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 voicing required for lead tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "High"
+              },
+              "purpose": "Enhance the 'wide vibrato' and give the lead tone a singing, ethereal quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here to simulate controlled pitch modulation/vibrato, which is key for Gary Moore's style.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "If a more rhythmic vibrato is preferred over a sustained wash."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Medium",
+                "Feedback": "Low-Medium",
+                "Mix": "Moderate"
+              },
+              "purpose": "Add a touch of delay to enhance sustain and space the lead lines.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Medium",
+                "Mix": "Low-Medium"
+              },
+              "purpose": "Add subtle depth and roundness to the overall tone without sounding ambient.",
+              "matchQuality": "close",
+              "gap": "Room reverb provides a natural, non-overpowering sense of space suitable for lead guitar work.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more defined, metallic echo is desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a lead guitar performance, so the rig focuses entirely on maximizing sustain and singing tone. The Chorus module is used to simulate wide vibrato/pitch modulation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic British lead tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (or similar Plexi voicing)",
+              "reason": "The AC30/Plexi sound needs a dedicated Marshall-voiced cabinet to ground the tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for lead tones",
+              "expectedGain": "Increased realism and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Gary Moore - The Messiah Will Come Again - Valeton GP-180",
+        "song": {
+          "artist": "Gary Moore",
+          "title": "The Messiah Will Come Again",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A warm, singing signal chain utilizing a Boost/OD for initial drive, followed by an AC30-style amp simulation and a 4x12 cabinet, enhanced with Chorus and Digital Delay for sustain and vibrato.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "Medium",
+              "Tone": "Bright"
+            },
+            "purpose": "Provide initial clean boost and sustain lift for lead lines.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to simulate the gentle push needed before a Plexi-style amp, avoiding heavy OD saturation.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "If more grit than pure boost is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "Low-Medium",
+              "Tone": "Mid-Focused"
+            },
+            "purpose": "Add creamy, singing mid-gain and sustain without heavy fuzz or modern crunch.",
+            "matchQuality": "close",
+            "gap": "Red Haze is chosen for its vintage character, simulating the desired 'creamy drive' while avoiding the harshness of pure distortion.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly cleaner alternative if Red Haze is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "Medium-High",
+              "Treble": "Mid",
+              "Presence": "Low"
+            },
+            "purpose": "Simulate the classic British Plexi/Marshall voicing for a warm, singing lead tone.",
+            "matchQuality": "close",
+            "gap": "The AC30 TB is ideal for capturing the 'Plexi' sound and warmth requested, while avoiding the JCM-800 edge.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A slightly more aggressive British option."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 voicing required for lead tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/vibrato",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Mix": "High"
+            },
+            "purpose": "Enhance the 'wide vibrato' and give the lead tone a singing, ethereal quality.",
+            "matchQuality": "close",
+            "gap": "Chorus is used here to simulate controlled pitch modulation/vibrato, which is key for Gary Moore's style.",
+            "alternatives": [
+              {
+                "model": "Tremolo",
+                "reason": "If a more rhythmic vibrato is preferred over a sustained wash."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "Medium",
+              "Feedback": "Low-Medium",
+              "Mix": "Moderate"
+            },
+            "purpose": "Add a touch of delay to enhance sustain and space the lead lines.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Medium",
+              "Mix": "Low-Medium"
+            },
+            "purpose": "Add subtle depth and roundness to the overall tone without sounding ambient.",
+            "matchQuality": "close",
+            "gap": "Room reverb provides a natural, non-overpowering sense of space suitable for lead guitar work.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a more defined, metallic echo is desired."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+          "toneProfile": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+          "idealSignalChain": "Les Paul style humbuckers | Marshall/Plexi lead | 2x12 or 4x12 | analog delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Les Paul style humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi lead",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "analog delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "long sustain",
+            "singing lead",
+            "wide vibrato",
+            "smooth mid gain",
+            "touch of delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on creamy, sustaining lead tones using classic British voicing and moderate gain.",
+          "bestMatchSummary": "A warm, singing signal chain utilizing a Boost/OD for initial drive, followed by an AC30-style amp simulation and a 4x12 cabinet, enhanced with Chorus and Digital Delay for sustain and vibrato.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide initial clean boost and sustain lift for lead lines.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the gentle push needed before a Plexi-style amp, avoiding heavy OD saturation.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more grit than pure boost is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "Low-Medium",
+                "Tone": "Mid-Focused"
+              },
+              "purpose": "Add creamy, singing mid-gain and sustain without heavy fuzz or modern crunch.",
+              "matchQuality": "close",
+              "gap": "Red Haze is chosen for its vintage character, simulating the desired 'creamy drive' while avoiding the harshness of pure distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if Red Haze is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Presence": "Low"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall voicing for a warm, singing lead tone.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is ideal for capturing the 'Plexi' sound and warmth requested, while avoiding the JCM-800 edge.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive British option."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 voicing required for lead tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "High"
+              },
+              "purpose": "Enhance the 'wide vibrato' and give the lead tone a singing, ethereal quality.",
+              "matchQuality": "close",
+              "gap": "Chorus is used here to simulate controlled pitch modulation/vibrato, which is key for Gary Moore's style.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "If a more rhythmic vibrato is preferred over a sustained wash."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Medium",
+                "Feedback": "Low-Medium",
+                "Mix": "Moderate"
+              },
+              "purpose": "Add a touch of delay to enhance sustain and space the lead lines.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Medium",
+                "Mix": "Low-Medium"
+              },
+              "purpose": "Add subtle depth and roundness to the overall tone without sounding ambient.",
+              "matchQuality": "close",
+              "gap": "Room reverb provides a natural, non-overpowering sense of space suitable for lead guitar work.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more defined, metallic echo is desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic British lead tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (or similar Plexi voicing)",
+              "reason": "The AC30/Plexi sound needs a dedicated Marshall-voiced cabinet to ground the tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for lead tones",
+              "expectedGain": "Increased realism and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah",
+          "avoid JCM-800 edge",
+          "lean warmer than crunch"
+        ],
+        "warnings": [
+          "The source material is a lead guitar performance, so the rig focuses entirely on maximizing sustain and singing tone. The Chorus module is used to simulate wide vibrato/pitch modulation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.557,
+      "prompt_chars": 1006,
+      "response_chars": 305,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 86,
+        "total_duration": 9539750400,
+        "prompt_eval_duration": 512336000,
+        "eval_duration": 1216959000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.81,
+      "prompt_chars": 5251,
+      "response_chars": 502,
+      "usage": {
+        "input_tokens": 1476,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1618
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.154,
+      "prompt_chars": 3588,
+      "response_chars": 5715,
+      "usage": {
+        "prompt_eval_count": 1218,
+        "eval_count": 1573,
+        "total_duration": 29146988100,
+        "prompt_eval_duration": 145358000,
+        "eval_duration": 28630652000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.087,
+      "prompt_chars": 7856,
+      "response_chars": 536,
+      "usage": {
+        "prompt_eval_count": 2148,
+        "eval_count": 144,
+        "total_duration": 4056793000,
+        "prompt_eval_duration": 342265000,
+        "eval_duration": 3272410000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.731,
+      "prompt_chars": 2759,
+      "response_chars": 159,
+      "usage": {
+        "prompt_eval_count": 872,
+        "eval_count": 42,
+        "total_duration": 14708787500,
+        "prompt_eval_duration": 295319000,
+        "eval_duration": 875143000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Gary Moore",
+      "title": "The Messiah Will Come Again",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "Gary Moore - The Messiah Will Come Again - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+      "signalChainSummary": "A warm, singing signal chain utilizing a Boost/OD for initial drive, followed by an AC30-style amp simulation and a 4x12 cabinet, enhanced with Chorus and Digital Delay for sustain and vibrato.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "Medium",
+            "Tone": "Bright"
+          },
+          "purpose": "Provide initial clean boost and sustain lift for lead lines.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to simulate the gentle push needed before a Plexi-style amp, avoiding heavy OD saturation.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If more grit than pure boost is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "Low-Medium",
+            "Tone": "Mid-Focused"
+          },
+          "purpose": "Add creamy, singing mid-gain and sustain without heavy fuzz or modern crunch.",
+          "matchQuality": "close",
+          "gap": "Red Haze is chosen for its vintage character, simulating the desired 'creamy drive' while avoiding the harshness of pure distortion.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly cleaner alternative if Red Haze is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "Medium-High",
+            "Treble": "Mid",
+            "Presence": "Low"
+          },
+          "purpose": "Simulate the classic British Plexi/Marshall voicing for a warm, singing lead tone.",
+          "matchQuality": "close",
+          "gap": "The AC30 TB is ideal for capturing the 'Plexi' sound and warmth requested, while avoiding the JCM-800 edge.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A slightly more aggressive British option."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 voicing required for lead tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/vibrato",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Mix": "High"
+          },
+          "purpose": "Enhance the 'wide vibrato' and give the lead tone a singing, ethereal quality.",
+          "matchQuality": "close",
+          "gap": "Chorus is used here to simulate controlled pitch modulation/vibrato, which is key for Gary Moore's style.",
+          "alternatives": [
+            {
+              "model": "Tremolo",
+              "reason": "If a more rhythmic vibrato is preferred over a sustained wash."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "Medium",
+            "Feedback": "Low-Medium",
+            "Mix": "Moderate"
+          },
+          "purpose": "Add a touch of delay to enhance sustain and space the lead lines.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Medium",
+            "Mix": "Low-Medium"
+          },
+          "purpose": "Add subtle depth and roundness to the overall tone without sounding ambient.",
+          "matchQuality": "close",
+          "gap": "Room reverb provides a natural, non-overpowering sense of space suitable for lead guitar work.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more defined, metallic echo is desired."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+      "mustHave": [
+        "long sustain",
+        "singing lead",
+        "wide vibrato",
+        "smooth mid gain",
+        "touch of delay"
+      ],
+      "avoid": [
+        "clean arpeggios",
+        "heavy fuzz",
+        "ambient pads"
+      ],
+      "gearClues": [
+        "Les Paul style humbuckers",
+        "Marshall/Plexi lead",
+        "2x12 or 4x12",
+        "analog delay"
+      ],
+      "corrections": [
+        "drop wah",
+        "avoid JCM-800 edge",
+        "lean warmer than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "rock"
+      ],
+      "targetTone": "sustaining Gary Moore lead with vocal vibrato and creamy drive",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a more authentic British lead tone.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 IR (or similar Plexi voicing)",
+          "reason": "The AC30/Plexi sound needs a dedicated Marshall-voiced cabinet to ground the tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always for lead tones",
+          "expectedGain": "Increased realism and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 506,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

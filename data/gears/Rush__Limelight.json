@@ -1,0 +1,1034 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1204,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rush__Limelight.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rush",
+    "title": "Limelight",
+    "album": "",
+    "year": null,
+    "genre": "progressive rock"
+  },
+  "genreClassification": {
+    "genre": "progressive rock",
+    "subgenres": [
+      "art rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "Rush is a foundational progressive/classic rock band known for complex arrangements."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly overdriven rock tone with pronounced mid-range bite and clarity.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight chorus or vibrato modulation",
+        "Punchy attack for rhythmic strumming",
+        "Clean headroom for verses"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall/Vox family)",
+        "Mid-scooped EQ curve with boost at 1.5kHz - 3kHz",
+        "Overdrive pedal simulation (Tube Screamer type) for grit"
+      ],
+      "avoid": [
+        "Heavy fuzz or distortion",
+        "Deep bass resonance",
+        "Excessive delay trails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright chorus-clean with edge-of-breakup bite",
+      "mustHave": [
+        "chorused clean rhythm",
+        "tight low gain",
+        "clear top end",
+        "modulated sheen"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "wet delay"
+      ],
+      "gearClues": [
+        "HSS or single-coils",
+        "Vox/Marshall cleanish amp",
+        "stereo chorus",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "make chorus more obvious",
+        "reduce overdrive",
+        "keep verses cleaner"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright chorus-clean with edge-of-breakup bite",
+    "mustHave": [
+      "chorused clean rhythm",
+      "tight low gain",
+      "clear top end",
+      "modulated sheen"
+    ],
+    "avoid": [
+      "heavy crunch",
+      "fuzz",
+      "wet delay"
+    ],
+    "gearClues": [
+      "HSS or single-coils",
+      "Vox/Marshall cleanish amp",
+      "stereo chorus",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "make chorus more obvious",
+      "reduce overdrive",
+      "keep verses cleaner"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, modulated tones with controlled breakup.",
+          "bestMatchSummary": "A bright, chorus-drenched signal chain utilizing a classic British clean amp model (UK 50) paired with Chorus and light compression for rhythmic clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Even out dynamics and add sustain for rhythmic consistency.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "60%",
+                "Feedback": "50%"
+              },
+              "purpose": "Create the required 'modulated sheen' and obvious chorus effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "overdrive/gain shaping",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the 'edge-of-breakup bite' without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a light, natural breakup rather than aggressive distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more grit, but might push the clean tone too far."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Mid": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the required 'Vox/Marshall cleanish amp' tone, emphasizing clarity and brightness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British clean tone foundation and stereo width.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the clear top end and maintain tightness while reducing muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle depth and space without sounding wet or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, so the tone should be bright and articulate. The chain prioritizes clean modulation over heavy gain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the required clear top end and stereo width.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 IR (e.g., Fender Twin/Vox style)",
+              "reason": "Enhance clarity and top end for chorus-clean rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased articulation and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rush - Limelight - Valeton GP-180",
+        "song": {
+          "artist": "Rush",
+          "title": "Limelight",
+          "album": "",
+          "year": null,
+          "genre": "progressive rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright chorus-clean with edge-of-breakup bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, chorus-drenched signal chain utilizing a classic British clean amp model (UK 50) paired with Chorus and light compression for rhythmic clarity.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Even out dynamics and add sustain for rhythmic consistency.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "60%",
+              "Feedback": "50%"
+            },
+            "purpose": "Create the required 'modulated sheen' and obvious chorus effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "overdrive/gain shaping",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the 'edge-of-breakup bite' without heavy crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a light, natural breakup rather than aggressive distortion.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more grit, but might push the clean tone too far."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "7/10",
+              "Mid": "6/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the required 'Vox/Marshall cleanish amp' tone, emphasizing clarity and brightness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a classic British clean tone foundation and stereo width.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the clear top end and maintain tightness while reducing muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle depth and space without sounding wet or distracting.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright chorus-clean with edge-of-breakup bite",
+          "toneProfile": "bright chorus-clean with edge-of-breakup bite",
+          "idealSignalChain": "HSS or single-coils | Vox/Marshall cleanish amp | stereo chorus | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "HSS or single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Marshall cleanish amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "stereo chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorused clean rhythm",
+            "tight low gain",
+            "clear top end",
+            "modulated sheen"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, modulated tones with controlled breakup.",
+          "bestMatchSummary": "A bright, chorus-drenched signal chain utilizing a classic British clean amp model (UK 50) paired with Chorus and light compression for rhythmic clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Even out dynamics and add sustain for rhythmic consistency.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "60%",
+                "Feedback": "50%"
+              },
+              "purpose": "Create the required 'modulated sheen' and obvious chorus effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "overdrive/gain shaping",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the 'edge-of-breakup bite' without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a light, natural breakup rather than aggressive distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more grit, but might push the clean tone too far."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "7/10",
+                "Mid": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the required 'Vox/Marshall cleanish amp' tone, emphasizing clarity and brightness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British clean tone foundation and stereo width.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the clear top end and maintain tightness while reducing muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle depth and space without sounding wet or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the required clear top end and stereo width.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 IR (e.g., Fender Twin/Vox style)",
+              "reason": "Enhance clarity and top end for chorus-clean rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased articulation and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "make chorus more obvious",
+          "reduce overdrive",
+          "keep verses cleaner"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, so the tone should be bright and articulate. The chain prioritizes clean modulation over heavy gain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.278,
+      "prompt_chars": 982,
+      "response_chars": 559,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 137,
+        "total_duration": 10274783900,
+        "prompt_eval_duration": 306691000,
+        "eval_duration": 2355505000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.306,
+      "prompt_chars": 5475,
+      "response_chars": 479,
+      "usage": {
+        "input_tokens": 1524,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 37.276,
+      "prompt_chars": 3534,
+      "response_chars": 4660,
+      "usage": {
+        "prompt_eval_count": 1202,
+        "eval_count": 1352,
+        "total_duration": 37257140700,
+        "prompt_eval_duration": 294508000,
+        "eval_duration": 23450716000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.692,
+      "prompt_chars": 6717,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 1911,
+        "eval_count": 153,
+        "total_duration": 4673473100,
+        "prompt_eval_duration": 301711000,
+        "eval_duration": 3965366000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.037,
+      "prompt_chars": 2624,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 837,
+        "eval_count": 46,
+        "total_duration": 20033104600,
+        "prompt_eval_duration": 670618000,
+        "eval_duration": 584076000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rush",
+      "title": "Limelight",
+      "album": "",
+      "year": null,
+      "genre": "progressive rock"
+    },
+    "rig": {
+      "rigName": "Rush - Limelight - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright chorus-clean with edge-of-breakup bite",
+      "signalChainSummary": "A bright, chorus-drenched signal chain utilizing a classic British clean amp model (UK 50) paired with Chorus and light compression for rhythmic clarity.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Even out dynamics and add sustain for rhythmic consistency.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "60%",
+            "Feedback": "50%"
+          },
+          "purpose": "Create the required 'modulated sheen' and obvious chorus effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "overdrive/gain shaping",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the 'edge-of-breakup bite' without heavy crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a light, natural breakup rather than aggressive distortion.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more grit, but might push the clean tone too far."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "7/10",
+            "Mid": "6/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the required 'Vox/Marshall cleanish amp' tone, emphasizing clarity and brightness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a classic British clean tone foundation and stereo width.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the clear top end and maintain tightness while reducing muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle depth and space without sounding wet or distracting.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright chorus-clean with edge-of-breakup bite",
+      "mustHave": [
+        "chorused clean rhythm",
+        "tight low gain",
+        "clear top end",
+        "modulated sheen"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "wet delay"
+      ],
+      "gearClues": [
+        "HSS or single-coils",
+        "Vox/Marshall cleanish amp",
+        "stereo chorus",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "make chorus more obvious",
+        "reduce overdrive",
+        "keep verses cleaner"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "progressive rock",
+      "styleTags": [
+        "art rock",
+        "classic rock"
+      ],
+      "targetTone": "bright chorus-clean with edge-of-breakup bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the required clear top end and stereo width.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x12 IR (e.g., Fender Twin/Vox style)",
+          "reason": "Enhance clarity and top end for chorus-clean rhythm.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased articulation and brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1204,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

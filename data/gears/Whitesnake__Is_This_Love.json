@@ -1,0 +1,1011 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1740,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Whitesnake__Is_This_Love.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Whitesnake",
+    "title": "Is This Love",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "80s rock",
+      "arena rock",
+      "pop metal"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic 80s hard rock, matching the polished tone profile and gear clues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues rock tone with a touch of grit.",
+      "signatureElements": [
+        "Mid-focused crunch/overdrive",
+        "Slightly scooped mids on the lead lines (for space)",
+        "Smooth sustain and warmth",
+        "Controlled breakup (not harsh fuzz)"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall JCM family or similar)",
+        "Overdrive pedal simulation (Tube Screamer type for boost/mid-hump)",
+        "Spring reverb / Plate reverb"
+      ],
+      "avoid": [
+        "Harsh digital distortion",
+        "Extreme scooped mids (too modern metal)",
+        "Bright, brittle high end"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "smooth 80s hard rock crunch with chorus sheen",
+      "mustHave": [
+        "clean-to-crunch verse",
+        "sustained lead",
+        "polished compression",
+        "slight stereo chorus"
+      ],
+      "avoid": [
+        "bluesy breakup",
+        "fuzz",
+        "modern metal scoop",
+        "dry raw tone"
+      ],
+      "gearClues": [
+        "Marshall/JCM style",
+        "humbuckers",
+        "2x12 or 4x12",
+        "chorus",
+        "light delay"
+      ],
+      "corrections": [
+        "shift from blues rock to polished 80s hard rock",
+        "add chorus sheen",
+        "keep gain smoother, less gritty"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "smooth 80s hard rock crunch with chorus sheen",
+    "mustHave": [
+      "clean-to-crunch verse",
+      "sustained lead",
+      "polished compression",
+      "slight stereo chorus"
+    ],
+    "avoid": [
+      "bluesy breakup",
+      "fuzz",
+      "modern metal scoop",
+      "dry raw tone"
+    ],
+    "gearClues": [
+      "Marshall/JCM style",
+      "humbuckers",
+      "2x12 or 4x12",
+      "chorus",
+      "light delay"
+    ],
+    "corrections": [
+      "shift from blues rock to polished 80s hard rock",
+      "add chorus sheen",
+      "keep gain smoother, less gritty"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on polished, mid-gain British tones (JCM/Marshall style) with chorus and compression for the 80s sheen.",
+          "bestMatchSummary": "A smooth signal chain utilizing a pre-amp boost/OD for initial tone shaping, followed by an AC30 TB amp model paired with a UK Vintage 4x12 cabinet. Chorus and Compression are key effects to achieve the polished 80s sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-amp boost/OD",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide smooth, mid-range boost and slight grit for the clean-to-crunch transition.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate a slightly broken-in British overdrive tone (like an early Marshall pre-amp) without sounding too bluesy or aggressive.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain source primarily from the amp model (AC30 TB) to maintain smoothness and avoid harsh distortion.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is needed; relying on the AC30's natural breakup for controlled crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "75%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the classic British 'British' sound (Marshall/JCM style) required for 80s hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet voicing (Marshall style) and necessary punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "chorus/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Add the required 'chorus sheen' and stereo width characteristic of 80s pop/hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Achieve the 'polished compression' and sustain needed for sustained leads.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle 'light delay' for depth without muddying the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide subtle space and polish to the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on electric guitar tones. The AC30 TB and UK Vintage 4x12 combination provides the necessary British hard rock foundation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current IR is solid, but a more specific vintage cabinet will enhance the polished 80s sheen and punch required for Whitesnake's sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the specific punch and mid-range focus of 80s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Whitesnake - Is This Love - Valeton GP-180",
+        "song": {
+          "artist": "Whitesnake",
+          "title": "Is This Love",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "smooth 80s hard rock crunch with chorus sheen",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A smooth signal chain utilizing a pre-amp boost/OD for initial tone shaping, followed by an AC30 TB amp model paired with a UK Vintage 4x12 cabinet. Chorus and Compression are key effects to achieve the polished 80s sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "pre-amp boost/OD",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide smooth, mid-range boost and slight grit for the clean-to-crunch transition.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to emulate a slightly broken-in British overdrive tone (like an early Marshall pre-amp) without sounding too bluesy or aggressive.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain source primarily from the amp model (AC30 TB) to maintain smoothness and avoid harsh distortion.",
+            "matchQuality": "none",
+            "gap": "No dedicated distortion unit is needed; relying on the AC30's natural breakup for controlled crunch.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "65%",
+              "Treble": "70%",
+              "Midrange": "75%",
+              "Bass": "60%"
+            },
+            "purpose": "Emulate the classic British 'British' sound (Marshall/JCM style) required for 80s hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet voicing (Marshall style) and necessary punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "chorus/modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "50%",
+              "Mix": "30%"
+            },
+            "purpose": "Add the required 'chorus sheen' and stereo width characteristic of 80s pop/hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Achieve the 'polished compression' and sustain needed for sustained leads.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Add a subtle 'light delay' for depth without muddying the mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide subtle space and polish to the overall tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "smooth 80s hard rock crunch with chorus sheen",
+          "toneProfile": "smooth 80s hard rock crunch with chorus sheen",
+          "idealSignalChain": "Marshall/JCM style | humbuckers | 2x12 or 4x12 | chorus | light delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/JCM style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean-to-crunch verse",
+            "sustained lead",
+            "polished compression",
+            "slight stereo chorus"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on polished, mid-gain British tones (JCM/Marshall style) with chorus and compression for the 80s sheen.",
+          "bestMatchSummary": "A smooth signal chain utilizing a pre-amp boost/OD for initial tone shaping, followed by an AC30 TB amp model paired with a UK Vintage 4x12 cabinet. Chorus and Compression are key effects to achieve the polished 80s sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-amp boost/OD",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide smooth, mid-range boost and slight grit for the clean-to-crunch transition.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to emulate a slightly broken-in British overdrive tone (like an early Marshall pre-amp) without sounding too bluesy or aggressive.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain source primarily from the amp model (AC30 TB) to maintain smoothness and avoid harsh distortion.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is needed; relying on the AC30's natural breakup for controlled crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "75%",
+                "Bass": "60%"
+              },
+              "purpose": "Emulate the classic British 'British' sound (Marshall/JCM style) required for 80s hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet voicing (Marshall style) and necessary punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "chorus/modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Add the required 'chorus sheen' and stereo width characteristic of 80s pop/hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Achieve the 'polished compression' and sustain needed for sustained leads.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle 'light delay' for depth without muddying the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide subtle space and polish to the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current IR is solid, but a more specific vintage cabinet will enhance the polished 80s sheen and punch required for Whitesnake's sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the specific punch and mid-range focus of 80s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "shift from blues rock to polished 80s hard rock",
+          "add chorus sheen",
+          "keep gain smoother, less gritty"
+        ],
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on electric guitar tones. The AC30 TB and UK Vintage 4x12 combination provides the necessary British hard rock foundation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.227,
+      "prompt_chars": 991,
+      "response_chars": 577,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 137,
+        "total_duration": 10208914500,
+        "prompt_eval_duration": 314989000,
+        "eval_duration": 2465101000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.235,
+      "prompt_chars": 5502,
+      "response_chars": 543,
+      "usage": {
+        "input_tokens": 1526,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 152,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1678
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.343,
+      "prompt_chars": 3621,
+      "response_chars": 4855,
+      "usage": {
+        "prompt_eval_count": 1230,
+        "eval_count": 1407,
+        "total_duration": 23313627600,
+        "prompt_eval_duration": 401453000,
+        "eval_duration": 22367374000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.176,
+      "prompt_chars": 6981,
+      "response_chars": 627,
+      "usage": {
+        "prompt_eval_count": 1994,
+        "eval_count": 175,
+        "total_duration": 5166344800,
+        "prompt_eval_duration": 348178000,
+        "eval_duration": 4398298000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.146,
+      "prompt_chars": 2778,
+      "response_chars": 200,
+      "usage": {
+        "prompt_eval_count": 888,
+        "eval_count": 58,
+        "total_duration": 11128868300,
+        "prompt_eval_duration": 827601000,
+        "eval_duration": 910323000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Whitesnake",
+      "title": "Is This Love",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Whitesnake - Is This Love - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "smooth 80s hard rock crunch with chorus sheen",
+      "signalChainSummary": "A smooth signal chain utilizing a pre-amp boost/OD for initial tone shaping, followed by an AC30 TB amp model paired with a UK Vintage 4x12 cabinet. Chorus and Compression are key effects to achieve the polished 80s sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "pre-amp boost/OD",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide smooth, mid-range boost and slight grit for the clean-to-crunch transition.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to emulate a slightly broken-in British overdrive tone (like an early Marshall pre-amp) without sounding too bluesy or aggressive.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain source primarily from the amp model (AC30 TB) to maintain smoothness and avoid harsh distortion.",
+          "matchQuality": "fallback",
+          "gap": "No dedicated distortion unit is needed; relying on the AC30's natural breakup for controlled crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "65%",
+            "Treble": "70%",
+            "Midrange": "75%",
+            "Bass": "60%"
+          },
+          "purpose": "Emulate the classic British 'British' sound (Marshall/JCM style) required for 80s hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet voicing (Marshall style) and necessary punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "chorus/modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "50%",
+            "Mix": "30%"
+          },
+          "purpose": "Add the required 'chorus sheen' and stereo width characteristic of 80s pop/hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Achieve the 'polished compression' and sustain needed for sustained leads.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Add a subtle 'light delay' for depth without muddying the mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide subtle space and polish to the overall tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "smooth 80s hard rock crunch with chorus sheen",
+      "mustHave": [
+        "clean-to-crunch verse",
+        "sustained lead",
+        "polished compression",
+        "slight stereo chorus"
+      ],
+      "avoid": [
+        "bluesy breakup",
+        "fuzz",
+        "modern metal scoop",
+        "dry raw tone"
+      ],
+      "gearClues": [
+        "Marshall/JCM style",
+        "humbuckers",
+        "2x12 or 4x12",
+        "chorus",
+        "light delay"
+      ],
+      "corrections": [
+        "shift from blues rock to polished 80s hard rock",
+        "add chorus sheen",
+        "keep gain smoother, less gritty"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "80s rock",
+        "arena rock",
+        "pop metal"
+      ],
+      "targetTone": "smooth 80s hard rock crunch with chorus sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current IR is solid, but a more specific vintage cabinet will enhance the polished 80s sheen and punch required for Whitesnake's sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the specific punch and mid-range focus of 80s hard rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1740,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

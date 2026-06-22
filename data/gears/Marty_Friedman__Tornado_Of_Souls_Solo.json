@@ -1,0 +1,1075 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 886,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Marty_Friedman__Tornado_Of_Souls_Solo.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Marty Friedman",
+    "title": "Tornado Of Souls Solo",
+    "album": "",
+    "year": null,
+    "genre": "metal"
+  },
+  "genreClassification": {
+    "genre": "metal",
+    "subgenres": [
+      "shred metal",
+      "progressive metal"
+    ],
+    "confidence": "high",
+    "rationale": "Marty Friedman's soloing is characteristic of technical, high-energy progressive metal."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High gain, articulate lead tone with pronounced sustain and mid-range focus.",
+      "signatureElements": [
+        "Fuzz/Crunch (for grit)",
+        "Delay (dotted eighth notes)",
+        "Reverb (hall or plate)",
+        "Wah (optional sweep)"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style boost",
+        "High-gain Marshall/Mesa style amp model",
+        "Bright, articulate cabinet simulation"
+      ],
+      "avoid": [
+        "Low gain sludge tones",
+        "Heavy chorus modulation",
+        "Deep scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "fast singing lead with bright sustain and dry 80s metal bite",
+      "mustHave": [
+        "smooth legato",
+        "clear note attack",
+        "upper-mid focus",
+        "long sustain",
+        "slight delay"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "hall reverb wash",
+        "scooped mids",
+        "chorus"
+      ],
+      "gearClues": [
+        "JCM/Marshall lead",
+        "Tube Screamer boost",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop wah",
+        "keep delay subtle",
+        "favor Marshall over Mesa"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "fast singing lead with bright sustain and dry 80s metal bite",
+    "mustHave": [
+      "smooth legato",
+      "clear note attack",
+      "upper-mid focus",
+      "long sustain",
+      "slight delay"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "hall reverb wash",
+      "scooped mids",
+      "chorus"
+    ],
+    "gearClues": [
+      "JCM/Marshall lead",
+      "Tube Screamer boost",
+      "4x12 cab",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "drop wah",
+      "keep delay subtle",
+      "favor Marshall over Mesa"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, articulate lead tones reminiscent of 80s Marshall stacks.",
+          "bestMatchSummary": "A tight signal chain featuring a Tube Screamer boost into a British Marshall-style amp (UK 45/50) with a clear 4x12 cabinet, enhanced by subtle delay and compression for singing sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain signal noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer boost for upper-mid focus and sustain.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to emulate its tightening effect.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary high-gain '80s metal bite' and sustain.",
+              "matchQuality": "close",
+              "gap": "Using general Distortion model to capture Marshall lead tone, as specific JCM/Marshall models are absent.",
+              "alternatives": [
+                "RAT-style (if more aggressive grit is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Model the classic Marshall lead tone (JCM/Marshall lead) and provide headroom.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "UK 45"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance upper-mids and clarity while maintaining a focused lead tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle delay for added sustain and dimension without washing out the fast legato.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Tape (if a warmer, less defined echo is preferred)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide subtle ambience and depth without the wash of Hall reverb.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more defined, metallic echo is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a guitar solo, so the rig is built for maximum lead tone performance. The 'Boost' and 'Distortion' modules are used to emulate specific classic rock/metal pedals (TS/OD) not explicitly available."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and upper-mid focus, crucial for fast lead playing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-quality 4x12 IR (e.g., Brit Cab)",
+              "reason": "Improve cabinet realism and upper-mid articulation for soloing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Marty Friedman - Tornado Of Souls Solo - Valeton GP-180",
+        "song": {
+          "artist": "Marty Friedman",
+          "title": "Tornado Of Souls Solo",
+          "album": "",
+          "year": null,
+          "genre": "metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "fast singing lead with bright sustain and dry 80s metal bite",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight signal chain featuring a Tube Screamer boost into a British Marshall-style amp (UK 45/50) with a clear 4x12 cabinet, enhanced by subtle delay and compression for singing sustain.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain signal noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Simulate the Tube Screamer boost for upper-mid focus and sustain.",
+            "matchQuality": "close",
+            "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to emulate its tightening effect.",
+            "alternatives": [
+              "OD 9 (if more grit is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "5.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary high-gain '80s metal bite' and sustain.",
+            "matchQuality": "close",
+            "gap": "Using general Distortion model to capture Marshall lead tone, as specific JCM/Marshall models are absent.",
+            "alternatives": [
+              "RAT-style (if more aggressive grit is needed)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "7",
+              "Bass": "6"
+            },
+            "purpose": "Model the classic Marshall lead tone (JCM/Marshall lead) and provide headroom.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              "UK 45"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Enhance upper-mids and clarity while maintaining a focused lead tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "2"
+            },
+            "purpose": "Add subtle delay for added sustain and dimension without washing out the fast legato.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              "Tape (if a warmer, less defined echo is preferred)"
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide subtle ambience and depth without the wash of Hall reverb.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              "Plate (if a more defined, metallic echo is desired)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "fast singing lead with bright sustain and dry 80s metal bite",
+          "toneProfile": "fast singing lead with bright sustain and dry 80s metal bite",
+          "idealSignalChain": "JCM/Marshall lead | Tube Screamer boost | 4x12 cab | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "JCM/Marshall lead",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "smooth legato",
+            "clear note attack",
+            "upper-mid focus",
+            "long sustain",
+            "slight delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, articulate lead tones reminiscent of 80s Marshall stacks.",
+          "bestMatchSummary": "A tight signal chain featuring a Tube Screamer boost into a British Marshall-style amp (UK 45/50) with a clear 4x12 cabinet, enhanced by subtle delay and compression for singing sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain signal noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer boost for upper-mid focus and sustain.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to emulate its tightening effect.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary high-gain '80s metal bite' and sustain.",
+              "matchQuality": "close",
+              "gap": "Using general Distortion model to capture Marshall lead tone, as specific JCM/Marshall models are absent.",
+              "alternatives": [
+                "RAT-style (if more aggressive grit is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Model the classic Marshall lead tone (JCM/Marshall lead) and provide headroom.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "UK 45"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance upper-mids and clarity while maintaining a focused lead tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle delay for added sustain and dimension without washing out the fast legato.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Tape (if a warmer, less defined echo is preferred)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide subtle ambience and depth without the wash of Hall reverb.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more defined, metallic echo is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and upper-mid focus, crucial for fast lead playing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-quality 4x12 IR (e.g., Brit Cab)",
+              "reason": "Improve cabinet realism and upper-mid articulation for soloing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "drop wah",
+          "keep delay subtle",
+          "favor Marshall over Mesa"
+        ],
+        "warnings": [
+          "The source material is a guitar solo, so the rig is built for maximum lead tone performance. The 'Boost' and 'Distortion' modules are used to emulate specific classic rock/metal pedals (TS/OD) not explicitly available."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.236,
+      "prompt_chars": 1004,
+      "response_chars": 474,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 115,
+        "total_duration": 10220894300,
+        "prompt_eval_duration": 443353000,
+        "eval_duration": 1963003000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.406,
+      "prompt_chars": 5412,
+      "response_chars": 516,
+      "usage": {
+        "input_tokens": 1504,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1648
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 39.904,
+      "prompt_chars": 3621,
+      "response_chars": 4936,
+      "usage": {
+        "prompt_eval_count": 1227,
+        "eval_count": 1445,
+        "total_duration": 39898216300,
+        "prompt_eval_duration": 242921000,
+        "eval_duration": 25149520000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.96,
+      "prompt_chars": 7086,
+      "response_chars": 525,
+      "usage": {
+        "prompt_eval_count": 2029,
+        "eval_count": 143,
+        "total_duration": 3931887500,
+        "prompt_eval_duration": 296719000,
+        "eval_duration": 3087836000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.152,
+      "prompt_chars": 2775,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 884,
+        "eval_count": 50,
+        "total_duration": 19147262000,
+        "prompt_eval_duration": 646437000,
+        "eval_duration": 736562000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Marty Friedman",
+      "title": "Tornado Of Souls Solo",
+      "album": "",
+      "year": null,
+      "genre": "metal"
+    },
+    "rig": {
+      "rigName": "Marty Friedman - Tornado Of Souls Solo - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "fast singing lead with bright sustain and dry 80s metal bite",
+      "signalChainSummary": "A tight signal chain featuring a Tube Screamer boost into a British Marshall-style amp (UK 45/50) with a clear 4x12 cabinet, enhanced by subtle delay and compression for singing sustain.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain signal noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Simulate the Tube Screamer boost for upper-mid focus and sustain.",
+          "matchQuality": "close",
+          "gap": "The GP-180 lacks a dedicated TS model, but 'Boost' is used to emulate its tightening effect.",
+          "alternatives": [
+            {
+              "model": "OD 9 (if more grit is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "5.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary high-gain '80s metal bite' and sustain.",
+          "matchQuality": "close",
+          "gap": "Using general Distortion model to capture Marshall lead tone, as specific JCM/Marshall models are absent.",
+          "alternatives": [
+            {
+              "model": "RAT-style (if more aggressive grit is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "7",
+            "Bass": "6"
+          },
+          "purpose": "Model the classic Marshall lead tone (JCM/Marshall lead) and provide headroom.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Enhance upper-mids and clarity while maintaining a focused lead tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "2"
+          },
+          "purpose": "Add subtle delay for added sustain and dimension without washing out the fast legato.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Tape (if a warmer, less defined echo is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide subtle ambience and depth without the wash of Hall reverb.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate (if a more defined, metallic echo is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "fast singing lead with bright sustain and dry 80s metal bite",
+      "mustHave": [
+        "smooth legato",
+        "clear note attack",
+        "upper-mid focus",
+        "long sustain",
+        "slight delay"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "hall reverb wash",
+        "scooped mids",
+        "chorus"
+      ],
+      "gearClues": [
+        "JCM/Marshall lead",
+        "Tube Screamer boost",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "drop wah",
+        "keep delay subtle",
+        "favor Marshall over Mesa"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "metal",
+      "styleTags": [
+        "shred metal",
+        "progressive metal"
+      ],
+      "targetTone": "fast singing lead with bright sustain and dry 80s metal bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better realism and upper-mid focus, crucial for fast lead playing.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-quality 4x12 IR (e.g., Brit Cab)",
+          "reason": "Improve cabinet realism and upper-mid articulation for soloing.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 886,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

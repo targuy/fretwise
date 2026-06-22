@@ -1,0 +1,1096 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1303,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Steely_Dan__Reelin_In_The_Years.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Steely Dan",
+    "title": "Reelin' In The Years",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "70s",
+      "smooth rock",
+      "aor"
+    ],
+    "confidence": "high",
+    "rationale": "Steely Dan's style fits sophisticated 70s pop/rock and AOR genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Smooth, jazzy clean/light crunch tones with deep reverb and subtle chorus modulation.",
+      "signatureElements": [
+        "clean tone",
+        "chorus",
+        "reverb",
+        "delay",
+        "wah"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus effect",
+        "Clean amp model (e.g., Fender Twin)",
+        "EQ pedal for tonal shaping"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain distortion",
+        "overdriven rock crunch"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright biting 70s lead crunch with springy attack",
+      "mustHave": [
+        "singing sustain",
+        "upper-mid bite",
+        "light overdrive",
+        "slight compression",
+        "tight phrasing"
+      ],
+      "avoid": [
+        "deep reverb",
+        "chorus wash",
+        "jazzy clean",
+        "fuzz",
+        "heavy gain"
+      ],
+      "gearClues": [
+        "Strat bridge pickup",
+        "Plexi/Marshall-style amp",
+        "4x12 cab",
+        "light spring reverb"
+      ],
+      "corrections": [
+        "Replace clean/chorus focus with dry biting lead crunch.",
+        "Add spring reverb only, very light.",
+        "Keep wah only if used in solo phrasing."
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright biting 70s lead crunch with springy attack",
+    "mustHave": [
+      "singing sustain",
+      "upper-mid bite",
+      "light overdrive",
+      "slight compression",
+      "tight phrasing"
+    ],
+    "avoid": [
+      "deep reverb",
+      "chorus wash",
+      "jazzy clean",
+      "fuzz",
+      "heavy gain"
+    ],
+    "gearClues": [
+      "Strat bridge pickup",
+      "Plexi/Marshall-style amp",
+      "4x12 cab",
+      "light spring reverb"
+    ],
+    "corrections": [
+      "Replace clean/chorus focus with dry biting lead crunch.",
+      "Add spring reverb only, very light.",
+      "Keep wah only if used in solo phrasing."
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, biting lead tones using classic British amp models and light overdrive/compression.",
+          "bestMatchSummary": "A tight signal chain featuring compression for sustain, a mild OD boost for bite, followed by the UK 45 or UK 50 model to emulate a Plexi-style crunch, paired with a bright cab and minimal spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight phrasing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide slight compression and singing sustain for lead lines.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "4"
+              },
+              "purpose": "Add light overdrive and upper-mid bite without heavy gain.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but it provides the necessary mid-range lift for 'biting' tone.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide light grit, but Green OD often has better upper-mid focus."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on natural amp crunch.",
+              "matchQuality": "exact",
+              "gap": "No dedicated distortion needed; the OD/AMP combination handles the required 'crunch'.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the Plexi/Marshall-style amp for bright, biting lead crunch.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for classic British rock tones required by Steely Dan's style.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 often provides a slightly brighter edge."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound associated with the target tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "500 Hz"
+              },
+              "purpose": "Optional filter for solo phrasing if needed, otherwise bypassed.",
+              "matchQuality": "close",
+              "gap": "The wah is only used sparingly in solos, so it's kept optional/bypassed by default.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation (reverb)",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Damping": "Medium"
+              },
+              "purpose": "Add the required light spring reverb for a vintage, non-washy sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "0%"
+              },
+              "purpose": "Keep delay off to maintain tight phrasing and avoid wash.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "6"
+              },
+              "purpose": "Overall output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a complex, highly produced studio recording. This rig aims for the core 'biting lead crunch' tone and may require manual EQ adjustments to match specific track sections."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased upper-mid bite and definition, crucial for the 'biting' Steely Dan lead tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Upper-Mid Definition/Bite",
+              "recommendedAsset": "Studio 4x12 (High Mids)",
+              "reason": "Enhance upper-mids to achieve the required 'biting' lead tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Steely Dan - Reelin' In The Years - Valeton GP-180",
+        "song": {
+          "artist": "Steely Dan",
+          "title": "Reelin' In The Years",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright biting 70s lead crunch with springy attack",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight signal chain featuring compression for sustain, a mild OD boost for bite, followed by the UK 45 or UK 50 model to emulate a Plexi-style crunch, paired with a bright cab and minimal spring reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight phrasing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide slight compression and singing sustain for lead lines.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "5",
+              "Level": "4"
+            },
+            "purpose": "Add light overdrive and upper-mid bite without heavy gain.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general boost, but it provides the necessary mid-range lift for 'biting' tone.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Could also provide light grit, but Green OD often has better upper-mid focus."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain clean and focused on natural amp crunch.",
+            "matchQuality": "exact",
+            "gap": "No dedicated distortion needed; the OD/AMP combination handles the required 'crunch'.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Emulate the Plexi/Marshall-style amp for bright, biting lead crunch.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is the best fit for classic British rock tones required by Steely Dan's style.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also suitable, but UK 45 often provides a slightly brighter edge."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound associated with the target tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter (optional)",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "500 Hz"
+            },
+            "purpose": "Optional filter for solo phrasing if needed, otherwise bypassed.",
+            "matchQuality": "close",
+            "gap": "The wah is only used sparingly in solos, so it's kept optional/bypassed by default.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation (reverb)",
+            "module": "RVB",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Damping": "Medium"
+            },
+            "purpose": "Add the required light spring reverb for a vintage, non-washy sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "0%"
+            },
+            "purpose": "Keep delay off to maintain tight phrasing and avoid wash.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "6"
+            },
+            "purpose": "Overall output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright biting 70s lead crunch with springy attack",
+          "toneProfile": "bright biting 70s lead crunch with springy attack",
+          "idealSignalChain": "Strat bridge pickup | Plexi/Marshall-style amp | 4x12 cab | light spring reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light spring reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "singing sustain",
+            "upper-mid bite",
+            "light overdrive",
+            "slight compression",
+            "tight phrasing"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, biting lead tones using classic British amp models and light overdrive/compression.",
+          "bestMatchSummary": "A tight signal chain featuring compression for sustain, a mild OD boost for bite, followed by the UK 45 or UK 50 model to emulate a Plexi-style crunch, paired with a bright cab and minimal spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight phrasing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide slight compression and singing sustain for lead lines.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "4"
+              },
+              "purpose": "Add light overdrive and upper-mid bite without heavy gain.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general boost, but it provides the necessary mid-range lift for 'biting' tone.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide light grit, but Green OD often has better upper-mid focus."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on natural amp crunch.",
+              "matchQuality": "exact",
+              "gap": "No dedicated distortion needed; the OD/AMP combination handles the required 'crunch'.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the Plexi/Marshall-style amp for bright, biting lead crunch.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for classic British rock tones required by Steely Dan's style.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 often provides a slightly brighter edge."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound associated with the target tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "500 Hz"
+              },
+              "purpose": "Optional filter for solo phrasing if needed, otherwise bypassed.",
+              "matchQuality": "close",
+              "gap": "The wah is only used sparingly in solos, so it's kept optional/bypassed by default.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation (reverb)",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Damping": "Medium"
+              },
+              "purpose": "Add the required light spring reverb for a vintage, non-washy sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "0%"
+              },
+              "purpose": "Keep delay off to maintain tight phrasing and avoid wash.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "6"
+              },
+              "purpose": "Overall output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased upper-mid bite and definition, crucial for the 'biting' Steely Dan lead tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Upper-Mid Definition/Bite",
+              "recommendedAsset": "Studio 4x12 (High Mids)",
+              "reason": "Enhance upper-mids to achieve the required 'biting' lead tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Replace clean/chorus focus with dry biting lead crunch.",
+          "Add spring reverb only, very light.",
+          "Keep wah only if used in solo phrasing."
+        ],
+        "warnings": [
+          "The source material is a complex, highly produced studio recording. This rig aims for the core 'biting lead crunch' tone and may require manual EQ adjustments to match specific track sections."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.734,
+      "prompt_chars": 999,
+      "response_chars": 409,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 104,
+        "total_duration": 9712498200,
+        "prompt_eval_duration": 318132000,
+        "eval_duration": 1875499000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.97,
+      "prompt_chars": 5354,
+      "response_chars": 596,
+      "usage": {
+        "input_tokens": 1496,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 161,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.499,
+      "prompt_chars": 3689,
+      "response_chars": 5425,
+      "usage": {
+        "prompt_eval_count": 1239,
+        "eval_count": 1527,
+        "total_duration": 29471344000,
+        "prompt_eval_duration": 406437000,
+        "eval_duration": 28544747000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 6.031,
+      "prompt_chars": 7661,
+      "response_chars": 529,
+      "usage": {
+        "prompt_eval_count": 2123,
+        "eval_count": 152,
+        "total_duration": 6010786500,
+        "prompt_eval_duration": 471524000,
+        "eval_duration": 5057370000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.857,
+      "prompt_chars": 2972,
+      "response_chars": 170,
+      "usage": {
+        "prompt_eval_count": 930,
+        "eval_count": 57,
+        "total_duration": 14810311200,
+        "prompt_eval_duration": 487725000,
+        "eval_duration": 1028232000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Steely Dan",
+      "title": "Reelin' In The Years",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Steely Dan - Reelin' In The Years - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright biting 70s lead crunch with springy attack",
+      "signalChainSummary": "A tight signal chain featuring compression for sustain, a mild OD boost for bite, followed by the UK 45 or UK 50 model to emulate a Plexi-style crunch, paired with a bright cab and minimal spring reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight phrasing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide slight compression and singing sustain for lead lines.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "5",
+            "Level": "4"
+          },
+          "purpose": "Add light overdrive and upper-mid bite without heavy gain.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general boost, but it provides the necessary mid-range lift for 'biting' tone.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Could also provide light grit, but Green OD often has better upper-mid focus."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain clean and focused on natural amp crunch.",
+          "matchQuality": "exact",
+          "gap": "No dedicated distortion needed; the OD/AMP combination handles the required 'crunch'.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Emulate the Plexi/Marshall-style amp for bright, biting lead crunch.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is the best fit for classic British rock tones required by Steely Dan's style.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also suitable, but UK 45 often provides a slightly brighter edge."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound associated with the target tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter (optional)",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "500 Hz"
+          },
+          "purpose": "Optional filter for solo phrasing if needed, otherwise bypassed.",
+          "matchQuality": "close",
+          "gap": "The wah is only used sparingly in solos, so it's kept optional/bypassed by default.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation (reverb)",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Damping": "Medium"
+          },
+          "purpose": "Add the required light spring reverb for a vintage, non-washy sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "0%"
+          },
+          "purpose": "Keep delay off to maintain tight phrasing and avoid wash.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "6"
+          },
+          "purpose": "Overall output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright biting 70s lead crunch with springy attack",
+      "mustHave": [
+        "singing sustain",
+        "upper-mid bite",
+        "light overdrive",
+        "slight compression",
+        "tight phrasing"
+      ],
+      "avoid": [
+        "deep reverb",
+        "chorus wash",
+        "jazzy clean",
+        "fuzz",
+        "heavy gain"
+      ],
+      "gearClues": [
+        "Strat bridge pickup",
+        "Plexi/Marshall-style amp",
+        "4x12 cab",
+        "light spring reverb"
+      ],
+      "corrections": [
+        "Replace clean/chorus focus with dry biting lead crunch.",
+        "Add spring reverb only, very light.",
+        "Keep wah only if used in solo phrasing."
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "70s",
+        "smooth rock",
+        "aor"
+      ],
+      "targetTone": "bright biting 70s lead crunch with springy attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased upper-mid bite and definition, crucial for the 'biting' Steely Dan lead tone.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Upper-Mid Definition/Bite",
+          "recommendedAsset": "Studio 4x12 (High Mids)",
+          "reason": "Enhance upper-mids to achieve the required 'biting' lead tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1303,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1024 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1105,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Pink_Floyd__Time.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Pink Floyd",
+    "title": "Time",
+    "album": "",
+    "year": null,
+    "genre": "progressive rock"
+  },
+  "genreClassification": {
+    "genre": "progressive rock",
+    "subgenres": [
+      "psychedelic rock",
+      "art rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "Pink Floyd's 'Time' is a foundational piece of progressive/psychedelic rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Ambient, spacious, and slightly melancholic; ranging from clean arpeggios to heavily modulated washes.",
+      "signatureElements": [
+        "Delay (long repeats)",
+        "Reverb (hall/plate)",
+        "Chorus/Flanger (modulation)",
+        "Clean-to-crunch dynamic shifts",
+        "Wah pedal sweeps"
+      ],
+      "gearHypotheses": [
+        "Modulation effects (chorus, phaser)",
+        "High-quality delay unit",
+        "Ambient reverb unit",
+        "Overdrive/Low-gain crunch"
+      ],
+      "avoid": [
+        "Aggressive distortion",
+        "Bright treble spikes",
+        "Single-note punk tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry Gilmour lead with big sustain and delay",
+      "mustHave": [
+        "sustaining lead",
+        "smooth overdrive",
+        "delay repeats",
+        "wide vibrato",
+        "clear note bloom"
+      ],
+      "avoid": [
+        "chorus wash",
+        "flanger shimmer",
+        "heavy reverb",
+        "punk crunch",
+        "fuzzy gating"
+      ],
+      "gearClues": [
+        "Les Paul or Strat neck pickup",
+        "Tube screamer style boost",
+        "Marshall/Plexi style amp",
+        "2x12 or 4x12 cab",
+        "analog delay"
+      ],
+      "corrections": [
+        "drop chorus/flanger",
+        "drop hall/plate reverb",
+        "focus on lead, not ambient wash",
+        "keep wah optional, not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry Gilmour lead with big sustain and delay",
+    "mustHave": [
+      "sustaining lead",
+      "smooth overdrive",
+      "delay repeats",
+      "wide vibrato",
+      "clear note bloom"
+    ],
+    "avoid": [
+      "chorus wash",
+      "flanger shimmer",
+      "heavy reverb",
+      "punk crunch",
+      "fuzzy gating"
+    ],
+    "gearClues": [
+      "Les Paul or Strat neck pickup",
+      "Tube screamer style boost",
+      "Marshall/Plexi style amp",
+      "2x12 or 4x12 cab",
+      "analog delay"
+    ],
+    "corrections": [
+      "drop chorus/flanger",
+      "drop hall/plate reverb",
+      "focus on lead, not ambient wash",
+      "keep wah optional, not core"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on Gilmour's clean, sustained lead tones using classic British amp models and delay.",
+          "bestMatchSummary": "A clear signal chain featuring a Tube Screamer boost for smooth overdrive, followed by an AC30-style preamp into a UK Vintage 4x12 cab. Modulation includes Chorus (used sparingly) and a Digital Delay to achieve the signature sustained, wide lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the smooth, mid-focused boost (Tube Screamer style) needed for lead sustain.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is a general overdrive; while it captures the tone essence, a dedicated TS model would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle grit if needed (kept off to maintain clarity).",
+              "matchQuality": "none",
+              "gap": "Not required for the clean lead tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Provide the classic British chime and clarity associated with Gilmour's tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone with a classic British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+2",
+                "Treble": "+1"
+              },
+              "purpose": "Slightly scoop the low end and boost mids/highs for note definition and clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (vibrato)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Provide a subtle, wide vibrato effect without sounding like a 'wash'.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used here specifically for its gentle pitch modulation rather than the typical ambient wash.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "450 ms",
+                "Feedback": "6",
+                "Mix": "35%"
+              },
+              "purpose": "Achieve the signature sustained echo and repeat effect.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add subtle space and bloom without creating a heavy wash.",
+              "matchQuality": "close",
+              "gap": "The 'Room' is preferred over Plate/Spring to keep the ambience natural and non-overwhelming.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig is designed for a clean, sustained lead tone. The Chorus module should be used with moderate settings to provide vibrato rather than an ambient wash."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation for better realism and note definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Improve natural tone bloom and sustain.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Pink Floyd - Time - Valeton GP-180",
+        "song": {
+          "artist": "Pink Floyd",
+          "title": "Time",
+          "album": "",
+          "year": null,
+          "genre": "progressive rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry Gilmour lead with big sustain and delay",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clear signal chain featuring a Tube Screamer boost for smooth overdrive, followed by an AC30-style preamp into a UK Vintage 4x12 cab. Modulation includes Chorus (used sparingly) and a Digital Delay to achieve the signature sustained, wide lead sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Simulate the smooth, mid-focused boost (Tube Screamer style) needed for lead sustain.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is a general overdrive; while it captures the tone essence, a dedicated TS model would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use for subtle grit if needed (kept off to maintain clarity).",
+            "matchQuality": "none",
+            "gap": "Not required for the clean lead tone.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "6",
+              "Mid": "7",
+              "Bass": "5"
+            },
+            "purpose": "Provide the classic British chime and clarity associated with Gilmour's tone.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Ground the tone with a classic British cabinet sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+2",
+              "Treble": "+1"
+            },
+            "purpose": "Slightly scoop the low end and boost mids/highs for note definition and clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation (vibrato)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Mix": "25%"
+            },
+            "purpose": "Provide a subtle, wide vibrato effect without sounding like a 'wash'.",
+            "matchQuality": "close",
+            "gap": "The Chorus is used here specifically for its gentle pitch modulation rather than the typical ambient wash.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "450 ms",
+              "Feedback": "6",
+              "Mix": "35%"
+            },
+            "purpose": "Achieve the signature sustained echo and repeat effect.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Add subtle space and bloom without creating a heavy wash.",
+            "matchQuality": "close",
+            "gap": "The 'Room' is preferred over Plate/Spring to keep the ambience natural and non-overwhelming.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry Gilmour lead with big sustain and delay",
+          "toneProfile": "dry Gilmour lead with big sustain and delay",
+          "idealSignalChain": "Les Paul or Strat neck pickup | Tube screamer style boost | Marshall/Plexi style amp | 2x12 or 4x12 cab | analog delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Les Paul or Strat neck pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube screamer style boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "analog delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "sustaining lead",
+            "smooth overdrive",
+            "delay repeats",
+            "wide vibrato",
+            "clear note bloom"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on Gilmour's clean, sustained lead tones using classic British amp models and delay.",
+          "bestMatchSummary": "A clear signal chain featuring a Tube Screamer boost for smooth overdrive, followed by an AC30-style preamp into a UK Vintage 4x12 cab. Modulation includes Chorus (used sparingly) and a Digital Delay to achieve the signature sustained, wide lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the smooth, mid-focused boost (Tube Screamer style) needed for lead sustain.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is a general overdrive; while it captures the tone essence, a dedicated TS model would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle grit if needed (kept off to maintain clarity).",
+              "matchQuality": "none",
+              "gap": "Not required for the clean lead tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Provide the classic British chime and clarity associated with Gilmour's tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone with a classic British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+2",
+                "Treble": "+1"
+              },
+              "purpose": "Slightly scoop the low end and boost mids/highs for note definition and clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (vibrato)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Provide a subtle, wide vibrato effect without sounding like a 'wash'.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used here specifically for its gentle pitch modulation rather than the typical ambient wash.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "450 ms",
+                "Feedback": "6",
+                "Mix": "35%"
+              },
+              "purpose": "Achieve the signature sustained echo and repeat effect.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add subtle space and bloom without creating a heavy wash.",
+              "matchQuality": "close",
+              "gap": "The 'Room' is preferred over Plate/Spring to keep the ambience natural and non-overwhelming.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation for better realism and note definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Improve natural tone bloom and sustain.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/flanger",
+          "drop hall/plate reverb",
+          "focus on lead, not ambient wash",
+          "keep wah optional, not core"
+        ],
+        "warnings": [
+          "This rig is designed for a clean, sustained lead tone. The Chorus module should be used with moderate settings to provide vibrato rather than an ambient wash."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.622,
+      "prompt_chars": 983,
+      "response_chars": 521,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 131,
+        "total_duration": 11611819500,
+        "prompt_eval_duration": 611672000,
+        "eval_duration": 2904973000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.089,
+      "prompt_chars": 5450,
+      "response_chars": 614,
+      "usage": {
+        "input_tokens": 1520,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 167,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1687
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.076,
+      "prompt_chars": 3705,
+      "response_chars": 4838,
+      "usage": {
+        "prompt_eval_count": 1245,
+        "eval_count": 1381,
+        "total_duration": 38054978800,
+        "prompt_eval_duration": 272922000,
+        "eval_duration": 24617881000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.95,
+      "prompt_chars": 7048,
+      "response_chars": 482,
+      "usage": {
+        "prompt_eval_count": 1983,
+        "eval_count": 125,
+        "total_duration": 3930768300,
+        "prompt_eval_duration": 298282000,
+        "eval_duration": 3095706000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.352,
+      "prompt_chars": 2934,
+      "response_chars": 207,
+      "usage": {
+        "prompt_eval_count": 912,
+        "eval_count": 55,
+        "total_duration": 18334645000,
+        "prompt_eval_duration": 758836000,
+        "eval_duration": 975835000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Pink Floyd",
+      "title": "Time",
+      "album": "",
+      "year": null,
+      "genre": "progressive rock"
+    },
+    "rig": {
+      "rigName": "Pink Floyd - Time - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry Gilmour lead with big sustain and delay",
+      "signalChainSummary": "A clear signal chain featuring a Tube Screamer boost for smooth overdrive, followed by an AC30-style preamp into a UK Vintage 4x12 cab. Modulation includes Chorus (used sparingly) and a Digital Delay to achieve the signature sustained, wide lead sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Simulate the smooth, mid-focused boost (Tube Screamer style) needed for lead sustain.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is a general overdrive; while it captures the tone essence, a dedicated TS model would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use for subtle grit if needed (kept off to maintain clarity).",
+          "matchQuality": "fallback",
+          "gap": "Not required for the clean lead tone.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "6",
+            "Mid": "7",
+            "Bass": "5"
+          },
+          "purpose": "Provide the classic British chime and clarity associated with Gilmour's tone.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Ground the tone with a classic British cabinet sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+2",
+            "Treble": "+1"
+          },
+          "purpose": "Slightly scoop the low end and boost mids/highs for note definition and clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation (vibrato)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Mix": "25%"
+          },
+          "purpose": "Provide a subtle, wide vibrato effect without sounding like a 'wash'.",
+          "matchQuality": "close",
+          "gap": "The Chorus is used here specifically for its gentle pitch modulation rather than the typical ambient wash.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "450 ms",
+            "Feedback": "6",
+            "Mix": "35%"
+          },
+          "purpose": "Achieve the signature sustained echo and repeat effect.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Add subtle space and bloom without creating a heavy wash.",
+          "matchQuality": "close",
+          "gap": "The 'Room' is preferred over Plate/Spring to keep the ambience natural and non-overwhelming.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry Gilmour lead with big sustain and delay",
+      "mustHave": [
+        "sustaining lead",
+        "smooth overdrive",
+        "delay repeats",
+        "wide vibrato",
+        "clear note bloom"
+      ],
+      "avoid": [
+        "chorus wash",
+        "flanger shimmer",
+        "heavy reverb",
+        "punk crunch",
+        "fuzzy gating"
+      ],
+      "gearClues": [
+        "Les Paul or Strat neck pickup",
+        "Tube screamer style boost",
+        "Marshall/Plexi style amp",
+        "2x12 or 4x12 cab",
+        "analog delay"
+      ],
+      "corrections": [
+        "drop chorus/flanger",
+        "drop hall/plate reverb",
+        "focus on lead, not ambient wash",
+        "keep wah optional, not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "progressive rock",
+      "styleTags": [
+        "psychedelic rock",
+        "art rock",
+        "classic rock"
+      ],
+      "targetTone": "dry Gilmour lead with big sustain and delay",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet simulation for better realism and note definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Improve natural tone bloom and sustain.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and depth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1105,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

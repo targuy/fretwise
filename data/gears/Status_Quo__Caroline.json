@@ -1,0 +1,941 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1298,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Status_Quo__Caroline.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Status Quo",
+    "title": "Caroline",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "british rock",
+      "rhythm-driven",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Status Quo is a foundational band in classic British rock, known for high-energy, riff-based tracks."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, punchy rock crunch with a slight nasal edge.",
+      "signatureElements": [
+        "Crunch",
+        "Punchy rhythm tone",
+        "Slightly overdriven mid-range"
+      ],
+      "gearHypotheses": [
+        "British style amp (Marshall/Vox)",
+        "Overdrive pedal (Tube Screamer type)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Clean arpeggios",
+        "High modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Marshall crunch with tight attack",
+      "mustHave": [
+        "riff-driven crunch",
+        "bright upper mids",
+        "tight pick attack",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "clean tone",
+        "soft overdrive"
+      ],
+      "gearClues": [
+        "Les Paul or humbucker",
+        "Marshall/Plexi",
+        "4x12"
+      ],
+      "corrections": [
+        "drop Vox/Tube Screamer",
+        "lean more British crunch",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Marshall crunch with tight attack",
+    "mustHave": [
+      "riff-driven crunch",
+      "bright upper mids",
+      "tight pick attack",
+      "dry rhythm"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "clean tone",
+      "soft overdrive"
+    ],
+    "gearClues": [
+      "Les Paul or humbucker",
+      "Marshall/Plexi",
+      "4x12"
+    ],
+    "corrections": [
+      "drop Vox/Tube Screamer",
+      "lean more British crunch",
+      "keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British crunch and punchy rhythm tones.",
+          "bestMatchSummary": "A tight, bright signal chain using a Boost/OD for attack, followed by an AC30-style amp model, paired with a 4x12 cabinet to deliver classic Marshall-esque British rock crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide tight attack and mid-range punch (simulating a Tube Screamer/Boost).",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used as a general boost, but a dedicated Boost or Green OD might be closer to the desired 'tight crunch' character.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "6.0",
+                "Level": "5.0"
+              },
+              "purpose": "Keep the gain stage clean to avoid muddying the punchy rhythm tone.",
+              "matchQuality": "none",
+              "gap": "The RAT-style is kept inactive/low drive because the primary crunch should come from the amp model, not a dedicated distortion pedal. This slot acts as a potential secondary boost or grit source if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Mid": "7.5",
+                "Bass": "6.0"
+              },
+              "purpose": "Deliver the classic British Marshall/Plexi sound with bright upper mids.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Mid": "+1.5",
+                "Treble": "+1.0"
+              },
+              "purpose": "Fine-tune the tone by slightly boosting mids and controlling low end for maximum punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Deactivate modulation effects as per the 'avoid' list.",
+              "matchQuality": "none",
+              "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0.0",
+                "Feedback": "0.0"
+              },
+              "purpose": "Keep delay effects off to maintain a dry rhythm sound.",
+              "matchQuality": "none",
+              "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic rock, requiring a punchy, dry rhythm sound. The signal chain prioritizes British amp models and tight overdrive/boost effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the desired Marshall-esque punch and upper mids.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance classic British crunch voicing and mid-range presence.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for Status Quo style rock",
+              "expectedGain": "Punchier mids, tighter overall tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Status Quo - Caroline - Valeton GP-180",
+        "song": {
+          "artist": "Status Quo",
+          "title": "Caroline",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Marshall crunch with tight attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, bright signal chain using a Boost/OD for attack, followed by an AC30-style amp model, paired with a 4x12 cabinet to deliver classic Marshall-esque British rock crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Provide tight attack and mid-range punch (simulating a Tube Screamer/Boost).",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used as a general boost, but a dedicated Boost or Green OD might be closer to the desired 'tight crunch' character.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {
+              "Drive": "4.0",
+              "Tone": "6.0",
+              "Level": "5.0"
+            },
+            "purpose": "Keep the gain stage clean to avoid muddying the punchy rhythm tone.",
+            "matchQuality": "none",
+            "gap": "The RAT-style is kept inactive/low drive because the primary crunch should come from the amp model, not a dedicated distortion pedal. This slot acts as a potential secondary boost or grit source if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7.0",
+              "Mid": "7.5",
+              "Bass": "6.0"
+            },
+            "purpose": "Deliver the classic British Marshall/Plexi sound with bright upper mids.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet voicing.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2.0",
+              "Mid": "+1.5",
+              "Treble": "+1.0"
+            },
+            "purpose": "Fine-tune the tone by slightly boosting mids and controlling low end for maximum punch.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0.0",
+              "Depth": "0.0"
+            },
+            "purpose": "Deactivate modulation effects as per the 'avoid' list.",
+            "matchQuality": "none",
+            "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0.0",
+              "Feedback": "0.0"
+            },
+            "purpose": "Keep delay effects off to maintain a dry rhythm sound.",
+            "matchQuality": "none",
+            "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Marshall crunch with tight attack",
+          "toneProfile": "bright Marshall crunch with tight attack",
+          "idealSignalChain": "Les Paul or humbucker | Marshall/Plexi | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Les Paul or humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "riff-driven crunch",
+            "bright upper mids",
+            "tight pick attack",
+            "dry rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British crunch and punchy rhythm tones.",
+          "bestMatchSummary": "A tight, bright signal chain using a Boost/OD for attack, followed by an AC30-style amp model, paired with a 4x12 cabinet to deliver classic Marshall-esque British rock crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide tight attack and mid-range punch (simulating a Tube Screamer/Boost).",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used as a general boost, but a dedicated Boost or Green OD might be closer to the desired 'tight crunch' character.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "6.0",
+                "Level": "5.0"
+              },
+              "purpose": "Keep the gain stage clean to avoid muddying the punchy rhythm tone.",
+              "matchQuality": "none",
+              "gap": "The RAT-style is kept inactive/low drive because the primary crunch should come from the amp model, not a dedicated distortion pedal. This slot acts as a potential secondary boost or grit source if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Mid": "7.5",
+                "Bass": "6.0"
+              },
+              "purpose": "Deliver the classic British Marshall/Plexi sound with bright upper mids.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Mid": "+1.5",
+                "Treble": "+1.0"
+              },
+              "purpose": "Fine-tune the tone by slightly boosting mids and controlling low end for maximum punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Deactivate modulation effects as per the 'avoid' list.",
+              "matchQuality": "none",
+              "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0.0",
+                "Feedback": "0.0"
+              },
+              "purpose": "Keep delay effects off to maintain a dry rhythm sound.",
+              "matchQuality": "none",
+              "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the desired Marshall-esque punch and upper mids.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance classic British crunch voicing and mid-range presence.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for Status Quo style rock",
+              "expectedGain": "Punchier mids, tighter overall tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Vox/Tube Screamer",
+          "lean more British crunch",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is classic rock, requiring a punchy, dry rhythm sound. The signal chain prioritizes British amp models and tight overdrive/boost effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.222,
+      "prompt_chars": 987,
+      "response_chars": 341,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 93,
+        "total_duration": 10197464000,
+        "prompt_eval_duration": 491368000,
+        "eval_duration": 2096107000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.785,
+      "prompt_chars": 5250,
+      "response_chars": 461,
+      "usage": {
+        "input_tokens": 1475,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 127,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1602
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 27.838,
+      "prompt_chars": 3521,
+      "response_chars": 4515,
+      "usage": {
+        "prompt_eval_count": 1196,
+        "eval_count": 1326,
+        "total_duration": 27831838200,
+        "prompt_eval_duration": 515240000,
+        "eval_duration": 26869874000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.589,
+      "prompt_chars": 6515,
+      "response_chars": 552,
+      "usage": {
+        "prompt_eval_count": 1879,
+        "eval_count": 147,
+        "total_duration": 20574487000,
+        "prompt_eval_duration": 840823000,
+        "eval_duration": 2859379000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.716,
+      "prompt_chars": 2584,
+      "response_chars": 226,
+      "usage": {
+        "prompt_eval_count": 837,
+        "eval_count": 61,
+        "total_duration": 9712460400,
+        "prompt_eval_duration": 427914000,
+        "eval_duration": 1055835000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Status Quo",
+      "title": "Caroline",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Status Quo - Caroline - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Marshall crunch with tight attack",
+      "signalChainSummary": "A tight, bright signal chain using a Boost/OD for attack, followed by an AC30-style amp model, paired with a 4x12 cabinet to deliver classic Marshall-esque British rock crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Provide tight attack and mid-range punch (simulating a Tube Screamer/Boost).",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used as a general boost, but a dedicated Boost or Green OD might be closer to the desired 'tight crunch' character.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {
+            "Drive": "4.0",
+            "Tone": "6.0",
+            "Level": "5.0"
+          },
+          "purpose": "Keep the gain stage clean to avoid muddying the punchy rhythm tone.",
+          "matchQuality": "fallback",
+          "gap": "The RAT-style is kept inactive/low drive because the primary crunch should come from the amp model, not a dedicated distortion pedal. This slot acts as a potential secondary boost or grit source if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7.0",
+            "Mid": "7.5",
+            "Bass": "6.0"
+          },
+          "purpose": "Deliver the classic British Marshall/Plexi sound with bright upper mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet voicing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2.0",
+            "Mid": "+1.5",
+            "Treble": "+1.0"
+          },
+          "purpose": "Fine-tune the tone by slightly boosting mids and controlling low end for maximum punch.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0.0",
+            "Depth": "0.0"
+          },
+          "purpose": "Deactivate modulation effects as per the 'avoid' list.",
+          "matchQuality": "fallback",
+          "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0.0",
+            "Feedback": "0.0"
+          },
+          "purpose": "Keep delay effects off to maintain a dry rhythm sound.",
+          "matchQuality": "fallback",
+          "gap": "None (Used to fulfill the required block count while adhering to tone constraints).",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Marshall crunch with tight attack",
+      "mustHave": [
+        "riff-driven crunch",
+        "bright upper mids",
+        "tight pick attack",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "clean tone",
+        "soft overdrive"
+      ],
+      "gearClues": [
+        "Les Paul or humbucker",
+        "Marshall/Plexi",
+        "4x12"
+      ],
+      "corrections": [
+        "drop Vox/Tube Screamer",
+        "lean more British crunch",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "british rock",
+        "rhythm-driven",
+        "arena rock"
+      ],
+      "targetTone": "bright Marshall crunch with tight attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the desired Marshall-esque punch and upper mids.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 IR (e.g., Brit Cab)",
+          "reason": "Enhance classic British crunch voicing and mid-range presence.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always for Status Quo style rock",
+          "expectedGain": "Punchier mids, tighter overall tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1298,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

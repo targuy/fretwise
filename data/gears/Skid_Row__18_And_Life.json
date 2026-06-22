@@ -1,0 +1,1041 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1256,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Skid_Row__18_And_Life.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Skid Row",
+    "title": "18 And Life",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "80s rock",
+      "arena rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic 80s hard rock, matching the specified Marshall/JCM-style tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy hard rock tone with a slight nasal edge.",
+      "signatureElements": [
+        "Crunch/mid-gain overdrive",
+        "Slightly scooped mids (for modern metal feel)",
+        "High output for clarity in headphones"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM800 style amp model",
+        "Overdrive pedal simulation (e.g., Tube Screamer type) for tightening the low end",
+        "Cabinet simulation with a punchy, aggressive character"
+      ],
+      "avoid": [
+        "Excessive clean reverb or delay",
+        "Thin, scooped metal tone without enough mid-range bite"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s hard rock crunch with vocal lead sustain",
+      "mustHave": [
+        "upper-mid bite",
+        "tight palm mutes",
+        "singing sustain",
+        "slight chorus on clean/rhythm parts",
+        "present but not scooped mids"
+      ],
+      "avoid": [
+        "modern scooped metal",
+        "fizzy high gain",
+        "wet delay wash",
+        "thin clean tone"
+      ],
+      "gearClues": [
+        "Marshall JCM800/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "light overdrive boost"
+      ],
+      "corrections": [
+        "raise mids",
+        "less modern metal",
+        "add chorus only if needed"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s hard rock crunch with vocal lead sustain",
+    "mustHave": [
+      "upper-mid bite",
+      "tight palm mutes",
+      "singing sustain",
+      "slight chorus on clean/rhythm parts",
+      "present but not scooped mids"
+    ],
+    "avoid": [
+      "modern scooped metal",
+      "fizzy high gain",
+      "wet delay wash",
+      "thin clean tone"
+    ],
+    "gearClues": [
+      "Marshall JCM800/Plexi",
+      "4x12 cab",
+      "humbucker bridge",
+      "light overdrive boost"
+    ],
+    "corrections": [
+      "raise mids",
+      "less modern metal",
+      "add chorus only if needed"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 80s rock tones (JCM800/Plexi emulation) with emphasis on upper-mids and sustain.",
+          "bestMatchSummary": "A high-gain, mid-focused chain using the UK SLP or UK 45 amp models, paired with a light overdrive boost for bite, Chorus for texture, and Room reverb for space. The overall tone is bright, punchy, and sustaining, fitting classic hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and upper-mid bite for rhythm parts (Plexi/JCM800 style boost).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it serves the function of adding classic rock punch and mid-focus needed.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core hard rock crunch and sustain (emulating JCM800 saturation).",
+              "matchQuality": "close",
+              "gap": "The general 'Distortion' model is used to achieve high-gain, mid-focused saturation without sounding like modern metal.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British high-gain sound (Plexi/JCM800) with emphasized mids and brightness.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is ideal for bright, punchy rock tones required by 80s hard rock.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British rock cabinet sound (Marshall style).",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add subtle movement and width to clean/rhythm parts, as requested.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used sparingly to add texture without sounding overly wet or distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Give the tone space and depth without excessive wash (avoiding wet delay).",
+              "matchQuality": "close",
+              "gap": "Room reverb provides natural, non-washy ambience suitable for hard rock.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Final tone shaping to boost upper-mids and overall punch (raising mids).",
+              "matchQuality": "close",
+              "gap": "Used for precise frequency adjustments to meet the 'upper-mid bite' requirement.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a hard rock song, requiring high gain and aggressive tone shaping. The Chorus module should be kept subtle to avoid sounding overly pop or clean."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the IR for a more authentic, punchy Marshall/Plexi sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall JCM800 Cab realism",
+              "recommendedAsset": "4x12 British Vintage (JCM-style)",
+              "reason": "Enhance the classic 80s hard rock punch and upper-mid bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in rhythm parts.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Skid Row - 18 And Life - Valeton GP-180",
+        "song": {
+          "artist": "Skid Row",
+          "title": "18 And Life",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s hard rock crunch with vocal lead sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain, mid-focused chain using the UK SLP or UK 45 amp models, paired with a light overdrive boost for bite, Chorus for texture, and Room reverb for space. The overall tone is bright, punchy, and sustaining, fitting classic hard rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light grit and upper-mid bite for rhythm parts (Plexi/JCM800 style boost).",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general overdrive, but it serves the function of adding classic rock punch and mid-focus needed.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Blues OD"
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "50%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Establish the core hard rock crunch and sustain (emulating JCM800 saturation).",
+            "matchQuality": "close",
+            "gap": "The general 'Distortion' model is used to achieve high-gain, mid-focused saturation without sounding like modern metal.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "RAT-style"
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "65%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the classic British high-gain sound (Plexi/JCM800) with emphasized mids and brightness.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is ideal for bright, punchy rock tones required by 80s hard rock.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 45"
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the classic British rock cabinet sound (Marshall style).",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "40%",
+              "Feedback": "20%"
+            },
+            "purpose": "Add subtle movement and width to clean/rhythm parts, as requested.",
+            "matchQuality": "close",
+            "gap": "The Chorus is used sparingly to add texture without sounding overly wet or distracting.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Give the tone space and depth without excessive wash (avoiding wet delay).",
+            "matchQuality": "close",
+            "gap": "Room reverb provides natural, non-washy ambience suitable for hard rock.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate"
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Final tone shaping to boost upper-mids and overall punch (raising mids).",
+            "matchQuality": "close",
+            "gap": "Used for precise frequency adjustments to meet the 'upper-mid bite' requirement.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s hard rock crunch with vocal lead sustain",
+          "toneProfile": "bright 80s hard rock crunch with vocal lead sustain",
+          "idealSignalChain": "Marshall JCM800/Plexi | 4x12 cab | humbucker bridge | light overdrive boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall JCM800/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "upper-mid bite",
+            "tight palm mutes",
+            "singing sustain",
+            "slight chorus on clean/rhythm parts",
+            "present but not scooped mids"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 80s rock tones (JCM800/Plexi emulation) with emphasis on upper-mids and sustain.",
+          "bestMatchSummary": "A high-gain, mid-focused chain using the UK SLP or UK 45 amp models, paired with a light overdrive boost for bite, Chorus for texture, and Room reverb for space. The overall tone is bright, punchy, and sustaining, fitting classic hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and upper-mid bite for rhythm parts (Plexi/JCM800 style boost).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it serves the function of adding classic rock punch and mid-focus needed.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core hard rock crunch and sustain (emulating JCM800 saturation).",
+              "matchQuality": "close",
+              "gap": "The general 'Distortion' model is used to achieve high-gain, mid-focused saturation without sounding like modern metal.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British high-gain sound (Plexi/JCM800) with emphasized mids and brightness.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is ideal for bright, punchy rock tones required by 80s hard rock.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British rock cabinet sound (Marshall style).",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add subtle movement and width to clean/rhythm parts, as requested.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used sparingly to add texture without sounding overly wet or distracting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Give the tone space and depth without excessive wash (avoiding wet delay).",
+              "matchQuality": "close",
+              "gap": "Room reverb provides natural, non-washy ambience suitable for hard rock.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Final tone shaping to boost upper-mids and overall punch (raising mids).",
+              "matchQuality": "close",
+              "gap": "Used for precise frequency adjustments to meet the 'upper-mid bite' requirement.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the IR for a more authentic, punchy Marshall/Plexi sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall JCM800 Cab realism",
+              "recommendedAsset": "4x12 British Vintage (JCM-style)",
+              "reason": "Enhance the classic 80s hard rock punch and upper-mid bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in rhythm parts.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "raise mids",
+          "less modern metal",
+          "add chorus only if needed"
+        ],
+        "warnings": [
+          "The source material is a hard rock song, requiring high gain and aggressive tone shaping. The Chorus module should be kept subtle to avoid sounding overly pop or clean."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.382,
+      "prompt_chars": 988,
+      "response_chars": 541,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 131,
+        "total_duration": 11356095600,
+        "prompt_eval_duration": 705280000,
+        "eval_duration": 2781676000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.466,
+      "prompt_chars": 5451,
+      "response_chars": 565,
+      "usage": {
+        "input_tokens": 1517,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 153,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1670
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 44.938,
+      "prompt_chars": 3640,
+      "response_chars": 5175,
+      "usage": {
+        "prompt_eval_count": 1232,
+        "eval_count": 1494,
+        "total_duration": 44928164800,
+        "prompt_eval_duration": 619097000,
+        "eval_duration": 29467804000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.283,
+      "prompt_chars": 7338,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 2083,
+        "eval_count": 150,
+        "total_duration": 4277589100,
+        "prompt_eval_duration": 828287000,
+        "eval_duration": 3009878000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.183,
+      "prompt_chars": 2756,
+      "response_chars": 200,
+      "usage": {
+        "prompt_eval_count": 868,
+        "eval_count": 60,
+        "total_duration": 11158323800,
+        "prompt_eval_duration": 383045000,
+        "eval_duration": 1046031000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Skid Row",
+      "title": "18 And Life",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Skid Row - 18 And Life - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s hard rock crunch with vocal lead sustain",
+      "signalChainSummary": "A high-gain, mid-focused chain using the UK SLP or UK 45 amp models, paired with a light overdrive boost for bite, Chorus for texture, and Room reverb for space. The overall tone is bright, punchy, and sustaining, fitting classic hard rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light grit and upper-mid bite for rhythm parts (Plexi/JCM800 style boost).",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general overdrive, but it serves the function of adding classic rock punch and mid-focus needed.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "50%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Establish the core hard rock crunch and sustain (emulating JCM800 saturation).",
+          "matchQuality": "close",
+          "gap": "The general 'Distortion' model is used to achieve high-gain, mid-focused saturation without sounding like modern metal.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "65%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the classic British high-gain sound (Plexi/JCM800) with emphasized mids and brightness.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is ideal for bright, punchy rock tones required by 80s hard rock.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the classic British rock cabinet sound (Marshall style).",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "40%",
+            "Feedback": "20%"
+          },
+          "purpose": "Add subtle movement and width to clean/rhythm parts, as requested.",
+          "matchQuality": "close",
+          "gap": "The Chorus is used sparingly to add texture without sounding overly wet or distracting.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Give the tone space and depth without excessive wash (avoiding wet delay).",
+          "matchQuality": "close",
+          "gap": "Room reverb provides natural, non-washy ambience suitable for hard rock.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Final tone shaping to boost upper-mids and overall punch (raising mids).",
+          "matchQuality": "close",
+          "gap": "Used for precise frequency adjustments to meet the 'upper-mid bite' requirement.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s hard rock crunch with vocal lead sustain",
+      "mustHave": [
+        "upper-mid bite",
+        "tight palm mutes",
+        "singing sustain",
+        "slight chorus on clean/rhythm parts",
+        "present but not scooped mids"
+      ],
+      "avoid": [
+        "modern scooped metal",
+        "fizzy high gain",
+        "wet delay wash",
+        "thin clean tone"
+      ],
+      "gearClues": [
+        "Marshall JCM800/Plexi",
+        "4x12 cab",
+        "humbucker bridge",
+        "light overdrive boost"
+      ],
+      "corrections": [
+        "raise mids",
+        "less modern metal",
+        "add chorus only if needed"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "80s rock",
+        "arena rock",
+        "classic rock"
+      ],
+      "targetTone": "bright 80s hard rock crunch with vocal lead sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the IR for a more authentic, punchy Marshall/Plexi sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Marshall JCM800 Cab realism",
+          "recommendedAsset": "4x12 British Vintage (JCM-style)",
+          "reason": "Enhance the classic 80s hard rock punch and upper-mid bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and definition in rhythm parts.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1256,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1140 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 723,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Joe_Satriani__Summer_Song.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Joe Satriani",
+    "title": "Summer Song",
+    "album": "",
+    "year": null,
+    "genre": "instrumental rock"
+  },
+  "genreClassification": {
+    "genre": "instrumental rock",
+    "subgenres": [
+      "fusion",
+      "progressive rock"
+    ],
+    "confidence": "high",
+    "rationale": "Satriani's style is known for highly technical, melodic instrumental rock and fusion."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, singing lead tone with moderate sustain and touch sensitivity.",
+      "signatureElements": [
+        "clean arpeggios",
+        "smooth legato phrasing",
+        "chorus/modulation effect",
+        "delay (dotted eighth notes)",
+        "bright compression"
+      ],
+      "gearHypotheses": [
+        "Tube-screamer style overdrive (low gain)",
+        "Chorus pedal",
+        "Digital delay unit",
+        "Bright EQ boost"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "overdriven rhythm tones",
+        "scooped mids",
+        "dirty breakup"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright liquid lead with chorus-delay sheen",
+      "mustHave": [
+        "smooth sustain",
+        "legato lead",
+        "bright compression",
+        "chorus",
+        "delay"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy breakup",
+        "scooped mids",
+        "rhythm crunch"
+      ],
+      "gearClues": [
+        "humbucker lead",
+        "mid-gain OD",
+        "stereo delay",
+        "chorus",
+        "clean solid-state or clean tube amp"
+      ],
+      "corrections": [
+        "drop clean arpeggios",
+        "make delay subtle, not dotted-eighth obvious",
+        "keep lead focused and glossy"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright liquid lead with chorus-delay sheen",
+    "mustHave": [
+      "smooth sustain",
+      "legato lead",
+      "bright compression",
+      "chorus",
+      "delay"
+    ],
+    "avoid": [
+      "fuzz",
+      "heavy breakup",
+      "scooped mids",
+      "rhythm crunch"
+    ],
+    "gearClues": [
+      "humbucker lead",
+      "mid-gain OD",
+      "stereo delay",
+      "chorus",
+      "clean solid-state or clean tube amp"
+    ],
+    "corrections": [
+      "drop clean arpeggios",
+      "make delay subtle, not dotted-eighth obvious",
+      "keep lead focused and glossy"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, articulate lead tones with chorus and delay for a glossy sheen.",
+          "bestMatchSummary": "A bright signal chain utilizing compression and a mid-gain OD to boost the signal into a clean solid-state amp (US Deluxe), followed by Chorus and Digital Delay for the required liquid, shimmering lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide smooth sustain and bright compression for articulate lead playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Add gentle mid-gain boost and focus without heavy breakup or crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used for its clean, focused boost character rather than aggressive dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more grit, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed).",
+              "matchQuality": "perfect",
+              "gap": "The signal path is kept clean by the Comp and Green OD.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "60%",
+                "Middle": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Provide a clean, articulate solid-state platform suitable for bright lead tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also excellent for clean sounds."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the clean, bright character of the US Deluxe amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the clarity and 'liquid' brightness of the lead tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add the required shimmering, liquid sheen to the lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Provide subtle stereo delay without sounding like obvious dotted-eighth rhythms.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and glue to the overall tone.",
+              "matchQuality": "close",
+              "gap": "A small amount of reverb is needed for depth, but it must be kept minimal so as not to muddy the lead focus.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work, but Room provides a more natural 'air' feel."
+                }
+              ]
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and clarity, especially in the upper mids/treble range.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Fender style)",
+              "reason": "Enhance clarity and 'liquid' brightness required for lead tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/airiness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Joe Satriani - Summer Song - Valeton GP-180",
+        "song": {
+          "artist": "Joe Satriani",
+          "title": "Summer Song",
+          "album": "",
+          "year": null,
+          "genre": "instrumental rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright liquid lead with chorus-delay sheen",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A bright signal chain utilizing compression and a mid-gain OD to boost the signal into a clean solid-state amp (US Deluxe), followed by Chorus and Digital Delay for the required liquid, shimmering lead sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide smooth sustain and bright compression for articulate lead playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Add gentle mid-gain boost and focus without heavy breakup or crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used for its clean, focused boost character rather than aggressive dirt.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more grit, but still suitable."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No heavy distortion needed).",
+            "matchQuality": "perfect",
+            "gap": "The signal path is kept clean by the Comp and Green OD.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Treble": "60%",
+              "Middle": "55%",
+              "Bass": "50%"
+            },
+            "purpose": "Provide a clean, articulate solid-state platform suitable for bright lead tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also excellent for clean sounds."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the clean, bright character of the US Deluxe amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+4 dB"
+            },
+            "purpose": "Enhance the clarity and 'liquid' brightness of the lead tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Mix": "50%"
+            },
+            "purpose": "Add the required shimmering, liquid sheen to the lead lines.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "25%"
+            },
+            "purpose": "Provide subtle stereo delay without sounding like obvious dotted-eighth rhythms.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add subtle space and glue to the overall tone.",
+            "matchQuality": "close",
+            "gap": "A small amount of reverb is needed for depth, but it must be kept minimal so as not to muddy the lead focus.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could also work, but Room provides a more natural 'air' feel."
+              }
+            ]
+          }
+        ],
+        "general": {
+          "targetSound": "bright liquid lead with chorus-delay sheen",
+          "toneProfile": "bright liquid lead with chorus-delay sheen",
+          "idealSignalChain": "humbucker lead | mid-gain OD | stereo delay | chorus | clean solid-state or clean tube amp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker lead",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mid-gain OD",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "stereo delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean solid-state or clean tube amp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "smooth sustain",
+            "legato lead",
+            "bright compression",
+            "chorus",
+            "delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, articulate lead tones with chorus and delay for a glossy sheen.",
+          "bestMatchSummary": "A bright signal chain utilizing compression and a mid-gain OD to boost the signal into a clean solid-state amp (US Deluxe), followed by Chorus and Digital Delay for the required liquid, shimmering lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide smooth sustain and bright compression for articulate lead playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Add gentle mid-gain boost and focus without heavy breakup or crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used for its clean, focused boost character rather than aggressive dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more grit, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed).",
+              "matchQuality": "perfect",
+              "gap": "The signal path is kept clean by the Comp and Green OD.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "60%",
+                "Middle": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Provide a clean, articulate solid-state platform suitable for bright lead tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also excellent for clean sounds."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the clean, bright character of the US Deluxe amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+4 dB"
+              },
+              "purpose": "Enhance the clarity and 'liquid' brightness of the lead tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add the required shimmering, liquid sheen to the lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Provide subtle stereo delay without sounding like obvious dotted-eighth rhythms.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and glue to the overall tone.",
+              "matchQuality": "close",
+              "gap": "A small amount of reverb is needed for depth, but it must be kept minimal so as not to muddy the lead focus.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work, but Room provides a more natural 'air' feel."
+                }
+              ]
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and clarity, especially in the upper mids/treble range.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Fender style)",
+              "reason": "Enhance clarity and 'liquid' brightness required for lead tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/airiness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop clean arpeggios",
+          "make delay subtle, not dotted-eighth obvious",
+          "keep lead focused and glossy"
+        ],
+        "warnings": [],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.846,
+      "prompt_chars": 992,
+      "response_chars": 465,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 111,
+        "total_duration": 9823069900,
+        "prompt_eval_duration": 247577000,
+        "eval_duration": 1829162000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.889,
+      "prompt_chars": 5409,
+      "response_chars": 533,
+      "usage": {
+        "input_tokens": 1507,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1650
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.697,
+      "prompt_chars": 3619,
+      "response_chars": 5377,
+      "usage": {
+        "prompt_eval_count": 1221,
+        "eval_count": 1562,
+        "total_duration": 27669416500,
+        "prompt_eval_duration": 229372000,
+        "eval_duration": 26994678000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.58,
+      "prompt_chars": 7561,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 2140,
+        "eval_count": 156,
+        "total_duration": 5571770700,
+        "prompt_eval_duration": 410288000,
+        "eval_duration": 4595382000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.959,
+      "prompt_chars": 2894,
+      "response_chars": 199,
+      "usage": {
+        "prompt_eval_count": 926,
+        "eval_count": 50,
+        "total_duration": 8945262900,
+        "prompt_eval_duration": 759330000,
+        "eval_duration": 762737000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Joe Satriani",
+      "title": "Summer Song",
+      "album": "",
+      "year": null,
+      "genre": "instrumental rock"
+    },
+    "rig": {
+      "rigName": "Joe Satriani - Summer Song - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright liquid lead with chorus-delay sheen",
+      "signalChainSummary": "A bright signal chain utilizing compression and a mid-gain OD to boost the signal into a clean solid-state amp (US Deluxe), followed by Chorus and Digital Delay for the required liquid, shimmering lead sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide smooth sustain and bright compression for articulate lead playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Add gentle mid-gain boost and focus without heavy breakup or crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used for its clean, focused boost character rather than aggressive dirt.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more grit, but still suitable."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No heavy distortion needed).",
+          "matchQuality": "exact",
+          "gap": "The signal path is kept clean by the Comp and Green OD.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Treble": "60%",
+            "Middle": "55%",
+            "Bass": "50%"
+          },
+          "purpose": "Provide a clean, articulate solid-state platform suitable for bright lead tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also excellent for clean sounds."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the clean, bright character of the US Deluxe amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+4 dB"
+          },
+          "purpose": "Enhance the clarity and 'liquid' brightness of the lead tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Mix": "50%"
+          },
+          "purpose": "Add the required shimmering, liquid sheen to the lead lines.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "25%"
+          },
+          "purpose": "Provide subtle stereo delay without sounding like obvious dotted-eighth rhythms.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add subtle space and glue to the overall tone.",
+          "matchQuality": "close",
+          "gap": "A small amount of reverb is needed for depth, but it must be kept minimal so as not to muddy the lead focus.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could also work, but Room provides a more natural 'air' feel."
+            }
+          ]
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright liquid lead with chorus-delay sheen",
+      "mustHave": [
+        "smooth sustain",
+        "legato lead",
+        "bright compression",
+        "chorus",
+        "delay"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy breakup",
+        "scooped mids",
+        "rhythm crunch"
+      ],
+      "gearClues": [
+        "humbucker lead",
+        "mid-gain OD",
+        "stereo delay",
+        "chorus",
+        "clean solid-state or clean tube amp"
+      ],
+      "corrections": [
+        "drop clean arpeggios",
+        "make delay subtle, not dotted-eighth obvious",
+        "keep lead focused and glossy"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "instrumental rock",
+      "styleTags": [
+        "fusion",
+        "progressive rock"
+      ],
+      "targetTone": "bright liquid lead with chorus-delay sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better realism and clarity, especially in the upper mids/treble range.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Fender style)",
+          "reason": "Enhance clarity and 'liquid' brightness required for lead tones.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism/airiness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 723,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

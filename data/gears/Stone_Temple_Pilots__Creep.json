@@ -1,0 +1,1208 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1337,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Stone_Temple_Pilots__Creep.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Stone Temple Pilots",
+    "title": "Creep",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "grunge",
+      "alt-rock",
+      "90s"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a seminal 90s alternative/grunge track with distinct alt-rock characteristics."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, slightly dirty clean tone with pronounced chorus/modulation and a touch of reverb.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Clean-to-crunch dynamic shifts",
+        "Mid-scooped rhythm guitar sound",
+        "Slightly overdriven edge (not full fuzz)"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/Deluxe style)",
+        "Modulation pedal (Chorus/Vibrato)",
+        "Overdrive/Boost pedal (for crunch lift)"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Fuzz tones",
+        "High gain saturation",
+        "Aggressive scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean-to-edge crunch with chorus sheen",
+      "mustHave": [
+        "chorus modulation",
+        "slightly dirty attack",
+        "clean-to-crunch shift",
+        "wide rhythm texture"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "dry plain clean",
+        "big reverb wash"
+      ],
+      "gearClues": [
+        "clean Fender-style amp",
+        "chorus pedal",
+        "light OD",
+        "2x12 or combo"
+      ],
+      "corrections": [
+        "drop vibrato wording",
+        "keep chorus subtle",
+        "less scoop, more mid body"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean-to-edge crunch with chorus sheen",
+    "mustHave": [
+      "chorus modulation",
+      "slightly dirty attack",
+      "clean-to-crunch shift",
+      "wide rhythm texture"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "high gain",
+      "dry plain clean",
+      "big reverb wash"
+    ],
+    "gearClues": [
+      "clean Fender-style amp",
+      "chorus pedal",
+      "light OD",
+      "2x12 or combo"
+    ],
+    "corrections": [
+      "drop vibrato wording",
+      "keep chorus subtle",
+      "less scoop, more mid body"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean Fender tones with subtle breakup and chorus modulation.",
+          "bestMatchSummary": "A classic, chimey signal chain using a light boost/OD into a US Deluxe amp model, enhanced by Chorus for the signature 'Creep' sheen. The overall tone is bright, mid-focused, and dynamic.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "15%",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a subtle, slightly dirty attack and boost the signal into the clean amp model.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its light breakup character, mimicking a classic tube overdrive without heavy grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Not needed for this song's tone).",
+              "matchQuality": "none",
+              "gap": "No wah effect is required.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Keep gain low via PRE).",
+              "matchQuality": "none",
+              "gap": "Heavy distortion is explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, chimey Fender-style tone required for the verses and chorus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar, but US Deluxe is often preferred for its specific clean breakup character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused cabinet sound matching the US Deluxe amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Feedback": "25%"
+              },
+              "purpose": "Add the signature 'sheen' and wide rhythm texture required for the chorus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids for body and compensate for the chorus's potential scoop.",
+              "matchQuality": "close",
+              "gap": "Using Guitar EQ 1 to fine-tune the frequency response, focusing on mid-range presence.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 2",
+                  "reason": "Potentially too aggressive for subtle shaping."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle depth and space without creating a 'big reverb wash'.",
+              "matchQuality": "close",
+              "gap": "A light delay is used instead of heavy reverb to maintain clarity.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could add too much warmth, distracting from the clean tone."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a natural room ambience to give the tone width without sounding overly wet.",
+              "matchQuality": "close",
+              "gap": "Keeping the reverb mix low (15%) is crucial to avoid the 'big reverb wash' specified in the avoidance list.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sound too artificial for this specific song."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a guitar-driven rock song, so the rig focuses on electric guitar emulation. The tone requires careful balancing of clean headroom and subtle breakup."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the vintage, chimey Fender sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., tweed/blackface)",
+              "reason": "Enhance the classic Fender chime and mid-focus for 'Creep'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and vintage character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Stone Temple Pilots - Creep - Valeton GP-180",
+        "song": {
+          "artist": "Stone Temple Pilots",
+          "title": "Creep",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean-to-edge crunch with chorus sheen",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A classic, chimey signal chain using a light boost/OD into a US Deluxe amp model, enhanced by Chorus for the signature 'Creep' sheen. The overall tone is bright, mid-focused, and dynamic.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "15%",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide a subtle, slightly dirty attack and boost the signal into the clean amp model.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its light breakup character, mimicking a classic tube overdrive without heavy grit.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more aggressive than needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (Not needed for this song's tone).",
+            "matchQuality": "none",
+            "gap": "No wah effect is required.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (Keep gain low via PRE).",
+            "matchQuality": "none",
+            "gap": "Heavy distortion is explicitly avoided.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the clean, chimey Fender-style tone required for the verses and chorus.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Similar, but US Deluxe is often preferred for its specific clean breakup character."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, focused cabinet sound matching the US Deluxe amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Feedback": "25%"
+            },
+            "purpose": "Add the signature 'sheen' and wide rhythm texture required for the chorus.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "EQ/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the mids for body and compensate for the chorus's potential scoop.",
+            "matchQuality": "close",
+            "gap": "Using Guitar EQ 1 to fine-tune the frequency response, focusing on mid-range presence.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 2",
+                "reason": "Potentially too aggressive for subtle shaping."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle depth and space without creating a 'big reverb wash'.",
+            "matchQuality": "close",
+            "gap": "A light delay is used instead of heavy reverb to maintain clarity.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could add too much warmth, distracting from the clean tone."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide a natural room ambience to give the tone width without sounding overly wet.",
+            "matchQuality": "close",
+            "gap": "Keeping the reverb mix low (15%) is crucial to avoid the 'big reverb wash' specified in the avoidance list.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Can sound too artificial for this specific song."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean-to-edge crunch with chorus sheen",
+          "toneProfile": "clean-to-edge crunch with chorus sheen",
+          "idealSignalChain": "clean Fender-style amp | chorus pedal | light OD | 2x12 or combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean Fender-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus modulation",
+            "slightly dirty attack",
+            "clean-to-crunch shift",
+            "wide rhythm texture"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean Fender tones with subtle breakup and chorus modulation.",
+          "bestMatchSummary": "A classic, chimey signal chain using a light boost/OD into a US Deluxe amp model, enhanced by Chorus for the signature 'Creep' sheen. The overall tone is bright, mid-focused, and dynamic.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "15%",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a subtle, slightly dirty attack and boost the signal into the clean amp model.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its light breakup character, mimicking a classic tube overdrive without heavy grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Not needed for this song's tone).",
+              "matchQuality": "none",
+              "gap": "No wah effect is required.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Keep gain low via PRE).",
+              "matchQuality": "none",
+              "gap": "Heavy distortion is explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, chimey Fender-style tone required for the verses and chorus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar, but US Deluxe is often preferred for its specific clean breakup character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused cabinet sound matching the US Deluxe amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Feedback": "25%"
+              },
+              "purpose": "Add the signature 'sheen' and wide rhythm texture required for the chorus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids for body and compensate for the chorus's potential scoop.",
+              "matchQuality": "close",
+              "gap": "Using Guitar EQ 1 to fine-tune the frequency response, focusing on mid-range presence.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 2",
+                  "reason": "Potentially too aggressive for subtle shaping."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle depth and space without creating a 'big reverb wash'.",
+              "matchQuality": "close",
+              "gap": "A light delay is used instead of heavy reverb to maintain clarity.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could add too much warmth, distracting from the clean tone."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a natural room ambience to give the tone width without sounding overly wet.",
+              "matchQuality": "close",
+              "gap": "Keeping the reverb mix low (15%) is crucial to avoid the 'big reverb wash' specified in the avoidance list.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sound too artificial for this specific song."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the vintage, chimey Fender sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., tweed/blackface)",
+              "reason": "Enhance the classic Fender chime and mid-focus for 'Creep'.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and vintage character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop vibrato wording",
+          "keep chorus subtle",
+          "less scoop, more mid body"
+        ],
+        "warnings": [
+          "The source material is a guitar-driven rock song, so the rig focuses on electric guitar emulation. The tone requires careful balancing of clean headroom and subtle breakup."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.396,
+      "prompt_chars": 993,
+      "response_chars": 546,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 141,
+        "total_duration": 25377807500,
+        "prompt_eval_duration": 268279000,
+        "eval_duration": 1709237000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.777,
+      "prompt_chars": 5479,
+      "response_chars": 502,
+      "usage": {
+        "input_tokens": 1528,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1661
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 47.828,
+      "prompt_chars": 3575,
+      "response_chars": 6244,
+      "usage": {
+        "prompt_eval_count": 1207,
+        "eval_count": 1752,
+        "total_duration": 47795867000,
+        "prompt_eval_duration": 409241000,
+        "eval_duration": 33509616000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.354,
+      "prompt_chars": 8426,
+      "response_chars": 516,
+      "usage": {
+        "prompt_eval_count": 2316,
+        "eval_count": 143,
+        "total_duration": 4324778000,
+        "prompt_eval_duration": 363021000,
+        "eval_duration": 3408296000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.936,
+      "prompt_chars": 2894,
+      "response_chars": 202,
+      "usage": {
+        "prompt_eval_count": 921,
+        "eval_count": 57,
+        "total_duration": 8920486100,
+        "prompt_eval_duration": 359283000,
+        "eval_duration": 746444000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Stone Temple Pilots",
+      "title": "Creep",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Stone Temple Pilots - Creep - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean-to-edge crunch with chorus sheen",
+      "signalChainSummary": "A classic, chimey signal chain using a light boost/OD into a US Deluxe amp model, enhanced by Chorus for the signature 'Creep' sheen. The overall tone is bright, mid-focused, and dynamic.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "15%",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide a subtle, slightly dirty attack and boost the signal into the clean amp model.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its light breakup character, mimicking a classic tube overdrive without heavy grit.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more aggressive than needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (Not needed for this song's tone).",
+          "matchQuality": "fallback",
+          "gap": "No wah effect is required.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (Keep gain low via PRE).",
+          "matchQuality": "fallback",
+          "gap": "Heavy distortion is explicitly avoided.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the clean, chimey Fender-style tone required for the verses and chorus.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Similar, but US Deluxe is often preferred for its specific clean breakup character."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, focused cabinet sound matching the US Deluxe amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Feedback": "25%"
+          },
+          "purpose": "Add the signature 'sheen' and wide rhythm texture required for the chorus.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "EQ/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the mids for body and compensate for the chorus's potential scoop.",
+          "matchQuality": "close",
+          "gap": "Using Guitar EQ 1 to fine-tune the frequency response, focusing on mid-range presence.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 2",
+              "reason": "Potentially too aggressive for subtle shaping."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle depth and space without creating a 'big reverb wash'.",
+          "matchQuality": "close",
+          "gap": "A light delay is used instead of heavy reverb to maintain clarity.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could add too much warmth, distracting from the clean tone."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide a natural room ambience to give the tone width without sounding overly wet.",
+          "matchQuality": "close",
+          "gap": "Keeping the reverb mix low (15%) is crucial to avoid the 'big reverb wash' specified in the avoidance list.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Can sound too artificial for this specific song."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean-to-edge crunch with chorus sheen",
+      "mustHave": [
+        "chorus modulation",
+        "slightly dirty attack",
+        "clean-to-crunch shift",
+        "wide rhythm texture"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "dry plain clean",
+        "big reverb wash"
+      ],
+      "gearClues": [
+        "clean Fender-style amp",
+        "chorus pedal",
+        "light OD",
+        "2x12 or combo"
+      ],
+      "corrections": [
+        "drop vibrato wording",
+        "keep chorus subtle",
+        "less scoop, more mid body"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "grunge",
+        "alt-rock",
+        "90s"
+      ],
+      "targetTone": "clean-to-edge crunch with chorus sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better match the vintage, chimey Fender sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 IR (e.g., tweed/blackface)",
+          "reason": "Enhance the classic Fender chime and mid-focus for 'Creep'.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Improved clarity and vintage character.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1337,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

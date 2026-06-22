@@ -1,0 +1,1171 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 526,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Gipsy_Kings__Bamboleo.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Gipsy Kings",
+    "title": "Bamboleo",
+    "album": "",
+    "year": null,
+    "genre": "flamenco pop"
+  },
+  "genreClassification": {
+    "genre": "flamenco pop",
+    "subgenres": [
+      "latin",
+      "rumba",
+      "pop"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of flamenco-influenced Latin pop music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, jangly acoustic/electric blend with a slight tropical reverb wash.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "wah (optional)",
+        "tremolo"
+      ],
+      "gearHypotheses": [
+        "Clean amp model (e.g., Fender Twin style)",
+        "Chorus or Vibrato modulation",
+        "Spring Reverb simulation"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Fuzz",
+        "Crunch",
+        "Overdrive (unless very light)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright nylon-flamenco guitar with percussive strum",
+      "mustHave": [
+        "nylon-string attack",
+        "fast rasgueado strum",
+        "dry close-mic sound",
+        "hand percussion feel"
+      ],
+      "avoid": [
+        "jangly steel-string",
+        "chorus",
+        "tremolo",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "classical/flamenco guitar",
+        "bridge/piezo-like pickup",
+        "small clean amp or direct"
+      ],
+      "corrections": [
+        "Drop electric-jangle framing",
+        "Remove delay/chorus/tremolo",
+        "Keep reverb very light or none"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright nylon-flamenco guitar with percussive strum",
+    "mustHave": [
+      "nylon-string attack",
+      "fast rasgueado strum",
+      "dry close-mic sound",
+      "hand percussion feel"
+    ],
+    "avoid": [
+      "jangly steel-string",
+      "chorus",
+      "tremolo",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "classical/flamenco guitar",
+      "bridge/piezo-like pickup",
+      "small clean amp or direct"
+    ],
+    "corrections": [
+      "Drop electric-jangle framing",
+      "Remove delay/chorus/tremolo",
+      "Keep reverb very light or none"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, bright tones and percussive attack over heavy gain.",
+          "bestMatchSummary": "A bright, clean signal chain emphasizing the natural attack of nylon strings, using a low-gain preamp and minimal effects to simulate flamenco's dry, rhythmic feel.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight signal for fast strumming.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the initial attack and sustain of the nylon strings (percussive strum feel).",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the percussiveness and punch required for flamenco.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "Could provide similar attack enhancement but might be too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Drive": "0%",
+                "Tone": "12:00",
+                "Level": "60%"
+              },
+              "purpose": "Keep the tone completely clean and transparent to preserve the nylon character.",
+              "matchQuality": "exact",
+              "gap": "None. Bypass all gain stages.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "7/10",
+                "Middle": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Provide a bright, articulate clean platform suitable for fingerstyle and strumming.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its clarity and ability to handle high-frequency content without sounding overly aggressive.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable, but US Deluxe often provides a slightly brighter edge needed for flamenco."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Bright"
+              },
+              "purpose": "Simulate a close-mic'd sound, emphasizing the percussive attack and clarity.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its bright voicing, mimicking direct/close miking techniques common in flamenco recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and enhance articulation while keeping the low end controlled.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the bright, articulate tone required for nylon strings.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Mode": "Bypass"
+              },
+              "purpose": "No wah effect needed; keep the tone natural and direct.",
+              "matchQuality": "exact",
+              "gap": "The flamenco style requires a pure, unfiltered sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Disabled. Chorus is explicitly avoided to maintain the dry, natural sound.",
+              "matchQuality": "exact",
+              "gap": "The module is included but deactivated per musical verdict instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "120 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Add a very subtle sense of space without sounding like traditional delay (minimal ambience).",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add minimal depth, but kept low to avoid washing out the percussive attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide the absolute minimum amount of natural room ambience without sounding wet or heavy.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept extremely low to respect the 'dry close-mic' requirement, only adding subtle dimension.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Final output level adjustment for optimal performance volume.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is nylon-string flamenco guitar, which requires specialized tone shaping. This rig uses a clean, bright signal chain (US Deluxe/US 2x12) to emulate the percussive attack and clarity of classical instruments.",
+          "All effects (Chorus, heavy reverb, delay) are minimized or bypassed to adhere strictly to the 'dry close-mic' requirement."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Focus on specialized IR/Cab simulation for dry, percussive nylon string sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Flamenco/Classical Guitar Cab",
+              "recommendedAsset": "Close-mic'd Nylon String IR (e.g., specific vintage mic on classical guitar)",
+              "reason": "Current US 2x12 is too generic; needs a specialized, dry cab voicing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and percussive attack definition.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Gipsy Kings - Bamboleo - Valeton GP-180",
+        "song": {
+          "artist": "Gipsy Kings",
+          "title": "Bamboleo",
+          "album": "",
+          "year": null,
+          "genre": "flamenco pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright nylon-flamenco guitar with percussive strum",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, clean signal chain emphasizing the natural attack of nylon strings, using a low-gain preamp and minimal effects to simulate flamenco's dry, rhythmic feel.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a tight signal for fast strumming.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Enhance the initial attack and sustain of the nylon strings (percussive strum feel).",
+            "matchQuality": "close",
+            "gap": "The Comp module is used to simulate the percussiveness and punch required for flamenco.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "Could provide similar attack enhancement but might be too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Drive": "0%",
+              "Tone": "12:00",
+              "Level": "60%"
+            },
+            "purpose": "Keep the tone completely clean and transparent to preserve the nylon character.",
+            "matchQuality": "exact",
+            "gap": "None. Bypass all gain stages.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "7/10",
+              "Middle": "6/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Provide a bright, articulate clean platform suitable for fingerstyle and strumming.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its clarity and ability to handle high-frequency content without sounding overly aggressive.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also suitable, but US Deluxe often provides a slightly brighter edge needed for flamenco."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "EQ": "Bright"
+            },
+            "purpose": "Simulate a close-mic'd sound, emphasizing the percussive attack and clarity.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is selected for its bright voicing, mimicking direct/close miking techniques common in flamenco recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the high end and enhance articulation while keeping the low end controlled.",
+            "matchQuality": "close",
+            "gap": "Used to fine-tune the bright, articulate tone required for nylon strings.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Mode": "Bypass"
+            },
+            "purpose": "No wah effect needed; keep the tone natural and direct.",
+            "matchQuality": "exact",
+            "gap": "The flamenco style requires a pure, unfiltered sound.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Disabled. Chorus is explicitly avoided to maintain the dry, natural sound.",
+            "matchQuality": "exact",
+            "gap": "The module is included but deactivated per musical verdict instructions.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "120 ms",
+              "Feedback": "1",
+              "Mix": "15%"
+            },
+            "purpose": "Add a very subtle sense of space without sounding like traditional delay (minimal ambience).",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add minimal depth, but kept low to avoid washing out the percussive attack.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide the absolute minimum amount of natural room ambience without sounding wet or heavy.",
+            "matchQuality": "close",
+            "gap": "The reverb is kept extremely low to respect the 'dry close-mic' requirement, only adding subtle dimension.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "70%"
+            },
+            "purpose": "Final output level adjustment for optimal performance volume.",
+            "matchQuality": "exact",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright nylon-flamenco guitar with percussive strum",
+          "toneProfile": "bright nylon-flamenco guitar with percussive strum",
+          "idealSignalChain": "classical/flamenco guitar | bridge/piezo-like pickup | small clean amp or direct",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "classical/flamenco guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge/piezo-like pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small clean amp or direct",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "nylon-string attack",
+            "fast rasgueado strum",
+            "dry close-mic sound",
+            "hand percussion feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, bright tones and percussive attack over heavy gain.",
+          "bestMatchSummary": "A bright, clean signal chain emphasizing the natural attack of nylon strings, using a low-gain preamp and minimal effects to simulate flamenco's dry, rhythmic feel.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight signal for fast strumming.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the initial attack and sustain of the nylon strings (percussive strum feel).",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to simulate the percussiveness and punch required for flamenco.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "Could provide similar attack enhancement but might be too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Drive": "0%",
+                "Tone": "12:00",
+                "Level": "60%"
+              },
+              "purpose": "Keep the tone completely clean and transparent to preserve the nylon character.",
+              "matchQuality": "exact",
+              "gap": "None. Bypass all gain stages.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "7/10",
+                "Middle": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Provide a bright, articulate clean platform suitable for fingerstyle and strumming.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its clarity and ability to handle high-frequency content without sounding overly aggressive.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable, but US Deluxe often provides a slightly brighter edge needed for flamenco."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Bright"
+              },
+              "purpose": "Simulate a close-mic'd sound, emphasizing the percussive attack and clarity.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its bright voicing, mimicking direct/close miking techniques common in flamenco recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and enhance articulation while keeping the low end controlled.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the bright, articulate tone required for nylon strings.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Mode": "Bypass"
+              },
+              "purpose": "No wah effect needed; keep the tone natural and direct.",
+              "matchQuality": "exact",
+              "gap": "The flamenco style requires a pure, unfiltered sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Disabled. Chorus is explicitly avoided to maintain the dry, natural sound.",
+              "matchQuality": "exact",
+              "gap": "The module is included but deactivated per musical verdict instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "120 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Add a very subtle sense of space without sounding like traditional delay (minimal ambience).",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add minimal depth, but kept low to avoid washing out the percussive attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide the absolute minimum amount of natural room ambience without sounding wet or heavy.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept extremely low to respect the 'dry close-mic' requirement, only adding subtle dimension.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Final output level adjustment for optimal performance volume.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Focus on specialized IR/Cab simulation for dry, percussive nylon string sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Flamenco/Classical Guitar Cab",
+              "recommendedAsset": "Close-mic'd Nylon String IR (e.g., specific vintage mic on classical guitar)",
+              "reason": "Current US 2x12 is too generic; needs a specialized, dry cab voicing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and percussive attack definition.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Drop electric-jangle framing",
+          "Remove delay/chorus/tremolo",
+          "Keep reverb very light or none"
+        ],
+        "warnings": [
+          "The source material is nylon-string flamenco guitar, which requires specialized tone shaping. This rig uses a clean, bright signal chain (US Deluxe/US 2x12) to emulate the percussive attack and clarity of classical instruments.",
+          "All effects (Chorus, heavy reverb, delay) are minimized or bypassed to adhere strictly to the 'dry close-mic' requirement."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.587,
+      "prompt_chars": 988,
+      "response_chars": 401,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 105,
+        "total_duration": 9560883200,
+        "prompt_eval_duration": 368817000,
+        "eval_duration": 1672482000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.029,
+      "prompt_chars": 5335,
+      "response_chars": 549,
+      "usage": {
+        "input_tokens": 1496,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 151,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1647
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 45.97,
+      "prompt_chars": 3610,
+      "response_chars": 6726,
+      "usage": {
+        "prompt_eval_count": 1222,
+        "eval_count": 1827,
+        "total_duration": 45950853600,
+        "prompt_eval_duration": 383771000,
+        "eval_duration": 30273132000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 17.987,
+      "prompt_chars": 8929,
+      "response_chars": 594,
+      "usage": {
+        "prompt_eval_count": 2406,
+        "eval_count": 159,
+        "total_duration": 17957072600,
+        "prompt_eval_duration": 286191000,
+        "eval_duration": 1073373000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 24.764,
+      "prompt_chars": 2934,
+      "response_chars": 173,
+      "usage": {
+        "prompt_eval_count": 925,
+        "eval_count": 50,
+        "total_duration": 24761397100,
+        "prompt_eval_duration": 169905000,
+        "eval_duration": 340045000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Gipsy Kings",
+      "title": "Bamboleo",
+      "album": "",
+      "year": null,
+      "genre": "flamenco pop"
+    },
+    "rig": {
+      "rigName": "Gipsy Kings - Bamboleo - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright nylon-flamenco guitar with percussive strum",
+      "signalChainSummary": "A bright, clean signal chain emphasizing the natural attack of nylon strings, using a low-gain preamp and minimal effects to simulate flamenco's dry, rhythmic feel.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a tight signal for fast strumming.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Enhance the initial attack and sustain of the nylon strings (percussive strum feel).",
+          "matchQuality": "close",
+          "gap": "The Comp module is used to simulate the percussiveness and punch required for flamenco.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "Could provide similar attack enhancement but might be too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Drive": "0%",
+            "Tone": "12:00",
+            "Level": "60%"
+          },
+          "purpose": "Keep the tone completely clean and transparent to preserve the nylon character.",
+          "matchQuality": "exact",
+          "gap": "None. Bypass all gain stages.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "7/10",
+            "Middle": "6/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Provide a bright, articulate clean platform suitable for fingerstyle and strumming.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its clarity and ability to handle high-frequency content without sounding overly aggressive.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable, but US Deluxe often provides a slightly brighter edge needed for flamenco."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "EQ": "Bright"
+          },
+          "purpose": "Simulate a close-mic'd sound, emphasizing the percussive attack and clarity.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is selected for its bright voicing, mimicking direct/close miking techniques common in flamenco recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the high end and enhance articulation while keeping the low end controlled.",
+          "matchQuality": "close",
+          "gap": "Used to fine-tune the bright, articulate tone required for nylon strings.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Mode": "Bypass"
+          },
+          "purpose": "No wah effect needed; keep the tone natural and direct.",
+          "matchQuality": "exact",
+          "gap": "The flamenco style requires a pure, unfiltered sound.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Disabled. Chorus is explicitly avoided to maintain the dry, natural sound.",
+          "matchQuality": "exact",
+          "gap": "The module is included but deactivated per musical verdict instructions.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "120 ms",
+            "Feedback": "1",
+            "Mix": "15%"
+          },
+          "purpose": "Add a very subtle sense of space without sounding like traditional delay (minimal ambience).",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add minimal depth, but kept low to avoid washing out the percussive attack.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide the absolute minimum amount of natural room ambience without sounding wet or heavy.",
+          "matchQuality": "close",
+          "gap": "The reverb is kept extremely low to respect the 'dry close-mic' requirement, only adding subtle dimension.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "70%"
+          },
+          "purpose": "Final output level adjustment for optimal performance volume.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright nylon-flamenco guitar with percussive strum",
+      "mustHave": [
+        "nylon-string attack",
+        "fast rasgueado strum",
+        "dry close-mic sound",
+        "hand percussion feel"
+      ],
+      "avoid": [
+        "jangly steel-string",
+        "chorus",
+        "tremolo",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "classical/flamenco guitar",
+        "bridge/piezo-like pickup",
+        "small clean amp or direct"
+      ],
+      "corrections": [
+        "Drop electric-jangle framing",
+        "Remove delay/chorus/tremolo",
+        "Keep reverb very light or none"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "flamenco pop",
+      "styleTags": [
+        "latin",
+        "rumba",
+        "pop"
+      ],
+      "targetTone": "bright nylon-flamenco guitar with percussive strum",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Focus on specialized IR/Cab simulation for dry, percussive nylon string sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Flamenco/Classical Guitar Cab",
+          "recommendedAsset": "Close-mic'd Nylon String IR (e.g., specific vintage mic on classical guitar)",
+          "reason": "Current US 2x12 is too generic; needs a specialized, dry cab voicing.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and percussive attack definition.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 526,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

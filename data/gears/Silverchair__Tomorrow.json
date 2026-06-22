@@ -1,0 +1,1058 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1246,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Silverchair__Tomorrow.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Silverchair",
+    "title": "Tomorrow",
+    "album": "",
+    "year": null,
+    "genre": "grunge"
+  },
+  "genreClassification": {
+    "genre": "grunge",
+    "subgenres": [
+      "alternative rock",
+      "slacker rock"
+    ],
+    "confidence": "high",
+    "rationale": "The fuzz, dark mids, and thick tone profile are hallmarks of 90s grunge."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, heavily distorted grunge/alt rock tone with a thick fuzz foundation and pronounced mid-range crunch.",
+      "signatureElements": [
+        "Fuzz (thick, saturated)",
+        "Crunch (mid-focused)",
+        "Heavy Distortion",
+        "Low-end punch"
+      ],
+      "gearHypotheses": [
+        "High-gain Tube Screamer style overdrive for grit boost",
+        "Overdriven British amp model (e.g., Plexi/AC30 style) for mid-range bite",
+        "Fuzz pedal emulation (Big Muff or similar) for foundational texture"
+      ],
+      "avoid": [
+        "Bright, scooped tones",
+        "Clean arpeggios",
+        "Excessive modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick muff-style grunge fuzz with dark mid crunch",
+      "mustHave": [
+        "fuzz foundation",
+        "thick sustain",
+        "dark mids",
+        "heavy low-end"
+      ],
+      "avoid": [
+        "clean shimmer",
+        "bright scoop",
+        "chorus",
+        "flanger"
+      ],
+      "gearClues": [
+        "Big Muff style fuzz",
+        "British high-gain amp",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop Tube Screamer boost",
+        "make fuzz primary, not crunch primary",
+        "keep it raw and dark"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick muff-style grunge fuzz with dark mid crunch",
+    "mustHave": [
+      "fuzz foundation",
+      "thick sustain",
+      "dark mids",
+      "heavy low-end"
+    ],
+    "avoid": [
+      "clean shimmer",
+      "bright scoop",
+      "chorus",
+      "flanger"
+    ],
+    "gearClues": [
+      "Big Muff style fuzz",
+      "British high-gain amp",
+      "4x12 cab"
+    ],
+    "corrections": [
+      "drop Tube Screamer boost",
+      "make fuzz primary, not crunch primary",
+      "keep it raw and dark"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on thick, dark fuzz and high sustain using Muff-style distortion into a British 4x12.",
+          "bestMatchSummary": "Gate -> Boost (TS) -> Fuzz (Muff) -> Amp (UK 50/SLP) -> Cab (UK Vintage 4x12) -> EQ -> Delay -> Reverb",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/sculpting",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.0"
+              },
+              "purpose": "Simulate the Tube Screamer boost to tighten up the fuzz and add mid-range punch.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but Boost is used for gain staging and mid-hump.",
+              "alternatives": [
+                "OD 9 (if more grit is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Muff-style",
+              "active": true,
+              "settings": {
+                "Drive": "8.0",
+                "Tone": "5.5",
+                "Volume": "7.0"
+              },
+              "purpose": "Provide the core thick, dark grunge fuzz foundation.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Fuzz (if a more raw, less defined tone is desired)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "7.0",
+                "Treble": "6.5",
+                "Midrange": "7.5",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate a British high-gain, mid-focused amp suitable for grunge rock.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen over the UK 45/50 to balance high gain with classic British tone characteristics.",
+              "alternatives": [
+                "UK 45 (for a slightly more aggressive, punchy sound)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the required British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "1.0",
+                "Midrange": "8.5",
+                "Treble": "3.0"
+              },
+              "purpose": "Darken the overall tone and emphasize the dark mid-crunch required for grunge.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.5",
+                "Mix": "3.0"
+              },
+              "purpose": "Add subtle depth and sustain without sounding too clean or bright.",
+              "matchQuality": "close",
+              "gap": "Delay is used for ambience, as the target tone is heavy and sustained.",
+              "alternatives": [
+                "Tape (for a warmer, less defined echo)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.0 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and thickness to the heavy fuzz tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is preferred over Plate/Spring as it adds natural, dark ambience suitable for grunge.",
+              "alternatives": [
+                "Plate (if more metallic sustain is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a grunge rock track, requiring heavy fuzz and high gain. The chain prioritizes distortion (Muff-style) over clean tones.",
+          "Since the GP-180 lacks a dedicated Tube Screamer model, the 'Boost' module is used for mid-hump and gain staging."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the raw, dark sound of grunge rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., dirty 4x12)",
+              "reason": "Enhance grit and low-end response for a raw, dark grunge sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased thickness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Silverchair - Tomorrow - Valeton GP-180",
+        "song": {
+          "artist": "Silverchair",
+          "title": "Tomorrow",
+          "album": "",
+          "year": null,
+          "genre": "grunge"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick muff-style grunge fuzz with dark mid crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate -> Boost (TS) -> Fuzz (Muff) -> Amp (UK 50/SLP) -> Cab (UK Vintage 4x12) -> EQ -> Delay -> Reverb",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/sculpting",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Tone": "5.0"
+            },
+            "purpose": "Simulate the Tube Screamer boost to tighten up the fuzz and add mid-range punch.",
+            "matchQuality": "close",
+            "gap": "The GP-180 lacks a dedicated TS model, but Boost is used for gain staging and mid-hump.",
+            "alternatives": [
+              "OD 9 (if more grit is needed)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Muff-style",
+            "active": true,
+            "settings": {
+              "Drive": "8.0",
+              "Tone": "5.5",
+              "Volume": "7.0"
+            },
+            "purpose": "Provide the core thick, dark grunge fuzz foundation.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              "Fuzz (if a more raw, less defined tone is desired)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "7.0",
+              "Treble": "6.5",
+              "Midrange": "7.5",
+              "Bass": "6.0"
+            },
+            "purpose": "Simulate a British high-gain, mid-focused amp suitable for grunge rock.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is chosen over the UK 45/50 to balance high gain with classic British tone characteristics.",
+            "alternatives": [
+              "UK 45 (for a slightly more aggressive, punchy sound)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide the required British 4x12 cabinet voicing.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "1.0",
+              "Midrange": "8.5",
+              "Treble": "3.0"
+            },
+            "purpose": "Darken the overall tone and emphasize the dark mid-crunch required for grunge.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2.5",
+              "Mix": "3.0"
+            },
+            "purpose": "Add subtle depth and sustain without sounding too clean or bright.",
+            "matchQuality": "close",
+            "gap": "Delay is used for ambience, as the target tone is heavy and sustained.",
+            "alternatives": [
+              "Tape (for a warmer, less defined echo)"
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.0 s",
+              "Mix": "15%"
+            },
+            "purpose": "Add a subtle sense of space and thickness to the heavy fuzz tone.",
+            "matchQuality": "close",
+            "gap": "Room reverb is preferred over Plate/Spring as it adds natural, dark ambience suitable for grunge.",
+            "alternatives": [
+              "Plate (if more metallic sustain is desired)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick muff-style grunge fuzz with dark mid crunch",
+          "toneProfile": "thick muff-style grunge fuzz with dark mid crunch",
+          "idealSignalChain": "Big Muff style fuzz | British high-gain amp | 4x12 cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Big Muff style fuzz",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "British high-gain amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzz foundation",
+            "thick sustain",
+            "dark mids",
+            "heavy low-end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on thick, dark fuzz and high sustain using Muff-style distortion into a British 4x12.",
+          "bestMatchSummary": "Gate -> Boost (TS) -> Fuzz (Muff) -> Amp (UK 50/SLP) -> Cab (UK Vintage 4x12) -> EQ -> Delay -> Reverb",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/sculpting",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.0"
+              },
+              "purpose": "Simulate the Tube Screamer boost to tighten up the fuzz and add mid-range punch.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, but Boost is used for gain staging and mid-hump.",
+              "alternatives": [
+                "OD 9 (if more grit is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Muff-style",
+              "active": true,
+              "settings": {
+                "Drive": "8.0",
+                "Tone": "5.5",
+                "Volume": "7.0"
+              },
+              "purpose": "Provide the core thick, dark grunge fuzz foundation.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                "Fuzz (if a more raw, less defined tone is desired)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "7.0",
+                "Treble": "6.5",
+                "Midrange": "7.5",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate a British high-gain, mid-focused amp suitable for grunge rock.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen over the UK 45/50 to balance high gain with classic British tone characteristics.",
+              "alternatives": [
+                "UK 45 (for a slightly more aggressive, punchy sound)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the required British 4x12 cabinet voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "1.0",
+                "Midrange": "8.5",
+                "Treble": "3.0"
+              },
+              "purpose": "Darken the overall tone and emphasize the dark mid-crunch required for grunge.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.5",
+                "Mix": "3.0"
+              },
+              "purpose": "Add subtle depth and sustain without sounding too clean or bright.",
+              "matchQuality": "close",
+              "gap": "Delay is used for ambience, as the target tone is heavy and sustained.",
+              "alternatives": [
+                "Tape (for a warmer, less defined echo)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.0 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and thickness to the heavy fuzz tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is preferred over Plate/Spring as it adds natural, dark ambience suitable for grunge.",
+              "alternatives": [
+                "Plate (if more metallic sustain is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the raw, dark sound of grunge rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., dirty 4x12)",
+              "reason": "Enhance grit and low-end response for a raw, dark grunge sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased thickness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Tube Screamer boost",
+          "make fuzz primary, not crunch primary",
+          "keep it raw and dark"
+        ],
+        "warnings": [
+          "The source material is a grunge rock track, requiring heavy fuzz and high gain. The chain prioritizes distortion (Muff-style) over clean tones.",
+          "Since the GP-180 lacks a dedicated Tube Screamer model, the 'Boost' module is used for mid-hump and gain staging."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.127,
+      "prompt_chars": 988,
+      "response_chars": 578,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 149,
+        "total_duration": 11102726100,
+        "prompt_eval_duration": 263197000,
+        "eval_duration": 3134302000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.703,
+      "prompt_chars": 5500,
+      "response_chars": 484,
+      "usage": {
+        "input_tokens": 1532,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1664
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 41.036,
+      "prompt_chars": 3545,
+      "response_chars": 5167,
+      "usage": {
+        "prompt_eval_count": 1198,
+        "eval_count": 1542,
+        "total_duration": 41028998600,
+        "prompt_eval_duration": 662470000,
+        "eval_duration": 25351282000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.245,
+      "prompt_chars": 7243,
+      "response_chars": 534,
+      "usage": {
+        "prompt_eval_count": 2097,
+        "eval_count": 149,
+        "total_duration": 4220561800,
+        "prompt_eval_duration": 410420000,
+        "eval_duration": 3312658000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.833,
+      "prompt_chars": 2628,
+      "response_chars": 181,
+      "usage": {
+        "prompt_eval_count": 854,
+        "eval_count": 51,
+        "total_duration": 13819053100,
+        "prompt_eval_duration": 400752000,
+        "eval_duration": 859210000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Silverchair",
+      "title": "Tomorrow",
+      "album": "",
+      "year": null,
+      "genre": "grunge"
+    },
+    "rig": {
+      "rigName": "Silverchair - Tomorrow - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick muff-style grunge fuzz with dark mid crunch",
+      "signalChainSummary": "Gate -> Boost (TS) -> Fuzz (Muff) -> Amp (UK 50/SLP) -> Cab (UK Vintage 4x12) -> EQ -> Delay -> Reverb",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/sculpting",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Tone": "5.0"
+          },
+          "purpose": "Simulate the Tube Screamer boost to tighten up the fuzz and add mid-range punch.",
+          "matchQuality": "close",
+          "gap": "The GP-180 lacks a dedicated TS model, but Boost is used for gain staging and mid-hump.",
+          "alternatives": [
+            {
+              "model": "OD 9 (if more grit is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Muff-style",
+          "active": true,
+          "settings": {
+            "Drive": "8.0",
+            "Tone": "5.5",
+            "Volume": "7.0"
+          },
+          "purpose": "Provide the core thick, dark grunge fuzz foundation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Fuzz (if a more raw, less defined tone is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "7.0",
+            "Treble": "6.5",
+            "Midrange": "7.5",
+            "Bass": "6.0"
+          },
+          "purpose": "Simulate a British high-gain, mid-focused amp suitable for grunge rock.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is chosen over the UK 45/50 to balance high gain with classic British tone characteristics.",
+          "alternatives": [
+            {
+              "model": "UK 45 (for a slightly more aggressive, punchy sound)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide the required British 4x12 cabinet voicing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "1.0",
+            "Midrange": "8.5",
+            "Treble": "3.0"
+          },
+          "purpose": "Darken the overall tone and emphasize the dark mid-crunch required for grunge.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2.5",
+            "Mix": "3.0"
+          },
+          "purpose": "Add subtle depth and sustain without sounding too clean or bright.",
+          "matchQuality": "close",
+          "gap": "Delay is used for ambience, as the target tone is heavy and sustained.",
+          "alternatives": [
+            {
+              "model": "Tape (for a warmer, less defined echo)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.0 s",
+            "Mix": "15%"
+          },
+          "purpose": "Add a subtle sense of space and thickness to the heavy fuzz tone.",
+          "matchQuality": "close",
+          "gap": "Room reverb is preferred over Plate/Spring as it adds natural, dark ambience suitable for grunge.",
+          "alternatives": [
+            {
+              "model": "Plate (if more metallic sustain is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick muff-style grunge fuzz with dark mid crunch",
+      "mustHave": [
+        "fuzz foundation",
+        "thick sustain",
+        "dark mids",
+        "heavy low-end"
+      ],
+      "avoid": [
+        "clean shimmer",
+        "bright scoop",
+        "chorus",
+        "flanger"
+      ],
+      "gearClues": [
+        "Big Muff style fuzz",
+        "British high-gain amp",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop Tube Screamer boost",
+        "make fuzz primary, not crunch primary",
+        "keep it raw and dark"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "grunge",
+      "styleTags": [
+        "alternative rock",
+        "slacker rock"
+      ],
+      "targetTone": "thick muff-style grunge fuzz with dark mid crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the raw, dark sound of grunge rock.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., dirty 4x12)",
+          "reason": "Enhance grit and low-end response for a raw, dark grunge sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased thickness and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1246,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

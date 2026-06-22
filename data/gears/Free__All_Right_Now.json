@@ -1,0 +1,1088 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 490,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Free__All_Right_Now.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Free",
+    "title": "All Right Now",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "hard rock",
+      "british rock",
+      "blues rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile and gear clues point directly to classic 70s British hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor (Aeolian)",
+      "signatureElements": [
+        "crunch",
+        "wah",
+        "delay",
+        "reverb"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM-800 style amp/cab",
+        "Wah pedal",
+        "Delay unit"
+      ],
+      "avoid": [
+        "fuzz",
+        "clean arpeggios"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry British hard-rock crunch with biting upper mids",
+      "mustHave": [
+        "tight riff crunch",
+        "slight amp breakup",
+        "bright bridge pickup bite",
+        "raw 70s mono feel"
+      ],
+      "avoid": [
+        "wah as default",
+        "delay",
+        "reverb wash",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Les Paul / humbucker",
+        "Marshall Plexi / early JMP",
+        "4x12"
+      ],
+      "corrections": [
+        "drop key label",
+        "remove delay",
+        "make wah optional"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry British hard-rock crunch with biting upper mids",
+    "mustHave": [
+      "tight riff crunch",
+      "slight amp breakup",
+      "bright bridge pickup bite",
+      "raw 70s mono feel"
+    ],
+    "avoid": [
+      "wah as default",
+      "delay",
+      "reverb wash",
+      "fuzz"
+    ],
+    "gearClues": [
+      "Les Paul / humbucker",
+      "Marshall Plexi / early JMP",
+      "4x12"
+    ],
+    "corrections": [
+      "drop key label",
+      "remove delay",
+      "make wah optional"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Plexi/Marshall era) with high mid-range bite and tight crunch.",
+          "bestMatchSummary": "A vintage Marshall Plexi style chain, utilizing a Boost for initial punch, followed by a Distortion to achieve the core crunchy tone, paired with the UK 45 amp model and UK Vintage 4x12 cabinet. Minimal effects are used to maintain raw clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in raw rock recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for high-gain modeling.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial grit and punch to simulate the early JMP/Plexi feel without excessive coloration.",
+              "matchQuality": "exact",
+              "gap": "None. Boost is ideal for adding controlled drive.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If a slightly more colored, vintage overdrive was desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core tight riff crunch and biting upper mids required for 70s hard rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate Plexi-era grit; specific vintage models are not available in the compact catalog.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused crunch was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British Marshall Plexi sound and provide the necessary upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None. This model is perfect for vintage British rock tones.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more modern or aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and complement the Plexi tone.",
+              "matchQuality": "exact",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly scoop the bass and boost the upper mids to enhance the 'biting' quality required.",
+              "matchQuality": "exact",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "10%"
+              },
+              "purpose": "Kept optional and subtle. If the player wants a slight vintage shimmer without distracting from the raw crunch.",
+              "matchQuality": "close",
+              "gap": "The 'Chorus' is used here as a general modulation option, but it should be kept off or set very low to maintain the raw 70s feel.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "room ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and dimension without creating an excessive 'wash' or reverb tail.",
+              "matchQuality": "close",
+              "gap": "The Room effect is used sparingly to provide depth, adhering to the 'avoid reverb wash' rule.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Essential final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone is heavily focused on British classic rock (Plexi/Marshall) grit. The 'Distortion' and 'Boost' modules are used to build the necessary crunch before hitting the dedicated UK 45 amp model.",
+          "Reverb and Delay effects have been avoided or minimized to maintain the raw, dry 70s feel."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 Plexi/Marshall IR",
+              "reason": "Enhance the raw, period-accurate British rock tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved depth and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Free - All Right Now - Valeton GP-180",
+        "song": {
+          "artist": "Free",
+          "title": "All Right Now",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry British hard-rock crunch with biting upper mids",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A vintage Marshall Plexi style chain, utilizing a Boost for initial punch, followed by a Distortion to achieve the core crunchy tone, paired with the UK 45 amp model and UK Vintage 4x12 cabinet. Minimal effects are used to maintain raw clarity.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise inherent in raw rock recordings.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for high-gain modeling.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide initial grit and punch to simulate the early JMP/Plexi feel without excessive coloration.",
+            "matchQuality": "exact",
+            "gap": "None. Boost is ideal for adding controlled drive.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "If a slightly more colored, vintage overdrive was desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/crunch",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "50%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Establish the core tight riff crunch and biting upper mids required for 70s hard rock.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is a general choice to emulate Plexi-era grit; specific vintage models are not available in the compact catalog.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "If a more aggressive, mid-focused crunch was needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the classic British Marshall Plexi sound and provide the necessary upper-mid bite.",
+            "matchQuality": "exact",
+            "gap": "None. This model is perfect for vintage British rock tones.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A slightly more modern or aggressive alternative."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the classic British rock cabinet sound and complement the Plexi tone.",
+            "matchQuality": "exact",
+            "gap": "None. Standard choice for this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Slightly scoop the bass and boost the upper mids to enhance the 'biting' quality required.",
+            "matchQuality": "exact",
+            "gap": "None. Used for surgical tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/vibrato (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%",
+              "Mix": "10%"
+            },
+            "purpose": "Kept optional and subtle. If the player wants a slight vintage shimmer without distracting from the raw crunch.",
+            "matchQuality": "close",
+            "gap": "The 'Chorus' is used here as a general modulation option, but it should be kept off or set very low to maintain the raw 70s feel.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "room ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and dimension without creating an excessive 'wash' or reverb tail.",
+            "matchQuality": "close",
+            "gap": "The Room effect is used sparingly to provide depth, adhering to the 'avoid reverb wash' rule.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a more controlled, metallic ambience was preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None. Essential final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry British hard-rock crunch with biting upper mids",
+          "toneProfile": "dry British hard-rock crunch with biting upper mids",
+          "idealSignalChain": "Les Paul / humbucker | Marshall Plexi / early JMP | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Les Paul / humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall Plexi / early JMP",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight riff crunch",
+            "slight amp breakup",
+            "bright bridge pickup bite",
+            "raw 70s mono feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Plexi/Marshall era) with high mid-range bite and tight crunch.",
+          "bestMatchSummary": "A vintage Marshall Plexi style chain, utilizing a Boost for initial punch, followed by a Distortion to achieve the core crunchy tone, paired with the UK 45 amp model and UK Vintage 4x12 cabinet. Minimal effects are used to maintain raw clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in raw rock recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for high-gain modeling.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial grit and punch to simulate the early JMP/Plexi feel without excessive coloration.",
+              "matchQuality": "exact",
+              "gap": "None. Boost is ideal for adding controlled drive.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If a slightly more colored, vintage overdrive was desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core tight riff crunch and biting upper mids required for 70s hard rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate Plexi-era grit; specific vintage models are not available in the compact catalog.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused crunch was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British Marshall Plexi sound and provide the necessary upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None. This model is perfect for vintage British rock tones.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more modern or aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and complement the Plexi tone.",
+              "matchQuality": "exact",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly scoop the bass and boost the upper mids to enhance the 'biting' quality required.",
+              "matchQuality": "exact",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Mix": "10%"
+              },
+              "purpose": "Kept optional and subtle. If the player wants a slight vintage shimmer without distracting from the raw crunch.",
+              "matchQuality": "close",
+              "gap": "The 'Chorus' is used here as a general modulation option, but it should be kept off or set very low to maintain the raw 70s feel.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "room ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and dimension without creating an excessive 'wash' or reverb tail.",
+              "matchQuality": "close",
+              "gap": "The Room effect is used sparingly to provide depth, adhering to the 'avoid reverb wash' rule.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Essential final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 Plexi/Marshall IR",
+              "reason": "Enhance the raw, period-accurate British rock tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved depth and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop key label",
+          "remove delay",
+          "make wah optional"
+        ],
+        "warnings": [
+          "The tone is heavily focused on British classic rock (Plexi/Marshall) grit. The 'Distortion' and 'Boost' modules are used to build the necessary crunch before hitting the dedicated UK 45 amp model.",
+          "Reverb and Delay effects have been avoided or minimized to maintain the raw, dry 70s feel."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.087,
+      "prompt_chars": 986,
+      "response_chars": 235,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 76,
+        "total_duration": 9072298000,
+        "prompt_eval_duration": 338418000,
+        "eval_duration": 1071844000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.27,
+      "prompt_chars": 5149,
+      "response_chars": 471,
+      "usage": {
+        "input_tokens": 1459,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1589
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.357,
+      "prompt_chars": 3530,
+      "response_chars": 6060,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1672,
+        "total_duration": 27350864000,
+        "prompt_eval_duration": 426088000,
+        "eval_duration": 26366676000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.981,
+      "prompt_chars": 8143,
+      "response_chars": 477,
+      "usage": {
+        "prompt_eval_count": 2230,
+        "eval_count": 134,
+        "total_duration": 3972783600,
+        "prompt_eval_duration": 419431000,
+        "eval_duration": 3165457000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.073,
+      "prompt_chars": 2759,
+      "response_chars": 202,
+      "usage": {
+        "prompt_eval_count": 863,
+        "eval_count": 54,
+        "total_duration": 9068429100,
+        "prompt_eval_duration": 237163000,
+        "eval_duration": 1246666000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Free",
+      "title": "All Right Now",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Free - All Right Now - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry British hard-rock crunch with biting upper mids",
+      "signalChainSummary": "A vintage Marshall Plexi style chain, utilizing a Boost for initial punch, followed by a Distortion to achieve the core crunchy tone, paired with the UK 45 amp model and UK Vintage 4x12 cabinet. Minimal effects are used to maintain raw clarity.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise inherent in raw rock recordings.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for high-gain modeling.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide initial grit and punch to simulate the early JMP/Plexi feel without excessive coloration.",
+          "matchQuality": "exact",
+          "gap": "None. Boost is ideal for adding controlled drive.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If a slightly more colored, vintage overdrive was desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/crunch",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "50%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Establish the core tight riff crunch and biting upper mids required for 70s hard rock.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is a general choice to emulate Plexi-era grit; specific vintage models are not available in the compact catalog.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "If a more aggressive, mid-focused crunch was needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the classic British Marshall Plexi sound and provide the necessary upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None. This model is perfect for vintage British rock tones.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly more modern or aggressive alternative."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the classic British rock cabinet sound and complement the Plexi tone.",
+          "matchQuality": "exact",
+          "gap": "None. Standard choice for this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Slightly scoop the bass and boost the upper mids to enhance the 'biting' quality required.",
+          "matchQuality": "exact",
+          "gap": "None. Used for surgical tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/vibrato (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%",
+            "Mix": "10%"
+          },
+          "purpose": "Kept optional and subtle. If the player wants a slight vintage shimmer without distracting from the raw crunch.",
+          "matchQuality": "close",
+          "gap": "The 'Chorus' is used here as a general modulation option, but it should be kept off or set very low to maintain the raw 70s feel.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "room ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and dimension without creating an excessive 'wash' or reverb tail.",
+          "matchQuality": "close",
+          "gap": "The Room effect is used sparingly to provide depth, adhering to the 'avoid reverb wash' rule.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more controlled, metallic ambience was preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Essential final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry British hard-rock crunch with biting upper mids",
+      "mustHave": [
+        "tight riff crunch",
+        "slight amp breakup",
+        "bright bridge pickup bite",
+        "raw 70s mono feel"
+      ],
+      "avoid": [
+        "wah as default",
+        "delay",
+        "reverb wash",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Les Paul / humbucker",
+        "Marshall Plexi / early JMP",
+        "4x12"
+      ],
+      "corrections": [
+        "drop key label",
+        "remove delay",
+        "make wah optional"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "hard rock",
+        "british rock",
+        "blues rock"
+      ],
+      "targetTone": "dry British hard-rock crunch with biting upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better vintage cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 Plexi/Marshall IR",
+          "reason": "Enhance the raw, period-accurate British rock tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved depth and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 490,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

