@@ -28,6 +28,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from fretwise.biomechanics import (
+    NON_ACTIONABLE_CODES,
     BiomechanicalReport,
     BiomechanicalSeverity,
     BiomechanicalViolation,
@@ -414,12 +415,19 @@ def _audit_one_movement(
     # Signal 2b: deterministic final-output biomechanical validation. Unlike
     # cost density, this is a hard structural signal: fatal violations mean the
     # final fingering contains an anatomically invalid state or chord.
+    # Non-actionable codes (data/tuning/bend artefacts — see
+    # ``NON_ACTIONABLE_CODES``) are excluded so the verdict agrees with the
+    # review list and the per-note highlight, which apply the same filter.
+    actionable_biomechanical = [
+        violation for violation in movement_biomechanical
+        if violation.code not in NON_ACTIONABLE_CODES
+    ]
     biomechanical_fatal_count = sum(
-        1 for violation in movement_biomechanical
+        1 for violation in actionable_biomechanical
         if violation.severity == BiomechanicalSeverity.FATAL
     )
     biomechanical_high_count = sum(
-        1 for violation in movement_biomechanical
+        1 for violation in actionable_biomechanical
         if violation.severity == BiomechanicalSeverity.HIGH
     )
     signals["biomechanical_fatal_count"] = float(biomechanical_fatal_count)
@@ -487,6 +495,11 @@ def _audit_one_movement(
         # One strong but noisy signal alone → soft warning.
         verdict = "suspect"
     elif source_amber and (cost_amber or ml_amber):
+        verdict = "suspect"
+    elif biomechanical_amber:
+        # A lone actionable HIGH violation (e.g. a genuine awkward stretch) is
+        # a real, if soft, finding — stand-alone like biomechanical_red, but
+        # warn rather than fail.
         verdict = "suspect"
     else:
         verdict = "clean"

@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
+from fretwise.biomechanics import NON_ACTIONABLE_CODES
 from fretwise.auth.accounts import LocalAccountStore
 from fretwise.auth.config import load_auth_config
 from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
@@ -3201,7 +3202,13 @@ def _annotate_serialized_review_status(
     rows: list[dict[str, Any]],
     audit: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
-    """Attach note-level review severity from the serialized audit payload."""
+    """Attach note-level review severity from the serialized audit payload.
+
+    Applies the same ``NON_ACTIONABLE_CODES`` filter as the review panel
+    (:func:`fretwise.review.flag_fingerings`) and the audit verdict cascade
+    (:func:`fretwise.audit.audit_score`) so the per-note highlight never
+    disagrees with them about what counts as an actionable violation.
+    """
     if not rows:
         return rows
 
@@ -3211,6 +3218,8 @@ def _annotate_serialized_review_status(
     if isinstance(violations, list):
         for violation in violations:
             if not isinstance(violation, dict):
+                continue
+            if violation.get("code") in NON_ACTIONABLE_CODES:
                 continue
             severity = str(violation.get("severity") or "").lower()
             if severity == "fatal":
