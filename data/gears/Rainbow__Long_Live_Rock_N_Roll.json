@@ -1,0 +1,1085 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1163,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rainbow__Long_Live_Rock_N_Roll.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rainbow",
+    "title": "Long Live Rock N Roll",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song title and tone profile point directly to classic British hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and pronounced mid-range punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Bright treble bite",
+        "Punchy bass response"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (for core crunch)",
+        "Fuzz pedal (for added grit/texture)",
+        "British-style amp simulation (Marshall/Vox family)"
+      ],
+      "avoid": [
+        "Deep scooped mids",
+        "High gain metal saturation",
+        "Clean ambient delay effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry British hard-rock crunch with bright upper mids",
+      "mustHave": [
+        "mid-forward crunch",
+        "bright bite",
+        "tight punch",
+        "slight grit"
+      ],
+      "avoid": [
+        "fuzz-wash",
+        "scooped mids",
+        "metal gain",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "bridge humbucker",
+        "light OD"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "lean more Marshall than Vox",
+        "keep it dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry British hard-rock crunch with bright upper mids",
+    "mustHave": [
+      "mid-forward crunch",
+      "bright bite",
+      "tight punch",
+      "slight grit"
+    ],
+    "avoid": [
+      "fuzz-wash",
+      "scooped mids",
+      "metal gain",
+      "ambient delay"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12",
+      "bridge humbucker",
+      "light OD"
+    ],
+    "corrections": [
+      "drop fuzz edge",
+      "lean more Marshall than Vox",
+      "keep it dry"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Marshall/Plexi) with mid-forward crunch and brightness.",
+          "bestMatchSummary": "A tight, crunchy signal chain utilizing a light OD boost into a UK 45 or UK 50 style amp, paired with the UK Vintage 4x12 cabinet for bright British hard rock tones.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and mid-forward crunch (Plexi/Marshall style).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more American tone, but still suitable for light grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on the OD boost for crunch.",
+              "matchQuality": "perfect",
+              "gap": "The Green OD handles the necessary grit; no dedicated distortion is needed to avoid 'metal gain'.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 is often cited for the classic hard rock bite."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British hard rock cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Midrange": "+4 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the mid-forward crunch and bright bite as requested.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and focused on crunch; Chorus is unnecessary.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid ambient delay to maintain tightness and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add subtle depth without sounding ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "A very slight touch of Room reverb is acceptable, but keep the mix low to maintain dryness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work for a subtle room feel."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track, requiring the use of high-gain British amp simulations (UK 45/UK 50) combined with light overdrive to achieve the desired 'crunch' without excessive fuzz or modern metal gain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and bite.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance classic British hard rock punch and upper mids.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rainbow - Long Live Rock N Roll - Valeton GP-180",
+        "song": {
+          "artist": "Rainbow",
+          "title": "Long Live Rock N Roll",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry British hard-rock crunch with bright upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, crunchy signal chain utilizing a light OD boost into a UK 45 or UK 50 style amp, paired with the UK Vintage 4x12 cabinet for bright British hard rock tones.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light grit and mid-forward crunch (Plexi/Marshall style).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more American tone, but still suitable for light grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain clean and focused on the OD boost for crunch.",
+            "matchQuality": "perfect",
+            "gap": "The Green OD handles the necessary grit; no dedicated distortion is needed to avoid 'metal gain'.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%",
+              "Midrange": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also suitable, but UK 45 is often cited for the classic hard rock bite."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British hard rock cabinet tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-3 dB",
+              "Midrange": "+4 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the mid-forward crunch and bright bite as requested.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone dry and focused on crunch; Chorus is unnecessary.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid ambient delay to maintain tightness and punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add subtle depth without sounding ambient or muddy.",
+            "matchQuality": "close",
+            "gap": "A very slight touch of Room reverb is acceptable, but keep the mix low to maintain dryness.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could also work for a subtle room feel."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry British hard-rock crunch with bright upper mids",
+          "toneProfile": "dry British hard-rock crunch with bright upper mids",
+          "idealSignalChain": "Marshall/Plexi | 4x12 | bridge humbucker | light OD",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward crunch",
+            "bright bite",
+            "tight punch",
+            "slight grit"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Marshall/Plexi) with mid-forward crunch and brightness.",
+          "bestMatchSummary": "A tight, crunchy signal chain utilizing a light OD boost into a UK 45 or UK 50 style amp, paired with the UK Vintage 4x12 cabinet for bright British hard rock tones.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and mid-forward crunch (Plexi/Marshall style).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more American tone, but still suitable for light grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain clean and focused on the OD boost for crunch.",
+              "matchQuality": "perfect",
+              "gap": "The Green OD handles the necessary grit; no dedicated distortion is needed to avoid 'metal gain'.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 is often cited for the classic hard rock bite."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British hard rock cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Midrange": "+4 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the mid-forward crunch and bright bite as requested.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and focused on crunch; Chorus is unnecessary.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid ambient delay to maintain tightness and punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add subtle depth without sounding ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "A very slight touch of Room reverb is acceptable, but keep the mix low to maintain dryness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could also work for a subtle room feel."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and bite.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance classic British hard rock punch and upper mids.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite/punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz edge",
+          "lean more Marshall than Vox",
+          "keep it dry"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track, requiring the use of high-gain British amp simulations (UK 45/UK 50) combined with light overdrive to achieve the desired 'crunch' without excessive fuzz or modern metal gain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.757,
+      "prompt_chars": 997,
+      "response_chars": 506,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 124,
+        "total_duration": 10753958000,
+        "prompt_eval_duration": 354581000,
+        "eval_duration": 2351483000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.89,
+      "prompt_chars": 5437,
+      "response_chars": 461,
+      "usage": {
+        "input_tokens": 1509,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 128,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1637
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 40.698,
+      "prompt_chars": 3538,
+      "response_chars": 5248,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1505,
+        "total_duration": 40670995200,
+        "prompt_eval_duration": 265043999,
+        "eval_duration": 27324557000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.821,
+      "prompt_chars": 7333,
+      "response_chars": 448,
+      "usage": {
+        "prompt_eval_count": 2065,
+        "eval_count": 124,
+        "total_duration": 4791829700,
+        "prompt_eval_duration": 329295000,
+        "eval_duration": 4041155000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.23,
+      "prompt_chars": 2789,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 889,
+        "eval_count": 46,
+        "total_duration": 19210017900,
+        "prompt_eval_duration": 385209000,
+        "eval_duration": 823285000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rainbow",
+      "title": "Long Live Rock N Roll",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Rainbow - Long Live Rock N Roll - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry British hard-rock crunch with bright upper mids",
+      "signalChainSummary": "A tight, crunchy signal chain utilizing a light OD boost into a UK 45 or UK 50 style amp, paired with the UK Vintage 4x12 cabinet for bright British hard rock tones.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light grit and mid-forward crunch (Plexi/Marshall style).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more American tone, but still suitable for light grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain clean and focused on the OD boost for crunch.",
+          "matchQuality": "exact",
+          "gap": "The Green OD handles the necessary grit; no dedicated distortion is needed to avoid 'metal gain'.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%",
+            "Midrange": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also suitable, but UK 45 is often cited for the classic hard rock bite."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British hard rock cabinet tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-3 dB",
+            "Midrange": "+4 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the mid-forward crunch and bright bite as requested.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone dry and focused on crunch; Chorus is unnecessary.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid ambient delay to maintain tightness and punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add subtle depth without sounding ambient or muddy.",
+          "matchQuality": "close",
+          "gap": "A very slight touch of Room reverb is acceptable, but keep the mix low to maintain dryness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could also work for a subtle room feel."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry British hard-rock crunch with bright upper mids",
+      "mustHave": [
+        "mid-forward crunch",
+        "bright bite",
+        "tight punch",
+        "slight grit"
+      ],
+      "avoid": [
+        "fuzz-wash",
+        "scooped mids",
+        "metal gain",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "bridge humbucker",
+        "light OD"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "lean more Marshall than Vox",
+        "keep it dry"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "dry British hard-rock crunch with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and bite.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Brit)",
+          "reason": "Enhance classic British hard rock punch and upper mids.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased bite/punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1163,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

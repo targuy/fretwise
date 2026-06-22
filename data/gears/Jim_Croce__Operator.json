@@ -1,0 +1,1079 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 683,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Jim_Croce__Operator.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Jim Croce",
+    "title": "Operator",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Jim Croce is a classic singer-songwriter known for intimate, acoustic folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, acoustic-electric fingerpicking tone with subtle vintage grit.",
+      "signatureElements": [
+        "clean",
+        "subtle reverb",
+        "fingerpicking arpeggios",
+        "warm compression"
+      ],
+      "gearHypotheses": [
+        "Acoustic/Electric Guitar Model",
+        "Clean Amp Simulation (e.g., Fender Twin)",
+        "Light Chorus or Tremolo for texture"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Fuzz",
+        "Wah pedal effects",
+        "Overly bright high end"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm steel-string acoustic-folk fingerpicking with intimate room",
+      "mustHave": [
+        "clean acoustic pick attack",
+        "fingerpicked arpeggios",
+        "warm low mids",
+        "small room ambience"
+      ],
+      "avoid": [
+        "electric amp tone",
+        "chorus",
+        "tremolo",
+        "heavy distortion",
+        "bright sheen"
+      ],
+      "gearClues": [
+        "acoustic sim or piezo DI",
+        "steel-string acoustic",
+        "light compression",
+        "short room reverb"
+      ],
+      "corrections": [
+        "drop electric amp sim",
+        "remove chorus/tremolo",
+        "keep it mostly dry and intimate"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm steel-string acoustic-folk fingerpicking with intimate room",
+    "mustHave": [
+      "clean acoustic pick attack",
+      "fingerpicked arpeggios",
+      "warm low mids",
+      "small room ambience"
+    ],
+    "avoid": [
+      "electric amp tone",
+      "chorus",
+      "tremolo",
+      "heavy distortion",
+      "bright sheen"
+    ],
+    "gearClues": [
+      "acoustic sim or piezo DI",
+      "steel-string acoustic",
+      "light compression",
+      "short room reverb"
+    ],
+    "corrections": [
+      "drop electric amp sim",
+      "remove chorus/tremolo",
+      "keep it mostly dry and intimate"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Imitation: Focus on clean, warm tones and intimate room ambiance.",
+          "bestMatchSummary": "The chain uses light compression (Comp) for pick attack definition, followed by a clean preamp (US Deluxe or Silver Twin) to simulate the warmth of acoustic pickups. A small-voiced amp (UK 50/US Deluxe) with a vintage cab is paired with minimal reverb and EQ shaping to achieve an intimate, warm folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick clicks.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the pick attack and sustain for fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/tone",
+              "module": "PRE",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Provide a warm, clean, and non-aggressive tone suitable for folk music.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over the Silver Twin for its slightly warmer character, mimicking vintage acoustic pickups.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also clean and warm, but US Deluxe offers better mid-range focus."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion needed for acoustic folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "4",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide a small, articulate, and non-overpowering clean tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for intimate settings, avoiding the massive sound of larger amps.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Could be used as an amp model if PRE was bypassed, but using it here provides a more defined tube character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Select a small, focused cabinet sound that complements the intimate acoustic feel.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides a good balance of clarity and warmth without sounding too large or aggressive.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Might be too bright for the desired warm, vintage sound."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Midrange Cut": "-1 dB",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Warm up the tone by slightly boosting low-mids and rolling off harsh high frequencies.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for shaping acoustic warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle, intimate room ambience without sounding artificial or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None. Required for the 'intimate room' feel.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and metallic for a warm folk setting."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No noticeable delay needed for the arpeggiated style.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk, requiring an electric guitar rig to imitate the sound. The tone focuses on warmth and intimacy rather than raw power.",
+          "Due to the nature of the genre (fingerpicking), compression and subtle room reverb are prioritized over aggressive effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic US 2x12 IR with a specific, warm acoustic cabinet simulation to better capture the vintage, intimate sound of steel-string fingerpicking.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Vintage Small Cab IR (e.g., Parlor or Vintage 2x12)",
+              "reason": "The US 2x12 is too generic; a specialized acoustic cab will enhance the warm, vintage folk tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased warmth and realism in low-mids/highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Jim Croce - Operator - Valeton GP-180",
+        "song": {
+          "artist": "Jim Croce",
+          "title": "Operator",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm steel-string acoustic-folk fingerpicking with intimate room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "The chain uses light compression (Comp) for pick attack definition, followed by a clean preamp (US Deluxe or Silver Twin) to simulate the warmth of acoustic pickups. A small-voiced amp (UK 50/US Deluxe) with a vintage cab is paired with minimal reverb and EQ shaping to achieve an intimate, warm folk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and pick clicks.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Enhance the pick attack and sustain for fingerpicking.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for acoustic tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/tone",
+            "module": "PRE",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "5",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Provide a warm, clean, and non-aggressive tone suitable for folk music.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen over the Silver Twin for its slightly warmer character, mimicking vintage acoustic pickups.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also clean and warm, but US Deluxe offers better mid-range focus."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No distortion needed for acoustic folk tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "4",
+              "Midrange": "5",
+              "Bass": "4"
+            },
+            "purpose": "Provide a small, articulate, and non-overpowering clean tone.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is ideal for intimate settings, avoiding the massive sound of larger amps.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "Could be used as an amp model if PRE was bypassed, but using it here provides a more defined tube character."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Select a small, focused cabinet sound that complements the intimate acoustic feel.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 provides a good balance of clarity and warmth without sounding too large or aggressive.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "Might be too bright for the desired warm, vintage sound."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Midrange Cut": "-1 dB",
+              "Treble Cut": "-2 dB"
+            },
+            "purpose": "Warm up the tone by slightly boosting low-mids and rolling off harsh high frequencies.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for shaping acoustic warmth.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a subtle, intimate room ambience without sounding artificial or distracting.",
+            "matchQuality": "perfect",
+            "gap": "None. Required for the 'intimate room' feel.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too bright and metallic for a warm folk setting."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No noticeable delay needed for the arpeggiated style.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm steel-string acoustic-folk fingerpicking with intimate room",
+          "toneProfile": "warm steel-string acoustic-folk fingerpicking with intimate room",
+          "idealSignalChain": "acoustic sim or piezo DI | steel-string acoustic | light compression | short room reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic sim or piezo DI",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "steel-string acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short room reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean acoustic pick attack",
+            "fingerpicked arpeggios",
+            "warm low mids",
+            "small room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Imitation: Focus on clean, warm tones and intimate room ambiance.",
+          "bestMatchSummary": "The chain uses light compression (Comp) for pick attack definition, followed by a clean preamp (US Deluxe or Silver Twin) to simulate the warmth of acoustic pickups. A small-voiced amp (UK 50/US Deluxe) with a vintage cab is paired with minimal reverb and EQ shaping to achieve an intimate, warm folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick clicks.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the pick attack and sustain for fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for acoustic tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/tone",
+              "module": "PRE",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Provide a warm, clean, and non-aggressive tone suitable for folk music.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over the Silver Twin for its slightly warmer character, mimicking vintage acoustic pickups.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also clean and warm, but US Deluxe offers better mid-range focus."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion needed for acoustic folk tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "4",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide a small, articulate, and non-overpowering clean tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for intimate settings, avoiding the massive sound of larger amps.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Could be used as an amp model if PRE was bypassed, but using it here provides a more defined tube character."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Select a small, focused cabinet sound that complements the intimate acoustic feel.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides a good balance of clarity and warmth without sounding too large or aggressive.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Might be too bright for the desired warm, vintage sound."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Midrange Cut": "-1 dB",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Warm up the tone by slightly boosting low-mids and rolling off harsh high frequencies.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for shaping acoustic warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a subtle, intimate room ambience without sounding artificial or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None. Required for the 'intimate room' feel.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and metallic for a warm folk setting."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No noticeable delay needed for the arpeggiated style.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic US 2x12 IR with a specific, warm acoustic cabinet simulation to better capture the vintage, intimate sound of steel-string fingerpicking.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Vintage Small Cab IR (e.g., Parlor or Vintage 2x12)",
+              "reason": "The US 2x12 is too generic; a specialized acoustic cab will enhance the warm, vintage folk tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased warmth and realism in low-mids/highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop electric amp sim",
+          "remove chorus/tremolo",
+          "keep it mostly dry and intimate"
+        ],
+        "warnings": [
+          "The source material is acoustic folk, requiring an electric guitar rig to imitate the sound. The tone focuses on warmth and intimacy rather than raw power.",
+          "Due to the nature of the genre (fingerpicking), compression and subtle room reverb are prioritized over aggressive effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.746,
+      "prompt_chars": 986,
+      "response_chars": 427,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 108,
+        "total_duration": 11725186200,
+        "prompt_eval_duration": 268634000,
+        "eval_duration": 2056089000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.678,
+      "prompt_chars": 5353,
+      "response_chars": 578,
+      "usage": {
+        "input_tokens": 1494,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 145,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1639
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 30.253,
+      "prompt_chars": 3651,
+      "response_chars": 5806,
+      "usage": {
+        "prompt_eval_count": 1214,
+        "eval_count": 1613,
+        "total_duration": 30250302300,
+        "prompt_eval_duration": 240455000,
+        "eval_duration": 29495001000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 6.426,
+      "prompt_chars": 8000,
+      "response_chars": 688,
+      "usage": {
+        "prompt_eval_count": 2184,
+        "eval_count": 190,
+        "total_duration": 6419433600,
+        "prompt_eval_duration": 391817000,
+        "eval_duration": 5419334000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.224,
+      "prompt_chars": 2952,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 915,
+        "eval_count": 47,
+        "total_duration": 9205280700,
+        "prompt_eval_duration": 397022000,
+        "eval_duration": 702955000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Jim Croce",
+      "title": "Operator",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Jim Croce - Operator - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm steel-string acoustic-folk fingerpicking with intimate room",
+      "signalChainSummary": "The chain uses light compression (Comp) for pick attack definition, followed by a clean preamp (US Deluxe or Silver Twin) to simulate the warmth of acoustic pickups. A small-voiced amp (UK 50/US Deluxe) with a vintage cab is paired with minimal reverb and EQ shaping to achieve an intimate, warm folk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and pick clicks.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Enhance the pick attack and sustain for fingerpicking.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for acoustic tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/tone",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "5",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Provide a warm, clean, and non-aggressive tone suitable for folk music.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen over the Silver Twin for its slightly warmer character, mimicking vintage acoustic pickups.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also clean and warm, but US Deluxe offers better mid-range focus."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No distortion needed for acoustic folk tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "4",
+            "Midrange": "5",
+            "Bass": "4"
+          },
+          "purpose": "Provide a small, articulate, and non-overpowering clean tone.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is ideal for intimate settings, avoiding the massive sound of larger amps.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "Could be used as an amp model if PRE was bypassed, but using it here provides a more defined tube character."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Select a small, focused cabinet sound that complements the intimate acoustic feel.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 provides a good balance of clarity and warmth without sounding too large or aggressive.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "Might be too bright for the desired warm, vintage sound."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Midrange Cut": "-1 dB",
+            "Treble Cut": "-2 dB"
+          },
+          "purpose": "Warm up the tone by slightly boosting low-mids and rolling off harsh high frequencies.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for shaping acoustic warmth.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a subtle, intimate room ambience without sounding artificial or distracting.",
+          "matchQuality": "exact",
+          "gap": "None. Required for the 'intimate room' feel.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too bright and metallic for a warm folk setting."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No noticeable delay needed for the arpeggiated style.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm steel-string acoustic-folk fingerpicking with intimate room",
+      "mustHave": [
+        "clean acoustic pick attack",
+        "fingerpicked arpeggios",
+        "warm low mids",
+        "small room ambience"
+      ],
+      "avoid": [
+        "electric amp tone",
+        "chorus",
+        "tremolo",
+        "heavy distortion",
+        "bright sheen"
+      ],
+      "gearClues": [
+        "acoustic sim or piezo DI",
+        "steel-string acoustic",
+        "light compression",
+        "short room reverb"
+      ],
+      "corrections": [
+        "drop electric amp sim",
+        "remove chorus/tremolo",
+        "keep it mostly dry and intimate"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "singer-songwriter"
+      ],
+      "targetTone": "warm steel-string acoustic-folk fingerpicking with intimate room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic US 2x12 IR with a specific, warm acoustic cabinet simulation to better capture the vintage, intimate sound of steel-string fingerpicking.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Acoustic/Vintage Small Cab IR (e.g., Parlor or Vintage 2x12)",
+          "reason": "The US 2x12 is too generic; a specialized acoustic cab will enhance the warm, vintage folk tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased warmth and realism in low-mids/highs.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 683,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

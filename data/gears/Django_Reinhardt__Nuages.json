@@ -1,0 +1,1090 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 364,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Django_Reinhardt__Nuages.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Django Reinhardt",
+    "title": "Nuages",
+    "album": "",
+    "year": null,
+    "genre": "jazz"
+  },
+  "genreClassification": {
+    "genre": "jazz",
+    "subgenres": [
+      "gypsy jazz",
+      "swing",
+      "jazz manouche"
+    ],
+    "confidence": "high",
+    "rationale": "Django Reinhardt is a foundational figure in gypsy jazz, which falls under the broader genre of jazz."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, woody acoustic jazz tone with subtle overtones and warmth.",
+      "signatureElements": [
+        "fingerpicking complexity",
+        "jazz improvisation",
+        "acoustic/archtop sound",
+        "subtle reverb"
+      ],
+      "gearHypotheses": [
+        "clean archtop simulation",
+        "vintage tube amp model (e.g., Fender or Vox)",
+        "EQ for woody resonance"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "fuzz",
+        "crunch",
+        "high gain"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm gypsy-jazz archtop lead with dry natural room",
+      "mustHave": [
+        "single-note lyrical lead",
+        "warm woody attack",
+        "clear acoustic-like pick transient",
+        "dry, intimate ambiance"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "fuzz",
+        "crunch",
+        "bright modern clean",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "humbucker or neck pickup",
+        "archtop",
+        "clean tube amp",
+        "small room"
+      ],
+      "corrections": [
+        "Use archtop lead, not acoustic guitar",
+        "Reduce reverb to near-dry",
+        "Keep tone warm, rounded, and direct"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm gypsy-jazz archtop lead with dry natural room",
+    "mustHave": [
+      "single-note lyrical lead",
+      "warm woody attack",
+      "clear acoustic-like pick transient",
+      "dry, intimate ambiance"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "fuzz",
+      "crunch",
+      "bright modern clean",
+      "lush reverb"
+    ],
+    "gearClues": [
+      "humbucker or neck pickup",
+      "archtop",
+      "clean tube amp",
+      "small room"
+    ],
+    "corrections": [
+      "Use archtop lead, not acoustic guitar",
+      "Reduce reverb to near-dry",
+      "Keep tone warm, rounded, and direct"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, vintage clean tones and natural room ambiance.",
+          "bestMatchSummary": "A classic jazz setup using a gentle boost for warmth, followed by a low-gain tube amp simulation (US Deluxe) paired with a small cabinet (US 2x12), finished with minimal chorus and dry Room reverb to capture the intimate archtop sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for single-note lines.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean jazz tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Jazz",
+                "Level": "4"
+              },
+              "purpose": "Provide gentle harmonic lift and warmth to emulate the woody attack of an archtop.",
+              "matchQuality": "close",
+              "gap": "No dedicated 'jazz' or 'archtop' boost. Using general Boost for subtle tone shaping.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also add sustain and roundness, but Boost is better for pure tonal warmth."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and natural, avoiding any grit or crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires pure clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a classic clean tube amp suitable for jazz and warm tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for vintage, non-aggressive clean sounds. Settings are dialed back to prevent modern brightness.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable, but US Deluxe often provides a slightly warmer core tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, intimate sound suitable for single-note lead work.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most compact and versatile choice for this delicate tone.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "A good alternative, but US 2x12 generally offers a more neutral jazz voicing."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+1",
+                "Treble": "-1"
+              },
+              "purpose": "Slightly scoop the high end and boost mids to enhance the woody, round archtop tone.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to achieve the specific 'woody' character required for jazz.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "15%",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and dimension without sounding lush or distracting.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly to add a gentle, vintage shimmer, avoiding the 'lush' sound that was explicitly avoided.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "Too aggressive for this lyrical jazz style."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a dry, intimate room ambiance without sounding like a large hall.",
+              "matchQuality": "close",
+              "gap": "The 'dry' requirement necessitates careful setting of the Room reverb mix to keep it subtle and natural.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too metallic or artificial for this warm jazz tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is jazz/archtop, requiring a highly specific clean tone that deviates from typical rock rig recommendations. The settings prioritize warmth and natural decay over power or grit."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for better woody archtop resonance.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage jazz/archtop IR",
+              "reason": "Enhance the specific warm, woody resonance of an archtop guitar in a small room setting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved realism and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Django Reinhardt - Nuages - Valeton GP-180",
+        "song": {
+          "artist": "Django Reinhardt",
+          "title": "Nuages",
+          "album": "",
+          "year": null,
+          "genre": "jazz"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm gypsy-jazz archtop lead with dry natural room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic jazz setup using a gentle boost for warmth, followed by a low-gain tube amp simulation (US Deluxe) paired with a small cabinet (US 2x12), finished with minimal chorus and dry Room reverb to capture the intimate archtop sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain clarity for single-note lines.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean jazz tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tone shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Jazz",
+              "Level": "4"
+            },
+            "purpose": "Provide gentle harmonic lift and warmth to emulate the woody attack of an archtop.",
+            "matchQuality": "close",
+            "gap": "No dedicated 'jazz' or 'archtop' boost. Using general Boost for subtle tone shaping.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "Compression could also add sustain and roundness, but Boost is better for pure tonal warmth."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone completely clean and natural, avoiding any grit or crunch.",
+            "matchQuality": "exact",
+            "gap": "N/A. The target requires pure clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "5",
+              "Midrange": "6",
+              "Bass": "4"
+            },
+            "purpose": "Simulate a classic clean tube amp suitable for jazz and warm tones.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best fit for vintage, non-aggressive clean sounds. Settings are dialed back to prevent modern brightness.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also suitable, but US Deluxe often provides a slightly warmer core tone."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, intimate sound suitable for single-note lead work.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is the most compact and versatile choice for this delicate tone.",
+            "alternatives": [
+              {
+                "model": "Foxy 2x12",
+                "reason": "A good alternative, but US 2x12 generally offers a more neutral jazz voicing."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+1",
+              "Treble": "-1"
+            },
+            "purpose": "Slightly scoop the high end and boost mids to enhance the woody, round archtop tone.",
+            "matchQuality": "close",
+            "gap": "Manual EQ adjustment is necessary to achieve the specific 'woody' character required for jazz.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/vibrato",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "15%",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle movement and dimension without sounding lush or distracting.",
+            "matchQuality": "close",
+            "gap": "Chorus is used sparingly to add a gentle, vintage shimmer, avoiding the 'lush' sound that was explicitly avoided.",
+            "alternatives": [
+              {
+                "model": "Tremolo",
+                "reason": "Too aggressive for this lyrical jazz style."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a dry, intimate room ambiance without sounding like a large hall.",
+            "matchQuality": "close",
+            "gap": "The 'dry' requirement necessitates careful setting of the Room reverb mix to keep it subtle and natural.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too metallic or artificial for this warm jazz tone."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm gypsy-jazz archtop lead with dry natural room",
+          "toneProfile": "warm gypsy-jazz archtop lead with dry natural room",
+          "idealSignalChain": "humbucker or neck pickup | archtop | clean tube amp | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker or neck pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "archtop",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean tube amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "single-note lyrical lead",
+            "warm woody attack",
+            "clear acoustic-like pick transient",
+            "dry, intimate ambiance"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, vintage clean tones and natural room ambiance.",
+          "bestMatchSummary": "A classic jazz setup using a gentle boost for warmth, followed by a low-gain tube amp simulation (US Deluxe) paired with a small cabinet (US 2x12), finished with minimal chorus and dry Room reverb to capture the intimate archtop sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for single-note lines.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean jazz tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tone shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Jazz",
+                "Level": "4"
+              },
+              "purpose": "Provide gentle harmonic lift and warmth to emulate the woody attack of an archtop.",
+              "matchQuality": "close",
+              "gap": "No dedicated 'jazz' or 'archtop' boost. Using general Boost for subtle tone shaping.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also add sustain and roundness, but Boost is better for pure tonal warmth."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone completely clean and natural, avoiding any grit or crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A. The target requires pure clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a classic clean tube amp suitable for jazz and warm tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for vintage, non-aggressive clean sounds. Settings are dialed back to prevent modern brightness.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable, but US Deluxe often provides a slightly warmer core tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, intimate sound suitable for single-note lead work.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most compact and versatile choice for this delicate tone.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "A good alternative, but US 2x12 generally offers a more neutral jazz voicing."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+1",
+                "Treble": "-1"
+              },
+              "purpose": "Slightly scoop the high end and boost mids to enhance the woody, round archtop tone.",
+              "matchQuality": "close",
+              "gap": "Manual EQ adjustment is necessary to achieve the specific 'woody' character required for jazz.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "15%",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and dimension without sounding lush or distracting.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly to add a gentle, vintage shimmer, avoiding the 'lush' sound that was explicitly avoided.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "Too aggressive for this lyrical jazz style."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a dry, intimate room ambiance without sounding like a large hall.",
+              "matchQuality": "close",
+              "gap": "The 'dry' requirement necessitates careful setting of the Room reverb mix to keep it subtle and natural.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too metallic or artificial for this warm jazz tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for better woody archtop resonance.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage jazz/archtop IR",
+              "reason": "Enhance the specific warm, woody resonance of an archtop guitar in a small room setting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved realism and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Use archtop lead, not acoustic guitar",
+          "Reduce reverb to near-dry",
+          "Keep tone warm, rounded, and direct"
+        ],
+        "warnings": [
+          "The source material is jazz/archtop, requiring a highly specific clean tone that deviates from typical rock rig recommendations. The settings prioritize warmth and natural decay over power or grit."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.495,
+      "prompt_chars": 991,
+      "response_chars": 406,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 100,
+        "total_duration": 12469099600,
+        "prompt_eval_duration": 126276000,
+        "eval_duration": 655183000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.766,
+      "prompt_chars": 5337,
+      "response_chars": 579,
+      "usage": {
+        "input_tokens": 1494,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 152,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1646
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.229,
+      "prompt_chars": 3657,
+      "response_chars": 5956,
+      "usage": {
+        "prompt_eval_count": 1221,
+        "eval_count": 1613,
+        "total_duration": 11221368500,
+        "prompt_eval_duration": 129645999,
+        "eval_duration": 10685687000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.554,
+      "prompt_chars": 8164,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 2191,
+        "eval_count": 138,
+        "total_duration": 1524310300,
+        "prompt_eval_duration": 194785000,
+        "eval_duration": 941294000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.212,
+      "prompt_chars": 2863,
+      "response_chars": 212,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 55,
+        "total_duration": 12186713100,
+        "prompt_eval_duration": 161719000,
+        "eval_duration": 361887000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Django Reinhardt",
+      "title": "Nuages",
+      "album": "",
+      "year": null,
+      "genre": "jazz"
+    },
+    "rig": {
+      "rigName": "Django Reinhardt - Nuages - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm gypsy-jazz archtop lead with dry natural room",
+      "signalChainSummary": "A classic jazz setup using a gentle boost for warmth, followed by a low-gain tube amp simulation (US Deluxe) paired with a small cabinet (US 2x12), finished with minimal chorus and dry Room reverb to capture the intimate archtop sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain clarity for single-note lines.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean jazz tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tone shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Jazz",
+            "Level": "4"
+          },
+          "purpose": "Provide gentle harmonic lift and warmth to emulate the woody attack of an archtop.",
+          "matchQuality": "close",
+          "gap": "No dedicated 'jazz' or 'archtop' boost. Using general Boost for subtle tone shaping.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Compression could also add sustain and roundness, but Boost is better for pure tonal warmth."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone completely clean and natural, avoiding any grit or crunch.",
+          "matchQuality": "exact",
+          "gap": "N/A. The target requires pure clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "5",
+            "Midrange": "6",
+            "Bass": "4"
+          },
+          "purpose": "Simulate a classic clean tube amp suitable for jazz and warm tones.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best fit for vintage, non-aggressive clean sounds. Settings are dialed back to prevent modern brightness.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable, but US Deluxe often provides a slightly warmer core tone."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, intimate sound suitable for single-note lead work.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is the most compact and versatile choice for this delicate tone.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": "A good alternative, but US 2x12 generally offers a more neutral jazz voicing."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+1",
+            "Treble": "-1"
+          },
+          "purpose": "Slightly scoop the high end and boost mids to enhance the woody, round archtop tone.",
+          "matchQuality": "close",
+          "gap": "Manual EQ adjustment is necessary to achieve the specific 'woody' character required for jazz.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/vibrato",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "15%",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle movement and dimension without sounding lush or distracting.",
+          "matchQuality": "close",
+          "gap": "Chorus is used sparingly to add a gentle, vintage shimmer, avoiding the 'lush' sound that was explicitly avoided.",
+          "alternatives": [
+            {
+              "model": "Tremolo",
+              "reason": "Too aggressive for this lyrical jazz style."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a dry, intimate room ambiance without sounding like a large hall.",
+          "matchQuality": "close",
+          "gap": "The 'dry' requirement necessitates careful setting of the Room reverb mix to keep it subtle and natural.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too metallic or artificial for this warm jazz tone."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm gypsy-jazz archtop lead with dry natural room",
+      "mustHave": [
+        "single-note lyrical lead",
+        "warm woody attack",
+        "clear acoustic-like pick transient",
+        "dry, intimate ambiance"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "fuzz",
+        "crunch",
+        "bright modern clean",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "humbucker or neck pickup",
+        "archtop",
+        "clean tube amp",
+        "small room"
+      ],
+      "corrections": [
+        "Use archtop lead, not acoustic guitar",
+        "Reduce reverb to near-dry",
+        "Keep tone warm, rounded, and direct"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "jazz",
+      "styleTags": [
+        "gypsy jazz",
+        "swing",
+        "jazz manouche"
+      ],
+      "targetTone": "warm gypsy-jazz archtop lead with dry natural room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for better woody archtop resonance.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage jazz/archtop IR",
+          "reason": "Enhance the specific warm, woody resonance of an archtop guitar in a small room setting.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved realism and depth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 364,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1130 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 57,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Anthrax__Caught_In_A_Mosh.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Anthrax",
+    "title": "Caught In A Mosh",
+    "album": "",
+    "year": null,
+    "genre": "thrash metal"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, aggressive crunch with a thick, saturated fuzz edge.",
+      "signatureElements": [
+        "High-mid focused attack (chugging rhythm)",
+        "Sustained, slightly scooped low end for punch",
+        "Aggressive palm muting articulation",
+        "Controlled harmonic distortion"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (for mid-hump and tightness)",
+        "Heavy fuzz/distortion pedal (for raw aggression)",
+        "British-style high-gain amp simulation (Marshall JCM family)"
+      ],
+      "avoid": [
+        "Thin, scooped metal tones",
+        "Clean arpeggios or delay effects",
+        "Excessive modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight thrash crunch with bright upper mids",
+      "mustHave": [
+        "fast palm-muted attack",
+        "dry rhythm",
+        "tight low end",
+        "aggressive pick bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "big reverb"
+      ],
+      "gearClues": [
+        "JCM-style amp",
+        "Tube Screamer boost",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "keep it more Marshall crunch than saturation",
+        "favor tight thrash bite over thick drive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight thrash crunch with bright upper mids",
+    "mustHave": [
+      "fast palm-muted attack",
+      "dry rhythm",
+      "tight low end",
+      "aggressive pick bite"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "flanger",
+      "big reverb"
+    ],
+    "gearClues": [
+      "JCM-style amp",
+      "Tube Screamer boost",
+      "4x12 cab",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop fuzz edge",
+      "keep it more Marshall crunch than saturation",
+      "favor tight thrash bite over thick drive"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, aggressive British crunch tones suitable for thrash metal.",
+          "bestMatchSummary": "A high-gain signal chain utilizing a Tube Screamer boost into a Marshall-style amp (UK 45/UK 50) paired with a classic 4x12 cabinet to achieve bright, punchy, and tight rhythm crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and unwanted noise inherent in high-gain thrash playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer boost for aggressive pick attack and tightening the low end.",
+              "matchQuality": "close",
+              "gap": "The dedicated TS model is absent, so 'Boost' is used to emulate its mid-hump and drive function.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If a specific OD pedal was required."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary high-gain crunch and aggressive bite required for thrash metal.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is used to achieve a tight, punchy gain structure rather than thick saturation.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could also provide aggressive bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall crunch tone (JCM-style) with bright upper mids and punchy attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly different Marshall voicing, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punch for rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the tone by tightening the low end and emphasizing bright upper mids for maximum bite.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.5 Hz",
+                "Depth": "2",
+                "Mix": "1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to avoid unwanted wash or thinning of the aggressive rhythm tone.",
+              "matchQuality": "far",
+              "gap": "The target explicitly avoids chorus, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to maintain maximum dryness and tightness for thrash rhythm.",
+              "matchQuality": "far",
+              "gap": "The target requires dry rhythm, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {
+                "Decay Time": "1.5 s",
+                "Mix": "0.1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to ensure the tone remains extremely tight and dry.",
+              "matchQuality": "far",
+              "gap": "The target avoids big reverb, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The signal chain is optimized for aggressive, tight rhythm playing. If lead lines are required, the gain stages (Distortion/Boost) should be bypassed or significantly reduced."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic IR for a specific British 4x12 to enhance punch and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the tight, aggressive British crunch tone and definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and clarity in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Anthrax - Caught In A Mosh - Valeton GP-180",
+        "song": {
+          "artist": "Anthrax",
+          "title": "Caught In A Mosh",
+          "album": "",
+          "year": null,
+          "genre": "thrash metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight thrash crunch with bright upper mids",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A high-gain signal chain utilizing a Tube Screamer boost into a Marshall-style amp (UK 45/UK 50) paired with a classic 4x12 cabinet to achieve bright, punchy, and tight rhythm crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Eliminate hum and unwanted noise inherent in high-gain thrash playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Simulate the Tube Screamer boost for aggressive pick attack and tightening the low end.",
+            "matchQuality": "close",
+            "gap": "The dedicated TS model is absent, so 'Boost' is used to emulate its mid-hump and drive function.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "If a specific OD pedal was required."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "5.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary high-gain crunch and aggressive bite required for thrash metal.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is used to achieve a tight, punchy gain structure rather than thick saturation.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could also provide aggressive bite."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall crunch tone (JCM-style) with bright upper mids and punchy attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A slightly different Marshall voicing, but still suitable."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary punch for rhythm guitar.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "High Boost": "3 dB",
+              "Mid Scoop": "-2 dB"
+            },
+            "purpose": "Fine-tune the tone by tightening the low end and emphasizing bright upper mids for maximum bite.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0.5 Hz",
+              "Depth": "2",
+              "Mix": "1"
+            },
+            "purpose": "Included as a placeholder; kept inactive to avoid unwanted wash or thinning of the aggressive rhythm tone.",
+            "matchQuality": "far",
+            "gap": "The target explicitly avoids chorus, so this module is included but deactivated. No alternative needed.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "1"
+            },
+            "purpose": "Included as a placeholder; kept inactive to maintain maximum dryness and tightness for thrash rhythm.",
+            "matchQuality": "far",
+            "gap": "The target requires dry rhythm, so this module is included but deactivated. No alternative needed.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": false,
+            "settings": {
+              "Decay Time": "1.5 s",
+              "Mix": "0.1"
+            },
+            "purpose": "Included as a placeholder; kept inactive to ensure the tone remains extremely tight and dry.",
+            "matchQuality": "far",
+            "gap": "The target avoids big reverb, so this module is included but deactivated. No alternative needed.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight thrash crunch with bright upper mids",
+          "toneProfile": "tight thrash crunch with bright upper mids",
+          "idealSignalChain": "JCM-style amp | Tube Screamer boost | 4x12 cab | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "JCM-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fast palm-muted attack",
+            "dry rhythm",
+            "tight low end",
+            "aggressive pick bite"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, aggressive British crunch tones suitable for thrash metal.",
+          "bestMatchSummary": "A high-gain signal chain utilizing a Tube Screamer boost into a Marshall-style amp (UK 45/UK 50) paired with a classic 4x12 cabinet to achieve bright, punchy, and tight rhythm crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and unwanted noise inherent in high-gain thrash playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer boost for aggressive pick attack and tightening the low end.",
+              "matchQuality": "close",
+              "gap": "The dedicated TS model is absent, so 'Boost' is used to emulate its mid-hump and drive function.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If a specific OD pedal was required."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary high-gain crunch and aggressive bite required for thrash metal.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is used to achieve a tight, punchy gain structure rather than thick saturation.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could also provide aggressive bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall crunch tone (JCM-style) with bright upper mids and punchy attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly different Marshall voicing, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punch for rhythm guitar.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "High Boost": "3 dB",
+                "Mid Scoop": "-2 dB"
+              },
+              "purpose": "Fine-tune the tone by tightening the low end and emphasizing bright upper mids for maximum bite.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.5 Hz",
+                "Depth": "2",
+                "Mix": "1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to avoid unwanted wash or thinning of the aggressive rhythm tone.",
+              "matchQuality": "far",
+              "gap": "The target explicitly avoids chorus, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to maintain maximum dryness and tightness for thrash rhythm.",
+              "matchQuality": "far",
+              "gap": "The target requires dry rhythm, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {
+                "Decay Time": "1.5 s",
+                "Mix": "0.1"
+              },
+              "purpose": "Included as a placeholder; kept inactive to ensure the tone remains extremely tight and dry.",
+              "matchQuality": "far",
+              "gap": "The target avoids big reverb, so this module is included but deactivated. No alternative needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic IR for a specific British 4x12 to enhance punch and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the tight, aggressive British crunch tone and definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and clarity in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz edge",
+          "keep it more Marshall crunch than saturation",
+          "favor tight thrash bite over thick drive"
+        ],
+        "warnings": [
+          "The signal chain is optimized for aggressive, tight rhythm playing. If lead lines are required, the gain stages (Distortion/Boost) should be bypassed or significantly reduced."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.932,
+      "prompt_chars": 977,
+      "response_chars": 614,
+      "usage": {
+        "prompt_eval_count": 317,
+        "eval_count": 148,
+        "total_duration": 1908973900,
+        "prompt_eval_duration": 71137000,
+        "eval_duration": 1351999000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.166,
+      "prompt_chars": 5523,
+      "response_chars": 507,
+      "usage": {
+        "input_tokens": 1530,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 20.642,
+      "prompt_chars": 3509,
+      "response_chars": 6050,
+      "usage": {
+        "prompt_eval_count": 1177,
+        "eval_count": 1684,
+        "total_duration": 20614837400,
+        "prompt_eval_duration": 323453000,
+        "eval_duration": 19827206000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.475,
+      "prompt_chars": 8185,
+      "response_chars": 594,
+      "usage": {
+        "prompt_eval_count": 2246,
+        "eval_count": 164,
+        "total_duration": 2469033400,
+        "prompt_eval_duration": 220830000,
+        "eval_duration": 1881769000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.892,
+      "prompt_chars": 2881,
+      "response_chars": 200,
+      "usage": {
+        "prompt_eval_count": 910,
+        "eval_count": 51,
+        "total_duration": 865073300,
+        "prompt_eval_duration": 109842000,
+        "eval_duration": 382741000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Anthrax",
+      "title": "Caught In A Mosh",
+      "album": "",
+      "year": null,
+      "genre": "thrash metal"
+    },
+    "rig": {
+      "rigName": "Anthrax - Caught In A Mosh - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight thrash crunch with bright upper mids",
+      "signalChainSummary": "A high-gain signal chain utilizing a Tube Screamer boost into a Marshall-style amp (UK 45/UK 50) paired with a classic 4x12 cabinet to achieve bright, punchy, and tight rhythm crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Eliminate hum and unwanted noise inherent in high-gain thrash playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Simulate the Tube Screamer boost for aggressive pick attack and tightening the low end.",
+          "matchQuality": "close",
+          "gap": "The dedicated TS model is absent, so 'Boost' is used to emulate its mid-hump and drive function.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If a specific OD pedal was required."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "5.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary high-gain crunch and aggressive bite required for thrash metal.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is used to achieve a tight, punchy gain structure rather than thick saturation.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could also provide aggressive bite."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall crunch tone (JCM-style) with bright upper mids and punchy attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A slightly different Marshall voicing, but still suitable."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary punch for rhythm guitar.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "High Boost": "3 dB",
+            "Mid Scoop": "-2 dB"
+          },
+          "purpose": "Fine-tune the tone by tightening the low end and emphasizing bright upper mids for maximum bite.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0.5 Hz",
+            "Depth": "2",
+            "Mix": "1"
+          },
+          "purpose": "Included as a placeholder; kept inactive to avoid unwanted wash or thinning of the aggressive rhythm tone.",
+          "matchQuality": "fallback",
+          "gap": "The target explicitly avoids chorus, so this module is included but deactivated. No alternative needed.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "1"
+          },
+          "purpose": "Included as a placeholder; kept inactive to maintain maximum dryness and tightness for thrash rhythm.",
+          "matchQuality": "fallback",
+          "gap": "The target requires dry rhythm, so this module is included but deactivated. No alternative needed.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": false,
+          "settings": {
+            "Decay Time": "1.5 s",
+            "Mix": "0.1"
+          },
+          "purpose": "Included as a placeholder; kept inactive to ensure the tone remains extremely tight and dry.",
+          "matchQuality": "fallback",
+          "gap": "The target avoids big reverb, so this module is included but deactivated. No alternative needed.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight thrash crunch with bright upper mids",
+      "mustHave": [
+        "fast palm-muted attack",
+        "dry rhythm",
+        "tight low end",
+        "aggressive pick bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "big reverb"
+      ],
+      "gearClues": [
+        "JCM-style amp",
+        "Tube Screamer boost",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "keep it more Marshall crunch than saturation",
+        "favor tight thrash bite over thick drive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "thrash metal",
+      "styleTags": [
+        "heavy metal",
+        "punk influence"
+      ],
+      "targetTone": "tight thrash crunch with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the generic IR for a specific British 4x12 to enhance punch and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the tight, aggressive British crunch tone and definition.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased punch and clarity in the low mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 57,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "thrash metal",
+    "subgenres": [
+      "heavy metal",
+      "punk influence"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of thrash metal, matching the specified tight crunch tone."
+  }
+}

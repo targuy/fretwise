@@ -1,0 +1,1104 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 521,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Georges_Brassens__Chanson_Pour_L_auvergnat.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Georges Brassens",
+    "title": "Chanson Pour L'auvergnat",
+    "album": "",
+    "year": null,
+    "genre": "chanson"
+  },
+  "genreClassification": {
+    "genre": "chanson",
+    "subgenres": [
+      "french folk",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Brassens is a foundational artist of French chanson, characterized by acoustic intimacy."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Acoustic/Fingerstyle Folk",
+      "signatureElements": [
+        "clean",
+        "fingerpicking",
+        "acoustic tone",
+        "subtle reverb"
+      ],
+      "gearHypotheses": [
+        "Clean acoustic modeling amp sim",
+        "EQ for warmth and body",
+        "Light delay (slapback)"
+      ],
+      "avoid": [
+        "Distortion",
+        "Fuzz",
+        "Crunch",
+        "Wah"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "dry French chanson guitar with intimate mic’d nylon/steel acoustic",
+      "mustHave": [
+        "fingerpicked acoustic",
+        "dry close mic",
+        "intimate room",
+        "soft low-mid body"
+      ],
+      "avoid": [
+        "electric crunch",
+        "fuzz",
+        "wah",
+        "big reverb"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "small condenser mic",
+        "light room"
+      ],
+      "corrections": [
+        "likely acoustic-led backing, not electric rig"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title/artist context is ambiguous for guitar target",
+      "draft is generic acoustic-folk and may miss specific chanson texture",
+      "instrument context may be acoustic accompaniment rather than electric rig"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "fingerpicked nylon-string acoustic chanson",
+    "mustHave": [
+      "acoustic guitar tone",
+      "dry intimate mic",
+      "fingerstyle clarity"
+    ],
+    "avoid": [
+      "electric amp sim",
+      "distortion",
+      "chorus",
+      "reverb"
+    ],
+    "gearClues": [
+      "nylon-string acoustic",
+      "close condenser mic",
+      "1950s French studio dry"
+    ],
+    "corrections": [
+      "not electric guitar rig target",
+      "acoustic instrument signature",
+      "GP-180 cannot model acoustic guitar authentically"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "fingerpicked nylon-string acoustic chanson",
+    "mustHave": [
+      "acoustic guitar tone",
+      "dry intimate mic",
+      "fingerstyle clarity"
+    ],
+    "avoid": [
+      "electric amp sim",
+      "distortion",
+      "chorus",
+      "reverb"
+    ],
+    "gearClues": [
+      "nylon-string acoustic",
+      "close condenser mic",
+      "1950s French studio dry"
+    ],
+    "corrections": [
+      "not electric guitar rig target",
+      "acoustic instrument signature",
+      "GP-180 cannot model acoustic guitar authentically"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar (Used as a proxy for acoustic tone)",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is purely acoustic/nylon-string, this rig focuses on maximizing clarity and intimacy using clean preamps and minimal effects, simulating a close mic'd sound.",
+          "bestMatchSummary": "A highly transparent signal chain utilizing a clean preamp (US Deluxe) with light compression and EQ to mimic the delicate, dry tone of fingerpicked nylon-string acoustic guitar recorded in a vintage studio setting.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-70 dB"
+              },
+              "purpose": "To eliminate ambient noise and maintain a clean signal floor.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for recording clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-15 dB"
+              },
+              "purpose": "To smooth out dynamics and enhance the consistent clarity required for fingerpicking.",
+              "matchQuality": "close",
+              "gap": "The ideal module would be a dedicated acoustic preamp, but Comp helps maintain consistency.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No drive or distortion is needed; the tone must remain pristine and acoustic.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Bass": "5"
+              },
+              "purpose": "To provide a clean, articulate, and vintage-sounding foundation suitable for intimate recordings.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the cleanest option available; however, it cannot replicate the specific resonance of nylon strings.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "To simulate a close-mic'd, focused sound characteristic of vintage studio recordings.",
+              "matchQuality": "close",
+              "gap": "The ideal IR would be a condenser mic placed in a small room setting (e.g., Neumann U47), not just an amp cabinet simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1.5 dB"
+              },
+              "purpose": "To enhance the fundamental frequencies and clarity of the nylon strings without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ would be better, but this helps shape the frequency response for maximum articulation.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Wah effects are inappropriate for the delicate and sustained nature of this genre.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Modulation effects (Chorus/Tremolo) would distract from the pure acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Delay is generally avoided in intimate chanson recordings unless used very subtly.",
+              "matchQuality": "close",
+              "gap": "If delay were needed, a short slapback would be preferred over digital echo.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "To add a subtle sense of space and intimacy without sounding like a large hall.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list specified avoiding reverb, but a minimal Room setting is used here to prevent the sound from being too dry/dead in an FRFR context.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is purely acoustic (nylon-string guitar). The GP-180 is an electric guitar simulator and cannot authentically replicate the specific resonance, attack, or timbre of a nylon-string acoustic instrument.",
+          "This rig uses clean tones and minimal effects to maximize clarity and intimacy, simulating a close condenser mic recording rather than a traditional amplified sound."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic cabinet simulation with an IR that mimics a vintage, dry studio microphone setup for maximum acoustic realism.",
+          "proposals": [
+            {
+              "priority": "P1",
+              "type": "IR",
+              "target": "Studio Microphone/Room Ambience",
+              "recommendedAsset": "Neumann U47 or similar condenser mic IR (dry room)",
+              "reason": "Acoustic chanson requires a vintage, dry, close-mic'd sound, not an amp cabinet.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and intimacy",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Georges Brassens - Chanson Pour L'auvergnat - Valeton GP-180",
+        "song": {
+          "artist": "Georges Brassens",
+          "title": "Chanson Pour L'auvergnat",
+          "album": "",
+          "year": null,
+          "genre": "chanson"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar (Used as a proxy for acoustic tone)",
+        "output": "FRFR / headphones",
+        "toneProfile": "fingerpicked nylon-string acoustic chanson",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly transparent signal chain utilizing a clean preamp (US Deluxe) with light compression and EQ to mimic the delicate, dry tone of fingerpicked nylon-string acoustic guitar recorded in a vintage studio setting.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-70 dB"
+            },
+            "purpose": "To eliminate ambient noise and maintain a clean signal floor.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for recording clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Threshold": "-15 dB"
+            },
+            "purpose": "To smooth out dynamics and enhance the consistent clarity required for fingerpicking.",
+            "matchQuality": "close",
+            "gap": "The ideal module would be a dedicated acoustic preamp, but Comp helps maintain consistency.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No drive or distortion is needed; the tone must remain pristine and acoustic.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "6",
+              "Bass": "5"
+            },
+            "purpose": "To provide a clean, articulate, and vintage-sounding foundation suitable for intimate recordings.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the cleanest option available; however, it cannot replicate the specific resonance of nylon strings.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "To simulate a close-mic'd, focused sound characteristic of vintage studio recordings.",
+            "matchQuality": "close",
+            "gap": "The ideal IR would be a condenser mic placed in a small room setting (e.g., Neumann U47), not just an amp cabinet simulation.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Mid Cut": "-1 dB",
+              "Treble Boost": "+1.5 dB"
+            },
+            "purpose": "To enhance the fundamental frequencies and clarity of the nylon strings without sounding artificial.",
+            "matchQuality": "close",
+            "gap": "A dedicated acoustic EQ would be better, but this helps shape the frequency response for maximum articulation.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Wah effects are inappropriate for the delicate and sustained nature of this genre.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Modulation effects (Chorus/Tremolo) would distract from the pure acoustic tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Delay is generally avoided in intimate chanson recordings unless used very subtly.",
+            "matchQuality": "close",
+            "gap": "If delay were needed, a short slapback would be preferred over digital echo.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "To add a subtle sense of space and intimacy without sounding like a large hall.",
+            "matchQuality": "close",
+            "gap": "The 'avoid' list specified avoiding reverb, but a minimal Room setting is used here to prevent the sound from being too dry/dead in an FRFR context.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "fingerpicked nylon-string acoustic chanson",
+          "toneProfile": "fingerpicked nylon-string acoustic chanson",
+          "idealSignalChain": "nylon-string acoustic | close condenser mic | 1950s French studio dry",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "nylon-string acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close condenser mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1950s French studio dry",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar tone",
+            "dry intimate mic",
+            "fingerstyle clarity"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar (Used as a proxy for acoustic tone)",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is purely acoustic/nylon-string, this rig focuses on maximizing clarity and intimacy using clean preamps and minimal effects, simulating a close mic'd sound.",
+          "bestMatchSummary": "A highly transparent signal chain utilizing a clean preamp (US Deluxe) with light compression and EQ to mimic the delicate, dry tone of fingerpicked nylon-string acoustic guitar recorded in a vintage studio setting.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-70 dB"
+              },
+              "purpose": "To eliminate ambient noise and maintain a clean signal floor.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for recording clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Threshold": "-15 dB"
+              },
+              "purpose": "To smooth out dynamics and enhance the consistent clarity required for fingerpicking.",
+              "matchQuality": "close",
+              "gap": "The ideal module would be a dedicated acoustic preamp, but Comp helps maintain consistency.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No drive or distortion is needed; the tone must remain pristine and acoustic.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Bass": "5"
+              },
+              "purpose": "To provide a clean, articulate, and vintage-sounding foundation suitable for intimate recordings.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the cleanest option available; however, it cannot replicate the specific resonance of nylon strings.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "To simulate a close-mic'd, focused sound characteristic of vintage studio recordings.",
+              "matchQuality": "close",
+              "gap": "The ideal IR would be a condenser mic placed in a small room setting (e.g., Neumann U47), not just an amp cabinet simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1.5 dB"
+              },
+              "purpose": "To enhance the fundamental frequencies and clarity of the nylon strings without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "A dedicated acoustic EQ would be better, but this helps shape the frequency response for maximum articulation.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Wah effects are inappropriate for the delicate and sustained nature of this genre.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Modulation effects (Chorus/Tremolo) would distract from the pure acoustic tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Delay is generally avoided in intimate chanson recordings unless used very subtly.",
+              "matchQuality": "close",
+              "gap": "If delay were needed, a short slapback would be preferred over digital echo.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "To add a subtle sense of space and intimacy without sounding like a large hall.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list specified avoiding reverb, but a minimal Room setting is used here to prevent the sound from being too dry/dead in an FRFR context.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic cabinet simulation with an IR that mimics a vintage, dry studio microphone setup for maximum acoustic realism.",
+          "proposals": [
+            {
+              "priority": "P1",
+              "type": "IR",
+              "target": "Studio Microphone/Room Ambience",
+              "recommendedAsset": "Neumann U47 or similar condenser mic IR (dry room)",
+              "reason": "Acoustic chanson requires a vintage, dry, close-mic'd sound, not an amp cabinet.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and intimacy",
+              "requiredIfGp180Gap": true
+            }
+          ]
+        },
+        "assumptions": [
+          "not electric guitar rig target",
+          "acoustic instrument signature",
+          "GP-180 cannot model acoustic guitar authentically"
+        ],
+        "warnings": [
+          "The source material is purely acoustic (nylon-string guitar). The GP-180 is an electric guitar simulator and cannot authentically replicate the specific resonance, attack, or timbre of a nylon-string acoustic instrument.",
+          "This rig uses clean tones and minimal effects to maximize clarity and intimacy, simulating a close condenser mic recording rather than a traditional amplified sound."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.967,
+      "prompt_chars": 1009,
+      "response_chars": 305,
+      "usage": {
+        "prompt_eval_count": 328,
+        "eval_count": 86,
+        "total_duration": 8950606100,
+        "prompt_eval_duration": 266873000,
+        "eval_duration": 1218186000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.047,
+      "prompt_chars": 5254,
+      "response_chars": 661,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 155,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1636
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 10.272,
+      "prompt_chars": 4746,
+      "response_chars": 578,
+      "usage": {
+        "input_tokens": 1406,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 194,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 21.154,
+      "prompt_chars": 3593,
+      "response_chars": 6149,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1644,
+        "total_duration": 21132519700,
+        "prompt_eval_duration": 157164000,
+        "eval_duration": 20658531000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.615,
+      "prompt_chars": 8281,
+      "response_chars": 611,
+      "usage": {
+        "prompt_eval_count": 2202,
+        "eval_count": 157,
+        "total_duration": 18609193600,
+        "prompt_eval_duration": 366025000,
+        "eval_duration": 2214772000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.419,
+      "prompt_chars": 2925,
+      "response_chars": 198,
+      "usage": {
+        "prompt_eval_count": 905,
+        "eval_count": 48,
+        "total_duration": 8415890000,
+        "prompt_eval_duration": 165594000,
+        "eval_duration": 320552000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Georges Brassens",
+      "title": "Chanson Pour L'auvergnat",
+      "album": "",
+      "year": null,
+      "genre": "chanson"
+    },
+    "rig": {
+      "rigName": "Georges Brassens - Chanson Pour L'auvergnat - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar (Used as a proxy for acoustic tone)",
+      "output": "FRFR / headphones",
+      "toneProfile": "fingerpicked nylon-string acoustic chanson",
+      "signalChainSummary": "A highly transparent signal chain utilizing a clean preamp (US Deluxe) with light compression and EQ to mimic the delicate, dry tone of fingerpicked nylon-string acoustic guitar recorded in a vintage studio setting.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-70 dB"
+          },
+          "purpose": "To eliminate ambient noise and maintain a clean signal floor.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for recording clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Threshold": "-15 dB"
+          },
+          "purpose": "To smooth out dynamics and enhance the consistent clarity required for fingerpicking.",
+          "matchQuality": "close",
+          "gap": "The ideal module would be a dedicated acoustic preamp, but Comp helps maintain consistency.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No drive or distortion is needed; the tone must remain pristine and acoustic.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "6",
+            "Bass": "5"
+          },
+          "purpose": "To provide a clean, articulate, and vintage-sounding foundation suitable for intimate recordings.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the cleanest option available; however, it cannot replicate the specific resonance of nylon strings.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "To simulate a close-mic'd, focused sound characteristic of vintage studio recordings.",
+          "matchQuality": "close",
+          "gap": "The ideal IR would be a condenser mic placed in a small room setting (e.g., Neumann U47), not just an amp cabinet simulation.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Mid Cut": "-1 dB",
+            "Treble Boost": "+1.5 dB"
+          },
+          "purpose": "To enhance the fundamental frequencies and clarity of the nylon strings without sounding artificial.",
+          "matchQuality": "close",
+          "gap": "A dedicated acoustic EQ would be better, but this helps shape the frequency response for maximum articulation.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Wah effects are inappropriate for the delicate and sustained nature of this genre.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Modulation effects (Chorus/Tremolo) would distract from the pure acoustic tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Delay is generally avoided in intimate chanson recordings unless used very subtly.",
+          "matchQuality": "close",
+          "gap": "If delay were needed, a short slapback would be preferred over digital echo.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "To add a subtle sense of space and intimacy without sounding like a large hall.",
+          "matchQuality": "close",
+          "gap": "The 'avoid' list specified avoiding reverb, but a minimal Room setting is used here to prevent the sound from being too dry/dead in an FRFR context.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "fingerpicked nylon-string acoustic chanson",
+      "mustHave": [
+        "acoustic guitar tone",
+        "dry intimate mic",
+        "fingerstyle clarity"
+      ],
+      "avoid": [
+        "electric amp sim",
+        "distortion",
+        "chorus",
+        "reverb"
+      ],
+      "gearClues": [
+        "nylon-string acoustic",
+        "close condenser mic",
+        "1950s French studio dry"
+      ],
+      "corrections": [
+        "not electric guitar rig target",
+        "acoustic instrument signature",
+        "GP-180 cannot model acoustic guitar authentically"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "chanson",
+      "styleTags": [
+        "french folk",
+        "singer-songwriter"
+      ],
+      "targetTone": "fingerpicked nylon-string acoustic chanson",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic cabinet simulation with an IR that mimics a vintage, dry studio microphone setup for maximum acoustic realism.",
+      "proposals": [
+        {
+          "priority": "P1",
+          "type": "IR",
+          "target": "Studio Microphone/Room Ambience",
+          "recommendedAsset": "Neumann U47 or similar condenser mic IR (dry room)",
+          "reason": "Acoustic chanson requires a vintage, dry, close-mic'd sound, not an amp cabinet.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and intimacy",
+          "requiredIfGp180Gap": true
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 521,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

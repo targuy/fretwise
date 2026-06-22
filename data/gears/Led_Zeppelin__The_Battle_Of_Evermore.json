@@ -1,0 +1,1137 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 821,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Led_Zeppelin__The_Battle_Of_Evermore.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Led Zeppelin",
+    "title": "The Battle Of Evermore",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "ballad"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a folk ballad, requiring an acoustic and intimate sound profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues rock tone with a touch of psychedelic grit.",
+      "signatureElements": [
+        "Crunch (mid-focused)",
+        "Slight fuzz/grit texture",
+        "Moderate reverb and delay for atmosphere",
+        "Mid-scooped EQ on lead lines"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (e.g., AC30 or EL84 model)",
+        "Overdrive pedal emulation (for grit)"
+      ],
+      "avoid": [
+        "High gain modern metal tones",
+        "Bright, sterile clean sounds",
+        "Heavy digital modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "dry acoustic-folk strum with occasional mandolin/dulcimer feel",
+      "mustHave": [
+        "acoustic guitar",
+        "fingerpicked/strummed folk texture",
+        "dry, intimate room",
+        "light pluck transients"
+      ],
+      "avoid": [
+        "blues rock crunch",
+        "fuzz",
+        "delay-heavy ambience",
+        "electric lead tone"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "12-string or folk-string shimmer",
+        "small-room mic"
+      ],
+      "corrections": [
+        "not electric guitar",
+        "not overdriven",
+        "lean acoustic and sparse"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "iconic song but draft is generic electric blues rock",
+      "likely acoustic/folk texture, not amp-driven guitar",
+      "wrong gain family would misbuild the preset"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "acoustic folk strum with mandolin shimmer",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "dry intimate room",
+      "fingerpicked folk texture",
+      "light transient pluck"
+    ],
+    "avoid": [
+      "overdrive or fuzz",
+      "electric amp simulation",
+      "delay or reverb wash",
+      "blues rock crunch"
+    ],
+    "gearClues": [
+      "acoustic guitar",
+      "12-string shimmer",
+      "close room mic",
+      "mandolin doubling"
+    ],
+    "corrections": [
+      "not electric guitar track",
+      "no amp or overdrive needed",
+      "folk ballad not rock song",
+      "Jimmy Page plays mandolin here"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "acoustic folk strum with mandolin shimmer",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "dry intimate room",
+      "fingerpicked folk texture",
+      "light transient pluck"
+    ],
+    "avoid": [
+      "overdrive or fuzz",
+      "electric amp simulation",
+      "delay or reverb wash",
+      "blues rock crunch"
+    ],
+    "gearClues": [
+      "acoustic guitar",
+      "12-string shimmer",
+      "close room mic",
+      "mandolin doubling"
+    ],
+    "corrections": [
+      "not electric guitar track",
+      "no amp or overdrive needed",
+      "folk ballad not rock song",
+      "Jimmy Page plays mandolin here"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, acoustic simulation and intimate room tone.",
+          "bestMatchSummary": "A highly controlled, clean signal chain using a gentle compressor, followed by an acoustic-focused amp model (US Deluxe/Silver Twin), minimal EQ shaping, and finally, a subtle Room reverb to capture the 'close mic' folk intimacy. The goal is fingerpicked clarity, not rock power.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain intimate recording quality.",
+              "matchQuality": "close",
+              "gap": "None. Essential for clean folk recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics of fingerpicking and enhance transient pluck without sounding overly processed.",
+              "matchQuality": "close",
+              "gap": "The ideal acoustic compressor is missing, but Comp provides necessary dynamic control for folk texture.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid all overdrive or fuzz as per the 'avoid' list.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2.5",
+                "Treble": "6",
+                "Bass": "4",
+                "Mids": "5"
+              },
+              "purpose": "Simulate a clean, articulate acoustic sound suitable for folk ballads (US Deluxe is ideal for clarity).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over Silver Twin/AC30 because it often provides better definition and less inherent 'rock' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, intimate sound suitable for close-mic'd acoustic performance.",
+              "matchQuality": "close",
+              "gap": "No dedicated acoustic cabinet is available; US 2x12 provides the necessary clean voicing and focus.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+1.5 dB (around 800 Hz)",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost the upper mids to enhance mandolin shimmer and fingerpicked clarity.",
+              "matchQuality": "exact",
+              "gap": "None. Essential for tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect needed for folk strumming.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus is too distracting and artificial for the required 'dry intimate' folk texture.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid delay or reverb wash.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix Level": "20%"
+              },
+              "purpose": "Provide a subtle 'close room mic' ambiance without creating an excessive wash.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept very low to maintain the intimate, dry feel of the recording.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage module.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk/mandolin, not electric guitar. The rig simulates the *role* of a clean, articulate instrument in this style.",
+          "All effects (Delay, Chorus) are bypassed or set to minimal levels to maintain the required 'dry intimate' sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic US 2x12 IR with a specialized acoustic cabinet or close-mic recording IR to enhance mandolin shimmer and folk intimacy.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Acoustic/Mandolin Clarity",
+              "recommendedAsset": "Close-Mic Acoustic Cabinet IR (e.g., Neumann U87 style)",
+              "reason": "Enhance the intimate, close-mic sound and mandolin shimmer.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for this genre",
+              "expectedGain": "Increased clarity and definition in upper mids/highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Led Zeppelin - The Battle Of Evermore - Valeton GP-180",
+        "song": {
+          "artist": "Led Zeppelin",
+          "title": "The Battle Of Evermore",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "acoustic folk strum with mandolin shimmer",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly controlled, clean signal chain using a gentle compressor, followed by an acoustic-focused amp model (US Deluxe/Silver Twin), minimal EQ shaping, and finally, a subtle Room reverb to capture the 'close mic' folk intimacy. The goal is fingerpicked clarity, not rock power.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain intimate recording quality.",
+            "matchQuality": "close",
+            "gap": "None. Essential for clean folk recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out the dynamics of fingerpicking and enhance transient pluck without sounding overly processed.",
+            "matchQuality": "close",
+            "gap": "The ideal acoustic compressor is missing, but Comp provides necessary dynamic control for folk texture.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid all overdrive or fuzz as per the 'avoid' list.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2.5",
+              "Treble": "6",
+              "Bass": "4",
+              "Mids": "5"
+            },
+            "purpose": "Simulate a clean, articulate acoustic sound suitable for folk ballads (US Deluxe is ideal for clarity).",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen over Silver Twin/AC30 because it often provides better definition and less inherent 'rock' character.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, intimate sound suitable for close-mic'd acoustic performance.",
+            "matchQuality": "close",
+            "gap": "No dedicated acoustic cabinet is available; US 2x12 provides the necessary clean voicing and focus.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-2 dB",
+              "Mid Boost": "+1.5 dB (around 800 Hz)",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Slightly scoop the low end and boost the upper mids to enhance mandolin shimmer and fingerpicked clarity.",
+            "matchQuality": "exact",
+            "gap": "None. Essential for tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No wah effect needed for folk strumming.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Chorus is too distracting and artificial for the required 'dry intimate' folk texture.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid delay or reverb wash.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix Level": "20%"
+            },
+            "purpose": "Provide a subtle 'close room mic' ambiance without creating an excessive wash.",
+            "matchQuality": "close",
+            "gap": "The reverb must be kept very low to maintain the intimate, dry feel of the recording.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage module.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "acoustic folk strum with mandolin shimmer",
+          "toneProfile": "acoustic folk strum with mandolin shimmer",
+          "idealSignalChain": "acoustic guitar | 12-string shimmer | close room mic | mandolin doubling",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-string shimmer",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close room mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mandolin doubling",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation",
+            "dry intimate room",
+            "fingerpicked folk texture",
+            "light transient pluck"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, acoustic simulation and intimate room tone.",
+          "bestMatchSummary": "A highly controlled, clean signal chain using a gentle compressor, followed by an acoustic-focused amp model (US Deluxe/Silver Twin), minimal EQ shaping, and finally, a subtle Room reverb to capture the 'close mic' folk intimacy. The goal is fingerpicked clarity, not rock power.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain intimate recording quality.",
+              "matchQuality": "close",
+              "gap": "None. Essential for clean folk recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out the dynamics of fingerpicking and enhance transient pluck without sounding overly processed.",
+              "matchQuality": "close",
+              "gap": "The ideal acoustic compressor is missing, but Comp provides necessary dynamic control for folk texture.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid all overdrive or fuzz as per the 'avoid' list.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2.5",
+                "Treble": "6",
+                "Bass": "4",
+                "Mids": "5"
+              },
+              "purpose": "Simulate a clean, articulate acoustic sound suitable for folk ballads (US Deluxe is ideal for clarity).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over Silver Twin/AC30 because it often provides better definition and less inherent 'rock' character.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, intimate sound suitable for close-mic'd acoustic performance.",
+              "matchQuality": "close",
+              "gap": "No dedicated acoustic cabinet is available; US 2x12 provides the necessary clean voicing and focus.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+1.5 dB (around 800 Hz)",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost the upper mids to enhance mandolin shimmer and fingerpicked clarity.",
+              "matchQuality": "exact",
+              "gap": "None. Essential for tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect needed for folk strumming.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Chorus is too distracting and artificial for the required 'dry intimate' folk texture.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid delay or reverb wash.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix Level": "20%"
+              },
+              "purpose": "Provide a subtle 'close room mic' ambiance without creating an excessive wash.",
+              "matchQuality": "close",
+              "gap": "The reverb must be kept very low to maintain the intimate, dry feel of the recording.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage module.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic US 2x12 IR with a specialized acoustic cabinet or close-mic recording IR to enhance mandolin shimmer and folk intimacy.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Acoustic/Mandolin Clarity",
+              "recommendedAsset": "Close-Mic Acoustic Cabinet IR (e.g., Neumann U87 style)",
+              "reason": "Enhance the intimate, close-mic sound and mandolin shimmer.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for this genre",
+              "expectedGain": "Increased clarity and definition in upper mids/highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "not electric guitar track",
+          "no amp or overdrive needed",
+          "folk ballad not rock song",
+          "Jimmy Page plays mandolin here"
+        ],
+        "warnings": [
+          "The source material is acoustic folk/mandolin, not electric guitar. The rig simulates the *role* of a clean, articulate instrument in this style.",
+          "All effects (Delay, Chorus) are bypassed or set to minimal levels to maintain the required 'dry intimate' sound."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.993,
+      "prompt_chars": 1003,
+      "response_chars": 505,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 128,
+        "total_duration": 9988581800,
+        "prompt_eval_duration": 207400000,
+        "eval_duration": 2336345000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.578,
+      "prompt_chars": 5436,
+      "response_chars": 701,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 174,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1685
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 6.266,
+      "prompt_chars": 4986,
+      "response_chars": 672,
+      "usage": {
+        "input_tokens": 1470,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 222,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 89.496,
+      "prompt_chars": 3687,
+      "response_chars": 5748,
+      "usage": {
+        "prompt_eval_count": 1276,
+        "eval_count": 1606,
+        "total_duration": 37705799800,
+        "prompt_eval_duration": 568114000,
+        "eval_duration": 22961687000
+      },
+      "attempts": 3,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 66 column 8 (char 2617)"
+        },
+        {
+          "attempt": 2,
+          "error": "Semantic validation failed: GP-180 result must contain at least 3 blocks"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.447,
+      "prompt_chars": 7978,
+      "response_chars": 638,
+      "usage": {
+        "prompt_eval_count": 2180,
+        "eval_count": 170,
+        "total_duration": 5425671700,
+        "prompt_eval_duration": 293833000,
+        "eval_duration": 4702903000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.737,
+      "prompt_chars": 3081,
+      "response_chars": 169,
+      "usage": {
+        "prompt_eval_count": 940,
+        "eval_count": 45,
+        "total_duration": 14733446300,
+        "prompt_eval_duration": 273956000,
+        "eval_duration": 1115091000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Led Zeppelin",
+      "title": "The Battle Of Evermore",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Led Zeppelin - The Battle Of Evermore - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "acoustic folk strum with mandolin shimmer",
+      "signalChainSummary": "A highly controlled, clean signal chain using a gentle compressor, followed by an acoustic-focused amp model (US Deluxe/Silver Twin), minimal EQ shaping, and finally, a subtle Room reverb to capture the 'close mic' folk intimacy. The goal is fingerpicked clarity, not rock power.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain intimate recording quality.",
+          "matchQuality": "close",
+          "gap": "None. Essential for clean folk recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out the dynamics of fingerpicking and enhance transient pluck without sounding overly processed.",
+          "matchQuality": "close",
+          "gap": "The ideal acoustic compressor is missing, but Comp provides necessary dynamic control for folk texture.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid all overdrive or fuzz as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2.5",
+            "Treble": "6",
+            "Bass": "4",
+            "Mids": "5"
+          },
+          "purpose": "Simulate a clean, articulate acoustic sound suitable for folk ballads (US Deluxe is ideal for clarity).",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen over Silver Twin/AC30 because it often provides better definition and less inherent 'rock' character.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, intimate sound suitable for close-mic'd acoustic performance.",
+          "matchQuality": "close",
+          "gap": "No dedicated acoustic cabinet is available; US 2x12 provides the necessary clean voicing and focus.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-2 dB",
+            "Mid Boost": "+1.5 dB (around 800 Hz)",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Slightly scoop the low end and boost the upper mids to enhance mandolin shimmer and fingerpicked clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No wah effect needed for folk strumming.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Chorus is too distracting and artificial for the required 'dry intimate' folk texture.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid delay or reverb wash.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix Level": "20%"
+          },
+          "purpose": "Provide a subtle 'close room mic' ambiance without creating an excessive wash.",
+          "matchQuality": "close",
+          "gap": "The reverb must be kept very low to maintain the intimate, dry feel of the recording.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage module.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "acoustic folk strum with mandolin shimmer",
+      "mustHave": [
+        "acoustic guitar simulation",
+        "dry intimate room",
+        "fingerpicked folk texture",
+        "light transient pluck"
+      ],
+      "avoid": [
+        "overdrive or fuzz",
+        "electric amp simulation",
+        "delay or reverb wash",
+        "blues rock crunch"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "12-string shimmer",
+        "close room mic",
+        "mandolin doubling"
+      ],
+      "corrections": [
+        "not electric guitar track",
+        "no amp or overdrive needed",
+        "folk ballad not rock song",
+        "Jimmy Page plays mandolin here"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "ballad"
+      ],
+      "targetTone": "acoustic folk strum with mandolin shimmer",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic US 2x12 IR with a specialized acoustic cabinet or close-mic recording IR to enhance mandolin shimmer and folk intimacy.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Acoustic/Mandolin Clarity",
+          "recommendedAsset": "Close-Mic Acoustic Cabinet IR (e.g., Neumann U87 style)",
+          "reason": "Enhance the intimate, close-mic sound and mandolin shimmer.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always for this genre",
+          "expectedGain": "Increased clarity and definition in upper mids/highs.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 821,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

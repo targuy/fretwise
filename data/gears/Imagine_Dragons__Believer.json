@@ -1,0 +1,1164 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 602,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Imagine_Dragons__Believer.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Imagine Dragons",
+    "title": "Believer",
+    "album": "",
+    "year": null,
+    "genre": "arena rock"
+  },
+  "genreClassification": {
+    "genre": "arena rock",
+    "subgenres": [
+      "alternative rock",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song's sound and the specified tone profile fit modern arena rock well."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Aggressive, mid-heavy rock tone with a slight grit and punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture for thickness",
+        "Punchy attack",
+        "Rock amp character"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "British style amp simulation (Marshall/Vox family)"
+      ],
+      "avoid": [
+        "Thin, scooped tones",
+        "Excessive modulation effects",
+        "Clean arpeggios"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "aggressive, gritty arena-rock crunch with tight low end",
+      "mustHave": [
+        "mid-heavy crunch",
+        "punchy attack",
+        "slight grit",
+        "tight bass",
+        "dry feel"
+      ],
+      "avoid": [
+        "clean tone",
+        "big modulation",
+        "scooped mids",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "mid-gain OD",
+        "4x12 cab",
+        "dynamic humbucker"
+      ],
+      "corrections": [
+        "drop Vox",
+        "keep fuzz only if subtle",
+        "favor tight crunch over fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "aggressive, gritty arena-rock crunch with tight low end",
+    "mustHave": [
+      "mid-heavy crunch",
+      "punchy attack",
+      "slight grit",
+      "tight bass",
+      "dry feel"
+    ],
+    "avoid": [
+      "clean tone",
+      "big modulation",
+      "scooped mids",
+      "lush reverb"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "mid-gain OD",
+      "4x12 cab",
+      "dynamic humbucker"
+    ],
+    "corrections": [
+      "drop Vox",
+      "keep fuzz only if subtle",
+      "favor tight crunch over fuzz"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, mid-heavy crunch and punchy attack using classic rock/arena tones.",
+          "bestMatchSummary": "A high-gain signal chain utilizing a Boost for initial punch, followed by Distortion for grit, paired with the UK 45 amp model and UK Vintage 4x12 cab to achieve an aggressive, mid-heavy arena crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain signal and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Enhance the initial attack and punchiness of the riff.",
+              "matchQuality": "close",
+              "gap": "Using Boost for controlled attack rather than a dedicated OD pedal.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more coloration is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide the core aggressive crunch and slight grit required for arena rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over RAT-style or Muff-style to maintain tightness and avoid excessive mud.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, biting edge is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall-style punch and mid-heavy character.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "7",
+                "High": "5"
+              },
+              "purpose": "Boost the mid-range frequencies to achieve the required 'mid-heavy crunch' and cut low end mud.",
+              "matchQuality": "close",
+              "gap": "Using EQ 2 for more precise, aggressive tonal shaping compared to EQ 1.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "If a slightly warmer overall tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2",
+                "Depth": "3"
+              },
+              "purpose": "Placeholder for modulation; kept off to avoid 'big modulation' and maintain dry feel.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids big modulation, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding lush or overly ambient.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, avoiding the 'lush reverb' trap.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, controlled ambience to ground the sound without sounding 'lush' or overly wet.",
+              "matchQuality": "close",
+              "gap": "The mix is kept low (20%) and decay time moderate to satisfy the need for depth while avoiding excessive reverb.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more metallic, controlled ambience is desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control/mastering",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "8"
+              },
+              "purpose": "Final output level adjustment and overall tone shaping.",
+              "matchQuality": "none",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is modern arena rock, requiring a high-gain, aggressive crunch. The chain prioritizes tightness and mid-range punch over natural warmth or clean tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the tight, aggressive character needed for modern arena rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/tightness",
+              "recommendedAsset": "Modern 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "The current IR may lack the aggressive, tight punch required for Imagine Dragons' modern sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased tightness and definition in the low-mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Imagine Dragons - Believer - Valeton GP-180",
+        "song": {
+          "artist": "Imagine Dragons",
+          "title": "Believer",
+          "album": "",
+          "year": null,
+          "genre": "arena rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "aggressive, gritty arena-rock crunch with tight low end",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain signal chain utilizing a Boost for initial punch, followed by Distortion for grit, paired with the UK 45 amp model and UK Vintage 4x12 cab to achieve an aggressive, mid-heavy arena crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain signal and eliminate hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/attack",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "5"
+            },
+            "purpose": "Enhance the initial attack and punchiness of the riff.",
+            "matchQuality": "close",
+            "gap": "Using Boost for controlled attack rather than a dedicated OD pedal.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "If more coloration is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/grit",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Provide the core aggressive crunch and slight grit required for arena rock.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is chosen over RAT-style or Muff-style to maintain tightness and avoid excessive mud.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "If a more aggressive, biting edge is needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall-style punch and mid-heavy character.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound and necessary punch.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "7",
+              "High": "5"
+            },
+            "purpose": "Boost the mid-range frequencies to achieve the required 'mid-heavy crunch' and cut low end mud.",
+            "matchQuality": "close",
+            "gap": "Using EQ 2 for more precise, aggressive tonal shaping compared to EQ 1.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 1",
+                "reason": "If a slightly warmer overall tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2",
+              "Depth": "3"
+            },
+            "purpose": "Placeholder for modulation; kept off to avoid 'big modulation' and maintain dry feel.",
+            "matchQuality": "none",
+            "gap": "The target tone explicitly avoids big modulation, so this module is included but deactivated.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Add subtle rhythmic depth without sounding lush or overly ambient.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add dimension, avoiding the 'lush reverb' trap.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined echo is preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide minimal, controlled ambience to ground the sound without sounding 'lush' or overly wet.",
+            "matchQuality": "close",
+            "gap": "The mix is kept low (20%) and decay time moderate to satisfy the need for depth while avoiding excessive reverb.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a more metallic, controlled ambience is desired."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control/mastering",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "8"
+            },
+            "purpose": "Final output level adjustment and overall tone shaping.",
+            "matchQuality": "none",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "aggressive, gritty arena-rock crunch with tight low end",
+          "toneProfile": "aggressive, gritty arena-rock crunch with tight low end",
+          "idealSignalChain": "Marshall-style amp | mid-gain OD | 4x12 cab | dynamic humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mid-gain OD",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "dynamic humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-heavy crunch",
+            "punchy attack",
+            "slight grit",
+            "tight bass",
+            "dry feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, mid-heavy crunch and punchy attack using classic rock/arena tones.",
+          "bestMatchSummary": "A high-gain signal chain utilizing a Boost for initial punch, followed by Distortion for grit, paired with the UK 45 amp model and UK Vintage 4x12 cab to achieve an aggressive, mid-heavy arena crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain signal and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Enhance the initial attack and punchiness of the riff.",
+              "matchQuality": "close",
+              "gap": "Using Boost for controlled attack rather than a dedicated OD pedal.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more coloration is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide the core aggressive crunch and slight grit required for arena rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over RAT-style or Muff-style to maintain tightness and avoid excessive mud.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, biting edge is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall-style punch and mid-heavy character.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "7",
+                "High": "5"
+              },
+              "purpose": "Boost the mid-range frequencies to achieve the required 'mid-heavy crunch' and cut low end mud.",
+              "matchQuality": "close",
+              "gap": "Using EQ 2 for more precise, aggressive tonal shaping compared to EQ 1.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "If a slightly warmer overall tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2",
+                "Depth": "3"
+              },
+              "purpose": "Placeholder for modulation; kept off to avoid 'big modulation' and maintain dry feel.",
+              "matchQuality": "none",
+              "gap": "The target tone explicitly avoids big modulation, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding lush or overly ambient.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, avoiding the 'lush reverb' trap.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, controlled ambience to ground the sound without sounding 'lush' or overly wet.",
+              "matchQuality": "close",
+              "gap": "The mix is kept low (20%) and decay time moderate to satisfy the need for depth while avoiding excessive reverb.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more metallic, controlled ambience is desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control/mastering",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "8"
+              },
+              "purpose": "Final output level adjustment and overall tone shaping.",
+              "matchQuality": "none",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the tight, aggressive character needed for modern arena rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism/tightness",
+              "recommendedAsset": "Modern 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "The current IR may lack the aggressive, tight punch required for Imagine Dragons' modern sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased tightness and definition in the low-mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Vox",
+          "keep fuzz only if subtle",
+          "favor tight crunch over fuzz"
+        ],
+        "warnings": [
+          "The source material is modern arena rock, requiring a high-gain, aggressive crunch. The chain prioritizes tightness and mid-range punch over natural warmth or clean tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.24,
+      "prompt_chars": 992,
+      "response_chars": 452,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 115,
+        "total_duration": 10212689200,
+        "prompt_eval_duration": 674687000,
+        "eval_duration": 2456612000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.786,
+      "prompt_chars": 5372,
+      "response_chars": 498,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1634
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 48.824,
+      "prompt_chars": 3577,
+      "response_chars": 6096,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1686,
+        "total_duration": 48805978200,
+        "prompt_eval_duration": 627102000,
+        "eval_duration": 33061453999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 5.062,
+      "prompt_chars": 8258,
+      "response_chars": 614,
+      "usage": {
+        "prompt_eval_count": 2253,
+        "eval_count": 158,
+        "total_duration": 5043290600,
+        "prompt_eval_duration": 879459000,
+        "eval_duration": 3812884000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.206,
+      "prompt_chars": 2882,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 905,
+        "eval_count": 48,
+        "total_duration": 9187965400,
+        "prompt_eval_duration": 566315000,
+        "eval_duration": 1129275000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Imagine Dragons",
+      "title": "Believer",
+      "album": "",
+      "year": null,
+      "genre": "arena rock"
+    },
+    "rig": {
+      "rigName": "Imagine Dragons - Believer - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "aggressive, gritty arena-rock crunch with tight low end",
+      "signalChainSummary": "A high-gain signal chain utilizing a Boost for initial punch, followed by Distortion for grit, paired with the UK 45 amp model and UK Vintage 4x12 cab to achieve an aggressive, mid-heavy arena crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain signal and eliminate hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/attack",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "5"
+          },
+          "purpose": "Enhance the initial attack and punchiness of the riff.",
+          "matchQuality": "close",
+          "gap": "Using Boost for controlled attack rather than a dedicated OD pedal.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If more coloration is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/grit",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Provide the core aggressive crunch and slight grit required for arena rock.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is chosen over RAT-style or Muff-style to maintain tightness and avoid excessive mud.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "If a more aggressive, biting edge is needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall-style punch and mid-heavy character.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound and necessary punch.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "7",
+            "High": "5"
+          },
+          "purpose": "Boost the mid-range frequencies to achieve the required 'mid-heavy crunch' and cut low end mud.",
+          "matchQuality": "close",
+          "gap": "Using EQ 2 for more precise, aggressive tonal shaping compared to EQ 1.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "If a slightly warmer overall tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2",
+            "Depth": "3"
+          },
+          "purpose": "Placeholder for modulation; kept off to avoid 'big modulation' and maintain dry feel.",
+          "matchQuality": "fallback",
+          "gap": "The target tone explicitly avoids big modulation, so this module is included but deactivated.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Add subtle rhythmic depth without sounding lush or overly ambient.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add dimension, avoiding the 'lush reverb' trap.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined echo is preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide minimal, controlled ambience to ground the sound without sounding 'lush' or overly wet.",
+          "matchQuality": "close",
+          "gap": "The mix is kept low (20%) and decay time moderate to satisfy the need for depth while avoiding excessive reverb.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more metallic, controlled ambience is desired."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control/mastering",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "8"
+          },
+          "purpose": "Final output level adjustment and overall tone shaping.",
+          "matchQuality": "fallback",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "aggressive, gritty arena-rock crunch with tight low end",
+      "mustHave": [
+        "mid-heavy crunch",
+        "punchy attack",
+        "slight grit",
+        "tight bass",
+        "dry feel"
+      ],
+      "avoid": [
+        "clean tone",
+        "big modulation",
+        "scooped mids",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "mid-gain OD",
+        "4x12 cab",
+        "dynamic humbucker"
+      ],
+      "corrections": [
+        "drop Vox",
+        "keep fuzz only if subtle",
+        "favor tight crunch over fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "arena rock",
+      "styleTags": [
+        "alternative rock",
+        "hard rock"
+      ],
+      "targetTone": "aggressive, gritty arena-rock crunch with tight low end",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the tight, aggressive character needed for modern arena rock.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism/tightness",
+          "recommendedAsset": "Modern 4x12 (e.g., Celestion Greenback or similar)",
+          "reason": "The current IR may lack the aggressive, tight punch required for Imagine Dragons' modern sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased tightness and definition in the low-mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 602,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

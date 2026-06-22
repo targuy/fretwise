@@ -1,0 +1,1197 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 546,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Green_Day__Boulevard_Of_Broken_Dreams.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Green Day",
+    "title": "Boulevard Of Broken Dreams",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "pop punk",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Green Day's style is classic pop-punk, fitting the described tight, distorted rhythm tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused punk/alt rock tone with noticeable grit and sustain.",
+      "signatureElements": [
+        "Mid-range punch (Pinch)",
+        "Slightly overdriven crunch (Breakup)",
+        "Punchy bass response",
+        "Controlled amount of reverb"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall/Vox family)",
+        "Overdrive pedal simulation (Tube Screamer type)",
+        "Spring or plate reverb unit"
+      ],
+      "avoid": [
+        "Excessive fuzz",
+        "High-gain metal saturation",
+        "Clean, glassy tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight distorted punk rhythm with dry mids",
+      "mustHave": [
+        "tight palm-muted crunch",
+        "mid-forward distortion",
+        "little reverb",
+        "steady sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "glassy clean",
+        "big ambience"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "single OD boost",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "less sustain sheen",
+        "drier than draft",
+        "more compressed riff attack"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight distorted punk rhythm with dry mids",
+    "mustHave": [
+      "tight palm-muted crunch",
+      "mid-forward distortion",
+      "little reverb",
+      "steady sustain"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "glassy clean",
+      "big ambience"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "single OD boost",
+      "4x12 cab"
+    ],
+    "corrections": [
+      "less sustain sheen",
+      "drier than draft",
+      "more compressed riff attack"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk rhythm tone, focusing on tight, mid-forward crunch.",
+          "bestMatchSummary": "A compressed signal chain using a Green OD boost into a UK 45 amp model, paired with the UK Vintage 4x12 cab for classic punk grit and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Cleaning up the signal and ensuring tight palm-muted rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Providing the necessary mid-forward crunch and attack boost for punk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative, but Green OD is better suited for the specific mid-punch of pop-punk."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Adding foundational distortion and grit without sounding like heavy metal.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is generic; a dedicated punk/rock overdrive might be better, but this provides the necessary crunch foundation.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be too aggressive or dirty for the specific pop-punk tone required."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Increasing the perceived attack and sustain while maintaining tightness for palm-muted riffs.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulating the classic British punk/mod sound (Marshall-style) with punchy mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Slightly more aggressive and less focused on the tight, mid-forward crunch of this song."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Providing the classic British rock cabinet sound and punchy midrange response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Shaping the tone to emphasize mid-range punch and cut any excessive low end or high hiss.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Disabled to avoid any 'big ambience' or wash that contradicts the dry punk aesthetic.",
+              "matchQuality": "N/A",
+              "gap": "None (Module is present but inactive)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0",
+                "Feedback": "0"
+              },
+              "purpose": "Disabled to maintain a dry, punchy sound and avoid excessive ambience.",
+              "matchQuality": "N/A",
+              "gap": "None (Module is present but inactive)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adding minimal, natural room ambience to give the tone depth without sounding wet or big.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is used sparingly (low mix) to meet the 'little reverb' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial or bright for this specific punk tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a punk/pop-punk rhythm track. The chain prioritizes aggressive compression and mid-range boost to achieve the required 'tight palm-muted crunch' over pure distortion."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current IR with a more focused, aggressive punk/rock cabinet simulation to enhance mid-range punch and tightness.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Punk 4x12 (or similar)",
+              "reason": "Enhance the tight, mid-forward punk crunch required for Green Day's style.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Immediately",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Green Day - Boulevard Of Broken Dreams - Valeton GP-180",
+        "song": {
+          "artist": "Green Day",
+          "title": "Boulevard Of Broken Dreams",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight distorted punk rhythm with dry mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A compressed signal chain using a Green OD boost into a UK 45 amp model, paired with the UK Vintage 4x12 cab for classic punk grit and punch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Cleaning up the signal and ensuring tight palm-muted rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Providing the necessary mid-forward crunch and attack boost for punk rhythm.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good alternative, but Green OD is better suited for the specific mid-punch of pop-punk."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Adding foundational distortion and grit without sounding like heavy metal.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is generic; a dedicated punk/rock overdrive might be better, but this provides the necessary crunch foundation.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could be too aggressive or dirty for the specific pop-punk tone required."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-10 dB",
+              "Ratio": "3:1"
+            },
+            "purpose": "Increasing the perceived attack and sustain while maintaining tightness for palm-muted riffs.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulating the classic British punk/mod sound (Marshall-style) with punchy mids.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Slightly more aggressive and less focused on the tight, mid-forward crunch of this song."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Providing the classic British rock cabinet sound and punchy midrange response.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Shaping the tone to emphasize mid-range punch and cut any excessive low end or high hiss.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Disabled to avoid any 'big ambience' or wash that contradicts the dry punk aesthetic.",
+            "matchQuality": "N/A",
+            "gap": "None (Module is present but inactive)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0",
+              "Feedback": "0"
+            },
+            "purpose": "Disabled to maintain a dry, punchy sound and avoid excessive ambience.",
+            "matchQuality": "N/A",
+            "gap": "None (Module is present but inactive)",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Adding minimal, natural room ambience to give the tone depth without sounding wet or big.",
+            "matchQuality": "close",
+            "gap": "The 'Room' setting is used sparingly (low mix) to meet the 'little reverb' requirement.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might sound too artificial or bright for this specific punk tone."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight distorted punk rhythm with dry mids",
+          "toneProfile": "tight distorted punk rhythm with dry mids",
+          "idealSignalChain": "Marshall-style amp | single OD boost | 4x12 cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single OD boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-muted crunch",
+            "mid-forward distortion",
+            "little reverb",
+            "steady sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Punk rhythm tone, focusing on tight, mid-forward crunch.",
+          "bestMatchSummary": "A compressed signal chain using a Green OD boost into a UK 45 amp model, paired with the UK Vintage 4x12 cab for classic punk grit and punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Cleaning up the signal and ensuring tight palm-muted rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Providing the necessary mid-forward crunch and attack boost for punk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good alternative, but Green OD is better suited for the specific mid-punch of pop-punk."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Adding foundational distortion and grit without sounding like heavy metal.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is generic; a dedicated punk/rock overdrive might be better, but this provides the necessary crunch foundation.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be too aggressive or dirty for the specific pop-punk tone required."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Increasing the perceived attack and sustain while maintaining tightness for palm-muted riffs.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulating the classic British punk/mod sound (Marshall-style) with punchy mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Slightly more aggressive and less focused on the tight, mid-forward crunch of this song."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Providing the classic British rock cabinet sound and punchy midrange response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Shaping the tone to emphasize mid-range punch and cut any excessive low end or high hiss.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Disabled to avoid any 'big ambience' or wash that contradicts the dry punk aesthetic.",
+              "matchQuality": "N/A",
+              "gap": "None (Module is present but inactive)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0",
+                "Feedback": "0"
+              },
+              "purpose": "Disabled to maintain a dry, punchy sound and avoid excessive ambience.",
+              "matchQuality": "N/A",
+              "gap": "None (Module is present but inactive)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adding minimal, natural room ambience to give the tone depth without sounding wet or big.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is used sparingly (low mix) to meet the 'little reverb' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial or bright for this specific punk tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current IR with a more focused, aggressive punk/rock cabinet simulation to enhance mid-range punch and tightness.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Punk 4x12 (or similar)",
+              "reason": "Enhance the tight, mid-forward punk crunch required for Green Day's style.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Immediately",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "less sustain sheen",
+          "drier than draft",
+          "more compressed riff attack"
+        ],
+        "warnings": [
+          "The source material is a punk/pop-punk rhythm track. The chain prioritizes aggressive compression and mid-range boost to achieve the required 'tight palm-muted crunch' over pure distortion."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.672,
+      "prompt_chars": 1004,
+      "response_chars": 494,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 121,
+        "total_duration": 10657397400,
+        "prompt_eval_duration": 729734000,
+        "eval_duration": 2608515000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.76,
+      "prompt_chars": 5433,
+      "response_chars": 471,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 121,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1633
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 50.011,
+      "prompt_chars": 3548,
+      "response_chars": 6250,
+      "usage": {
+        "prompt_eval_count": 1194,
+        "eval_count": 1758,
+        "total_duration": 50004517000,
+        "prompt_eval_duration": 614515000,
+        "eval_duration": 34627764000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.235,
+      "prompt_chars": 8405,
+      "response_chars": 562,
+      "usage": {
+        "prompt_eval_count": 2309,
+        "eval_count": 147,
+        "total_duration": 4212085900,
+        "prompt_eval_duration": 897844000,
+        "eval_duration": 2916979000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 12.422,
+      "prompt_chars": 2810,
+      "response_chars": 198,
+      "usage": {
+        "prompt_eval_count": 888,
+        "eval_count": 52,
+        "total_duration": 12419858700,
+        "prompt_eval_duration": 830927000,
+        "eval_duration": 984626000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Green Day",
+      "title": "Boulevard Of Broken Dreams",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Green Day - Boulevard Of Broken Dreams - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight distorted punk rhythm with dry mids",
+      "signalChainSummary": "A compressed signal chain using a Green OD boost into a UK 45 amp model, paired with the UK Vintage 4x12 cab for classic punk grit and punch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Cleaning up the signal and ensuring tight palm-muted rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Providing the necessary mid-forward crunch and attack boost for punk rhythm.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good alternative, but Green OD is better suited for the specific mid-punch of pop-punk."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Adding foundational distortion and grit without sounding like heavy metal.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is generic; a dedicated punk/rock overdrive might be better, but this provides the necessary crunch foundation.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could be too aggressive or dirty for the specific pop-punk tone required."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-10 dB",
+            "Ratio": "3:1"
+          },
+          "purpose": "Increasing the perceived attack and sustain while maintaining tightness for palm-muted riffs.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulating the classic British punk/mod sound (Marshall-style) with punchy mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Slightly more aggressive and less focused on the tight, mid-forward crunch of this song."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Providing the classic British rock cabinet sound and punchy midrange response.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Shaping the tone to emphasize mid-range punch and cut any excessive low end or high hiss.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Disabled to avoid any 'big ambience' or wash that contradicts the dry punk aesthetic.",
+          "matchQuality": "fallback",
+          "gap": "None (Module is present but inactive)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0",
+            "Feedback": "0"
+          },
+          "purpose": "Disabled to maintain a dry, punchy sound and avoid excessive ambience.",
+          "matchQuality": "fallback",
+          "gap": "None (Module is present but inactive)",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Adding minimal, natural room ambience to give the tone depth without sounding wet or big.",
+          "matchQuality": "close",
+          "gap": "The 'Room' setting is used sparingly (low mix) to meet the 'little reverb' requirement.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might sound too artificial or bright for this specific punk tone."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight distorted punk rhythm with dry mids",
+      "mustHave": [
+        "tight palm-muted crunch",
+        "mid-forward distortion",
+        "little reverb",
+        "steady sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "glassy clean",
+        "big ambience"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "single OD boost",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "less sustain sheen",
+        "drier than draft",
+        "more compressed riff attack"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "pop punk",
+        "alternative rock"
+      ],
+      "targetTone": "tight distorted punk rhythm with dry mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current IR with a more focused, aggressive punk/rock cabinet simulation to enhance mid-range punch and tightness.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Punk 4x12 (or similar)",
+          "reason": "Enhance the tight, mid-forward punk crunch required for Green Day's style.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Immediately",
+          "expectedGain": "Increased punch and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 546,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

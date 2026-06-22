@@ -1,0 +1,1182 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 460,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Foo_Fighters__Monkey_Wrench.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Foo Fighters",
+    "title": "Monkey Wrench",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "post-grunge",
+      "alt metal",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Foo Fighters are known for high-energy, anthemic alternative and arena rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and pronounced mid-range punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Punchy bass response",
+        "Driving rhythm strumming"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "Amp simulation with Marshall or Fender style cab modeling",
+        "EQ boost for mid-range emphasis"
+      ],
+      "avoid": [
+        "Thin, scooped tones",
+        "Excessive clean reverb/delay",
+        "Overly saturated distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight Marshall crunch with slight fuzz edge",
+      "mustHave": [
+        "big rhythm drive",
+        "mid punch",
+        "dry attack",
+        "slight fuzz bite",
+        "tight low end"
+      ],
+      "avoid": [
+        "scooped tone",
+        "clean chorus",
+        "lush delay",
+        "heavy fuzz",
+        "over-saturated distortion"
+      ],
+      "gearClues": [
+        "Marshall/Plexi gain",
+        "4x12 cab",
+        "humbucker guitar",
+        "Tube Screamer boost"
+      ],
+      "corrections": [
+        "drop Fender cab guess",
+        "bias toward Marshall not generic rock",
+        "keep fuzz subtle, not main texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight Marshall crunch with slight fuzz edge",
+    "mustHave": [
+      "big rhythm drive",
+      "mid punch",
+      "dry attack",
+      "slight fuzz bite",
+      "tight low end"
+    ],
+    "avoid": [
+      "scooped tone",
+      "clean chorus",
+      "lush delay",
+      "heavy fuzz",
+      "over-saturated distortion"
+    ],
+    "gearClues": [
+      "Marshall/Plexi gain",
+      "4x12 cab",
+      "humbucker guitar",
+      "Tube Screamer boost"
+    ],
+    "corrections": [
+      "drop Fender cab guess",
+      "bias toward Marshall not generic rock",
+      "keep fuzz subtle, not main texture"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on Marshall/Plexi tones with controlled fuzz and mid punch.",
+          "bestMatchSummary": "A tight, aggressive rhythm tone built around the UK 45 amp model, utilizing a Boost pedal for grit and shaping the mids, followed by a classic British cab simulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate a Tube Screamer-style boost for mid punch and tightening the low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Good alternative, but 'Boost' is more direct for TS emulation."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz edge",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Output": "6"
+              },
+              "purpose": "Add a subtle fuzz bite and grit without heavy saturation.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is aggressive, but settings are dialed back to provide only an edge/texture rather than main distortion.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Might be too complex or bright for the desired Marshall crunch."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Middle": "8",
+                "Bass": "6"
+              },
+              "purpose": "Provide the core Marshall/Plexi tone and mid-focused punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Similar, but UK 45 is more classically associated with the desired Plexi sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Ground the tone with a classic British cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Fine-tune the mid punch and tighten the low end without sounding scooped.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Kept inactive to avoid 'clean chorus' and maintain aggressive focus.",
+              "matchQuality": "N/A",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding like a 'lush delay'.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal ambience; settings are kept low.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could add too much warmth, detracting from the dry attack."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space without muddying the tight rhythm tone.",
+              "matchQuality": "close",
+              "gap": "The reverb mix is kept low to maintain tightness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too bright or artificial for this specific rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a high-energy rock track, requiring aggressive gain stages. The settings prioritize punch and mid-range focus over pure saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve the cabinet realism by swapping the current IR for a more specific, high-punch Marshall 4x12 simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (specific to Plexi/Crunch)",
+              "reason": "Enhance the core British crunch tone and mid-punch required for Foo Fighters' style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Foo Fighters - Monkey Wrench - Valeton GP-180",
+        "song": {
+          "artist": "Foo Fighters",
+          "title": "Monkey Wrench",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight Marshall crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive rhythm tone built around the UK 45 amp model, utilizing a Boost pedal for grit and shaping the mids, followed by a classic British cab simulation.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "4.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Simulate a Tube Screamer-style boost for mid punch and tightening the low end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Good alternative, but 'Boost' is more direct for TS emulation."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz edge",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "5",
+              "Output": "6"
+            },
+            "purpose": "Add a subtle fuzz bite and grit without heavy saturation.",
+            "matchQuality": "close",
+            "gap": "The RAT-style is aggressive, but settings are dialed back to provide only an edge/texture rather than main distortion.",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Might be too complex or bright for the desired Marshall crunch."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Middle": "8",
+              "Bass": "6"
+            },
+            "purpose": "Provide the core Marshall/Plexi tone and mid-focused punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Similar, but UK 45 is more classically associated with the desired Plexi sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Ground the tone with a classic British cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2",
+              "Mid": "+3",
+              "High": "+1"
+            },
+            "purpose": "Fine-tune the mid punch and tighten the low end without sounding scooped.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Kept inactive to avoid 'clean chorus' and maintain aggressive focus.",
+            "matchQuality": "N/A",
+            "gap": "None (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "1"
+            },
+            "purpose": "Add subtle rhythmic depth without sounding like a 'lush delay'.",
+            "matchQuality": "close",
+            "gap": "The goal is minimal ambience; settings are kept low.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could add too much warmth, detracting from the dry attack."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a subtle sense of space without muddying the tight rhythm tone.",
+            "matchQuality": "close",
+            "gap": "The reverb mix is kept low to maintain tightness.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might sound too bright or artificial for this specific rock context."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight Marshall crunch with slight fuzz edge",
+          "toneProfile": "tight Marshall crunch with slight fuzz edge",
+          "idealSignalChain": "Marshall/Plexi gain | 4x12 cab | humbucker guitar | Tube Screamer boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi gain",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "big rhythm drive",
+            "mid punch",
+            "dry attack",
+            "slight fuzz bite",
+            "tight low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on Marshall/Plexi tones with controlled fuzz and mid punch.",
+          "bestMatchSummary": "A tight, aggressive rhythm tone built around the UK 45 amp model, utilizing a Boost pedal for grit and shaping the mids, followed by a classic British cab simulation.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate a Tube Screamer-style boost for mid punch and tightening the low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Good alternative, but 'Boost' is more direct for TS emulation."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz edge",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "5",
+                "Output": "6"
+              },
+              "purpose": "Add a subtle fuzz bite and grit without heavy saturation.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is aggressive, but settings are dialed back to provide only an edge/texture rather than main distortion.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Might be too complex or bright for the desired Marshall crunch."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Middle": "8",
+                "Bass": "6"
+              },
+              "purpose": "Provide the core Marshall/Plexi tone and mid-focused punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Similar, but UK 45 is more classically associated with the desired Plexi sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Ground the tone with a classic British cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Fine-tune the mid punch and tighten the low end without sounding scooped.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Kept inactive to avoid 'clean chorus' and maintain aggressive focus.",
+              "matchQuality": "N/A",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding like a 'lush delay'.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal ambience; settings are kept low.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could add too much warmth, detracting from the dry attack."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space without muddying the tight rhythm tone.",
+              "matchQuality": "close",
+              "gap": "The reverb mix is kept low to maintain tightness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too bright or artificial for this specific rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve the cabinet realism by swapping the current IR for a more specific, high-punch Marshall 4x12 simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (specific to Plexi/Crunch)",
+              "reason": "Enhance the core British crunch tone and mid-punch required for Foo Fighters' style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Fender cab guess",
+          "bias toward Marshall not generic rock",
+          "keep fuzz subtle, not main texture"
+        ],
+        "warnings": [
+          "The source material is a high-energy rock track, requiring aggressive gain stages. The settings prioritize punch and mid-range focus over pure saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.778,
+      "prompt_chars": 994,
+      "response_chars": 527,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 129,
+        "total_duration": 12757097300,
+        "prompt_eval_duration": 231597000,
+        "eval_duration": 2240649000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.693,
+      "prompt_chars": 5455,
+      "response_chars": 557,
+      "usage": {
+        "input_tokens": 1514,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 42.712,
+      "prompt_chars": 3645,
+      "response_chars": 5815,
+      "usage": {
+        "prompt_eval_count": 1222,
+        "eval_count": 1651,
+        "total_duration": 42704976400,
+        "prompt_eval_duration": 360846000,
+        "eval_duration": 27877738000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.163,
+      "prompt_chars": 8051,
+      "response_chars": 606,
+      "usage": {
+        "prompt_eval_count": 2230,
+        "eval_count": 162,
+        "total_duration": 4140346900,
+        "prompt_eval_duration": 540898000,
+        "eval_duration": 3085938000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.132,
+      "prompt_chars": 2912,
+      "response_chars": 201,
+      "usage": {
+        "prompt_eval_count": 902,
+        "eval_count": 53,
+        "total_duration": 9104086700,
+        "prompt_eval_duration": 364117000,
+        "eval_duration": 1054674000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Foo Fighters",
+      "title": "Monkey Wrench",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Foo Fighters - Monkey Wrench - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight Marshall crunch with slight fuzz edge",
+      "signalChainSummary": "A tight, aggressive rhythm tone built around the UK 45 amp model, utilizing a Boost pedal for grit and shaping the mids, followed by a classic British cab simulation.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "4.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Simulate a Tube Screamer-style boost for mid punch and tightening the low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Good alternative, but 'Boost' is more direct for TS emulation."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz edge",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "5",
+            "Output": "6"
+          },
+          "purpose": "Add a subtle fuzz bite and grit without heavy saturation.",
+          "matchQuality": "close",
+          "gap": "The RAT-style is aggressive, but settings are dialed back to provide only an edge/texture rather than main distortion.",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Might be too complex or bright for the desired Marshall crunch."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Middle": "8",
+            "Bass": "6"
+          },
+          "purpose": "Provide the core Marshall/Plexi tone and mid-focused punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Similar, but UK 45 is more classically associated with the desired Plexi sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Ground the tone with a classic British cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2",
+            "Mid": "+3",
+            "High": "+1"
+          },
+          "purpose": "Fine-tune the mid punch and tighten the low end without sounding scooped.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Kept inactive to avoid 'clean chorus' and maintain aggressive focus.",
+          "matchQuality": "fallback",
+          "gap": "None (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "1"
+          },
+          "purpose": "Add subtle rhythmic depth without sounding like a 'lush delay'.",
+          "matchQuality": "close",
+          "gap": "The goal is minimal ambience; settings are kept low.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could add too much warmth, detracting from the dry attack."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a subtle sense of space without muddying the tight rhythm tone.",
+          "matchQuality": "close",
+          "gap": "The reverb mix is kept low to maintain tightness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might sound too bright or artificial for this specific rock context."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight Marshall crunch with slight fuzz edge",
+      "mustHave": [
+        "big rhythm drive",
+        "mid punch",
+        "dry attack",
+        "slight fuzz bite",
+        "tight low end"
+      ],
+      "avoid": [
+        "scooped tone",
+        "clean chorus",
+        "lush delay",
+        "heavy fuzz",
+        "over-saturated distortion"
+      ],
+      "gearClues": [
+        "Marshall/Plexi gain",
+        "4x12 cab",
+        "humbucker guitar",
+        "Tube Screamer boost"
+      ],
+      "corrections": [
+        "drop Fender cab guess",
+        "bias toward Marshall not generic rock",
+        "keep fuzz subtle, not main texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "post-grunge",
+        "alt metal",
+        "arena rock"
+      ],
+      "targetTone": "tight Marshall crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve the cabinet realism by swapping the current IR for a more specific, high-punch Marshall 4x12 simulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (specific to Plexi/Crunch)",
+          "reason": "Enhance the core British crunch tone and mid-punch required for Foo Fighters' style.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and punch in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 460,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1062 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 7,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Accept__Balls_To_The_Wall.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Accept",
+    "title": "Balls To The Wall",
+    "album": "",
+    "year": null,
+    "genre": "heavy metal"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive hard rock/metal tone with a thick, saturated crunch.",
+      "signatureElements": [
+        "Heavy distortion/fuzz saturation",
+        "Mid-scooped punchy rhythm sound",
+        "Aggressive palm muting articulation",
+        "Sustained lead lines"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (for mid-hump)",
+        "High-gain Marshall or Mesa Boogie style amp model",
+        "British cabinet emulation (4x12)"
+      ],
+      "avoid": [
+        "Clean arpeggios",
+        "Ambient delay washes",
+        "Thin, scooped punk tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+      "mustHave": [
+        "aggressive palm-mute attack",
+        "saturated but not fuzzy gain",
+        "tight riff punch",
+        "singing lead sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "scooped modern metal",
+        "clean tone",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot-rodded British amp",
+        "4x12 cab",
+        "humbucker guitar",
+        "light boost only"
+      ],
+      "corrections": [
+        "drop fuzz wording",
+        "avoid Mesa-style scoop",
+        "keep it hard-rock, not metal"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+    "mustHave": [
+      "aggressive palm-mute attack",
+      "saturated but not fuzzy gain",
+      "tight riff punch",
+      "singing lead sustain"
+    ],
+    "avoid": [
+      "fuzz",
+      "scooped modern metal",
+      "clean tone",
+      "ambient delay"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or hot-rodded British amp",
+      "4x12 cab",
+      "humbucker guitar",
+      "light boost only"
+    ],
+    "corrections": [
+      "drop fuzz wording",
+      "avoid Mesa-style scoop",
+      "keep it hard-rock, not metal"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British hard rock tones (AC/DC, early Iron Maiden) using Marshall-style amps and cabs.",
+          "bestMatchSummary": "A high-gain, punchy chain utilizing a UK 50 or UK 45 amp model with moderate distortion, followed by a British cab simulation to achieve the thick, aggressive hard rock sound required for 'Balls To The Wall'.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain hard rock playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Provide a subtle, aggressive boost to enhance the attack and punch of palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "The 'light boost only' clue is addressed by using the dedicated Boost module rather than an OD pedal.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If a more colored, dirtier boost is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide saturated but not fuzzy gain, mimicking the aggressive crunch of 80s hard rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over specific amp models to shape the core tone before the main preamp stage, ensuring tight riff punch.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused dirt is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Marshall/Plexi sound required for AC/DC-style hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive alternative if the UK 50 is too round."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the necessary British cabinet coloration and punch for hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1",
+                "Mid Boost": "+3",
+                "Treble Cut": "-1"
+              },
+              "purpose": "Enhance the biting upper mids and maintain tight low end while controlling excessive bass.",
+              "matchQuality": "close",
+              "gap": "The specific EQ curve is subjective, but Guitar EQ 2 allows for precise mid-range focus required by the verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibe",
+              "module": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle width and sustain to the singing lead lines without sounding ambient.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here, as the primary goal is punchy riffing. It adds dimension for the 'singing lead' requirement.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural sense of space and depth to the overall tone without muddying the attack.",
+              "matchQuality": "close",
+              "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the raw, aggressive feel while adding necessary sustain for lead parts.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a hard rock track, so the resulting tone will be aggressive and high-gain. Adjust settings carefully to prevent excessive muddiness."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better definition and punch in hard rock contexts.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic British crunch and mid-range bite required for 80s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end and more defined upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Accept - Balls To The Wall - Valeton GP-180",
+        "song": {
+          "artist": "Accept",
+          "title": "Balls To The Wall",
+          "album": "",
+          "year": null,
+          "genre": "heavy metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A high-gain, punchy chain utilizing a UK 50 or UK 45 amp model with moderate distortion, followed by a British cab simulation to achieve the thick, aggressive hard rock sound required for 'Balls To The Wall'.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain hard rock playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Tone": "Mid-boost"
+            },
+            "purpose": "Provide a subtle, aggressive boost to enhance the attack and punch of palm-muted riffs.",
+            "matchQuality": "close",
+            "gap": "The 'light boost only' clue is addressed by using the dedicated Boost module rather than an OD pedal.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "If a more colored, dirtier boost is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Provide saturated but not fuzzy gain, mimicking the aggressive crunch of 80s hard rock.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is chosen over specific amp models to shape the core tone before the main preamp stage, ensuring tight riff punch.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "If a more aggressive, mid-focused dirt is needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "7",
+              "Treble": "6",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British Marshall/Plexi sound required for AC/DC-style hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A slightly more aggressive alternative if the UK 50 is too round."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the necessary British cabinet coloration and punch for hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-1",
+              "Mid Boost": "+3",
+              "Treble Cut": "-1"
+            },
+            "purpose": "Enhance the biting upper mids and maintain tight low end while controlling excessive bass.",
+            "matchQuality": "close",
+            "gap": "The specific EQ curve is subjective, but Guitar EQ 2 allows for precise mid-range focus required by the verdict.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/vibe",
+            "module": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3",
+              "Mix": "1"
+            },
+            "purpose": "Add subtle width and sustain to the singing lead lines without sounding ambient.",
+            "matchQuality": "close",
+            "gap": "Chorus is used sparingly here, as the primary goal is punchy riffing. It adds dimension for the 'singing lead' requirement.",
+            "alternatives": [],
+            "model": "None"
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a natural sense of space and depth to the overall tone without muddying the attack.",
+            "matchQuality": "close",
+            "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the raw, aggressive feel while adding necessary sustain for lead parts.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+          "toneProfile": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+          "idealSignalChain": "Marshall/Plexi or hot-rodded British amp | 4x12 cab | humbucker guitar | light boost only",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or hot-rodded British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light boost only",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "aggressive palm-mute attack",
+            "saturated but not fuzzy gain",
+            "tight riff punch",
+            "singing lead sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British hard rock tones (AC/DC, early Iron Maiden) using Marshall-style amps and cabs.",
+          "bestMatchSummary": "A high-gain, punchy chain utilizing a UK 50 or UK 45 amp model with moderate distortion, followed by a British cab simulation to achieve the thick, aggressive hard rock sound required for 'Balls To The Wall'.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain hard rock playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Tone": "Mid-boost"
+              },
+              "purpose": "Provide a subtle, aggressive boost to enhance the attack and punch of palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "The 'light boost only' clue is addressed by using the dedicated Boost module rather than an OD pedal.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If a more colored, dirtier boost is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Provide saturated but not fuzzy gain, mimicking the aggressive crunch of 80s hard rock.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is chosen over specific amp models to shape the core tone before the main preamp stage, ensuring tight riff punch.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused dirt is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Marshall/Plexi sound required for AC/DC-style hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A slightly more aggressive alternative if the UK 50 is too round."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the necessary British cabinet coloration and punch for hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1",
+                "Mid Boost": "+3",
+                "Treble Cut": "-1"
+              },
+              "purpose": "Enhance the biting upper mids and maintain tight low end while controlling excessive bass.",
+              "matchQuality": "close",
+              "gap": "The specific EQ curve is subjective, but Guitar EQ 2 allows for precise mid-range focus required by the verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibe",
+              "module": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle width and sustain to the singing lead lines without sounding ambient.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here, as the primary goal is punchy riffing. It adds dimension for the 'singing lead' requirement.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural sense of space and depth to the overall tone without muddying the attack.",
+              "matchQuality": "close",
+              "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the raw, aggressive feel while adding necessary sustain for lead parts.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better definition and punch in hard rock contexts.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic British crunch and mid-range bite required for 80s hard rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end and more defined upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz wording",
+          "avoid Mesa-style scoop",
+          "keep it hard-rock, not metal"
+        ],
+        "warnings": [
+          "The source material is a hard rock track, so the resulting tone will be aggressive and high-gain. Adjust settings carefully to prevent excessive muddiness."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.609,
+      "prompt_chars": 977,
+      "response_chars": 517,
+      "usage": {
+        "prompt_eval_count": 315,
+        "eval_count": 132,
+        "total_duration": 1587232800,
+        "prompt_eval_duration": 71236000,
+        "eval_duration": 1026125000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.241,
+      "prompt_chars": 5426,
+      "response_chars": 571,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 155,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.981,
+      "prompt_chars": 3573,
+      "response_chars": 5622,
+      "usage": {
+        "prompt_eval_count": 1195,
+        "eval_count": 1559,
+        "total_duration": 12973583600,
+        "prompt_eval_duration": 235899000,
+        "eval_duration": 12306012000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.829,
+      "prompt_chars": 7785,
+      "response_chars": 535,
+      "usage": {
+        "prompt_eval_count": 2139,
+        "eval_count": 148,
+        "total_duration": 1822816900,
+        "prompt_eval_duration": 216588000,
+        "eval_duration": 1162223000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.894,
+      "prompt_chars": 2859,
+      "response_chars": 193,
+      "usage": {
+        "prompt_eval_count": 896,
+        "eval_count": 52,
+        "total_duration": 878785400,
+        "prompt_eval_duration": 104798000,
+        "eval_duration": 395847000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Accept",
+      "title": "Balls To The Wall",
+      "album": "",
+      "year": null,
+      "genre": "heavy metal"
+    },
+    "rig": {
+      "rigName": "Accept - Balls To The Wall - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+      "signalChainSummary": "A high-gain, punchy chain utilizing a UK 50 or UK 45 amp model with moderate distortion, followed by a British cab simulation to achieve the thick, aggressive hard rock sound required for 'Balls To The Wall'.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain hard rock playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Tone": "Mid-boost"
+          },
+          "purpose": "Provide a subtle, aggressive boost to enhance the attack and punch of palm-muted riffs.",
+          "matchQuality": "close",
+          "gap": "The 'light boost only' clue is addressed by using the dedicated Boost module rather than an OD pedal.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If a more colored, dirtier boost is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Provide saturated but not fuzzy gain, mimicking the aggressive crunch of 80s hard rock.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is chosen over specific amp models to shape the core tone before the main preamp stage, ensuring tight riff punch.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "If a more aggressive, mid-focused dirt is needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "7",
+            "Treble": "6",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British Marshall/Plexi sound required for AC/DC-style hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A slightly more aggressive alternative if the UK 50 is too round."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the necessary British cabinet coloration and punch for hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-1",
+            "Mid Boost": "+3",
+            "Treble Cut": "-1"
+          },
+          "purpose": "Enhance the biting upper mids and maintain tight low end while controlling excessive bass.",
+          "matchQuality": "close",
+          "gap": "The specific EQ curve is subjective, but Guitar EQ 2 allows for precise mid-range focus required by the verdict.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/vibe",
+          "module": "PRE",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3",
+            "Mix": "1"
+          },
+          "purpose": "Add subtle width and sustain to the singing lead lines without sounding ambient.",
+          "matchQuality": "close",
+          "gap": "Chorus is used sparingly here, as the primary goal is punchy riffing. It adds dimension for the 'singing lead' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a natural sense of space and depth to the overall tone without muddying the attack.",
+          "matchQuality": "close",
+          "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the raw, aggressive feel while adding necessary sustain for lead parts.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+      "mustHave": [
+        "aggressive palm-mute attack",
+        "saturated but not fuzzy gain",
+        "tight riff punch",
+        "singing lead sustain"
+      ],
+      "avoid": [
+        "fuzz",
+        "scooped modern metal",
+        "clean tone",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot-rodded British amp",
+        "4x12 cab",
+        "humbucker guitar",
+        "light boost only"
+      ],
+      "corrections": [
+        "drop fuzz wording",
+        "avoid Mesa-style scoop",
+        "keep it hard-rock, not metal"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "heavy metal",
+      "styleTags": [
+        "power metal",
+        "hard rock"
+      ],
+      "targetTone": "thick 80s hard-rock crunch with tight low end and biting upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better definition and punch in hard rock contexts.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (UK)",
+          "reason": "Enhance the classic British crunch and mid-range bite required for 80s hard rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter low end and more defined upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 7,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "heavy metal",
+    "subgenres": [
+      "power metal",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic heavy metal, and the tone profile confirms a hard-rock/metal sound."
+  }
+}

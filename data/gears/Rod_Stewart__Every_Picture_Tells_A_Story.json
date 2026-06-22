@@ -1,0 +1,1048 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1191,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rod_Stewart__Every_Picture_Tells_A_Story.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rod Stewart",
+    "title": "Every Picture Tells A Story",
+    "album": "",
+    "year": null,
+    "genre": "british rock"
+  },
+  "genreClassification": {
+    "genre": "british rock",
+    "subgenres": [
+      "classic rock",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "Rod Stewart's style aligns perfectly with classic British blues and rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with natural room reverb and subtle chorus.",
+      "signatureElements": [
+        "Clean foundation",
+        "Subtle modulation (chorus/vibrato)",
+        "Natural spring or plate reverb",
+        "Mid-focused warmth"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin reissue model)",
+        "Cab simulation (2x12, open back)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "Aggressive digital delay"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "gritty British rock crunch with raw amp bite",
+      "mustHave": [
+        "edge-of-breakup drive",
+        "bright upper mids",
+        "slight room",
+        "tight pick attack"
+      ],
+      "avoid": [
+        "clean chorus",
+        "lush reverb",
+        "fender scooped clean",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "small/medium British combo",
+        "single coils or humbucker",
+        "open-back cab"
+      ],
+      "corrections": [
+        "drop chorus",
+        "less clean",
+        "more dry crunch",
+        "no Twin-style sheen"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "gritty British rock crunch with raw amp bite",
+    "mustHave": [
+      "edge-of-breakup drive",
+      "bright upper mids",
+      "slight room",
+      "tight pick attack"
+    ],
+    "avoid": [
+      "clean chorus",
+      "lush reverb",
+      "fender scooped clean",
+      "heavy fuzz"
+    ],
+    "gearClues": [
+      "small/medium British combo",
+      "single coils or humbucker",
+      "open-back cab"
+    ],
+    "corrections": [
+      "drop chorus",
+      "less clean",
+      "more dry crunch",
+      "no Twin-style sheen"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British rock tones, prioritizing mid-range punch and controlled breakup.",
+          "bestMatchSummary": "A classic British crunch tone achieved using a UK 45/UK 50 style amp model, paired with a vintage cabinet and moderate compression for tight attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in vintage rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'edge-of-breakup' drive and grit without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a slightly overdriven British tube preamp, matching the desired crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative for general breakup, but might be too American sounding."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier passages; kept off to maintain the 'crunch' feel.",
+              "matchQuality": "far",
+              "gap": "The RAT is too aggressive for the primary tone. It is included as a powerful option if more grit is needed, but should be bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the small British combo amp and provide bright upper mids and raw bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Also excellent, but UK 50 often provides a slightly more robust mid-range punch suitable for Rod Stewart's style."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British open-back cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Achieve a tight pick attack and smooth out the dynamics for consistent crunch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1 dB",
+                "Mid Boost": "+3 dB (Upper Mids)",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by boosting upper mids for clarity and bite, while controlling low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add slight room ambience without sounding lush or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate/Spring to keep the sound grounded and less 'lush'.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used, but might add too much metallic sheen."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring a vintage British tone. The chain prioritizes mid-range punch and controlled breakup over modern saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, open-back British sound required for classic rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Open Back 4x12 (e.g., Vox/AC30 style)",
+              "reason": "The current IR is too generic; a specific open-back British cab will enhance the raw bite and mid-range punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and grit",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rod Stewart - Every Picture Tells A Story - Valeton GP-180",
+        "song": {
+          "artist": "Rod Stewart",
+          "title": "Every Picture Tells A Story",
+          "album": "",
+          "year": null,
+          "genre": "british rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "gritty British rock crunch with raw amp bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British crunch tone achieved using a UK 45/UK 50 style amp model, paired with a vintage cabinet and moderate compression for tight attack.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and stray noise inherent in vintage rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the required 'edge-of-breakup' drive and grit without heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a slightly overdriven British tube preamp, matching the desired crunch.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative for general breakup, but might be too American sounding."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {},
+            "purpose": "Reserved for heavier passages; kept off to maintain the 'crunch' feel.",
+            "matchQuality": "far",
+            "gap": "The RAT is too aggressive for the primary tone. It is included as a powerful option if more grit is needed, but should be bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6/10",
+              "Treble": "7/10",
+              "Midrange": "8/10",
+              "Bass": "6/10"
+            },
+            "purpose": "Simulate the small British combo amp and provide bright upper mids and raw bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Also excellent, but UK 50 often provides a slightly more robust mid-range punch suitable for Rod Stewart's style."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British open-back cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "compression/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Achieve a tight pick attack and smooth out the dynamics for consistent crunch.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-1 dB",
+              "Mid Boost": "+3 dB (Upper Mids)",
+              "Treble Cut": "-2 dB"
+            },
+            "purpose": "Sculpt the tone by boosting upper mids for clarity and bite, while controlling low end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add slight room ambience without sounding lush or overly wet.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is preferred over Plate/Spring to keep the sound grounded and less 'lush'.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could be used, but might add too much metallic sheen."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "gritty British rock crunch with raw amp bite",
+          "toneProfile": "gritty British rock crunch with raw amp bite",
+          "idealSignalChain": "small/medium British combo | single coils or humbucker | open-back cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small/medium British combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils or humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "open-back cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "edge-of-breakup drive",
+            "bright upper mids",
+            "slight room",
+            "tight pick attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British rock tones, prioritizing mid-range punch and controlled breakup.",
+          "bestMatchSummary": "A classic British crunch tone achieved using a UK 45/UK 50 style amp model, paired with a vintage cabinet and moderate compression for tight attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in vintage rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'edge-of-breakup' drive and grit without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a slightly overdriven British tube preamp, matching the desired crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative for general breakup, but might be too American sounding."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier passages; kept off to maintain the 'crunch' feel.",
+              "matchQuality": "far",
+              "gap": "The RAT is too aggressive for the primary tone. It is included as a powerful option if more grit is needed, but should be bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the small British combo amp and provide bright upper mids and raw bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Also excellent, but UK 50 often provides a slightly more robust mid-range punch suitable for Rod Stewart's style."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British open-back cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Achieve a tight pick attack and smooth out the dynamics for consistent crunch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1 dB",
+                "Mid Boost": "+3 dB (Upper Mids)",
+                "Treble Cut": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by boosting upper mids for clarity and bite, while controlling low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add slight room ambience without sounding lush or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate/Spring to keep the sound grounded and less 'lush'.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used, but might add too much metallic sheen."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, open-back British sound required for classic rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Open Back 4x12 (e.g., Vox/AC30 style)",
+              "reason": "The current IR is too generic; a specific open-back British cab will enhance the raw bite and mid-range punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and grit",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "less clean",
+          "more dry crunch",
+          "no Twin-style sheen"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring a vintage British tone. The chain prioritizes mid-range punch and controlled breakup over modern saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.79,
+      "prompt_chars": 1007,
+      "response_chars": 444,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 111,
+        "total_duration": 9781189800,
+        "prompt_eval_duration": 244691000,
+        "eval_duration": 2043496000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.028,
+      "prompt_chars": 5379,
+      "response_chars": 503,
+      "usage": {
+        "input_tokens": 1498,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1631
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 41.189,
+      "prompt_chars": 3590,
+      "response_chars": 5287,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1501,
+        "total_duration": 41168919400,
+        "prompt_eval_duration": 485425000,
+        "eval_duration": 26925132000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.125,
+      "prompt_chars": 7408,
+      "response_chars": 587,
+      "usage": {
+        "prompt_eval_count": 2066,
+        "eval_count": 160,
+        "total_duration": 5104647000,
+        "prompt_eval_duration": 585506000,
+        "eval_duration": 3727298000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.764,
+      "prompt_chars": 2744,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 873,
+        "eval_count": 47,
+        "total_duration": 16735827700,
+        "prompt_eval_duration": 528602999,
+        "eval_duration": 849637000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rod Stewart",
+      "title": "Every Picture Tells A Story",
+      "album": "",
+      "year": null,
+      "genre": "british rock"
+    },
+    "rig": {
+      "rigName": "Rod Stewart - Every Picture Tells A Story - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "gritty British rock crunch with raw amp bite",
+      "signalChainSummary": "A classic British crunch tone achieved using a UK 45/UK 50 style amp model, paired with a vintage cabinet and moderate compression for tight attack.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and stray noise inherent in vintage rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the required 'edge-of-breakup' drive and grit without heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a slightly overdriven British tube preamp, matching the desired crunch.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative for general breakup, but might be too American sounding."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {},
+          "purpose": "Reserved for heavier passages; kept off to maintain the 'crunch' feel.",
+          "matchQuality": "fallback",
+          "gap": "The RAT is too aggressive for the primary tone. It is included as a powerful option if more grit is needed, but should be bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6/10",
+            "Treble": "7/10",
+            "Midrange": "8/10",
+            "Bass": "6/10"
+          },
+          "purpose": "Simulate the small British combo amp and provide bright upper mids and raw bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Also excellent, but UK 50 often provides a slightly more robust mid-range punch suitable for Rod Stewart's style."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British open-back cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "compression/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Achieve a tight pick attack and smooth out the dynamics for consistent crunch.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-1 dB",
+            "Mid Boost": "+3 dB (Upper Mids)",
+            "Treble Cut": "-2 dB"
+          },
+          "purpose": "Sculpt the tone by boosting upper mids for clarity and bite, while controlling low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add slight room ambience without sounding lush or overly wet.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is preferred over Plate/Spring to keep the sound grounded and less 'lush'.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could be used, but might add too much metallic sheen."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "gritty British rock crunch with raw amp bite",
+      "mustHave": [
+        "edge-of-breakup drive",
+        "bright upper mids",
+        "slight room",
+        "tight pick attack"
+      ],
+      "avoid": [
+        "clean chorus",
+        "lush reverb",
+        "fender scooped clean",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "small/medium British combo",
+        "single coils or humbucker",
+        "open-back cab"
+      ],
+      "corrections": [
+        "drop chorus",
+        "less clean",
+        "more dry crunch",
+        "no Twin-style sheen"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "british rock",
+      "styleTags": [
+        "classic rock",
+        "blues-rock"
+      ],
+      "targetTone": "gritty British rock crunch with raw amp bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the raw, open-back British sound required for classic rock.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British Open Back 4x12 (e.g., Vox/AC30 style)",
+          "reason": "The current IR is too generic; a specific open-back British cab will enhance the raw bite and mid-range punch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and grit",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1191,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

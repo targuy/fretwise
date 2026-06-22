@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 592,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Hozier__Work_Song.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Hozier",
+    "title": "Work Song",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "indie folk",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Hozier's style is rooted in intimate, acoustic-driven folk and soul music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean to dirty blues/folk tones",
+      "signatureElements": [
+        "Subtle compression and light overdrive (crunch)",
+        "Fingerpicked acoustic-electric feel",
+        "Ambient reverb and delay for space"
+      ],
+      "gearHypotheses": [
+        "Modeling amp with rich low end (e.g., Fender Twin/Jazzmaster style)",
+        "Clean boost or transparent overdrive pedal"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Aggressive distortion",
+        "Wah sweeps"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm intimate clean-crunch folk electric with roomy ambience",
+      "mustHave": [
+        "fingerpicked feel",
+        "light edge-of-breakup",
+        "soft low-end body",
+        "subtle room reverb"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big lead distortion",
+        "wah"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "small transparent overdrive",
+        "single-coil or P90"
+      ],
+      "corrections": [
+        "drop acoustic-electric wording",
+        "reduce delay prominence",
+        "keep drive mild"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm intimate clean-crunch folk electric with roomy ambience",
+    "mustHave": [
+      "fingerpicked feel",
+      "light edge-of-breakup",
+      "soft low-end body",
+      "subtle room reverb"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "big lead distortion",
+      "wah"
+    ],
+    "gearClues": [
+      "Fender-style clean amp",
+      "small transparent overdrive",
+      "single-coil or P90"
+    ],
+    "corrections": [
+      "drop acoustic-electric wording",
+      "reduce delay prominence",
+      "keep drive mild"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones with subtle breakup and natural room ambience.",
+          "bestMatchSummary": "A gentle signal chain utilizing a transparent overdrive for light crunch, paired with a Fender-style amp (US Deluxe) and a small cab to achieve the required intimate, fingerpicked folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in intimate recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'small transparent overdrive' and light edge-of-breakup without sounding aggressive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its transparency, mimicking a mild tube preamp boost suitable for folk tones. A dedicated clean boost would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "If the overdrive needs to be even more subtle and focused on sustain rather than grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the 'Fender-style clean amp' and provide a warm, open platform for fingerpicked tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for classic American clean tones. A dedicated Fender model would be perfect.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A slightly brighter alternative if the tone needs more sparkle."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Use a smaller cabinet to keep the sound intimate and focused, matching the 'small' feel of the performance.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "5%",
+                "Midrange": "2%",
+                "Treble": "3%"
+              },
+              "purpose": "Subtly scoop the frequencies to enhance the 'soft low-end body' and maintain clarity for fingerpicking.",
+              "matchQuality": "close",
+              "gap": "A parametric EQ would offer more surgical control, but Guitar EQ 1 is sufficient for subtle shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'wah' effect as requested by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and natural to emphasize the raw, intimate feel of the folk performance.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle depth and space without making the delay prominent, fulfilling the 'reduce delay prominence' correction.",
+              "matchQuality": "close",
+              "gap": "A Tape Delay might be more natural for folk music, but Digital Delay allows precise control over low mix/feedback.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If the delay needs to sound warmer and less digital."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Apply the required 'subtle room reverb' and create a sense of natural, warm ambience.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (folk song), so the rig focuses on clean, acoustic-electric emulation rather than pure electric rock tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for a more natural and intimate room sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the warm, intimate folk ambience.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Hozier - Work Song - Valeton GP-180",
+        "song": {
+          "artist": "Hozier",
+          "title": "Work Song",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm intimate clean-crunch folk electric with roomy ambience",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gentle signal chain utilizing a transparent overdrive for light crunch, paired with a Fender-style amp (US Deluxe) and a small cab to achieve the required intimate, fingerpicked folk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in intimate recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the required 'small transparent overdrive' and light edge-of-breakup without sounding aggressive.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its transparency, mimicking a mild tube preamp boost suitable for folk tones. A dedicated clean boost would be ideal.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "If the overdrive needs to be even more subtle and focused on sustain rather than grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "35%",
+              "Treble": "60%",
+              "Midrange": "70%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the 'Fender-style clean amp' and provide a warm, open platform for fingerpicked tones.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best fit for classic American clean tones. A dedicated Fender model would be perfect.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "A slightly brighter alternative if the tone needs more sparkle."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Use a smaller cabinet to keep the sound intimate and focused, matching the 'small' feel of the performance.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "5%",
+              "Midrange": "2%",
+              "Treble": "3%"
+            },
+            "purpose": "Subtly scoop the frequencies to enhance the 'soft low-end body' and maintain clarity for fingerpicking.",
+            "matchQuality": "close",
+            "gap": "A parametric EQ would offer more surgical control, but Guitar EQ 1 is sufficient for subtle shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid the 'wah' effect as requested by the musical verdict.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone dry and natural to emphasize the raw, intimate feel of the folk performance.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Provide subtle depth and space without making the delay prominent, fulfilling the 'reduce delay prominence' correction.",
+            "matchQuality": "close",
+            "gap": "A Tape Delay might be more natural for folk music, but Digital Delay allows precise control over low mix/feedback.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If the delay needs to sound warmer and less digital."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Apply the required 'subtle room reverb' and create a sense of natural, warm ambience.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm intimate clean-crunch folk electric with roomy ambience",
+          "toneProfile": "warm intimate clean-crunch folk electric with roomy ambience",
+          "idealSignalChain": "Fender-style clean amp | small transparent overdrive | single-coil or P90",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small transparent overdrive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or P90",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fingerpicked feel",
+            "light edge-of-breakup",
+            "soft low-end body",
+            "subtle room reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones with subtle breakup and natural room ambience.",
+          "bestMatchSummary": "A gentle signal chain utilizing a transparent overdrive for light crunch, paired with a Fender-style amp (US Deluxe) and a small cab to achieve the required intimate, fingerpicked folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in intimate recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'small transparent overdrive' and light edge-of-breakup without sounding aggressive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its transparency, mimicking a mild tube preamp boost suitable for folk tones. A dedicated clean boost would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "If the overdrive needs to be even more subtle and focused on sustain rather than grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the 'Fender-style clean amp' and provide a warm, open platform for fingerpicked tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for classic American clean tones. A dedicated Fender model would be perfect.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A slightly brighter alternative if the tone needs more sparkle."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Use a smaller cabinet to keep the sound intimate and focused, matching the 'small' feel of the performance.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "5%",
+                "Midrange": "2%",
+                "Treble": "3%"
+              },
+              "purpose": "Subtly scoop the frequencies to enhance the 'soft low-end body' and maintain clarity for fingerpicking.",
+              "matchQuality": "close",
+              "gap": "A parametric EQ would offer more surgical control, but Guitar EQ 1 is sufficient for subtle shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid the 'wah' effect as requested by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and natural to emphasize the raw, intimate feel of the folk performance.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle depth and space without making the delay prominent, fulfilling the 'reduce delay prominence' correction.",
+              "matchQuality": "close",
+              "gap": "A Tape Delay might be more natural for folk music, but Digital Delay allows precise control over low mix/feedback.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If the delay needs to sound warmer and less digital."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Apply the required 'subtle room reverb' and create a sense of natural, warm ambience.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for a more natural and intimate room sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the warm, intimate folk ambience.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop acoustic-electric wording",
+          "reduce delay prominence",
+          "keep drive mild"
+        ],
+        "warnings": [
+          "The source material is non-guitar (folk song), so the rig focuses on clean, acoustic-electric emulation rather than pure electric rock tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.257,
+      "prompt_chars": 984,
+      "response_chars": 449,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 104,
+        "total_duration": 9255873100,
+        "prompt_eval_duration": 276120000,
+        "eval_duration": 1563691000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.861,
+      "prompt_chars": 5355,
+      "response_chars": 515,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 129,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1622
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.851,
+      "prompt_chars": 3565,
+      "response_chars": 6144,
+      "usage": {
+        "prompt_eval_count": 1198,
+        "eval_count": 1708,
+        "total_duration": 29840140500,
+        "prompt_eval_duration": 156582000,
+        "eval_duration": 29245631000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.321,
+      "prompt_chars": 8288,
+      "response_chars": 466,
+      "usage": {
+        "prompt_eval_count": 2263,
+        "eval_count": 129,
+        "total_duration": 3297756100,
+        "prompt_eval_duration": 556715000,
+        "eval_duration": 1991429000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.823,
+      "prompt_chars": 2885,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 902,
+        "eval_count": 52,
+        "total_duration": 8795225100,
+        "prompt_eval_duration": 234185000,
+        "eval_duration": 1201814000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Hozier",
+      "title": "Work Song",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Hozier - Work Song - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm intimate clean-crunch folk electric with roomy ambience",
+      "signalChainSummary": "A gentle signal chain utilizing a transparent overdrive for light crunch, paired with a Fender-style amp (US Deluxe) and a small cab to achieve the required intimate, fingerpicked folk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in intimate recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the required 'small transparent overdrive' and light edge-of-breakup without sounding aggressive.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its transparency, mimicking a mild tube preamp boost suitable for folk tones. A dedicated clean boost would be ideal.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "If the overdrive needs to be even more subtle and focused on sustain rather than grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "35%",
+            "Treble": "60%",
+            "Midrange": "70%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the 'Fender-style clean amp' and provide a warm, open platform for fingerpicked tones.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best fit for classic American clean tones. A dedicated Fender model would be perfect.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A slightly brighter alternative if the tone needs more sparkle."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Use a smaller cabinet to keep the sound intimate and focused, matching the 'small' feel of the performance.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "5%",
+            "Midrange": "2%",
+            "Treble": "3%"
+          },
+          "purpose": "Subtly scoop the frequencies to enhance the 'soft low-end body' and maintain clarity for fingerpicking.",
+          "matchQuality": "close",
+          "gap": "A parametric EQ would offer more surgical control, but Guitar EQ 1 is sufficient for subtle shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid the 'wah' effect as requested by the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone dry and natural to emphasize the raw, intimate feel of the folk performance.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Provide subtle depth and space without making the delay prominent, fulfilling the 'reduce delay prominence' correction.",
+          "matchQuality": "close",
+          "gap": "A Tape Delay might be more natural for folk music, but Digital Delay allows precise control over low mix/feedback.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If the delay needs to sound warmer and less digital."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Apply the required 'subtle room reverb' and create a sense of natural, warm ambience.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm intimate clean-crunch folk electric with roomy ambience",
+      "mustHave": [
+        "fingerpicked feel",
+        "light edge-of-breakup",
+        "soft low-end body",
+        "subtle room reverb"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big lead distortion",
+        "wah"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "small transparent overdrive",
+        "single-coil or P90"
+      ],
+      "corrections": [
+        "drop acoustic-electric wording",
+        "reduce delay prominence",
+        "keep drive mild"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "indie folk",
+        "singer-songwriter"
+      ],
+      "targetTone": "warm intimate clean-crunch folk electric with roomy ambience",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for a more natural and intimate room sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance the warm, intimate folk ambience.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more natural tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 592,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

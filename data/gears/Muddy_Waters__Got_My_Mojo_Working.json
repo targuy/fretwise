@@ -1,0 +1,1161 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 954,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Muddy_Waters__Got_My_Mojo_Working.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Muddy Waters",
+    "title": "Got My Mojo Working",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "delta blues",
+      "electric blues",
+      "chicago blues"
+    ],
+    "confidence": "high",
+    "rationale": "Muddy Waters is a foundational artist of electric Chicago Blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bluesy, gritty Chicago blues sound (E minor/E dominant)",
+      "signatureElements": [
+        "Crunch overdrive",
+        "Mid-focused EQ curve",
+        "Slight natural reverb",
+        "Warm tube amp character"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style) for grit",
+        "Amp simulation with classic Fender or Marshall voicing",
+        "Cabinet simulation to enhance mid-range bite"
+      ],
+      "avoid": [
+        "Excessive digital delay",
+        "Bright, scooped EQ tones",
+        "Modern high-gain metal distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty Chicago blues combo break-up with bite",
+      "mustHave": [
+        "gritty small-amp crunch",
+        "mid bite",
+        "raw mono feel",
+        "light room only"
+      ],
+      "avoid": [
+        "Tube Screamer focus",
+        "modern overdrive",
+        "big reverb",
+        "metal gain"
+      ],
+      "gearClues": [
+        "dynamic mic",
+        "small Fender/Valco combo",
+        "1x12 or 2x10",
+        "single-coil or P-90"
+      ],
+      "corrections": [
+        "drop E minor",
+        "avoid generic Fender/Marshall guess",
+        "keep it drier and more direct"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty Chicago blues combo break-up with bite",
+    "mustHave": [
+      "gritty small-amp crunch",
+      "mid bite",
+      "raw mono feel",
+      "light room only"
+    ],
+    "avoid": [
+      "Tube Screamer focus",
+      "modern overdrive",
+      "big reverb",
+      "metal gain"
+    ],
+    "gearClues": [
+      "dynamic mic",
+      "small Fender/Valco combo",
+      "1x12 or 2x10",
+      "single-coil or P-90"
+    ],
+    "corrections": [
+      "drop E minor",
+      "avoid generic Fender/Marshall guess",
+      "keep it drier and more direct"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Chicago blues combo tone simulation, focusing on mid-range bite and raw grit.",
+          "bestMatchSummary": "A compact, dirty Chicago blues sound achieved using a low-gain boost/OD, followed by the US Deluxe amp model into a 2x12 cabinet, finished with minimal room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary gritty small-amp crunch and mid-range bite characteristic of Chicago blues.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly more raw, less polished grit. It simulates the breakup of an older combo amp.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly too clean/modern."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient breakup.",
+              "matchQuality": "none",
+              "gap": "The required tone is based on natural amp breakup rather than heavy pedal saturation.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the sound of a small Fender/Valco combo amp, providing clarity and punch.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for the 'small Fender' clue. Settings are adjusted to emphasize mids for bite.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar, but US Deluxe often captures a slightly dirtier, more vintage combo sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the '1x12 or 2x10' clue and provide a focused, raw sound.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the closest available cabinet to simulate a small combo speaker setup.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "Could work, but US 2x12 generally has a more vintage/American tone."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Boost the mid-range frequency to achieve the required 'mid bite' and cut through the mix.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, emphasizing the core blues frequencies.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is required for this specific blues tone.",
+              "matchQuality": "none",
+              "gap": "The focus is on raw grit and directness, not filtering sweeps.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and direct as requested.",
+              "matchQuality": "none",
+              "gap": "Modulation effects are generally avoided for this raw Chicago blues sound.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and direct.",
+              "matchQuality": "none",
+              "gap": "Delay is not essential for a raw combo break-up sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the requested 'light room only' ambience without sounding overly wet or big.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen specifically because it provides a natural, contained space feel, avoiding excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for the raw blues tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "8"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic blues recording, which inherently requires tube-like saturation. The Green OD and US Deluxe combination simulates this vintage breakup effectively."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 2x12 IR for a more period-appropriate, focused speaker simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage single-coil/P90 cab IR (e.g., Fender Deluxe or Valco)",
+              "reason": "Enhance the raw, vintage combo feel and focus on mid-range bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/focus",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "medium",
+          "needsReview": true
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Muddy Waters - Got My Mojo Working - Valeton GP-180",
+        "song": {
+          "artist": "Muddy Waters",
+          "title": "Got My Mojo Working",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty Chicago blues combo break-up with bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A compact, dirty Chicago blues sound achieved using a low-gain boost/OD, followed by the US Deluxe amp model into a 2x12 cabinet, finished with minimal room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary gritty small-amp crunch and mid-range bite characteristic of Chicago blues.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD for a slightly more raw, less polished grit. It simulates the breakup of an older combo amp.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly too clean/modern."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD provides sufficient breakup.",
+            "matchQuality": "none",
+            "gap": "The required tone is based on natural amp breakup rather than heavy pedal saturation.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the sound of a small Fender/Valco combo amp, providing clarity and punch.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best fit for the 'small Fender' clue. Settings are adjusted to emphasize mids for bite.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Similar, but US Deluxe often captures a slightly dirtier, more vintage combo sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the '1x12 or 2x10' clue and provide a focused, raw sound.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is the closest available cabinet to simulate a small combo speaker setup.",
+            "alternatives": [
+              {
+                "model": "Foxy 2x12",
+                "reason": "Could work, but US 2x12 generally has a more vintage/American tone."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+1"
+            },
+            "purpose": "Boost the mid-range frequency to achieve the required 'mid bite' and cut through the mix.",
+            "matchQuality": "close",
+            "gap": "Used for surgical tone shaping, emphasizing the core blues frequencies.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah effect is required for this specific blues tone.",
+            "matchQuality": "none",
+            "gap": "The focus is on raw grit and directness, not filtering sweeps.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone dry and direct as requested.",
+            "matchQuality": "none",
+            "gap": "Modulation effects are generally avoided for this raw Chicago blues sound.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone dry and direct.",
+            "matchQuality": "none",
+            "gap": "Delay is not essential for a raw combo break-up sound.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide the requested 'light room only' ambience without sounding overly wet or big.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is chosen specifically because it provides a natural, contained space feel, avoiding excessive wash.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too bright and artificial for the raw blues tone."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "8"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "none",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty Chicago blues combo break-up with bite",
+          "toneProfile": "dirty Chicago blues combo break-up with bite",
+          "idealSignalChain": "dynamic mic | small Fender/Valco combo | 1x12 or 2x10 | single-coil or P-90",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "dynamic mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small Fender/Valco combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x10",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or P-90",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "gritty small-amp crunch",
+            "mid bite",
+            "raw mono feel",
+            "light room only"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Chicago blues combo tone simulation, focusing on mid-range bite and raw grit.",
+          "bestMatchSummary": "A compact, dirty Chicago blues sound achieved using a low-gain boost/OD, followed by the US Deluxe amp model into a 2x12 cabinet, finished with minimal room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary gritty small-amp crunch and mid-range bite characteristic of Chicago blues.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly more raw, less polished grit. It simulates the breakup of an older combo amp.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly too clean/modern."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient breakup.",
+              "matchQuality": "none",
+              "gap": "The required tone is based on natural amp breakup rather than heavy pedal saturation.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the sound of a small Fender/Valco combo amp, providing clarity and punch.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best fit for the 'small Fender' clue. Settings are adjusted to emphasize mids for bite.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar, but US Deluxe often captures a slightly dirtier, more vintage combo sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the '1x12 or 2x10' clue and provide a focused, raw sound.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the closest available cabinet to simulate a small combo speaker setup.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "Could work, but US 2x12 generally has a more vintage/American tone."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Boost the mid-range frequency to achieve the required 'mid bite' and cut through the mix.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, emphasizing the core blues frequencies.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is required for this specific blues tone.",
+              "matchQuality": "none",
+              "gap": "The focus is on raw grit and directness, not filtering sweeps.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and direct as requested.",
+              "matchQuality": "none",
+              "gap": "Modulation effects are generally avoided for this raw Chicago blues sound.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone dry and direct.",
+              "matchQuality": "none",
+              "gap": "Delay is not essential for a raw combo break-up sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the requested 'light room only' ambience without sounding overly wet or big.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen specifically because it provides a natural, contained space feel, avoiding excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for the raw blues tone."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "8"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 2x12 IR for a more period-appropriate, focused speaker simulation.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage single-coil/P90 cab IR (e.g., Fender Deluxe or Valco)",
+              "reason": "Enhance the raw, vintage combo feel and focus on mid-range bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/focus",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "medium",
+          "needsReview": true
+        },
+        "assumptions": [
+          "drop E minor",
+          "avoid generic Fender/Marshall guess",
+          "keep it drier and more direct"
+        ],
+        "warnings": [
+          "The source material is a classic blues recording, which inherently requires tube-like saturation. The Green OD and US Deluxe combination simulates this vintage breakup effectively."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.719,
+      "prompt_chars": 1000,
+      "response_chars": 499,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 120,
+        "total_duration": 10715141100,
+        "prompt_eval_duration": 520995000,
+        "eval_duration": 2543785000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.816,
+      "prompt_chars": 5433,
+      "response_chars": 521,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1656
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 34.228,
+      "prompt_chars": 3601,
+      "response_chars": 6255,
+      "usage": {
+        "prompt_eval_count": 1220,
+        "eval_count": 1728,
+        "total_duration": 34219269200,
+        "prompt_eval_duration": 521510000,
+        "eval_duration": 33248348000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 21.794,
+      "prompt_chars": 8437,
+      "response_chars": 591,
+      "usage": {
+        "prompt_eval_count": 2305,
+        "eval_count": 165,
+        "total_duration": 21783738000,
+        "prompt_eval_duration": 929176000,
+        "eval_duration": 3204493000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.901,
+      "prompt_chars": 2881,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 920,
+        "eval_count": 47,
+        "total_duration": 8875243700,
+        "prompt_eval_duration": 415879000,
+        "eval_duration": 776563000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Muddy Waters",
+      "title": "Got My Mojo Working",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Muddy Waters - Got My Mojo Working - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty Chicago blues combo break-up with bite",
+      "signalChainSummary": "A compact, dirty Chicago blues sound achieved using a low-gain boost/OD, followed by the US Deluxe amp model into a 2x12 cabinet, finished with minimal room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary gritty small-amp crunch and mid-range bite characteristic of Chicago blues.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD for a slightly more raw, less polished grit. It simulates the breakup of an older combo amp.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly too clean/modern."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD provides sufficient breakup.",
+          "matchQuality": "fallback",
+          "gap": "The required tone is based on natural amp breakup rather than heavy pedal saturation.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the sound of a small Fender/Valco combo amp, providing clarity and punch.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best fit for the 'small Fender' clue. Settings are adjusted to emphasize mids for bite.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Similar, but US Deluxe often captures a slightly dirtier, more vintage combo sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the '1x12 or 2x10' clue and provide a focused, raw sound.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is the closest available cabinet to simulate a small combo speaker setup.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": "Could work, but US 2x12 generally has a more vintage/American tone."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+1"
+          },
+          "purpose": "Boost the mid-range frequency to achieve the required 'mid bite' and cut through the mix.",
+          "matchQuality": "close",
+          "gap": "Used for surgical tone shaping, emphasizing the core blues frequencies.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah effect is required for this specific blues tone.",
+          "matchQuality": "fallback",
+          "gap": "The focus is on raw grit and directness, not filtering sweeps.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone dry and direct as requested.",
+          "matchQuality": "fallback",
+          "gap": "Modulation effects are generally avoided for this raw Chicago blues sound.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone dry and direct.",
+          "matchQuality": "fallback",
+          "gap": "Delay is not essential for a raw combo break-up sound.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide the requested 'light room only' ambience without sounding overly wet or big.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is chosen specifically because it provides a natural, contained space feel, avoiding excessive wash.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too bright and artificial for the raw blues tone."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "8"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "fallback",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty Chicago blues combo break-up with bite",
+      "mustHave": [
+        "gritty small-amp crunch",
+        "mid bite",
+        "raw mono feel",
+        "light room only"
+      ],
+      "avoid": [
+        "Tube Screamer focus",
+        "modern overdrive",
+        "big reverb",
+        "metal gain"
+      ],
+      "gearClues": [
+        "dynamic mic",
+        "small Fender/Valco combo",
+        "1x12 or 2x10",
+        "single-coil or P-90"
+      ],
+      "corrections": [
+        "drop E minor",
+        "avoid generic Fender/Marshall guess",
+        "keep it drier and more direct"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "delta blues",
+        "electric blues",
+        "chicago blues"
+      ],
+      "targetTone": "dirty Chicago blues combo break-up with bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the generic 2x12 IR for a more period-appropriate, focused speaker simulation.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage single-coil/P90 cab IR (e.g., Fender Deluxe or Valco)",
+          "reason": "Enhance the raw, vintage combo feel and focus on mid-range bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism/focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 954,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

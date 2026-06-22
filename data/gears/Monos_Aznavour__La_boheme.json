@@ -1,0 +1,1143 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 937,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Monos_Aznavour__La_boheme.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Monos-Aznavour",
+    "title": "La bohème",
+    "album": "",
+    "year": null,
+    "genre": "chanson"
+  },
+  "genreClassification": {
+    "genre": "chanson",
+    "subgenres": [
+      "french pop",
+      "folk"
+    ],
+    "confidence": "high",
+    "rationale": "The song title and tone profile strongly indicate French chanson style."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with noticeable reverb and delay.",
+      "signatureElements": [
+        "Reverb",
+        "Delay",
+        "Clean/Crunch blend",
+        "Modulation (Chorus/Vibrato)",
+        "Fingerpicked arpeggios"
+      ],
+      "gearHypotheses": [
+        "Digital Delay unit (e.g., Boss RV-6 or similar)",
+        "Spring Reverb simulation",
+        "Low-gain overdrive pedal (for warmth)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "Aggressive scooped mids"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "warm chanson electric with subtle ambience",
+      "mustHave": [
+        "clean melody",
+        "soft sustain",
+        "gentle room reverb"
+      ],
+      "avoid": [
+        "heavy drive",
+        "big delay",
+        "chorus wash"
+      ],
+      "gearClues": [
+        "single-coil or hollowbody",
+        "small clean amp",
+        "spring or room reverb"
+      ],
+      "corrections": [
+        "drop delay/chorus unless clearly heard",
+        "keep it mostly dry and intimate"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title likely iconic and draft generic",
+      "signature guitar texture uncertain",
+      "likely wrong effect family risk"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "intimate French chanson clean with minimal effects",
+    "mustHave": [
+      "clean compressed tone",
+      "warm single-coil or hollowbody voice",
+      "subtle room ambience"
+    ],
+    "avoid": [
+      "overdrive or crunch",
+      "delay or modulation",
+      "bright jangle or scoop"
+    ],
+    "gearClues": [
+      "small combo clean headroom",
+      "gentle spring or room reverb only",
+      "vocal-supporting rhythm texture"
+    ],
+    "corrections": [
+      "remove delay and chorus entirely",
+      "remove overdrive warmth claim",
+      "chanson guitar is accompaniment not lead"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "intimate French chanson clean with minimal effects",
+    "mustHave": [
+      "clean compressed tone",
+      "warm single-coil or hollowbody voice",
+      "subtle room ambience"
+    ],
+    "avoid": [
+      "overdrive or crunch",
+      "delay or modulation",
+      "bright jangle or scoop"
+    ],
+    "gearClues": [
+      "small combo clean headroom",
+      "gentle spring or room reverb only",
+      "vocal-supporting rhythm texture"
+    ],
+    "corrections": [
+      "remove delay and chorus entirely",
+      "remove overdrive warmth claim",
+      "chanson guitar is accompaniment not lead"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, clean tones suitable for intimate French chanson accompaniment.",
+          "bestMatchSummary": "A gentle signal chain using compression and a classic combo amp (US Deluxe/Silver Twin) paired with a vintage 2x12 cabinet to achieve a warm, vocal-supporting rhythm tone with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in recording the delicate acoustic style.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide consistent volume and smooth out dynamics, giving the guitar a warm, vocal-like presence.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a 'compressed' clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any grit or crunch that would detract from the intimate, clean chanson sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone requires pure cleanliness.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Bass": "High",
+                "Presence": "Medium"
+              },
+              "purpose": "Simulate the sound of a small, clean combo amplifier with plenty of headroom, ideal for warm rhythm playing.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over Silver Twin for its slightly warmer, vintage character suitable for French chanson.",
+              "alternatives": [
+                "Silver Twin"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, articulate sound from a smaller cabinet that complements the intimate nature of the performance.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its clean voicing and compact size, avoiding the massive sound of larger cabs.",
+              "alternatives": [
+                "Foxy 2x12"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "+2 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and bass frequencies to enhance warmth and body without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "A gentle EQ lift is necessary to ensure the guitar sits warmly in a vocal mix, supporting rather than competing with the voice.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or sweeping effects are desired; the tone must remain pure and constant.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The genre demands a static, unadorned sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any movement (chorus, tremolo) that would distract from the narrative focus of the chanson.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Modulation is counter to the 'minimal effects' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any echo or repetition that would disrupt the natural flow and intimacy of the performance.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The genre requires a dry, immediate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Provide a subtle sense of space and warmth (room ambience) without sounding artificial or overly dramatic.",
+              "matchQuality": "perfect",
+              "gap": "The 'subtle room ambience' is best achieved with Room reverb, keeping the sound natural.",
+              "alternatives": [
+                "Plate"
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/output",
+              "module": "VOL",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Level": "Unity"
+              },
+              "purpose": "Final output level control to ensure the guitar blends seamlessly with the vocal track.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a chanson (vocal/accompaniment focus), not a lead guitar piece. The rig prioritizes warmth and blend over aggressive tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Enhance cabinet realism for better vintage body and intimacy.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Gibson)",
+              "reason": "Improve the warm, woody character needed for chanson accompaniment.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased vintage body and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Monos-Aznavour - La bohème - Valeton GP-180",
+        "song": {
+          "artist": "Monos-Aznavour",
+          "title": "La bohème",
+          "album": "",
+          "year": null,
+          "genre": "chanson"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "intimate French chanson clean with minimal effects",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gentle signal chain using compression and a classic combo amp (US Deluxe/Silver Twin) paired with a vintage 2x12 cabinet to achieve a warm, vocal-supporting rhythm tone with subtle room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in recording the delicate acoustic style.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide consistent volume and smooth out dynamics, giving the guitar a warm, vocal-like presence.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for achieving a 'compressed' clean tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid any grit or crunch that would detract from the intimate, clean chanson sound.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The tone requires pure cleanliness.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "Mid",
+              "Bass": "High",
+              "Presence": "Medium"
+            },
+            "purpose": "Simulate the sound of a small, clean combo amplifier with plenty of headroom, ideal for warm rhythm playing.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen over Silver Twin for its slightly warmer, vintage character suitable for French chanson.",
+            "alternatives": [
+              "Silver Twin"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, articulate sound from a smaller cabinet that complements the intimate nature of the performance.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is selected for its clean voicing and compact size, avoiding the massive sound of larger cabs.",
+            "alternatives": [
+              "Foxy 2x12"
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+3 dB",
+              "Mid": "+2 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the low-mids and bass frequencies to enhance warmth and body without sounding muddy.",
+            "matchQuality": "close",
+            "gap": "A gentle EQ lift is necessary to ensure the guitar sits warmly in a vocal mix, supporting rather than competing with the voice.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No filtering or sweeping effects are desired; the tone must remain pure and constant.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The genre demands a static, unadorned sound.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid any movement (chorus, tremolo) that would distract from the narrative focus of the chanson.",
+            "matchQuality": "perfect",
+            "gap": "N/A. Modulation is counter to the 'minimal effects' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid any echo or repetition that would disrupt the natural flow and intimacy of the performance.",
+            "matchQuality": "perfect",
+            "gap": "N/A. The genre requires a dry, immediate sound.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "2.5s"
+            },
+            "purpose": "Provide a subtle sense of space and warmth (room ambience) without sounding artificial or overly dramatic.",
+            "matchQuality": "perfect",
+            "gap": "The 'subtle room ambience' is best achieved with Room reverb, keeping the sound natural.",
+            "alternatives": [
+              "Plate"
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/output",
+            "module": "VOL",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Level": "Unity"
+            },
+            "purpose": "Final output level control to ensure the guitar blends seamlessly with the vocal track.",
+            "matchQuality": "perfect",
+            "gap": "Standard final stage volume control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "intimate French chanson clean with minimal effects",
+          "toneProfile": "intimate French chanson clean with minimal effects",
+          "idealSignalChain": "small combo clean headroom | gentle spring or room reverb only | vocal-supporting rhythm texture",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small combo clean headroom",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "gentle spring or room reverb only",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "vocal-supporting rhythm texture",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean compressed tone",
+            "warm single-coil or hollowbody voice",
+            "subtle room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, clean tones suitable for intimate French chanson accompaniment.",
+          "bestMatchSummary": "A gentle signal chain using compression and a classic combo amp (US Deluxe/Silver Twin) paired with a vintage 2x12 cabinet to achieve a warm, vocal-supporting rhythm tone with subtle room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in recording the delicate acoustic style.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide consistent volume and smooth out dynamics, giving the guitar a warm, vocal-like presence.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving a 'compressed' clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any grit or crunch that would detract from the intimate, clean chanson sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The tone requires pure cleanliness.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Bass": "High",
+                "Presence": "Medium"
+              },
+              "purpose": "Simulate the sound of a small, clean combo amplifier with plenty of headroom, ideal for warm rhythm playing.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen over Silver Twin for its slightly warmer, vintage character suitable for French chanson.",
+              "alternatives": [
+                "Silver Twin"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, articulate sound from a smaller cabinet that complements the intimate nature of the performance.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its clean voicing and compact size, avoiding the massive sound of larger cabs.",
+              "alternatives": [
+                "Foxy 2x12"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "+2 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the low-mids and bass frequencies to enhance warmth and body without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "A gentle EQ lift is necessary to ensure the guitar sits warmly in a vocal mix, supporting rather than competing with the voice.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or sweeping effects are desired; the tone must remain pure and constant.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The genre demands a static, unadorned sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any movement (chorus, tremolo) that would distract from the narrative focus of the chanson.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Modulation is counter to the 'minimal effects' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid any echo or repetition that would disrupt the natural flow and intimacy of the performance.",
+              "matchQuality": "perfect",
+              "gap": "N/A. The genre requires a dry, immediate sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Provide a subtle sense of space and warmth (room ambience) without sounding artificial or overly dramatic.",
+              "matchQuality": "perfect",
+              "gap": "The 'subtle room ambience' is best achieved with Room reverb, keeping the sound natural.",
+              "alternatives": [
+                "Plate"
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/output",
+              "module": "VOL",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Level": "Unity"
+              },
+              "purpose": "Final output level control to ensure the guitar blends seamlessly with the vocal track.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Enhance cabinet realism for better vintage body and intimacy.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Gibson)",
+              "reason": "Improve the warm, woody character needed for chanson accompaniment.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased vintage body and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove delay and chorus entirely",
+          "remove overdrive warmth claim",
+          "chanson guitar is accompaniment not lead"
+        ],
+        "warnings": [
+          "The source material is a chanson (vocal/accompaniment focus), not a lead guitar piece. The rig prioritizes warmth and blend over aggressive tone."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.475,
+      "prompt_chars": 993,
+      "response_chars": 446,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 117,
+        "total_duration": 10471243000,
+        "prompt_eval_duration": 481359000,
+        "eval_duration": 2253253000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.719,
+      "prompt_chars": 5379,
+      "response_chars": 562,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1650
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.584,
+      "prompt_chars": 4763,
+      "response_chars": 644,
+      "usage": {
+        "input_tokens": 1422,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 32.775,
+      "prompt_chars": 3641,
+      "response_chars": 6085,
+      "usage": {
+        "prompt_eval_count": 1206,
+        "eval_count": 1647,
+        "total_duration": 32745450900,
+        "prompt_eval_duration": 525405000,
+        "eval_duration": 31776209000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.699,
+      "prompt_chars": 8341,
+      "response_chars": 507,
+      "usage": {
+        "prompt_eval_count": 2228,
+        "eval_count": 137,
+        "total_duration": 20670063700,
+        "prompt_eval_duration": 951797000,
+        "eval_duration": 2569468000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.89,
+      "prompt_chars": 2933,
+      "response_chars": 167,
+      "usage": {
+        "prompt_eval_count": 903,
+        "eval_count": 43,
+        "total_duration": 8886328900,
+        "prompt_eval_duration": 441101000,
+        "eval_duration": 716491000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Monos-Aznavour",
+      "title": "La bohème",
+      "album": "",
+      "year": null,
+      "genre": "chanson"
+    },
+    "rig": {
+      "rigName": "Monos-Aznavour - La bohème - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "intimate French chanson clean with minimal effects",
+      "signalChainSummary": "A gentle signal chain using compression and a classic combo amp (US Deluxe/Silver Twin) paired with a vintage 2x12 cabinet to achieve a warm, vocal-supporting rhythm tone with subtle room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in recording the delicate acoustic style.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide consistent volume and smooth out dynamics, giving the guitar a warm, vocal-like presence.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for achieving a 'compressed' clean tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid any grit or crunch that would detract from the intimate, clean chanson sound.",
+          "matchQuality": "exact",
+          "gap": "N/A. The tone requires pure cleanliness.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "Mid",
+            "Bass": "High",
+            "Presence": "Medium"
+          },
+          "purpose": "Simulate the sound of a small, clean combo amplifier with plenty of headroom, ideal for warm rhythm playing.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen over Silver Twin for its slightly warmer, vintage character suitable for French chanson.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, articulate sound from a smaller cabinet that complements the intimate nature of the performance.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is selected for its clean voicing and compact size, avoiding the massive sound of larger cabs.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+3 dB",
+            "Mid": "+2 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the low-mids and bass frequencies to enhance warmth and body without sounding muddy.",
+          "matchQuality": "close",
+          "gap": "A gentle EQ lift is necessary to ensure the guitar sits warmly in a vocal mix, supporting rather than competing with the voice.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No filtering or sweeping effects are desired; the tone must remain pure and constant.",
+          "matchQuality": "exact",
+          "gap": "N/A. The genre demands a static, unadorned sound.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid any movement (chorus, tremolo) that would distract from the narrative focus of the chanson.",
+          "matchQuality": "exact",
+          "gap": "N/A. Modulation is counter to the 'minimal effects' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid any echo or repetition that would disrupt the natural flow and intimacy of the performance.",
+          "matchQuality": "exact",
+          "gap": "N/A. The genre requires a dry, immediate sound.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "2.5s"
+          },
+          "purpose": "Provide a subtle sense of space and warmth (room ambience) without sounding artificial or overly dramatic.",
+          "matchQuality": "exact",
+          "gap": "The 'subtle room ambience' is best achieved with Room reverb, keeping the sound natural.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/output",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "Unity"
+          },
+          "purpose": "Final output level control to ensure the guitar blends seamlessly with the vocal track.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage volume control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "intimate French chanson clean with minimal effects",
+      "mustHave": [
+        "clean compressed tone",
+        "warm single-coil or hollowbody voice",
+        "subtle room ambience"
+      ],
+      "avoid": [
+        "overdrive or crunch",
+        "delay or modulation",
+        "bright jangle or scoop"
+      ],
+      "gearClues": [
+        "small combo clean headroom",
+        "gentle spring or room reverb only",
+        "vocal-supporting rhythm texture"
+      ],
+      "corrections": [
+        "remove delay and chorus entirely",
+        "remove overdrive warmth claim",
+        "chanson guitar is accompaniment not lead"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "chanson",
+      "styleTags": [
+        "french pop",
+        "folk"
+      ],
+      "targetTone": "intimate French chanson clean with minimal effects",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Enhance cabinet realism for better vintage body and intimacy.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 IR (e.g., Fender/Gibson)",
+          "reason": "Improve the warm, woody character needed for chanson accompaniment.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased vintage body and warmth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 937,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

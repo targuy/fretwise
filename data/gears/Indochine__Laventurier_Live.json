@@ -1,0 +1,1169 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 616,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Indochine__Laventurier_Live.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Indochine",
+    "title": "L’aventurier (Live)",
+    "album": "",
+    "year": null,
+    "genre": "new wave"
+  },
+  "genreClassification": {
+    "genre": "new wave",
+    "subgenres": [
+      "synth-pop",
+      "post-punk"
+    ],
+    "confidence": "high",
+    "rationale": "Indochine is a foundational band in the French new wave and synth-pop scene."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly crunchy synth-pop lead tone",
+      "signatureElements": [
+        "chorus/flanger modulation",
+        "bright treble boost",
+        "slight fuzz/grit"
+      ],
+      "gearHypotheses": [
+        "Chorus effect pedal",
+        "Treble EQ (e.g., Graphic EQ)",
+        "Overdrive/Fuzz (low gain)"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "deep reverb",
+        "ambient pads"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright chorus lead with light grit",
+      "mustHave": [
+        "chorus/flanger motion",
+        "treble-forward top end",
+        "light fuzz/grit",
+        "tight attack"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "deep reverb",
+        "ambient pads"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "chorus pedal",
+        "graphic EQ",
+        "light overdrive or fuzz",
+        "clean combo amp"
+      ],
+      "corrections": [
+        "drop synth-pop wording",
+        "name it as guitar lead",
+        "keep modulation but not wash"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright chorus lead with light grit",
+    "mustHave": [
+      "chorus/flanger motion",
+      "treble-forward top end",
+      "light fuzz/grit",
+      "tight attack"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "deep reverb",
+      "ambient pads"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "chorus pedal",
+      "graphic EQ",
+      "light overdrive or fuzz",
+      "clean combo amp"
+    ],
+    "corrections": [
+      "drop synth-pop wording",
+      "name it as guitar lead",
+      "keep modulation but not wash"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, modulated lead tone with controlled grit.",
+          "bestMatchSummary": "Gate -> Boost (light drive) -> Chorus -> OD 9 -> UK SLP -> UK Vintage 4x12 -> Guitar EQ 2 -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a tight initial boost for lead lines and attack.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the 'tight attack' requirement without adding excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also achieve a tight attack, but Boost keeps the tone brighter."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Medium",
+                "Depth": "High",
+                "Feedback": "Medium"
+              },
+              "purpose": "Achieve the required bright chorus/flanger motion without sounding washed out.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "drive/grit",
+              "module": "PRE",
+              "model": "OD 9",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "1 o'clock"
+              },
+              "purpose": "Add light grit and controlled overdrive for the lead tone.",
+              "matchQuality": "close",
+              "gap": "The OD 9 provides a versatile, low-gain boost that fits the 'light fuzz/grit' requirement better than full distortion.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could be used if a slightly warmer grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a clean combo amp foundation with bright, articulate tones.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic, non-aggressive sound profile suitable for modulated leads.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a slightly more American clean tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the classic rock feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-3 dB",
+                "Mid Boost": "+2 dB",
+                "Treble Boost": "+4 dB"
+              },
+              "purpose": "Enhance the treble-forward top end and cut unnecessary low frequencies.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth without becoming ambient.",
+              "matchQuality": "close",
+              "gap": "The delay is kept relatively short and low in mix to maintain focus on the lead melody.",
+              "alternatives": [
+                {
+                  "model": "Slapback",
+                  "reason": "Could be used for a more vintage, less complex echo effect."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle space and dimension without deep ambient pads.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is set to a moderate mix and decay time to avoid washing out the bright lead tone.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A Plate reverb could offer more controlled, metallic ambience."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is synth-pop/new wave, requiring a guitar interpretation. The tone focuses on bright modulation and controlled grit to mimic the lead lines."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased clarity and brightness in the high end.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or Single-Coil IR",
+              "reason": "Enhance treble focus and single-coil articulation for synth-pop lead tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Indochine - L’aventurier (Live) - Valeton GP-180",
+        "song": {
+          "artist": "Indochine",
+          "title": "L’aventurier (Live)",
+          "album": "",
+          "year": null,
+          "genre": "new wave"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright chorus lead with light grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate -> Boost (light drive) -> Chorus -> OD 9 -> UK SLP -> UK Vintage 4x12 -> Guitar EQ 2 -> Digital Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "12 o'clock"
+            },
+            "purpose": "Provide a tight initial boost for lead lines and attack.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to simulate the 'tight attack' requirement without adding excessive coloration.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "Compression could also achieve a tight attack, but Boost keeps the tone brighter."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "WAH",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Medium",
+              "Depth": "High",
+              "Feedback": "Medium"
+            },
+            "purpose": "Achieve the required bright chorus/flanger motion without sounding washed out.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "drive/grit",
+            "module": "PRE",
+            "model": "OD 9",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "1 o'clock"
+            },
+            "purpose": "Add light grit and controlled overdrive for the lead tone.",
+            "matchQuality": "close",
+            "gap": "The OD 9 provides a versatile, low-gain boost that fits the 'light fuzz/grit' requirement better than full distortion.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Could be used if a slightly warmer grit is desired."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Mid": "5",
+              "Bass": "4"
+            },
+            "purpose": "Simulate a clean combo amp foundation with bright, articulate tones.",
+            "matchQuality": "close",
+            "gap": "The UK SLP is chosen for its classic, non-aggressive sound profile suitable for modulated leads.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a slightly more American clean tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound matching the classic rock feel.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-3 dB",
+              "Mid Boost": "+2 dB",
+              "Treble Boost": "+4 dB"
+            },
+            "purpose": "Enhance the treble-forward top end and cut unnecessary low frequencies.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add subtle rhythmic depth without becoming ambient.",
+            "matchQuality": "close",
+            "gap": "The delay is kept relatively short and low in mix to maintain focus on the lead melody.",
+            "alternatives": [
+              {
+                "model": "Slapback",
+                "reason": "Could be used for a more vintage, less complex echo effect."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "2"
+            },
+            "purpose": "Add subtle space and dimension without deep ambient pads.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is set to a moderate mix and decay time to avoid washing out the bright lead tone.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A Plate reverb could offer more controlled, metallic ambience."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright chorus lead with light grit",
+          "toneProfile": "bright chorus lead with light grit",
+          "idealSignalChain": "single-coil guitar | chorus pedal | graphic EQ | light overdrive or fuzz | clean combo amp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "graphic EQ",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive or fuzz",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean combo amp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus/flanger motion",
+            "treble-forward top end",
+            "light fuzz/grit",
+            "tight attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, modulated lead tone with controlled grit.",
+          "bestMatchSummary": "Gate -> Boost (light drive) -> Chorus -> OD 9 -> UK SLP -> UK Vintage 4x12 -> Guitar EQ 2 -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a tight initial boost for lead lines and attack.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the 'tight attack' requirement without adding excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also achieve a tight attack, but Boost keeps the tone brighter."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Medium",
+                "Depth": "High",
+                "Feedback": "Medium"
+              },
+              "purpose": "Achieve the required bright chorus/flanger motion without sounding washed out.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "drive/grit",
+              "module": "PRE",
+              "model": "OD 9",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "1 o'clock"
+              },
+              "purpose": "Add light grit and controlled overdrive for the lead tone.",
+              "matchQuality": "close",
+              "gap": "The OD 9 provides a versatile, low-gain boost that fits the 'light fuzz/grit' requirement better than full distortion.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could be used if a slightly warmer grit is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate a clean combo amp foundation with bright, articulate tones.",
+              "matchQuality": "close",
+              "gap": "The UK SLP is chosen for its classic, non-aggressive sound profile suitable for modulated leads.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a slightly more American clean tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the classic rock feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-3 dB",
+                "Mid Boost": "+2 dB",
+                "Treble Boost": "+4 dB"
+              },
+              "purpose": "Enhance the treble-forward top end and cut unnecessary low frequencies.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth without becoming ambient.",
+              "matchQuality": "close",
+              "gap": "The delay is kept relatively short and low in mix to maintain focus on the lead melody.",
+              "alternatives": [
+                {
+                  "model": "Slapback",
+                  "reason": "Could be used for a more vintage, less complex echo effect."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle space and dimension without deep ambient pads.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is set to a moderate mix and decay time to avoid washing out the bright lead tone.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A Plate reverb could offer more controlled, metallic ambience."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased clarity and brightness in the high end.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or Single-Coil IR",
+              "reason": "Enhance treble focus and single-coil articulation for synth-pop lead tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity/brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop synth-pop wording",
+          "name it as guitar lead",
+          "keep modulation but not wash"
+        ],
+        "warnings": [
+          "The source material is synth-pop/new wave, requiring a guitar interpretation. The tone focuses on bright modulation and controlled grit to mimic the lead lines."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.816,
+      "prompt_chars": 997,
+      "response_chars": 345,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 95,
+        "total_duration": 9813070000,
+        "prompt_eval_duration": 336953000,
+        "eval_duration": 1831517000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.711,
+      "prompt_chars": 5270,
+      "response_chars": 514,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1614
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 34.344,
+      "prompt_chars": 3591,
+      "response_chars": 5971,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1687,
+        "total_duration": 34338297400,
+        "prompt_eval_duration": 436534000,
+        "eval_duration": 33548316000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.377,
+      "prompt_chars": 8149,
+      "response_chars": 522,
+      "usage": {
+        "prompt_eval_count": 2253,
+        "eval_count": 143,
+        "total_duration": 20370823500,
+        "prompt_eval_duration": 978922000,
+        "eval_duration": 2803042000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.972,
+      "prompt_chars": 2768,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 909,
+        "eval_count": 52,
+        "total_duration": 8969643500,
+        "prompt_eval_duration": 413399000,
+        "eval_duration": 884589000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Indochine",
+      "title": "L’aventurier (Live)",
+      "album": "",
+      "year": null,
+      "genre": "new wave"
+    },
+    "rig": {
+      "rigName": "Indochine - L’aventurier (Live) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright chorus lead with light grit",
+      "signalChainSummary": "Gate -> Boost (light drive) -> Chorus -> OD 9 -> UK SLP -> UK Vintage 4x12 -> Guitar EQ 2 -> Digital Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "12 o'clock"
+          },
+          "purpose": "Provide a tight initial boost for lead lines and attack.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to simulate the 'tight attack' requirement without adding excessive coloration.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Compression could also achieve a tight attack, but Boost keeps the tone brighter."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Medium",
+            "Depth": "High",
+            "Feedback": "Medium"
+          },
+          "purpose": "Achieve the required bright chorus/flanger motion without sounding washed out.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "drive/grit",
+          "module": "PRE",
+          "model": "OD 9",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "1 o'clock"
+          },
+          "purpose": "Add light grit and controlled overdrive for the lead tone.",
+          "matchQuality": "close",
+          "gap": "The OD 9 provides a versatile, low-gain boost that fits the 'light fuzz/grit' requirement better than full distortion.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Could be used if a slightly warmer grit is desired."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Mid": "5",
+            "Bass": "4"
+          },
+          "purpose": "Simulate a clean combo amp foundation with bright, articulate tones.",
+          "matchQuality": "close",
+          "gap": "The UK SLP is chosen for its classic, non-aggressive sound profile suitable for modulated leads.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a slightly more American clean tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound matching the classic rock feel.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-3 dB",
+            "Mid Boost": "+2 dB",
+            "Treble Boost": "+4 dB"
+          },
+          "purpose": "Enhance the treble-forward top end and cut unnecessary low frequencies.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add subtle rhythmic depth without becoming ambient.",
+          "matchQuality": "close",
+          "gap": "The delay is kept relatively short and low in mix to maintain focus on the lead melody.",
+          "alternatives": [
+            {
+              "model": "Slapback",
+              "reason": "Could be used for a more vintage, less complex echo effect."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "2"
+          },
+          "purpose": "Add subtle space and dimension without deep ambient pads.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is set to a moderate mix and decay time to avoid washing out the bright lead tone.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A Plate reverb could offer more controlled, metallic ambience."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright chorus lead with light grit",
+      "mustHave": [
+        "chorus/flanger motion",
+        "treble-forward top end",
+        "light fuzz/grit",
+        "tight attack"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "deep reverb",
+        "ambient pads"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "chorus pedal",
+        "graphic EQ",
+        "light overdrive or fuzz",
+        "clean combo amp"
+      ],
+      "corrections": [
+        "drop synth-pop wording",
+        "name it as guitar lead",
+        "keep modulation but not wash"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "new wave",
+      "styleTags": [
+        "synth-pop",
+        "post-punk"
+      ],
+      "targetTone": "bright chorus lead with light grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased clarity and brightness in the high end.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or Single-Coil IR",
+          "reason": "Enhance treble focus and single-coil articulation for synth-pop lead tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity/brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 616,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

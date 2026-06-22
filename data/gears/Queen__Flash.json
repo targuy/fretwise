@@ -1,0 +1,1004 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1130,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Queen__Flash.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Queen",
+    "title": "Flash",
+    "album": "",
+    "year": null,
+    "genre": "arena rock"
+  },
+  "genreClassification": {
+    "genre": "arena rock",
+    "subgenres": [
+      "pop rock",
+      "glam metal",
+      "synth-pop"
+    ],
+    "confidence": "high",
+    "rationale": "Queen's 'Flash' is quintessential 80s arena/pop rock, matching the synth and delay focus."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, aggressive rock tone with a biting mid-range and controlled grit.",
+      "signatureElements": [
+        "Crunch/Overdrive (for rhythm parts)",
+        "Slightly scooped mids on the main riff",
+        "High gain for solos, but not overly saturated fuzz",
+        "Delay (slapback or dotted eighth)"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall JCM-style)",
+        "Mid-gain overdrive pedal/emulation (Tube Screamer type)",
+        "Chorus/Flanger modulation effect"
+      ],
+      "avoid": [
+        "Heavy fuzz tones",
+        "Deep, dark reverb tails",
+        "Overly scooped bass frequencies"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s rock synth-guitar with delay sheen",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "bright upper mids",
+        "delay",
+        "cleanish attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy reverb",
+        "dark tone"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "short delay",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz aversion as primary point",
+        "add synthetic 80s texture",
+        "keep delay central"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s rock synth-guitar with delay sheen",
+    "mustHave": [
+      "tight crunchy rhythm",
+      "bright upper mids",
+      "delay",
+      "cleanish attack"
+    ],
+    "avoid": [
+      "fuzz",
+      "heavy reverb",
+      "dark tone"
+    ],
+    "gearClues": [
+      "Marshall-style amp",
+      "short delay",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop fuzz aversion as primary point",
+      "add synthetic 80s texture",
+      "keep delay central"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, crunchy rhythm tones with 80s synth textures and prominent delay.",
+          "bestMatchSummary": "A clean boost/OD into a British-style amp (UK SLP) paired with a bright cabinet, utilizing Chorus for synthetic sheen and Digital Delay for the signature 'Flash' echo effect.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide a tight, crunchy rhythm boost and upper-mid punch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its bright, slightly aggressive crunch suitable for 80s rock without sounding overly dirty.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if a warmer tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The required tone is crunchy but not heavily distorted; the Green OD handles this role better than a dedicated distortion unit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "70%",
+                "Mid": "65%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the bright, punchy sound of a Marshall-style amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the British rock aesthetic.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/sheen",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Add the synthetic 80s texture and 'sheen' required for the synth-guitar sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "45%",
+                "Mix": "35%"
+              },
+              "purpose": "Create the signature 'Flash' echo effect and keep the delay central to the tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without sounding like heavy reverb.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/level",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a full rock song, so the rig focuses on capturing the specific bright, crunchy rhythm tone rather than simulating a single instrument's role."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased brightness and articulation to match 80s synth-rock sheen.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright, articulate 4x12 IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance the bright upper mids and articulation needed for synth-rock sheen.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Queen - Flash - Valeton GP-180",
+        "song": {
+          "artist": "Queen",
+          "title": "Flash",
+          "album": "",
+          "year": null,
+          "genre": "arena rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s rock synth-guitar with delay sheen",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean boost/OD into a British-style amp (UK SLP) paired with a bright cabinet, utilizing Chorus for synthetic sheen and Digital Delay for the signature 'Flash' echo effect.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "75%",
+              "Level": "60%"
+            },
+            "purpose": "Provide a tight, crunchy rhythm boost and upper-mid punch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its bright, slightly aggressive crunch suitable for 80s rock without sounding overly dirty.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative if a warmer tone is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The Green OD provides sufficient crunch.",
+            "matchQuality": "none",
+            "gap": "The required tone is crunchy but not heavily distorted; the Green OD handles this role better than a dedicated distortion unit.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "50%",
+              "Treble": "70%",
+              "Mid": "65%",
+              "Bass": "55%"
+            },
+            "purpose": "Simulate the bright, punchy sound of a Marshall-style amp.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound matching the British rock aesthetic.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/sheen",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "50%",
+              "Mix": "30%"
+            },
+            "purpose": "Add the synthetic 80s texture and 'sheen' required for the synth-guitar sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay/echo",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "45%",
+              "Mix": "35%"
+            },
+            "purpose": "Create the signature 'Flash' echo effect and keep the delay central to the tone.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and depth without sounding like heavy reverb.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume/level",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s rock synth-guitar with delay sheen",
+          "toneProfile": "bright 80s rock synth-guitar with delay sheen",
+          "idealSignalChain": "Marshall-style amp | short delay | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight crunchy rhythm",
+            "bright upper mids",
+            "delay",
+            "cleanish attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, crunchy rhythm tones with 80s synth textures and prominent delay.",
+          "bestMatchSummary": "A clean boost/OD into a British-style amp (UK SLP) paired with a bright cabinet, utilizing Chorus for synthetic sheen and Digital Delay for the signature 'Flash' echo effect.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide a tight, crunchy rhythm boost and upper-mid punch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its bright, slightly aggressive crunch suitable for 80s rock without sounding overly dirty.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if a warmer tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient crunch.",
+              "matchQuality": "none",
+              "gap": "The required tone is crunchy but not heavily distorted; the Green OD handles this role better than a dedicated distortion unit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "70%",
+                "Mid": "65%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate the bright, punchy sound of a Marshall-style amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the British rock aesthetic.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/sheen",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Add the synthetic 80s texture and 'sheen' required for the synth-guitar sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/echo",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "45%",
+                "Mix": "35%"
+              },
+              "purpose": "Create the signature 'Flash' echo effect and keep the delay central to the tone.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without sounding like heavy reverb.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/level",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased brightness and articulation to match 80s synth-rock sheen.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright, articulate 4x12 IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance the bright upper mids and articulation needed for synth-rock sheen.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz aversion as primary point",
+          "add synthetic 80s texture",
+          "keep delay central"
+        ],
+        "warnings": [
+          "The source material is a full rock song, so the rig focuses on capturing the specific bright, crunchy rhythm tone rather than simulating a single instrument's role."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.607,
+      "prompt_chars": 979,
+      "response_chars": 568,
+      "usage": {
+        "prompt_eval_count": 318,
+        "eval_count": 138,
+        "total_duration": 11587484300,
+        "prompt_eval_duration": 290684000,
+        "eval_duration": 2677305000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.853,
+      "prompt_chars": 5481,
+      "response_chars": 465,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 124,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1646
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 36.765,
+      "prompt_chars": 3510,
+      "response_chars": 4681,
+      "usage": {
+        "prompt_eval_count": 1187,
+        "eval_count": 1349,
+        "total_duration": 36755297600,
+        "prompt_eval_duration": 392459000,
+        "eval_duration": 22854697000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.379,
+      "prompt_chars": 6702,
+      "response_chars": 581,
+      "usage": {
+        "prompt_eval_count": 1893,
+        "eval_count": 159,
+        "total_duration": 4349719000,
+        "prompt_eval_duration": 345768000,
+        "eval_duration": 3523859000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.119,
+      "prompt_chars": 2618,
+      "response_chars": 205,
+      "usage": {
+        "prompt_eval_count": 830,
+        "eval_count": 62,
+        "total_duration": 19100032600,
+        "prompt_eval_duration": 647741000,
+        "eval_duration": 866070000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Queen",
+      "title": "Flash",
+      "album": "",
+      "year": null,
+      "genre": "arena rock"
+    },
+    "rig": {
+      "rigName": "Queen - Flash - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s rock synth-guitar with delay sheen",
+      "signalChainSummary": "A clean boost/OD into a British-style amp (UK SLP) paired with a bright cabinet, utilizing Chorus for synthetic sheen and Digital Delay for the signature 'Flash' echo effect.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "75%",
+            "Level": "60%"
+          },
+          "purpose": "Provide a tight, crunchy rhythm boost and upper-mid punch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its bright, slightly aggressive crunch suitable for 80s rock without sounding overly dirty.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative if a warmer tone is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The Green OD provides sufficient crunch.",
+          "matchQuality": "fallback",
+          "gap": "The required tone is crunchy but not heavily distorted; the Green OD handles this role better than a dedicated distortion unit.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "50%",
+            "Treble": "70%",
+            "Mid": "65%",
+            "Bass": "55%"
+          },
+          "purpose": "Simulate the bright, punchy sound of a Marshall-style amp.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound matching the British rock aesthetic.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/sheen",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "50%",
+            "Mix": "30%"
+          },
+          "purpose": "Add the synthetic 80s texture and 'sheen' required for the synth-guitar sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay/echo",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "45%",
+            "Mix": "35%"
+          },
+          "purpose": "Create the signature 'Flash' echo effect and keep the delay central to the tone.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and depth without sounding like heavy reverb.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume/level",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s rock synth-guitar with delay sheen",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "bright upper mids",
+        "delay",
+        "cleanish attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy reverb",
+        "dark tone"
+      ],
+      "gearClues": [
+        "Marshall-style amp",
+        "short delay",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop fuzz aversion as primary point",
+        "add synthetic 80s texture",
+        "keep delay central"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "arena rock",
+      "styleTags": [
+        "pop rock",
+        "glam metal",
+        "synth-pop"
+      ],
+      "targetTone": "bright 80s rock synth-guitar with delay sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased brightness and articulation to match 80s synth-rock sheen.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "bright, articulate 4x12 IR (e.g., Celestion Greenback/V30 style)",
+          "reason": "Enhance the bright upper mids and articulation needed for synth-rock sheen.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1130,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

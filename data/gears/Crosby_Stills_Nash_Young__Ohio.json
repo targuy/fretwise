@@ -1,0 +1,1119 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 290,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Crosby_Stills_Nash_Young__Ohio.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Crosby, Stills, Nash & Young",
+    "title": "Ohio",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "singer-songwriter",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and song are foundational to the folk rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Acoustic/Electric Blend (Fingerpicked, Folk Rock)",
+      "signatureElements": [
+        "Clean acoustic strumming",
+        "Subtle electric counter-melodies",
+        "Harmonic vocal blend feel"
+      ],
+      "gearHypotheses": [
+        "Ambient reverb",
+        "Light chorus/modulation",
+        "Warm tube amp simulation (e.g., Fender Twin)"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Aggressive fuzz",
+        "Wah pedal sweeps"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry electric folk-rock crunch with clean pick attack",
+      "mustHave": [
+        "tight rhythmic strum",
+        "clean-to-edge-of-breakup",
+        "dry, upfront",
+        "electric guitar"
+      ],
+      "avoid": [
+        "acoustic blend",
+        "chorus",
+        "heavy reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "single-coil or bright humbucker",
+        "Fender/Marshall light drive",
+        "small room or near-dry"
+      ],
+      "corrections": [
+        "remove acoustic focus",
+        "keep it electric",
+        "skip chorus"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry electric folk-rock crunch with clean pick attack",
+    "mustHave": [
+      "tight rhythmic strum",
+      "clean-to-edge-of-breakup",
+      "dry, upfront",
+      "electric guitar"
+    ],
+    "avoid": [
+      "acoustic blend",
+      "chorus",
+      "heavy reverb",
+      "fuzz"
+    ],
+    "gearClues": [
+      "single-coil or bright humbucker",
+      "Fender/Marshall light drive",
+      "small room or near-dry"
+    ],
+    "corrections": [
+      "remove acoustic focus",
+      "keep it electric",
+      "skip chorus"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with controlled breakup for folk-rock strumming.",
+          "bestMatchSummary": "A clean signal chain using a light boost and classic British amp modeling (UK 45/US Deluxe) paired with a dry cabinet to achieve the required upfront, rhythmic folk-rock crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight signal for rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a subtle lift and tighten the attack for rhythmic strumming without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost module is ideal for gentle tightening, mimicking a clean boost pedal.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also achieve tightness but might soften the pick attack too much."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and upfront; no dedicated drive needed beyond amp breakup.",
+              "matchQuality": "exact",
+              "gap": "The target requires a clean-to-edge-of-breakup sound, making an explicit drive pedal unnecessary and potentially muddying the signal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "10 o'clock",
+                "Mid": "12 o'clock",
+                "Bass": "11 o'clock"
+              },
+              "purpose": "Model a classic British clean/crunch tone (Fender/Marshall light drive clue) suitable for folk-rock.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for the required vintage, bright, and slightly overdriven sound profile.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American clean tone was preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, classic British cabinet sound that complements the UK 45 amp model.",
+              "matchQuality": "close",
+              "gap": "This pairing reinforces the desired vintage folk-rock aesthetic.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, more intimate sound was required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the high end and presence to achieve an 'upfront' sound while controlling low-end muddiness.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the bright, dry character required by the folk genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect needed; the tone must remain direct and focused on strumming.",
+              "matchQuality": "exact",
+              "gap": "The target genre does not call for filtering or sweeping effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and dimension without sounding overly wet or distracting from the rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "A minimal delay adds space, fulfilling the 'dry but not sterile' requirement.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could also add subtle depth, but Digital Delay offers more control for a clean signal."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a subtle sense of space ('small room or near-dry') without the washiness of heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting is perfect for adding natural ambience while keeping the tone upfront and controlled.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial or metallic for a folk-rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control to ensure the signal is 'upfront' and balanced for performance.",
+              "matchQuality": "exact",
+              "gap": "Standard practice for final gain staging.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is folk-rock, requiring a clean signal chain. The chosen settings prioritize clarity and rhythmic attack over heavy saturation or complex effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by selecting an IR that better matches the 'small room' aesthetic while maintaining brightness.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Small Room/Acoustic IR",
+              "reason": "Enhance the natural, dry feel of a small recording space for folk-rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and dryness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Crosby, Stills, Nash & Young - Ohio - Valeton GP-180",
+        "song": {
+          "artist": "Crosby, Stills, Nash & Young",
+          "title": "Ohio",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry electric folk-rock crunch with clean pick attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain using a light boost and classic British amp modeling (UK 45/US Deluxe) paired with a dry cabinet to achieve the required upfront, rhythmic folk-rock crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a tight signal for rhythmic strumming.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "12 o'clock"
+            },
+            "purpose": "Provide a subtle lift and tighten the attack for rhythmic strumming without adding grit.",
+            "matchQuality": "close",
+            "gap": "The Boost module is ideal for gentle tightening, mimicking a clean boost pedal.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "Compression could also achieve tightness but might soften the pick attack too much."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and upfront; no dedicated drive needed beyond amp breakup.",
+            "matchQuality": "exact",
+            "gap": "The target requires a clean-to-edge-of-breakup sound, making an explicit drive pedal unnecessary and potentially muddying the signal.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "10 o'clock",
+              "Mid": "12 o'clock",
+              "Bass": "11 o'clock"
+            },
+            "purpose": "Model a classic British clean/crunch tone (Fender/Marshall light drive clue) suitable for folk-rock.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is the best fit for the required vintage, bright, and slightly overdriven sound profile.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a more American clean tone was preferred."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, classic British cabinet sound that complements the UK 45 amp model.",
+            "matchQuality": "close",
+            "gap": "This pairing reinforces the desired vintage folk-rock aesthetic.",
+            "alternatives": [
+              {
+                "model": "US 2x12",
+                "reason": "If a smaller, more intimate sound was required."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Slightly boost the high end and presence to achieve an 'upfront' sound while controlling low-end muddiness.",
+            "matchQuality": "close",
+            "gap": "Used for fine-tuning the bright, dry character required by the folk genre.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah effect needed; the tone must remain direct and focused on strumming.",
+            "matchQuality": "exact",
+            "gap": "The target genre does not call for filtering or sweeping effects.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle depth and dimension without sounding overly wet or distracting from the rhythmic strumming.",
+            "matchQuality": "close",
+            "gap": "A minimal delay adds space, fulfilling the 'dry but not sterile' requirement.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could also add subtle depth, but Digital Delay offers more control for a clean signal."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide a subtle sense of space ('small room or near-dry') without the washiness of heavy reverb.",
+            "matchQuality": "close",
+            "gap": "The Room setting is perfect for adding natural ambience while keeping the tone upfront and controlled.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might sound too artificial or metallic for a folk-rock context."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level control to ensure the signal is 'upfront' and balanced for performance.",
+            "matchQuality": "exact",
+            "gap": "Standard practice for final gain staging.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry electric folk-rock crunch with clean pick attack",
+          "toneProfile": "dry electric folk-rock crunch with clean pick attack",
+          "idealSignalChain": "single-coil or bright humbucker | Fender/Marshall light drive | small room or near-dry",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or bright humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender/Marshall light drive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room or near-dry",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight rhythmic strum",
+            "clean-to-edge-of-breakup",
+            "dry, upfront",
+            "electric guitar"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with controlled breakup for folk-rock strumming.",
+          "bestMatchSummary": "A clean signal chain using a light boost and classic British amp modeling (UK 45/US Deluxe) paired with a dry cabinet to achieve the required upfront, rhythmic folk-rock crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight signal for rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a subtle lift and tighten the attack for rhythmic strumming without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost module is ideal for gentle tightening, mimicking a clean boost pedal.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression could also achieve tightness but might soften the pick attack too much."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and upfront; no dedicated drive needed beyond amp breakup.",
+              "matchQuality": "exact",
+              "gap": "The target requires a clean-to-edge-of-breakup sound, making an explicit drive pedal unnecessary and potentially muddying the signal.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "10 o'clock",
+                "Mid": "12 o'clock",
+                "Bass": "11 o'clock"
+              },
+              "purpose": "Model a classic British clean/crunch tone (Fender/Marshall light drive clue) suitable for folk-rock.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is the best fit for the required vintage, bright, and slightly overdriven sound profile.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American clean tone was preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, classic British cabinet sound that complements the UK 45 amp model.",
+              "matchQuality": "close",
+              "gap": "This pairing reinforces the desired vintage folk-rock aesthetic.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, more intimate sound was required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the high end and presence to achieve an 'upfront' sound while controlling low-end muddiness.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the bright, dry character required by the folk genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect needed; the tone must remain direct and focused on strumming.",
+              "matchQuality": "exact",
+              "gap": "The target genre does not call for filtering or sweeping effects.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and dimension without sounding overly wet or distracting from the rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "A minimal delay adds space, fulfilling the 'dry but not sterile' requirement.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could also add subtle depth, but Digital Delay offers more control for a clean signal."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a subtle sense of space ('small room or near-dry') without the washiness of heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting is perfect for adding natural ambience while keeping the tone upfront and controlled.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial or metallic for a folk-rock context."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level control to ensure the signal is 'upfront' and balanced for performance.",
+              "matchQuality": "exact",
+              "gap": "Standard practice for final gain staging.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by selecting an IR that better matches the 'small room' aesthetic while maintaining brightness.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Small Room/Acoustic IR",
+              "reason": "Enhance the natural, dry feel of a small recording space for folk-rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism and dryness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove acoustic focus",
+          "keep it electric",
+          "skip chorus"
+        ],
+        "warnings": [
+          "The source material is folk-rock, requiring a clean signal chain. The chosen settings prioritize clarity and rhythmic attack over heavy saturation or complex effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.193,
+      "prompt_chars": 1001,
+      "response_chars": 388,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 98,
+        "total_duration": 12189561900,
+        "prompt_eval_duration": 124274000,
+        "eval_duration": 636245000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.724,
+      "prompt_chars": 5317,
+      "response_chars": 505,
+      "usage": {
+        "input_tokens": 1489,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1623
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.884,
+      "prompt_chars": 3579,
+      "response_chars": 6417,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1735,
+        "total_duration": 11867285600,
+        "prompt_eval_duration": 128533999,
+        "eval_duration": 11275387000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.591,
+      "prompt_chars": 8569,
+      "response_chars": 568,
+      "usage": {
+        "prompt_eval_count": 2302,
+        "eval_count": 147,
+        "total_duration": 1584931600,
+        "prompt_eval_duration": 197167000,
+        "eval_duration": 965008000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.985,
+      "prompt_chars": 2782,
+      "response_chars": 173,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 45,
+        "total_duration": 11962199000,
+        "prompt_eval_duration": 161556000,
+        "eval_duration": 301556000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Crosby, Stills, Nash & Young",
+      "title": "Ohio",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "Crosby, Stills, Nash & Young - Ohio - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry electric folk-rock crunch with clean pick attack",
+      "signalChainSummary": "A clean signal chain using a light boost and classic British amp modeling (UK 45/US Deluxe) paired with a dry cabinet to achieve the required upfront, rhythmic folk-rock crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a tight signal for rhythmic strumming.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "12 o'clock"
+          },
+          "purpose": "Provide a subtle lift and tighten the attack for rhythmic strumming without adding grit.",
+          "matchQuality": "close",
+          "gap": "The Boost module is ideal for gentle tightening, mimicking a clean boost pedal.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Compression could also achieve tightness but might soften the pick attack too much."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and upfront; no dedicated drive needed beyond amp breakup.",
+          "matchQuality": "exact",
+          "gap": "The target requires a clean-to-edge-of-breakup sound, making an explicit drive pedal unnecessary and potentially muddying the signal.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "10 o'clock",
+            "Mid": "12 o'clock",
+            "Bass": "11 o'clock"
+          },
+          "purpose": "Model a classic British clean/crunch tone (Fender/Marshall light drive clue) suitable for folk-rock.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is the best fit for the required vintage, bright, and slightly overdriven sound profile.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a more American clean tone was preferred."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, classic British cabinet sound that complements the UK 45 amp model.",
+          "matchQuality": "close",
+          "gap": "This pairing reinforces the desired vintage folk-rock aesthetic.",
+          "alternatives": [
+            {
+              "model": "US 2x12",
+              "reason": "If a smaller, more intimate sound was required."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Slightly boost the high end and presence to achieve an 'upfront' sound while controlling low-end muddiness.",
+          "matchQuality": "close",
+          "gap": "Used for fine-tuning the bright, dry character required by the folk genre.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah effect needed; the tone must remain direct and focused on strumming.",
+          "matchQuality": "exact",
+          "gap": "The target genre does not call for filtering or sweeping effects.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle depth and dimension without sounding overly wet or distracting from the rhythmic strumming.",
+          "matchQuality": "close",
+          "gap": "A minimal delay adds space, fulfilling the 'dry but not sterile' requirement.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could also add subtle depth, but Digital Delay offers more control for a clean signal."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide a subtle sense of space ('small room or near-dry') without the washiness of heavy reverb.",
+          "matchQuality": "close",
+          "gap": "The Room setting is perfect for adding natural ambience while keeping the tone upfront and controlled.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might sound too artificial or metallic for a folk-rock context."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level control to ensure the signal is 'upfront' and balanced for performance.",
+          "matchQuality": "exact",
+          "gap": "Standard practice for final gain staging.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry electric folk-rock crunch with clean pick attack",
+      "mustHave": [
+        "tight rhythmic strum",
+        "clean-to-edge-of-breakup",
+        "dry, upfront",
+        "electric guitar"
+      ],
+      "avoid": [
+        "acoustic blend",
+        "chorus",
+        "heavy reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "single-coil or bright humbucker",
+        "Fender/Marshall light drive",
+        "small room or near-dry"
+      ],
+      "corrections": [
+        "remove acoustic focus",
+        "keep it electric",
+        "skip chorus"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "singer-songwriter",
+        "classic rock"
+      ],
+      "targetTone": "dry electric folk-rock crunch with clean pick attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by selecting an IR that better matches the 'small room' aesthetic while maintaining brightness.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Small Room/Acoustic IR",
+          "reason": "Enhance the natural, dry feel of a small recording space for folk-rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism and dryness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 290,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

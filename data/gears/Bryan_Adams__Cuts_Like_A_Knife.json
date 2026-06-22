@@ -1,0 +1,1012 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 186,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bryan_Adams__Cuts_Like_A_Knife.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bryan Adams",
+    "title": "Cuts Like A Knife",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "80s pop",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Bryan Adams' style is classic 80s arena/pop rock, matching the bright crunch tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with a slight grit and pronounced attack.",
+      "signatureElements": [
+        "Mid-range punch",
+        "Slight overdrive/crunch",
+        "Punchy rhythm strumming"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation with natural breakup",
+        "Cabinet modeling for warmth"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Clean delay wash",
+        "High-gain metal saturation"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s pop-rock crunch with clean attack",
+      "mustHave": [
+        "tight mid punch",
+        "bright edge",
+        "clean strummed attack",
+        "light breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "washy delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "humbucker or bright single-coil",
+        "4x12 or 2x12 rock cab"
+      ],
+      "corrections": [
+        "add 80s polished pop-rock sheen",
+        "keep it crunchy but not heavy",
+        "favor clarity over grit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s pop-rock crunch with clean attack",
+    "mustHave": [
+      "tight mid punch",
+      "bright edge",
+      "clean strummed attack",
+      "light breakup"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "washy delay"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style amp",
+      "humbucker or bright single-coil",
+      "4x12 or 2x12 rock cab"
+    ],
+    "corrections": [
+      "add 80s polished pop-rock sheen",
+      "keep it crunchy but not heavy",
+      "favor clarity over grit"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, punchy tones using classic British amps and light overdrive for 80s pop-rock clarity.",
+          "bestMatchSummary": "A clean signal chain starting with a boost/overdrive to enhance attack, followed by the UK 50 amp model for its bright Plexi character, paired with the UK Vintage 4x12 cab. Chorus and light reverb add the necessary polished 80s sheen.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Enhance the initial attack and punch for clean strumming.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light breakup and mid-punch without heavy grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the mild, bright overdrive needed for 80s pop-rock crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more vintage/American tone."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the bright, punchy Plexi-style tone required for 80s pop-rock.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Sculpt the tone for tight mid-punch and bright edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Mix": "2"
+              },
+              "purpose": "Add the polished 80s pop-rock sheen and width.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle space and polish without sounding washy.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional subtle rhythmic echo (kept off to avoid washiness).",
+              "matchQuality": "close",
+              "gap": "The verdict specifically warns against 'washy delay', so this is kept inactive.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig assumes the source material's guitar parts are clean and punchy. The Chorus and Room reverb add necessary 80s polish, but careful mixing is required to avoid sounding overly processed."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better high-end clarity and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 Pop/Pop-Rock IR",
+              "reason": "Enhance the bright, polished 80s sheen and mid-punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bryan Adams - Cuts Like A Knife - Valeton GP-180",
+        "song": {
+          "artist": "Bryan Adams",
+          "title": "Cuts Like A Knife",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s pop-rock crunch with clean attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain starting with a boost/overdrive to enhance attack, followed by the UK 50 amp model for its bright Plexi character, paired with the UK Vintage 4x12 cab. Chorus and light reverb add the necessary polished 80s sheen.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up background noise and maintain clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Enhance the initial attack and punch for clean strumming.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide light breakup and mid-punch without heavy grit.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a good proxy for the mild, bright overdrive needed for 80s pop-rock crunch.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more vintage/American tone."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "6",
+              "Mid": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the bright, punchy Plexi-style tone required for 80s pop-rock.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Sculpt the tone for tight mid-punch and bright edge.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "4",
+              "Mix": "2"
+            },
+            "purpose": "Add the polished 80s pop-rock sheen and width.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle space and polish without sounding washy.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Optional subtle rhythmic echo (kept off to avoid washiness).",
+            "matchQuality": "close",
+            "gap": "The verdict specifically warns against 'washy delay', so this is kept inactive.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s pop-rock crunch with clean attack",
+          "toneProfile": "bright 80s pop-rock crunch with clean attack",
+          "idealSignalChain": "Marshall/Plexi style amp | humbucker or bright single-coil | 4x12 or 2x12 rock cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker or bright single-coil",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 or 2x12 rock cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight mid punch",
+            "bright edge",
+            "clean strummed attack",
+            "light breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, punchy tones using classic British amps and light overdrive for 80s pop-rock clarity.",
+          "bestMatchSummary": "A clean signal chain starting with a boost/overdrive to enhance attack, followed by the UK 50 amp model for its bright Plexi character, paired with the UK Vintage 4x12 cab. Chorus and light reverb add the necessary polished 80s sheen.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Enhance the initial attack and punch for clean strumming.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light breakup and mid-punch without heavy grit.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the mild, bright overdrive needed for 80s pop-rock crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more vintage/American tone."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the bright, punchy Plexi-style tone required for 80s pop-rock.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Sculpt the tone for tight mid-punch and bright edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Mix": "2"
+              },
+              "purpose": "Add the polished 80s pop-rock sheen and width.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle space and polish without sounding washy.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Optional subtle rhythmic echo (kept off to avoid washiness).",
+              "matchQuality": "close",
+              "gap": "The verdict specifically warns against 'washy delay', so this is kept inactive.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better high-end clarity and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 Pop/Pop-Rock IR",
+              "reason": "Enhance the bright, polished 80s sheen and mid-punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the highs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "add 80s polished pop-rock sheen",
+          "keep it crunchy but not heavy",
+          "favor clarity over grit"
+        ],
+        "warnings": [
+          "This rig assumes the source material's guitar parts are clean and punchy. The Chorus and Room reverb add necessary 80s polish, but careful mixing is required to avoid sounding overly processed."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.997,
+      "prompt_chars": 997,
+      "response_chars": 422,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 104,
+        "total_duration": 12984348200,
+        "prompt_eval_duration": 141986000,
+        "eval_duration": 805420000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 3.553,
+      "prompt_chars": 5347,
+      "response_chars": 503,
+      "usage": {
+        "input_tokens": 1489,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1630
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 11.843,
+      "prompt_chars": 3566,
+      "response_chars": 4786,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1428,
+        "total_duration": 11824931500,
+        "prompt_eval_duration": 288070000,
+        "eval_duration": 11117925000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.802,
+      "prompt_chars": 6873,
+      "response_chars": 527,
+      "usage": {
+        "prompt_eval_count": 2000,
+        "eval_count": 153,
+        "total_duration": 1775133600,
+        "prompt_eval_duration": 196980000,
+        "eval_duration": 1197909000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.337,
+      "prompt_chars": 2777,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 909,
+        "eval_count": 55,
+        "total_duration": 12333177400,
+        "prompt_eval_duration": 184434000,
+        "eval_duration": 429025000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bryan Adams",
+      "title": "Cuts Like A Knife",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Bryan Adams - Cuts Like A Knife - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s pop-rock crunch with clean attack",
+      "signalChainSummary": "A clean signal chain starting with a boost/overdrive to enhance attack, followed by the UK 50 amp model for its bright Plexi character, paired with the UK Vintage 4x12 cab. Chorus and light reverb add the necessary polished 80s sheen.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up background noise and maintain clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Enhance the initial attack and punch for clean strumming.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide light breakup and mid-punch without heavy grit.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a good proxy for the mild, bright overdrive needed for 80s pop-rock crunch.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more vintage/American tone."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "6",
+            "Mid": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the bright, punchy Plexi-style tone required for 80s pop-rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Sculpt the tone for tight mid-punch and bright edge.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "4",
+            "Mix": "2"
+          },
+          "purpose": "Add the polished 80s pop-rock sheen and width.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle space and polish without sounding washy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Optional subtle rhythmic echo (kept off to avoid washiness).",
+          "matchQuality": "close",
+          "gap": "The verdict specifically warns against 'washy delay', so this is kept inactive.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s pop-rock crunch with clean attack",
+      "mustHave": [
+        "tight mid punch",
+        "bright edge",
+        "clean strummed attack",
+        "light breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "washy delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "humbucker or bright single-coil",
+        "4x12 or 2x12 rock cab"
+      ],
+      "corrections": [
+        "add 80s polished pop-rock sheen",
+        "keep it crunchy but not heavy",
+        "favor clarity over grit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "80s pop",
+        "arena rock"
+      ],
+      "targetTone": "bright 80s pop-rock crunch with clean attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better high-end clarity and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x12 Pop/Pop-Rock IR",
+          "reason": "Enhance the bright, polished 80s sheen and mid-punch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition in the highs.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 186,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1052 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1309,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Steve_Miller_Band__Take_The_Money_And_Run.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Steve Miller Band",
+    "title": "Take The Money And Run",
+    "album": "",
+    "year": null,
+    "genre": "funk rock"
+  },
+  "genreClassification": {
+    "genre": "funk rock",
+    "subgenres": [
+      "pop rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic funk-infused pop/rock track, matching the clean chorus tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy blues rock tone with a touch of grit and bite.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture for thickness",
+        "Clean chime for verses",
+        "Wah pedal sweeps"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (for mid-hump)",
+        "British Plexi or Fender tweed amp model",
+        "Chorus/Vibrato modulation"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Deep scooped bass tones",
+        "Extreme digital delay tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean-chorus funk rock with bright bite",
+      "mustHave": [
+        "tight clean rhythm",
+        "slight edge on accents",
+        "bright treble bite",
+        "percussive groove",
+        "light stereo polish"
+      ],
+      "avoid": [
+        "blues crunch",
+        "fuzz",
+        "wah",
+        "heavy distortion",
+        "long delay"
+      ],
+      "gearClues": [
+        "Strat or similar",
+        "single-coils",
+        "Fender clean",
+        "2x12 or 4x10",
+        "light compression"
+      ],
+      "corrections": [
+        "Drop fuzz and wah",
+        "Lean cleaner than mid-gain",
+        "Keep rhythm crisp and dry",
+        "Use small edge-of-breakup only on peaks"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean-chorus funk rock with bright bite",
+    "mustHave": [
+      "tight clean rhythm",
+      "slight edge on accents",
+      "bright treble bite",
+      "percussive groove",
+      "light stereo polish"
+    ],
+    "avoid": [
+      "blues crunch",
+      "fuzz",
+      "wah",
+      "heavy distortion",
+      "long delay"
+    ],
+    "gearClues": [
+      "Strat or similar",
+      "single-coils",
+      "Fender clean",
+      "2x12 or 4x10",
+      "light compression"
+    ],
+    "corrections": [
+      "Drop fuzz and wah",
+      "Lean cleaner than mid-gain",
+      "Keep rhythm crisp and dry",
+      "Use small edge-of-breakup only on peaks"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with chorus and light compression for funk/pop rock feel.",
+          "bestMatchSummary": "A tight, bright signal chain using Comp and Chorus into a Fender-style amp (US Deluxe) paired with US 2x12 cabinet to achieve the required percussive, clean funk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide percussive groove and even out dynamics for tight rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "80%"
+              },
+              "purpose": "Provide slight edge/bite on accents without adding heavy distortion.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD to keep the tone clean and avoid blues crunch.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could provide bite, but might push into unwanted grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "50%",
+                "Mix": "40%"
+              },
+              "purpose": "Add light stereo polish and characteristic funk/pop rock shimmer.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "EQ shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "-1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance bright treble bite and cut unnecessary muddiness for clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "75%",
+                "Mid": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the clean, bright Fender-style tone required for funk rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required bright and focused sound profile (2x12 clue).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add light stereo polish and depth without sounding muddy or overly wet.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic funk/pop rock track, requiring extreme clarity and percussive attack. The chain prioritizes clean headroom over grit."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for increased realism and bite to match the funk rock genre's percussive nature.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the bright, focused bite needed for funk rhythm.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and snap",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Steve Miller Band - Take The Money And Run - Valeton GP-180",
+        "song": {
+          "artist": "Steve Miller Band",
+          "title": "Take The Money And Run",
+          "album": "",
+          "year": null,
+          "genre": "funk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean-chorus funk rock with bright bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, bright signal chain using Comp and Chorus into a Fender-style amp (US Deluxe) paired with US 2x12 cabinet to achieve the required percussive, clean funk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight rhythm definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide percussive groove and even out dynamics for tight rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/gain shaping",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "70%",
+              "Level": "80%"
+            },
+            "purpose": "Provide slight edge/bite on accents without adding heavy distortion.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of a dedicated OD to keep the tone clean and avoid blues crunch.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Could provide bite, but might push into unwanted grit."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "50%",
+              "Mix": "40%"
+            },
+            "purpose": "Add light stereo polish and characteristic funk/pop rock shimmer.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "EQ shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "-1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance bright treble bite and cut unnecessary muddiness for clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Treble": "75%",
+              "Mid": "60%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the clean, bright Fender-style tone required for funk rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required bright and focused sound profile (2x12 clue).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add light stereo polish and depth without sounding muddy or overly wet.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean-chorus funk rock with bright bite",
+          "toneProfile": "clean-chorus funk rock with bright bite",
+          "idealSignalChain": "Strat or similar | single-coils | Fender clean | 2x12 or 4x10 | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat or similar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender clean",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x10",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight clean rhythm",
+            "slight edge on accents",
+            "bright treble bite",
+            "percussive groove",
+            "light stereo polish"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with chorus and light compression for funk/pop rock feel.",
+          "bestMatchSummary": "A tight, bright signal chain using Comp and Chorus into a Fender-style amp (US Deluxe) paired with US 2x12 cabinet to achieve the required percussive, clean funk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide percussive groove and even out dynamics for tight rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/gain shaping",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "80%"
+              },
+              "purpose": "Provide slight edge/bite on accents without adding heavy distortion.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of a dedicated OD to keep the tone clean and avoid blues crunch.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could provide bite, but might push into unwanted grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "50%",
+                "Mix": "40%"
+              },
+              "purpose": "Add light stereo polish and characteristic funk/pop rock shimmer.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "EQ shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "-1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance bright treble bite and cut unnecessary muddiness for clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "75%",
+                "Mid": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the clean, bright Fender-style tone required for funk rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required bright and focused sound profile (2x12 clue).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add light stereo polish and depth without sounding muddy or overly wet.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for increased realism and bite to match the funk rock genre's percussive nature.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+              "reason": "Enhance the bright, focused bite needed for funk rhythm.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and snap",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Drop fuzz and wah",
+          "Lean cleaner than mid-gain",
+          "Keep rhythm crisp and dry",
+          "Use small edge-of-breakup only on peaks"
+        ],
+        "warnings": [
+          "The source material is a classic funk/pop rock track, requiring extreme clarity and percussive attack. The chain prioritizes clean headroom over grit."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.068,
+      "prompt_chars": 1008,
+      "response_chars": 482,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 118,
+        "total_duration": 11065073400,
+        "prompt_eval_duration": 353275000,
+        "eval_duration": 2109031000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.335,
+      "prompt_chars": 5424,
+      "response_chars": 587,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 159,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1669
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 22.438,
+      "prompt_chars": 3703,
+      "response_chars": 4686,
+      "usage": {
+        "prompt_eval_count": 1247,
+        "eval_count": 1354,
+        "total_duration": 22430664800,
+        "prompt_eval_duration": 359355000,
+        "eval_duration": 21624805000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.288,
+      "prompt_chars": 6910,
+      "response_chars": 556,
+      "usage": {
+        "prompt_eval_count": 1958,
+        "eval_count": 157,
+        "total_duration": 4269137100,
+        "prompt_eval_duration": 338118000,
+        "eval_duration": 3434328000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.961,
+      "prompt_chars": 2797,
+      "response_chars": 186,
+      "usage": {
+        "prompt_eval_count": 885,
+        "eval_count": 51,
+        "total_duration": 16909985800,
+        "prompt_eval_duration": 715700000,
+        "eval_duration": 939622000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Steve Miller Band",
+      "title": "Take The Money And Run",
+      "album": "",
+      "year": null,
+      "genre": "funk rock"
+    },
+    "rig": {
+      "rigName": "Steve Miller Band - Take The Money And Run - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean-chorus funk rock with bright bite",
+      "signalChainSummary": "A tight, bright signal chain using Comp and Chorus into a Fender-style amp (US Deluxe) paired with US 2x12 cabinet to achieve the required percussive, clean funk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight rhythm definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide percussive groove and even out dynamics for tight rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/gain shaping",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "70%",
+            "Level": "80%"
+          },
+          "purpose": "Provide slight edge/bite on accents without adding heavy distortion.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of a dedicated OD to keep the tone clean and avoid blues crunch.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Could provide bite, but might push into unwanted grit."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "50%",
+            "Mix": "40%"
+          },
+          "purpose": "Add light stereo polish and characteristic funk/pop rock shimmer.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "EQ shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "-1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance bright treble bite and cut unnecessary muddiness for clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Treble": "75%",
+            "Mid": "60%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the clean, bright Fender-style tone required for funk rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required bright and focused sound profile (2x12 clue).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add light stereo polish and depth without sounding muddy or overly wet.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean-chorus funk rock with bright bite",
+      "mustHave": [
+        "tight clean rhythm",
+        "slight edge on accents",
+        "bright treble bite",
+        "percussive groove",
+        "light stereo polish"
+      ],
+      "avoid": [
+        "blues crunch",
+        "fuzz",
+        "wah",
+        "heavy distortion",
+        "long delay"
+      ],
+      "gearClues": [
+        "Strat or similar",
+        "single-coils",
+        "Fender clean",
+        "2x12 or 4x10",
+        "light compression"
+      ],
+      "corrections": [
+        "Drop fuzz and wah",
+        "Lean cleaner than mid-gain",
+        "Keep rhythm crisp and dry",
+        "Use small edge-of-breakup only on peaks"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "funk rock",
+      "styleTags": [
+        "pop rock",
+        "classic rock"
+      ],
+      "targetTone": "clean-chorus funk rock with bright bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for increased realism and bite to match the funk rock genre's percussive nature.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x10 IR (e.g., Fender Deluxe)",
+          "reason": "Enhance the bright, focused bite needed for funk rhythm.",
+          "replacesBlockOrder": 7,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and snap",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1309,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1209 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 652,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Jacques_Dutronc__Les_Cactus.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Jacques Dutronc",
+    "title": "Les Cactus",
+    "album": "",
+    "year": null,
+    "genre": "garage pop"
+  },
+  "genreClassification": {
+    "genre": "garage pop",
+    "subgenres": [
+      "french pop",
+      "pop rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest a classic French garage pop sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly dirty clean/crunch tone with prominent mid-range focus.",
+      "signatureElements": [
+        "clean",
+        "light chorus/modulation",
+        "slight fuzz (for texture)",
+        "mid-scoop EQ"
+      ],
+      "gearHypotheses": [
+        "Fender Twin Reverb style amp model",
+        "British single-coil pickup sound",
+        "Chorus effect pedal"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "overly bright high end",
+        "deep reverb tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly garage pop crunch with slight fuzz texture",
+      "mustHave": [
+        "bright rhythmic attack",
+        "slight fuzz grain",
+        "dry close-mic feel",
+        "simple mono texture"
+      ],
+      "avoid": [
+        "chorus",
+        "mid-scoop",
+        "heavy distortion",
+        "deep reverb"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "light fuzz",
+        "spring reverb minimal"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop mid-scoop",
+        "push garage bite",
+        "keep fuzz subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly garage pop crunch with slight fuzz texture",
+    "mustHave": [
+      "bright rhythmic attack",
+      "slight fuzz grain",
+      "dry close-mic feel",
+      "simple mono texture"
+    ],
+    "avoid": [
+      "chorus",
+      "mid-scoop",
+      "heavy distortion",
+      "deep reverb"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "small combo amp",
+      "light fuzz",
+      "spring reverb minimal"
+    ],
+    "corrections": [
+      "drop chorus",
+      "drop mid-scoop",
+      "push garage bite",
+      "keep fuzz subtle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, crunchy tones with subtle fuzz and vintage combo character.",
+          "bestMatchSummary": "A punchy signal chain using a Green OD for bite, followed by the UK 45 amp model to capture the classic garage pop sound, finished with minimal spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain rhythmic clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide the necessary 'garage bite' and crunchy attack without heavy distortion.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but Green OD better captures the aggressive pop crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "2.0",
+                "Tone": "5.0",
+                "Level": "6.0"
+              },
+              "purpose": "Add the required subtle 'fuzz grain' texture without muddying the bright attack.",
+              "matchQuality": "close",
+              "gap": "The Fuzz model is broad; settings are dialed back to keep it textural rather than aggressive.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Might be too aggressive or colored for the subtle fuzz requirement."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.5",
+                "Midrange": "6.0",
+                "Bass": "5.0"
+              },
+              "purpose": "Emulate the small combo amp sound and provide bright, punchy midrange character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Might be too clean or lack the specific British pop bite of the UK 45."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British cabinet tone that complements the UK 45 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Midrange": "+1.5",
+                "Treble": "+3.0"
+              },
+              "purpose": "Boost the high-end 'jangly' quality and cut unnecessary low-mid mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Placeholder; V-Wah is kept inactive as the tone requires direct rhythmic attack.",
+              "matchQuality": "N/A",
+              "gap": "The WAH module is not needed for this specific pop crunch sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Placeholder; Chorus is explicitly avoided by the musical verdict.",
+              "matchQuality": "N/A",
+              "gap": "The Chorus module must be bypassed to meet the 'avoid' criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Placeholder; No delay effect is required for the dry, rhythmic pop sound.",
+              "matchQuality": "N/A",
+              "gap": "The Digital Delay module should be bypassed to maintain a tight, immediate rhythm.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3.0s"
+              },
+              "purpose": "Add a minimal amount of vintage room ambience (as suggested by gear clues) without sounding deep or wash-out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "Spring reverb better matches the 'vintage combo' and 'minimal' feel."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic French pop song, requiring a bright, punchy tone. The chain prioritizes the UK 45 and Green OD to achieve the desired 'garage bite' while keeping effects minimal."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for a tighter, more immediate close-mic sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "close-miked 1x12 or 2x12",
+              "reason": "Achieve the required 'dry close-mic feel' and punchy, immediate attack.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Jacques Dutronc - Les Cactus - Valeton GP-180",
+        "song": {
+          "artist": "Jacques Dutronc",
+          "title": "Les Cactus",
+          "album": "",
+          "year": null,
+          "genre": "garage pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly garage pop crunch with slight fuzz texture",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A punchy signal chain using a Green OD for bite, followed by the UK 45 amp model to capture the classic garage pop sound, finished with minimal spring reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up background noise and maintain rhythmic clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Provide the necessary 'garage bite' and crunchy attack without heavy distortion.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly warmer, but Green OD better captures the aggressive pop crunch."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "2.0",
+              "Tone": "5.0",
+              "Level": "6.0"
+            },
+            "purpose": "Add the required subtle 'fuzz grain' texture without muddying the bright attack.",
+            "matchQuality": "close",
+            "gap": "The Fuzz model is broad; settings are dialed back to keep it textural rather than aggressive.",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Might be too aggressive or colored for the subtle fuzz requirement."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.5",
+              "Midrange": "6.0",
+              "Bass": "5.0"
+            },
+            "purpose": "Emulate the small combo amp sound and provide bright, punchy midrange character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "Might be too clean or lack the specific British pop bite of the UK 45."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a classic British cabinet tone that complements the UK 45 amp model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2.0",
+              "Midrange": "+1.5",
+              "Treble": "+3.0"
+            },
+            "purpose": "Boost the high-end 'jangly' quality and cut unnecessary low-mid mud.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Cutoff": "500 Hz"
+            },
+            "purpose": "Placeholder; V-Wah is kept inactive as the tone requires direct rhythmic attack.",
+            "matchQuality": "N/A",
+            "gap": "The WAH module is not needed for this specific pop crunch sound.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0 Hz",
+              "Depth": "0%"
+            },
+            "purpose": "Placeholder; Chorus is explicitly avoided by the musical verdict.",
+            "matchQuality": "N/A",
+            "gap": "The Chorus module must be bypassed to meet the 'avoid' criteria.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0 ms",
+              "Feedback": "0%"
+            },
+            "purpose": "Placeholder; No delay effect is required for the dry, rhythmic pop sound.",
+            "matchQuality": "N/A",
+            "gap": "The Digital Delay module should be bypassed to maintain a tight, immediate rhythm.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "3.0s"
+            },
+            "purpose": "Add a minimal amount of vintage room ambience (as suggested by gear clues) without sounding deep or wash-out.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "Spring reverb better matches the 'vintage combo' and 'minimal' feel."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7.0"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly garage pop crunch with slight fuzz texture",
+          "toneProfile": "jangly garage pop crunch with slight fuzz texture",
+          "idealSignalChain": "single-coil guitar | small combo amp | light fuzz | spring reverb minimal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light fuzz",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring reverb minimal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright rhythmic attack",
+            "slight fuzz grain",
+            "dry close-mic feel",
+            "simple mono texture"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, crunchy tones with subtle fuzz and vintage combo character.",
+          "bestMatchSummary": "A punchy signal chain using a Green OD for bite, followed by the UK 45 amp model to capture the classic garage pop sound, finished with minimal spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up background noise and maintain rhythmic clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide the necessary 'garage bite' and crunchy attack without heavy distortion.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but Green OD better captures the aggressive pop crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "2.0",
+                "Tone": "5.0",
+                "Level": "6.0"
+              },
+              "purpose": "Add the required subtle 'fuzz grain' texture without muddying the bright attack.",
+              "matchQuality": "close",
+              "gap": "The Fuzz model is broad; settings are dialed back to keep it textural rather than aggressive.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Might be too aggressive or colored for the subtle fuzz requirement."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.5",
+                "Midrange": "6.0",
+                "Bass": "5.0"
+              },
+              "purpose": "Emulate the small combo amp sound and provide bright, punchy midrange character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Might be too clean or lack the specific British pop bite of the UK 45."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British cabinet tone that complements the UK 45 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2.0",
+                "Midrange": "+1.5",
+                "Treble": "+3.0"
+              },
+              "purpose": "Boost the high-end 'jangly' quality and cut unnecessary low-mid mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "500 Hz"
+              },
+              "purpose": "Placeholder; V-Wah is kept inactive as the tone requires direct rhythmic attack.",
+              "matchQuality": "N/A",
+              "gap": "The WAH module is not needed for this specific pop crunch sound.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Placeholder; Chorus is explicitly avoided by the musical verdict.",
+              "matchQuality": "N/A",
+              "gap": "The Chorus module must be bypassed to meet the 'avoid' criteria.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Placeholder; No delay effect is required for the dry, rhythmic pop sound.",
+              "matchQuality": "N/A",
+              "gap": "The Digital Delay module should be bypassed to maintain a tight, immediate rhythm.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3.0s"
+              },
+              "purpose": "Add a minimal amount of vintage room ambience (as suggested by gear clues) without sounding deep or wash-out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "Spring reverb better matches the 'vintage combo' and 'minimal' feel."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for a tighter, more immediate close-mic sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "close-miked 1x12 or 2x12",
+              "reason": "Achieve the required 'dry close-mic feel' and punchy, immediate attack.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "drop mid-scoop",
+          "push garage bite",
+          "keep fuzz subtle"
+        ],
+        "warnings": [
+          "The source material is a classic French pop song, requiring a bright, punchy tone. The chain prioritizes the UK 45 and Green OD to achieve the desired 'garage bite' while keeping effects minimal."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.534,
+      "prompt_chars": 994,
+      "response_chars": 413,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 105,
+        "total_duration": 11534468100,
+        "prompt_eval_duration": 370676000,
+        "eval_duration": 1892262000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.62,
+      "prompt_chars": 5341,
+      "response_chars": 512,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1626
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 35.682,
+      "prompt_chars": 3593,
+      "response_chars": 6249,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1793,
+        "total_duration": 35678197000,
+        "prompt_eval_duration": 156352000,
+        "eval_duration": 35080577000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 6.186,
+      "prompt_chars": 8449,
+      "response_chars": 528,
+      "usage": {
+        "prompt_eval_count": 2358,
+        "eval_count": 153,
+        "total_duration": 6158636600,
+        "prompt_eval_duration": 409394000,
+        "eval_duration": 5149058000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.458,
+      "prompt_chars": 2886,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 918,
+        "eval_count": 46,
+        "total_duration": 11452774700,
+        "prompt_eval_duration": 413606000,
+        "eval_duration": 565104000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Jacques Dutronc",
+      "title": "Les Cactus",
+      "album": "",
+      "year": null,
+      "genre": "garage pop"
+    },
+    "rig": {
+      "rigName": "Jacques Dutronc - Les Cactus - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly garage pop crunch with slight fuzz texture",
+      "signalChainSummary": "A punchy signal chain using a Green OD for bite, followed by the UK 45 amp model to capture the classic garage pop sound, finished with minimal spring reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up background noise and maintain rhythmic clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Provide the necessary 'garage bite' and crunchy attack without heavy distortion.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly warmer, but Green OD better captures the aggressive pop crunch."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "2.0",
+            "Tone": "5.0",
+            "Level": "6.0"
+          },
+          "purpose": "Add the required subtle 'fuzz grain' texture without muddying the bright attack.",
+          "matchQuality": "close",
+          "gap": "The Fuzz model is broad; settings are dialed back to keep it textural rather than aggressive.",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Might be too aggressive or colored for the subtle fuzz requirement."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.5",
+            "Midrange": "6.0",
+            "Bass": "5.0"
+          },
+          "purpose": "Emulate the small combo amp sound and provide bright, punchy midrange character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "Might be too clean or lack the specific British pop bite of the UK 45."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a classic British cabinet tone that complements the UK 45 amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2.0",
+            "Midrange": "+1.5",
+            "Treble": "+3.0"
+          },
+          "purpose": "Boost the high-end 'jangly' quality and cut unnecessary low-mid mud.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Cutoff": "500 Hz"
+          },
+          "purpose": "Placeholder; V-Wah is kept inactive as the tone requires direct rhythmic attack.",
+          "matchQuality": "fallback",
+          "gap": "The WAH module is not needed for this specific pop crunch sound.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0 Hz",
+            "Depth": "0%"
+          },
+          "purpose": "Placeholder; Chorus is explicitly avoided by the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus module must be bypassed to meet the 'avoid' criteria.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0 ms",
+            "Feedback": "0%"
+          },
+          "purpose": "Placeholder; No delay effect is required for the dry, rhythmic pop sound.",
+          "matchQuality": "fallback",
+          "gap": "The Digital Delay module should be bypassed to maintain a tight, immediate rhythm.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "3.0s"
+          },
+          "purpose": "Add a minimal amount of vintage room ambience (as suggested by gear clues) without sounding deep or wash-out.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "Spring reverb better matches the 'vintage combo' and 'minimal' feel."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7.0"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly garage pop crunch with slight fuzz texture",
+      "mustHave": [
+        "bright rhythmic attack",
+        "slight fuzz grain",
+        "dry close-mic feel",
+        "simple mono texture"
+      ],
+      "avoid": [
+        "chorus",
+        "mid-scoop",
+        "heavy distortion",
+        "deep reverb"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "light fuzz",
+        "spring reverb minimal"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop mid-scoop",
+        "push garage bite",
+        "keep fuzz subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage pop",
+      "styleTags": [
+        "french pop",
+        "pop rock"
+      ],
+      "targetTone": "jangly garage pop crunch with slight fuzz texture",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for a tighter, more immediate close-mic sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "close-miked 1x12 or 2x12",
+          "reason": "Achieve the required 'dry close-mic feel' and punchy, immediate attack.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition in the high end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 652,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

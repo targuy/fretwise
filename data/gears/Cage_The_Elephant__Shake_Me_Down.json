@@ -1,0 +1,1046 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 202,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Cage_The_Elephant__Shake_Me_Down.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Cage The Elephant",
+    "title": "Shake Me Down",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "alt-rock",
+      "jangly pop",
+      "garage rock"
+    ],
+    "confidence": "high",
+    "rationale": "Cage The Elephant is a staple of the modern indie/alternative rock scene."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty crunch with a touch of fuzz and pronounced mid-range bite.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Punchy bass response",
+        "Moderate delay/reverb"
+      ],
+      "gearHypotheses": [
+        "British style Overdrive pedal (e.g., Klon, Tube Screamer variant)",
+        "Amp simulation with mid-scoop capability",
+        "Chorus or Flanger for movement"
+      ],
+      "avoid": [
+        "High gain metal tones",
+        "Thin clean sounds",
+        "Excessive modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly indie crunch with airy chorus and roomy delay",
+      "mustHave": [
+        "bright edge-of-breakup",
+        "indie jangle",
+        "airy chorus",
+        "roomy delay",
+        "slight grit"
+      ],
+      "avoid": [
+        "metal gain",
+        "heavy fuzz",
+        "mid-scoop",
+        "thick overdrive"
+      ],
+      "gearClues": [
+        "Vox-style amp",
+        "single coils",
+        "2x12 or 4x12",
+        "light chorus",
+        "short delay"
+      ],
+      "corrections": [
+        "drop fuzz as core texture",
+        "lean brighter and cleaner",
+        "add chorus/delay as key color"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly indie crunch with airy chorus and roomy delay",
+    "mustHave": [
+      "bright edge-of-breakup",
+      "indie jangle",
+      "airy chorus",
+      "roomy delay",
+      "slight grit"
+    ],
+    "avoid": [
+      "metal gain",
+      "heavy fuzz",
+      "mid-scoop",
+      "thick overdrive"
+    ],
+    "gearClues": [
+      "Vox-style amp",
+      "single coils",
+      "2x12 or 4x12",
+      "light chorus",
+      "short delay"
+    ],
+    "corrections": [
+      "drop fuzz as core texture",
+      "lean brighter and cleaner",
+      "add chorus/delay as key color"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean breakup and chorus/delay effects to achieve the jangly indie sound.",
+          "bestMatchSummary": "A clean signal chain utilizing a light overdrive for grit, followed by Chorus and an AC30 TB amp model with UK Vintage 4x12 cab, finished with Room reverb and Digital Delay for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide bright edge-of-breakup and slight grit without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "Green OD is a general choice for light breakup, mimicking the desired 'bright edge' effect.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than Green OD but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Feedback": "30%"
+              },
+              "purpose": "Add the required airy chorus texture for indie jangle.",
+              "matchQuality": "exact",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle texture if needed (kept off to maintain clean tone).",
+              "matchQuality": "N/A",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "70%",
+                "Mid": "50%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Vox-style amp and bright, articulate tone.",
+              "matchQuality": "close",
+              "gap": "AC30 TB is the best fit for a classic British/Vox sound required by the genre clues.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if AC30 sounds too bright."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound suitable for indie rock.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add a spacious, roomy depth to the mix.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2%",
+                "Mix": "20%"
+              },
+              "purpose": "Implement the required short, airy delay for depth and jangle.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Slightly boost the high end and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a full band recording. This rig focuses on creating an articulate, jangly electric guitar texture suitable for the lead/rhythm role."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tonal depth by swapping the IR for a more open, airy British cab sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "airy 2x12 or 4x12 IR",
+              "reason": "Enhance jangly indie tone with an open, less boxy cabinet sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased air and clarity in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Cage The Elephant - Shake Me Down - Valeton GP-180",
+        "song": {
+          "artist": "Cage The Elephant",
+          "title": "Shake Me Down",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly indie crunch with airy chorus and roomy delay",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain utilizing a light overdrive for grit, followed by Chorus and an AC30 TB amp model with UK Vintage 4x12 cab, finished with Room reverb and Digital Delay for depth.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "75%",
+              "Level": "60%"
+            },
+            "purpose": "Provide bright edge-of-breakup and slight grit without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "Green OD is a general choice for light breakup, mimicking the desired 'bright edge' effect.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more aggressive than Green OD but still suitable."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "50%",
+              "Feedback": "30%"
+            },
+            "purpose": "Add the required airy chorus texture for indie jangle.",
+            "matchQuality": "exact",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use for subtle texture if needed (kept off to maintain clean tone).",
+            "matchQuality": "N/A",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Treble": "70%",
+              "Mid": "50%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the Vox-style amp and bright, articulate tone.",
+            "matchQuality": "close",
+            "gap": "AC30 TB is the best fit for a classic British/Vox sound required by the genre clues.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative if AC30 sounds too bright."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound suitable for indie rock.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add a spacious, roomy depth to the mix.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "2%",
+              "Mix": "20%"
+            },
+            "purpose": "Implement the required short, airy delay for depth and jangle.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "EQ/Tone Shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Slightly boost the high end and cut unnecessary low-end mud.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly indie crunch with airy chorus and roomy delay",
+          "toneProfile": "jangly indie crunch with airy chorus and roomy delay",
+          "idealSignalChain": "Vox-style amp | single coils | 2x12 or 4x12 | light chorus | short delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright edge-of-breakup",
+            "indie jangle",
+            "airy chorus",
+            "roomy delay",
+            "slight grit"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean breakup and chorus/delay effects to achieve the jangly indie sound.",
+          "bestMatchSummary": "A clean signal chain utilizing a light overdrive for grit, followed by Chorus and an AC30 TB amp model with UK Vintage 4x12 cab, finished with Room reverb and Digital Delay for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide bright edge-of-breakup and slight grit without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "Green OD is a general choice for light breakup, mimicking the desired 'bright edge' effect.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than Green OD but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Feedback": "30%"
+              },
+              "purpose": "Add the required airy chorus texture for indie jangle.",
+              "matchQuality": "exact",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use for subtle texture if needed (kept off to maintain clean tone).",
+              "matchQuality": "N/A",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "70%",
+                "Mid": "50%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the Vox-style amp and bright, articulate tone.",
+              "matchQuality": "close",
+              "gap": "AC30 TB is the best fit for a classic British/Vox sound required by the genre clues.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative if AC30 sounds too bright."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound suitable for indie rock.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add a spacious, roomy depth to the mix.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2%",
+                "Mix": "20%"
+              },
+              "purpose": "Implement the required short, airy delay for depth and jangle.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "EQ/Tone Shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Slightly boost the high end and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tonal depth by swapping the IR for a more open, airy British cab sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "airy 2x12 or 4x12 IR",
+              "reason": "Enhance jangly indie tone with an open, less boxy cabinet sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased air and clarity in the high end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz as core texture",
+          "lean brighter and cleaner",
+          "add chorus/delay as key color"
+        ],
+        "warnings": [
+          "The source material is a full band recording. This rig focuses on creating an articulate, jangly electric guitar texture suitable for the lead/rhythm role."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 14.613,
+      "prompt_chars": 999,
+      "response_chars": 501,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 127,
+        "total_duration": 14609515600,
+        "prompt_eval_duration": 218568000,
+        "eval_duration": 2355288000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.946,
+      "prompt_chars": 5434,
+      "response_chars": 529,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 147,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1659
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 25.877,
+      "prompt_chars": 3622,
+      "response_chars": 4783,
+      "usage": {
+        "prompt_eval_count": 1228,
+        "eval_count": 1396,
+        "total_duration": 25861085700,
+        "prompt_eval_duration": 338031000,
+        "eval_duration": 25073753000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.87,
+      "prompt_chars": 6930,
+      "response_chars": 504,
+      "usage": {
+        "prompt_eval_count": 1981,
+        "eval_count": 146,
+        "total_duration": 1841911000,
+        "prompt_eval_duration": 200598000,
+        "eval_duration": 1263923000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.283,
+      "prompt_chars": 2737,
+      "response_chars": 191,
+      "usage": {
+        "prompt_eval_count": 871,
+        "eval_count": 54,
+        "total_duration": 12268682200,
+        "prompt_eval_duration": 180875000,
+        "eval_duration": 375287000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Cage The Elephant",
+      "title": "Shake Me Down",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "Cage The Elephant - Shake Me Down - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly indie crunch with airy chorus and roomy delay",
+      "signalChainSummary": "A clean signal chain utilizing a light overdrive for grit, followed by Chorus and an AC30 TB amp model with UK Vintage 4x12 cab, finished with Room reverb and Digital Delay for depth.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "75%",
+            "Level": "60%"
+          },
+          "purpose": "Provide bright edge-of-breakup and slight grit without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "Green OD is a general choice for light breakup, mimicking the desired 'bright edge' effect.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more aggressive than Green OD but still suitable."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "50%",
+            "Feedback": "30%"
+          },
+          "purpose": "Add the required airy chorus texture for indie jangle.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use for subtle texture if needed (kept off to maintain clean tone).",
+          "matchQuality": "fallback",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Treble": "70%",
+            "Mid": "50%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the Vox-style amp and bright, articulate tone.",
+          "matchQuality": "close",
+          "gap": "AC30 TB is the best fit for a classic British/Vox sound required by the genre clues.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative if AC30 sounds too bright."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound suitable for indie rock.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add a spacious, roomy depth to the mix.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "2%",
+            "Mix": "20%"
+          },
+          "purpose": "Implement the required short, airy delay for depth and jangle.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "EQ/Tone Shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Slightly boost the high end and cut unnecessary low-end mud.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly indie crunch with airy chorus and roomy delay",
+      "mustHave": [
+        "bright edge-of-breakup",
+        "indie jangle",
+        "airy chorus",
+        "roomy delay",
+        "slight grit"
+      ],
+      "avoid": [
+        "metal gain",
+        "heavy fuzz",
+        "mid-scoop",
+        "thick overdrive"
+      ],
+      "gearClues": [
+        "Vox-style amp",
+        "single coils",
+        "2x12 or 4x12",
+        "light chorus",
+        "short delay"
+      ],
+      "corrections": [
+        "drop fuzz as core texture",
+        "lean brighter and cleaner",
+        "add chorus/delay as key color"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "alt-rock",
+        "jangly pop",
+        "garage rock"
+      ],
+      "targetTone": "jangly indie crunch with airy chorus and roomy delay",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall tonal depth by swapping the IR for a more open, airy British cab sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "airy 2x12 or 4x12 IR",
+          "reason": "Enhance jangly indie tone with an open, less boxy cabinet sound.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased air and clarity in the high end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 202,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

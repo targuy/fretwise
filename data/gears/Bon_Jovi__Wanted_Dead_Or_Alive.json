@@ -1,0 +1,1095 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 161,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bon_Jovi__Wanted_Dead_Or_Alive.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bon Jovi",
+    "title": "Wanted Dead Or Alive",
+    "album": "",
+    "year": null,
+    "genre": "arena rock"
+  },
+  "genreClassification": {
+    "genre": "arena rock",
+    "subgenres": [
+      "pop rock",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "Bon Jovi's style is classic arena/pop hard rock, matching the clean-crunch tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-scooped rock tone with noticeable sustain and chorus/delay effects.",
+      "signatureElements": [
+        "Chorus modulation",
+        "Delay repeats",
+        "Mid-range crunch (rock)",
+        "Slightly scooped mids"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Fender Deluxe or Marshall JCM family)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Clean jazz tones",
+        "High gain metal saturation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+      "mustHave": [
+        "chorus shimmer",
+        "delay repeats",
+        "clean-picked arpeggio",
+        "acoustic-like attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped rock crunch"
+      ],
+      "gearClues": [
+        "12-string or acoustic sim",
+        "chorus",
+        "digital delay",
+        "clean amp",
+        "light breakup"
+      ],
+      "corrections": [
+        "not mid-scooped crunch",
+        "not sustained lead tone",
+        "intro is clean and acoustic-like"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+    "mustHave": [
+      "chorus shimmer",
+      "delay repeats",
+      "clean-picked arpeggio",
+      "acoustic-like attack"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "metal gain",
+      "scooped rock crunch"
+    ],
+    "gearClues": [
+      "12-string or acoustic sim",
+      "chorus",
+      "digital delay",
+      "clean amp",
+      "light breakup"
+    ],
+    "corrections": [
+      "not mid-scooped crunch",
+      "not sustained lead tone",
+      "intro is clean and acoustic-like"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, shimmering tones and articulate arpeggios.",
+          "bestMatchSummary": "A pristine signal chain focusing on chorus and delay for the acoustic intro, transitioning to a bright, clean-crunch tone suitable for arena rock verses.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity during arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "compression/attack shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the acoustic-like attack and sustain for clean arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation (shimmer)",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Feedback": "High"
+              },
+              "purpose": "Create the required shimmering, wide stereo chorus effect for the intro.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Bright",
+                "Level": "Medium"
+              },
+              "purpose": "Provide light breakup and warmth for the 'clean-crunch' transition without heavy gain.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a clean boost/breakup, as dedicated low-gain preamps are limited. It must be kept subtle.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Boost"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulate the bright, articulate clean tone of an American-style vintage amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a focused, bright sound suitable for clean arpeggios and arena rock clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "-1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the overall tone and enhance the high-end shimmer of the chorus/delay.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "time-based effect (shimmer)",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Provide the required delay repeats and shimmering echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle space and shimmer to the clean tone without muddying the arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone requires careful blending between the clean, shimmering intro and the slightly dirtier chorus sections. The Comp/Chorus/Green OD combination must be dialed in to avoid sounding muddy."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation and clarity across both clean arpeggios and arena crunch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+              "reason": "Enhance articulation for acoustic/clean tones and add depth to the arena crunch.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bon Jovi - Wanted Dead Or Alive - Valeton GP-180",
+        "song": {
+          "artist": "Bon Jovi",
+          "title": "Wanted Dead Or Alive",
+          "album": "",
+          "year": null,
+          "genre": "arena rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A pristine signal chain focusing on chorus and delay for the acoustic intro, transitioning to a bright, clean-crunch tone suitable for arena rock verses.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain clarity during arpeggios.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "compression/attack shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Enhance the acoustic-like attack and sustain for clean arpeggios.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation (shimmer)",
+            "module": "WAH",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Feedback": "High"
+            },
+            "purpose": "Create the required shimmering, wide stereo chorus effect for the intro.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "Low",
+              "Tone": "Bright",
+              "Level": "Medium"
+            },
+            "purpose": "Provide light breakup and warmth for the 'clean-crunch' transition without heavy gain.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a clean boost/breakup, as dedicated low-gain preamps are limited. It must be kept subtle.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Boost"
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "High",
+              "Mid": "Medium",
+              "Bass": "Medium"
+            },
+            "purpose": "Simulate the bright, articulate clean tone of an American-style vintage amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Bright"
+            },
+            "purpose": "Provide a focused, bright sound suitable for clean arpeggios and arena rock clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "-1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the overall tone and enhance the high-end shimmer of the chorus/delay.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "time-based effect (shimmer)",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "400 ms",
+              "Feedback": "50%",
+              "Mix": "30%"
+            },
+            "purpose": "Provide the required delay repeats and shimmering echo effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle space and shimmer to the clean tone without muddying the arpeggios.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+          "toneProfile": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+          "idealSignalChain": "12-string or acoustic sim | chorus | digital delay | clean amp | light breakup",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "12-string or acoustic sim",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "digital delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light breakup",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus shimmer",
+            "delay repeats",
+            "clean-picked arpeggio",
+            "acoustic-like attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, shimmering tones and articulate arpeggios.",
+          "bestMatchSummary": "A pristine signal chain focusing on chorus and delay for the acoustic intro, transitioning to a bright, clean-crunch tone suitable for arena rock verses.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity during arpeggios.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "compression/attack shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the acoustic-like attack and sustain for clean arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation (shimmer)",
+              "module": "WAH",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Feedback": "High"
+              },
+              "purpose": "Create the required shimmering, wide stereo chorus effect for the intro.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Bright",
+                "Level": "Medium"
+              },
+              "purpose": "Provide light breakup and warmth for the 'clean-crunch' transition without heavy gain.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a clean boost/breakup, as dedicated low-gain preamps are limited. It must be kept subtle.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Boost"
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulate the bright, articulate clean tone of an American-style vintage amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a focused, bright sound suitable for clean arpeggios and arena rock clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "-1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the overall tone and enhance the high-end shimmer of the chorus/delay.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "time-based effect (shimmer)",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "50%",
+                "Mix": "30%"
+              },
+              "purpose": "Provide the required delay repeats and shimmering echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle space and shimmer to the clean tone without muddying the arpeggios.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation and clarity across both clean arpeggios and arena crunch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+              "reason": "Enhance articulation for acoustic/clean tones and add depth to the arena crunch.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "not mid-scooped crunch",
+          "not sustained lead tone",
+          "intro is clean and acoustic-like"
+        ],
+        "warnings": [
+          "The tone requires careful blending between the clean, shimmering intro and the slightly dirtier chorus sections. The Comp/Chorus/Green OD combination must be dialed in to avoid sounding muddy."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.015,
+      "prompt_chars": 997,
+      "response_chars": 402,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 101,
+        "total_duration": 13000885500,
+        "prompt_eval_duration": 134589000,
+        "eval_duration": 800290000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.987,
+      "prompt_chars": 5321,
+      "response_chars": 548,
+      "usage": {
+        "input_tokens": 1486,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1626
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.402,
+      "prompt_chars": 3625,
+      "response_chars": 5295,
+      "usage": {
+        "prompt_eval_count": 1216,
+        "eval_count": 1508,
+        "total_duration": 12370299900,
+        "prompt_eval_duration": 152693000,
+        "eval_duration": 11745202000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.857,
+      "prompt_chars": 7475,
+      "response_chars": 581,
+      "usage": {
+        "prompt_eval_count": 2081,
+        "eval_count": 153,
+        "total_duration": 1850851500,
+        "prompt_eval_duration": 220917000,
+        "eval_duration": 1197236000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.562,
+      "prompt_chars": 2917,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 895,
+        "eval_count": 52,
+        "total_duration": 12557504000,
+        "prompt_eval_duration": 172386000,
+        "eval_duration": 413720000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bon Jovi",
+      "title": "Wanted Dead Or Alive",
+      "album": "",
+      "year": null,
+      "genre": "arena rock"
+    },
+    "rig": {
+      "rigName": "Bon Jovi - Wanted Dead Or Alive - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+      "signalChainSummary": "A pristine signal chain focusing on chorus and delay for the acoustic intro, transitioning to a bright, clean-crunch tone suitable for arena rock verses.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain clarity during arpeggios.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "compression/attack shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Enhance the acoustic-like attack and sustain for clean arpeggios.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation (shimmer)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Feedback": "High"
+          },
+          "purpose": "Create the required shimmering, wide stereo chorus effect for the intro.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "Low",
+            "Tone": "Bright",
+            "Level": "Medium"
+          },
+          "purpose": "Provide light breakup and warmth for the 'clean-crunch' transition without heavy gain.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a clean boost/breakup, as dedicated low-gain preamps are limited. It must be kept subtle.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "High",
+            "Mid": "Medium",
+            "Bass": "Medium"
+          },
+          "purpose": "Simulate the bright, articulate clean tone of an American-style vintage amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Bright"
+          },
+          "purpose": "Provide a focused, bright sound suitable for clean arpeggios and arena rock clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "-1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the overall tone and enhance the high-end shimmer of the chorus/delay.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "time-based effect (shimmer)",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "400 ms",
+            "Feedback": "50%",
+            "Mix": "30%"
+          },
+          "purpose": "Provide the required delay repeats and shimmering echo effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle space and shimmer to the clean tone without muddying the arpeggios.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+      "mustHave": [
+        "chorus shimmer",
+        "delay repeats",
+        "clean-picked arpeggio",
+        "acoustic-like attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped rock crunch"
+      ],
+      "gearClues": [
+        "12-string or acoustic sim",
+        "chorus",
+        "digital delay",
+        "clean amp",
+        "light breakup"
+      ],
+      "corrections": [
+        "not mid-scooped crunch",
+        "not sustained lead tone",
+        "intro is clean and acoustic-like"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "arena rock",
+      "styleTags": [
+        "pop rock",
+        "hard rock"
+      ],
+      "targetTone": "clean acoustic-like intro with chorus/delay shimmer; later arena clean-crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for better articulation and clarity across both clean arpeggios and arena crunch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+          "reason": "Enhance articulation for acoustic/clean tones and add depth to the arena crunch.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 161,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

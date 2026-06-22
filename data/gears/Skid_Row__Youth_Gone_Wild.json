@@ -1,0 +1,991 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1259,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Skid_Row__Youth_Gone_Wild.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Skid Row",
+    "title": "Youth Gone Wild",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "80s rock",
+      "arena rock",
+      "metal"
+    ],
+    "confidence": "high",
+    "rationale": "Skid Row is a classic hard rock band known for 80s arena anthems."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive hard rock tone with a thick, saturated crunch.",
+      "signatureElements": [
+        "Fuzz/Distortion (high saturation)",
+        "Mid-scooped EQ for aggression",
+        "Sustained lead tones",
+        "Crunchy rhythm chugging"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM800 style amp model",
+        "High-gain distortion pedal simulation",
+        "Overdrive/Boost for solos"
+      ],
+      "avoid": [
+        "Clean arpeggios",
+        "Ambient textures",
+        "Low-gain blues tone"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "hot Marshall hard rock crunch with bright upper mids",
+      "mustHave": [
+        "riffy crunch",
+        "tight palm-mutes",
+        "bright bite",
+        "80s rock drive"
+      ],
+      "avoid": [
+        "fuzz",
+        "mid scoop",
+        "clean tone",
+        "ambient effects"
+      ],
+      "gearClues": [
+        "JCM800/Plexi style",
+        "4x12 cab",
+        "bridge humbucker",
+        "light boost"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "avoid scooped EQ",
+        "keep it Marshall-forward"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "hot Marshall hard rock crunch with bright upper mids",
+    "mustHave": [
+      "riffy crunch",
+      "tight palm-mutes",
+      "bright bite",
+      "80s rock drive"
+    ],
+    "avoid": [
+      "fuzz",
+      "mid scoop",
+      "clean tone",
+      "ambient effects"
+    ],
+    "gearClues": [
+      "JCM800/Plexi style",
+      "4x12 cab",
+      "bridge humbucker",
+      "light boost"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "avoid scooped EQ",
+      "keep it Marshall-forward"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British rock tones (JCM/Plexi style).",
+          "bestMatchSummary": "A tight, aggressive signal chain using a Boost and Distortion to drive the UK 45 amp model, paired with a classic Marshall cabinet simulation for hot, crunchy hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide extra grit and tighten the low end for palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD/Overdrive to maintain clarity while adding necessary drive.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A solid alternative for grit, but Boost is better for tight palm-mutes."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "5"
+              },
+              "purpose": "Establish the core hard rock crunch and bite.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate JCM-style saturation without specific amp modeling.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be used for more aggressive, mid-focused bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JCM-style British hard rock tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the necessary cabinet coloration and punch for hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance the upper mids and bite while controlling excessive low-end boominess.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (Chorus)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Optional subtle thickening for solos (kept off for main riffs).",
+              "matchQuality": "close",
+              "gap": "Chorus is generally avoided in tight hard rock, but included as a versatile option.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience (Digital Delay)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Subtle echo for soloing sections without muddying the main riff tone.",
+              "matchQuality": "close",
+              "gap": "Delay is kept minimal and off by default to maintain aggressive focus.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is hard rock, so the Chorus module is set to inactive (off) for maximum tightness. The Delay should only be used sparingly during solos."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation with a more aggressive, high-mid focused IR to enhance the 'bright bite' required for 80s hard rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Aggressive 4x12 IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance upper mids and bite for hot hard rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and aggression",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Skid Row - Youth Gone Wild - Valeton GP-180",
+        "song": {
+          "artist": "Skid Row",
+          "title": "Youth Gone Wild",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "hot Marshall hard rock crunch with bright upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive signal chain using a Boost and Distortion to drive the UK 45 amp model, paired with a classic Marshall cabinet simulation for hot, crunchy hard rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide extra grit and tighten the low end for palm-muted riffs.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of OD/Overdrive to maintain clarity while adding necessary drive.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A solid alternative for grit, but Boost is better for tight palm-mutes."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "7",
+              "Level": "5"
+            },
+            "purpose": "Establish the core hard rock crunch and bite.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is a general choice to emulate JCM-style saturation without specific amp modeling.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could be used for more aggressive, mid-focused bite."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the classic Marshall Plexi/JCM-style British hard rock tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the necessary cabinet coloration and punch for hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization (EQ)",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Enhance the upper mids and bite while controlling excessive low-end boominess.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation (Chorus)",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3"
+            },
+            "purpose": "Optional subtle thickening for solos (kept off for main riffs).",
+            "matchQuality": "close",
+            "gap": "Chorus is generally avoided in tight hard rock, but included as a versatile option.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience (Digital Delay)",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Subtle echo for soloing sections without muddying the main riff tone.",
+            "matchQuality": "close",
+            "gap": "Delay is kept minimal and off by default to maintain aggressive focus.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "hot Marshall hard rock crunch with bright upper mids",
+          "toneProfile": "hot Marshall hard rock crunch with bright upper mids",
+          "idealSignalChain": "JCM800/Plexi style | 4x12 cab | bridge humbucker | light boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "JCM800/Plexi style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "riffy crunch",
+            "tight palm-mutes",
+            "bright bite",
+            "80s rock drive"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British rock tones (JCM/Plexi style).",
+          "bestMatchSummary": "A tight, aggressive signal chain using a Boost and Distortion to drive the UK 45 amp model, paired with a classic Marshall cabinet simulation for hot, crunchy hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide extra grit and tighten the low end for palm-muted riffs.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD/Overdrive to maintain clarity while adding necessary drive.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A solid alternative for grit, but Boost is better for tight palm-mutes."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "5"
+              },
+              "purpose": "Establish the core hard rock crunch and bite.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate JCM-style saturation without specific amp modeling.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be used for more aggressive, mid-focused bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall Plexi/JCM-style British hard rock tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the necessary cabinet coloration and punch for hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance the upper mids and bite while controlling excessive low-end boominess.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (Chorus)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Optional subtle thickening for solos (kept off for main riffs).",
+              "matchQuality": "close",
+              "gap": "Chorus is generally avoided in tight hard rock, but included as a versatile option.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience (Digital Delay)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Subtle echo for soloing sections without muddying the main riff tone.",
+              "matchQuality": "close",
+              "gap": "Delay is kept minimal and off by default to maintain aggressive focus.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet simulation with a more aggressive, high-mid focused IR to enhance the 'bright bite' required for 80s hard rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Aggressive 4x12 IR (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance upper mids and bite for hot hard rock crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and aggression",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "avoid scooped EQ",
+          "keep it Marshall-forward"
+        ],
+        "warnings": [
+          "The source material is hard rock, so the Chorus module is set to inactive (off) for maximum tightness. The Delay should only be used sparingly during solos."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.403,
+      "prompt_chars": 992,
+      "response_chars": 450,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 118,
+        "total_duration": 10400893300,
+        "prompt_eval_duration": 533674999,
+        "eval_duration": 2080360000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.686,
+      "prompt_chars": 5376,
+      "response_chars": 466,
+      "usage": {
+        "input_tokens": 1503,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1633
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 24.28,
+      "prompt_chars": 3538,
+      "response_chars": 4706,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1346,
+        "total_duration": 24273140800,
+        "prompt_eval_duration": 337960000,
+        "eval_duration": 23230145000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.551,
+      "prompt_chars": 6743,
+      "response_chars": 578,
+      "usage": {
+        "prompt_eval_count": 1911,
+        "eval_count": 160,
+        "total_duration": 3527078600,
+        "prompt_eval_duration": 381636000,
+        "eval_duration": 2688246000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 14.091,
+      "prompt_chars": 2652,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 847,
+        "eval_count": 56,
+        "total_duration": 14064388200,
+        "prompt_eval_duration": 557879000,
+        "eval_duration": 634690000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Skid Row",
+      "title": "Youth Gone Wild",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Skid Row - Youth Gone Wild - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "hot Marshall hard rock crunch with bright upper mids",
+      "signalChainSummary": "A tight, aggressive signal chain using a Boost and Distortion to drive the UK 45 amp model, paired with a classic Marshall cabinet simulation for hot, crunchy hard rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide extra grit and tighten the low end for palm-muted riffs.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of OD/Overdrive to maintain clarity while adding necessary drive.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A solid alternative for grit, but Boost is better for tight palm-mutes."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "7",
+            "Level": "5"
+          },
+          "purpose": "Establish the core hard rock crunch and bite.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is a general choice to emulate JCM-style saturation without specific amp modeling.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could be used for more aggressive, mid-focused bite."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the classic Marshall Plexi/JCM-style British hard rock tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the necessary cabinet coloration and punch for hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization (EQ)",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Enhance the upper mids and bite while controlling excessive low-end boominess.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation (Chorus)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3"
+          },
+          "purpose": "Optional subtle thickening for solos (kept off for main riffs).",
+          "matchQuality": "close",
+          "gap": "Chorus is generally avoided in tight hard rock, but included as a versatile option.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience (Digital Delay)",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Subtle echo for soloing sections without muddying the main riff tone.",
+          "matchQuality": "close",
+          "gap": "Delay is kept minimal and off by default to maintain aggressive focus.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "hot Marshall hard rock crunch with bright upper mids",
+      "mustHave": [
+        "riffy crunch",
+        "tight palm-mutes",
+        "bright bite",
+        "80s rock drive"
+      ],
+      "avoid": [
+        "fuzz",
+        "mid scoop",
+        "clean tone",
+        "ambient effects"
+      ],
+      "gearClues": [
+        "JCM800/Plexi style",
+        "4x12 cab",
+        "bridge humbucker",
+        "light boost"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "avoid scooped EQ",
+        "keep it Marshall-forward"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "80s rock",
+        "arena rock",
+        "metal"
+      ],
+      "targetTone": "hot Marshall hard rock crunch with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet simulation with a more aggressive, high-mid focused IR to enhance the 'bright bite' required for 80s hard rock.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Aggressive 4x12 IR (e.g., Celestion Greenback/V30 style)",
+          "reason": "Enhance upper mids and bite for hot hard rock crunch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and aggression",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1259,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

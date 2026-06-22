@@ -1,0 +1,984 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1433,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Animals__Please_Dont_Let_Me_Be_Misunderstood.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Animals",
+    "title": "Please Dont Let Me Be Misunderstood",
+    "album": "",
+    "year": null,
+    "genre": "r&b"
+  },
+  "genreClassification": {
+    "genre": "r&b",
+    "subgenres": [
+      "british r&b",
+      "60s",
+      "soul"
+    ],
+    "confidence": "high",
+    "rationale": "The song and tone profile strongly suggest classic 1960s British Rhythm and Blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly dirty blues/rock tone with prominent bass and mid-range focus.",
+      "signatureElements": [
+        "Crunch (mild overdrive)",
+        "Slightly scooped mids (for a classic 60s sound)",
+        "Subtle spring reverb",
+        "Clean delay"
+      ],
+      "gearHypotheses": [
+        "British tweed amp emulation (e.g., Vox AC30 or early Fender/Marshall blend)",
+        "Low-gain tube screamer style pedal"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High-gain metal distortion",
+        "Bright, scooped modern tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry 60s clean-to-gritty British R&B crunch",
+      "mustHave": [
+        "tight picked attack",
+        "slight edge-of-breakup",
+        "forward mids",
+        "small room or spring"
+      ],
+      "avoid": [
+        "scooped mids",
+        "clean delay",
+        "heavy fuzz",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "Vox/early Marshall",
+        "single coils",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop delay",
+        "lean drier",
+        "reduce scoop",
+        "keep it more urgent than bluesy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry 60s clean-to-gritty British R&B crunch",
+    "mustHave": [
+      "tight picked attack",
+      "slight edge-of-breakup",
+      "forward mids",
+      "small room or spring"
+    ],
+    "avoid": [
+      "scooped mids",
+      "clean delay",
+      "heavy fuzz",
+      "modern high gain"
+    ],
+    "gearClues": [
+      "Vox/early Marshall",
+      "single coils",
+      "1x12 or 2x12"
+    ],
+    "corrections": [
+      "drop delay",
+      "lean drier",
+      "reduce scoop",
+      "keep it more urgent than bluesy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British clean/crunch tones (60s R&B) using UK amps and vintage cabs.",
+          "bestMatchSummary": "A tight, mid-forward signal chain utilizing a Boost for attack, an OD pedal for grit, the AC30 TB amp model, and a classic 4x12 cabinet with Room reverb to capture the urgent, dry British R&B sound of the era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight picking attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Enhance the initial pick attack and provide necessary grit/edge-of-breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide the characteristic slight edge-of-breakup and mid-forward crunch associated with 60s British R&B.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier tones; kept inactive to maintain the dry, clean focus.",
+              "matchQuality": "none",
+              "gap": "The tone requires minimal saturation (handled by Green OD); this slot is left unused or bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British clean/crunch tone (Vox/early Marshall) with prominent mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and complement the AC30 model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "6",
+                "High": "5"
+              },
+              "purpose": "Further boost the crucial mid-range frequencies and reduce any potential low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, natural room ambience as requested, keeping the tone dry and urgent.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid noticeable delay effects to keep the tone lean and urgent.",
+              "matchQuality": "none",
+              "gap": "The verdict specifically advises against 'clean delay'.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig is designed for a 60s British R&B crunch. The use of the AC30 TB and Green OD focuses on mid-range punch and controlled breakup, avoiding modern high gain or heavy fuzz."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a vintage British speaker model to better capture the desired Vox/early Marshall sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage UK single-coil cab IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance vintage British grit and mid-focus over generic 4x12.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic '60s R&B' tone",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "The Animals - Please Dont Let Me Be Misunderstood - Valeton GP-180",
+        "song": {
+          "artist": "The Animals",
+          "title": "Please Dont Let Me Be Misunderstood",
+          "album": "",
+          "year": null,
+          "genre": "r&b"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry 60s clean-to-gritty British R&B crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, mid-forward signal chain utilizing a Boost for attack, an OD pedal for grit, the AC30 TB amp model, and a classic 4x12 cabinet with Room reverb to capture the urgent, dry British R&B sound of the era.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight picking attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/attack",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "5"
+            },
+            "purpose": "Enhance the initial pick attack and provide necessary grit/edge-of-breakup.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "5"
+            },
+            "purpose": "Provide the characteristic slight edge-of-breakup and mid-forward crunch associated with 60s British R&B.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": false,
+            "settings": {},
+            "purpose": "Reserved for heavier tones; kept inactive to maintain the dry, clean focus.",
+            "matchQuality": "none",
+            "gap": "The tone requires minimal saturation (handled by Green OD); this slot is left unused or bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Mid": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the classic British clean/crunch tone (Vox/early Marshall) with prominent mids.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and complement the AC30 model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "6",
+              "High": "5"
+            },
+            "purpose": "Further boost the crucial mid-range frequencies and reduce any potential low-end muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle, natural room ambience as requested, keeping the tone dry and urgent.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid noticeable delay effects to keep the tone lean and urgent.",
+            "matchQuality": "none",
+            "gap": "The verdict specifically advises against 'clean delay'.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry 60s clean-to-gritty British R&B crunch",
+          "toneProfile": "dry 60s clean-to-gritty British R&B crunch",
+          "idealSignalChain": "Vox/early Marshall | single coils | 1x12 or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox/early Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight picked attack",
+            "slight edge-of-breakup",
+            "forward mids",
+            "small room or spring"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British clean/crunch tones (60s R&B) using UK amps and vintage cabs.",
+          "bestMatchSummary": "A tight, mid-forward signal chain utilizing a Boost for attack, an OD pedal for grit, the AC30 TB amp model, and a classic 4x12 cabinet with Room reverb to capture the urgent, dry British R&B sound of the era.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight picking attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Enhance the initial pick attack and provide necessary grit/edge-of-breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide the characteristic slight edge-of-breakup and mid-forward crunch associated with 60s British R&B.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": false,
+              "settings": {},
+              "purpose": "Reserved for heavier tones; kept inactive to maintain the dry, clean focus.",
+              "matchQuality": "none",
+              "gap": "The tone requires minimal saturation (handled by Green OD); this slot is left unused or bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British clean/crunch tone (Vox/early Marshall) with prominent mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and complement the AC30 model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "6",
+                "High": "5"
+              },
+              "purpose": "Further boost the crucial mid-range frequencies and reduce any potential low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, natural room ambience as requested, keeping the tone dry and urgent.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid noticeable delay effects to keep the tone lean and urgent.",
+              "matchQuality": "none",
+              "gap": "The verdict specifically advises against 'clean delay'.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a vintage British speaker model to better capture the desired Vox/early Marshall sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage UK single-coil cab IR (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance vintage British grit and mid-focus over generic 4x12.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic '60s R&B' tone",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "assumptions": [
+          "drop delay",
+          "lean drier",
+          "reduce scoop",
+          "keep it more urgent than bluesy"
+        ],
+        "warnings": [
+          "This rig is designed for a 60s British R&B crunch. The use of the AC30 TB and Green OD focuses on mid-range punch and controlled breakup, avoiding modern high gain or heavy fuzz."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.736,
+      "prompt_chars": 1015,
+      "response_chars": 485,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 125,
+        "total_duration": 11733754900,
+        "prompt_eval_duration": 356467000,
+        "eval_duration": 2260744000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.147,
+      "prompt_chars": 5428,
+      "response_chars": 490,
+      "usage": {
+        "input_tokens": 1517,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.34,
+      "prompt_chars": 3585,
+      "response_chars": 4673,
+      "usage": {
+        "prompt_eval_count": 1220,
+        "eval_count": 1359,
+        "total_duration": 38317676500,
+        "prompt_eval_duration": 461570000,
+        "eval_duration": 24017209000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.895,
+      "prompt_chars": 6753,
+      "response_chars": 633,
+      "usage": {
+        "prompt_eval_count": 1936,
+        "eval_count": 177,
+        "total_duration": 3874907600,
+        "prompt_eval_duration": 379483000,
+        "eval_duration": 3026597000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 21.432,
+      "prompt_chars": 2804,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 911,
+        "eval_count": 58,
+        "total_duration": 21402083700,
+        "prompt_eval_duration": 675119000,
+        "eval_duration": 740654000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Animals",
+      "title": "Please Dont Let Me Be Misunderstood",
+      "album": "",
+      "year": null,
+      "genre": "r&b"
+    },
+    "rig": {
+      "rigName": "The Animals - Please Dont Let Me Be Misunderstood - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry 60s clean-to-gritty British R&B crunch",
+      "signalChainSummary": "A tight, mid-forward signal chain utilizing a Boost for attack, an OD pedal for grit, the AC30 TB amp model, and a classic 4x12 cabinet with Room reverb to capture the urgent, dry British R&B sound of the era.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight picking attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/attack",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "5"
+          },
+          "purpose": "Enhance the initial pick attack and provide necessary grit/edge-of-breakup.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "5"
+          },
+          "purpose": "Provide the characteristic slight edge-of-breakup and mid-forward crunch associated with 60s British R&B.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": false,
+          "settings": {},
+          "purpose": "Reserved for heavier tones; kept inactive to maintain the dry, clean focus.",
+          "matchQuality": "fallback",
+          "gap": "The tone requires minimal saturation (handled by Green OD); this slot is left unused or bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Mid": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the classic British clean/crunch tone (Vox/early Marshall) with prominent mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and complement the AC30 model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "6",
+            "High": "5"
+          },
+          "purpose": "Further boost the crucial mid-range frequencies and reduce any potential low-end muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle, natural room ambience as requested, keeping the tone dry and urgent.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid noticeable delay effects to keep the tone lean and urgent.",
+          "matchQuality": "fallback",
+          "gap": "The verdict specifically advises against 'clean delay'.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry 60s clean-to-gritty British R&B crunch",
+      "mustHave": [
+        "tight picked attack",
+        "slight edge-of-breakup",
+        "forward mids",
+        "small room or spring"
+      ],
+      "avoid": [
+        "scooped mids",
+        "clean delay",
+        "heavy fuzz",
+        "modern high gain"
+      ],
+      "gearClues": [
+        "Vox/early Marshall",
+        "single coils",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop delay",
+        "lean drier",
+        "reduce scoop",
+        "keep it more urgent than bluesy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "r&b",
+      "styleTags": [
+        "british r&b",
+        "60s",
+        "soul"
+      ],
+      "targetTone": "dry 60s clean-to-gritty British R&B crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the generic 4x12 IR for a vintage British speaker model to better capture the desired Vox/early Marshall sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage UK single-coil cab IR (e.g., Celestion Greenback or similar)",
+          "reason": "Enhance vintage British grit and mid-focus over generic 4x12.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More authentic '60s R&B' tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1433,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1107 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1685,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Tracy_Chapman__Give_Me_One_Reason.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Tracy Chapman",
+    "title": "Give Me One Reason",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "singer-songwriter",
+      "roots",
+      "blues"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile suggest a blend of folk, roots, and blues influences."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven acoustic/electric tone with deep reverb and subtle chorus.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "chorus",
+        "acoustic feel",
+        "subtle overdrive"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus effect (slow rate)",
+        "Clean amp model (e.g., Fender Twin style)"
+      ],
+      "avoid": [
+        "Fuzz",
+        "High gain distortion",
+        "Wah pedal sweeps"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean Strat neck pickup with light breakup and springy room",
+      "mustHave": [
+        "dry clean edge",
+        "slight grit on attack",
+        "bright neck-pickup twang",
+        "short spring reverb",
+        "bluesy country-rock phrasing"
+      ],
+      "avoid": [
+        "chorus",
+        "deep reverb",
+        "acoustic feel",
+        "high gain",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Strat-style single coils",
+        "Fender-style clean amp",
+        "spring reverb",
+        "1x12 or 2x12 combo"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop deep reverb",
+        "use light breakup not overdrive-heavy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean Strat neck pickup with light breakup and springy room",
+    "mustHave": [
+      "dry clean edge",
+      "slight grit on attack",
+      "bright neck-pickup twang",
+      "short spring reverb",
+      "bluesy country-rock phrasing"
+    ],
+    "avoid": [
+      "chorus",
+      "deep reverb",
+      "acoustic feel",
+      "high gain",
+      "fuzz"
+    ],
+    "gearClues": [
+      "Strat-style single coils",
+      "Fender-style clean amp",
+      "spring reverb",
+      "1x12 or 2x12 combo"
+    ],
+    "corrections": [
+      "drop chorus",
+      "drop deep reverb",
+      "use light breakup not overdrive-heavy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle grit and spring reverb.",
+          "bestMatchSummary": "A classic country/blues tone achieved using a light boost for attack, followed by a clean Fender-style amp model (US Deluxe) into a 2x12 cabinet, finished with minimal compression and spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide slight grit and enhance attack without heavy overdrive.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the light breakup/grit required, as dedicated low-gain preamps are not available.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No distortion needed for clean tone).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean Fender-style amp tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required bright, compact sound profile (Fender-style).",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3.5",
+                "Attack": "4",
+                "Release": "6"
+              },
+              "purpose": "Smooth dynamics and enhance the 'twang' of the neck pickup.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this style).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as requested.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Keep the tone dry and focused on phrasing.",
+              "matchQuality": "close",
+              "gap": "Delay is optional but kept minimal to avoid muddying the clean sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "3",
+                "Decay": "4"
+              },
+              "purpose": "Provide the required short, springy room ambiance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (vocal/acoustic focus). The rig is optimized for a bright, clean electric guitar tone to mimic the required 'twang' and phrasing.",
+          "Compression is used early in the chain to enhance attack and sustain, compensating for the lack of dedicated low-gain preamps."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more vintage, open-air sound that complements the clean Fender tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., tweed/open back)",
+              "reason": "Enhance vintage character and open-air feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Warmer, less boxy clean tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Tracy Chapman - Give Me One Reason - Valeton GP-180",
+        "song": {
+          "artist": "Tracy Chapman",
+          "title": "Give Me One Reason",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean Strat neck pickup with light breakup and springy room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic country/blues tone achieved using a light boost for attack, followed by a clean Fender-style amp model (US Deluxe) into a 2x12 cabinet, finished with minimal compression and spring reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide slight grit and enhance attack without heavy overdrive.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to simulate the light breakup/grit required, as dedicated low-gain preamps are not available.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No distortion needed for clean tone).",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "6",
+              "Midrange": "5",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, clean Fender-style amp tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required bright, compact sound profile (Fender-style).",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "compression/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3.5",
+              "Attack": "4",
+              "Release": "6"
+            },
+            "purpose": "Smooth dynamics and enhance the 'twang' of the neck pickup.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter (optional)",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No wah needed for this style).",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects as requested.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Keep the tone dry and focused on phrasing.",
+            "matchQuality": "close",
+            "gap": "Delay is optional but kept minimal to avoid muddying the clean sound.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "3",
+              "Decay": "4"
+            },
+            "purpose": "Provide the required short, springy room ambiance.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean Strat neck pickup with light breakup and springy room",
+          "toneProfile": "clean Strat neck pickup with light breakup and springy room",
+          "idealSignalChain": "Strat-style single coils | Fender-style clean amp | spring reverb | 1x12 or 2x12 combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat-style single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12 combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "dry clean edge",
+            "slight grit on attack",
+            "bright neck-pickup twang",
+            "short spring reverb",
+            "bluesy country-rock phrasing"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle grit and spring reverb.",
+          "bestMatchSummary": "A classic country/blues tone achieved using a light boost for attack, followed by a clean Fender-style amp model (US Deluxe) into a 2x12 cabinet, finished with minimal compression and spring reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide slight grit and enhance attack without heavy overdrive.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the light breakup/grit required, as dedicated low-gain preamps are not available.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No distortion needed for clean tone).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean Fender-style amp tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required bright, compact sound profile (Fender-style).",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "compression/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3.5",
+                "Attack": "4",
+                "Release": "6"
+              },
+              "purpose": "Smooth dynamics and enhance the 'twang' of the neck pickup.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this style).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as requested.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Keep the tone dry and focused on phrasing.",
+              "matchQuality": "close",
+              "gap": "Delay is optional but kept minimal to avoid muddying the clean sound.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "3",
+                "Decay": "4"
+              },
+              "purpose": "Provide the required short, springy room ambiance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more vintage, open-air sound that complements the clean Fender tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., tweed/open back)",
+              "reason": "Enhance vintage character and open-air feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Warmer, less boxy clean tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "drop deep reverb",
+          "use light breakup not overdrive-heavy"
+        ],
+        "warnings": [
+          "The source material is non-guitar (vocal/acoustic focus). The rig is optimized for a bright, clean electric guitar tone to mimic the required 'twang' and phrasing.",
+          "Compression is used early in the chain to enhance attack and sustain, compensating for the lack of dedicated low-gain preamps."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.504,
+      "prompt_chars": 1000,
+      "response_chars": 398,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 102,
+        "total_duration": 10499836100,
+        "prompt_eval_duration": 449541000,
+        "eval_duration": 2192337000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 4.344,
+      "prompt_chars": 5338,
+      "response_chars": 576,
+      "usage": {
+        "input_tokens": 1581,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 159,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1740
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "HTTP 503 from https://api.openai.com/v1/responses: upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 38.853,
+      "prompt_chars": 3670,
+      "response_chars": 5125,
+      "usage": {
+        "prompt_eval_count": 1295,
+        "eval_count": 1483,
+        "total_duration": 27568368000,
+        "prompt_eval_duration": 128920999,
+        "eval_duration": 27065905000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 39 column 8 (char 1369)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 21.261,
+      "prompt_chars": 7344,
+      "response_chars": 555,
+      "usage": {
+        "prompt_eval_count": 2073,
+        "eval_count": 161,
+        "total_duration": 21235052600,
+        "prompt_eval_duration": 880555000,
+        "eval_duration": 2981225000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.222,
+      "prompt_chars": 3027,
+      "response_chars": 196,
+      "usage": {
+        "prompt_eval_count": 939,
+        "eval_count": 52,
+        "total_duration": 9218190800,
+        "prompt_eval_duration": 440067000,
+        "eval_duration": 866616000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Tracy Chapman",
+      "title": "Give Me One Reason",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "Tracy Chapman - Give Me One Reason - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean Strat neck pickup with light breakup and springy room",
+      "signalChainSummary": "A classic country/blues tone achieved using a light boost for attack, followed by a clean Fender-style amp model (US Deluxe) into a 2x12 cabinet, finished with minimal compression and spring reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide slight grit and enhance attack without heavy overdrive.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to simulate the light breakup/grit required, as dedicated low-gain preamps are not available.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No distortion needed for clean tone).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "6",
+            "Midrange": "5",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, clean Fender-style amp tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required bright, compact sound profile (Fender-style).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "compression/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3.5",
+            "Attack": "4",
+            "Release": "6"
+          },
+          "purpose": "Smooth dynamics and enhance the 'twang' of the neck pickup.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter (optional)",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No wah needed for this style).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects as requested.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Keep the tone dry and focused on phrasing.",
+          "matchQuality": "close",
+          "gap": "Delay is optional but kept minimal to avoid muddying the clean sound.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "3",
+            "Decay": "4"
+          },
+          "purpose": "Provide the required short, springy room ambiance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean Strat neck pickup with light breakup and springy room",
+      "mustHave": [
+        "dry clean edge",
+        "slight grit on attack",
+        "bright neck-pickup twang",
+        "short spring reverb",
+        "bluesy country-rock phrasing"
+      ],
+      "avoid": [
+        "chorus",
+        "deep reverb",
+        "acoustic feel",
+        "high gain",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Strat-style single coils",
+        "Fender-style clean amp",
+        "spring reverb",
+        "1x12 or 2x12 combo"
+      ],
+      "corrections": [
+        "drop chorus",
+        "drop deep reverb",
+        "use light breakup not overdrive-heavy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "singer-songwriter",
+        "roots",
+        "blues"
+      ],
+      "targetTone": "clean Strat neck pickup with light breakup and springy room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more vintage, open-air sound that complements the clean Fender tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x12 IR (e.g., tweed/open back)",
+          "reason": "Enhance vintage character and open-air feel.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Warmer, less boxy clean tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1685,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

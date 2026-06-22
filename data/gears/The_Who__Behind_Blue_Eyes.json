@@ -1,0 +1,1092 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1640,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Who__Behind_Blue_Eyes.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Who",
+    "title": "Behind Blue Eyes",
+    "album": "",
+    "year": null,
+    "genre": "rock"
+  },
+  "genreClassification": {
+    "genre": "rock",
+    "subgenres": [
+      "british rock",
+      "pop rock"
+    ],
+    "confidence": "high",
+    "rationale": "The Who's style is classic British rock, fitting the clean-to-edge Vox tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly overdriven British rock crunch (Jangler/Rickenbacker style)",
+      "signatureElements": [
+        "Crunch",
+        "Slight chorus modulation",
+        "Bright treble focus",
+        "Punchy mid-range"
+      ],
+      "gearHypotheses": [
+        "British tweed amp model (e.g., Vox AC30 or Fender Twin Reverb emulation)",
+        "Overdrive pedal with moderate gain and high treble boost"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep scooped bass tones",
+        "Modern digital delay/reverb tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+      "mustHave": [
+        "clear picked chords",
+        "light breakup",
+        "bright jangle",
+        "mostly dry"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy crunch",
+        "fuzz",
+        "big delay"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "12-inch alnico",
+        "single-coils",
+        "light compression"
+      ],
+      "corrections": [
+        "drop chorus",
+        "soften gain",
+        "lean cleaner than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+    "mustHave": [
+      "clear picked chords",
+      "light breakup",
+      "bright jangle",
+      "mostly dry"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy crunch",
+      "fuzz",
+      "big delay"
+    ],
+    "gearClues": [
+      "Vox AC30",
+      "12-inch alnico",
+      "single-coils",
+      "light compression"
+    ],
+    "corrections": [
+      "drop chorus",
+      "soften gain",
+      "lean cleaner than crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean British tones (Vox/AC30) with light breakup and bright jangle, keeping the overall sound dry.",
+          "bestMatchSummary": "A classic British clean tone setup using the AC30 model for warmth and chime, paired with a slight compression boost and minimal room reverb to achieve the desired 'warm clean-to-edge' strumming sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Smooth out dynamics and provide light sustain for clear strumming.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide the 'light breakup' and jangle characteristic of Vox amps without heavy crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "6/10"
+              },
+              "purpose": "Simulate the classic Vox AC30 British chime and warmth.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a balanced British cabinet sound that complements the AC30 model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the 'bright jangle' and clarity of picked chords.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this clean strum tone).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as requested by the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth without sounding like a 'big delay'.",
+              "matchQuality": "close",
+              "gap": "The verdict asks for 'mostly dry', so the delay is kept minimal.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the requested 'dry room' ambience without excessive wash.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone is designed to emulate a classic British clean sound (Vox AC30), which may require careful EQ adjustments on the GP-180 to perfectly match the specific vintage character of The Who's recording."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more open, British-voiced option.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "open-mic-British-4x12",
+              "reason": "Enhance Vox chime and clarity; current IR is too closed.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased open air feel",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Who - Behind Blue Eyes - Valeton GP-180",
+        "song": {
+          "artist": "The Who",
+          "title": "Behind Blue Eyes",
+          "album": "",
+          "year": null,
+          "genre": "rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British clean tone setup using the AC30 model for warmth and chime, paired with a slight compression boost and minimal room reverb to achieve the desired 'warm clean-to-edge' strumming sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1"
+            },
+            "purpose": "Smooth out dynamics and provide light sustain for clear strumming.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%"
+            },
+            "purpose": "Provide the 'light breakup' and jangle characteristic of Vox amps without heavy crunch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Mid": "6/10"
+            },
+            "purpose": "Simulate the classic Vox AC30 British chime and warmth.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a balanced British cabinet sound that complements the AC30 model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the 'bright jangle' and clarity of picked chords.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No wah needed for this clean strum tone).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus as requested by the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle depth without sounding like a 'big delay'.",
+            "matchQuality": "close",
+            "gap": "The verdict asks for 'mostly dry', so the delay is kept minimal.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the requested 'dry room' ambience without excessive wash.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7/10"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+          "toneProfile": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+          "idealSignalChain": "Vox AC30 | 12-inch alnico | single-coils | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch alnico",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clear picked chords",
+            "light breakup",
+            "bright jangle",
+            "mostly dry"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean British tones (Vox/AC30) with light breakup and bright jangle, keeping the overall sound dry.",
+          "bestMatchSummary": "A classic British clean tone setup using the AC30 model for warmth and chime, paired with a slight compression boost and minimal room reverb to achieve the desired 'warm clean-to-edge' strumming sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Smooth out dynamics and provide light sustain for clear strumming.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide the 'light breakup' and jangle characteristic of Vox amps without heavy crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "6/10"
+              },
+              "purpose": "Simulate the classic Vox AC30 British chime and warmth.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a balanced British cabinet sound that complements the AC30 model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the 'bright jangle' and clarity of picked chords.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this clean strum tone).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus as requested by the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth without sounding like a 'big delay'.",
+              "matchQuality": "close",
+              "gap": "The verdict asks for 'mostly dry', so the delay is kept minimal.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the requested 'dry room' ambience without excessive wash.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more open, British-voiced option.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "open-mic-British-4x12",
+              "reason": "Enhance Vox chime and clarity; current IR is too closed.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased open air feel",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "soften gain",
+          "lean cleaner than crunch"
+        ],
+        "warnings": [
+          "The tone is designed to emulate a classic British clean sound (Vox AC30), which may require careful EQ adjustments on the GP-180 to perfectly match the specific vintage character of The Who's recording."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.445,
+      "prompt_chars": 992,
+      "response_chars": 467,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 118,
+        "total_duration": 10427081200,
+        "prompt_eval_duration": 366105000,
+        "eval_duration": 1984977000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.031,
+      "prompt_chars": 5387,
+      "response_chars": 468,
+      "usage": {
+        "input_tokens": 1503,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 128,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1631
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.381,
+      "prompt_chars": 3540,
+      "response_chars": 5171,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1510,
+        "total_duration": 27374213900,
+        "prompt_eval_duration": 623118000,
+        "eval_duration": 25916604000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.963,
+      "prompt_chars": 7262,
+      "response_chars": 537,
+      "usage": {
+        "prompt_eval_count": 2070,
+        "eval_count": 147,
+        "total_duration": 3955915100,
+        "prompt_eval_duration": 393826000,
+        "eval_duration": 3053781000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.543,
+      "prompt_chars": 2927,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 924,
+        "eval_count": 51,
+        "total_duration": 10539024200,
+        "prompt_eval_duration": 876123000,
+        "eval_duration": 770775000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Who",
+      "title": "Behind Blue Eyes",
+      "album": "",
+      "year": null,
+      "genre": "rock"
+    },
+    "rig": {
+      "rigName": "The Who - Behind Blue Eyes - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+      "signalChainSummary": "A classic British clean tone setup using the AC30 model for warmth and chime, paired with a slight compression boost and minimal room reverb to achieve the desired 'warm clean-to-edge' strumming sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1"
+          },
+          "purpose": "Smooth out dynamics and provide light sustain for clear strumming.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%"
+          },
+          "purpose": "Provide the 'light breakup' and jangle characteristic of Vox amps without heavy crunch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Mid": "6/10"
+          },
+          "purpose": "Simulate the classic Vox AC30 British chime and warmth.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a balanced British cabinet sound that complements the AC30 model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the 'bright jangle' and clarity of picked chords.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No wah needed for this clean strum tone).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus as requested by the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle depth without sounding like a 'big delay'.",
+          "matchQuality": "close",
+          "gap": "The verdict asks for 'mostly dry', so the delay is kept minimal.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the requested 'dry room' ambience without excessive wash.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7/10"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+      "mustHave": [
+        "clear picked chords",
+        "light breakup",
+        "bright jangle",
+        "mostly dry"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy crunch",
+        "fuzz",
+        "big delay"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "12-inch alnico",
+        "single-coils",
+        "light compression"
+      ],
+      "corrections": [
+        "drop chorus",
+        "soften gain",
+        "lean cleaner than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock",
+      "styleTags": [
+        "british rock",
+        "pop rock"
+      ],
+      "targetTone": "warm clean-to-edge Vox/British acoustic-like strum with dry room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall clarity by swapping the default IR for a more open, British-voiced option.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "open-mic-British-4x12",
+          "reason": "Enhance Vox chime and clarity; current IR is too closed.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased open air feel",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1640,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

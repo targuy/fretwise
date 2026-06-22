@@ -1,0 +1,1054 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 20,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Aerosmith__Toys_In_The_Attic.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Aerosmith",
+    "title": "Toys In The Attic",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with slight grit and bite.",
+      "signatureElements": [
+        "crunch",
+        "midrange focus",
+        "slight fuzz/grit",
+        "rock energy"
+      ],
+      "gearHypotheses": [
+        "Marshall JCM800 style amp model",
+        "British cabinet simulation (4x12)",
+        "Overdrive pedal emulation (e.g., Tube Screamer)"
+      ],
+      "avoid": [
+        "excessive clean reverb",
+        "heavy modulation effects",
+        "extreme fuzz tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight 70s hard-rock crunch with dirty bite",
+      "mustHave": [
+        "sharp upper mids",
+        "slightly ragged drive",
+        "dry mix",
+        "riff-forward attack"
+      ],
+      "avoid": [
+        "fuzzy sustain",
+        "chorus",
+        "lush reverb",
+        "polite clean"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop JCM800 specificity",
+        "lean drier and nastier",
+        "avoid true fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight 70s hard-rock crunch with dirty bite",
+    "mustHave": [
+      "sharp upper mids",
+      "slightly ragged drive",
+      "dry mix",
+      "riff-forward attack"
+    ],
+    "avoid": [
+      "fuzzy sustain",
+      "chorus",
+      "lush reverb",
+      "polite clean"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "bridge humbucker",
+      "light overdrive"
+    ],
+    "corrections": [
+      "drop JCM800 specificity",
+      "lean drier and nastier",
+      "avoid true fuzz"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic hard rock tones (70s/early 80s) using Plexi/Marshall emulation, prioritizing mid-range punch and aggressive drive.",
+          "bestMatchSummary": "A tight, crunchy signal chain utilizing a Boost for initial grit, followed by the UK 50 amp model and UK Vintage 4x12 cab. Compression is used to maintain riff clarity and attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain hard rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the required 'slightly ragged drive' and initial grit without resorting to full fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it captures the necessary mid-range bite and light breakup suggested by the Plexi/Marshall clue.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Enhance the 'riff-forward attack' and maintain consistent dynamics for tight hard rock playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add the necessary 'dirty bite' and aggressive crunch characteristic of 70s hard rock without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a robust, mid-focused dirt that is more controlled than pure fuzz but nastier than simple OD.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A safer choice if the bite needs to be less aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for 70s hard rock, providing punchy mids and controlled breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punch for hard rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1.5 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Sculpt the tone to emphasize 'sharp upper mids' and cut unnecessary low-end mud, keeping the mix dry.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "0.1"
+              },
+              "purpose": "Add minimal, natural ambience (dry mix requirement) without sounding lush or wet.",
+              "matchQuality": "close",
+              "gap": "The 'Room' module is the best choice for subtle ambiance; setting it very low ensures the tone remains dry and aggressive.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more defined, less natural ambience is acceptable."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track. The chosen signal chain emphasizes aggressive mid-range punch and controlled grit, avoiding the lush or fuzzy sounds specified in the 'avoid' list."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to better capture the specific aggressive mid-range bite and punch of 70s hard rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the aggressive, punchy mid-range bite required for 'Toys in the Attic' era hard rock.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and aggression in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Aerosmith - Toys In The Attic - Valeton GP-180",
+        "song": {
+          "artist": "Aerosmith",
+          "title": "Toys In The Attic",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight 70s hard-rock crunch with dirty bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, crunchy signal chain utilizing a Boost for initial grit, followed by the UK 50 amp model and UK Vintage 4x12 cab. Compression is used to maintain riff clarity and attack.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise inherent in high-gain hard rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the required 'slightly ragged drive' and initial grit without resorting to full fuzz.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general overdrive, but it captures the necessary mid-range bite and light breakup suggested by the Plexi/Marshall clue.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly cleaner alternative if more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-10 dB",
+              "Ratio": "4:1"
+            },
+            "purpose": "Enhance the 'riff-forward attack' and maintain consistent dynamics for tight hard rock playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "5.5",
+              "Tone": "6",
+              "Output": "7"
+            },
+            "purpose": "Add the necessary 'dirty bite' and aggressive crunch characteristic of 70s hard rock without sounding overly fuzzy.",
+            "matchQuality": "close",
+            "gap": "The RAT-style provides a robust, mid-focused dirt that is more controlled than pure fuzz but nastier than simple OD.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A safer choice if the bite needs to be less aggressive."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the classic Marshall/Plexi sound required for 70s hard rock, providing punchy mids and controlled breakup.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary punch for hard rock tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-1.5 dB",
+              "Mid Boost": "+3 dB",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Sculpt the tone to emphasize 'sharp upper mids' and cut unnecessary low-end mud, keeping the mix dry.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "0.1"
+            },
+            "purpose": "Add minimal, natural ambience (dry mix requirement) without sounding lush or wet.",
+            "matchQuality": "close",
+            "gap": "The 'Room' module is the best choice for subtle ambiance; setting it very low ensures the tone remains dry and aggressive.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly more defined, less natural ambience is acceptable."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight 70s hard-rock crunch with dirty bite",
+          "toneProfile": "tight 70s hard-rock crunch with dirty bite",
+          "idealSignalChain": "Marshall/Plexi style amp | 4x12 cab | bridge humbucker | light overdrive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "sharp upper mids",
+            "slightly ragged drive",
+            "dry mix",
+            "riff-forward attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic hard rock tones (70s/early 80s) using Plexi/Marshall emulation, prioritizing mid-range punch and aggressive drive.",
+          "bestMatchSummary": "A tight, crunchy signal chain utilizing a Boost for initial grit, followed by the UK 50 amp model and UK Vintage 4x12 cab. Compression is used to maintain riff clarity and attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain hard rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the required 'slightly ragged drive' and initial grit without resorting to full fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it captures the necessary mid-range bite and light breakup suggested by the Plexi/Marshall clue.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner alternative if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Enhance the 'riff-forward attack' and maintain consistent dynamics for tight hard rock playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Output": "7"
+              },
+              "purpose": "Add the necessary 'dirty bite' and aggressive crunch characteristic of 70s hard rock without sounding overly fuzzy.",
+              "matchQuality": "close",
+              "gap": "The RAT-style provides a robust, mid-focused dirt that is more controlled than pure fuzz but nastier than simple OD.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A safer choice if the bite needs to be less aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for 70s hard rock, providing punchy mids and controlled breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punch for hard rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-1.5 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Sculpt the tone to emphasize 'sharp upper mids' and cut unnecessary low-end mud, keeping the mix dry.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "0.1"
+              },
+              "purpose": "Add minimal, natural ambience (dry mix requirement) without sounding lush or wet.",
+              "matchQuality": "close",
+              "gap": "The 'Room' module is the best choice for subtle ambiance; setting it very low ensures the tone remains dry and aggressive.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more defined, less natural ambience is acceptable."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to better capture the specific aggressive mid-range bite and punch of 70s hard rock.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance the aggressive, punchy mid-range bite required for 'Toys in the Attic' era hard rock.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and aggression in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop JCM800 specificity",
+          "lean drier and nastier",
+          "avoid true fuzz"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track. The chosen signal chain emphasizes aggressive mid-range punch and controlled grit, avoiding the lush or fuzzy sounds specified in the 'avoid' list."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.945,
+      "prompt_chars": 980,
+      "response_chars": 413,
+      "usage": {
+        "prompt_eval_count": 317,
+        "eval_count": 110,
+        "total_duration": 2941211900,
+        "prompt_eval_duration": 168666000,
+        "eval_duration": 2311926000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.783,
+      "prompt_chars": 5325,
+      "response_chars": 491,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1631
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 17.663,
+      "prompt_chars": 3496,
+      "response_chars": 5553,
+      "usage": {
+        "prompt_eval_count": 1178,
+        "eval_count": 1563,
+        "total_duration": 17638885400,
+        "prompt_eval_duration": 355318000,
+        "eval_duration": 16793382000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.918,
+      "prompt_chars": 7637,
+      "response_chars": 597,
+      "usage": {
+        "prompt_eval_count": 2126,
+        "eval_count": 165,
+        "total_duration": 1911355400,
+        "prompt_eval_duration": 212847000,
+        "eval_duration": 1279719000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.947,
+      "prompt_chars": 2736,
+      "response_chars": 181,
+      "usage": {
+        "prompt_eval_count": 889,
+        "eval_count": 57,
+        "total_duration": 924185000,
+        "prompt_eval_duration": 107214000,
+        "eval_duration": 434717000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Aerosmith",
+      "title": "Toys In The Attic",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Aerosmith - Toys In The Attic - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight 70s hard-rock crunch with dirty bite",
+      "signalChainSummary": "A tight, crunchy signal chain utilizing a Boost for initial grit, followed by the UK 50 amp model and UK Vintage 4x12 cab. Compression is used to maintain riff clarity and attack.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise inherent in high-gain hard rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the required 'slightly ragged drive' and initial grit without resorting to full fuzz.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general overdrive, but it captures the necessary mid-range bite and light breakup suggested by the Plexi/Marshall clue.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly cleaner alternative if more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-10 dB",
+            "Ratio": "4:1"
+          },
+          "purpose": "Enhance the 'riff-forward attack' and maintain consistent dynamics for tight hard rock playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "5.5",
+            "Tone": "6",
+            "Output": "7"
+          },
+          "purpose": "Add the necessary 'dirty bite' and aggressive crunch characteristic of 70s hard rock without sounding overly fuzzy.",
+          "matchQuality": "close",
+          "gap": "The RAT-style provides a robust, mid-focused dirt that is more controlled than pure fuzz but nastier than simple OD.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A safer choice if the bite needs to be less aggressive."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the classic Marshall/Plexi sound required for 70s hard rock, providing punchy mids and controlled breakup.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary punch for hard rock tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-1.5 dB",
+            "Mid Boost": "+3 dB",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Sculpt the tone to emphasize 'sharp upper mids' and cut unnecessary low-end mud, keeping the mix dry.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "0.1"
+          },
+          "purpose": "Add minimal, natural ambience (dry mix requirement) without sounding lush or wet.",
+          "matchQuality": "close",
+          "gap": "The 'Room' module is the best choice for subtle ambiance; setting it very low ensures the tone remains dry and aggressive.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more defined, less natural ambience is acceptable."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight 70s hard-rock crunch with dirty bite",
+      "mustHave": [
+        "sharp upper mids",
+        "slightly ragged drive",
+        "dry mix",
+        "riff-forward attack"
+      ],
+      "avoid": [
+        "fuzzy sustain",
+        "chorus",
+        "lush reverb",
+        "polite clean"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop JCM800 specificity",
+        "lean drier and nastier",
+        "avoid true fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "70s rock"
+      ],
+      "targetTone": "tight 70s hard-rock crunch with dirty bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to better capture the specific aggressive mid-range bite and punch of 70s hard rock.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance the aggressive, punchy mid-range bite required for 'Toys in the Attic' era hard rock.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and aggression in the upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 20,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "70s rock"
+    ],
+    "confidence": "high",
+    "rationale": "Aerosmith's 'Toys in the Attic' is a quintessential example of 70s hard rock."
+  }
+}

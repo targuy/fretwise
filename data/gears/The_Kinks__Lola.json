@@ -1,0 +1,952 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1559,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Kinks__Lola.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Kinks",
+    "title": "Lola",
+    "album": "",
+    "year": null,
+    "genre": "mod rock"
+  },
+  "genreClassification": {
+    "genre": "mod rock",
+    "subgenres": [
+      "british rock",
+      "pop rock",
+      "jangly"
+    ],
+    "confidence": "high",
+    "rationale": "The Kinks' 'Lola' is a classic example of mod/British pop-rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly overdriven British rock tone (think Vox/AC30 or Marshall crunch)",
+      "signatureElements": [
+        "Crunch overdrive",
+        "Bright mid-range focus",
+        "Slightly nasal attack"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (e.g., AC30/Vox)",
+        "Mid-scooped EQ for punchy rhythm tones"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep scooped bass",
+        "Modern digital delay tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly Vox-ish crunch with slight honk",
+      "mustHave": [
+        "bright chime",
+        "slight nasal mid-honk",
+        "light breakup",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "modern delay",
+        "dark scooped tone"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single coils",
+        "12-inch cab",
+        "light spring"
+      ],
+      "corrections": [
+        "lean more jangly than Marshall",
+        "keep gain mild",
+        "no scooped mids"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly Vox-ish crunch with slight honk",
+    "mustHave": [
+      "bright chime",
+      "slight nasal mid-honk",
+      "light breakup",
+      "dry rhythm"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "modern delay",
+      "dark scooped tone"
+    ],
+    "gearClues": [
+      "Vox AC30",
+      "single coils",
+      "12-inch cab",
+      "light spring"
+    ],
+    "corrections": [
+      "lean more jangly than Marshall",
+      "keep gain mild",
+      "no scooped mids"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward British tones (Vox/AC30 style) with light breakup and chime.",
+          "bestMatchSummary": "A clean signal chain utilizing a Boost for initial tone shaping, followed by an AC30 TB amp model paired with the UK Vintage 4x12 cab. Chorus adds jangle, while Spring reverb provides classic British ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Slightly boost the signal and add initial brightness/edge.",
+              "matchQuality": "close",
+              "gap": "Using Boost for gentle tone shaping rather than pure gain.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide light breakup and the characteristic 'crunch' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "Red Haze is used sparingly to simulate tube saturation/breakup, not as a primary dirt source.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the bright, chimey, mid-forward tone of a Vox AC30.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cab/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and perceived size.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is a good proxy for a general British cab, though specific AC30 cabs might be better if available.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "5"
+              },
+              "purpose": "Add the required 'jangly' quality and movement to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "Chorus is used for jangle, which is a common effect in this genre, even if not explicitly listed.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "4",
+                "Treble": "3"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range chime and reduce excessive bass.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "3",
+                "Decay": "4"
+              },
+              "purpose": "Provide the classic 'light spring' ambience associated with vintage British tones.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of specific tube amplifier characteristics (Vox AC30). The chosen settings prioritize mid-range chime and light breakup over raw power.",
+          "Since the original recording uses vintage gear, the overall signal chain aims for warmth and clarity rather than modern high gain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the Vox AC30's specific voicing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Vox AC30 Cabinet Voicing",
+              "recommendedAsset": "AC30 4x12 IR (specific)",
+              "reason": "The current UK Vintage cab is generic; a dedicated AC30 IR will improve realism.",
+              "replacesBlockOrder": 5,
+              "whenToUse": null,
+              "expectedGain": "Improved chime and mid-focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Kinks - Lola - Valeton GP-180",
+        "song": {
+          "artist": "The Kinks",
+          "title": "Lola",
+          "album": "",
+          "year": null,
+          "genre": "mod rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly Vox-ish crunch with slight honk",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain utilizing a Boost for initial tone shaping, followed by an AC30 TB amp model paired with the UK Vintage 4x12 cab. Chorus adds jangle, while Spring reverb provides classic British ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Slightly boost the signal and add initial brightness/edge.",
+            "matchQuality": "close",
+            "gap": "Using Boost for gentle tone shaping rather than pure gain.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "6",
+              "Level": "5"
+            },
+            "purpose": "Provide light breakup and the characteristic 'crunch' without heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "Red Haze is used sparingly to simulate tube saturation/breakup, not as a primary dirt source.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Emulate the bright, chimey, mid-forward tone of a Vox AC30.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cab/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and perceived size.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is a good proxy for a general British cab, though specific AC30 cabs might be better if available.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3",
+              "Depth": "4",
+              "Mix": "5"
+            },
+            "purpose": "Add the required 'jangly' quality and movement to the rhythm parts.",
+            "matchQuality": "close",
+            "gap": "Chorus is used for jangle, which is a common effect in this genre, even if not explicitly listed.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "4",
+              "Treble": "3"
+            },
+            "purpose": "Fine-tune the tone to emphasize mid-range chime and reduce excessive bass.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "3",
+              "Decay": "4"
+            },
+            "purpose": "Provide the classic 'light spring' ambience associated with vintage British tones.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly Vox-ish crunch with slight honk",
+          "toneProfile": "jangly Vox-ish crunch with slight honk",
+          "idealSignalChain": "Vox AC30 | single coils | 12-inch cab | light spring",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Vox AC30",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light spring",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright chime",
+            "slight nasal mid-honk",
+            "light breakup",
+            "dry rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward British tones (Vox/AC30 style) with light breakup and chime.",
+          "bestMatchSummary": "A clean signal chain utilizing a Boost for initial tone shaping, followed by an AC30 TB amp model paired with the UK Vintage 4x12 cab. Chorus adds jangle, while Spring reverb provides classic British ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Slightly boost the signal and add initial brightness/edge.",
+              "matchQuality": "close",
+              "gap": "Using Boost for gentle tone shaping rather than pure gain.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Provide light breakup and the characteristic 'crunch' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "Red Haze is used sparingly to simulate tube saturation/breakup, not as a primary dirt source.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Emulate the bright, chimey, mid-forward tone of a Vox AC30.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cab/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and perceived size.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is a good proxy for a general British cab, though specific AC30 cabs might be better if available.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "5"
+              },
+              "purpose": "Add the required 'jangly' quality and movement to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "Chorus is used for jangle, which is a common effect in this genre, even if not explicitly listed.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "4",
+                "Treble": "3"
+              },
+              "purpose": "Fine-tune the tone to emphasize mid-range chime and reduce excessive bass.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "3",
+                "Decay": "4"
+              },
+              "purpose": "Provide the classic 'light spring' ambience associated with vintage British tones.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the Vox AC30's specific voicing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Vox AC30 Cabinet Voicing",
+              "recommendedAsset": "AC30 4x12 IR (specific)",
+              "reason": "The current UK Vintage cab is generic; a dedicated AC30 IR will improve realism.",
+              "replacesBlockOrder": 5,
+              "whenToUse": null,
+              "expectedGain": "Improved chime and mid-focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "lean more jangly than Marshall",
+          "keep gain mild",
+          "no scooped mids"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, requiring an emulation of specific tube amplifier characteristics (Vox AC30). The chosen settings prioritize mid-range chime and light breakup over raw power.",
+          "Since the original recording uses vintage gear, the overall signal chain aims for warmth and clarity rather than modern high gain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.882,
+      "prompt_chars": 982,
+      "response_chars": 404,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 107,
+        "total_duration": 9878890900,
+        "prompt_eval_duration": 349455000,
+        "eval_duration": 2075051000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.599,
+      "prompt_chars": 5308,
+      "response_chars": 453,
+      "usage": {
+        "input_tokens": 1489,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 126,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1615
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 25.35,
+      "prompt_chars": 3508,
+      "response_chars": 4592,
+      "usage": {
+        "prompt_eval_count": 1195,
+        "eval_count": 1315,
+        "total_duration": 25343254000,
+        "prompt_eval_duration": 437987000,
+        "eval_duration": 24555300000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.071,
+      "prompt_chars": 6583,
+      "response_chars": 514,
+      "usage": {
+        "prompt_eval_count": 1867,
+        "eval_count": 147,
+        "total_duration": 4065554300,
+        "prompt_eval_duration": 738453000,
+        "eval_duration": 2865702000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 19.761,
+      "prompt_chars": 2548,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 825,
+        "eval_count": 56,
+        "total_duration": 19744770600,
+        "prompt_eval_duration": 409489000,
+        "eval_duration": 921217000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Kinks",
+      "title": "Lola",
+      "album": "",
+      "year": null,
+      "genre": "mod rock"
+    },
+    "rig": {
+      "rigName": "The Kinks - Lola - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly Vox-ish crunch with slight honk",
+      "signalChainSummary": "A clean signal chain utilizing a Boost for initial tone shaping, followed by an AC30 TB amp model paired with the UK Vintage 4x12 cab. Chorus adds jangle, while Spring reverb provides classic British ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Slightly boost the signal and add initial brightness/edge.",
+          "matchQuality": "close",
+          "gap": "Using Boost for gentle tone shaping rather than pure gain.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "6",
+            "Level": "5"
+          },
+          "purpose": "Provide light breakup and the characteristic 'crunch' without heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "Red Haze is used sparingly to simulate tube saturation/breakup, not as a primary dirt source.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Emulate the bright, chimey, mid-forward tone of a Vox AC30.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cab/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and perceived size.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is a good proxy for a general British cab, though specific AC30 cabs might be better if available.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3",
+            "Depth": "4",
+            "Mix": "5"
+          },
+          "purpose": "Add the required 'jangly' quality and movement to the rhythm parts.",
+          "matchQuality": "close",
+          "gap": "Chorus is used for jangle, which is a common effect in this genre, even if not explicitly listed.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "4",
+            "Treble": "3"
+          },
+          "purpose": "Fine-tune the tone to emphasize mid-range chime and reduce excessive bass.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "3",
+            "Decay": "4"
+          },
+          "purpose": "Provide the classic 'light spring' ambience associated with vintage British tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly Vox-ish crunch with slight honk",
+      "mustHave": [
+        "bright chime",
+        "slight nasal mid-honk",
+        "light breakup",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "modern delay",
+        "dark scooped tone"
+      ],
+      "gearClues": [
+        "Vox AC30",
+        "single coils",
+        "12-inch cab",
+        "light spring"
+      ],
+      "corrections": [
+        "lean more jangly than Marshall",
+        "keep gain mild",
+        "no scooped mids"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "mod rock",
+      "styleTags": [
+        "british rock",
+        "pop rock",
+        "jangly"
+      ],
+      "targetTone": "jangly Vox-ish crunch with slight honk",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better match the Vox AC30's specific voicing.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Vox AC30 Cabinet Voicing",
+          "recommendedAsset": "AC30 4x12 IR (specific)",
+          "reason": "The current UK Vintage cab is generic; a dedicated AC30 IR will improve realism.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "",
+          "expectedGain": "Improved chime and mid-focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1559,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

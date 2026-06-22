@@ -1,0 +1,1159 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 994,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Nirvana__About_A_Girl.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Nirvana",
+    "title": "About A Girl",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "lo-fi",
+      "alternative",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "The song is Nirvana, but the target tone specifies a clean, indie/pop-punk sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Grunge/Alternative Rock, raw and slightly dirty",
+      "signatureElements": [
+        "crunch",
+        "fuzz (subtle)",
+        "chorus/flange modulation",
+        "delay",
+        "mid-scooped tone"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Fender Deluxe Reverb or Vox AC30 style) with slight breakup",
+        "Wah pedal for rhythmic accents",
+        "Chorus effect for thickening the sound"
+      ],
+      "avoid": [
+        "High gain metal tones",
+        "Clean jazz sounds",
+        "Bright, scooped hi-gain distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry lo-fi clean-crunch indie rhythm",
+      "mustHave": [
+        "clean edge",
+        "light breakup",
+        "dry room",
+        "tight strum",
+        "simple double-track feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flange",
+        "delay",
+        "heavy scoop"
+      ],
+      "gearClues": [
+        "small Fender/Hiwatt-style clean amp",
+        "1x12 or 2x12 cab",
+        "single-coils or bridge humbucker"
+      ],
+      "corrections": [
+        "remove fuzz",
+        "remove modulation",
+        "remove delay",
+        "lean cleaner than grunge"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry lo-fi clean-crunch indie rhythm",
+    "mustHave": [
+      "clean edge",
+      "light breakup",
+      "dry room",
+      "tight strum",
+      "simple double-track feel"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "flange",
+      "delay",
+      "heavy scoop"
+    ],
+    "gearClues": [
+      "small Fender/Hiwatt-style clean amp",
+      "1x12 or 2x12 cab",
+      "single-coils or bridge humbucker"
+    ],
+    "corrections": [
+      "remove fuzz",
+      "remove modulation",
+      "remove delay",
+      "lean cleaner than grunge"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, slightly broken-up tones with minimal ambience and maximum clarity for indie rhythm.",
+          "bestMatchSummary": "A tight signal chain using a light overdrive (Green OD) into a classic Fender/Hiwatt style amp (US Deluxe), paired with a small cab (US 2x12). Minimal reverb provides the required 'dry room' feel, keeping the tone clean and punchy.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in lo-fi recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "75%"
+              },
+              "purpose": "Provide the required 'clean edge' and light breakup without sounding like heavy distortion.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal for indie/lo-fi clean crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if the Green OD is too subtle."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the small Fender/Hiwatt-style clean amp required for a bright, punchy tone.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for classic indie clean tones.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if the US Deluxe is too bright."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Matches the required small cabinet size (1x12 or 2x12) and complements the US Deluxe amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Ensures tonal consistency with the chosen amplifier.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "A viable alternative if a Fender-style cab is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Midrange Cut": "-3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize clarity and cut through the mix, while slightly reducing muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for shaping a specific lo-fi rhythm sound.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is needed for this dry rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation effects (Chorus/Flange) are explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay effects are explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix Level": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the required 'dry room' ambience without adding excessive wash or sounding wet.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is ideal for subtle, natural space.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative if the room sound is too dark."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Final output level control to ensure the signal is balanced for FRFR monitoring.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (Nirvana's 'About A Girl') is inherently lo-fi and raw. This rig aims to replicate the *sound* of clean, slightly broken-up indie rhythm rather than achieving perfect fidelity."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current IR is good but could be improved with a specific vintage Fender/Hiwatt cab to enhance the lo-fi, dry room feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 tweed cabinet IR",
+              "reason": "Enhance the classic, slightly worn Fender/Hiwatt sound for better lo-fi authenticity.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage character and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Nirvana - About A Girl - Valeton GP-180",
+        "song": {
+          "artist": "Nirvana",
+          "title": "About A Girl",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry lo-fi clean-crunch indie rhythm",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A tight signal chain using a light overdrive (Green OD) into a classic Fender/Hiwatt style amp (US Deluxe), paired with a small cab (US 2x12). Minimal reverb provides the required 'dry room' feel, keeping the tone clean and punchy.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in lo-fi recordings.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "75%"
+            },
+            "purpose": "Provide the required 'clean edge' and light breakup without sounding like heavy distortion.",
+            "matchQuality": "perfect",
+            "gap": "None. Ideal for indie/lo-fi clean crunch.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive alternative if the Green OD is too subtle."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "6/10",
+              "Midrange": "7/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the small Fender/Hiwatt-style clean amp required for a bright, punchy tone.",
+            "matchQuality": "perfect",
+            "gap": "None. Best choice for classic indie clean tones.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "A good alternative if the US Deluxe is too bright."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Matches the required small cabinet size (1x12 or 2x12) and complements the US Deluxe amp model.",
+            "matchQuality": "perfect",
+            "gap": "None. Ensures tonal consistency with the chosen amplifier.",
+            "alternatives": [
+              {
+                "model": "Foxy 2x12",
+                "reason": "A viable alternative if a Fender-style cab is preferred."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-2 dB",
+              "Midrange Cut": "-3 dB",
+              "Treble Boost": "+2 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize clarity and cut through the mix, while slightly reducing muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for shaping a specific lo-fi rhythm sound.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No wah effect is needed for this dry rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Modulation effects (Chorus/Flange) are explicitly avoided.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Delay effects are explicitly avoided.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix Level": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide the required 'dry room' ambience without adding excessive wash or sounding wet.",
+            "matchQuality": "perfect",
+            "gap": "None. Room reverb is ideal for subtle, natural space.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A slightly brighter alternative if the room sound is too dark."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "70%"
+            },
+            "purpose": "Final output level control to ensure the signal is balanced for FRFR monitoring.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry lo-fi clean-crunch indie rhythm",
+          "toneProfile": "dry lo-fi clean-crunch indie rhythm",
+          "idealSignalChain": "small Fender/Hiwatt-style clean amp | 1x12 or 2x12 cab | single-coils or bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "small Fender/Hiwatt-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils or bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean edge",
+            "light breakup",
+            "dry room",
+            "tight strum",
+            "simple double-track feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, slightly broken-up tones with minimal ambience and maximum clarity for indie rhythm.",
+          "bestMatchSummary": "A tight signal chain using a light overdrive (Green OD) into a classic Fender/Hiwatt style amp (US Deluxe), paired with a small cab (US 2x12). Minimal reverb provides the required 'dry room' feel, keeping the tone clean and punchy.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in lo-fi recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "75%"
+              },
+              "purpose": "Provide the required 'clean edge' and light breakup without sounding like heavy distortion.",
+              "matchQuality": "perfect",
+              "gap": "None. Ideal for indie/lo-fi clean crunch.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if the Green OD is too subtle."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the small Fender/Hiwatt-style clean amp required for a bright, punchy tone.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for classic indie clean tones.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "A good alternative if the US Deluxe is too bright."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Matches the required small cabinet size (1x12 or 2x12) and complements the US Deluxe amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Ensures tonal consistency with the chosen amplifier.",
+              "alternatives": [
+                {
+                  "model": "Foxy 2x12",
+                  "reason": "A viable alternative if a Fender-style cab is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Midrange Cut": "-3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize clarity and cut through the mix, while slightly reducing muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for shaping a specific lo-fi rhythm sound.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is needed for this dry rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation effects (Chorus/Flange) are explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay effects are explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix Level": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide the required 'dry room' ambience without adding excessive wash or sounding wet.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is ideal for subtle, natural space.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly brighter alternative if the room sound is too dark."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "70%"
+              },
+              "purpose": "Final output level control to ensure the signal is balanced for FRFR monitoring.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current IR is good but could be improved with a specific vintage Fender/Hiwatt cab to enhance the lo-fi, dry room feel.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 tweed cabinet IR",
+              "reason": "Enhance the classic, slightly worn Fender/Hiwatt sound for better lo-fi authenticity.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage character and depth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove fuzz",
+          "remove modulation",
+          "remove delay",
+          "lean cleaner than grunge"
+        ],
+        "warnings": [
+          "The source material (Nirvana's 'About A Girl') is inherently lo-fi and raw. This rig aims to replicate the *sound* of clean, slightly broken-up indie rhythm rather than achieving perfect fidelity."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.231,
+      "prompt_chars": 988,
+      "response_chars": 481,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 124,
+        "total_duration": 11208542000,
+        "prompt_eval_duration": 557871000,
+        "eval_duration": 2291346000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.989,
+      "prompt_chars": 5409,
+      "response_chars": 505,
+      "usage": {
+        "input_tokens": 1515,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 142,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 34.834,
+      "prompt_chars": 3587,
+      "response_chars": 6129,
+      "usage": {
+        "prompt_eval_count": 1223,
+        "eval_count": 1739,
+        "total_duration": 34826920800,
+        "prompt_eval_duration": 221206000,
+        "eval_duration": 34156856000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.455,
+      "prompt_chars": 8297,
+      "response_chars": 601,
+      "usage": {
+        "prompt_eval_count": 2319,
+        "eval_count": 161,
+        "total_duration": 4447002800,
+        "prompt_eval_duration": 391450000,
+        "eval_duration": 3542534000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.815,
+      "prompt_chars": 2918,
+      "response_chars": 194,
+      "usage": {
+        "prompt_eval_count": 946,
+        "eval_count": 57,
+        "total_duration": 25811811800,
+        "prompt_eval_duration": 209229000,
+        "eval_duration": 507202000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Nirvana",
+      "title": "About A Girl",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "Nirvana - About A Girl - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry lo-fi clean-crunch indie rhythm",
+      "signalChainSummary": "A tight signal chain using a light overdrive (Green OD) into a classic Fender/Hiwatt style amp (US Deluxe), paired with a small cab (US 2x12). Minimal reverb provides the required 'dry room' feel, keeping the tone clean and punchy.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in lo-fi recordings.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "75%"
+          },
+          "purpose": "Provide the required 'clean edge' and light breakup without sounding like heavy distortion.",
+          "matchQuality": "exact",
+          "gap": "None. Ideal for indie/lo-fi clean crunch.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive alternative if the Green OD is too subtle."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No heavy distortion is required; the Green OD handles the breakup.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "6/10",
+            "Midrange": "7/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the small Fender/Hiwatt-style clean amp required for a bright, punchy tone.",
+          "matchQuality": "exact",
+          "gap": "None. Best choice for classic indie clean tones.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A good alternative if the US Deluxe is too bright."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Matches the required small cabinet size (1x12 or 2x12) and complements the US Deluxe amp model.",
+          "matchQuality": "exact",
+          "gap": "None. Ensures tonal consistency with the chosen amplifier.",
+          "alternatives": [
+            {
+              "model": "Foxy 2x12",
+              "reason": "A viable alternative if a Fender-style cab is preferred."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-2 dB",
+            "Midrange Cut": "-3 dB",
+            "Treble Boost": "+2 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize clarity and cut through the mix, while slightly reducing muddiness.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for shaping a specific lo-fi rhythm sound.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No wah effect is needed for this dry rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Modulation effects (Chorus/Flange) are explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Delay effects are explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix Level": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide the required 'dry room' ambience without adding excessive wash or sounding wet.",
+          "matchQuality": "exact",
+          "gap": "None. Room reverb is ideal for subtle, natural space.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly brighter alternative if the room sound is too dark."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "70%"
+          },
+          "purpose": "Final output level control to ensure the signal is balanced for FRFR monitoring.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry lo-fi clean-crunch indie rhythm",
+      "mustHave": [
+        "clean edge",
+        "light breakup",
+        "dry room",
+        "tight strum",
+        "simple double-track feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flange",
+        "delay",
+        "heavy scoop"
+      ],
+      "gearClues": [
+        "small Fender/Hiwatt-style clean amp",
+        "1x12 or 2x12 cab",
+        "single-coils or bridge humbucker"
+      ],
+      "corrections": [
+        "remove fuzz",
+        "remove modulation",
+        "remove delay",
+        "lean cleaner than grunge"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "lo-fi",
+        "alternative",
+        "pop punk"
+      ],
+      "targetTone": "dry lo-fi clean-crunch indie rhythm",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current IR is good but could be improved with a specific vintage Fender/Hiwatt cab to enhance the lo-fi, dry room feel.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 tweed cabinet IR",
+          "reason": "Enhance the classic, slightly worn Fender/Hiwatt sound for better lo-fi authenticity.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased vintage character and depth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 994,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

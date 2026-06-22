@@ -1,0 +1,1035 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1707,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Ufo__Doctor_Doctor.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Ufo",
+    "title": "Doctor Doctor",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile and gear clues point directly to classic hard rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge.",
+      "signatureElements": [
+        "Crunch overdrive",
+        "Slight fuzz texture",
+        "Punchy mid-range"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation (British/American rock stack)"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Clean tones",
+        "Wah effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright mid-gain Marshall crunch with lead sustain",
+      "mustHave": [
+        "upper-mid bite",
+        "tight crunch",
+        "singing sustain",
+        "classic hard-rock lead"
+      ],
+      "avoid": [
+        "fuzz",
+        "clean tone",
+        "heavy distortion",
+        "wah"
+      ],
+      "gearClues": [
+        "humbucker electric",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "light OD boost"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "push brighter upper mids",
+        "favor Marshall crunch over generic rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright mid-gain Marshall crunch with lead sustain",
+    "mustHave": [
+      "upper-mid bite",
+      "tight crunch",
+      "singing sustain",
+      "classic hard-rock lead"
+    ],
+    "avoid": [
+      "fuzz",
+      "clean tone",
+      "heavy distortion",
+      "wah"
+    ],
+    "gearClues": [
+      "humbucker electric",
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "light OD boost"
+    ],
+    "corrections": [
+      "drop fuzz edge",
+      "push brighter upper mids",
+      "favor Marshall crunch over generic rock"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic Marshall crunch and lead sustain using UK 45/UK 50 emulation.",
+          "bestMatchSummary": "A tight, bright signal chain utilizing a light OD boost for grit, followed by the UK 45 amp model to achieve the characteristic Plexi-style mid-gain crunch, finished with chorus and delay for dimension.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and upper-mid bite boost without sounding like a full overdrive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the 'light OD boost' clue, focusing on mid-range enhancement rather than heavy saturation.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a subtle gain stage if needed; the Green OD handles most of the required crunch.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is strictly necessary as the UK 45 amp model provides sufficient mid-gain saturation. Keeping it bypassed for clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for hard rock crunch and upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A good alternative if the tone needs slightly more punch."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the required classic Marshall cabinet tone and frequency response.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add dimension and width to the lead lines for a more 'singing' sustain effect.",
+              "matchQuality": "close",
+              "gap": "Chorus is used as an enhancement tool, not essential, but helps achieve the desired dimensionality.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Add depth and space to the lead sustain, enhancing the classic hard rock feel.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used to enhance the 'singing' quality of the sustained notes without cluttering the mix.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle natural ambience to round out the tone and give a sense of space.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is preferred over Plate/Spring to maintain the dry, punchy feel of classic hard rock while adding necessary depth.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track, requiring emulation of vintage Marshall/Plexi tones. The rig prioritizes upper-mid punch and controlled gain over heavy distortion."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage Marshall/Plexi character.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall 4x12 cab tone",
+              "recommendedAsset": "vintage-marshall-4x12-ir",
+              "reason": "Enhance upper-mid bite and vintage Plexi realism.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Ufo - Doctor Doctor - Valeton GP-180",
+        "song": {
+          "artist": "Ufo",
+          "title": "Doctor Doctor",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright mid-gain Marshall crunch with lead sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, bright signal chain utilizing a light OD boost for grit, followed by the UK 45 amp model to achieve the characteristic Plexi-style mid-gain crunch, finished with chorus and delay for dimension.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light grit and upper-mid bite boost without sounding like a full overdrive.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate the 'light OD boost' clue, focusing on mid-range enhancement rather than heavy saturation.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive option if more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a subtle gain stage if needed; the Green OD handles most of the required crunch.",
+            "matchQuality": "none",
+            "gap": "No dedicated distortion unit is strictly necessary as the UK 45 amp model provides sufficient mid-gain saturation. Keeping it bypassed for clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%",
+              "Midrange": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Emulate the classic Marshall/Plexi sound required for hard rock crunch and upper-mid bite.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A good alternative if the tone needs slightly more punch."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the required classic Marshall cabinet tone and frequency response.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Mix": "50%"
+            },
+            "purpose": "Add dimension and width to the lead lines for a more 'singing' sustain effect.",
+            "matchQuality": "close",
+            "gap": "Chorus is used as an enhancement tool, not essential, but helps achieve the desired dimensionality.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "25%"
+            },
+            "purpose": "Add depth and space to the lead sustain, enhancing the classic hard rock feel.",
+            "matchQuality": "close",
+            "gap": "A moderate delay is used to enhance the 'singing' quality of the sustained notes without cluttering the mix.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide subtle natural ambience to round out the tone and give a sense of space.",
+            "matchQuality": "close",
+            "gap": "A light Room reverb is preferred over Plate/Spring to maintain the dry, punchy feel of classic hard rock while adding necessary depth.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright mid-gain Marshall crunch with lead sustain",
+          "toneProfile": "bright mid-gain Marshall crunch with lead sustain",
+          "idealSignalChain": "humbucker electric | Marshall/Plexi style amp | 4x12 cab | light OD boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "upper-mid bite",
+            "tight crunch",
+            "singing sustain",
+            "classic hard-rock lead"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic Marshall crunch and lead sustain using UK 45/UK 50 emulation.",
+          "bestMatchSummary": "A tight, bright signal chain utilizing a light OD boost for grit, followed by the UK 45 amp model to achieve the characteristic Plexi-style mid-gain crunch, finished with chorus and delay for dimension.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light grit and upper-mid bite boost without sounding like a full overdrive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the 'light OD boost' clue, focusing on mid-range enhancement rather than heavy saturation.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a subtle gain stage if needed; the Green OD handles most of the required crunch.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is strictly necessary as the UK 45 amp model provides sufficient mid-gain saturation. Keeping it bypassed for clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for hard rock crunch and upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A good alternative if the tone needs slightly more punch."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the required classic Marshall cabinet tone and frequency response.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add dimension and width to the lead lines for a more 'singing' sustain effect.",
+              "matchQuality": "close",
+              "gap": "Chorus is used as an enhancement tool, not essential, but helps achieve the desired dimensionality.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "25%"
+              },
+              "purpose": "Add depth and space to the lead sustain, enhancing the classic hard rock feel.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used to enhance the 'singing' quality of the sustained notes without cluttering the mix.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle natural ambience to round out the tone and give a sense of space.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is preferred over Plate/Spring to maintain the dry, punchy feel of classic hard rock while adding necessary depth.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage Marshall/Plexi character.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall 4x12 cab tone",
+              "recommendedAsset": "vintage-marshall-4x12-ir",
+              "reason": "Enhance upper-mid bite and vintage Plexi realism.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz edge",
+          "push brighter upper mids",
+          "favor Marshall crunch over generic rock"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track, requiring emulation of vintage Marshall/Plexi tones. The rig prioritizes upper-mid punch and controlled gain over heavy distortion."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.427,
+      "prompt_chars": 985,
+      "response_chars": 354,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 92,
+        "total_duration": 10424539400,
+        "prompt_eval_duration": 315469000,
+        "eval_duration": 1570335000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.363,
+      "prompt_chars": 5261,
+      "response_chars": 507,
+      "usage": {
+        "input_tokens": 1474,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 131,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1605
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.827,
+      "prompt_chars": 3572,
+      "response_chars": 5397,
+      "usage": {
+        "prompt_eval_count": 1205,
+        "eval_count": 1498,
+        "total_duration": 23820123500,
+        "prompt_eval_duration": 155589000,
+        "eval_duration": 23143112000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.628,
+      "prompt_chars": 7492,
+      "response_chars": 492,
+      "usage": {
+        "prompt_eval_count": 2060,
+        "eval_count": 139,
+        "total_duration": 4596354200,
+        "prompt_eval_duration": 392116000,
+        "eval_duration": 3725152000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.052,
+      "prompt_chars": 2737,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 853,
+        "eval_count": 46,
+        "total_duration": 10034475700,
+        "prompt_eval_duration": 258692000,
+        "eval_duration": 925431000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Ufo",
+      "title": "Doctor Doctor",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Ufo - Doctor Doctor - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright mid-gain Marshall crunch with lead sustain",
+      "signalChainSummary": "A tight, bright signal chain utilizing a light OD boost for grit, followed by the UK 45 amp model to achieve the characteristic Plexi-style mid-gain crunch, finished with chorus and delay for dimension.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light grit and upper-mid bite boost without sounding like a full overdrive.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate the 'light OD boost' clue, focusing on mid-range enhancement rather than heavy saturation.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive option if more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a subtle gain stage if needed; the Green OD handles most of the required crunch.",
+          "matchQuality": "fallback",
+          "gap": "No dedicated distortion unit is strictly necessary as the UK 45 amp model provides sufficient mid-gain saturation. Keeping it bypassed for clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%",
+            "Midrange": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Emulate the classic Marshall/Plexi sound required for hard rock crunch and upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A good alternative if the tone needs slightly more punch."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the required classic Marshall cabinet tone and frequency response.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Mix": "50%"
+          },
+          "purpose": "Add dimension and width to the lead lines for a more 'singing' sustain effect.",
+          "matchQuality": "close",
+          "gap": "Chorus is used as an enhancement tool, not essential, but helps achieve the desired dimensionality.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "25%"
+          },
+          "purpose": "Add depth and space to the lead sustain, enhancing the classic hard rock feel.",
+          "matchQuality": "close",
+          "gap": "A moderate delay is used to enhance the 'singing' quality of the sustained notes without cluttering the mix.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide subtle natural ambience to round out the tone and give a sense of space.",
+          "matchQuality": "close",
+          "gap": "A light Room reverb is preferred over Plate/Spring to maintain the dry, punchy feel of classic hard rock while adding necessary depth.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright mid-gain Marshall crunch with lead sustain",
+      "mustHave": [
+        "upper-mid bite",
+        "tight crunch",
+        "singing sustain",
+        "classic hard-rock lead"
+      ],
+      "avoid": [
+        "fuzz",
+        "clean tone",
+        "heavy distortion",
+        "wah"
+      ],
+      "gearClues": [
+        "humbucker electric",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "light OD boost"
+      ],
+      "corrections": [
+        "drop fuzz edge",
+        "push brighter upper mids",
+        "favor Marshall crunch over generic rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "bright mid-gain Marshall crunch with lead sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the vintage Marshall/Plexi character.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Marshall 4x12 cab tone",
+          "recommendedAsset": "vintage-marshall-4x12-ir",
+          "reason": "Enhance upper-mid bite and vintage Plexi realism.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1707,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

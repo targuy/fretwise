@@ -1,0 +1,1082 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 17,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Aerosmith__Mama_Kin.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Aerosmith",
+    "title": "Mama Kin",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty blues rock tone with a touch of vintage grit.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture for thickness",
+        "Warm mid-range emphasis",
+        "Bluesy sustain"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive pedal",
+        "British single-coil pickup sound (e.g., PAF style)"
+      ],
+      "avoid": [
+        "High-gain metal distortion",
+        "Bright, scooped tones",
+        "Digital delay/reverb overkill"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "raw 70s hard-rock crunch with nasal edge",
+      "mustHave": [
+        "barky upper mids",
+        "slightly dirty rhythm",
+        "tight bite",
+        "small-room dryness"
+      ],
+      "avoid": [
+        "bluesy smoothness",
+        "modern high gain",
+        "lush delay/reverb"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "PAF humbucker",
+        "4x12"
+      ],
+      "corrections": [
+        "drop 'slight fuzz'",
+        "lean more aggressive and raw",
+        "keep it dry and riffy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "raw 70s hard-rock crunch with nasal edge",
+    "mustHave": [
+      "barky upper mids",
+      "slightly dirty rhythm",
+      "tight bite",
+      "small-room dryness"
+    ],
+    "avoid": [
+      "bluesy smoothness",
+      "modern high gain",
+      "lush delay/reverb"
+    ],
+    "gearClues": [
+      "Plexi/Marshall",
+      "PAF humbucker",
+      "4x12"
+    ],
+    "corrections": [
+      "drop 'slight fuzz'",
+      "lean more aggressive and raw",
+      "keep it dry and riffy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-focused British rock tones (70s hard rock). Prioritize grit and bite over modern polish.",
+          "bestMatchSummary": "A tight, aggressive chain using a Boost/OD for initial grit, followed by a classic UK amp model (UK 45 or UK 50) paired with a vintage 4x12 cabinet to capture the raw, mid-heavy sound of early hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide the initial 'dirty' bite and nasal edge required for 70s hard rock crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general choice to simulate an early, aggressive British overdrive (like a Plexi/Marshall boost) without modern high-gain characteristics.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly smoother alternative if the bite needs rounding."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.0",
+                "Tone": "6.0",
+                "Level": "7.0"
+              },
+              "purpose": "Add aggressive grit and sustain to push the tone into a raw hard-rock crunch.",
+              "matchQuality": "close",
+              "gap": "Used here as a secondary, aggressive dirt source to ensure the 'raw' and 'aggressive' mandate is met without excessive modern gain.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general choice if RAT-style sounds too specific."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the classic British Marshall/Plexi sound, providing the necessary mid-focus and raw power.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for capturing the aggressive, mid-heavy character of early hard rock amps.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A very close alternative if the tone needs to be slightly more vintage/less punchy."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary mid-range punch (PAF humbucker/Marshall clue).",
+              "matchQuality": "close",
+              "gap": "None. This is the standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1.0",
+                "Mid": "+3.0",
+                "High": "+1.5"
+              },
+              "purpose": "Boost the upper mids and bite (barky upper mids) while keeping the low end tight.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone towards the required 'nasal edge' and mid-focus, compensating for potential amp/cab deficiencies.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "A simpler alternative if complex EQ shaping is not needed."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Disabled (or set to minimum) as the verdict explicitly avoids 'lush delay/reverb' and excessive modulation.",
+              "matchQuality": "n/a",
+              "gap": "None. Included for completeness but deactivated per instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/room",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "0.2"
+              },
+              "purpose": "Provide the required 'small-room dryness' without adding excessive wash or lush reverb.",
+              "matchQuality": "close",
+              "gap": "The Room module is used specifically for its ability to add subtle, natural space rather than a dramatic echo/reverb tail.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too lush and reflective; less 'dry' than the Room setting."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track. The rig focuses on raw, aggressive British tones (UK 50/Vintage Cab) to meet the 'raw 70s crunch' mandate."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall grit by swapping the IR for a more aggressive, vintage-voiced option.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Plexi/Marshall)",
+              "reason": "Enhance raw grit and mid-focus to better match the 'barky upper mids' requirement.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Aerosmith - Mama Kin - Valeton GP-180",
+        "song": {
+          "artist": "Aerosmith",
+          "title": "Mama Kin",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "raw 70s hard-rock crunch with nasal edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive chain using a Boost/OD for initial grit, followed by a classic UK amp model (UK 45 or UK 50) paired with a vintage 4x12 cabinet to capture the raw, mid-heavy sound of early hard rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Provide the initial 'dirty' bite and nasal edge required for 70s hard rock crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general choice to simulate an early, aggressive British overdrive (like a Plexi/Marshall boost) without modern high-gain characteristics.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly smoother alternative if the bite needs rounding."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "5.0",
+              "Tone": "6.0",
+              "Level": "7.0"
+            },
+            "purpose": "Add aggressive grit and sustain to push the tone into a raw hard-rock crunch.",
+            "matchQuality": "close",
+            "gap": "Used here as a secondary, aggressive dirt source to ensure the 'raw' and 'aggressive' mandate is met without excessive modern gain.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A more general choice if RAT-style sounds too specific."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.0",
+              "Midrange": "8.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Simulate the classic British Marshall/Plexi sound, providing the necessary mid-focus and raw power.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is ideal for capturing the aggressive, mid-heavy character of early hard rock amps.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A very close alternative if the tone needs to be slightly more vintage/less punchy."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary mid-range punch (PAF humbucker/Marshall clue).",
+            "matchQuality": "close",
+            "gap": "None. This is the standard choice for this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1.0",
+              "Mid": "+3.0",
+              "High": "+1.5"
+            },
+            "purpose": "Boost the upper mids and bite (barky upper mids) while keeping the low end tight.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the tone towards the required 'nasal edge' and mid-focus, compensating for potential amp/cab deficiencies.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 1",
+                "reason": "A simpler alternative if complex EQ shaping is not needed."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0.0",
+              "Depth": "0.0"
+            },
+            "purpose": "Disabled (or set to minimum) as the verdict explicitly avoids 'lush delay/reverb' and excessive modulation.",
+            "matchQuality": "n/a",
+            "gap": "None. Included for completeness but deactivated per instructions.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/room",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "0.2"
+            },
+            "purpose": "Provide the required 'small-room dryness' without adding excessive wash or lush reverb.",
+            "matchQuality": "close",
+            "gap": "The Room module is used specifically for its ability to add subtle, natural space rather than a dramatic echo/reverb tail.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too lush and reflective; less 'dry' than the Room setting."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "10.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "raw 70s hard-rock crunch with nasal edge",
+          "toneProfile": "raw 70s hard-rock crunch with nasal edge",
+          "idealSignalChain": "Plexi/Marshall | PAF humbucker | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "PAF humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "barky upper mids",
+            "slightly dirty rhythm",
+            "tight bite",
+            "small-room dryness"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-focused British rock tones (70s hard rock). Prioritize grit and bite over modern polish.",
+          "bestMatchSummary": "A tight, aggressive chain using a Boost/OD for initial grit, followed by a classic UK amp model (UK 45 or UK 50) paired with a vintage 4x12 cabinet to capture the raw, mid-heavy sound of early hard rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Provide the initial 'dirty' bite and nasal edge required for 70s hard rock crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general choice to simulate an early, aggressive British overdrive (like a Plexi/Marshall boost) without modern high-gain characteristics.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly smoother alternative if the bite needs rounding."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.0",
+                "Tone": "6.0",
+                "Level": "7.0"
+              },
+              "purpose": "Add aggressive grit and sustain to push the tone into a raw hard-rock crunch.",
+              "matchQuality": "close",
+              "gap": "Used here as a secondary, aggressive dirt source to ensure the 'raw' and 'aggressive' mandate is met without excessive modern gain.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general choice if RAT-style sounds too specific."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate the classic British Marshall/Plexi sound, providing the necessary mid-focus and raw power.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for capturing the aggressive, mid-heavy character of early hard rock amps.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A very close alternative if the tone needs to be slightly more vintage/less punchy."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary mid-range punch (PAF humbucker/Marshall clue).",
+              "matchQuality": "close",
+              "gap": "None. This is the standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1.0",
+                "Mid": "+3.0",
+                "High": "+1.5"
+              },
+              "purpose": "Boost the upper mids and bite (barky upper mids) while keeping the low end tight.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone towards the required 'nasal edge' and mid-focus, compensating for potential amp/cab deficiencies.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "A simpler alternative if complex EQ shaping is not needed."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Disabled (or set to minimum) as the verdict explicitly avoids 'lush delay/reverb' and excessive modulation.",
+              "matchQuality": "n/a",
+              "gap": "None. Included for completeness but deactivated per instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/room",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "0.2"
+              },
+              "purpose": "Provide the required 'small-room dryness' without adding excessive wash or lush reverb.",
+              "matchQuality": "close",
+              "gap": "The Room module is used specifically for its ability to add subtle, natural space rather than a dramatic echo/reverb tail.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too lush and reflective; less 'dry' than the Room setting."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall grit by swapping the IR for a more aggressive, vintage-voiced option.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 (e.g., Plexi/Marshall)",
+              "reason": "Enhance raw grit and mid-focus to better match the 'barky upper mids' requirement.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased bite and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop 'slight fuzz'",
+          "lean more aggressive and raw",
+          "keep it dry and riffy"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track. The rig focuses on raw, aggressive British tones (UK 50/Vintage Cab) to meet the 'raw 70s crunch' mandate."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.389,
+      "prompt_chars": 971,
+      "response_chars": 462,
+      "usage": {
+        "prompt_eval_count": 315,
+        "eval_count": 116,
+        "total_duration": 1372740600,
+        "prompt_eval_duration": 63383000,
+        "eval_duration": 897686000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.814,
+      "prompt_chars": 5359,
+      "response_chars": 468,
+      "usage": {
+        "input_tokens": 1495,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1632
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 13.966,
+      "prompt_chars": 3450,
+      "response_chars": 6043,
+      "usage": {
+        "prompt_eval_count": 1167,
+        "eval_count": 1701,
+        "total_duration": 13957932700,
+        "prompt_eval_duration": 217180000,
+        "eval_duration": 13310244000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.879,
+      "prompt_chars": 8101,
+      "response_chars": 572,
+      "usage": {
+        "prompt_eval_count": 2253,
+        "eval_count": 153,
+        "total_duration": 1858720500,
+        "prompt_eval_duration": 220808000,
+        "eval_duration": 1232257000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.95,
+      "prompt_chars": 2672,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 866,
+        "eval_count": 54,
+        "total_duration": 923093800,
+        "prompt_eval_duration": 106100000,
+        "eval_duration": 412980000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Aerosmith",
+      "title": "Mama Kin",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Aerosmith - Mama Kin - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "raw 70s hard-rock crunch with nasal edge",
+      "signalChainSummary": "A tight, aggressive chain using a Boost/OD for initial grit, followed by a classic UK amp model (UK 45 or UK 50) paired with a vintage 4x12 cabinet to capture the raw, mid-heavy sound of early hard rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Provide the initial 'dirty' bite and nasal edge required for 70s hard rock crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general choice to simulate an early, aggressive British overdrive (like a Plexi/Marshall boost) without modern high-gain characteristics.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly smoother alternative if the bite needs rounding."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "5.0",
+            "Tone": "6.0",
+            "Level": "7.0"
+          },
+          "purpose": "Add aggressive grit and sustain to push the tone into a raw hard-rock crunch.",
+          "matchQuality": "close",
+          "gap": "Used here as a secondary, aggressive dirt source to ensure the 'raw' and 'aggressive' mandate is met without excessive modern gain.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A more general choice if RAT-style sounds too specific."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.0",
+            "Midrange": "8.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Simulate the classic British Marshall/Plexi sound, providing the necessary mid-focus and raw power.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is ideal for capturing the aggressive, mid-heavy character of early hard rock amps.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A very close alternative if the tone needs to be slightly more vintage/less punchy."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary mid-range punch (PAF humbucker/Marshall clue).",
+          "matchQuality": "close",
+          "gap": "None. This is the standard choice for this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1.0",
+            "Mid": "+3.0",
+            "High": "+1.5"
+          },
+          "purpose": "Boost the upper mids and bite (barky upper mids) while keeping the low end tight.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the tone towards the required 'nasal edge' and mid-focus, compensating for potential amp/cab deficiencies.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "A simpler alternative if complex EQ shaping is not needed."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0.0",
+            "Depth": "0.0"
+          },
+          "purpose": "Disabled (or set to minimum) as the verdict explicitly avoids 'lush delay/reverb' and excessive modulation.",
+          "matchQuality": "fallback",
+          "gap": "None. Included for completeness but deactivated per instructions.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/room",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "0.2"
+          },
+          "purpose": "Provide the required 'small-room dryness' without adding excessive wash or lush reverb.",
+          "matchQuality": "close",
+          "gap": "The Room module is used specifically for its ability to add subtle, natural space rather than a dramatic echo/reverb tail.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too lush and reflective; less 'dry' than the Room setting."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "10.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "raw 70s hard-rock crunch with nasal edge",
+      "mustHave": [
+        "barky upper mids",
+        "slightly dirty rhythm",
+        "tight bite",
+        "small-room dryness"
+      ],
+      "avoid": [
+        "bluesy smoothness",
+        "modern high gain",
+        "lush delay/reverb"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "PAF humbucker",
+        "4x12"
+      ],
+      "corrections": [
+        "drop 'slight fuzz'",
+        "lean more aggressive and raw",
+        "keep it dry and riffy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "blues-rock"
+      ],
+      "targetTone": "raw 70s hard-rock crunch with nasal edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall grit by swapping the IR for a more aggressive, vintage-voiced option.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British 4x12 (e.g., Plexi/Marshall)",
+          "reason": "Enhance raw grit and mid-focus to better match the 'barky upper mids' requirement.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased bite and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 17,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic hard rock track, and the verdict confirms this raw 70s sound."
+  }
+}

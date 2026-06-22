@@ -1,0 +1,1038 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1317,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Stevie_Ray_Vaughan_Double_Trouble__Cold_Shot.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Stevie Ray Vaughan & Double Trouble",
+    "title": "Cold Shot",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "texas blues",
+      "electric blues"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly indicate classic Texas electric blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bluesy, aggressive lead tone with grit and bite",
+      "signatureElements": [
+        "Overdriven crunch (mid-scooped)",
+        "Sustained vibrato/bending",
+        "Controlled fuzz/grit"
+      ],
+      "gearHypotheses": [
+        "High-gain tube amp simulation (e.g., Fender Twin or Marshall Plexi style)",
+        "Wah pedal for expressive filtering",
+        "Delay and Reverb for space"
+      ],
+      "avoid": [
+        "Clean, scooped tones",
+        "Heavy metal distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "Texas blues clean-crunch with bright bite",
+      "mustHave": [
+        "edge-of-breakup grind",
+        "tight SRV attack",
+        "strat neck/middle quack",
+        "slight compression",
+        "short room or none"
+      ],
+      "avoid": [
+        "mid-scooped",
+        "fuzz",
+        "wah",
+        "delay wash",
+        "heavy metal gain"
+      ],
+      "gearClues": [
+        "Strat-style single coils",
+        "Fender-style amp",
+        "4x10 or 2x12"
+      ],
+      "corrections": [
+        "Remove fuzz and wah",
+        "Use cleaner Fender-like crunch",
+        "Keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "Texas blues clean-crunch with bright bite",
+    "mustHave": [
+      "edge-of-breakup grind",
+      "tight SRV attack",
+      "strat neck/middle quack",
+      "slight compression",
+      "short room or none"
+    ],
+    "avoid": [
+      "mid-scooped",
+      "fuzz",
+      "wah",
+      "delay wash",
+      "heavy metal gain"
+    ],
+    "gearClues": [
+      "Strat-style single coils",
+      "Fender-style amp",
+      "4x10 or 2x12"
+    ],
+    "corrections": [
+      "Remove fuzz and wah",
+      "Use cleaner Fender-like crunch",
+      "Keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, punchy Fender-style crunch with bite.",
+          "bestMatchSummary": "A classic blues setup using a US Deluxe/Silver Twin style amp paired with single-coil tones and light compression for tight, bright 'edge-of-breakup' grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a subtle boost for attack and punch.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the slight compression/attack enhancement needed without adding excessive gain.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression would be more direct, but Boost offers a cleaner tone lift for this specific blues crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "10 o'clock",
+                "Level": "6"
+              },
+              "purpose": "Achieve the 'edge-of-breakup grind' and classic blues crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean, mid-focused breakup that emulates Fender/early tube amp grit without sounding overly aggressive or scooped.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A viable alternative, but Green OD often provides a slightly brighter, more bite-y tone suitable for SRV's style."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright Fender-style amp tone (US Deluxe/Silver Twin).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Very similar to US Deluxe and equally suitable for the target sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the Fender-style amp and provide a tight, focused sound (2x12 clue).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Too large and British-sounding for the required Fender bite."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+2 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the 'bright bite' and cut out excessive low-end mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without sounding like a 'delay wash' or heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room module provides the required ambience while keeping the sound dry and punchy, fulfilling the 'short room or none' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes be too bright or metallic for classic blues."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic blues guitar performance. The rig focuses on emulating the specific Fender-style clean crunch and bite required for Stevie Ray Vaughan's tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more open, vintage-voiced speaker to better capture the bright bite of classic blues.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR (e.g., tweed/blackface)",
+              "reason": "Enhance vintage character and brightness for SRV's bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and open sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Stevie Ray Vaughan & Double Trouble - Cold Shot - Valeton GP-180",
+        "song": {
+          "artist": "Stevie Ray Vaughan & Double Trouble",
+          "title": "Cold Shot",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "Texas blues clean-crunch with bright bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic blues setup using a US Deluxe/Silver Twin style amp paired with single-coil tones and light compression for tight, bright 'edge-of-breakup' grit.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "12 o'clock"
+            },
+            "purpose": "Provide a subtle boost for attack and punch.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to simulate the slight compression/attack enhancement needed without adding excessive gain.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "Compression would be more direct, but Boost offers a cleaner tone lift for this specific blues crunch."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "10 o'clock",
+              "Level": "6"
+            },
+            "purpose": "Achieve the 'edge-of-breakup grind' and classic blues crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its clean, mid-focused breakup that emulates Fender/early tube amp grit without sounding overly aggressive or scooped.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A viable alternative, but Green OD often provides a slightly brighter, more bite-y tone suitable for SRV's style."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Midrange": "6",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the clean, bright Fender-style amp tone (US Deluxe/Silver Twin).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Very similar to US Deluxe and equally suitable for the target sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the Fender-style amp and provide a tight, focused sound (2x12 clue).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "Too large and British-sounding for the required Fender bite."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+2 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the 'bright bite' and cut out excessive low-end mud.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space without sounding like a 'delay wash' or heavy reverb.",
+            "matchQuality": "close",
+            "gap": "The Room module provides the required ambience while keeping the sound dry and punchy, fulfilling the 'short room or none' requirement.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Can sometimes be too bright or metallic for classic blues."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "Texas blues clean-crunch with bright bite",
+          "toneProfile": "Texas blues clean-crunch with bright bite",
+          "idealSignalChain": "Strat-style single coils | Fender-style amp | 4x10 or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat-style single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x10 or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "edge-of-breakup grind",
+            "tight SRV attack",
+            "strat neck/middle quack",
+            "slight compression",
+            "short room or none"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, punchy Fender-style crunch with bite.",
+          "bestMatchSummary": "A classic blues setup using a US Deluxe/Silver Twin style amp paired with single-coil tones and light compression for tight, bright 'edge-of-breakup' grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "12 o'clock"
+              },
+              "purpose": "Provide a subtle boost for attack and punch.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate the slight compression/attack enhancement needed without adding excessive gain.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "Compression would be more direct, but Boost offers a cleaner tone lift for this specific blues crunch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "10 o'clock",
+                "Level": "6"
+              },
+              "purpose": "Achieve the 'edge-of-breakup grind' and classic blues crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean, mid-focused breakup that emulates Fender/early tube amp grit without sounding overly aggressive or scooped.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A viable alternative, but Green OD often provides a slightly brighter, more bite-y tone suitable for SRV's style."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Midrange": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright Fender-style amp tone (US Deluxe/Silver Twin).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Very similar to US Deluxe and equally suitable for the target sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the Fender-style amp and provide a tight, focused sound (2x12 clue).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Too large and British-sounding for the required Fender bite."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+2 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the 'bright bite' and cut out excessive low-end mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without sounding like a 'delay wash' or heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room module provides the required ambience while keeping the sound dry and punchy, fulfilling the 'short room or none' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes be too bright or metallic for classic blues."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more open, vintage-voiced speaker to better capture the bright bite of classic blues.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR (e.g., tweed/blackface)",
+              "reason": "Enhance vintage character and brightness for SRV's bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and open sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Remove fuzz and wah",
+          "Use cleaner Fender-like crunch",
+          "Keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is a classic blues guitar performance. The rig focuses on emulating the specific Fender-style clean crunch and bite required for Stevie Ray Vaughan's tone."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.541,
+      "prompt_chars": 1013,
+      "response_chars": 424,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 107,
+        "total_duration": 10538182400,
+        "prompt_eval_duration": 214623000,
+        "eval_duration": 2040081000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.107,
+      "prompt_chars": 5359,
+      "response_chars": 528,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 149,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1646
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.581,
+      "prompt_chars": 3628,
+      "response_chars": 5206,
+      "usage": {
+        "prompt_eval_count": 1232,
+        "eval_count": 1472,
+        "total_duration": 25554775700,
+        "prompt_eval_duration": 511162000,
+        "eval_duration": 24161509000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.962,
+      "prompt_chars": 7359,
+      "response_chars": 608,
+      "usage": {
+        "prompt_eval_count": 2061,
+        "eval_count": 166,
+        "total_duration": 5922749200,
+        "prompt_eval_duration": 1091804000,
+        "eval_duration": 4283395999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.955,
+      "prompt_chars": 2662,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 862,
+        "eval_count": 43,
+        "total_duration": 9939836800,
+        "prompt_eval_duration": 828970000,
+        "eval_duration": 709226000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Stevie Ray Vaughan & Double Trouble",
+      "title": "Cold Shot",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Stevie Ray Vaughan & Double Trouble - Cold Shot - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "Texas blues clean-crunch with bright bite",
+      "signalChainSummary": "A classic blues setup using a US Deluxe/Silver Twin style amp paired with single-coil tones and light compression for tight, bright 'edge-of-breakup' grit.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "12 o'clock"
+          },
+          "purpose": "Provide a subtle boost for attack and punch.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to simulate the slight compression/attack enhancement needed without adding excessive gain.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Compression would be more direct, but Boost offers a cleaner tone lift for this specific blues crunch."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "10 o'clock",
+            "Level": "6"
+          },
+          "purpose": "Achieve the 'edge-of-breakup grind' and classic blues crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its clean, mid-focused breakup that emulates Fender/early tube amp grit without sounding overly aggressive or scooped.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A viable alternative, but Green OD often provides a slightly brighter, more bite-y tone suitable for SRV's style."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Midrange": "6",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the clean, bright Fender-style amp tone (US Deluxe/Silver Twin).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Very similar to US Deluxe and equally suitable for the target sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the Fender-style amp and provide a tight, focused sound (2x12 clue).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "Too large and British-sounding for the required Fender bite."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+2 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the 'bright bite' and cut out excessive low-end mud.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space without sounding like a 'delay wash' or heavy reverb.",
+          "matchQuality": "close",
+          "gap": "The Room module provides the required ambience while keeping the sound dry and punchy, fulfilling the 'short room or none' requirement.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Can sometimes be too bright or metallic for classic blues."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "Texas blues clean-crunch with bright bite",
+      "mustHave": [
+        "edge-of-breakup grind",
+        "tight SRV attack",
+        "strat neck/middle quack",
+        "slight compression",
+        "short room or none"
+      ],
+      "avoid": [
+        "mid-scooped",
+        "fuzz",
+        "wah",
+        "delay wash",
+        "heavy metal gain"
+      ],
+      "gearClues": [
+        "Strat-style single coils",
+        "Fender-style amp",
+        "4x10 or 2x12"
+      ],
+      "corrections": [
+        "Remove fuzz and wah",
+        "Use cleaner Fender-like crunch",
+        "Keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "texas blues",
+        "electric blues"
+      ],
+      "targetTone": "Texas blues clean-crunch with bright bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default 2x12 IR for a more open, vintage-voiced speaker to better capture the bright bite of classic blues.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage Fender 2x12 IR (e.g., tweed/blackface)",
+          "reason": "Enhance vintage character and brightness for SRV's bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and open sound",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1317,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

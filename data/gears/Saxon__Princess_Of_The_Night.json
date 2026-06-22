@@ -1,0 +1,1102 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1225,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Saxon__Princess_Of_The_Night.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Saxon",
+    "title": "Princess Of The Night",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "british hard rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Saxon's sound is classic British hard rock, matching the Marshall crunch tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and pronounced mid-range punch.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight Fuzz texture",
+        "Punchy attack",
+        "Rock rhythm feel"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "Amp simulation with Marshall or Vox character",
+        "Cabinet modeling for mid-range emphasis"
+      ],
+      "avoid": [
+        "Excessive scooped mids",
+        "Thin, brittle clean tones",
+        "Heavy modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "hot Marshall crunch with biting upper mids",
+      "mustHave": [
+        "tight palm-mute",
+        "aggressive pick attack",
+        "bright mid punch",
+        "hard rock rhythm"
+      ],
+      "avoid": [
+        "fuzz",
+        "Vox chime",
+        "scooped mids",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "bridge humbucker",
+        "presence up"
+      ],
+      "corrections": [
+        "drop slight fuzz",
+        "lean harder into Marshall bite",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "hot Marshall crunch with biting upper mids",
+    "mustHave": [
+      "tight palm-mute",
+      "aggressive pick attack",
+      "bright mid punch",
+      "hard rock rhythm"
+    ],
+    "avoid": [
+      "fuzz",
+      "Vox chime",
+      "scooped mids",
+      "heavy modulation"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12 cab",
+      "bridge humbucker",
+      "presence up"
+    ],
+    "corrections": [
+      "drop slight fuzz",
+      "lean harder into Marshall bite",
+      "keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Hard rock/Classic Rock focus, emphasizing Marshall tones and punchy mids.",
+          "bestMatchSummary": "A classic British hard rock chain using a Boost for attack, Distortion for crunch, an AC30 TB amp model, and the UK Vintage 4x12 cab to deliver biting upper mids and tight rhythm performance.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum during tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "70%",
+                "Level": "6"
+              },
+              "purpose": "Increase pick attack and overall output level for aggressive rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core Marshall-style crunch and bite required for hard rock rhythm.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate Plexi/Marshall grit, as no specific British high-gain model (like UK 45) was available in the DST section. Using it before the amp helps shape the tone.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If a dedicated British overdrive were preferred over Distortion."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British tone (Plexi/Marshall) with emphasis on upper mids and bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the necessary British cabinet voicing and punchy high-end response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "+3 dB (1 kHz)",
+                "High Boost": "+2 dB (6 kHz)"
+              },
+              "purpose": "Aggressively boost the upper mids and high frequencies to achieve 'biting upper mids' punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "compression/sustain",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Tighten the rhythm and sustain the aggressive pick attack.",
+              "matchQuality": "close",
+              "gap": "While compression is useful, placing it here (after distortion/before amp) helps control dynamics for tight palm-muting. A dedicated compressor module would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth and space without muddying the hard rock punch.",
+              "matchQuality": "close",
+              "gap": "Delay is optional for this genre, but a short slapback or digital delay adds dimension to solos/fills.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space without losing the dry, punchy hard rock feel.",
+              "matchQuality": "close",
+              "gap": "A smaller room or plate reverb would be better to maintain tightness. Using Room sparingly is key.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is hard rock, requiring a high-gain British tone. The chain prioritizes the AC30 TB and UK Vintage 4x12 to achieve the desired 'Marshall bite' and punchy mids.",
+          "Compression (Comp) was placed early in the signal chain to help maintain tight dynamics crucial for palm-muting."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and high-end bite by swapping the current IR for a more aggressive, Marshall-voiced 4x12.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/High-end punch",
+              "recommendedAsset": "Marshall 4x12 (or similar British high-gain cab)",
+              "reason": "Enhance the aggressive, biting upper mids and overall Marshall character.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased bite and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Saxon - Princess Of The Night - Valeton GP-180",
+        "song": {
+          "artist": "Saxon",
+          "title": "Princess Of The Night",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "hot Marshall crunch with biting upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British hard rock chain using a Boost for attack, Distortion for crunch, an AC30 TB amp model, and the UK Vintage 4x12 cab to deliver biting upper mids and tight rhythm performance.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum during tight palm-muting.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/attack",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "70%",
+              "Level": "6"
+            },
+            "purpose": "Increase pick attack and overall output level for aggressive rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/crunch",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "5.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the core Marshall-style crunch and bite required for hard rock rhythm.",
+            "matchQuality": "close",
+            "gap": "The 'Distortion' model is a general choice to emulate Plexi/Marshall grit, as no specific British high-gain model (like UK 45) was available in the DST section. Using it before the amp helps shape the tone.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If a dedicated British overdrive were preferred over Distortion."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British tone (Plexi/Marshall) with emphasis on upper mids and bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide the necessary British cabinet voicing and punchy high-end response.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "Mid Boost": "+3 dB (1 kHz)",
+              "High Boost": "+2 dB (6 kHz)"
+            },
+            "purpose": "Aggressively boost the upper mids and high frequencies to achieve 'biting upper mids' punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "compression/sustain",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Tighten the rhythm and sustain the aggressive pick attack.",
+            "matchQuality": "close",
+            "gap": "While compression is useful, placing it here (after distortion/before amp) helps control dynamics for tight palm-muting. A dedicated compressor module would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add subtle rhythmic depth and space without muddying the hard rock punch.",
+            "matchQuality": "close",
+            "gap": "Delay is optional for this genre, but a short slapback or digital delay adds dimension to solos/fills.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a subtle sense of space without losing the dry, punchy hard rock feel.",
+            "matchQuality": "close",
+            "gap": "A smaller room or plate reverb would be better to maintain tightness. Using Room sparingly is key.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "hot Marshall crunch with biting upper mids",
+          "toneProfile": "hot Marshall crunch with biting upper mids",
+          "idealSignalChain": "Marshall/Plexi | 4x12 cab | bridge humbucker | presence up",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "presence up",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-mute",
+            "aggressive pick attack",
+            "bright mid punch",
+            "hard rock rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Hard rock/Classic Rock focus, emphasizing Marshall tones and punchy mids.",
+          "bestMatchSummary": "A classic British hard rock chain using a Boost for attack, Distortion for crunch, an AC30 TB amp model, and the UK Vintage 4x12 cab to deliver biting upper mids and tight rhythm performance.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum during tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/attack",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "70%",
+                "Level": "6"
+              },
+              "purpose": "Increase pick attack and overall output level for aggressive rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "5.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core Marshall-style crunch and bite required for hard rock rhythm.",
+              "matchQuality": "close",
+              "gap": "The 'Distortion' model is a general choice to emulate Plexi/Marshall grit, as no specific British high-gain model (like UK 45) was available in the DST section. Using it before the amp helps shape the tone.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If a dedicated British overdrive were preferred over Distortion."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British tone (Plexi/Marshall) with emphasis on upper mids and bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the necessary British cabinet voicing and punchy high-end response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "+3 dB (1 kHz)",
+                "High Boost": "+2 dB (6 kHz)"
+              },
+              "purpose": "Aggressively boost the upper mids and high frequencies to achieve 'biting upper mids' punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "compression/sustain",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Tighten the rhythm and sustain the aggressive pick attack.",
+              "matchQuality": "close",
+              "gap": "While compression is useful, placing it here (after distortion/before amp) helps control dynamics for tight palm-muting. A dedicated compressor module would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth and space without muddying the hard rock punch.",
+              "matchQuality": "close",
+              "gap": "Delay is optional for this genre, but a short slapback or digital delay adds dimension to solos/fills.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space without losing the dry, punchy hard rock feel.",
+              "matchQuality": "close",
+              "gap": "A smaller room or plate reverb would be better to maintain tightness. Using Room sparingly is key.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and high-end bite by swapping the current IR for a more aggressive, Marshall-voiced 4x12.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism/High-end punch",
+              "recommendedAsset": "Marshall 4x12 (or similar British high-gain cab)",
+              "reason": "Enhance the aggressive, biting upper mids and overall Marshall character.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased bite and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop slight fuzz",
+          "lean harder into Marshall bite",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is hard rock, requiring a high-gain British tone. The chain prioritizes the AC30 TB and UK Vintage 4x12 to achieve the desired 'Marshall bite' and punchy mids.",
+          "Compression (Comp) was placed early in the signal chain to help maintain tight dynamics crucial for palm-muting."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.792,
+      "prompt_chars": 995,
+      "response_chars": 505,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 123,
+        "total_duration": 11746483900,
+        "prompt_eval_duration": 336101000,
+        "eval_duration": 2056581000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.582,
+      "prompt_chars": 5434,
+      "response_chars": 490,
+      "usage": {
+        "input_tokens": 1509,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1643
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.271,
+      "prompt_chars": 3565,
+      "response_chars": 5897,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1660,
+        "total_duration": 32265101200,
+        "prompt_eval_duration": 239465000,
+        "eval_duration": 31582270000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.942,
+      "prompt_chars": 8019,
+      "response_chars": 602,
+      "usage": {
+        "prompt_eval_count": 2220,
+        "eval_count": 162,
+        "total_duration": 18925469500,
+        "prompt_eval_duration": 443768000,
+        "eval_duration": 2801316000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.493,
+      "prompt_chars": 2812,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 880,
+        "eval_count": 49,
+        "total_duration": 8489519900,
+        "prompt_eval_duration": 167289000,
+        "eval_duration": 330660000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Saxon",
+      "title": "Princess Of The Night",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Saxon - Princess Of The Night - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "hot Marshall crunch with biting upper mids",
+      "signalChainSummary": "A classic British hard rock chain using a Boost for attack, Distortion for crunch, an AC30 TB amp model, and the UK Vintage 4x12 cab to deliver biting upper mids and tight rhythm performance.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum during tight palm-muting.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/attack",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "70%",
+            "Level": "6"
+          },
+          "purpose": "Increase pick attack and overall output level for aggressive rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/crunch",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "5.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the core Marshall-style crunch and bite required for hard rock rhythm.",
+          "matchQuality": "close",
+          "gap": "The 'Distortion' model is a general choice to emulate Plexi/Marshall grit, as no specific British high-gain model (like UK 45) was available in the DST section. Using it before the amp helps shape the tone.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If a dedicated British overdrive were preferred over Distortion."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British tone (Plexi/Marshall) with emphasis on upper mids and bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide the necessary British cabinet voicing and punchy high-end response.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "Mid Boost": "+3 dB (1 kHz)",
+            "High Boost": "+2 dB (6 kHz)"
+          },
+          "purpose": "Aggressively boost the upper mids and high frequencies to achieve 'biting upper mids' punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "compression/sustain",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Tighten the rhythm and sustain the aggressive pick attack.",
+          "matchQuality": "close",
+          "gap": "While compression is useful, placing it here (after distortion/before amp) helps control dynamics for tight palm-muting. A dedicated compressor module would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add subtle rhythmic depth and space without muddying the hard rock punch.",
+          "matchQuality": "close",
+          "gap": "Delay is optional for this genre, but a short slapback or digital delay adds dimension to solos/fills.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a subtle sense of space without losing the dry, punchy hard rock feel.",
+          "matchQuality": "close",
+          "gap": "A smaller room or plate reverb would be better to maintain tightness. Using Room sparingly is key.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "hot Marshall crunch with biting upper mids",
+      "mustHave": [
+        "tight palm-mute",
+        "aggressive pick attack",
+        "bright mid punch",
+        "hard rock rhythm"
+      ],
+      "avoid": [
+        "fuzz",
+        "Vox chime",
+        "scooped mids",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12 cab",
+        "bridge humbucker",
+        "presence up"
+      ],
+      "corrections": [
+        "drop slight fuzz",
+        "lean harder into Marshall bite",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "british hard rock",
+        "arena rock"
+      ],
+      "targetTone": "hot Marshall crunch with biting upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and high-end bite by swapping the current IR for a more aggressive, Marshall-voiced 4x12.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism/High-end punch",
+          "recommendedAsset": "Marshall 4x12 (or similar British high-gain cab)",
+          "reason": "Enhance the aggressive, biting upper mids and overall Marshall character.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased bite and realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1225,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

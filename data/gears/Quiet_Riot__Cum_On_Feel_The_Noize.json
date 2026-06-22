@@ -1,0 +1,1096 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1144,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Quiet_Riot__Cum_On_Feel_The_Noize.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Quiet Riot",
+    "title": "Cum On Feel The Noize",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "glam metal",
+      "classic rock",
+      "70s"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of 70s glam hard rock, matching the target tone perfectly."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, crunchy hard rock tone with a thick mid-range and aggressive attack.",
+      "signatureElements": [
+        "Crunch/Fuzz (for main riff)",
+        "Mid-scooped lead tones",
+        "Sustained power chords",
+        "Wah pedal use"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style boost",
+        "High-gain Marshall or Mesa Boogie style amp model",
+        "British cabinet emulation (4x12)"
+      ],
+      "avoid": [
+        "Clean jazz sounds",
+        "Ambient delay washes",
+        "Thin, scooped metal tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "big 70s glam hard-rock crunch with bright upper mids",
+      "mustHave": [
+        "tight power chords",
+        "slight fuzz-crunch edge",
+        "bright, biting attack",
+        "4x12 British cab feel"
+      ],
+      "avoid": [
+        "mid-scooped metal",
+        "clean tones",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "humbucker electric",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop lead-tone focus",
+        "keep it crunchy, not high-gain modern"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "big 70s glam hard-rock crunch with bright upper mids",
+    "mustHave": [
+      "tight power chords",
+      "slight fuzz-crunch edge",
+      "bright, biting attack",
+      "4x12 British cab feel"
+    ],
+    "avoid": [
+      "mid-scooped metal",
+      "clean tones",
+      "ambient delay"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style amp",
+      "humbucker electric",
+      "4x12 cab"
+    ],
+    "corrections": [
+      "drop wah",
+      "drop lead-tone focus",
+      "keep it crunchy, not high-gain modern"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British rock tones (Plexi/Marshall) with moderate gain and bright mids.",
+          "bestMatchSummary": "A crunchy, mid-focused signal chain using a Plexi-style amp model, Red Haze fuzz for bite, and a 4x12 cab to capture the classic 70s hard rock sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a slight, biting overdrive edge (fuzz-crunch) without sounding modern or scooped.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the classic Plexi/Marshall boost character required for 70s rock bite.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative, but Green OD often captures the specific mid-range punch of this era better."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'slight fuzz-crunch edge' and bright attack without excessive modern saturation.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi style amp foundation for 70s hard rock.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Also suitable, but UK SLP often provides a slightly more open and aggressive mid-range needed for this specific genre."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required '4x12 British cab feel' and classic rock voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance the bright upper mids and tighten the power chords as requested.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "N/A"
+              },
+              "purpose": "Included as a potential option (though the verdict suggests dropping wah), it is kept in the chain for versatility.",
+              "matchQuality": "close",
+              "gap": "The verdict explicitly recommends 'drop wah', so this module should be bypassed or used minimally.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Used minimally for subtle thickening if needed, but kept off to avoid ambient delay/washy sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "1"
+              },
+              "purpose": "Kept off to avoid 'ambient delay' as per the verdict.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Add a subtle sense of space without becoming overly ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic hard rock, requiring high-gain simulation. The chain prioritizes mid-range punch and vintage British tones (Plexi/Marshall) over modern metal saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to nail the classic 70s hard rock sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 IR (e.g., Marshall/Marshall Plexi)",
+              "reason": "Enhance the specific vintage character and mid-range punch of a classic 70s rock cab.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Quiet Riot - Cum On Feel The Noize - Valeton GP-180",
+        "song": {
+          "artist": "Quiet Riot",
+          "title": "Cum On Feel The Noize",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "big 70s glam hard-rock crunch with bright upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A crunchy, mid-focused signal chain using a Plexi-style amp model, Red Haze fuzz for bite, and a 4x12 cab to capture the classic 70s hard rock sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide a slight, biting overdrive edge (fuzz-crunch) without sounding modern or scooped.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate the classic Plexi/Marshall boost character required for 70s rock bite.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative, but Green OD often captures the specific mid-range punch of this era better."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add the required 'slight fuzz-crunch edge' and bright attack without excessive modern saturation.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi style amp foundation for 70s hard rock.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Also suitable, but UK SLP often provides a slightly more open and aggressive mid-range needed for this specific genre."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required '4x12 British cab feel' and classic rock voicing.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Enhance the bright upper mids and tighten the power chords as requested.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "N/A"
+            },
+            "purpose": "Included as a potential option (though the verdict suggests dropping wah), it is kept in the chain for versatility.",
+            "matchQuality": "close",
+            "gap": "The verdict explicitly recommends 'drop wah', so this module should be bypassed or used minimally.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3"
+            },
+            "purpose": "Used minimally for subtle thickening if needed, but kept off to avoid ambient delay/washy sound.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "1"
+            },
+            "purpose": "Kept off to avoid 'ambient delay' as per the verdict.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "3"
+            },
+            "purpose": "Add a subtle sense of space without becoming overly ambient or muddy.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "big 70s glam hard-rock crunch with bright upper mids",
+          "toneProfile": "big 70s glam hard-rock crunch with bright upper mids",
+          "idealSignalChain": "Marshall/Plexi style amp | humbucker electric | 4x12 cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight power chords",
+            "slight fuzz-crunch edge",
+            "bright, biting attack",
+            "4x12 British cab feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British rock tones (Plexi/Marshall) with moderate gain and bright mids.",
+          "bestMatchSummary": "A crunchy, mid-focused signal chain using a Plexi-style amp model, Red Haze fuzz for bite, and a 4x12 cab to capture the classic 70s hard rock sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a slight, biting overdrive edge (fuzz-crunch) without sounding modern or scooped.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the classic Plexi/Marshall boost character required for 70s rock bite.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative, but Green OD often captures the specific mid-range punch of this era better."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'slight fuzz-crunch edge' and bright attack without excessive modern saturation.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi style amp foundation for 70s hard rock.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Also suitable, but UK SLP often provides a slightly more open and aggressive mid-range needed for this specific genre."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required '4x12 British cab feel' and classic rock voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Enhance the bright upper mids and tighten the power chords as requested.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "N/A"
+              },
+              "purpose": "Included as a potential option (though the verdict suggests dropping wah), it is kept in the chain for versatility.",
+              "matchQuality": "close",
+              "gap": "The verdict explicitly recommends 'drop wah', so this module should be bypassed or used minimally.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Used minimally for subtle thickening if needed, but kept off to avoid ambient delay/washy sound.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "1"
+              },
+              "purpose": "Kept off to avoid 'ambient delay' as per the verdict.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "3"
+              },
+              "purpose": "Add a subtle sense of space without becoming overly ambient or muddy.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to nail the classic 70s hard rock sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British 4x12 IR (e.g., Marshall/Marshall Plexi)",
+              "reason": "Enhance the specific vintage character and mid-range punch of a classic 70s rock cab.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah",
+          "drop lead-tone focus",
+          "keep it crunchy, not high-gain modern"
+        ],
+        "warnings": [
+          "The source material is classic hard rock, requiring high-gain simulation. The chain prioritizes mid-range punch and vintage British tones (Plexi/Marshall) over modern metal saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.479,
+      "prompt_chars": 1000,
+      "response_chars": 476,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 122,
+        "total_duration": 10458014100,
+        "prompt_eval_duration": 365274000,
+        "eval_duration": 2361941000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.894,
+      "prompt_chars": 5410,
+      "response_chars": 506,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1651
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 32.7,
+      "prompt_chars": 3572,
+      "response_chars": 5550,
+      "usage": {
+        "prompt_eval_count": 1214,
+        "eval_count": 1603,
+        "total_duration": 32673494500,
+        "prompt_eval_duration": 431084000,
+        "eval_duration": 31774754000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.877,
+      "prompt_chars": 7679,
+      "response_chars": 536,
+      "usage": {
+        "prompt_eval_count": 2174,
+        "eval_count": 150,
+        "total_duration": 4847054900,
+        "prompt_eval_duration": 1031381000,
+        "eval_duration": 3271998000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.326,
+      "prompt_chars": 2775,
+      "response_chars": 201,
+      "usage": {
+        "prompt_eval_count": 911,
+        "eval_count": 59,
+        "total_duration": 10321528000,
+        "prompt_eval_duration": 636779000,
+        "eval_duration": 1189860000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Quiet Riot",
+      "title": "Cum On Feel The Noize",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Quiet Riot - Cum On Feel The Noize - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "big 70s glam hard-rock crunch with bright upper mids",
+      "signalChainSummary": "A crunchy, mid-focused signal chain using a Plexi-style amp model, Red Haze fuzz for bite, and a 4x12 cab to capture the classic 70s hard rock sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide a slight, biting overdrive edge (fuzz-crunch) without sounding modern or scooped.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate the classic Plexi/Marshall boost character required for 70s rock bite.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative, but Green OD often captures the specific mid-range punch of this era better."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add the required 'slight fuzz-crunch edge' and bright attack without excessive modern saturation.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi style amp foundation for 70s hard rock.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Also suitable, but UK SLP often provides a slightly more open and aggressive mid-range needed for this specific genre."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required '4x12 British cab feel' and classic rock voicing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Enhance the bright upper mids and tighten the power chords as requested.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "N/A"
+          },
+          "purpose": "Included as a potential option (though the verdict suggests dropping wah), it is kept in the chain for versatility.",
+          "matchQuality": "close",
+          "gap": "The verdict explicitly recommends 'drop wah', so this module should be bypassed or used minimally.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3"
+          },
+          "purpose": "Used minimally for subtle thickening if needed, but kept off to avoid ambient delay/washy sound.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "1"
+          },
+          "purpose": "Kept off to avoid 'ambient delay' as per the verdict.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "3"
+          },
+          "purpose": "Add a subtle sense of space without becoming overly ambient or muddy.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "big 70s glam hard-rock crunch with bright upper mids",
+      "mustHave": [
+        "tight power chords",
+        "slight fuzz-crunch edge",
+        "bright, biting attack",
+        "4x12 British cab feel"
+      ],
+      "avoid": [
+        "mid-scooped metal",
+        "clean tones",
+        "ambient delay"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style amp",
+        "humbucker electric",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop lead-tone focus",
+        "keep it crunchy, not high-gain modern"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "glam metal",
+        "classic rock",
+        "70s"
+      ],
+      "targetTone": "big 70s glam hard-rock crunch with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to nail the classic 70s hard rock sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British 4x12 IR (e.g., Marshall/Marshall Plexi)",
+          "reason": "Enhance the specific vintage character and mid-range punch of a classic 70s rock cab.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1144,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

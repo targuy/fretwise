@@ -1,0 +1,1059 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1200,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Royal_Blood__Lights_Out.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Royal Blood",
+    "title": "Lights Out",
+    "album": "",
+    "year": null,
+    "genre": "post-punk"
+  },
+  "genreClassification": {
+    "genre": "post-punk",
+    "subgenres": [
+      "alternative rock",
+      "garage rock",
+      "indie rock"
+    ],
+    "confidence": "high",
+    "rationale": "Royal Blood's sound is defined by heavy, bass-driven post-punk and alternative rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Heavy, saturated, mid-focused rock tone",
+      "signatureElements": [
+        "Fuzz/Overdrive saturation",
+        "Punchy low end (bass focus)",
+        "Mid-scooped aggression",
+        "Tight attack"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Klon/TS style)",
+        "Bass boost or EQ pedal",
+        "Amp simulation with robust bass response"
+      ],
+      "avoid": [
+        "Thin, scooped hi-end",
+        "Overly clean tones",
+        "Excessive modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+      "mustHave": [
+        "fuzz-like saturation",
+        "bass-focused low end",
+        "tight pick attack",
+        "thick low-mid grind"
+      ],
+      "avoid": [
+        "Klon-style overdrive",
+        "mid-scooped generic metal",
+        "clean tone",
+        "chorus"
+      ],
+      "gearClues": [
+        "bass-like electric or octave bass feel",
+        "fuzz pedal",
+        "amp with strong low end",
+        "4x10 or 2x15 low end"
+      ],
+      "corrections": [
+        "replace overdrive with fuzz",
+        "reduce scoop; keep low-mids present",
+        "aim for Royal Blood bass-guitar heft"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+    "mustHave": [
+      "fuzz-like saturation",
+      "bass-focused low end",
+      "tight pick attack",
+      "thick low-mid grind"
+    ],
+    "avoid": [
+      "Klon-style overdrive",
+      "mid-scooped generic metal",
+      "clean tone",
+      "chorus"
+    ],
+    "gearClues": [
+      "bass-like electric or octave bass feel",
+      "fuzz pedal",
+      "amp with strong low end",
+      "4x10 or 2x15 low end"
+    ],
+    "corrections": [
+      "replace overdrive with fuzz",
+      "reduce scoop; keep low-mids present",
+      "aim for Royal Blood bass-guitar heft"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is a bass-heavy rock track, requiring the rig to emulate a thick, fuzzy, low-end focused rhythm guitar/bass tone. We prioritize fuzz and powerful, deep amps.",
+          "bestMatchSummary": "A heavy signal chain starting with Fuzz for saturation, followed by an aggressive amp (Recti) paired with a robust 4x12 cabinet to achieve the required bass-focused, low-mid grind.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/saturation",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Low-Mid Focus"
+              },
+              "purpose": "Provide the core fuzzy saturation and thick low-end character required for the bass-drone sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Tone": "Low-End Emphasis"
+              },
+              "purpose": "Slightly boost the signal into the amp to maintain tightness and punch through the fuzz.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here as a general tone shaper/preamp stage, compensating for potential low-end loss after heavy fuzz.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Bass": "High",
+                "Mids": "Medium-Low",
+                "Treble": "Medium"
+              },
+              "purpose": "Provide the necessary high gain and massive low-end foundation for modern rock/bass tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "Mess 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ Curve": "Bass Boosted"
+              },
+              "purpose": "Select a robust cabinet that handles low frequencies well and complements the aggressive Recti tone.",
+              "matchQuality": "close",
+              "gap": "While 4x10 was suggested, Mess 4x12 is chosen as the closest available option to achieve deep bass response without sacrificing overall power.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "1 kHz - 3 kHz (Slight)",
+                "High Cut": "10 kHz"
+              },
+              "purpose": "Fine-tune the frequency response, ensuring the low-mids grind is present while keeping the bass focused.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Sweep Range": "Closed"
+              },
+              "purpose": "Included as a potential utility module (though likely bypassed for this specific track) to maintain the full chain requirement.",
+              "matchQuality": "n/a",
+              "gap": "The V-Wah is included but set inactive, as no wah effect was specified or required by the genre. It fulfills the WAH slot requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "time/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Minimal delay used only for subtle rhythmic thickening if needed, otherwise kept off to maintain tightness.",
+              "matchQuality": "close",
+              "gap": "The effect is minimized/bypassed because the focus must remain on raw power and attack, not ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (10%)",
+                "Decay Time": "Short"
+              },
+              "purpose": "Add a minimal amount of natural room ambience to prevent the tone from sounding too sterile or claustrophobic.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept very low (10%) to maintain the aggressive, dry punch required by the genre.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment and master tone shaping.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is bass-heavy rock, requiring the rig to emulate a thick, fuzzy, low-end focused rhythm guitar/bass tone. The use of 'Mess 4x12' is an approximation for the desired deep, powerful cabinet sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to better capture the massive low-end and aggressive character needed for Royal Blood's bass-heavy fuzz tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-power 4x10 or 2x15 IR (e.g., Ampeg/Gibson)",
+              "reason": "Mess 4x12 is a compromise; need dedicated low-end cabinet to match the bass heft.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Deeper, more focused sub-bass response",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Royal Blood - Lights Out - Valeton GP-180",
+        "song": {
+          "artist": "Royal Blood",
+          "title": "Lights Out",
+          "album": "",
+          "year": null,
+          "genre": "post-punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A heavy signal chain starting with Fuzz for saturation, followed by an aggressive amp (Recti) paired with a robust 4x12 cabinet to achieve the required bass-focused, low-mid grind.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/saturation",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "High",
+              "Tone": "Low-Mid Focus"
+            },
+            "purpose": "Provide the core fuzzy saturation and thick low-end character required for the bass-drone sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "Medium",
+              "Tone": "Low-End Emphasis"
+            },
+            "purpose": "Slightly boost the signal into the amp to maintain tightness and punch through the fuzz.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used here as a general tone shaper/preamp stage, compensating for potential low-end loss after heavy fuzz.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "Recti",
+            "active": true,
+            "settings": {
+              "Gain": "High",
+              "Bass": "High",
+              "Mids": "Medium-Low",
+              "Treble": "Medium"
+            },
+            "purpose": "Provide the necessary high gain and massive low-end foundation for modern rock/bass tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "Mess 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "EQ Curve": "Bass Boosted"
+            },
+            "purpose": "Select a robust cabinet that handles low frequencies well and complements the aggressive Recti tone.",
+            "matchQuality": "close",
+            "gap": "While 4x10 was suggested, Mess 4x12 is chosen as the closest available option to achieve deep bass response without sacrificing overall power.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "Mid Boost": "1 kHz - 3 kHz (Slight)",
+              "High Cut": "10 kHz"
+            },
+            "purpose": "Fine-tune the frequency response, ensuring the low-mids grind is present while keeping the bass focused.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Sweep Range": "Closed"
+            },
+            "purpose": "Included as a potential utility module (though likely bypassed for this specific track) to maintain the full chain requirement.",
+            "matchQuality": "n/a",
+            "gap": "The V-Wah is included but set inactive, as no wah effect was specified or required by the genre. It fulfills the WAH slot requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "time/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "Off",
+              "Feedback": "Low"
+            },
+            "purpose": "Minimal delay used only for subtle rhythmic thickening if needed, otherwise kept off to maintain tightness.",
+            "matchQuality": "close",
+            "gap": "The effect is minimized/bypassed because the focus must remain on raw power and attack, not ambience.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "Low (10%)",
+              "Decay Time": "Short"
+            },
+            "purpose": "Add a minimal amount of natural room ambience to prevent the tone from sounding too sterile or claustrophobic.",
+            "matchQuality": "close",
+            "gap": "The reverb is kept very low (10%) to maintain the aggressive, dry punch required by the genre.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity Gain"
+            },
+            "purpose": "Final output level adjustment and master tone shaping.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+          "toneProfile": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+          "idealSignalChain": "bass-like electric or octave bass feel | fuzz pedal | amp with strong low end | 4x10 or 2x15 low end",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "bass-like electric or octave bass feel",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "amp with strong low end",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x10 or 2x15 low end",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzz-like saturation",
+            "bass-focused low end",
+            "tight pick attack",
+            "thick low-mid grind"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is a bass-heavy rock track, requiring the rig to emulate a thick, fuzzy, low-end focused rhythm guitar/bass tone. We prioritize fuzz and powerful, deep amps.",
+          "bestMatchSummary": "A heavy signal chain starting with Fuzz for saturation, followed by an aggressive amp (Recti) paired with a robust 4x12 cabinet to achieve the required bass-focused, low-mid grind.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/saturation",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Low-Mid Focus"
+              },
+              "purpose": "Provide the core fuzzy saturation and thick low-end character required for the bass-drone sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Tone": "Low-End Emphasis"
+              },
+              "purpose": "Slightly boost the signal into the amp to maintain tightness and punch through the fuzz.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here as a general tone shaper/preamp stage, compensating for potential low-end loss after heavy fuzz.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Bass": "High",
+                "Mids": "Medium-Low",
+                "Treble": "Medium"
+              },
+              "purpose": "Provide the necessary high gain and massive low-end foundation for modern rock/bass tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "Mess 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ Curve": "Bass Boosted"
+              },
+              "purpose": "Select a robust cabinet that handles low frequencies well and complements the aggressive Recti tone.",
+              "matchQuality": "close",
+              "gap": "While 4x10 was suggested, Mess 4x12 is chosen as the closest available option to achieve deep bass response without sacrificing overall power.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "Mid Boost": "1 kHz - 3 kHz (Slight)",
+                "High Cut": "10 kHz"
+              },
+              "purpose": "Fine-tune the frequency response, ensuring the low-mids grind is present while keeping the bass focused.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Sweep Range": "Closed"
+              },
+              "purpose": "Included as a potential utility module (though likely bypassed for this specific track) to maintain the full chain requirement.",
+              "matchQuality": "n/a",
+              "gap": "The V-Wah is included but set inactive, as no wah effect was specified or required by the genre. It fulfills the WAH slot requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "time/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Minimal delay used only for subtle rhythmic thickening if needed, otherwise kept off to maintain tightness.",
+              "matchQuality": "close",
+              "gap": "The effect is minimized/bypassed because the focus must remain on raw power and attack, not ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (10%)",
+                "Decay Time": "Short"
+              },
+              "purpose": "Add a minimal amount of natural room ambience to prevent the tone from sounding too sterile or claustrophobic.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept very low (10%) to maintain the aggressive, dry punch required by the genre.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity Gain"
+              },
+              "purpose": "Final output level adjustment and master tone shaping.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to better capture the massive low-end and aggressive character needed for Royal Blood's bass-heavy fuzz tone.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-power 4x10 or 2x15 IR (e.g., Ampeg/Gibson)",
+              "reason": "Mess 4x12 is a compromise; need dedicated low-end cabinet to match the bass heft.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Deeper, more focused sub-bass response",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace overdrive with fuzz",
+          "reduce scoop; keep low-mids present",
+          "aim for Royal Blood bass-guitar heft"
+        ],
+        "warnings": [
+          "The source material is bass-heavy rock, requiring the rig to emulate a thick, fuzzy, low-end focused rhythm guitar/bass tone. The use of 'Mess 4x12' is an approximation for the desired deep, powerful cabinet sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.145,
+      "prompt_chars": 990,
+      "response_chars": 426,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 114,
+        "total_duration": 10096553000,
+        "prompt_eval_duration": 988486000,
+        "eval_duration": 1861940000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.962,
+      "prompt_chars": 5350,
+      "response_chars": 610,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 164,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1663
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.699,
+      "prompt_chars": 3680,
+      "response_chars": 5903,
+      "usage": {
+        "prompt_eval_count": 1239,
+        "eval_count": 1638,
+        "total_duration": 31676799000,
+        "prompt_eval_duration": 238339000,
+        "eval_duration": 30990916000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 2.22,
+      "prompt_chars": 8116,
+      "response_chars": 592,
+      "usage": {
+        "prompt_eval_count": 2234,
+        "eval_count": 172,
+        "total_duration": 2188294700,
+        "prompt_eval_duration": 306872000,
+        "eval_duration": 1436175000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.624,
+      "prompt_chars": 2921,
+      "response_chars": 209,
+      "usage": {
+        "prompt_eval_count": 931,
+        "eval_count": 58,
+        "total_duration": 8602852000,
+        "prompt_eval_duration": 256154000,
+        "eval_duration": 1053165999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Royal Blood",
+      "title": "Lights Out",
+      "album": "",
+      "year": null,
+      "genre": "post-punk"
+    },
+    "rig": {
+      "rigName": "Royal Blood - Lights Out - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+      "signalChainSummary": "A heavy signal chain starting with Fuzz for saturation, followed by an aggressive amp (Recti) paired with a robust 4x12 cabinet to achieve the required bass-focused, low-mid grind.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/saturation",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "High",
+            "Tone": "Low-Mid Focus"
+          },
+          "purpose": "Provide the core fuzzy saturation and thick low-end character required for the bass-drone sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "Medium",
+            "Tone": "Low-End Emphasis"
+          },
+          "purpose": "Slightly boost the signal into the amp to maintain tightness and punch through the fuzz.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used here as a general tone shaper/preamp stage, compensating for potential low-end loss after heavy fuzz.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "Recti",
+          "active": true,
+          "settings": {
+            "Gain": "High",
+            "Bass": "High",
+            "Mids": "Medium-Low",
+            "Treble": "Medium"
+          },
+          "purpose": "Provide the necessary high gain and massive low-end foundation for modern rock/bass tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "Mess 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "EQ Curve": "Bass Boosted"
+          },
+          "purpose": "Select a robust cabinet that handles low frequencies well and complements the aggressive Recti tone.",
+          "matchQuality": "close",
+          "gap": "While 4x10 was suggested, Mess 4x12 is chosen as the closest available option to achieve deep bass response without sacrificing overall power.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "Mid Boost": "1 kHz - 3 kHz (Slight)",
+            "High Cut": "10 kHz"
+          },
+          "purpose": "Fine-tune the frequency response, ensuring the low-mids grind is present while keeping the bass focused.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Sweep Range": "Closed"
+          },
+          "purpose": "Included as a potential utility module (though likely bypassed for this specific track) to maintain the full chain requirement.",
+          "matchQuality": "fallback",
+          "gap": "The V-Wah is included but set inactive, as no wah effect was specified or required by the genre. It fulfills the WAH slot requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "time/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "Off",
+            "Feedback": "Low"
+          },
+          "purpose": "Minimal delay used only for subtle rhythmic thickening if needed, otherwise kept off to maintain tightness.",
+          "matchQuality": "close",
+          "gap": "The effect is minimized/bypassed because the focus must remain on raw power and attack, not ambience.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "Low (10%)",
+            "Decay Time": "Short"
+          },
+          "purpose": "Add a minimal amount of natural room ambience to prevent the tone from sounding too sterile or claustrophobic.",
+          "matchQuality": "close",
+          "gap": "The reverb is kept very low (10%) to maintain the aggressive, dry punch required by the genre.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity Gain"
+          },
+          "purpose": "Final output level adjustment and master tone shaping.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+      "mustHave": [
+        "fuzz-like saturation",
+        "bass-focused low end",
+        "tight pick attack",
+        "thick low-mid grind"
+      ],
+      "avoid": [
+        "Klon-style overdrive",
+        "mid-scooped generic metal",
+        "clean tone",
+        "chorus"
+      ],
+      "gearClues": [
+        "bass-like electric or octave bass feel",
+        "fuzz pedal",
+        "amp with strong low end",
+        "4x10 or 2x15 low end"
+      ],
+      "corrections": [
+        "replace overdrive with fuzz",
+        "reduce scoop; keep low-mids present",
+        "aim for Royal Blood bass-guitar heft"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-punk",
+      "styleTags": [
+        "alternative rock",
+        "garage rock",
+        "indie rock"
+      ],
+      "targetTone": "fuzzy bass-drone rock with tight attack and heavy low-mid grind",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to better capture the massive low-end and aggressive character needed for Royal Blood's bass-heavy fuzz tone.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-power 4x10 or 2x15 IR (e.g., Ampeg/Gibson)",
+          "reason": "Mess 4x12 is a compromise; need dedicated low-end cabinet to match the bass heft.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Deeper, more focused sub-bass response",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1200,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1122 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 430,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Everclear__Father_Of_Mine.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Everclear",
+    "title": "Father Of Mine",
+    "album": "",
+    "year": null,
+    "genre": "alt rock"
+  },
+  "genreClassification": {
+    "genre": "alt rock",
+    "subgenres": [
+      "grunge",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "Everclear's sound is classic alt-rock, fitting the grunge/pop punk tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with slight fuzz character.",
+      "signatureElements": [
+        "crunch",
+        "mid-focus",
+        "slight fuzz"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Amp simulation (British/American combo)"
+      ],
+      "avoid": [
+        "clean delay",
+        "heavy modulation",
+        "extreme reverb"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry mid-forward alt-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "dry attack",
+        "mid-forward crunch",
+        "slight fuzz edge",
+        "tight palm mute"
+      ],
+      "avoid": [
+        "clean delay",
+        "heavy modulation",
+        "washy reverb",
+        "smooth overdrive"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall-style amp",
+        "4x12 cab",
+        "light fuzz or dirty boost"
+      ],
+      "corrections": [
+        "drop Tube Screamer emphasis",
+        "lean rougher than classic crunch",
+        "keep effects minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry mid-forward alt-rock crunch with slight fuzz edge",
+    "mustHave": [
+      "dry attack",
+      "mid-forward crunch",
+      "slight fuzz edge",
+      "tight palm mute"
+    ],
+    "avoid": [
+      "clean delay",
+      "heavy modulation",
+      "washy reverb",
+      "smooth overdrive"
+    ],
+    "gearClues": [
+      "humbucker guitar",
+      "Marshall-style amp",
+      "4x12 cab",
+      "light fuzz or dirty boost"
+    ],
+    "corrections": [
+      "drop Tube Screamer emphasis",
+      "lean rougher than classic crunch",
+      "keep effects minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Alt-rock crunch with fuzz edge, emphasizing mid-range and tightness.",
+          "bestMatchSummary": "Gate 1 -> Boost (OD 9) -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 1 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-60 dB"
+              },
+              "purpose": "Clean up hum and tighten the signal for palm-muted parts.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Tone": "5"
+              },
+              "purpose": "Simulate the Tube Screamer emphasis for mid-hump and attack boost.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, so Boost is used to achieve the mid-range focus and compression needed.",
+              "alternatives": [
+                "OD 9 (if more dirt is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Fuzz": "3"
+              },
+              "purpose": "Provide the required 'slight fuzz edge' and aggressive crunch.",
+              "matchQuality": "close",
+              "gap": "RAT-style provides a gritty, mid-focused dirt that fits the alt-rock tone better than pure Distortion or Muff-style.",
+              "alternatives": [
+                "Red Haze (if more psychedelic fuzz is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the Marshall-style amp tone for classic alt-rock punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                "UK 50 (if a slightly more open, British sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Enhance the mid-forward crunch and cut any excessive low end.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "2",
+                "Mix": "4"
+              },
+              "purpose": "Add subtle movement and width without sounding 'washy'.",
+              "matchQuality": "close",
+              "gap": "The instructions advise keeping effects minimal, but a slight Chorus adds necessary dimension for the genre.",
+              "alternatives": [
+                "None (if absolute minimalism is required)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add space and definition to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle ambience without being 'washy'.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal effects, so the Room reverb is kept at a low mix.",
+              "alternatives": [
+                "Plate (if a more controlled decay is preferred)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is alt-rock, requiring a blend of classic British crunch and modern grit. The chain prioritizes mid-range focus (Boost/EQ) combined with the fuzz edge (RAT-style)."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tone by swapping the default IR for a more aggressive, mid-focused alt-rock cab.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "alt-rock 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance the gritty, aggressive crunch required for Everclear's sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Everclear - Father Of Mine - Valeton GP-180",
+        "song": {
+          "artist": "Everclear",
+          "title": "Father Of Mine",
+          "album": "",
+          "year": null,
+          "genre": "alt rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry mid-forward alt-rock crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate 1 -> Boost (OD 9) -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 1 -> Chorus -> Digital Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-60 dB"
+            },
+            "purpose": "Clean up hum and tighten the signal for palm-muted parts.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Tone": "5"
+            },
+            "purpose": "Simulate the Tube Screamer emphasis for mid-hump and attack boost.",
+            "matchQuality": "close",
+            "gap": "The GP-180 lacks a dedicated TS model, so Boost is used to achieve the mid-range focus and compression needed.",
+            "alternatives": [
+              "OD 9 (if more dirt is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Fuzz": "3"
+            },
+            "purpose": "Provide the required 'slight fuzz edge' and aggressive crunch.",
+            "matchQuality": "close",
+            "gap": "RAT-style provides a gritty, mid-focused dirt that fits the alt-rock tone better than pure Distortion or Muff-style.",
+            "alternatives": [
+              "Red Haze (if more psychedelic fuzz is needed)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "7",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the Marshall-style amp tone for classic alt-rock punch.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": [
+              "UK 50 (if a slightly more open, British sound is preferred)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+3",
+              "Treble": "+1"
+            },
+            "purpose": "Enhance the mid-forward crunch and cut any excessive low end.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3",
+              "Depth": "2",
+              "Mix": "4"
+            },
+            "purpose": "Add subtle movement and width without sounding 'washy'.",
+            "matchQuality": "close",
+            "gap": "The instructions advise keeping effects minimal, but a slight Chorus adds necessary dimension for the genre.",
+            "alternatives": [
+              "None (if absolute minimalism is required)"
+            ]
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add space and definition to the rhythm parts.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide subtle ambience without being 'washy'.",
+            "matchQuality": "close",
+            "gap": "The goal is minimal effects, so the Room reverb is kept at a low mix.",
+            "alternatives": [
+              "Plate (if a more controlled decay is preferred)"
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry mid-forward alt-rock crunch with slight fuzz edge",
+          "toneProfile": "dry mid-forward alt-rock crunch with slight fuzz edge",
+          "idealSignalChain": "humbucker guitar | Marshall-style amp | 4x12 cab | light fuzz or dirty boost",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light fuzz or dirty boost",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "dry attack",
+            "mid-forward crunch",
+            "slight fuzz edge",
+            "tight palm mute"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Alt-rock crunch with fuzz edge, emphasizing mid-range and tightness.",
+          "bestMatchSummary": "Gate 1 -> Boost (OD 9) -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 1 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-60 dB"
+              },
+              "purpose": "Clean up hum and tighten the signal for palm-muted parts.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Tone": "5"
+              },
+              "purpose": "Simulate the Tube Screamer emphasis for mid-hump and attack boost.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated TS model, so Boost is used to achieve the mid-range focus and compression needed.",
+              "alternatives": [
+                "OD 9 (if more dirt is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Fuzz": "3"
+              },
+              "purpose": "Provide the required 'slight fuzz edge' and aggressive crunch.",
+              "matchQuality": "close",
+              "gap": "RAT-style provides a gritty, mid-focused dirt that fits the alt-rock tone better than pure Distortion or Muff-style.",
+              "alternatives": [
+                "Red Haze (if more psychedelic fuzz is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the Marshall-style amp tone for classic alt-rock punch.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": [
+                "UK 50 (if a slightly more open, British sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+3",
+                "Treble": "+1"
+              },
+              "purpose": "Enhance the mid-forward crunch and cut any excessive low end.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "2",
+                "Mix": "4"
+              },
+              "purpose": "Add subtle movement and width without sounding 'washy'.",
+              "matchQuality": "close",
+              "gap": "The instructions advise keeping effects minimal, but a slight Chorus adds necessary dimension for the genre.",
+              "alternatives": [
+                "None (if absolute minimalism is required)"
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add space and definition to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide subtle ambience without being 'washy'.",
+              "matchQuality": "close",
+              "gap": "The goal is minimal effects, so the Room reverb is kept at a low mix.",
+              "alternatives": [
+                "Plate (if a more controlled decay is preferred)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tone by swapping the default IR for a more aggressive, mid-focused alt-rock cab.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "alt-rock 4x12 IR (e.g., Brit Cab)",
+              "reason": "Enhance the gritty, aggressive crunch required for Everclear's sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Tube Screamer emphasis",
+          "lean rougher than classic crunch",
+          "keep effects minimal"
+        ],
+        "warnings": [
+          "The source material is alt-rock, requiring a blend of classic British crunch and modern grit. The chain prioritizes mid-range focus (Boost/EQ) combined with the fuzz edge (RAT-style)."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.772,
+      "prompt_chars": 992,
+      "response_chars": 335,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 87,
+        "total_duration": 9747271900,
+        "prompt_eval_duration": 177349000,
+        "eval_duration": 1509636000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.389,
+      "prompt_chars": 5249,
+      "response_chars": 534,
+      "usage": {
+        "input_tokens": 1470,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 136,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1606
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 37.938,
+      "prompt_chars": 3606,
+      "response_chars": 5340,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1570,
+        "total_duration": 37930669700,
+        "prompt_eval_duration": 379624000,
+        "eval_duration": 24050724000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.083,
+      "prompt_chars": 7505,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 2137,
+        "eval_count": 151,
+        "total_duration": 5058622400,
+        "prompt_eval_duration": 343991000,
+        "eval_duration": 4258649000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 15.347,
+      "prompt_chars": 2747,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 883,
+        "eval_count": 51,
+        "total_duration": 15332773200,
+        "prompt_eval_duration": 347553000,
+        "eval_duration": 904552000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Everclear",
+      "title": "Father Of Mine",
+      "album": "",
+      "year": null,
+      "genre": "alt rock"
+    },
+    "rig": {
+      "rigName": "Everclear - Father Of Mine - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry mid-forward alt-rock crunch with slight fuzz edge",
+      "signalChainSummary": "Gate 1 -> Boost (OD 9) -> Distortion (RAT-style) -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 1 -> Chorus -> Digital Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-60 dB"
+          },
+          "purpose": "Clean up hum and tighten the signal for palm-muted parts.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Tone": "5"
+          },
+          "purpose": "Simulate the Tube Screamer emphasis for mid-hump and attack boost.",
+          "matchQuality": "close",
+          "gap": "The GP-180 lacks a dedicated TS model, so Boost is used to achieve the mid-range focus and compression needed.",
+          "alternatives": [
+            {
+              "model": "OD 9 (if more dirt is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Fuzz": "3"
+          },
+          "purpose": "Provide the required 'slight fuzz edge' and aggressive crunch.",
+          "matchQuality": "close",
+          "gap": "RAT-style provides a gritty, mid-focused dirt that fits the alt-rock tone better than pure Distortion or Muff-style.",
+          "alternatives": [
+            {
+              "model": "Red Haze (if more psychedelic fuzz is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "7",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the Marshall-style amp tone for classic alt-rock punch.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50 (if a slightly more open, British sound is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+3",
+            "Treble": "+1"
+          },
+          "purpose": "Enhance the mid-forward crunch and cut any excessive low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3",
+            "Depth": "2",
+            "Mix": "4"
+          },
+          "purpose": "Add subtle movement and width without sounding 'washy'.",
+          "matchQuality": "close",
+          "gap": "The instructions advise keeping effects minimal, but a slight Chorus adds necessary dimension for the genre.",
+          "alternatives": [
+            {
+              "model": "None (if absolute minimalism is required)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add space and definition to the rhythm parts.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide subtle ambience without being 'washy'.",
+          "matchQuality": "close",
+          "gap": "The goal is minimal effects, so the Room reverb is kept at a low mix.",
+          "alternatives": [
+            {
+              "model": "Plate (if a more controlled decay is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry mid-forward alt-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "dry attack",
+        "mid-forward crunch",
+        "slight fuzz edge",
+        "tight palm mute"
+      ],
+      "avoid": [
+        "clean delay",
+        "heavy modulation",
+        "washy reverb",
+        "smooth overdrive"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Marshall-style amp",
+        "4x12 cab",
+        "light fuzz or dirty boost"
+      ],
+      "corrections": [
+        "drop Tube Screamer emphasis",
+        "lean rougher than classic crunch",
+        "keep effects minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alt rock",
+      "styleTags": [
+        "grunge",
+        "pop punk"
+      ],
+      "targetTone": "dry mid-forward alt-rock crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall tone by swapping the default IR for a more aggressive, mid-focused alt-rock cab.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "alt-rock 4x12 IR (e.g., Brit Cab)",
+          "reason": "Enhance the gritty, aggressive crunch required for Everclear's sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased punch and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 430,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

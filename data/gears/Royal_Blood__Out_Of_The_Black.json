@@ -1,0 +1,1095 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1201,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Royal_Blood__Out_Of_The_Black.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Royal Blood",
+    "title": "Out Of The Black",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "post-punk",
+      "garage rock",
+      "riff-rock"
+    ],
+    "confidence": "high",
+    "rationale": "Royal Blood specializes in heavy, fuzz-driven, riff-centric alternative/garage rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Heavy, saturated rock tone with a thick, aggressive fuzz foundation.",
+      "signatureElements": [
+        "Fuzz (primary)",
+        "Crunch/Overdrive (secondary)",
+        "High gain saturation",
+        "Punchy low end"
+      ],
+      "gearHypotheses": [
+        "High-gain tube amp simulation (e.g., Marshall JCM800 or Mesa Boogie Rectifier style)",
+        "Heavy fuzz pedal emulation (Big Muff, Tone Bender style)"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Wah effects",
+        "Modulation effects",
+        "Delay/Reverb overkill"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+      "mustHave": [
+        "primary fuzz",
+        "aggressive saturation",
+        "tight punch",
+        "raw riff attack"
+      ],
+      "avoid": [
+        "clean",
+        "chorus",
+        "long delay",
+        "washy reverb"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "Marshall-style amp",
+        "4x12 cab",
+        "single-coil or humbucker"
+      ],
+      "corrections": [
+        "drop generic high-gain lead framing",
+        "favor fuzz over overdrive",
+        "keep it dry and mono"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+    "mustHave": [
+      "primary fuzz",
+      "aggressive saturation",
+      "tight punch",
+      "raw riff attack"
+    ],
+    "avoid": [
+      "clean",
+      "chorus",
+      "long delay",
+      "washy reverb"
+    ],
+    "gearClues": [
+      "fuzz pedal",
+      "Marshall-style amp",
+      "4x12 cab",
+      "single-coil or humbucker"
+    ],
+    "corrections": [
+      "drop generic high-gain lead framing",
+      "favor fuzz over overdrive",
+      "keep it dry and mono"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on aggressive fuzz and tight, saturated rock tones.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) -> EQ -> Compression/Gate. Designed for raw, punchy riffing.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and tighten the riff attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Slightly boost the signal before fuzz to ensure maximum punch and definition.",
+              "matchQuality": "close",
+              "gap": "Using Boost for initial attack rather than a dedicated OD/Boost pedal.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed before the fuzz."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the primary thick, aggressive fuzz tone required for Royal Blood's style.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If the desired fuzz is more aggressive/metallic."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the punchy, mid-focused British rock sound (Marshall style) while maintaining fuzz integrity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50",
+                  "reason": "A slightly different British flavor if UK 45 is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary punchy low-mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "3",
+                "Treble": "1"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize gritty upper mids and control low end bloom.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/enhancement",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder for potential subtle movement; kept off to avoid washiness.",
+              "matchQuality": "n/a",
+              "gap": "The Chorus module is generally avoided per the 'avoid' list, but it occupies a slot and can be used if needed later.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Add minimal, natural room ambience without sounding washy or overly wet.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list suggests avoiding washy reverb; therefore, the mix and decay time are kept very low to maintain tightness.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "If a slightly more defined, less natural reverb is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "dynamics",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a high-gain, aggressive rock riff. The chain prioritizes fuzz and saturation over clean tones or complex effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance punchy low-mids and grit, crucial for Royal Blood's aggressive riffing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance punchy low-mids and grit for aggressive riffing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased tightness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Royal Blood - Out Of The Black - Valeton GP-180",
+        "song": {
+          "artist": "Royal Blood",
+          "title": "Out Of The Black",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) -> EQ -> Compression/Gate. Designed for raw, punchy riffing.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and tighten the riff attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "5"
+            },
+            "purpose": "Slightly boost the signal before fuzz to ensure maximum punch and definition.",
+            "matchQuality": "close",
+            "gap": "Using Boost for initial attack rather than a dedicated OD/Boost pedal.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If more grit is needed before the fuzz."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "7",
+              "Tone": "6",
+              "Output": "5"
+            },
+            "purpose": "Provide the primary thick, aggressive fuzz tone required for Royal Blood's style.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Red Haze",
+                "reason": "If the desired fuzz is more aggressive/metallic."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "7"
+            },
+            "purpose": "Simulate the punchy, mid-focused British rock sound (Marshall style) while maintaining fuzz integrity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 50",
+                "reason": "A slightly different British flavor if UK 45 is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound and necessary punchy low-mids.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1",
+              "Mid": "3",
+              "Treble": "1"
+            },
+            "purpose": "Fine-tune the frequency response to emphasize gritty upper mids and control low end bloom.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/enhancement",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Placeholder for potential subtle movement; kept off to avoid washiness.",
+            "matchQuality": "n/a",
+            "gap": "The Chorus module is generally avoided per the 'avoid' list, but it occupies a slot and can be used if needed later.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "10%",
+              "Decay Time": "2s"
+            },
+            "purpose": "Add minimal, natural room ambience without sounding washy or overly wet.",
+            "matchQuality": "close",
+            "gap": "The 'avoid' list suggests avoiding washy reverb; therefore, the mix and decay time are kept very low to maintain tightness.",
+            "alternatives": [
+              {
+                "module": "EQ/MOD/DLY/RVB/VOL",
+                "model": "Plate",
+                "reason": "If a slightly more defined, less natural reverb is preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "dynamics",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+          "toneProfile": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+          "idealSignalChain": "fuzz pedal | Marshall-style amp | 4x12 cab | single-coil or humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "primary fuzz",
+            "aggressive saturation",
+            "tight punch",
+            "raw riff attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on aggressive fuzz and tight, saturated rock tones.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) -> EQ -> Compression/Gate. Designed for raw, punchy riffing.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and tighten the riff attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "5"
+              },
+              "purpose": "Slightly boost the signal before fuzz to ensure maximum punch and definition.",
+              "matchQuality": "close",
+              "gap": "Using Boost for initial attack rather than a dedicated OD/Boost pedal.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed before the fuzz."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide the primary thick, aggressive fuzz tone required for Royal Blood's style.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If the desired fuzz is more aggressive/metallic."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the punchy, mid-focused British rock sound (Marshall style) while maintaining fuzz integrity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50",
+                  "reason": "A slightly different British flavor if UK 45 is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary punchy low-mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "3",
+                "Treble": "1"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize gritty upper mids and control low end bloom.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/enhancement",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder for potential subtle movement; kept off to avoid washiness.",
+              "matchQuality": "n/a",
+              "gap": "The Chorus module is generally avoided per the 'avoid' list, but it occupies a slot and can be used if needed later.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "10%",
+                "Decay Time": "2s"
+              },
+              "purpose": "Add minimal, natural room ambience without sounding washy or overly wet.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list suggests avoiding washy reverb; therefore, the mix and decay time are kept very low to maintain tightness.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "If a slightly more defined, less natural reverb is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "dynamics",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance punchy low-mids and grit, crucial for Royal Blood's aggressive riffing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30 style)",
+              "reason": "Enhance punchy low-mids and grit for aggressive riffing.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased tightness and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop generic high-gain lead framing",
+          "favor fuzz over overdrive",
+          "keep it dry and mono"
+        ],
+        "warnings": [
+          "The source material is a high-gain, aggressive rock riff. The chain prioritizes fuzz and saturation over clean tones or complex effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.275,
+      "prompt_chars": 996,
+      "response_chars": 479,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 122,
+        "total_duration": 10272174900,
+        "prompt_eval_duration": 483451000,
+        "eval_duration": 2233415000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.852,
+      "prompt_chars": 5409,
+      "response_chars": 515,
+      "usage": {
+        "input_tokens": 1508,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1649
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 32.052,
+      "prompt_chars": 3591,
+      "response_chars": 5369,
+      "usage": {
+        "prompt_eval_count": 1212,
+        "eval_count": 1558,
+        "total_duration": 32046796300,
+        "prompt_eval_duration": 540969000,
+        "eval_duration": 30986243000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 21.451,
+      "prompt_chars": 7513,
+      "response_chars": 547,
+      "usage": {
+        "prompt_eval_count": 2127,
+        "eval_count": 158,
+        "total_duration": 21444886500,
+        "prompt_eval_duration": 896646000,
+        "eval_duration": 3017271000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.247,
+      "prompt_chars": 2713,
+      "response_chars": 208,
+      "usage": {
+        "prompt_eval_count": 898,
+        "eval_count": 56,
+        "total_duration": 9231795100,
+        "prompt_eval_duration": 482313000,
+        "eval_duration": 938168000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Royal Blood",
+      "title": "Out Of The Black",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Royal Blood - Out Of The Black - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+      "signalChainSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) -> EQ -> Compression/Gate. Designed for raw, punchy riffing.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and tighten the riff attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "5"
+          },
+          "purpose": "Slightly boost the signal before fuzz to ensure maximum punch and definition.",
+          "matchQuality": "close",
+          "gap": "Using Boost for initial attack rather than a dedicated OD/Boost pedal.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more grit is needed before the fuzz."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "7",
+            "Tone": "6",
+            "Output": "5"
+          },
+          "purpose": "Provide the primary thick, aggressive fuzz tone required for Royal Blood's style.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "If the desired fuzz is more aggressive/metallic."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "7"
+          },
+          "purpose": "Simulate the punchy, mid-focused British rock sound (Marshall style) while maintaining fuzz integrity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly different British flavor if UK 45 is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound and necessary punchy low-mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1",
+            "Mid": "3",
+            "Treble": "1"
+          },
+          "purpose": "Fine-tune the frequency response to emphasize gritty upper mids and control low end bloom.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/enhancement",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Placeholder for potential subtle movement; kept off to avoid washiness.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus module is generally avoided per the 'avoid' list, but it occupies a slot and can be used if needed later.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "10%",
+            "Decay Time": "2s"
+          },
+          "purpose": "Add minimal, natural room ambience without sounding washy or overly wet.",
+          "matchQuality": "close",
+          "gap": "The 'avoid' list suggests avoiding washy reverb; therefore, the mix and decay time are kept very low to maintain tightness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more defined, less natural reverb is preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "dynamics",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+      "mustHave": [
+        "primary fuzz",
+        "aggressive saturation",
+        "tight punch",
+        "raw riff attack"
+      ],
+      "avoid": [
+        "clean",
+        "chorus",
+        "long delay",
+        "washy reverb"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "Marshall-style amp",
+        "4x12 cab",
+        "single-coil or humbucker"
+      ],
+      "corrections": [
+        "drop generic high-gain lead framing",
+        "favor fuzz over overdrive",
+        "keep it dry and mono"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "post-punk",
+        "garage rock",
+        "riff-rock"
+      ],
+      "targetTone": "thick fuzzed rock riff with gritty upper mids and punchy low end",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to enhance punchy low-mids and grit, crucial for Royal Blood's aggressive riffing.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-gain 4x12 (e.g., Celestion Greenback/V30 style)",
+          "reason": "Enhance punchy low-mids and grit for aggressive riffing.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased tightness and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1201,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

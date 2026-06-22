@@ -1,0 +1,1121 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1608,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Smiths__Bigmouth_Strikes_Again.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The Smiths",
+    "title": "Bigmouth Strikes Again",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "jangle pop",
+      "british indie",
+      "alternative"
+    ],
+    "confidence": "high",
+    "rationale": "The Smiths are foundational to the jangle-pop and British alternative scene."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "jangly, chiming jangle pop/indie rock tone",
+      "signatureElements": [
+        "clean",
+        "chorus",
+        "reverb",
+        "delay",
+        "bright"
+      ],
+      "gearHypotheses": [
+        "spring reverb simulation",
+        "modulation (chorus/vibrato)",
+        "high-headroom clean amp model",
+        "cab simulation (vintage British or American)"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "distortion",
+        "overdrive"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright trebly clean with slight bite and roomy splash",
+      "mustHave": [
+        "clean attack",
+        "bright upper mids",
+        "little/no gain",
+        "slap or short room",
+        "cutting lead edge"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "delay wash",
+        "fuzz",
+        "thick crunch"
+      ],
+      "gearClues": [
+        "Rickenbacker-style or bright single-coil",
+        "Vox/clean British amp",
+        "small combo or 2x12",
+        "spring or short room"
+      ],
+      "corrections": [
+        "remove chorus",
+        "keep it drier",
+        "add sharper bite",
+        "use lead-friendly bright clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright trebly clean with slight bite and roomy splash",
+    "mustHave": [
+      "clean attack",
+      "bright upper mids",
+      "little/no gain",
+      "slap or short room",
+      "cutting lead edge"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy reverb",
+      "delay wash",
+      "fuzz",
+      "thick crunch"
+    ],
+    "gearClues": [
+      "Rickenbacker-style or bright single-coil",
+      "Vox/clean British amp",
+      "small combo or 2x12",
+      "spring or short room"
+    ],
+    "corrections": [
+      "remove chorus",
+      "keep it drier",
+      "add sharper bite",
+      "use lead-friendly bright clean"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean British tones with added bite and room ambience.",
+          "bestMatchSummary": "A classic Brit twang setup using a clean combo amp (AC30 TB) paired with a slight boost/overdrive for bite, finished with short plate reverb and EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Add controlled bite and attack to the clean signal.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general tone shaping/edge enhancement, mimicking a subtle boost pedal's role in adding 'bite'.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could provide bite but might introduce too much grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the signal clean and transparent.",
+              "matchQuality": "exact",
+              "gap": "No dedicated drive is needed as the Boost module handles the required bite.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide the classic bright, British clean tone (Vox/Rickenbacker style).",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Too American; lacks the specific Brit twang."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone in a classic British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is chosen for its general British voicing, fitting the required clean/bright aesthetic.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Might be too dark or muddy."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "+2",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the bright upper mids and treble for cutting lead edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and focused.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Provide a short, controlled room splash and ambience without heavy reverb wash.",
+              "matchQuality": "close",
+              "gap": "Plate is used for its clean decay characteristics, mimicking the desired 'roomy splash' effect while avoiding excessive wetness.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "Could be too large or diffuse."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay wash as requested.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic British indie/rock sound. The rig focuses on achieving the bright, twangy clean tone characteristic of Rickenbacker-style guitars and Vox amps."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Swap the general British cabinet for a more specific, open-sounding IR to enhance the bright, cutting lead edge.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright single-coil 2x12 IR",
+              "reason": "Enhance Rickenbacker/single-coil brightness and cut.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Smiths - Bigmouth Strikes Again - Valeton GP-180",
+        "song": {
+          "artist": "The Smiths",
+          "title": "Bigmouth Strikes Again",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright trebly clean with slight bite and roomy splash",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic Brit twang setup using a clean combo amp (AC30 TB) paired with a slight boost/overdrive for bite, finished with short plate reverb and EQ shaping.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "5"
+            },
+            "purpose": "Add controlled bite and attack to the clean signal.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used for general tone shaping/edge enhancement, mimicking a subtle boost pedal's role in adding 'bite'.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "Could provide bite but might introduce too much grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the signal clean and transparent.",
+            "matchQuality": "exact",
+            "gap": "No dedicated drive is needed as the Boost module handles the required bite.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "6",
+              "Mid": "5",
+              "Bass": "4"
+            },
+            "purpose": "Provide the classic bright, British clean tone (Vox/Rickenbacker style).",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "Too American; lacks the specific Brit twang."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Ground the tone in a classic British cabinet sound.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is chosen for its general British voicing, fitting the required clean/bright aesthetic.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "Might be too dark or muddy."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1",
+              "Mid": "+2",
+              "Treble": "+3"
+            },
+            "purpose": "Enhance the bright upper mids and treble for cutting lead edge.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed; keep the tone direct and focused.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "1.5s"
+            },
+            "purpose": "Provide a short, controlled room splash and ambience without heavy reverb wash.",
+            "matchQuality": "close",
+            "gap": "Plate is used for its clean decay characteristics, mimicking the desired 'roomy splash' effect while avoiding excessive wetness.",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "Could be too large or diffuse."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay wash as requested.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright trebly clean with slight bite and roomy splash",
+          "toneProfile": "bright trebly clean with slight bite and roomy splash",
+          "idealSignalChain": "Rickenbacker-style or bright single-coil | Vox/clean British amp | small combo or 2x12 | spring or short room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rickenbacker-style or bright single-coil",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/clean British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo or 2x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring or short room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean attack",
+            "bright upper mids",
+            "little/no gain",
+            "slap or short room",
+            "cutting lead edge"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean British tones with added bite and room ambience.",
+          "bestMatchSummary": "A classic Brit twang setup using a clean combo amp (AC30 TB) paired with a slight boost/overdrive for bite, finished with short plate reverb and EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "5"
+              },
+              "purpose": "Add controlled bite and attack to the clean signal.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general tone shaping/edge enhancement, mimicking a subtle boost pedal's role in adding 'bite'.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "Could provide bite but might introduce too much grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the signal clean and transparent.",
+              "matchQuality": "exact",
+              "gap": "No dedicated drive is needed as the Boost module handles the required bite.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "6",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide the classic bright, British clean tone (Vox/Rickenbacker style).",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "Too American; lacks the specific Brit twang."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Ground the tone in a classic British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is chosen for its general British voicing, fitting the required clean/bright aesthetic.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Might be too dark or muddy."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "+2",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the bright upper mids and treble for cutting lead edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed; keep the tone direct and focused.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Provide a short, controlled room splash and ambience without heavy reverb wash.",
+              "matchQuality": "close",
+              "gap": "Plate is used for its clean decay characteristics, mimicking the desired 'roomy splash' effect while avoiding excessive wetness.",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "Could be too large or diffuse."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay wash as requested.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Swap the general British cabinet for a more specific, open-sounding IR to enhance the bright, cutting lead edge.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright single-coil 2x12 IR",
+              "reason": "Enhance Rickenbacker/single-coil brightness and cut.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "keep it drier",
+          "add sharper bite",
+          "use lead-friendly bright clean"
+        ],
+        "warnings": [
+          "The source material is a classic British indie/rock sound. The rig focuses on achieving the bright, twangy clean tone characteristic of Rickenbacker-style guitars and Vox amps."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.315,
+      "prompt_chars": 1001,
+      "response_chars": 369,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 104,
+        "total_duration": 10298437600,
+        "prompt_eval_duration": 477290000,
+        "eval_duration": 2255401000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.211,
+      "prompt_chars": 5322,
+      "response_chars": 577,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 156,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 31.447,
+      "prompt_chars": 3679,
+      "response_chars": 5413,
+      "usage": {
+        "prompt_eval_count": 1235,
+        "eval_count": 1552,
+        "total_duration": 31416385100,
+        "prompt_eval_duration": 543485000,
+        "eval_duration": 30357862000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 19.892,
+      "prompt_chars": 7649,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 2144,
+        "eval_count": 149,
+        "total_duration": 19871610800,
+        "prompt_eval_duration": 892713000,
+        "eval_duration": 2828324000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.311,
+      "prompt_chars": 2939,
+      "response_chars": 199,
+      "usage": {
+        "prompt_eval_count": 943,
+        "eval_count": 52,
+        "total_duration": 9284964200,
+        "prompt_eval_duration": 424822000,
+        "eval_duration": 872881000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Smiths",
+      "title": "Bigmouth Strikes Again",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "The Smiths - Bigmouth Strikes Again - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright trebly clean with slight bite and roomy splash",
+      "signalChainSummary": "A classic Brit twang setup using a clean combo amp (AC30 TB) paired with a slight boost/overdrive for bite, finished with short plate reverb and EQ shaping.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "5"
+          },
+          "purpose": "Add controlled bite and attack to the clean signal.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used for general tone shaping/edge enhancement, mimicking a subtle boost pedal's role in adding 'bite'.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "Could provide bite but might introduce too much grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the signal clean and transparent.",
+          "matchQuality": "exact",
+          "gap": "No dedicated drive is needed as the Boost module handles the required bite.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "6",
+            "Mid": "5",
+            "Bass": "4"
+          },
+          "purpose": "Provide the classic bright, British clean tone (Vox/Rickenbacker style).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "Too American; lacks the specific Brit twang."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Ground the tone in a classic British cabinet sound.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is chosen for its general British voicing, fitting the required clean/bright aesthetic.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "Might be too dark or muddy."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1",
+            "Mid": "+2",
+            "Treble": "+3"
+          },
+          "purpose": "Enhance the bright upper mids and treble for cutting lead edge.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed; keep the tone direct and focused.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "1.5s"
+          },
+          "purpose": "Provide a short, controlled room splash and ambience without heavy reverb wash.",
+          "matchQuality": "close",
+          "gap": "Plate is used for its clean decay characteristics, mimicking the desired 'roomy splash' effect while avoiding excessive wetness.",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "Could be too large or diffuse."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay wash as requested.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright trebly clean with slight bite and roomy splash",
+      "mustHave": [
+        "clean attack",
+        "bright upper mids",
+        "little/no gain",
+        "slap or short room",
+        "cutting lead edge"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "delay wash",
+        "fuzz",
+        "thick crunch"
+      ],
+      "gearClues": [
+        "Rickenbacker-style or bright single-coil",
+        "Vox/clean British amp",
+        "small combo or 2x12",
+        "spring or short room"
+      ],
+      "corrections": [
+        "remove chorus",
+        "keep it drier",
+        "add sharper bite",
+        "use lead-friendly bright clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "jangle pop",
+        "british indie",
+        "alternative"
+      ],
+      "targetTone": "bright trebly clean with slight bite and roomy splash",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Swap the general British cabinet for a more specific, open-sounding IR to enhance the bright, cutting lead edge.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "bright single-coil 2x12 IR",
+          "reason": "Enhance Rickenbacker/single-coil brightness and cut.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1608,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

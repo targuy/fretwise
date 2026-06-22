@@ -1,0 +1,1146 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1429,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Allman_Brothers_Band__Midnight_Rider.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Allman Brothers Band",
+    "title": "Midnight Rider",
+    "album": "",
+    "year": null,
+    "genre": "southern rock"
+  },
+  "genreClassification": {
+    "genre": "southern rock",
+    "subgenres": [
+      "blues rock",
+      "classic rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and song are foundational to the Southern rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bluesy, warm, slightly overdriven rock tone with a touch of grit.",
+      "signatureElements": [
+        "Sustain-rich lead lines",
+        "Warm mid-range focus",
+        "Subtle compression/overdrive boost",
+        "Dynamic clean to crunch transitions"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (mid-hump)",
+        "Spring reverb simulation",
+        "Amp model: Fender Deluxe or similar vintage tube amp sound",
+        "Delay (slapback or tape) for fills"
+      ],
+      "avoid": [
+        "High gain metal fuzz",
+        "Bright, scooped modern rock tones",
+        "Digital chorus/flanger effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry Southern rock clean-crunch with slight grit",
+      "mustHave": [
+        "acoustic-sounding intro feel",
+        "light edge-of-breakup",
+        "round mids",
+        "little or no ambience"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "heavy delay",
+        "metal gain"
+      ],
+      "gearClues": [
+        "clean combo amp",
+        "light OD",
+        "humbucker or single-coil"
+      ],
+      "corrections": [
+        "drop lead-sustain focus",
+        "drop slapback guess",
+        "keep it drier than blues rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry Southern rock clean-crunch with slight grit",
+    "mustHave": [
+      "acoustic-sounding intro feel",
+      "light edge-of-breakup",
+      "round mids",
+      "little or no ambience"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "heavy delay",
+      "metal gain"
+    ],
+    "gearClues": [
+      "clean combo amp",
+      "light OD",
+      "humbucker or single-coil"
+    ],
+    "corrections": [
+      "drop lead-sustain focus",
+      "drop slapback guess",
+      "keep it drier than blues rock"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Southern rock clean/crunch tone, prioritizing round mids and minimal ambience.",
+          "bestMatchSummary": "A warm, vintage signal chain using a light OD boost into a classic British combo amp (UK 50) with a dry cabinet to achieve the required clean-crunch sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the light edge-of-breakup and round mids required for clean-crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly warmer, vintage grit suitable for Southern rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A viable alternative if the desired tone leans more towards classic blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+              "matchQuality": "exact",
+              "gap": "The target tone is clean-crunch, making a separate high-gain pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Mid": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the classic, warm British combo amp sound (like a Fender or Vox style) for vintage character.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for clean-crunch tones and round mids. We avoid higher gain amps like Recti.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if the tone needs a more American/Fender character."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "The Vintage 4x12 offers a balanced, vintage voicing suitable for Southern rock.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A slightly more open sound if the tone needs to be brighter."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and bass to enhance the 'round' tone while keeping it focused.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the specific mid-range warmth required by the genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is needed for this specific clean-crunch tone.",
+              "matchQuality": "exact",
+              "gap": "The target sound does not call for a sweeping filter effect.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided per the 'avoid' list (chorus). Keeping this module inactive.",
+              "matchQuality": "exact",
+              "gap": "The target tone requires minimal ambience and specifically avoids chorus effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided per the 'avoid' list (heavy delay). Keeping this module inactive.",
+              "matchQuality": "exact",
+              "gap": "The target tone requires a dry sound and minimal ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without adding excessive ambience (dryer than blues rock).",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that suits Southern rock.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A viable alternative if a slightly brighter room sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard master volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone is designed to be dry and warm, so excessive reverb or delay should be avoided during performance."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more vintage-voiced option that better complements the Southern rock genre.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x10 IR",
+              "reason": "The current cabinet is too generic; a vintage-voiced option will enhance the warm, round mids.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more focused tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Allman Brothers Band - Midnight Rider - Valeton GP-180",
+        "song": {
+          "artist": "The Allman Brothers Band",
+          "title": "Midnight Rider",
+          "album": "",
+          "year": null,
+          "genre": "southern rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry Southern rock clean-crunch with slight grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A warm, vintage signal chain using a light OD boost into a classic British combo amp (UK 50) with a dry cabinet to achieve the required clean-crunch sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the light edge-of-breakup and round mids required for clean-crunch.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD for a slightly warmer, vintage grit suitable for Southern rock.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A viable alternative if the desired tone leans more towards classic blues."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+            "matchQuality": "exact",
+            "gap": "The target tone is clean-crunch, making a separate high-gain pedal unnecessary.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6/10",
+              "Treble": "7/10",
+              "Mid": "8/10",
+              "Bass": "6/10"
+            },
+            "purpose": "Simulate the classic, warm British combo amp sound (like a Fender or Vox style) for vintage character.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is ideal for clean-crunch tones and round mids. We avoid higher gain amps like Recti.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if the tone needs a more American/Fender character."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+            "matchQuality": "close",
+            "gap": "The Vintage 4x12 offers a balanced, vintage voicing suitable for Southern rock.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "A slightly more open sound if the tone needs to be brighter."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the mids and bass to enhance the 'round' tone while keeping it focused.",
+            "matchQuality": "close",
+            "gap": "Used for fine-tuning the specific mid-range warmth required by the genre.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah effect is needed for this specific clean-crunch tone.",
+            "matchQuality": "exact",
+            "gap": "The target sound does not call for a sweeping filter effect.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoided per the 'avoid' list (chorus). Keeping this module inactive.",
+            "matchQuality": "exact",
+            "gap": "The target tone requires minimal ambience and specifically avoids chorus effects.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoided per the 'avoid' list (heavy delay). Keeping this module inactive.",
+            "matchQuality": "exact",
+            "gap": "The target tone requires a dry sound and minimal ambience.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space without adding excessive ambience (dryer than blues rock).",
+            "matchQuality": "close",
+            "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that suits Southern rock.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A viable alternative if a slightly brighter room sound is desired."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "Standard master volume control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry Southern rock clean-crunch with slight grit",
+          "toneProfile": "dry Southern rock clean-crunch with slight grit",
+          "idealSignalChain": "clean combo amp | light OD | humbucker or single-coil",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean combo amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker or single-coil",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic-sounding intro feel",
+            "light edge-of-breakup",
+            "round mids",
+            "little or no ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Southern rock clean/crunch tone, prioritizing round mids and minimal ambience.",
+          "bestMatchSummary": "A warm, vintage signal chain using a light OD boost into a classic British combo amp (UK 50) with a dry cabinet to achieve the required clean-crunch sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the light edge-of-breakup and round mids required for clean-crunch.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for a slightly warmer, vintage grit suitable for Southern rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A viable alternative if the desired tone leans more towards classic blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+              "matchQuality": "exact",
+              "gap": "The target tone is clean-crunch, making a separate high-gain pedal unnecessary.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Mid": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the classic, warm British combo amp sound (like a Fender or Vox style) for vintage character.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for clean-crunch tones and round mids. We avoid higher gain amps like Recti.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if the tone needs a more American/Fender character."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "The Vintage 4x12 offers a balanced, vintage voicing suitable for Southern rock.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A slightly more open sound if the tone needs to be brighter."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and bass to enhance the 'round' tone while keeping it focused.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the specific mid-range warmth required by the genre.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is needed for this specific clean-crunch tone.",
+              "matchQuality": "exact",
+              "gap": "The target sound does not call for a sweeping filter effect.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided per the 'avoid' list (chorus). Keeping this module inactive.",
+              "matchQuality": "exact",
+              "gap": "The target tone requires minimal ambience and specifically avoids chorus effects.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided per the 'avoid' list (heavy delay). Keeping this module inactive.",
+              "matchQuality": "exact",
+              "gap": "The target tone requires a dry sound and minimal ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space without adding excessive ambience (dryer than blues rock).",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that suits Southern rock.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A viable alternative if a slightly brighter room sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard master volume control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more vintage-voiced option that better complements the Southern rock genre.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x10 IR",
+              "reason": "The current cabinet is too generic; a vintage-voiced option will enhance the warm, round mids.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more focused tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop lead-sustain focus",
+          "drop slapback guess",
+          "keep it drier than blues rock"
+        ],
+        "warnings": [
+          "The tone is designed to be dry and warm, so excessive reverb or delay should be avoided during performance."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.821,
+      "prompt_chars": 1007,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 136,
+        "total_duration": 10801941200,
+        "prompt_eval_duration": 339203000,
+        "eval_duration": 2746918000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.643,
+      "prompt_chars": 5501,
+      "response_chars": 494,
+      "usage": {
+        "input_tokens": 1526,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1660
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 33.109,
+      "prompt_chars": 3574,
+      "response_chars": 6265,
+      "usage": {
+        "prompt_eval_count": 1205,
+        "eval_count": 1738,
+        "total_duration": 33083510200,
+        "prompt_eval_duration": 300470000,
+        "eval_duration": 32300152000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.532,
+      "prompt_chars": 8420,
+      "response_chars": 601,
+      "usage": {
+        "prompt_eval_count": 2300,
+        "eval_count": 161,
+        "total_duration": 20518173600,
+        "prompt_eval_duration": 375538000,
+        "eval_duration": 2800600000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.318,
+      "prompt_chars": 2839,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 901,
+        "eval_count": 44,
+        "total_duration": 8314640600,
+        "prompt_eval_duration": 223252000,
+        "eval_duration": 319356000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Allman Brothers Band",
+      "title": "Midnight Rider",
+      "album": "",
+      "year": null,
+      "genre": "southern rock"
+    },
+    "rig": {
+      "rigName": "The Allman Brothers Band - Midnight Rider - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry Southern rock clean-crunch with slight grit",
+      "signalChainSummary": "A warm, vintage signal chain using a light OD boost into a classic British combo amp (UK 50) with a dry cabinet to achieve the required clean-crunch sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the light edge-of-breakup and round mids required for clean-crunch.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD for a slightly warmer, vintage grit suitable for Southern rock.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A viable alternative if the desired tone leans more towards classic blues."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No dedicated distortion needed; the Green OD provides sufficient grit.",
+          "matchQuality": "exact",
+          "gap": "The target tone is clean-crunch, making a separate high-gain pedal unnecessary.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6/10",
+            "Treble": "7/10",
+            "Mid": "8/10",
+            "Bass": "6/10"
+          },
+          "purpose": "Simulate the classic, warm British combo amp sound (like a Fender or Vox style) for vintage character.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is ideal for clean-crunch tones and round mids. We avoid higher gain amps like Recti.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if the tone needs a more American/Fender character."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the UK 50 amp model.",
+          "matchQuality": "close",
+          "gap": "The Vintage 4x12 offers a balanced, vintage voicing suitable for Southern rock.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "A slightly more open sound if the tone needs to be brighter."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the mids and bass to enhance the 'round' tone while keeping it focused.",
+          "matchQuality": "close",
+          "gap": "Used for fine-tuning the specific mid-range warmth required by the genre.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah effect is needed for this specific clean-crunch tone.",
+          "matchQuality": "exact",
+          "gap": "The target sound does not call for a sweeping filter effect.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoided per the 'avoid' list (chorus). Keeping this module inactive.",
+          "matchQuality": "exact",
+          "gap": "The target tone requires minimal ambience and specifically avoids chorus effects.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoided per the 'avoid' list (heavy delay). Keeping this module inactive.",
+          "matchQuality": "exact",
+          "gap": "The target tone requires a dry sound and minimal ambience.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space without adding excessive ambience (dryer than blues rock).",
+          "matchQuality": "close",
+          "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that suits Southern rock.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A viable alternative if a slightly brighter room sound is desired."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "Standard master volume control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry Southern rock clean-crunch with slight grit",
+      "mustHave": [
+        "acoustic-sounding intro feel",
+        "light edge-of-breakup",
+        "round mids",
+        "little or no ambience"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "heavy delay",
+        "metal gain"
+      ],
+      "gearClues": [
+        "clean combo amp",
+        "light OD",
+        "humbucker or single-coil"
+      ],
+      "corrections": [
+        "drop lead-sustain focus",
+        "drop slapback guess",
+        "keep it drier than blues rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "southern rock",
+      "styleTags": [
+        "blues rock",
+        "classic rock"
+      ],
+      "targetTone": "dry Southern rock clean-crunch with slight grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current IR for a more vintage-voiced option that better complements the Southern rock genre.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x10 IR",
+          "reason": "The current cabinet is too generic; a vintage-voiced option will enhance the warm, round mids.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more focused tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1429,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

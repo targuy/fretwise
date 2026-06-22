@@ -1,0 +1,1011 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1133,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Queen__Somebody_To_Love.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Queen",
+    "title": "Somebody To Love",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "arena pop",
+      "glam rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic Queen track, fitting the described bright, layered pop-rock tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, anthemic rock with a touch of soulful grit.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation for atmosphere",
+        "Slightly overdriven crunch (not heavy fuzz)",
+        "Clean-to-mid gain dynamic range",
+        "Plate reverb and delay for space"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/Brit AC30 style) with clean headroom",
+        "Overdrive pedal (for grit, not distortion)",
+        "Chorus or Vibrato effect"
+      ],
+      "avoid": [
+        "Heavy fuzz tones",
+        "Deep scooped bass sounds",
+        "Aggressive metal gain"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Queen pop-rock crunch with chime and layered space",
+      "mustHave": [
+        "jangly upper mids",
+        "light crunch",
+        "clean-to-mid gain",
+        "short plate reverb",
+        "subtle modulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped bass",
+        "dark woolly tone"
+      ],
+      "gearClues": [
+        "AC30/Brit chime",
+        "Fender clean headroom",
+        "single-coils or split humbucker",
+        "1x12 or 2x12",
+        "light chorus/vibrato"
+      ],
+      "corrections": [
+        "add more Vox chime",
+        "keep modulation subtle",
+        "reduce delay emphasis"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Queen pop-rock crunch with chime and layered space",
+    "mustHave": [
+      "jangly upper mids",
+      "light crunch",
+      "clean-to-mid gain",
+      "short plate reverb",
+      "subtle modulation"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "metal gain",
+      "scooped bass",
+      "dark woolly tone"
+    ],
+    "gearClues": [
+      "AC30/Brit chime",
+      "Fender clean headroom",
+      "single-coils or split humbucker",
+      "1x12 or 2x12",
+      "light chorus/vibrato"
+    ],
+    "corrections": [
+      "add more Vox chime",
+      "keep modulation subtle",
+      "reduce delay emphasis"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British clean tones (AC30 style) with subtle modulation and reverb.",
+          "bestMatchSummary": "A classic pop-rock chain utilizing a Fender/British clean amp model (US Deluxe or AC30 TB), light OD boost for crunch, Chorus for shimmer, and Plate Reverb for space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, chimey crunch and upper-mid punch (AC30 style).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the desired 'Brit chime' boost.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a clean boost if needed; keeping the gain light.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is required as the Green OD provides sufficient crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the bright, chimey British clean headroom required for Queen's pop-rock sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 tone.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is a solid choice for pop-rock, though US 2x12 might be considered if pure Fender chime was prioritized.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add subtle shimmer and width to the tone, fulfilling the 'subtle modulation' requirement.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the upper mids and brightness (jangly upper mids) while controlling low-end mud.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add layered space and shimmer without sounding overly wet or dark.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is pop-rock, requiring a bright and articulate tone. The chain prioritizes British chime (AC30) over pure American clean headroom to match the 'Vox chime' clue.",
+          "Since the target requires subtle modulation, the Chorus settings are kept moderate to avoid sounding overly processed."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the UK 4x12 for a more open/American voicing IR.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright US 2x12 or 4x12 IR",
+              "reason": "Better captures the bright, articulate Fender-style chime needed for Queen's pop sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and openness in upper mids/treble.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Queen - Somebody To Love - Valeton GP-180",
+        "song": {
+          "artist": "Queen",
+          "title": "Somebody To Love",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Queen pop-rock crunch with chime and layered space",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic pop-rock chain utilizing a Fender/British clean amp model (US Deluxe or AC30 TB), light OD boost for crunch, Chorus for shimmer, and Plate Reverb for space.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, chimey crunch and upper-mid punch (AC30 style).",
+            "matchQuality": "close",
+            "gap": "The Green OD is a good proxy for the desired 'Brit chime' boost.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a clean boost if needed; keeping the gain light.",
+            "matchQuality": "none",
+            "gap": "No dedicated distortion unit is required as the Green OD provides sufficient crunch.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Mid": "8/10",
+              "Bass": "6/10"
+            },
+            "purpose": "Simulate the bright, chimey British clean headroom required for Queen's pop-rock sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a classic British cabinet voicing that complements the AC30 tone.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is a solid choice for pop-rock, though US 2x12 might be considered if pure Fender chime was prioritized.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Mix": "50%"
+            },
+            "purpose": "Add subtle shimmer and width to the tone, fulfilling the 'subtle modulation' requirement.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Enhance the upper mids and brightness (jangly upper mids) while controlling low-end mud.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add layered space and shimmer without sounding overly wet or dark.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Queen pop-rock crunch with chime and layered space",
+          "toneProfile": "bright Queen pop-rock crunch with chime and layered space",
+          "idealSignalChain": "AC30/Brit chime | Fender clean headroom | single-coils or split humbucker | 1x12 or 2x12 | light chorus/vibrato",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "AC30/Brit chime",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender clean headroom",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coils or split humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus/vibrato",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "jangly upper mids",
+            "light crunch",
+            "clean-to-mid gain",
+            "short plate reverb",
+            "subtle modulation"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chimey British clean tones (AC30 style) with subtle modulation and reverb.",
+          "bestMatchSummary": "A classic pop-rock chain utilizing a Fender/British clean amp model (US Deluxe or AC30 TB), light OD boost for crunch, Chorus for shimmer, and Plate Reverb for space.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, chimey crunch and upper-mid punch (AC30 style).",
+              "matchQuality": "close",
+              "gap": "The Green OD is a good proxy for the desired 'Brit chime' boost.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a clean boost if needed; keeping the gain light.",
+              "matchQuality": "none",
+              "gap": "No dedicated distortion unit is required as the Green OD provides sufficient crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the bright, chimey British clean headroom required for Queen's pop-rock sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 tone.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is a solid choice for pop-rock, though US 2x12 might be considered if pure Fender chime was prioritized.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Mix": "50%"
+              },
+              "purpose": "Add subtle shimmer and width to the tone, fulfilling the 'subtle modulation' requirement.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Enhance the upper mids and brightness (jangly upper mids) while controlling low-end mud.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add layered space and shimmer without sounding overly wet or dark.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the UK 4x12 for a more open/American voicing IR.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "bright US 2x12 or 4x12 IR",
+              "reason": "Better captures the bright, articulate Fender-style chime needed for Queen's pop sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and openness in upper mids/treble.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "add more Vox chime",
+          "keep modulation subtle",
+          "reduce delay emphasis"
+        ],
+        "warnings": [
+          "The source material is pop-rock, requiring a bright and articulate tone. The chain prioritizes British chime (AC30) over pure American clean headroom to match the 'Vox chime' clue.",
+          "Since the target requires subtle modulation, the Chorus settings are kept moderate to avoid sounding overly processed."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.32,
+      "prompt_chars": 990,
+      "response_chars": 531,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 134,
+        "total_duration": 11317576600,
+        "prompt_eval_duration": 186712000,
+        "eval_duration": 2783765000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.906,
+      "prompt_chars": 5455,
+      "response_chars": 573,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 164,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1686
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.345,
+      "prompt_chars": 3657,
+      "response_chars": 4806,
+      "usage": {
+        "prompt_eval_count": 1236,
+        "eval_count": 1393,
+        "total_duration": 38339286300,
+        "prompt_eval_duration": 508303000,
+        "eval_duration": 23638546000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.147,
+      "prompt_chars": 6968,
+      "response_chars": 575,
+      "usage": {
+        "prompt_eval_count": 1986,
+        "eval_count": 162,
+        "total_duration": 5123435400,
+        "prompt_eval_duration": 377722000,
+        "eval_duration": 4193214000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.827,
+      "prompt_chars": 2778,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 876,
+        "eval_count": 52,
+        "total_duration": 16806188200,
+        "prompt_eval_duration": 359849000,
+        "eval_duration": 703297000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Queen",
+      "title": "Somebody To Love",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Queen - Somebody To Love - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Queen pop-rock crunch with chime and layered space",
+      "signalChainSummary": "A classic pop-rock chain utilizing a Fender/British clean amp model (US Deluxe or AC30 TB), light OD boost for crunch, Chorus for shimmer, and Plate Reverb for space.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, chimey crunch and upper-mid punch (AC30 style).",
+          "matchQuality": "close",
+          "gap": "The Green OD is a good proxy for the desired 'Brit chime' boost.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a clean boost if needed; keeping the gain light.",
+          "matchQuality": "fallback",
+          "gap": "No dedicated distortion unit is required as the Green OD provides sufficient crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Mid": "8/10",
+            "Bass": "6/10"
+          },
+          "purpose": "Simulate the bright, chimey British clean headroom required for Queen's pop-rock sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a classic British cabinet voicing that complements the AC30 tone.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is a solid choice for pop-rock, though US 2x12 might be considered if pure Fender chime was prioritized.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Mix": "50%"
+          },
+          "purpose": "Add subtle shimmer and width to the tone, fulfilling the 'subtle modulation' requirement.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Enhance the upper mids and brightness (jangly upper mids) while controlling low-end mud.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add layered space and shimmer without sounding overly wet or dark.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Queen pop-rock crunch with chime and layered space",
+      "mustHave": [
+        "jangly upper mids",
+        "light crunch",
+        "clean-to-mid gain",
+        "short plate reverb",
+        "subtle modulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped bass",
+        "dark woolly tone"
+      ],
+      "gearClues": [
+        "AC30/Brit chime",
+        "Fender clean headroom",
+        "single-coils or split humbucker",
+        "1x12 or 2x12",
+        "light chorus/vibrato"
+      ],
+      "corrections": [
+        "add more Vox chime",
+        "keep modulation subtle",
+        "reduce delay emphasis"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "arena pop",
+        "glam rock"
+      ],
+      "targetTone": "bright Queen pop-rock crunch with chime and layered space",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the UK 4x12 for a more open/American voicing IR.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "bright US 2x12 or 4x12 IR",
+          "reason": "Better captures the bright, articulate Fender-style chime needed for Queen's pop sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and openness in upper mids/treble.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1133,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

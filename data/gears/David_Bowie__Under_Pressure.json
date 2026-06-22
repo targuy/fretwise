@@ -1,0 +1,977 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 313,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\David_Bowie__Under_Pressure.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "David Bowie",
+    "title": "Under Pressure",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "new wave",
+      "funk",
+      "british pop"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic blend of funk, new wave, and pop sensibilities."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Punchy, slightly overdriven rock tone with a pronounced bass response.",
+      "signatureElements": [
+        "Crunch overdrive (medium gain)",
+        "Slight chorus/modulation for width",
+        "Clean-ish attack with controlled grit"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style) into a clean amp model",
+        "Amp simulation focusing on British rock amps (Marshall/Vox family)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High gain distortion",
+        "Ambient delay tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean jangly compression with bright rhythm edge",
+      "mustHave": [
+        "tight clean attack",
+        "chorus-like width",
+        "slight grit on accents"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "delay tails"
+      ],
+      "gearClues": [
+        "Treble pickup",
+        "Vox/clean combo",
+        "light compression"
+      ],
+      "corrections": [
+        "de-emphasize medium gain",
+        "make it cleaner and brighter",
+        "keep modulation subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean jangly compression with bright rhythm edge",
+    "mustHave": [
+      "tight clean attack",
+      "chorus-like width",
+      "slight grit on accents"
+    ],
+    "avoid": [
+      "heavy crunch",
+      "fuzz",
+      "delay tails"
+    ],
+    "gearClues": [
+      "Treble pickup",
+      "Vox/clean combo",
+      "light compression"
+    ],
+    "corrections": [
+      "de-emphasize medium gain",
+      "make it cleaner and brighter",
+      "keep modulation subtle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle modulation and compression.",
+          "bestMatchSummary": "A classic British clean tone setup using light compression, a Vox-style amp simulation (UK 50), Chorus for width, and a bright cab to achieve the jangly, compressed rhythm sound of 'Under Pressure'.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide tight clean attack and smooth out dynamics.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid heavy crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "4",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean Vox-style combo tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic British clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabs/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a bright and articulate clean sound profile.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 offers the necessary brightness for jangly tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/width",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "25%",
+                "Feedback": "10%"
+              },
+              "purpose": "Add chorus-like width and subtle movement.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the tone and enhance the jangly rhythm edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without muddying the clean rhythm.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is best to maintain clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a pop/rock track, and the rig focuses on replicating the clean, bright guitar parts rather than the overall band sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to enhance the jangly brightness and articulation required for 'Under Pressure'.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright, articulate 2x12 or 4x12 IR (e.g., Fender Twin/Vox)",
+              "reason": "Enhance the bright, jangly rhythm edge and articulation.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "David Bowie - Under Pressure - Valeton GP-180",
+        "song": {
+          "artist": "David Bowie",
+          "title": "Under Pressure",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean jangly compression with bright rhythm edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British clean tone setup using light compression, a Vox-style amp simulation (UK 50), Chorus for width, and a bright cab to achieve the jangly, compressed rhythm sound of 'Under Pressure'.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide tight clean attack and smooth out dynamics.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and avoid heavy crunch.",
+            "matchQuality": "exact",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "6",
+              "Midrange": "4",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the bright, clean Vox-style combo tone.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is a good proxy for classic British clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabs/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide a bright and articulate clean sound profile.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 offers the necessary brightness for jangly tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "modulation/width",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "25%",
+              "Feedback": "10%"
+            },
+            "purpose": "Add chorus-like width and subtle movement.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the tone and enhance the jangly rhythm edge.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and depth without muddying the clean rhythm.",
+            "matchQuality": "close",
+            "gap": "A light Room reverb is best to maintain clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean jangly compression with bright rhythm edge",
+          "toneProfile": "clean jangly compression with bright rhythm edge",
+          "idealSignalChain": "Treble pickup | Vox/clean combo | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Treble pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/clean combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight clean attack",
+            "chorus-like width",
+            "slight grit on accents"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle modulation and compression.",
+          "bestMatchSummary": "A classic British clean tone setup using light compression, a Vox-style amp simulation (UK 50), Chorus for width, and a bright cab to achieve the jangly, compressed rhythm sound of 'Under Pressure'.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide tight clean attack and smooth out dynamics.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and avoid heavy crunch.",
+              "matchQuality": "exact",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "4",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the bright, clean Vox-style combo tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic British clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabs/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a bright and articulate clean sound profile.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 offers the necessary brightness for jangly tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "modulation/width",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "25%",
+                "Feedback": "10%"
+              },
+              "purpose": "Add chorus-like width and subtle movement.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the tone and enhance the jangly rhythm edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without muddying the clean rhythm.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is best to maintain clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to enhance the jangly brightness and articulation required for 'Under Pressure'.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright, articulate 2x12 or 4x12 IR (e.g., Fender Twin/Vox)",
+              "reason": "Enhance the bright, jangly rhythm edge and articulation.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and brightness",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "de-emphasize medium gain",
+          "make it cleaner and brighter",
+          "keep modulation subtle"
+        ],
+        "warnings": [
+          "The source material is a pop/rock track, and the rig focuses on replicating the clean, bright guitar parts rather than the overall band sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.625,
+      "prompt_chars": 994,
+      "response_chars": 478,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 113,
+        "total_duration": 12598704900,
+        "prompt_eval_duration": 130545999,
+        "eval_duration": 744723000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.727,
+      "prompt_chars": 5394,
+      "response_chars": 463,
+      "usage": {
+        "input_tokens": 1494,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 120,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1614
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 9.001,
+      "prompt_chars": 3516,
+      "response_chars": 4425,
+      "usage": {
+        "prompt_eval_count": 1181,
+        "eval_count": 1294,
+        "total_duration": 8965256700,
+        "prompt_eval_duration": 132285000,
+        "eval_duration": 8457746999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.625,
+      "prompt_chars": 6446,
+      "response_chars": 577,
+      "usage": {
+        "prompt_eval_count": 1832,
+        "eval_count": 157,
+        "total_duration": 1598518900,
+        "prompt_eval_duration": 164823000,
+        "eval_duration": 1023027000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 12.002,
+      "prompt_chars": 2650,
+      "response_chars": 179,
+      "usage": {
+        "prompt_eval_count": 825,
+        "eval_count": 51,
+        "total_duration": 11980252300,
+        "prompt_eval_duration": 161347000,
+        "eval_duration": 332151000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "David Bowie",
+      "title": "Under Pressure",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "David Bowie - Under Pressure - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean jangly compression with bright rhythm edge",
+      "signalChainSummary": "A classic British clean tone setup using light compression, a Vox-style amp simulation (UK 50), Chorus for width, and a bright cab to achieve the jangly, compressed rhythm sound of 'Under Pressure'.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide tight clean attack and smooth out dynamics.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and avoid heavy crunch.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "6",
+            "Midrange": "4",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the bright, clean Vox-style combo tone.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is a good proxy for classic British clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabs/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide a bright and articulate clean sound profile.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 offers the necessary brightness for jangly tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "modulation/width",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "25%",
+            "Feedback": "10%"
+          },
+          "purpose": "Add chorus-like width and subtle movement.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the tone and enhance the jangly rhythm edge.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and depth without muddying the clean rhythm.",
+          "matchQuality": "close",
+          "gap": "A light Room reverb is best to maintain clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean jangly compression with bright rhythm edge",
+      "mustHave": [
+        "tight clean attack",
+        "chorus-like width",
+        "slight grit on accents"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "fuzz",
+        "delay tails"
+      ],
+      "gearClues": [
+        "Treble pickup",
+        "Vox/clean combo",
+        "light compression"
+      ],
+      "corrections": [
+        "de-emphasize medium gain",
+        "make it cleaner and brighter",
+        "keep modulation subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "new wave",
+        "funk",
+        "british pop"
+      ],
+      "targetTone": "clean jangly compression with bright rhythm edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to enhance the jangly brightness and articulation required for 'Under Pressure'.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright, articulate 2x12 or 4x12 IR (e.g., Fender Twin/Vox)",
+          "reason": "Enhance the bright, jangly rhythm edge and articulation.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and brightness",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 313,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

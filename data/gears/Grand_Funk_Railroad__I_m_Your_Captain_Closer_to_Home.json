@@ -1,0 +1,953 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 539,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Grand_Funk_Railroad__I_m_Your_Captain_Closer_to_Home.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Grand Funk Railroad",
+    "title": "I'm Your Captain (Closer to Home)",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "hard rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Grand Funk Railroad is a foundational band of classic and hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty rock tone with pronounced mid-range punch and slight harmonic saturation.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz texture for grit",
+        "Punchy attack",
+        "Rock reverb"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "Amp simulation with mid-scoop capability",
+        "Spring or plate reverb unit"
+      ],
+      "avoid": [
+        "Excessive clean chime",
+        "Deep scooped bass tones",
+        "Heavy modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry mid-gain classic rock crunch with slight fuzz grit",
+      "mustHave": [
+        "mid-forward crunch",
+        "slight fuzz edge",
+        "strong attack",
+        "mostly dry",
+        "big rock sustain"
+      ],
+      "avoid": [
+        "clean chime",
+        "deep scoop",
+        "heavy modulation",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "humbucker or hot single coil",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "light fuzz or dirt pedal"
+      ],
+      "corrections": [
+        "drop generic rock reverb",
+        "push fuzz more than overdrive",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry mid-gain classic rock crunch with slight fuzz grit",
+    "mustHave": [
+      "mid-forward crunch",
+      "slight fuzz edge",
+      "strong attack",
+      "mostly dry",
+      "big rock sustain"
+    ],
+    "avoid": [
+      "clean chime",
+      "deep scoop",
+      "heavy modulation",
+      "lush reverb"
+    ],
+    "gearClues": [
+      "humbucker or hot single coil",
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "light fuzz or dirt pedal"
+    ],
+    "corrections": [
+      "drop generic rock reverb",
+      "push fuzz more than overdrive",
+      "keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock tone emulation focusing on mid-gain crunch and controlled fuzz.",
+          "bestMatchSummary": "The chain uses a slight dirt pedal (OD 9) for initial grit, followed by the UK 45/UK Vintage 4x12 combination to deliver classic Marshall-style mid-forward punch and sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dirt",
+              "module": "PRE",
+              "model": "OD 9",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the required mid-forward crunch and slight fuzz edge.",
+              "matchQuality": "close",
+              "gap": "The OD 9 is used to simulate a light dirt pedal/boost, fulfilling the 'slight fuzz grit' requirement without excessive distortion.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "5.5",
+                "Level": "6"
+              },
+              "purpose": "Add controlled fuzz grit and strong attack as requested.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is chosen over Fuzz/Muff-style to keep the dirt focused on mid-range punch rather than pure psychedelic wash, matching the 'classic rock' feel.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Emulate the Marshall/Plexi style amp for classic rock tone and mid-forward punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "3.0",
+                "Treble": "1.5"
+              },
+              "purpose": "Fine-tune the mid-forward crunch and punchiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Kept inactive to avoid heavy modulation and maintain a dry punchy sound.",
+              "matchQuality": "close",
+              "gap": "None (Used as an optional slot filler, but kept off).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding like 'lush reverb', maintaining punchiness.",
+              "matchQuality": "close",
+              "gap": "The delay is used sparingly to add dimension, fulfilling the need for sustain without excessive ambience.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track. The rig focuses on emulating Marshall-style mid-gain crunch and controlled fuzz grit."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, aggressive punch of classic rock without losing the Marshall character.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Vintage/Live)",
+              "reason": "Enhance mid-range aggression and vintage grit for a punchier classic rock sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Grand Funk Railroad - I'm Your Captain (Closer to Home) - Valeton GP-180",
+        "song": {
+          "artist": "Grand Funk Railroad",
+          "title": "I'm Your Captain (Closer to Home)",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry mid-gain classic rock crunch with slight fuzz grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "The chain uses a slight dirt pedal (OD 9) for initial grit, followed by the UK 45/UK Vintage 4x12 combination to deliver classic Marshall-style mid-forward punch and sustain.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dirt",
+            "module": "PRE",
+            "model": "OD 9",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the required mid-forward crunch and slight fuzz edge.",
+            "matchQuality": "close",
+            "gap": "The OD 9 is used to simulate a light dirt pedal/boost, fulfilling the 'slight fuzz grit' requirement without excessive distortion.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4.0",
+              "Tone": "5.5",
+              "Level": "6"
+            },
+            "purpose": "Add controlled fuzz grit and strong attack as requested.",
+            "matchQuality": "close",
+            "gap": "The RAT-style is chosen over Fuzz/Muff-style to keep the dirt focused on mid-range punch rather than pure psychedelic wash, matching the 'classic rock' feel.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.0",
+              "Midrange": "8.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Emulate the Marshall/Plexi style amp for classic rock tone and mid-forward punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic Marshall-style cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1.0",
+              "Midrange": "3.0",
+              "Treble": "1.5"
+            },
+            "purpose": "Fine-tune the mid-forward crunch and punchiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0.0",
+              "Depth": "0.0"
+            },
+            "purpose": "Kept inactive to avoid heavy modulation and maintain a dry punchy sound.",
+            "matchQuality": "close",
+            "gap": "None (Used as an optional slot filler, but kept off).",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Add subtle rhythmic depth without sounding like 'lush reverb', maintaining punchiness.",
+            "matchQuality": "close",
+            "gap": "The delay is used sparingly to add dimension, fulfilling the need for sustain without excessive ambience.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry mid-gain classic rock crunch with slight fuzz grit",
+          "toneProfile": "dry mid-gain classic rock crunch with slight fuzz grit",
+          "idealSignalChain": "humbucker or hot single coil | Marshall/Plexi style amp | 4x12 cab | light fuzz or dirt pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker or hot single coil",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light fuzz or dirt pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward crunch",
+            "slight fuzz edge",
+            "strong attack",
+            "mostly dry",
+            "big rock sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock tone emulation focusing on mid-gain crunch and controlled fuzz.",
+          "bestMatchSummary": "The chain uses a slight dirt pedal (OD 9) for initial grit, followed by the UK 45/UK Vintage 4x12 combination to deliver classic Marshall-style mid-forward punch and sustain.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dirt",
+              "module": "PRE",
+              "model": "OD 9",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the required mid-forward crunch and slight fuzz edge.",
+              "matchQuality": "close",
+              "gap": "The OD 9 is used to simulate a light dirt pedal/boost, fulfilling the 'slight fuzz grit' requirement without excessive distortion.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.0",
+                "Tone": "5.5",
+                "Level": "6"
+              },
+              "purpose": "Add controlled fuzz grit and strong attack as requested.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is chosen over Fuzz/Muff-style to keep the dirt focused on mid-range punch rather than pure psychedelic wash, matching the 'classic rock' feel.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Emulate the Marshall/Plexi style amp for classic rock tone and mid-forward punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "3.0",
+                "Treble": "1.5"
+              },
+              "purpose": "Fine-tune the mid-forward crunch and punchiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0.0",
+                "Depth": "0.0"
+              },
+              "purpose": "Kept inactive to avoid heavy modulation and maintain a dry punchy sound.",
+              "matchQuality": "close",
+              "gap": "None (Used as an optional slot filler, but kept off).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without sounding like 'lush reverb', maintaining punchiness.",
+              "matchQuality": "close",
+              "gap": "The delay is used sparingly to add dimension, fulfilling the need for sustain without excessive ambience.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture the raw, aggressive punch of classic rock without losing the Marshall character.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Vintage/Live)",
+              "reason": "Enhance mid-range aggression and vintage grit for a punchier classic rock sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased bite and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop generic rock reverb",
+          "push fuzz more than overdrive",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is a classic rock track. The rig focuses on emulating Marshall-style mid-gain crunch and controlled fuzz grit."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.586,
+      "prompt_chars": 1021,
+      "response_chars": 496,
+      "usage": {
+        "prompt_eval_count": 329,
+        "eval_count": 120,
+        "total_duration": 10580384300,
+        "prompt_eval_duration": 543214000,
+        "eval_duration": 2250892000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.089,
+      "prompt_chars": 5451,
+      "response_chars": 558,
+      "usage": {
+        "input_tokens": 1512,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 148,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1660
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.512,
+      "prompt_chars": 3666,
+      "response_chars": 4451,
+      "usage": {
+        "prompt_eval_count": 1229,
+        "eval_count": 1308,
+        "total_duration": 32492961700,
+        "prompt_eval_duration": 250872000,
+        "eval_duration": 19850032000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.87,
+      "prompt_chars": 6596,
+      "response_chars": 598,
+      "usage": {
+        "prompt_eval_count": 1894,
+        "eval_count": 154,
+        "total_duration": 3854900900,
+        "prompt_eval_duration": 281060000,
+        "eval_duration": 3226136000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.904,
+      "prompt_chars": 2725,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 874,
+        "eval_count": 45,
+        "total_duration": 19900850700,
+        "prompt_eval_duration": 262995999,
+        "eval_duration": 884910000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Grand Funk Railroad",
+      "title": "I'm Your Captain (Closer to Home)",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Grand Funk Railroad - I'm Your Captain (Closer to Home) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry mid-gain classic rock crunch with slight fuzz grit",
+      "signalChainSummary": "The chain uses a slight dirt pedal (OD 9) for initial grit, followed by the UK 45/UK Vintage 4x12 combination to deliver classic Marshall-style mid-forward punch and sustain.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dirt",
+          "module": "PRE",
+          "model": "OD 9",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the required mid-forward crunch and slight fuzz edge.",
+          "matchQuality": "close",
+          "gap": "The OD 9 is used to simulate a light dirt pedal/boost, fulfilling the 'slight fuzz grit' requirement without excessive distortion.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4.0",
+            "Tone": "5.5",
+            "Level": "6"
+          },
+          "purpose": "Add controlled fuzz grit and strong attack as requested.",
+          "matchQuality": "close",
+          "gap": "The RAT-style is chosen over Fuzz/Muff-style to keep the dirt focused on mid-range punch rather than pure psychedelic wash, matching the 'classic rock' feel.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.0",
+            "Midrange": "8.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Emulate the Marshall/Plexi style amp for classic rock tone and mid-forward punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic Marshall-style cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1.0",
+            "Midrange": "3.0",
+            "Treble": "1.5"
+          },
+          "purpose": "Fine-tune the mid-forward crunch and punchiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0.0",
+            "Depth": "0.0"
+          },
+          "purpose": "Kept inactive to avoid heavy modulation and maintain a dry punchy sound.",
+          "matchQuality": "close",
+          "gap": "None (Used as an optional slot filler, but kept off).",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Add subtle rhythmic depth without sounding like 'lush reverb', maintaining punchiness.",
+          "matchQuality": "close",
+          "gap": "The delay is used sparingly to add dimension, fulfilling the need for sustain without excessive ambience.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry mid-gain classic rock crunch with slight fuzz grit",
+      "mustHave": [
+        "mid-forward crunch",
+        "slight fuzz edge",
+        "strong attack",
+        "mostly dry",
+        "big rock sustain"
+      ],
+      "avoid": [
+        "clean chime",
+        "deep scoop",
+        "heavy modulation",
+        "lush reverb"
+      ],
+      "gearClues": [
+        "humbucker or hot single coil",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "light fuzz or dirt pedal"
+      ],
+      "corrections": [
+        "drop generic rock reverb",
+        "push fuzz more than overdrive",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "hard rock",
+        "arena rock"
+      ],
+      "targetTone": "dry mid-gain classic rock crunch with slight fuzz grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture the raw, aggressive punch of classic rock without losing the Marshall character.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Vintage/Live)",
+          "reason": "Enhance mid-range aggression and vintage grit for a punchier classic rock sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased bite and definition in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 539,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

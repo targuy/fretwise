@@ -1,0 +1,1088 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 777,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Kansas__Dust_In_The_Wind.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Kansas",
+    "title": "Dust In The Wind",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "acoustic",
+      "ballad"
+    ],
+    "confidence": "high",
+    "rationale": "Kansas's 'Dust In The Wind' is a classic acoustic folk-rock ballad."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly compressed clean tone with noticeable reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "modulation"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus/Vibrato effect",
+        "Delay unit (dotted eighth notes)"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "distortion",
+        "high gain"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm fingerpicked acoustic-style clean with light room",
+      "mustHave": [
+        "very clean",
+        "intimate fingerpicking",
+        "warm low-mid body",
+        "short room ambience"
+      ],
+      "avoid": [
+        "delay",
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "crunch",
+        "high gain"
+      ],
+      "gearClues": [
+        "acoustic or acoustic-sim electric",
+        "neck pickup",
+        "small clean amp",
+        "light room"
+      ],
+      "corrections": [
+        "remove delay",
+        "remove chorus",
+        "keep ambience subtle",
+        "lean acoustic, not electric effects"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm fingerpicked acoustic-style clean with light room",
+    "mustHave": [
+      "very clean",
+      "intimate fingerpicking",
+      "warm low-mid body",
+      "short room ambience"
+    ],
+    "avoid": [
+      "delay",
+      "chorus",
+      "heavy reverb",
+      "fuzz",
+      "crunch",
+      "high gain"
+    ],
+    "gearClues": [
+      "acoustic or acoustic-sim electric",
+      "neck pickup",
+      "small clean amp",
+      "light room"
+    ],
+    "corrections": [
+      "remove delay",
+      "remove chorus",
+      "keep ambience subtle",
+      "lean acoustic, not electric effects"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, warm tones and intimate acoustic simulation using low-gain preamps and room ambience.",
+          "bestMatchSummary": "A gentle signal chain featuring a Comp for warmth, followed by the US Deluxe amp model paired with the US 2x12 cabinet. Subtle Room reverb adds depth without sounding wet, achieving an intimate fingerpicked tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and add warmth to the acoustic-style tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and transparent.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "5/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide a classic, warm, and clean American tone suitable for fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the US Deluxe amp for a focused, clean sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the low-mid body and warmth required for acoustic simulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone natural and focused on fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus or other distracting effects as requested.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects as requested.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle room ambience and depth without sounding wet or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Set the overall output level for intimate performance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/fingerpicking, so while this rig uses an electric guitar model (Default), the settings are optimized to simulate a warm, intimate acoustic-electric sound. The Comp and US Deluxe amp help achieve this warmth."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better natural room realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the intimate, warm acoustic feel of the tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Subtle depth increase",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Kansas - Dust In The Wind - Valeton GP-180",
+        "song": {
+          "artist": "Kansas",
+          "title": "Dust In The Wind",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm fingerpicked acoustic-style clean with light room",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A gentle signal chain featuring a Comp for warmth, followed by the US Deluxe amp model paired with the US 2x12 cabinet. Subtle Room reverb adds depth without sounding wet, achieving an intimate fingerpicked tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and fingerpicking transients.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth dynamics and add warmth to the acoustic-style tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and transparent.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3/10",
+              "Treble": "5/10",
+              "Midrange": "6/10",
+              "Bass": "4/10"
+            },
+            "purpose": "Provide a classic, warm, and clean American tone suitable for fingerpicking.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Complement the US Deluxe amp for a focused, clean sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Enhance the low-mid body and warmth required for acoustic simulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone natural and focused on fingerpicking.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid chorus or other distracting effects as requested.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay effects as requested.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle room ambience and depth without sounding wet or distracting.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7/10"
+            },
+            "purpose": "Set the overall output level for intimate performance.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm fingerpicked acoustic-style clean with light room",
+          "toneProfile": "warm fingerpicked acoustic-style clean with light room",
+          "idealSignalChain": "acoustic or acoustic-sim electric | neck pickup | small clean amp | light room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic or acoustic-sim electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "neck pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "very clean",
+            "intimate fingerpicking",
+            "warm low-mid body",
+            "short room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, warm tones and intimate acoustic simulation using low-gain preamps and room ambience.",
+          "bestMatchSummary": "A gentle signal chain featuring a Comp for warmth, followed by the US Deluxe amp model paired with the US 2x12 cabinet. Subtle Room reverb adds depth without sounding wet, achieving an intimate fingerpicked tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and add warmth to the acoustic-style tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and transparent.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3/10",
+                "Treble": "5/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Provide a classic, warm, and clean American tone suitable for fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the US Deluxe amp for a focused, clean sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the low-mid body and warmth required for acoustic simulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone natural and focused on fingerpicking.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid chorus or other distracting effects as requested.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects as requested.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle room ambience and depth without sounding wet or distracting.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7/10"
+              },
+              "purpose": "Set the overall output level for intimate performance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better natural room realism.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the intimate, warm acoustic feel of the tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Subtle depth increase",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove delay",
+          "remove chorus",
+          "keep ambience subtle",
+          "lean acoustic, not electric effects"
+        ],
+        "warnings": [
+          "The source material is acoustic/fingerpicking, so while this rig uses an electric guitar model (Default), the settings are optimized to simulate a warm, intimate acoustic-electric sound. The Comp and US Deluxe amp help achieve this warmth."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.211,
+      "prompt_chars": 991,
+      "response_chars": 340,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 87,
+        "total_duration": 11208512500,
+        "prompt_eval_duration": 639114000,
+        "eval_duration": 1557304000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.102,
+      "prompt_chars": 5271,
+      "response_chars": 541,
+      "usage": {
+        "input_tokens": 1477,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1615
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 40.936,
+      "prompt_chars": 3633,
+      "response_chars": 5060,
+      "usage": {
+        "prompt_eval_count": 1216,
+        "eval_count": 1457,
+        "total_duration": 40930491700,
+        "prompt_eval_duration": 373111000,
+        "eval_duration": 24982719000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.259,
+      "prompt_chars": 7236,
+      "response_chars": 463,
+      "usage": {
+        "prompt_eval_count": 2030,
+        "eval_count": 127,
+        "total_duration": 4233630300,
+        "prompt_eval_duration": 375403000,
+        "eval_duration": 3435031000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.475,
+      "prompt_chars": 2939,
+      "response_chars": 165,
+      "usage": {
+        "prompt_eval_count": 914,
+        "eval_count": 49,
+        "total_duration": 20446695900,
+        "prompt_eval_duration": 689964000,
+        "eval_duration": 793957000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Kansas",
+      "title": "Dust In The Wind",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "Kansas - Dust In The Wind - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm fingerpicked acoustic-style clean with light room",
+      "signalChainSummary": "A gentle signal chain featuring a Comp for warmth, followed by the US Deluxe amp model paired with the US 2x12 cabinet. Subtle Room reverb adds depth without sounding wet, achieving an intimate fingerpicked tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and fingerpicking transients.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth dynamics and add warmth to the acoustic-style tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and transparent.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3/10",
+            "Treble": "5/10",
+            "Midrange": "6/10",
+            "Bass": "4/10"
+          },
+          "purpose": "Provide a classic, warm, and clean American tone suitable for fingerpicking.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Complement the US Deluxe amp for a focused, clean sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Enhance the low-mid body and warmth required for acoustic simulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone natural and focused on fingerpicking.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid chorus or other distracting effects as requested.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay effects as requested.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle room ambience and depth without sounding wet or distracting.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7/10"
+          },
+          "purpose": "Set the overall output level for intimate performance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm fingerpicked acoustic-style clean with light room",
+      "mustHave": [
+        "very clean",
+        "intimate fingerpicking",
+        "warm low-mid body",
+        "short room ambience"
+      ],
+      "avoid": [
+        "delay",
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "crunch",
+        "high gain"
+      ],
+      "gearClues": [
+        "acoustic or acoustic-sim electric",
+        "neck pickup",
+        "small clean amp",
+        "light room"
+      ],
+      "corrections": [
+        "remove delay",
+        "remove chorus",
+        "keep ambience subtle",
+        "lean acoustic, not electric effects"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "acoustic",
+        "ballad"
+      ],
+      "targetTone": "warm fingerpicked acoustic-style clean with light room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better natural room realism.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance the intimate, warm acoustic feel of the tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Subtle depth increase",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 777,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

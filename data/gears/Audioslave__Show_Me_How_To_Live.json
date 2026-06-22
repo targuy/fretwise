@@ -1,0 +1,989 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 76,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Audioslave__Show_Me_How_To_Live.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Audioslave",
+    "title": "Show Me How To Live",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with noticeable grit and sustain.",
+      "signatureElements": [
+        "Mid-range focus",
+        "Slight fuzz/grit (crunch)",
+        "Moderate delay/reverb for space",
+        "Punchy attack"
+      ],
+      "gearHypotheses": [
+        "High-gain amp simulation (e.g., Marshall JCM family)",
+        "Overdrive pedal emulation (for grit)"
+      ],
+      "avoid": [
+        "Excessive clean chime",
+        "Heavy modulation (chorus/flanger)",
+        "Extreme scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry Marshall crunch with gritty sustain",
+      "mustHave": [
+        "mid-forward crunch",
+        "tight palm-mute punch",
+        "thick sustain",
+        "slight room/delay"
+      ],
+      "avoid": [
+        "clean chime",
+        "chorus",
+        "flanger",
+        "scooped mids",
+        "big fuzz"
+      ],
+      "gearClues": [
+        "Marshall/JCM-style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop moderate delay if it sounds too wet",
+        "make grit more crunch than fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry Marshall crunch with gritty sustain",
+    "mustHave": [
+      "mid-forward crunch",
+      "tight palm-mute punch",
+      "thick sustain",
+      "slight room/delay"
+    ],
+    "avoid": [
+      "clean chime",
+      "chorus",
+      "flanger",
+      "scooped mids",
+      "big fuzz"
+    ],
+    "gearClues": [
+      "Marshall/JCM-style amp",
+      "4x12 cab",
+      "bridge humbucker",
+      "light overdrive"
+    ],
+    "corrections": [
+      "drop moderate delay if it sounds too wet",
+      "make grit more crunch than fuzz"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock crunch and sustain, mimicking Marshall tones.",
+          "bestMatchSummary": "A crunchy, mid-forward signal chain using an AC30 or UK 45 style amp, boosted by a light OD pedal, followed by room ambience and delay for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light overdrive and grit for the 'crunch' sound.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a classic British boost/overdrive tone, fitting the Marshall vibe better than Blues OD or OD 9.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD for crunch.",
+              "matchQuality": "none",
+              "gap": "No dedicated high-gain pedal is needed; the Green OD provides sufficient grit. Setting this block as 'None' and inactive maintains signal integrity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British Marshall/JCM-style tone with mid-forward punch.",
+              "matchQuality": "close",
+              "gap": "AC30 TB is the best fit for a vintage, mid-focused British rock sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "close",
+              "gap": "Directly matches the 'Marshall/JCM-style amp' and '4x12 cab' clues.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Enhance the mid-forward character and tighten the punch.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone towards a more aggressive, mid-focused crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space without sounding too wet (per corrections).",
+              "matchQuality": "close",
+              "gap": "The delay is kept minimal to avoid excessive 'wet' sound, fulfilling the correction requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle room ambience for depth and sustain.",
+              "matchQuality": "close",
+              "gap": "Room reverb is ideal for adding natural space without the artificiality of plate or spring, supporting the 'slight room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage block for signal management.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on electric guitar tones. The AC30 TB and Green OD combination should provide the required Marshall-esque crunch."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, high-fidelity 4x12 that better captures the tight punch and grit required.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance tightness and aggressive crunch for palm-muting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end, more bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Audioslave - Show Me How To Live - Valeton GP-180",
+        "song": {
+          "artist": "Audioslave",
+          "title": "Show Me How To Live",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry Marshall crunch with gritty sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A crunchy, mid-forward signal chain using an AC30 or UK 45 style amp, boosted by a light OD pedal, followed by room ambience and delay for depth.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light overdrive and grit for the 'crunch' sound.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a classic British boost/overdrive tone, fitting the Marshall vibe better than Blues OD or OD 9.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the distortion section clean to rely on the Green OD for crunch.",
+            "matchQuality": "none",
+            "gap": "No dedicated high-gain pedal is needed; the Green OD provides sufficient grit. Setting this block as 'None' and inactive maintains signal integrity.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "65%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "60%"
+            },
+            "purpose": "Simulate the classic British Marshall/JCM-style tone with mid-forward punch.",
+            "matchQuality": "close",
+            "gap": "AC30 TB is the best fit for a vintage, mid-focused British rock sound.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound.",
+            "matchQuality": "close",
+            "gap": "Directly matches the 'Marshall/JCM-style amp' and '4x12 cab' clues.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Enhance the mid-forward character and tighten the punch.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the tone towards a more aggressive, mid-focused crunch.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle depth and space without sounding too wet (per corrections).",
+            "matchQuality": "close",
+            "gap": "The delay is kept minimal to avoid excessive 'wet' sound, fulfilling the correction requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle room ambience for depth and sustain.",
+            "matchQuality": "close",
+            "gap": "Room reverb is ideal for adding natural space without the artificiality of plate or spring, supporting the 'slight room' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "none",
+            "gap": "Standard final stage block for signal management.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry Marshall crunch with gritty sustain",
+          "toneProfile": "dry Marshall crunch with gritty sustain",
+          "idealSignalChain": "Marshall/JCM-style amp | 4x12 cab | bridge humbucker | light overdrive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/JCM-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward crunch",
+            "tight palm-mute punch",
+            "thick sustain",
+            "slight room/delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock crunch and sustain, mimicking Marshall tones.",
+          "bestMatchSummary": "A crunchy, mid-forward signal chain using an AC30 or UK 45 style amp, boosted by a light OD pedal, followed by room ambience and delay for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light overdrive and grit for the 'crunch' sound.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a classic British boost/overdrive tone, fitting the Marshall vibe better than Blues OD or OD 9.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD for crunch.",
+              "matchQuality": "none",
+              "gap": "No dedicated high-gain pedal is needed; the Green OD provides sufficient grit. Setting this block as 'None' and inactive maintains signal integrity.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "65%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "60%"
+              },
+              "purpose": "Simulate the classic British Marshall/JCM-style tone with mid-forward punch.",
+              "matchQuality": "close",
+              "gap": "AC30 TB is the best fit for a vintage, mid-focused British rock sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "close",
+              "gap": "Directly matches the 'Marshall/JCM-style amp' and '4x12 cab' clues.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Enhance the mid-forward character and tighten the punch.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the tone towards a more aggressive, mid-focused crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space without sounding too wet (per corrections).",
+              "matchQuality": "close",
+              "gap": "The delay is kept minimal to avoid excessive 'wet' sound, fulfilling the correction requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle room ambience for depth and sustain.",
+              "matchQuality": "close",
+              "gap": "Room reverb is ideal for adding natural space without the artificiality of plate or spring, supporting the 'slight room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "none",
+              "gap": "Standard final stage block for signal management.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, high-fidelity 4x12 that better captures the tight punch and grit required.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance tightness and aggressive crunch for palm-muting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end, more bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop moderate delay if it sounds too wet",
+          "make grit more crunch than fuzz"
+        ],
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on electric guitar tones. The AC30 TB and Green OD combination should provide the required Marshall-esque crunch."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.013,
+      "prompt_chars": 983,
+      "response_chars": 440,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 115,
+        "total_duration": 3008834100,
+        "prompt_eval_duration": 162793000,
+        "eval_duration": 2336052000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.12,
+      "prompt_chars": 5349,
+      "response_chars": 505,
+      "usage": {
+        "input_tokens": 1498,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1636
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 39.175,
+      "prompt_chars": 3513,
+      "response_chars": 4950,
+      "usage": {
+        "prompt_eval_count": 1241,
+        "eval_count": 1406,
+        "total_duration": 26706025300,
+        "prompt_eval_duration": 66494000,
+        "eval_duration": 26197136000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 43 column 8 (char 1520)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 4.432,
+      "prompt_chars": 7017,
+      "response_chars": 580,
+      "usage": {
+        "prompt_eval_count": 1970,
+        "eval_count": 160,
+        "total_duration": 4410174700,
+        "prompt_eval_duration": 493939000,
+        "eval_duration": 3513804000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.894,
+      "prompt_chars": 2655,
+      "response_chars": 178,
+      "usage": {
+        "prompt_eval_count": 845,
+        "eval_count": 45,
+        "total_duration": 871270700,
+        "prompt_eval_duration": 104480000,
+        "eval_duration": 340684000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Audioslave",
+      "title": "Show Me How To Live",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Audioslave - Show Me How To Live - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry Marshall crunch with gritty sustain",
+      "signalChainSummary": "A crunchy, mid-forward signal chain using an AC30 or UK 45 style amp, boosted by a light OD pedal, followed by room ambience and delay for depth.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light overdrive and grit for the 'crunch' sound.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a classic British boost/overdrive tone, fitting the Marshall vibe better than Blues OD or OD 9.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the distortion section clean to rely on the Green OD for crunch.",
+          "matchQuality": "fallback",
+          "gap": "No dedicated high-gain pedal is needed; the Green OD provides sufficient grit. Setting this block as 'None' and inactive maintains signal integrity.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "65%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "60%"
+          },
+          "purpose": "Simulate the classic British Marshall/JCM-style tone with mid-forward punch.",
+          "matchQuality": "close",
+          "gap": "AC30 TB is the best fit for a vintage, mid-focused British rock sound.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound.",
+          "matchQuality": "close",
+          "gap": "Directly matches the 'Marshall/JCM-style amp' and '4x12 cab' clues.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Enhance the mid-forward character and tighten the punch.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the tone towards a more aggressive, mid-focused crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle depth and space without sounding too wet (per corrections).",
+          "matchQuality": "close",
+          "gap": "The delay is kept minimal to avoid excessive 'wet' sound, fulfilling the correction requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle room ambience for depth and sustain.",
+          "matchQuality": "close",
+          "gap": "Room reverb is ideal for adding natural space without the artificiality of plate or spring, supporting the 'slight room' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "fallback",
+          "gap": "Standard final stage block for signal management.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry Marshall crunch with gritty sustain",
+      "mustHave": [
+        "mid-forward crunch",
+        "tight palm-mute punch",
+        "thick sustain",
+        "slight room/delay"
+      ],
+      "avoid": [
+        "clean chime",
+        "chorus",
+        "flanger",
+        "scooped mids",
+        "big fuzz"
+      ],
+      "gearClues": [
+        "Marshall/JCM-style amp",
+        "4x12 cab",
+        "bridge humbucker",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop moderate delay if it sounds too wet",
+        "make grit more crunch than fuzz"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "post-grunge",
+        "hard rock"
+      ],
+      "targetTone": "dry Marshall crunch with gritty sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, high-fidelity 4x12 that better captures the tight punch and grit required.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Brit)",
+          "reason": "Enhance tightness and aggressive crunch for palm-muting.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter low end, more bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 76,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "post-grunge",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and source genre strongly suggest alternative/hard rock."
+  }
+}

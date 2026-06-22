@@ -1,0 +1,999 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 739,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\John_Mayer__Slow_Dancing_In_A_Burning_Room.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "John Mayer",
+    "title": "Slow Dancing In A Burning Room",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "soul",
+      "pop"
+    ],
+    "confidence": "high",
+    "rationale": "John Mayer's style is rooted in blues and soul, fitting the warm lead tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues/rock tone with clear articulation.",
+      "signatureElements": [
+        "Clean arpeggios",
+        "Subtle compression",
+        "Slight chorus or vibrato modulation",
+        "Spring reverb"
+      ],
+      "gearHypotheses": [
+        "Tube-screamer style overdrive (low gain)",
+        "British single-coil amp simulation (e.g., AC30/Plexi)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion pedal saturation",
+        "Aggressive delay tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm edge-of-breakup blues lead with long sustain",
+      "mustHave": [
+        "smooth singing sustain",
+        "slight mid push",
+        "light compression",
+        "roomy plate reverb",
+        "clear note attack"
+      ],
+      "avoid": [
+        "chorus",
+        "vibrato modulation",
+        "clean arpeggio focus",
+        "heavy fuzz",
+        "aggressive delay"
+      ],
+      "gearClues": [
+        "strat-style single coils",
+        "low-gain tube screamer",
+        "D-style or F-style clean amp",
+        "2x12 or 1x12"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "lean into sustained lead tone",
+        "keep delay minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm edge-of-breakup blues lead with long sustain",
+    "mustHave": [
+      "smooth singing sustain",
+      "slight mid push",
+      "light compression",
+      "roomy plate reverb",
+      "clear note attack"
+    ],
+    "avoid": [
+      "chorus",
+      "vibrato modulation",
+      "clean arpeggio focus",
+      "heavy fuzz",
+      "aggressive delay"
+    ],
+    "gearClues": [
+      "strat-style single coils",
+      "low-gain tube screamer",
+      "D-style or F-style clean amp",
+      "2x12 or 1x12"
+    ],
+    "corrections": [
+      "drop chorus/vibrato",
+      "lean into sustained lead tone",
+      "keep delay minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, sustained blues lead tones using low-gain clean/edge-of-breakup amps and compression.",
+          "bestMatchSummary": "Compression -> Low Gain Boost -> US Deluxe Amp -> UK Vintage 4x12 Cab -> Guitar EQ 2 (Mid Push) -> Plate Reverb -> Digital Delay",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Provide light compression and smooth sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/gain stage",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate a low-gain tube screamer/edge of breakup tone.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to approximate the desired low-gain, warm grit without excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Slightly cleaner option if blues tone is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Provide a clean, articulate, and warm foundation suitable for blues lead work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a classic, balanced British voicing that complements the US Deluxe amp model.",
+              "matchQuality": "close",
+              "gap": "While the source suggests 2x12, the UK Vintage 4x12 offers better overall tonal depth for sustained leads.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, more focused cabinet is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Implement the required 'slight mid push' for vocal presence and lead clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a 'roomy plate reverb' for depth and sustain without sounding overly wet.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add minimal delay for subtle sustain and rhythmic interest.",
+              "matchQuality": "close",
+              "gap": "The settings are kept low to avoid the 'aggressive delay' mentioned in the instructions.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig is optimized for a sustained, blues-rock lead tone. The compression and mid-boost will emphasize singing sustain over rhythmic complexity."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current 4x12 IR for a more appropriate, focused 2x12 voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12",
+              "reason": "Source suggests 2x12; provides tighter focus for lead tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end and more focused midrange clarity.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "John Mayer - Slow Dancing In A Burning Room - Valeton GP-180",
+        "song": {
+          "artist": "John Mayer",
+          "title": "Slow Dancing In A Burning Room",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm edge-of-breakup blues lead with long sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Compression -> Low Gain Boost -> US Deluxe Amp -> UK Vintage 4x12 Cab -> Guitar EQ 2 (Mid Push) -> Plate Reverb -> Digital Delay",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1"
+            },
+            "purpose": "Provide light compression and smooth sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/gain stage",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Simulate a low-gain tube screamer/edge of breakup tone.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used to approximate the desired low-gain, warm grit without excessive distortion.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Slightly cleaner option if blues tone is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "50%",
+              "Treble": "60%",
+              "Mid": "70%",
+              "Bass": "55%"
+            },
+            "purpose": "Provide a clean, articulate, and warm foundation suitable for blues lead work.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide a classic, balanced British voicing that complements the US Deluxe amp model.",
+            "matchQuality": "close",
+            "gap": "While the source suggests 2x12, the UK Vintage 4x12 offers better overall tonal depth for sustained leads.",
+            "alternatives": [
+              {
+                "model": "US 2x12",
+                "reason": "If a smaller, more focused cabinet is preferred."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1 dB",
+              "Mid": "+3 dB",
+              "High": "+1 dB"
+            },
+            "purpose": "Implement the required 'slight mid push' for vocal presence and lead clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "3.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a 'roomy plate reverb' for depth and sustain without sounding overly wet.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Add minimal delay for subtle sustain and rhythmic interest.",
+            "matchQuality": "close",
+            "gap": "The settings are kept low to avoid the 'aggressive delay' mentioned in the instructions.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm edge-of-breakup blues lead with long sustain",
+          "toneProfile": "warm edge-of-breakup blues lead with long sustain",
+          "idealSignalChain": "strat-style single coils | low-gain tube screamer | D-style or F-style clean amp | 2x12 or 1x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "strat-style single coils",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "low-gain tube screamer",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "D-style or F-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 1x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "smooth singing sustain",
+            "slight mid push",
+            "light compression",
+            "roomy plate reverb",
+            "clear note attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, sustained blues lead tones using low-gain clean/edge-of-breakup amps and compression.",
+          "bestMatchSummary": "Compression -> Low Gain Boost -> US Deluxe Amp -> UK Vintage 4x12 Cab -> Guitar EQ 2 (Mid Push) -> Plate Reverb -> Digital Delay",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1"
+              },
+              "purpose": "Provide light compression and smooth sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/gain stage",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate a low-gain tube screamer/edge of breakup tone.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to approximate the desired low-gain, warm grit without excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Slightly cleaner option if blues tone is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Provide a clean, articulate, and warm foundation suitable for blues lead work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a classic, balanced British voicing that complements the US Deluxe amp model.",
+              "matchQuality": "close",
+              "gap": "While the source suggests 2x12, the UK Vintage 4x12 offers better overall tonal depth for sustained leads.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "If a smaller, more focused cabinet is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Implement the required 'slight mid push' for vocal presence and lead clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a 'roomy plate reverb' for depth and sustain without sounding overly wet.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Add minimal delay for subtle sustain and rhythmic interest.",
+              "matchQuality": "close",
+              "gap": "The settings are kept low to avoid the 'aggressive delay' mentioned in the instructions.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current 4x12 IR for a more appropriate, focused 2x12 voicing.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "US 2x12",
+              "reason": "Source suggests 2x12; provides tighter focus for lead tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter low end and more focused midrange clarity.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/vibrato",
+          "lean into sustained lead tone",
+          "keep delay minimal"
+        ],
+        "warnings": [
+          "This rig is optimized for a sustained, blues-rock lead tone. The compression and mid-boost will emphasize singing sustain over rhythmic complexity."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.476,
+      "prompt_chars": 1009,
+      "response_chars": 429,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 111,
+        "total_duration": 9473498800,
+        "prompt_eval_duration": 273369000,
+        "eval_duration": 1905224000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.76,
+      "prompt_chars": 5366,
+      "response_chars": 587,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 157,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1654
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 36.291,
+      "prompt_chars": 3690,
+      "response_chars": 4653,
+      "usage": {
+        "prompt_eval_count": 1242,
+        "eval_count": 1334,
+        "total_duration": 36269601800,
+        "prompt_eval_duration": 452833000,
+        "eval_duration": 22371965000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.139,
+      "prompt_chars": 6844,
+      "response_chars": 544,
+      "usage": {
+        "prompt_eval_count": 1933,
+        "eval_count": 155,
+        "total_duration": 3133699600,
+        "prompt_eval_duration": 341734000,
+        "eval_duration": 2362865000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 27.61,
+      "prompt_chars": 2714,
+      "response_chars": 167,
+      "usage": {
+        "prompt_eval_count": 858,
+        "eval_count": 48,
+        "total_duration": 27586093900,
+        "prompt_eval_duration": 563592000,
+        "eval_duration": 607926000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "John Mayer",
+      "title": "Slow Dancing In A Burning Room",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "John Mayer - Slow Dancing In A Burning Room - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm edge-of-breakup blues lead with long sustain",
+      "signalChainSummary": "Compression -> Low Gain Boost -> US Deluxe Amp -> UK Vintage 4x12 Cab -> Guitar EQ 2 (Mid Push) -> Plate Reverb -> Digital Delay",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1"
+          },
+          "purpose": "Provide light compression and smooth sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/gain stage",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Simulate a low-gain tube screamer/edge of breakup tone.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used to approximate the desired low-gain, warm grit without excessive distortion.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Slightly cleaner option if blues tone is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "50%",
+            "Treble": "60%",
+            "Mid": "70%",
+            "Bass": "55%"
+          },
+          "purpose": "Provide a clean, articulate, and warm foundation suitable for blues lead work.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide a classic, balanced British voicing that complements the US Deluxe amp model.",
+          "matchQuality": "close",
+          "gap": "While the source suggests 2x12, the UK Vintage 4x12 offers better overall tonal depth for sustained leads.",
+          "alternatives": [
+            {
+              "model": "US 2x12",
+              "reason": "If a smaller, more focused cabinet is preferred."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1 dB",
+            "Mid": "+3 dB",
+            "High": "+1 dB"
+          },
+          "purpose": "Implement the required 'slight mid push' for vocal presence and lead clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "3.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a 'roomy plate reverb' for depth and sustain without sounding overly wet.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Add minimal delay for subtle sustain and rhythmic interest.",
+          "matchQuality": "close",
+          "gap": "The settings are kept low to avoid the 'aggressive delay' mentioned in the instructions.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm edge-of-breakup blues lead with long sustain",
+      "mustHave": [
+        "smooth singing sustain",
+        "slight mid push",
+        "light compression",
+        "roomy plate reverb",
+        "clear note attack"
+      ],
+      "avoid": [
+        "chorus",
+        "vibrato modulation",
+        "clean arpeggio focus",
+        "heavy fuzz",
+        "aggressive delay"
+      ],
+      "gearClues": [
+        "strat-style single coils",
+        "low-gain tube screamer",
+        "D-style or F-style clean amp",
+        "2x12 or 1x12"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "lean into sustained lead tone",
+        "keep delay minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "soul",
+        "pop"
+      ],
+      "targetTone": "warm edge-of-breakup blues lead with long sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current 4x12 IR for a more appropriate, focused 2x12 voicing.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "US 2x12",
+          "reason": "Source suggests 2x12; provides tighter focus for lead tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter low end and more focused midrange clarity.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 739,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

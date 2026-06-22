@@ -1,0 +1,1159 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 593,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Hugues_Aufray__Santiano.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Hugues Aufray",
+    "title": "Santiano",
+    "album": "",
+    "year": null,
+    "genre": "chanson"
+  },
+  "genreClassification": {
+    "genre": "chanson",
+    "subgenres": [
+      "folk"
+    ],
+    "confidence": "high",
+    "rationale": "Hugues Aufray is a French singer known for chanson and folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rock tone with a vintage warmth.",
+      "signatureElements": [
+        "light fuzz/crunch",
+        "mid-range focus",
+        "vintage tube amp character",
+        "slight compression"
+      ],
+      "gearHypotheses": [
+        "British style crunch (AC30 emulation)",
+        "Overdrive pedal (Tube Screamer type) for grit",
+        "Spring reverb or plate reverb"
+      ],
+      "avoid": [
+        "extreme digital modulation",
+        "harsh high-gain metal tones",
+        "bright clean jazz sounds"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright folk-rock strum with light crunch",
+      "mustHave": [
+        "clear rhythmic strum",
+        "slight tube breakup",
+        "dry/near-dry mix",
+        "vintage warmth"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "lush chorus",
+        "big delay"
+      ],
+      "gearClues": [
+        "acoustic-like electric",
+        "Vox/AC30 or small tube combo",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "lean cleaner",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright folk-rock strum with light crunch",
+    "mustHave": [
+      "clear rhythmic strum",
+      "slight tube breakup",
+      "dry/near-dry mix",
+      "vintage warmth"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "metal gain",
+      "lush chorus",
+      "big delay"
+    ],
+    "gearClues": [
+      "acoustic-like electric",
+      "Vox/AC30 or small tube combo",
+      "1x12 or 2x12"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "lean cleaner",
+      "keep reverb minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, vintage British tones with light breakup for folk strumming.",
+          "bestMatchSummary": "A bright, clean signal chain utilizing a mild overdrive and classic UK amp models (AC30/UK 45) paired with a small cabinet to achieve a dry, warm, acoustic-like electric sound suitable for rhythmic strumming.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, vintage tube breakup and warmth for strumming.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a gentler, more 'acoustic-like' grit without heavy distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly heavier breakup than desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to maintain clean signal integrity.",
+              "matchQuality": "exact",
+              "gap": "No dedicated distortion module is needed as the Green OD provides sufficient light breakup.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the classic, bright British tube sound (Vox/AC30) required for folk-rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is the best match for the 'Vox/AC30' clue and vintage warmth.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Slightly more aggressive tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "Foxy 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Mimic the small combo amp sound (1x12 or 2x12) and provide a focused, bright tone.",
+              "matchQuality": "close",
+              "gap": "The Foxy 2x12 best captures the 'small tube combo' feel while maintaining brightness.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "Might be too American in tone."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the high end and presence to maintain 'bright' strumming clarity.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the bright, clear folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to keep the tone focused on strumming and clarity.",
+              "matchQuality": "exact",
+              "gap": "No wah effect is required for this genre/style.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to avoid 'lush chorus' and keep the sound dry.",
+              "matchQuality": "exact",
+              "gap": "The instructions explicitly advise against lush chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "2%",
+                "Level": "15%"
+              },
+              "purpose": "Add minimal rhythmic depth without sounding like a 'big delay'.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add subtle dimension, respecting the 'minimal reverb/delay' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space and vintage warmth without being excessive.",
+              "matchQuality": "close",
+              "gap": "Kept low to satisfy the 'keep reverb minimal' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial for folk-rock."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a vocal/folk-rock performance. This rig provides an electric guitar imitation designed for rhythmic strumming, focusing on vintage British clean tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture a small, natural-sounding combo amp tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 1x12 IR (e.g., Fender Twin/Vox)",
+              "reason": "The current Foxy 2x12 might be too modern; a vintage combo IR will enhance the acoustic-like, natural folk tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more organic sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Hugues Aufray - Santiano - Valeton GP-180",
+        "song": {
+          "artist": "Hugues Aufray",
+          "title": "Santiano",
+          "album": "",
+          "year": null,
+          "genre": "chanson"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright folk-rock strum with light crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, clean signal chain utilizing a mild overdrive and classic UK amp models (AC30/UK 45) paired with a small cabinet to achieve a dry, warm, acoustic-like electric sound suitable for rhythmic strumming.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide light, vintage tube breakup and warmth for strumming.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a gentler, more 'acoustic-like' grit without heavy distortion.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly heavier breakup than desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass to maintain clean signal integrity.",
+            "matchQuality": "exact",
+            "gap": "No dedicated distortion module is needed as the Green OD provides sufficient light breakup.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Mid": "6/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate the classic, bright British tube sound (Vox/AC30) required for folk-rock.",
+            "matchQuality": "close",
+            "gap": "The AC30 TB is the best match for the 'Vox/AC30' clue and vintage warmth.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Slightly more aggressive tone."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "Foxy 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Mimic the small combo amp sound (1x12 or 2x12) and provide a focused, bright tone.",
+            "matchQuality": "close",
+            "gap": "The Foxy 2x12 best captures the 'small tube combo' feel while maintaining brightness.",
+            "alternatives": [
+              {
+                "model": "US 2x12",
+                "reason": "Might be too American in tone."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Slightly boost the high end and presence to maintain 'bright' strumming clarity.",
+            "matchQuality": "close",
+            "gap": "Used for fine-tuning the bright, clear folk tone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass to keep the tone focused on strumming and clarity.",
+            "matchQuality": "exact",
+            "gap": "No wah effect is required for this genre/style.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass to avoid 'lush chorus' and keep the sound dry.",
+            "matchQuality": "exact",
+            "gap": "The instructions explicitly advise against lush chorus.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "250 ms",
+              "Feedback": "2%",
+              "Level": "15%"
+            },
+            "purpose": "Add minimal rhythmic depth without sounding like a 'big delay'.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add subtle dimension, respecting the 'minimal reverb/delay' rule.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide a subtle sense of space and vintage warmth without being excessive.",
+            "matchQuality": "close",
+            "gap": "Kept low to satisfy the 'keep reverb minimal' requirement.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Might sound too artificial for folk-rock."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright folk-rock strum with light crunch",
+          "toneProfile": "bright folk-rock strum with light crunch",
+          "idealSignalChain": "acoustic-like electric | Vox/AC30 or small tube combo | 1x12 or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic-like electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/AC30 or small tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clear rhythmic strum",
+            "slight tube breakup",
+            "dry/near-dry mix",
+            "vintage warmth"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, vintage British tones with light breakup for folk strumming.",
+          "bestMatchSummary": "A bright, clean signal chain utilizing a mild overdrive and classic UK amp models (AC30/UK 45) paired with a small cabinet to achieve a dry, warm, acoustic-like electric sound suitable for rhythmic strumming.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide light, vintage tube breakup and warmth for strumming.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a gentler, more 'acoustic-like' grit without heavy distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly heavier breakup than desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to maintain clean signal integrity.",
+              "matchQuality": "exact",
+              "gap": "No dedicated distortion module is needed as the Green OD provides sufficient light breakup.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Mid": "6/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate the classic, bright British tube sound (Vox/AC30) required for folk-rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is the best match for the 'Vox/AC30' clue and vintage warmth.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Slightly more aggressive tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "Foxy 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Mimic the small combo amp sound (1x12 or 2x12) and provide a focused, bright tone.",
+              "matchQuality": "close",
+              "gap": "The Foxy 2x12 best captures the 'small tube combo' feel while maintaining brightness.",
+              "alternatives": [
+                {
+                  "model": "US 2x12",
+                  "reason": "Might be too American in tone."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the high end and presence to maintain 'bright' strumming clarity.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the bright, clear folk tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to keep the tone focused on strumming and clarity.",
+              "matchQuality": "exact",
+              "gap": "No wah effect is required for this genre/style.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to avoid 'lush chorus' and keep the sound dry.",
+              "matchQuality": "exact",
+              "gap": "The instructions explicitly advise against lush chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "2%",
+                "Level": "15%"
+              },
+              "purpose": "Add minimal rhythmic depth without sounding like a 'big delay'.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add subtle dimension, respecting the 'minimal reverb/delay' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space and vintage warmth without being excessive.",
+              "matchQuality": "close",
+              "gap": "Kept low to satisfy the 'keep reverb minimal' requirement.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Might sound too artificial for folk-rock."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better capture a small, natural-sounding combo amp tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 1x12 IR (e.g., Fender Twin/Vox)",
+              "reason": "The current Foxy 2x12 might be too modern; a vintage combo IR will enhance the acoustic-like, natural folk tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more organic sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "lean cleaner",
+          "keep reverb minimal"
+        ],
+        "warnings": [
+          "The source material is a vocal/folk-rock performance. This rig provides an electric guitar imitation designed for rhythmic strumming, focusing on vintage British clean tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.304,
+      "prompt_chars": 990,
+      "response_chars": 459,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 111,
+        "total_duration": 9302451600,
+        "prompt_eval_duration": 174193000,
+        "eval_duration": 1828869000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.842,
+      "prompt_chars": 5383,
+      "response_chars": 469,
+      "usage": {
+        "input_tokens": 1500,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1634
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.069,
+      "prompt_chars": 3532,
+      "response_chars": 6138,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1753,
+        "total_duration": 31062568900,
+        "prompt_eval_duration": 250580000,
+        "eval_duration": 30354185000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 2.5,
+      "prompt_chars": 8259,
+      "response_chars": 594,
+      "usage": {
+        "prompt_eval_count": 2313,
+        "eval_count": 173,
+        "total_duration": 2471329800,
+        "prompt_eval_duration": 342428000,
+        "eval_duration": 1741716000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.108,
+      "prompt_chars": 2832,
+      "response_chars": 148,
+      "usage": {
+        "prompt_eval_count": 908,
+        "eval_count": 43,
+        "total_duration": 8105107200,
+        "prompt_eval_duration": 390490000,
+        "eval_duration": 762467000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Hugues Aufray",
+      "title": "Santiano",
+      "album": "",
+      "year": null,
+      "genre": "chanson"
+    },
+    "rig": {
+      "rigName": "Hugues Aufray - Santiano - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright folk-rock strum with light crunch",
+      "signalChainSummary": "A bright, clean signal chain utilizing a mild overdrive and classic UK amp models (AC30/UK 45) paired with a small cabinet to achieve a dry, warm, acoustic-like electric sound suitable for rhythmic strumming.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide light, vintage tube breakup and warmth for strumming.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a gentler, more 'acoustic-like' grit without heavy distortion.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly heavier breakup than desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass to maintain clean signal integrity.",
+          "matchQuality": "exact",
+          "gap": "No dedicated distortion module is needed as the Green OD provides sufficient light breakup.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Mid": "6/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate the classic, bright British tube sound (Vox/AC30) required for folk-rock.",
+          "matchQuality": "close",
+          "gap": "The AC30 TB is the best match for the 'Vox/AC30' clue and vintage warmth.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Slightly more aggressive tone."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "Foxy 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Mimic the small combo amp sound (1x12 or 2x12) and provide a focused, bright tone.",
+          "matchQuality": "close",
+          "gap": "The Foxy 2x12 best captures the 'small tube combo' feel while maintaining brightness.",
+          "alternatives": [
+            {
+              "model": "US 2x12",
+              "reason": "Might be too American in tone."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Slightly boost the high end and presence to maintain 'bright' strumming clarity.",
+          "matchQuality": "close",
+          "gap": "Used for fine-tuning the bright, clear folk tone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass to keep the tone focused on strumming and clarity.",
+          "matchQuality": "exact",
+          "gap": "No wah effect is required for this genre/style.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass to avoid 'lush chorus' and keep the sound dry.",
+          "matchQuality": "exact",
+          "gap": "The instructions explicitly advise against lush chorus.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "250 ms",
+            "Feedback": "2%",
+            "Level": "15%"
+          },
+          "purpose": "Add minimal rhythmic depth without sounding like a 'big delay'.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add subtle dimension, respecting the 'minimal reverb/delay' rule.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide a subtle sense of space and vintage warmth without being excessive.",
+          "matchQuality": "close",
+          "gap": "Kept low to satisfy the 'keep reverb minimal' requirement.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Might sound too artificial for folk-rock."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright folk-rock strum with light crunch",
+      "mustHave": [
+        "clear rhythmic strum",
+        "slight tube breakup",
+        "dry/near-dry mix",
+        "vintage warmth"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "lush chorus",
+        "big delay"
+      ],
+      "gearClues": [
+        "acoustic-like electric",
+        "Vox/AC30 or small tube combo",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "lean cleaner",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "chanson",
+      "styleTags": [
+        "folk"
+      ],
+      "targetTone": "bright folk-rock strum with light crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better capture a small, natural-sounding combo amp tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 1x12 IR (e.g., Fender Twin/Vox)",
+          "reason": "The current Foxy 2x12 might be too modern; a vintage combo IR will enhance the acoustic-like, natural folk tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more organic sound",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 593,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

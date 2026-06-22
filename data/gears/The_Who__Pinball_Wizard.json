@@ -1,0 +1,1103 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1643,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Who__Pinball_Wizard.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Who",
+    "title": "Pinball Wizard",
+    "album": "",
+    "year": null,
+    "genre": "mod rock"
+  },
+  "genreClassification": {
+    "genre": "mod rock",
+    "subgenres": [
+      "british rock",
+      "rock and roll",
+      "punk influence"
+    ],
+    "confidence": "high",
+    "rationale": "The Who's sound is foundational to mod and British rock genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, aggressive crunch with pronounced bite and sustain.",
+      "signatureElements": [
+        "Fuzz/Overdrive (aggressive)",
+        "Crunch (mid-focused)",
+        "Sustain",
+        "Wah (optional)"
+      ],
+      "gearHypotheses": [
+        "High-output Tube Screamer style pedal (for mid-hump)",
+        "British Plexi or Marshall style amp model",
+        "Cabinet simulation with aggressive speaker voicing"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Heavy modulation (chorus/flanger)",
+        "Deep reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "driven British crunch with tight bite",
+      "mustHave": [
+        "midforward crunch",
+        "ringing attack",
+        "light sustain",
+        "optional wah color"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "flanger",
+        "deep reverb"
+      ],
+      "gearClues": [
+        "Marshall/Plexi amp",
+        "upper-mid cab",
+        "single-coil or humbucker"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "keep it more crunch than overdrive",
+        "make wah optional not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "driven British crunch with tight bite",
+    "mustHave": [
+      "midforward crunch",
+      "ringing attack",
+      "light sustain",
+      "optional wah color"
+    ],
+    "avoid": [
+      "clean tone",
+      "chorus",
+      "flanger",
+      "deep reverb"
+    ],
+    "gearClues": [
+      "Marshall/Plexi amp",
+      "upper-mid cab",
+      "single-coil or humbucker"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "keep it more crunch than overdrive",
+      "make wah optional not core"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British crunch and mid-range punch, mimicking Plexi/Marshall tones.",
+          "bestMatchSummary": "A classic British rock chain using a Boost for initial bite, Distortion for core crunch, an AC30 TB amp model, and a UK Vintage 4x12 cab to achieve the required midforward, ringing tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise inherent in crunchy rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial bite and tighten the attack for the 'ringing' effect.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD/Green OD to keep the tone focused on crunch rather than pure overdrive.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A solid alternative for initial drive, but Boost is cleaner for this specific 'bite' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah pedal",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "500 Hz",
+                "Resonance": "6"
+              },
+              "purpose": "Optional wah color and vocal sweep for added dimension.",
+              "matchQuality": "close",
+              "gap": "The requirement stated 'optional wah,' so this is included but kept subtle.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/crunch core",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Establish the core 'midforward crunch' and sustain.",
+              "matchQuality": "close",
+              "gap": "Using general Distortion model to achieve a classic Marshall-style grit, avoiding deep fuzz or pure overdrive.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could provide more aggressive bite, but 'Distortion' is safer for the Plexi vibe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the necessary upper-mid frequency punch and British cabinet character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Fine-tune the mid-range punch and tighten the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Included as a potential subtle texture layer, but kept inactive to avoid conflicting with the 'crunch' focus.",
+              "matchQuality": "close",
+              "gap": "The verdict explicitly avoids chorus, so this is included only for completeness and can be bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Subtle rhythmic echo for added depth without muddying the crunch.",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary, but a subtle delay can enhance the 'ringing' attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a touch of natural room ambience without the deep wash of plate/spring reverb.",
+              "matchQuality": "close",
+              "gap": "The verdict advises against 'deep reverb,' so this is kept subtle and controlled.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "This rig is optimized for British rock crunch (Plexi/Marshall style). The Chorus module is set to inactive by default, as per the 'avoid' list."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better upper-mid punch and vintage British cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK Plexi IR",
+              "reason": "Enhance the specific midforward, ringing bite required for The Who's sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Who - Pinball Wizard - Valeton GP-180",
+        "song": {
+          "artist": "The Who",
+          "title": "Pinball Wizard",
+          "album": "",
+          "year": null,
+          "genre": "mod rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "driven British crunch with tight bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British rock chain using a Boost for initial bite, Distortion for core crunch, an AC30 TB amp model, and a UK Vintage 4x12 cab to achieve the required midforward, ringing tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain noise inherent in crunchy rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide initial bite and tighten the attack for the 'ringing' effect.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of OD/Green OD to keep the tone focused on crunch rather than pure overdrive.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A solid alternative for initial drive, but Boost is cleaner for this specific 'bite' requirement."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah pedal",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "500 Hz",
+              "Resonance": "6"
+            },
+            "purpose": "Optional wah color and vocal sweep for added dimension.",
+            "matchQuality": "close",
+            "gap": "The requirement stated 'optional wah,' so this is included but kept subtle.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/crunch core",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Establish the core 'midforward crunch' and sustain.",
+            "matchQuality": "close",
+            "gap": "Using general Distortion model to achieve a classic Marshall-style grit, avoiding deep fuzz or pure overdrive.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could provide more aggressive bite, but 'Distortion' is safer for the Plexi vibe."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the necessary upper-mid frequency punch and British cabinet character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+1 dB"
+            },
+            "purpose": "Fine-tune the mid-range punch and tighten the overall tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3"
+            },
+            "purpose": "Included as a potential subtle texture layer, but kept inactive to avoid conflicting with the 'crunch' focus.",
+            "matchQuality": "close",
+            "gap": "The verdict explicitly avoids chorus, so this is included only for completeness and can be bypassed.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Subtle rhythmic echo for added depth without muddying the crunch.",
+            "matchQuality": "close",
+            "gap": "Not strictly necessary, but a subtle delay can enhance the 'ringing' attack.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a touch of natural room ambience without the deep wash of plate/spring reverb.",
+            "matchQuality": "close",
+            "gap": "The verdict advises against 'deep reverb,' so this is kept subtle and controlled.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "driven British crunch with tight bite",
+          "toneProfile": "driven British crunch with tight bite",
+          "idealSignalChain": "Marshall/Plexi amp | upper-mid cab | single-coil or humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "upper-mid cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "midforward crunch",
+            "ringing attack",
+            "light sustain",
+            "optional wah color"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British crunch and mid-range punch, mimicking Plexi/Marshall tones.",
+          "bestMatchSummary": "A classic British rock chain using a Boost for initial bite, Distortion for core crunch, an AC30 TB amp model, and a UK Vintage 4x12 cab to achieve the required midforward, ringing tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain noise inherent in crunchy rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial bite and tighten the attack for the 'ringing' effect.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD/Green OD to keep the tone focused on crunch rather than pure overdrive.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A solid alternative for initial drive, but Boost is cleaner for this specific 'bite' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah pedal",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "500 Hz",
+                "Resonance": "6"
+              },
+              "purpose": "Optional wah color and vocal sweep for added dimension.",
+              "matchQuality": "close",
+              "gap": "The requirement stated 'optional wah,' so this is included but kept subtle.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/crunch core",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Establish the core 'midforward crunch' and sustain.",
+              "matchQuality": "close",
+              "gap": "Using general Distortion model to achieve a classic Marshall-style grit, avoiding deep fuzz or pure overdrive.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could provide more aggressive bite, but 'Distortion' is safer for the Plexi vibe."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the necessary upper-mid frequency punch and British cabinet character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Fine-tune the mid-range punch and tighten the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Included as a potential subtle texture layer, but kept inactive to avoid conflicting with the 'crunch' focus.",
+              "matchQuality": "close",
+              "gap": "The verdict explicitly avoids chorus, so this is included only for completeness and can be bypassed.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Subtle rhythmic echo for added depth without muddying the crunch.",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary, but a subtle delay can enhance the 'ringing' attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a touch of natural room ambience without the deep wash of plate/spring reverb.",
+              "matchQuality": "close",
+              "gap": "The verdict advises against 'deep reverb,' so this is kept subtle and controlled.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better upper-mid punch and vintage British cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK Plexi IR",
+              "reason": "Enhance the specific midforward, ringing bite required for The Who's sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "keep it more crunch than overdrive",
+          "make wah optional not core"
+        ],
+        "warnings": [
+          "This rig is optimized for British rock crunch (Plexi/Marshall style). The Chorus module is set to inactive by default, as per the 'avoid' list."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.199,
+      "prompt_chars": 990,
+      "response_chars": 461,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 115,
+        "total_duration": 10176855000,
+        "prompt_eval_duration": 349953000,
+        "eval_duration": 1840126000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.665,
+      "prompt_chars": 5385,
+      "response_chars": 475,
+      "usage": {
+        "input_tokens": 1500,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 128,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1628
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 29.542,
+      "prompt_chars": 3538,
+      "response_chars": 5781,
+      "usage": {
+        "prompt_eval_count": 1194,
+        "eval_count": 1619,
+        "total_duration": 29525083800,
+        "prompt_eval_duration": 414220000,
+        "eval_duration": 28587673000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.298,
+      "prompt_chars": 7878,
+      "response_chars": 506,
+      "usage": {
+        "prompt_eval_count": 2170,
+        "eval_count": 137,
+        "total_duration": 3277037800,
+        "prompt_eval_duration": 450452000,
+        "eval_duration": 2335827000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.394,
+      "prompt_chars": 2798,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 879,
+        "eval_count": 51,
+        "total_duration": 9371527100,
+        "prompt_eval_duration": 419919000,
+        "eval_duration": 1047983999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Who",
+      "title": "Pinball Wizard",
+      "album": "",
+      "year": null,
+      "genre": "mod rock"
+    },
+    "rig": {
+      "rigName": "The Who - Pinball Wizard - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "driven British crunch with tight bite",
+      "signalChainSummary": "A classic British rock chain using a Boost for initial bite, Distortion for core crunch, an AC30 TB amp model, and a UK Vintage 4x12 cab to achieve the required midforward, ringing tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain noise inherent in crunchy rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide initial bite and tighten the attack for the 'ringing' effect.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of OD/Green OD to keep the tone focused on crunch rather than pure overdrive.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A solid alternative for initial drive, but Boost is cleaner for this specific 'bite' requirement."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah pedal",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "500 Hz",
+            "Resonance": "6"
+          },
+          "purpose": "Optional wah color and vocal sweep for added dimension.",
+          "matchQuality": "close",
+          "gap": "The requirement stated 'optional wah,' so this is included but kept subtle.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/crunch core",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Establish the core 'midforward crunch' and sustain.",
+          "matchQuality": "close",
+          "gap": "Using general Distortion model to achieve a classic Marshall-style grit, avoiding deep fuzz or pure overdrive.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could provide more aggressive bite, but 'Distortion' is safer for the Plexi vibe."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the classic British Plexi/Marshall sound profile.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the necessary upper-mid frequency punch and British cabinet character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+1 dB"
+          },
+          "purpose": "Fine-tune the mid-range punch and tighten the overall tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3"
+          },
+          "purpose": "Included as a potential subtle texture layer, but kept inactive to avoid conflicting with the 'crunch' focus.",
+          "matchQuality": "close",
+          "gap": "The verdict explicitly avoids chorus, so this is included only for completeness and can be bypassed.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Subtle rhythmic echo for added depth without muddying the crunch.",
+          "matchQuality": "close",
+          "gap": "Not strictly necessary, but a subtle delay can enhance the 'ringing' attack.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a touch of natural room ambience without the deep wash of plate/spring reverb.",
+          "matchQuality": "close",
+          "gap": "The verdict advises against 'deep reverb,' so this is kept subtle and controlled.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "driven British crunch with tight bite",
+      "mustHave": [
+        "midforward crunch",
+        "ringing attack",
+        "light sustain",
+        "optional wah color"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "flanger",
+        "deep reverb"
+      ],
+      "gearClues": [
+        "Marshall/Plexi amp",
+        "upper-mid cab",
+        "single-coil or humbucker"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "keep it more crunch than overdrive",
+        "make wah optional not core"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "mod rock",
+      "styleTags": [
+        "british rock",
+        "rock and roll",
+        "punk influence"
+      ],
+      "targetTone": "driven British crunch with tight bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better upper-mid punch and vintage British cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 UK Plexi IR",
+          "reason": "Enhance the specific midforward, ringing bite required for The Who's sound.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1643,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

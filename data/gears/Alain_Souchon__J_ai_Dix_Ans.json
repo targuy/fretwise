@@ -1,0 +1,1030 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 34,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Alain_Souchon__J_ai_Dix_Ans.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Alain Souchon",
+    "title": "J'ai Dix Ans",
+    "album": "",
+    "year": null,
+    "genre": "pop"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with noticeable reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "modulation"
+      ],
+      "gearHypotheses": [
+        "Spring Reverb simulation",
+        "Chorus/Vibrato effect",
+        "Tube-screamer style overdrive (subtle)"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Heavy distortion",
+        "Crunch"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright jangly 60s pop clean with light spring reverb",
+      "mustHave": [
+        "clean edge",
+        "jangle",
+        "light spring reverb",
+        "simple pop rhythm"
+      ],
+      "avoid": [
+        "delay wash",
+        "heavy modulation",
+        "fuzz",
+        "modern overdrive"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender clean",
+        "small combo",
+        "spring reverb"
+      ],
+      "corrections": [
+        "drop delay",
+        "drop chorus",
+        "keep it mostly dry",
+        "use light reverb only"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright jangly 60s pop clean with light spring reverb",
+    "mustHave": [
+      "clean edge",
+      "jangle",
+      "light spring reverb",
+      "simple pop rhythm"
+    ],
+    "avoid": [
+      "delay wash",
+      "heavy modulation",
+      "fuzz",
+      "modern overdrive"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Vox/Fender clean",
+      "small combo",
+      "spring reverb"
+    ],
+    "corrections": [
+      "drop delay",
+      "drop chorus",
+      "keep it mostly dry",
+      "use light reverb only"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones using classic British/American combo models and emphasizing jangle with Chorus/Spring.",
+          "bestMatchSummary": "A bright, jangly 60s pop sound achieved through a clean preamp (Green OD/Boost), coupled with the US Deluxe or Silver Twin amp model, finished with a Spring reverb and light EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Provide a subtle clean edge and boost the signal for jangle.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a gentle, transparent boost/overdrive to achieve the 'clean edge' without sounding like modern dirt.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple clean boost would also work well."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to maintain maximum clarity and avoid unwanted dirt.",
+              "matchQuality": "exact",
+              "gap": "The target tone explicitly avoids fuzz or heavy overdrive, so the distortion block is bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright sound of a small American combo (Vox/Fender style).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic, articulate clean headroom.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for a bright, clean tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound matching the US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the bright, jangly character required for 60s pop.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "2",
+                "Mix": "40%"
+              },
+              "purpose": "Introduce the required 'jangle' effect characteristic of 60s pop.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used lightly to provide shimmer and width, fulfilling the jangle requirement without heavy modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3s"
+              },
+              "purpose": "Provide the specified light spring reverb for vintage pop ambiance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (vocal/pop), so the rig focuses on creating a bright, clean rhythm guitar accompaniment suitable for pop music."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the vintage, jangly 60s pop aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British combo IR (e.g., AC30/Vox)",
+              "reason": "A classic British cab will enhance the vintage, jangly 60s pop sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage character and warmth.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Alain Souchon - J'ai Dix Ans - Valeton GP-180",
+        "song": {
+          "artist": "Alain Souchon",
+          "title": "J'ai Dix Ans",
+          "album": "",
+          "year": null,
+          "genre": "pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright jangly 60s pop clean with light spring reverb",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, jangly 60s pop sound achieved through a clean preamp (Green OD/Boost), coupled with the US Deluxe or Silver Twin amp model, finished with a Spring reverb and light EQ shaping.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "10%",
+              "Tone": "7",
+              "Level": "6"
+            },
+            "purpose": "Provide a subtle clean edge and boost the signal for jangle.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here as a gentle, transparent boost/overdrive to achieve the 'clean edge' without sounding like modern dirt.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "A simple clean boost would also work well."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass to maintain maximum clarity and avoid unwanted dirt.",
+            "matchQuality": "exact",
+            "gap": "The target tone explicitly avoids fuzz or heavy overdrive, so the distortion block is bypassed entirely.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the clean, bright sound of a small American combo (Vox/Fender style).",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its classic, articulate clean headroom.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also suitable for a bright, clean tone."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and focused cabinet sound matching the US Deluxe amp.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the high end and cut unnecessary low-end mud.",
+            "matchQuality": "close",
+            "gap": "Used to fine-tune the bright, jangly character required for 60s pop.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "2",
+              "Mix": "40%"
+            },
+            "purpose": "Introduce the required 'jangle' effect characteristic of 60s pop.",
+            "matchQuality": "close",
+            "gap": "The Chorus is used lightly to provide shimmer and width, fulfilling the jangle requirement without heavy modulation.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Spring",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "3s"
+            },
+            "purpose": "Provide the specified light spring reverb for vintage pop ambiance.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright jangly 60s pop clean with light spring reverb",
+          "toneProfile": "bright jangly 60s pop clean with light spring reverb",
+          "idealSignalChain": "single-coil guitar | Vox/Fender clean | small combo | spring reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Fender clean",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean edge",
+            "jangle",
+            "light spring reverb",
+            "simple pop rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones using classic British/American combo models and emphasizing jangle with Chorus/Spring.",
+          "bestMatchSummary": "A bright, jangly 60s pop sound achieved through a clean preamp (Green OD/Boost), coupled with the US Deluxe or Silver Twin amp model, finished with a Spring reverb and light EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "7",
+                "Level": "6"
+              },
+              "purpose": "Provide a subtle clean edge and boost the signal for jangle.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a gentle, transparent boost/overdrive to achieve the 'clean edge' without sounding like modern dirt.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple clean boost would also work well."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass to maintain maximum clarity and avoid unwanted dirt.",
+              "matchQuality": "exact",
+              "gap": "The target tone explicitly avoids fuzz or heavy overdrive, so the distortion block is bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright sound of a small American combo (Vox/Fender style).",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic, articulate clean headroom.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for a bright, clean tone."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound matching the US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and cut unnecessary low-end mud.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the bright, jangly character required for 60s pop.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "2",
+                "Mix": "40%"
+              },
+              "purpose": "Introduce the required 'jangle' effect characteristic of 60s pop.",
+              "matchQuality": "close",
+              "gap": "The Chorus is used lightly to provide shimmer and width, fulfilling the jangle requirement without heavy modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Spring",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "3s"
+              },
+              "purpose": "Provide the specified light spring reverb for vintage pop ambiance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the vintage, jangly 60s pop aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British combo IR (e.g., AC30/Vox)",
+              "reason": "A classic British cab will enhance the vintage, jangly 60s pop sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased vintage character and warmth.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop delay",
+          "drop chorus",
+          "keep it mostly dry",
+          "use light reverb only"
+        ],
+        "warnings": [
+          "The source material is non-guitar (vocal/pop), so the rig focuses on creating a bright, clean rhythm guitar accompaniment suitable for pop music."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.556,
+      "prompt_chars": 979,
+      "response_chars": 339,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 88,
+        "total_duration": 1543235100,
+        "prompt_eval_duration": 90532000,
+        "eval_duration": 937609000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.734,
+      "prompt_chars": 5250,
+      "response_chars": 492,
+      "usage": {
+        "input_tokens": 1475,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1609
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 16.871,
+      "prompt_chars": 3503,
+      "response_chars": 5070,
+      "usage": {
+        "prompt_eval_count": 1175,
+        "eval_count": 1449,
+        "total_duration": 16864350200,
+        "prompt_eval_duration": 319146000,
+        "eval_duration": 16062659000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.953,
+      "prompt_chars": 7147,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 2009,
+        "eval_count": 154,
+        "total_duration": 1925045200,
+        "prompt_eval_duration": 197077000,
+        "eval_duration": 1232834000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.922,
+      "prompt_chars": 2750,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 890,
+        "eval_count": 56,
+        "total_duration": 905011300,
+        "prompt_eval_duration": 105543000,
+        "eval_duration": 422437000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Alain Souchon",
+      "title": "J'ai Dix Ans",
+      "album": "",
+      "year": null,
+      "genre": "pop"
+    },
+    "rig": {
+      "rigName": "Alain Souchon - J'ai Dix Ans - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright jangly 60s pop clean with light spring reverb",
+      "signalChainSummary": "A bright, jangly 60s pop sound achieved through a clean preamp (Green OD/Boost), coupled with the US Deluxe or Silver Twin amp model, finished with a Spring reverb and light EQ shaping.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "10%",
+            "Tone": "7",
+            "Level": "6"
+          },
+          "purpose": "Provide a subtle clean edge and boost the signal for jangle.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here as a gentle, transparent boost/overdrive to achieve the 'clean edge' without sounding like modern dirt.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "A simple clean boost would also work well."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass to maintain maximum clarity and avoid unwanted dirt.",
+          "matchQuality": "exact",
+          "gap": "The target tone explicitly avoids fuzz or heavy overdrive, so the distortion block is bypassed entirely.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the clean, bright sound of a small American combo (Vox/Fender style).",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its classic, articulate clean headroom.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable for a bright, clean tone."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and focused cabinet sound matching the US Deluxe amp.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the high end and cut unnecessary low-end mud.",
+          "matchQuality": "close",
+          "gap": "Used to fine-tune the bright, jangly character required for 60s pop.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "2",
+            "Mix": "40%"
+          },
+          "purpose": "Introduce the required 'jangle' effect characteristic of 60s pop.",
+          "matchQuality": "close",
+          "gap": "The Chorus is used lightly to provide shimmer and width, fulfilling the jangle requirement without heavy modulation.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Spring",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "3s"
+          },
+          "purpose": "Provide the specified light spring reverb for vintage pop ambiance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright jangly 60s pop clean with light spring reverb",
+      "mustHave": [
+        "clean edge",
+        "jangle",
+        "light spring reverb",
+        "simple pop rhythm"
+      ],
+      "avoid": [
+        "delay wash",
+        "heavy modulation",
+        "fuzz",
+        "modern overdrive"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender clean",
+        "small combo",
+        "spring reverb"
+      ],
+      "corrections": [
+        "drop delay",
+        "drop chorus",
+        "keep it mostly dry",
+        "use light reverb only"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop",
+      "styleTags": [
+        "french pop",
+        "60s pop"
+      ],
+      "targetTone": "bright jangly 60s pop clean with light spring reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better match the vintage, jangly 60s pop aesthetic.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage British combo IR (e.g., AC30/Vox)",
+          "reason": "A classic British cab will enhance the vintage, jangly 60s pop sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased vintage character and warmth.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 34,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "pop",
+    "subgenres": [
+      "french pop",
+      "60s pop"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre is 'pop', and the tone profile strongly suggests 1960s French pop sounds."
+  }
+}

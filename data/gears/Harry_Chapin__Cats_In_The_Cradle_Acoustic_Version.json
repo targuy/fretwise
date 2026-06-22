@@ -1,0 +1,1128 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 569,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Harry_Chapin__Cats_In_The_Cradle_Acoustic_Version.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Harry Chapin",
+    "title": "Cats In The Cradle (Acoustic Version)",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic acoustic folk/singer-songwriter piece."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, fingerpicked acoustic folk tone with subtle vintage coloration.",
+      "signatureElements": [
+        "fingerpicking arpeggios",
+        "acoustic warmth",
+        "subtle reverb",
+        "vintage tube amp emulation"
+      ],
+      "gearHypotheses": [
+        "Clean/Acoustic model (e.g., Fender Twin or Vox AC36 style)",
+        "Light compression for consistency",
+        "Plate or spring reverb"
+      ],
+      "avoid": [
+        "Distortion",
+        "Heavy modulation",
+        "Wah pedal effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "warm fingerpicked acoustic folk, dry and intimate",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "acoustic body warmth",
+        "close vocal-bed mix",
+        "light room only"
+      ],
+      "avoid": [
+        "electric amp chime",
+        "plate reverb",
+        "heavy compression",
+        "modulation",
+        "wah"
+      ],
+      "gearClues": [
+        "acoustic sim or piezo",
+        "very light compression",
+        "small room"
+      ],
+      "corrections": [
+        "remove electric amp guesses",
+        "drop plate reverb",
+        "keep it mostly dry"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "acoustic version can be non-guitar or ambiguous",
+      "draft leans on electric amp models for an acoustic part",
+      "signature recording context is unclear"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "dry fingerpicked acoustic folk, intimate and warm",
+    "mustHave": [
+      "fingerpicked arpeggios",
+      "acoustic body resonance",
+      "close dry mix"
+    ],
+    "avoid": [
+      "electric amp models",
+      "plate reverb",
+      "compression artifacts",
+      "modulation"
+    ],
+    "gearClues": [
+      "acoustic sim or piezo input",
+      "minimal room ambience",
+      "no electric coloration"
+    ],
+    "corrections": [
+      "remove Fender Twin and Vox AC30 references",
+      "drop vintage tube amp emulation",
+      "keep reverb minimal or off"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "dry fingerpicked acoustic folk, intimate and warm",
+    "mustHave": [
+      "fingerpicked arpeggios",
+      "acoustic body resonance",
+      "close dry mix"
+    ],
+    "avoid": [
+      "electric amp models",
+      "plate reverb",
+      "compression artifacts",
+      "modulation"
+    ],
+    "gearClues": [
+      "acoustic sim or piezo input",
+      "minimal room ambience",
+      "no electric coloration"
+    ],
+    "corrections": [
+      "remove Fender Twin and Vox AC30 references",
+      "drop vintage tube amp emulation",
+      "keep reverb minimal or off"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "Clean, warm acoustic folk tone using a clean preamp and minimal reverb to simulate fingerpicked arpeggios.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "2:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used gently, avoiding heavy artifacts as requested. Ideal for acoustic warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass drive section to maintain clean acoustic character.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provides a clean, warm American tone suitable for folk and acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best available clean amp model to avoid vintage tube coloration while maintaining warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates a small, intimate acoustic setting with minimal coloration.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clean voicing and compact sound, fitting the 'intimate' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slight boost in bass and mids to enhance the body resonance of acoustic arpeggios.",
+              "matchQuality": "exact",
+              "gap": "Used for subtle tonal shaping, enhancing warmth without sounding artificial.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass wah to keep the tone natural and uncolored.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass modulation to maintain the dry, natural acoustic sound.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle echo to add depth without sounding like a typical delay effect.",
+              "matchQuality": "close",
+              "gap": "Used sparingly (low mix/feedback) to enhance the sense of space, not as a primary effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Minimal room ambience to give the arpeggios a sense of space without sounding artificial or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used at very low mix levels, respecting the 'minimal' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk (non-electric). This rig uses an electric guitar input and simulates the tone using clean, warm amp models to achieve the desired 'acoustic body resonance' effect."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current IR with a highly natural acoustic simulation cabinet to better capture the intimate, dry sound of fingerpicked arpeggios.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic body resonance/Intimacy",
+              "recommendedAsset": "High-quality Acoustic Simulation IR (e.g., specific mic on a parlor guitar)",
+              "reason": "The current US 2x12 is too 'electric' and lacks the natural, dry resonance of an acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Harry Chapin - Cats In The Cradle (Acoustic Version) - Valeton GP-180",
+        "song": {
+          "artist": "Harry Chapin",
+          "title": "Cats In The Cradle (Acoustic Version)",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry fingerpicked acoustic folk, intimate and warm",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Clean, warm acoustic folk tone using a clean preamp and minimal reverb to simulate fingerpicked arpeggios.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and fingerpicking transients.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "2:1",
+              "Attack": "Medium"
+            },
+            "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used gently, avoiding heavy artifacts as requested. Ideal for acoustic warmth.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass drive section to maintain clean acoustic character.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "2",
+              "Treble": "5",
+              "Midrange": "6",
+              "Bass": "4"
+            },
+            "purpose": "Provides a clean, warm American tone suitable for folk and acoustic simulation.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best available clean amp model to avoid vintage tube coloration while maintaining warmth.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulates a small, intimate acoustic setting with minimal coloration.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its clean voicing and compact sound, fitting the 'intimate' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slight boost in bass and mids to enhance the body resonance of acoustic arpeggios.",
+            "matchQuality": "exact",
+            "gap": "Used for subtle tonal shaping, enhancing warmth without sounding artificial.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass wah to keep the tone natural and uncolored.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass modulation to maintain the dry, natural acoustic sound.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "250 ms",
+              "Feedback": "1",
+              "Mix": "15%"
+            },
+            "purpose": "Subtle echo to add depth without sounding like a typical delay effect.",
+            "matchQuality": "close",
+            "gap": "Used sparingly (low mix/feedback) to enhance the sense of space, not as a primary effect.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Minimal room ambience to give the arpeggios a sense of space without sounding artificial or overly wet.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is used at very low mix levels, respecting the 'minimal' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry fingerpicked acoustic folk, intimate and warm",
+          "toneProfile": "dry fingerpicked acoustic folk, intimate and warm",
+          "idealSignalChain": "acoustic sim or piezo input | minimal room ambience | no electric coloration",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic sim or piezo input",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal room ambience",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "no electric coloration",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fingerpicked arpeggios",
+            "acoustic body resonance",
+            "close dry mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic/Folk Simulation (Electric Guitar)",
+          "bestMatchSummary": "Clean, warm acoustic folk tone using a clean preamp and minimal reverb to simulate fingerpicked arpeggios.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and fingerpicking transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "2:1",
+                "Attack": "Medium"
+              },
+              "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used gently, avoiding heavy artifacts as requested. Ideal for acoustic warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass drive section to maintain clean acoustic character.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "2",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provides a clean, warm American tone suitable for folk and acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best available clean amp model to avoid vintage tube coloration while maintaining warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulates a small, intimate acoustic setting with minimal coloration.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clean voicing and compact sound, fitting the 'intimate' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slight boost in bass and mids to enhance the body resonance of acoustic arpeggios.",
+              "matchQuality": "exact",
+              "gap": "Used for subtle tonal shaping, enhancing warmth without sounding artificial.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass wah to keep the tone natural and uncolored.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass modulation to maintain the dry, natural acoustic sound.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle echo to add depth without sounding like a typical delay effect.",
+              "matchQuality": "close",
+              "gap": "Used sparingly (low mix/feedback) to enhance the sense of space, not as a primary effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Minimal room ambience to give the arpeggios a sense of space without sounding artificial or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used at very low mix levels, respecting the 'minimal' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current IR with a highly natural acoustic simulation cabinet to better capture the intimate, dry sound of fingerpicked arpeggios.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic body resonance/Intimacy",
+              "recommendedAsset": "High-quality Acoustic Simulation IR (e.g., specific mic on a parlor guitar)",
+              "reason": "The current US 2x12 is too 'electric' and lacks the natural, dry resonance of an acoustic source.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove Fender Twin and Vox AC30 references",
+          "drop vintage tube amp emulation",
+          "keep reverb minimal or off"
+        ],
+        "warnings": [
+          "The source material is acoustic folk (non-electric). This rig uses an electric guitar input and simulates the tone using clean, warm amp models to achieve the desired 'acoustic body resonance' effect."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.523,
+      "prompt_chars": 1018,
+      "response_chars": 436,
+      "usage": {
+        "prompt_eval_count": 328,
+        "eval_count": 106,
+        "total_duration": 9520866500,
+        "prompt_eval_duration": 351162000,
+        "eval_duration": 1648393000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.985,
+      "prompt_chars": 5388,
+      "response_chars": 667,
+      "usage": {
+        "input_tokens": 1502,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 165,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.162,
+      "prompt_chars": 4913,
+      "response_chars": 612,
+      "usage": {
+        "input_tokens": 1443,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 205,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 35.933,
+      "prompt_chars": 3636,
+      "response_chars": 5482,
+      "usage": {
+        "prompt_eval_count": 1202,
+        "eval_count": 1550,
+        "total_duration": 35902844300,
+        "prompt_eval_duration": 242703000,
+        "eval_duration": 24871124000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.098,
+      "prompt_chars": 7667,
+      "response_chars": 664,
+      "usage": {
+        "prompt_eval_count": 2109,
+        "eval_count": 171,
+        "total_duration": 5093183800,
+        "prompt_eval_duration": 333722000,
+        "eval_duration": 4403727000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.607,
+      "prompt_chars": 2838,
+      "response_chars": 164,
+      "usage": {
+        "prompt_eval_count": 878,
+        "eval_count": 44,
+        "total_duration": 9590048500,
+        "prompt_eval_duration": 362202000,
+        "eval_duration": 632577000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Harry Chapin",
+      "title": "Cats In The Cradle (Acoustic Version)",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Harry Chapin - Cats In The Cradle (Acoustic Version) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry fingerpicked acoustic folk, intimate and warm",
+      "signalChainSummary": "Clean, warm acoustic folk tone using a clean preamp and minimal reverb to simulate fingerpicked arpeggios.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and fingerpicking transients.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "2:1",
+            "Attack": "Medium"
+          },
+          "purpose": "Gentle compression to even out the dynamics of fingerpicked arpeggios.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used gently, avoiding heavy artifacts as requested. Ideal for acoustic warmth.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass drive section to maintain clean acoustic character.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "2",
+            "Treble": "5",
+            "Midrange": "6",
+            "Bass": "4"
+          },
+          "purpose": "Provides a clean, warm American tone suitable for folk and acoustic simulation.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best available clean amp model to avoid vintage tube coloration while maintaining warmth.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulates a small, intimate acoustic setting with minimal coloration.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its clean voicing and compact sound, fitting the 'intimate' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slight boost in bass and mids to enhance the body resonance of acoustic arpeggios.",
+          "matchQuality": "exact",
+          "gap": "Used for subtle tonal shaping, enhancing warmth without sounding artificial.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass wah to keep the tone natural and uncolored.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass modulation to maintain the dry, natural acoustic sound.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "250 ms",
+            "Feedback": "1",
+            "Mix": "15%"
+          },
+          "purpose": "Subtle echo to add depth without sounding like a typical delay effect.",
+          "matchQuality": "close",
+          "gap": "Used sparingly (low mix/feedback) to enhance the sense of space, not as a primary effect.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Minimal room ambience to give the arpeggios a sense of space without sounding artificial or overly wet.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is used at very low mix levels, respecting the 'minimal' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry fingerpicked acoustic folk, intimate and warm",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "acoustic body resonance",
+        "close dry mix"
+      ],
+      "avoid": [
+        "electric amp models",
+        "plate reverb",
+        "compression artifacts",
+        "modulation"
+      ],
+      "gearClues": [
+        "acoustic sim or piezo input",
+        "minimal room ambience",
+        "no electric coloration"
+      ],
+      "corrections": [
+        "remove Fender Twin and Vox AC30 references",
+        "drop vintage tube amp emulation",
+        "keep reverb minimal or off"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "singer-songwriter"
+      ],
+      "targetTone": "dry fingerpicked acoustic folk, intimate and warm",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current IR with a highly natural acoustic simulation cabinet to better capture the intimate, dry sound of fingerpicked arpeggios.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic body resonance/Intimacy",
+          "recommendedAsset": "High-quality Acoustic Simulation IR (e.g., specific mic on a parlor guitar)",
+          "reason": "The current US 2x12 is too 'electric' and lacks the natural, dry resonance of an acoustic source.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and warmth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 569,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

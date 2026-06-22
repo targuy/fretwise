@@ -1,0 +1,1083 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\10cc__I_m_Not_In_Love.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "10cc",
+    "title": "I'm Not In Love",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Clean, slightly chorused pop sound",
+      "signatureElements": [
+        "chorus",
+        "clean delay",
+        "light reverb",
+        "pop sensibility"
+      ],
+      "gearHypotheses": [
+        "Chorus effect pedal",
+        "Spring Reverb simulation",
+        "Modeling amp with clean voicing (e.g., Fender style)"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Distortion",
+        "Wah"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "lush vocal-bed ambience, not a guitar rig",
+      "mustHave": [
+        "no clear guitar lead",
+        "layered vocal texture",
+        "wide studio reverb",
+        "soft polished 70s production"
+      ],
+      "avoid": [
+        "generic clean chorus guitar",
+        "overdriven guitar",
+        "fuzz",
+        "wah"
+      ],
+      "gearClues": [
+        "likely non-guitar source",
+        "studio layering",
+        "wide room/reverb"
+      ],
+      "corrections": [
+        "song is mainly vocal, not guitar-forward",
+        "do not build a guitar tone as the target"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": [
+      "iconic track but draft is generic guitar chorus",
+      "likely non-guitar dominant arrangement",
+      "GP-180 would build wrong amp/effect family"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "no guitar rig needed, vocal-layered studio texture",
+    "mustHave": [
+      "track is vocal-dominated arrangement",
+      "no signature guitar part exists",
+      "wide studio reverb on voices"
+    ],
+    "avoid": [
+      "building any guitar preset",
+      "chorus guitar assumption",
+      "clean amp modeling"
+    ],
+    "gearClues": [
+      "studio vocal layering technique",
+      "tape-based production",
+      "non-guitar instrumentation"
+    ],
+    "corrections": [
+      "song has no guitar-rig target",
+      "famous for vocal bed not guitar tone",
+      "GP-180 preset generation inappropriate"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "no guitar rig needed, vocal-layered studio texture",
+    "mustHave": [
+      "track is vocal-dominated arrangement",
+      "no signature guitar part exists",
+      "wide studio reverb on voices"
+    ],
+    "avoid": [
+      "building any guitar preset",
+      "chorus guitar assumption",
+      "clean amp modeling"
+    ],
+    "gearClues": [
+      "studio vocal layering technique",
+      "tape-based production",
+      "non-guitar instrumentation"
+    ],
+    "corrections": [
+      "song has no guitar-rig target",
+      "famous for vocal bed not guitar tone",
+      "GP-180 preset generation inappropriate"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is vocal/studio texture, the rig will be built for a clean, atmospheric, and supportive rhythm role (e.g., arpeggios or gentle strumming) to complement the vocals without competing.",
+          "bestMatchSummary": "A highly ambient, vintage-toned chain using light compression, subtle overdrive, Chorus, and heavy Plate/Room reverb to mimic the spacious, layered studio sound of 10cc's vocal arrangements.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-18 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Smooth dynamics and add sustain to support the vocal texture.",
+              "matchQuality": "close",
+              "gap": "The source is non-guitar, but compression helps create a consistent, supportive background tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5"
+              },
+              "purpose": "Provide a subtle, vintage warmth and gentle grit without sounding like a lead tone.",
+              "matchQuality": "close",
+              "gap": "Used for texture rather than aggressive drive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "modulation",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "2.5",
+                "Mix": "40%"
+              },
+              "purpose": "Create a wide, ethereal wash that mimics studio vocal layering and depth.",
+              "matchQuality": "close",
+              "gap": "The effect is used for atmosphere rather than typical guitar modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "5",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide a clean, articulate, and vintage-sounding platform for gentle arpeggios.",
+              "matchQuality": "close",
+              "gap": "The amp choice is based on the need for clarity and warmth, not genre requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "A compact, clear sound that supports the clean, atmospheric tone.",
+              "matchQuality": "close",
+              "gap": "Standard choice for clean, vintage tones.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Cut": "-3 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Slightly scoop the mids to keep the focus on the vocals and maintain clarity.",
+              "matchQuality": "close",
+              "gap": "Used for tonal shaping to complement a vocal-heavy mix.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "60%"
+              },
+              "purpose": "Provide a lush, studio-quality reverb to match the vocal layering and spacious feel.",
+              "matchQuality": "close",
+              "gap": "The Plate setting is chosen for its classic, smooth decay suitable for atmospheric music.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "40%"
+              },
+              "purpose": "Add a secondary layer of natural space and depth to the overall mix.",
+              "matchQuality": "close",
+              "gap": "Layering two reverbs helps achieve the 'wide studio texture' requested.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is vocal-dominated and non-guitar focused. This rig is designed to provide a subtle, atmospheric background rhythm role (e.g., arpeggios) that supports the vocals without competing with them.",
+          "Heavy use of reverb (Plate + Room) is necessary to mimic the 'wide studio texture' mentioned in the musical verdict."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "The current IR choice is generic. A more specific, vintage-sounding cabinet will better support the 10cc's classic studio aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British Cabinet (e.g., AC30/Vox)",
+              "reason": "To match the vintage, warm sound of 10cc's era and studio recordings.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased warmth and character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "10cc - I'm Not In Love - Valeton GP-180",
+        "song": {
+          "artist": "10cc",
+          "title": "I'm Not In Love",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "no guitar rig needed, vocal-layered studio texture",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly ambient, vintage-toned chain using light compression, subtle overdrive, Chorus, and heavy Plate/Room reverb to mimic the spacious, layered studio sound of 10cc's vocal arrangements.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-18 dB",
+              "Ratio": "3:1"
+            },
+            "purpose": "Smooth dynamics and add sustain to support the vocal texture.",
+            "matchQuality": "close",
+            "gap": "The source is non-guitar, but compression helps create a consistent, supportive background tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "drive/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "5"
+            },
+            "purpose": "Provide a subtle, vintage warmth and gentle grit without sounding like a lead tone.",
+            "matchQuality": "close",
+            "gap": "Used for texture rather than aggressive drive.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "modulation",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "2.5",
+              "Mix": "40%"
+            },
+            "purpose": "Create a wide, ethereal wash that mimics studio vocal layering and depth.",
+            "matchQuality": "close",
+            "gap": "The effect is used for atmosphere rather than typical guitar modulation.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No heavy distortion needed).",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "5",
+              "Mid": "5",
+              "Bass": "4"
+            },
+            "purpose": "Provide a clean, articulate, and vintage-sounding platform for gentle arpeggios.",
+            "matchQuality": "close",
+            "gap": "The amp choice is based on the need for clarity and warmth, not genre requirements.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "A compact, clear sound that supports the clean, atmospheric tone.",
+            "matchQuality": "close",
+            "gap": "Standard choice for clean, vintage tones.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "equalization/EQ",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-2 dB",
+              "Mid Cut": "-3 dB",
+              "Treble Boost": "+1 dB"
+            },
+            "purpose": "Slightly scoop the mids to keep the focus on the vocals and maintain clarity.",
+            "matchQuality": "close",
+            "gap": "Used for tonal shaping to complement a vocal-heavy mix.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "3.5s",
+              "Mix": "60%"
+            },
+            "purpose": "Provide a lush, studio-quality reverb to match the vocal layering and spacious feel.",
+            "matchQuality": "close",
+            "gap": "The Plate setting is chosen for its classic, smooth decay suitable for atmospheric music.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "40%"
+            },
+            "purpose": "Add a secondary layer of natural space and depth to the overall mix.",
+            "matchQuality": "close",
+            "gap": "Layering two reverbs helps achieve the 'wide studio texture' requested.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "no guitar rig needed, vocal-layered studio texture",
+          "toneProfile": "no guitar rig needed, vocal-layered studio texture",
+          "idealSignalChain": "studio vocal layering technique | tape-based production | non-guitar instrumentation",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "studio vocal layering technique",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tape-based production",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "non-guitar instrumentation",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "track is vocal-dominated arrangement",
+            "no signature guitar part exists",
+            "wide studio reverb on voices"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the source is vocal/studio texture, the rig will be built for a clean, atmospheric, and supportive rhythm role (e.g., arpeggios or gentle strumming) to complement the vocals without competing.",
+          "bestMatchSummary": "A highly ambient, vintage-toned chain using light compression, subtle overdrive, Chorus, and heavy Plate/Room reverb to mimic the spacious, layered studio sound of 10cc's vocal arrangements.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-18 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Smooth dynamics and add sustain to support the vocal texture.",
+              "matchQuality": "close",
+              "gap": "The source is non-guitar, but compression helps create a consistent, supportive background tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5"
+              },
+              "purpose": "Provide a subtle, vintage warmth and gentle grit without sounding like a lead tone.",
+              "matchQuality": "close",
+              "gap": "Used for texture rather than aggressive drive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "modulation",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "2.5",
+                "Mix": "40%"
+              },
+              "purpose": "Create a wide, ethereal wash that mimics studio vocal layering and depth.",
+              "matchQuality": "close",
+              "gap": "The effect is used for atmosphere rather than typical guitar modulation.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed).",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "5",
+                "Mid": "5",
+                "Bass": "4"
+              },
+              "purpose": "Provide a clean, articulate, and vintage-sounding platform for gentle arpeggios.",
+              "matchQuality": "close",
+              "gap": "The amp choice is based on the need for clarity and warmth, not genre requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "A compact, clear sound that supports the clean, atmospheric tone.",
+              "matchQuality": "close",
+              "gap": "Standard choice for clean, vintage tones.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Mid Cut": "-3 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Slightly scoop the mids to keep the focus on the vocals and maintain clarity.",
+              "matchQuality": "close",
+              "gap": "Used for tonal shaping to complement a vocal-heavy mix.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "60%"
+              },
+              "purpose": "Provide a lush, studio-quality reverb to match the vocal layering and spacious feel.",
+              "matchQuality": "close",
+              "gap": "The Plate setting is chosen for its classic, smooth decay suitable for atmospheric music.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "40%"
+              },
+              "purpose": "Add a secondary layer of natural space and depth to the overall mix.",
+              "matchQuality": "close",
+              "gap": "Layering two reverbs helps achieve the 'wide studio texture' requested.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "The current IR choice is generic. A more specific, vintage-sounding cabinet will better support the 10cc's classic studio aesthetic.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Vintage British Cabinet (e.g., AC30/Vox)",
+              "reason": "To match the vintage, warm sound of 10cc's era and studio recordings.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased warmth and character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "song has no guitar-rig target",
+          "famous for vocal bed not guitar tone",
+          "GP-180 preset generation inappropriate"
+        ],
+        "warnings": [
+          "The source material is vocal-dominated and non-guitar focused. This rig is designed to provide a subtle, atmospheric background rhythm role (e.g., arpeggios) that supports the vocals without competing with them.",
+          "Heavy use of reverb (Plate + Room) is necessary to mimic the 'wide studio texture' mentioned in the musical verdict."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.331,
+      "prompt_chars": 973,
+      "response_chars": 334,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 89,
+        "total_duration": 1306864400,
+        "prompt_eval_duration": 57948000,
+        "eval_duration": 752186000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 2.121,
+      "prompt_chars": 5245,
+      "response_chars": 664,
+      "usage": {
+        "input_tokens": 1475,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 167,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1642
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 5.08,
+      "prompt_chars": 4749,
+      "response_chars": 658,
+      "usage": {
+        "input_tokens": 1412,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 203,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 20.22,
+      "prompt_chars": 3580,
+      "response_chars": 5604,
+      "usage": {
+        "prompt_eval_count": 1173,
+        "eval_count": 1565,
+        "total_duration": 20211559700,
+        "prompt_eval_duration": 323837000,
+        "eval_duration": 19398613000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.932,
+      "prompt_chars": 7770,
+      "response_chars": 599,
+      "usage": {
+        "prompt_eval_count": 2123,
+        "eval_count": 164,
+        "total_duration": 1926550100,
+        "prompt_eval_duration": 218503000,
+        "eval_duration": 1271476000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 1.205,
+      "prompt_chars": 2883,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 885,
+        "eval_count": 52,
+        "total_duration": 1185670500,
+        "prompt_eval_duration": 370926000,
+        "eval_duration": 407600000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "10cc",
+      "title": "I'm Not In Love",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "10cc - I'm Not In Love - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "no guitar rig needed, vocal-layered studio texture",
+      "signalChainSummary": "A highly ambient, vintage-toned chain using light compression, subtle overdrive, Chorus, and heavy Plate/Room reverb to mimic the spacious, layered studio sound of 10cc's vocal arrangements.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-18 dB",
+            "Ratio": "3:1"
+          },
+          "purpose": "Smooth dynamics and add sustain to support the vocal texture.",
+          "matchQuality": "close",
+          "gap": "The source is non-guitar, but compression helps create a consistent, supportive background tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "drive/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "5"
+          },
+          "purpose": "Provide a subtle, vintage warmth and gentle grit without sounding like a lead tone.",
+          "matchQuality": "close",
+          "gap": "Used for texture rather than aggressive drive.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "2.5",
+            "Mix": "40%"
+          },
+          "purpose": "Create a wide, ethereal wash that mimics studio vocal layering and depth.",
+          "matchQuality": "close",
+          "gap": "The effect is used for atmosphere rather than typical guitar modulation.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No heavy distortion needed).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "5",
+            "Mid": "5",
+            "Bass": "4"
+          },
+          "purpose": "Provide a clean, articulate, and vintage-sounding platform for gentle arpeggios.",
+          "matchQuality": "close",
+          "gap": "The amp choice is based on the need for clarity and warmth, not genre requirements.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "A compact, clear sound that supports the clean, atmospheric tone.",
+          "matchQuality": "close",
+          "gap": "Standard choice for clean, vintage tones.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "equalization/EQ",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-2 dB",
+            "Mid Cut": "-3 dB",
+            "Treble Boost": "+1 dB"
+          },
+          "purpose": "Slightly scoop the mids to keep the focus on the vocals and maintain clarity.",
+          "matchQuality": "close",
+          "gap": "Used for tonal shaping to complement a vocal-heavy mix.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "3.5s",
+            "Mix": "60%"
+          },
+          "purpose": "Provide a lush, studio-quality reverb to match the vocal layering and spacious feel.",
+          "matchQuality": "close",
+          "gap": "The Plate setting is chosen for its classic, smooth decay suitable for atmospheric music.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "40%"
+          },
+          "purpose": "Add a secondary layer of natural space and depth to the overall mix.",
+          "matchQuality": "close",
+          "gap": "Layering two reverbs helps achieve the 'wide studio texture' requested.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "no guitar rig needed, vocal-layered studio texture",
+      "mustHave": [
+        "track is vocal-dominated arrangement",
+        "no signature guitar part exists",
+        "wide studio reverb on voices"
+      ],
+      "avoid": [
+        "building any guitar preset",
+        "chorus guitar assumption",
+        "clean amp modeling"
+      ],
+      "gearClues": [
+        "studio vocal layering technique",
+        "tape-based production",
+        "non-guitar instrumentation"
+      ],
+      "corrections": [
+        "song has no guitar-rig target",
+        "famous for vocal bed not guitar tone",
+        "GP-180 preset generation inappropriate"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "soft rock",
+        "british pop"
+      ],
+      "targetTone": "no guitar rig needed, vocal-layered studio texture",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "The current IR choice is generic. A more specific, vintage-sounding cabinet will better support the 10cc's classic studio aesthetic.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Vintage British Cabinet (e.g., AC30/Vox)",
+          "reason": "To match the vintage, warm sound of 10cc's era and studio recordings.",
+          "replacesBlockOrder": 7,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased warmth and character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "soft rock",
+      "british pop"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre is accurate, matching 10cc's signature vocal-driven pop sound."
+  }
+}

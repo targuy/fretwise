@@ -1,0 +1,1049 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1032,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Ohio_Players__Fire.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Ohio Players",
+    "title": "Fire",
+    "album": "",
+    "year": null,
+    "genre": "funk"
+  },
+  "genreClassification": {
+    "genre": "funk",
+    "subgenres": [
+      "funk rock",
+      "soul"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and song are classic funk/soul, matching the wah-led funk tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty funk/soul rock tone with pronounced bass and bite.",
+      "signatureElements": [
+        "Wah pedal sweeps (rhythmic)",
+        "Slightly overdriven crunch (mid-range focus)",
+        "Punchy attack",
+        "Controlled amount of chorus or vibrato"
+      ],
+      "gearHypotheses": [
+        "Fuzz/Overdrive emulation (for grit, not pure fuzz)",
+        "EQ boost in the upper mids (2-4 kHz) for bite",
+        "Compression (to maintain rhythmic consistency)"
+      ],
+      "avoid": [
+        "Heavy distortion (too muddy)",
+        "Excessive reverb/delay (keeps it dry and punchy)",
+        "High-gain saturation (loses definition)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "wah-led funk rock bite with gritty clean-crunch",
+      "mustHave": [
+        "rhythmic wah sweeps",
+        "tight percussive attack",
+        "light grit",
+        "dry punch"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "washy reverb",
+        "delay smear",
+        "generic chorus"
+      ],
+      "gearClues": [
+        "wah",
+        "compressor",
+        "mid-boost",
+        "clean amp edge",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "keep it funkier than rock crunch",
+        "lean on wah and bite, not saturation"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "wah-led funk rock bite with gritty clean-crunch",
+    "mustHave": [
+      "rhythmic wah sweeps",
+      "tight percussive attack",
+      "light grit",
+      "dry punch"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "washy reverb",
+      "delay smear",
+      "generic chorus"
+    ],
+    "gearClues": [
+      "wah",
+      "compressor",
+      "mid-boost",
+      "clean amp edge",
+      "1x12 or 2x12"
+    ],
+    "corrections": [
+      "drop chorus/vibrato",
+      "keep it funkier than rock crunch",
+      "lean on wah and bite, not saturation"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, percussive funk tones using compression and wah, avoiding heavy saturation.",
+          "bestMatchSummary": "A clean, compressed signal path utilizing a Green OD boost for bite, followed by rhythmic Wah sweeps, into a US Deluxe/US 2x12 setup to achieve dry punch and grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight percussive attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "3-5 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Provide tight percussive attack and sustain necessary for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "boost/mid-focus",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2-3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add light grit and mid-boost for the characteristic funk bite without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a clean boost/mid scoop, simulating an aggressive preamp tone rather than pure dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If more classic grit was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Range": "Medium",
+                "Sensitivity": "High"
+              },
+              "purpose": "Execute rhythmic wah sweeps and filter the tone for funk articulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a clean, punchy American tone suitable for funk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, dry punch sound characteristic of smaller funk setups.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize mid-range bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle depth and space without sounding washy or muddy.",
+              "matchQuality": "close",
+              "gap": "The 'Room' reverb is chosen over Plate/Spring to provide a natural, non-smearing ambience suitable for funk.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic decay was desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a funk rock track, requiring the rig to prioritize percussive attack and mid-range bite over heavy saturation or washy effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Enhance cabinet realism for a tighter, punchier funk sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Fender 2x12)",
+              "reason": "The current US 2x12 is good, but a specific funk/pop IR will enhance the dry punch and bite.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Ohio Players - Fire - Valeton GP-180",
+        "song": {
+          "artist": "Ohio Players",
+          "title": "Fire",
+          "album": "",
+          "year": null,
+          "genre": "funk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "wah-led funk rock bite with gritty clean-crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, compressed signal path utilizing a Green OD boost for bite, followed by rhythmic Wah sweeps, into a US Deluxe/US 2x12 setup to achieve dry punch and grit.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight percussive attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "3-5 dB",
+              "Ratio": "4:1"
+            },
+            "purpose": "Provide tight percussive attack and sustain necessary for funk rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "boost/mid-focus",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "2-3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add light grit and mid-boost for the characteristic funk bite without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here as a clean boost/mid scoop, simulating an aggressive preamp tone rather than pure dirt.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "If more classic grit was needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Sweep Range": "Medium",
+              "Sensitivity": "High"
+            },
+            "purpose": "Execute rhythmic wah sweeps and filter the tone for funk articulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate a clean, punchy American tone suitable for funk rhythm.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, dry punch sound characteristic of smaller funk setups.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "EQ/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-2 dB",
+              "Mid Boost": "+3 dB",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Fine-tune the frequency response to emphasize mid-range bite and clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle depth and space without sounding washy or muddy.",
+            "matchQuality": "close",
+            "gap": "The 'Room' reverb is chosen over Plate/Spring to provide a natural, non-smearing ambience suitable for funk.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a more controlled, metallic decay was desired."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "wah-led funk rock bite with gritty clean-crunch",
+          "toneProfile": "wah-led funk rock bite with gritty clean-crunch",
+          "idealSignalChain": "wah | compressor | mid-boost | clean amp edge | 1x12 or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "wah",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "compressor",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mid-boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp edge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "rhythmic wah sweeps",
+            "tight percussive attack",
+            "light grit",
+            "dry punch"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, percussive funk tones using compression and wah, avoiding heavy saturation.",
+          "bestMatchSummary": "A clean, compressed signal path utilizing a Green OD boost for bite, followed by rhythmic Wah sweeps, into a US Deluxe/US 2x12 setup to achieve dry punch and grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight percussive attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "3-5 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Provide tight percussive attack and sustain necessary for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "boost/mid-focus",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "2-3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add light grit and mid-boost for the characteristic funk bite without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a clean boost/mid scoop, simulating an aggressive preamp tone rather than pure dirt.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If more classic grit was needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Range": "Medium",
+                "Sensitivity": "High"
+              },
+              "purpose": "Execute rhythmic wah sweeps and filter the tone for funk articulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a clean, punchy American tone suitable for funk rhythm.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, dry punch sound characteristic of smaller funk setups.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize mid-range bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle depth and space without sounding washy or muddy.",
+              "matchQuality": "close",
+              "gap": "The 'Room' reverb is chosen over Plate/Spring to provide a natural, non-smearing ambience suitable for funk.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic decay was desired."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Enhance cabinet realism for a tighter, punchier funk sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Fender 2x12)",
+              "reason": "The current US 2x12 is good, but a specific funk/pop IR will enhance the dry punch and bite.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition in the low mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/vibrato",
+          "keep it funkier than rock crunch",
+          "lean on wah and bite, not saturation"
+        ],
+        "warnings": [
+          "The source material is a funk rock track, requiring the rig to prioritize percussive attack and mid-range bite over heavy saturation or washy effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.895,
+      "prompt_chars": 985,
+      "response_chars": 588,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 149,
+        "total_duration": 11891572000,
+        "prompt_eval_duration": 449428000,
+        "eval_duration": 3109186000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.303,
+      "prompt_chars": 5507,
+      "response_chars": 520,
+      "usage": {
+        "input_tokens": 1538,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 146,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1684
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 28.963,
+      "prompt_chars": 3592,
+      "response_chars": 4905,
+      "usage": {
+        "prompt_eval_count": 1219,
+        "eval_count": 1397,
+        "total_duration": 28934879000,
+        "prompt_eval_duration": 533981000,
+        "eval_duration": 27975186000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 21.425,
+      "prompt_chars": 7022,
+      "response_chars": 566,
+      "usage": {
+        "prompt_eval_count": 1973,
+        "eval_count": 161,
+        "total_duration": 21405480300,
+        "prompt_eval_duration": 905895000,
+        "eval_duration": 2991989000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.957,
+      "prompt_chars": 2689,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 865,
+        "eval_count": 49,
+        "total_duration": 8935975300,
+        "prompt_eval_duration": 410568000,
+        "eval_duration": 809104000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Ohio Players",
+      "title": "Fire",
+      "album": "",
+      "year": null,
+      "genre": "funk"
+    },
+    "rig": {
+      "rigName": "Ohio Players - Fire - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "wah-led funk rock bite with gritty clean-crunch",
+      "signalChainSummary": "A clean, compressed signal path utilizing a Green OD boost for bite, followed by rhythmic Wah sweeps, into a US Deluxe/US 2x12 setup to achieve dry punch and grit.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight percussive attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "3-5 dB",
+            "Ratio": "4:1"
+          },
+          "purpose": "Provide tight percussive attack and sustain necessary for funk rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "boost/mid-focus",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "2-3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add light grit and mid-boost for the characteristic funk bite without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here as a clean boost/mid scoop, simulating an aggressive preamp tone rather than pure dirt.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "If more classic grit was needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Sweep Range": "Medium",
+            "Sensitivity": "High"
+          },
+          "purpose": "Execute rhythmic wah sweeps and filter the tone for funk articulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate a clean, punchy American tone suitable for funk rhythm.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, dry punch sound characteristic of smaller funk setups.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "EQ/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-2 dB",
+            "Mid Boost": "+3 dB",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Fine-tune the frequency response to emphasize mid-range bite and clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle depth and space without sounding washy or muddy.",
+          "matchQuality": "close",
+          "gap": "The 'Room' reverb is chosen over Plate/Spring to provide a natural, non-smearing ambience suitable for funk.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more controlled, metallic decay was desired."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "wah-led funk rock bite with gritty clean-crunch",
+      "mustHave": [
+        "rhythmic wah sweeps",
+        "tight percussive attack",
+        "light grit",
+        "dry punch"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "washy reverb",
+        "delay smear",
+        "generic chorus"
+      ],
+      "gearClues": [
+        "wah",
+        "compressor",
+        "mid-boost",
+        "clean amp edge",
+        "1x12 or 2x12"
+      ],
+      "corrections": [
+        "drop chorus/vibrato",
+        "keep it funkier than rock crunch",
+        "lean on wah and bite, not saturation"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "funk",
+      "styleTags": [
+        "funk rock",
+        "soul"
+      ],
+      "targetTone": "wah-led funk rock bite with gritty clean-crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Enhance cabinet realism for a tighter, punchier funk sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., Fender 2x12)",
+          "reason": "The current US 2x12 is good, but a specific funk/pop IR will enhance the dry punch and bite.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition in the low mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1032,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

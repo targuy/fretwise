@@ -1,0 +1,1010 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1198,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Royal_Blood__Figure_It_Out.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Royal Blood",
+    "title": "Figure It Out",
+    "album": "",
+    "year": null,
+    "genre": "post-punk"
+  },
+  "genreClassification": {
+    "genre": "post-punk",
+    "subgenres": [
+      "alternative rock",
+      "garage rock",
+      "indie rock"
+    ],
+    "confidence": "high",
+    "rationale": "Royal Blood's sound is characterized by heavy, riff-driven post-punk and garage influences."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Heavy, saturated, mid-focused rock tone",
+      "signatureElements": [
+        "Fuzz/Overdrive saturation",
+        "Punchy low end (bass focus)",
+        "Midrange bite",
+        "Simple, aggressive rhythm structure"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Klon/Bluesbreaker style)",
+        "Amp simulation with robust bass response (British or American rock cab model)"
+      ],
+      "avoid": [
+        "Thin clean tones",
+        "Excessive modulation effects",
+        "Bright treble focus"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "heavy bass fuzz with mid bite and amp-like saturation",
+      "mustHave": [
+        "fuzzed low end",
+        "strong mids",
+        "aggressive riff attack",
+        "slight grind"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "bright treble",
+        "polite overdrive"
+      ],
+      "gearClues": [
+        "bass fuzz pedal",
+        "British amp",
+        "4x10 or 2x12",
+        "FRFR-ready"
+      ],
+      "corrections": [
+        "use fuzz, not Klon-style OD",
+        "lean into bass-guitar weight",
+        "keep it dry and raw"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "heavy bass fuzz with mid bite and amp-like saturation",
+    "mustHave": [
+      "fuzzed low end",
+      "strong mids",
+      "aggressive riff attack",
+      "slight grind"
+    ],
+    "avoid": [
+      "clean tone",
+      "chorus",
+      "bright treble",
+      "polite overdrive"
+    ],
+    "gearClues": [
+      "bass fuzz pedal",
+      "British amp",
+      "4x10 or 2x12",
+      "FRFR-ready"
+    ],
+    "corrections": [
+      "use fuzz, not Klon-style OD",
+      "lean into bass-guitar weight",
+      "keep it dry and raw"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high gain, fuzz, and mid-focused British tones.",
+          "bestMatchSummary": "A raw, aggressive chain utilizing Fuzz for low end weight, followed by a powerful UK amp model (UK 800) to deliver saturated mids and punchy attack, paired with a robust 4x12 cabinet.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive fuzz/high gain.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "50%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the required fuzzed low end and weight for bass-guitar emulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp overdrive/mid boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Tone": "60%"
+              },
+              "purpose": "Enhance the mid-range bite and aggressive riff attack without sounding like polite OD.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here to simulate a powerful EQ boost in the mids, fulfilling the 'strong mids' requirement after the fuzz stage.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "75%",
+                "Treble": "60%",
+                "Mid": "70%",
+                "Bass": "70%"
+              },
+              "purpose": "Deliver the core British amp saturation and punchy tone required for heavy rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound suitable for heavy rock and aggressive tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and slightly rolling off extreme lows/highs for focus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Included as a placeholder; kept inactive to avoid sounding too clean or 'polite'.",
+              "matchQuality": "low",
+              "gap": "The verdict explicitly avoids chorus, so this module is included but disabled.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space without distracting from the raw, aggressive riffing.",
+              "matchQuality": "close",
+              "gap": "The tone is meant to be dry and raw; delay settings are kept minimal to maintain aggression.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "Room",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide a minimal sense of space to prevent the tone from sounding too boxy or dry.",
+              "matchQuality": "close",
+              "gap": "Used sparingly (low mix) to maintain raw aggression while adding necessary depth.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a heavy rock/punk style, requiring high gain and fuzz. The chain prioritizes aggressive saturation over clean tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more open, raw British speaker sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance raw, aggressive British tone and punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased depth and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Royal Blood - Figure It Out - Valeton GP-180",
+        "song": {
+          "artist": "Royal Blood",
+          "title": "Figure It Out",
+          "album": "",
+          "year": null,
+          "genre": "post-punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "heavy bass fuzz with mid bite and amp-like saturation",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A raw, aggressive chain utilizing Fuzz for low end weight, followed by a powerful UK amp model (UK 800) to deliver saturated mids and punchy attack, paired with a robust 4x12 cabinet.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from aggressive fuzz/high gain.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "50%",
+              "Level": "80%"
+            },
+            "purpose": "Provide the required fuzzed low end and weight for bass-guitar emulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp overdrive/mid boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Tone": "60%"
+            },
+            "purpose": "Enhance the mid-range bite and aggressive riff attack without sounding like polite OD.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used here to simulate a powerful EQ boost in the mids, fulfilling the 'strong mids' requirement after the fuzz stage.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 800",
+            "active": true,
+            "settings": {
+              "Gain": "75%",
+              "Treble": "60%",
+              "Mid": "70%",
+              "Bass": "70%"
+            },
+            "purpose": "Deliver the core British amp saturation and punchy tone required for heavy rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound suitable for heavy rock and aggressive tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-3 dB",
+              "Mid": "+4 dB",
+              "High": "-2 dB"
+            },
+            "purpose": "Sculpt the tone by emphasizing mids and slightly rolling off extreme lows/highs for focus.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation (optional)",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%"
+            },
+            "purpose": "Included as a placeholder; kept inactive to avoid sounding too clean or 'polite'.",
+            "matchQuality": "low",
+            "gap": "The verdict explicitly avoids chorus, so this module is included but disabled.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "Digital Delay",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle depth and space without distracting from the raw, aggressive riffing.",
+            "matchQuality": "close",
+            "gap": "The tone is meant to be dry and raw; delay settings are kept minimal to maintain aggression.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "Room",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide a minimal sense of space to prevent the tone from sounding too boxy or dry.",
+            "matchQuality": "close",
+            "gap": "Used sparingly (low mix) to maintain raw aggression while adding necessary depth.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "heavy bass fuzz with mid bite and amp-like saturation",
+          "toneProfile": "heavy bass fuzz with mid bite and amp-like saturation",
+          "idealSignalChain": "bass fuzz pedal | British amp | 4x10 or 2x12 | FRFR-ready",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "bass fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x10 or 2x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "FRFR-ready",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzed low end",
+            "strong mids",
+            "aggressive riff attack",
+            "slight grind"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high gain, fuzz, and mid-focused British tones.",
+          "bestMatchSummary": "A raw, aggressive chain utilizing Fuzz for low end weight, followed by a powerful UK amp model (UK 800) to deliver saturated mids and punchy attack, paired with a robust 4x12 cabinet.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive fuzz/high gain.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "50%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the required fuzzed low end and weight for bass-guitar emulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp overdrive/mid boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Tone": "60%"
+              },
+              "purpose": "Enhance the mid-range bite and aggressive riff attack without sounding like polite OD.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used here to simulate a powerful EQ boost in the mids, fulfilling the 'strong mids' requirement after the fuzz stage.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "75%",
+                "Treble": "60%",
+                "Mid": "70%",
+                "Bass": "70%"
+              },
+              "purpose": "Deliver the core British amp saturation and punchy tone required for heavy rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound suitable for heavy rock and aggressive tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-3 dB",
+                "Mid": "+4 dB",
+                "High": "-2 dB"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and slightly rolling off extreme lows/highs for focus.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Included as a placeholder; kept inactive to avoid sounding too clean or 'polite'.",
+              "matchQuality": "low",
+              "gap": "The verdict explicitly avoids chorus, so this module is included but disabled.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and space without distracting from the raw, aggressive riffing.",
+              "matchQuality": "close",
+              "gap": "The tone is meant to be dry and raw; delay settings are kept minimal to maintain aggression.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "Room",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide a minimal sense of space to prevent the tone from sounding too boxy or dry.",
+              "matchQuality": "close",
+              "gap": "Used sparingly (low mix) to maintain raw aggression while adding necessary depth.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more open, raw British speaker sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance raw, aggressive British tone and punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased depth and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "use fuzz, not Klon-style OD",
+          "lean into bass-guitar weight",
+          "keep it dry and raw"
+        ],
+        "warnings": [
+          "The source material is a heavy rock/punk style, requiring high gain and fuzz. The chain prioritizes aggressive saturation over clean tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.77,
+      "prompt_chars": 993,
+      "response_chars": 466,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 114,
+        "total_duration": 9766595900,
+        "prompt_eval_duration": 453204000,
+        "eval_duration": 2031747000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.285,
+      "prompt_chars": 5387,
+      "response_chars": 498,
+      "usage": {
+        "input_tokens": 1499,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1642
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 39.598,
+      "prompt_chars": 3571,
+      "response_chars": 4979,
+      "usage": {
+        "prompt_eval_count": 1216,
+        "eval_count": 1412,
+        "total_duration": 39592054000,
+        "prompt_eval_duration": 454308000,
+        "eval_duration": 24947102000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.625,
+      "prompt_chars": 7059,
+      "response_chars": 511,
+      "usage": {
+        "prompt_eval_count": 1985,
+        "eval_count": 135,
+        "total_duration": 3591242600,
+        "prompt_eval_duration": 700167000,
+        "eval_duration": 2412695000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 17.614,
+      "prompt_chars": 2755,
+      "response_chars": 216,
+      "usage": {
+        "prompt_eval_count": 878,
+        "eval_count": 58,
+        "total_duration": 17593732200,
+        "prompt_eval_duration": 410290000,
+        "eval_duration": 1026698000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Royal Blood",
+      "title": "Figure It Out",
+      "album": "",
+      "year": null,
+      "genre": "post-punk"
+    },
+    "rig": {
+      "rigName": "Royal Blood - Figure It Out - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "heavy bass fuzz with mid bite and amp-like saturation",
+      "signalChainSummary": "A raw, aggressive chain utilizing Fuzz for low end weight, followed by a powerful UK amp model (UK 800) to deliver saturated mids and punchy attack, paired with a robust 4x12 cabinet.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from aggressive fuzz/high gain.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "50%",
+            "Level": "80%"
+          },
+          "purpose": "Provide the required fuzzed low end and weight for bass-guitar emulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp overdrive/mid boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Tone": "60%"
+          },
+          "purpose": "Enhance the mid-range bite and aggressive riff attack without sounding like polite OD.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used here to simulate a powerful EQ boost in the mids, fulfilling the 'strong mids' requirement after the fuzz stage.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 800",
+          "active": true,
+          "settings": {
+            "Gain": "75%",
+            "Treble": "60%",
+            "Mid": "70%",
+            "Bass": "70%"
+          },
+          "purpose": "Deliver the core British amp saturation and punchy tone required for heavy rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound suitable for heavy rock and aggressive tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-3 dB",
+            "Mid": "+4 dB",
+            "High": "-2 dB"
+          },
+          "purpose": "Sculpt the tone by emphasizing mids and slightly rolling off extreme lows/highs for focus.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%"
+          },
+          "purpose": "Included as a placeholder; kept inactive to avoid sounding too clean or 'polite'.",
+          "matchQuality": "fallback",
+          "gap": "The verdict explicitly avoids chorus, so this module is included but disabled.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle depth and space without distracting from the raw, aggressive riffing.",
+          "matchQuality": "close",
+          "gap": "The tone is meant to be dry and raw; delay settings are kept minimal to maintain aggression.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide a minimal sense of space to prevent the tone from sounding too boxy or dry.",
+          "matchQuality": "close",
+          "gap": "Used sparingly (low mix) to maintain raw aggression while adding necessary depth.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "heavy bass fuzz with mid bite and amp-like saturation",
+      "mustHave": [
+        "fuzzed low end",
+        "strong mids",
+        "aggressive riff attack",
+        "slight grind"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "bright treble",
+        "polite overdrive"
+      ],
+      "gearClues": [
+        "bass fuzz pedal",
+        "British amp",
+        "4x10 or 2x12",
+        "FRFR-ready"
+      ],
+      "corrections": [
+        "use fuzz, not Klon-style OD",
+        "lean into bass-guitar weight",
+        "keep it dry and raw"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-punk",
+      "styleTags": [
+        "alternative rock",
+        "garage rock",
+        "indie rock"
+      ],
+      "targetTone": "heavy bass fuzz with mid bite and amp-like saturation",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more open, raw British speaker sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance raw, aggressive British tone and punch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased depth and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1198,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

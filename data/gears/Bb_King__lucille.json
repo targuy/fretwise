@@ -1,0 +1,1113 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 100,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bb_King__lucille.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5",
+      "genreClassifier": "gemma4:latest"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false
+  },
+  "song": {
+    "artist": "Bb King",
+    "title": "lucille",
+    "album": "",
+    "year": null,
+    "genre": "blues"
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor blues, soulful and gritty",
+      "signatureElements": [
+        "wah pedal sweep",
+        "overdriven tube amp sound (crunch)",
+        "fingerpicked lead lines",
+        "blues scale phrasing"
+      ],
+      "gearHypotheses": [
+        "Tube-screamer style overdrive",
+        "Wah pedal",
+        "Spring reverb simulation"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "modern digital delay",
+        "clean arpeggios"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean-to-edge blues lead with vocal sustain",
+      "mustHave": [
+        "smooth singing sustain",
+        "slight amp breakup",
+        "wide vibrato",
+        "mid-forward lead",
+        "occasional wah"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "modern delay",
+        "clean arpeggios"
+      ],
+      "gearClues": [
+        "ES-355 style humbuckers",
+        "small to mid tube combo",
+        "light spring reverb",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop E minor",
+        "replace crunch with smooth breakup",
+        "keep wah optional, not constant"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean-to-edge blues lead with vocal sustain",
+    "mustHave": [
+      "smooth singing sustain",
+      "slight amp breakup",
+      "wide vibrato",
+      "mid-forward lead",
+      "occasional wah"
+    ],
+    "avoid": [
+      "heavy distortion",
+      "modern delay",
+      "clean arpeggios"
+    ],
+    "gearClues": [
+      "ES-355 style humbuckers",
+      "small to mid tube combo",
+      "light spring reverb",
+      "wah pedal"
+    ],
+    "corrections": [
+      "drop E minor",
+      "replace crunch with smooth breakup",
+      "keep wah optional, not constant"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic blues tones, prioritizing smooth breakup and vocal sustain over aggressive gain.",
+          "bestMatchSummary": "A vintage-voiced chain using a clean British amp model (UK 50/AC30 style) combined with compression for sustain, chorus/vibrato for movement, and a wah effect to capture the classic blues lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide smooth vocal sustain and even dynamics for lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate the slight breakup of a small tube combo without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate light, natural grit/breakup typical of vintage blues amps (like an AC30 or Fender), rather than pure clean tone. A dedicated 'Blues Breakup' pedal would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If Green OD is too colored, Boost can provide a simple volume lift and slight grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/filter",
+              "module": "MOD",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Manual Sweep",
+                "Depth": "Medium"
+              },
+              "purpose": "Provide the classic blues lead tone and vocal filter sweep.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Model the small to mid tube combo sound, providing clarity and natural breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic British combos (like AC30), which fit the vintage blues aesthetic better than US models for this specific tone.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "If available, AC30 TB would be an even more accurate choice."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the UK 50 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and 'singing' quality to the sustained notes.",
+              "matchQuality": "close",
+              "gap": "While Chorus is used here for vibrato effect, a dedicated Vibrato module would be ideal. However, Chorus provides sufficient depth variation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Provide a smooth, open sense of space and sustain without sounding overly wet.",
+              "matchQuality": "close",
+              "gap": "The Plate reverb is chosen for its classic, controlled decay, fitting the vintage blues sound. Spring was also considered but Plate offers more control for lead work.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and low-mids to ensure the lead voice cuts through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is classic blues, requiring a vintage and articulate tone. The chain prioritizes smooth sustain (Comp) and natural breakup (Green OD/UK 50) over aggressive gain.",
+          "Since the Wah module is used as an effect rather than a fixed pedal slot, its placement after the preamp ensures it colors the signal before the main amp voicing."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall vintage character.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., AC30)",
+              "reason": "Enhance the classic blues/British combo voicing for better realism.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved tone depth and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bb King - lucille - Valeton GP-180",
+        "song": {
+          "artist": "Bb King",
+          "title": "lucille",
+          "album": "",
+          "year": null,
+          "genre": "blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean-to-edge blues lead with vocal sustain",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "A vintage-voiced chain using a clean British amp model (UK 50/AC30 style) combined with compression for sustain, chorus/vibrato for movement, and a wah effect to capture the classic blues lead sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "4:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide smooth vocal sustain and even dynamics for lead lines.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Simulate the slight breakup of a small tube combo without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate light, natural grit/breakup typical of vintage blues amps (like an AC30 or Fender), rather than pure clean tone. A dedicated 'Blues Breakup' pedal would be ideal.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "If Green OD is too colored, Boost can provide a simple volume lift and slight grit."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "modulation/filter",
+            "module": "MOD",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "Manual Sweep",
+              "Depth": "Medium"
+            },
+            "purpose": "Provide the classic blues lead tone and vocal filter sweep.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "6/10",
+              "Midrange": "7/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Model the small to mid tube combo sound, providing clarity and natural breakup.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is a good proxy for classic British combos (like AC30), which fit the vintage blues aesthetic better than US models for this specific tone.",
+            "alternatives": [
+              {
+                "model": "AC30 TB",
+                "reason": "If available, AC30 TB would be an even more accurate choice."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide a classic British cabinet voicing that complements the UK 50 amp model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/vibrato",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Medium",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle movement and 'singing' quality to the sustained notes.",
+            "matchQuality": "close",
+            "gap": "While Chorus is used here for vibrato effect, a dedicated Vibrato module would be ideal. However, Chorus provides sufficient depth variation.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Provide a smooth, open sense of space and sustain without sounding overly wet.",
+            "matchQuality": "close",
+            "gap": "The Plate reverb is chosen for its classic, controlled decay, fitting the vintage blues sound. Spring was also considered but Plate offers more control for lead work.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "EQ/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the mids and low-mids to ensure the lead voice cuts through the mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean-to-edge blues lead with vocal sustain",
+          "toneProfile": "clean-to-edge blues lead with vocal sustain",
+          "idealSignalChain": "ES-355 style humbuckers | small to mid tube combo | light spring reverb | wah pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "ES-355 style humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small to mid tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light spring reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "smooth singing sustain",
+            "slight amp breakup",
+            "wide vibrato",
+            "mid-forward lead",
+            "occasional wah"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic blues tones, prioritizing smooth breakup and vocal sustain over aggressive gain.",
+          "bestMatchSummary": "A vintage-voiced chain using a clean British amp model (UK 50/AC30 style) combined with compression for sustain, chorus/vibrato for movement, and a wah effect to capture the classic blues lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "4:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide smooth vocal sustain and even dynamics for lead lines.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate the slight breakup of a small tube combo without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate light, natural grit/breakup typical of vintage blues amps (like an AC30 or Fender), rather than pure clean tone. A dedicated 'Blues Breakup' pedal would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If Green OD is too colored, Boost can provide a simple volume lift and slight grit."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "modulation/filter",
+              "module": "MOD",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Manual Sweep",
+                "Depth": "Medium"
+              },
+              "purpose": "Provide the classic blues lead tone and vocal filter sweep.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Model the small to mid tube combo sound, providing clarity and natural breakup.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is a good proxy for classic British combos (like AC30), which fit the vintage blues aesthetic better than US models for this specific tone.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "If available, AC30 TB would be an even more accurate choice."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the UK 50 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/vibrato",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Medium",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle movement and 'singing' quality to the sustained notes.",
+              "matchQuality": "close",
+              "gap": "While Chorus is used here for vibrato effect, a dedicated Vibrato module would be ideal. However, Chorus provides sufficient depth variation.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Provide a smooth, open sense of space and sustain without sounding overly wet.",
+              "matchQuality": "close",
+              "gap": "The Plate reverb is chosen for its classic, controlled decay, fitting the vintage blues sound. Spring was also considered but Plate offers more control for lead work.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the mids and low-mids to ensure the lead voice cuts through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall vintage character.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 4x12 IR (e.g., AC30)",
+              "reason": "Enhance the classic blues/British combo voicing for better realism.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved tone depth and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop E minor",
+          "replace crunch with smooth breakup",
+          "keep wah optional, not constant"
+        ],
+        "warnings": [
+          "The source material is classic blues, requiring a vintage and articulate tone. The chain prioritizes smooth sustain (Comp) and natural breakup (Green OD/UK 50) over aggressive gain.",
+          "Since the Wah module is used as an effect rather than a fixed pedal slot, its placement after the preamp ensures it colors the signal before the main amp voicing."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 2.49,
+      "prompt_chars": 968,
+      "response_chars": 372,
+      "usage": {
+        "prompt_eval_count": 314,
+        "eval_count": 91,
+        "total_duration": 2486997900,
+        "prompt_eval_duration": 168427000,
+        "eval_duration": 1913387000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "seconds": 1.871,
+      "prompt_chars": 5272,
+      "response_chars": 538,
+      "usage": {
+        "input_tokens": 1477,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1616
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 29.584,
+      "prompt_chars": 3531,
+      "response_chars": 6148,
+      "usage": {
+        "prompt_eval_count": 1178,
+        "eval_count": 1711,
+        "total_duration": 29567752100,
+        "prompt_eval_duration": 335241000,
+        "eval_duration": 28796291000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 3.55,
+      "prompt_chars": 8297,
+      "response_chars": 504,
+      "usage": {
+        "prompt_eval_count": 2274,
+        "eval_count": 135,
+        "total_duration": 3527551200,
+        "prompt_eval_duration": 363612000,
+        "eval_duration": 2741686000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "seconds": 0.885,
+      "prompt_chars": 2855,
+      "response_chars": 197,
+      "usage": {
+        "prompt_eval_count": 902,
+        "eval_count": 49,
+        "total_duration": 865825400,
+        "prompt_eval_duration": 111240000,
+        "eval_duration": 367670000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bb King",
+      "title": "lucille",
+      "album": "",
+      "year": null,
+      "genre": "blues"
+    },
+    "rig": {
+      "rigName": "Bb King - lucille - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean-to-edge blues lead with vocal sustain",
+      "signalChainSummary": "A vintage-voiced chain using a clean British amp model (UK 50/AC30 style) combined with compression for sustain, chorus/vibrato for movement, and a wah effect to capture the classic blues lead sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "4:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide smooth vocal sustain and even dynamics for lead lines.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Simulate the slight breakup of a small tube combo without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate light, natural grit/breakup typical of vintage blues amps (like an AC30 or Fender), rather than pure clean tone. A dedicated 'Blues Breakup' pedal would be ideal.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "If Green OD is too colored, Boost can provide a simple volume lift and slight grit."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "modulation/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "Manual Sweep",
+            "Depth": "Medium"
+          },
+          "purpose": "Provide the classic blues lead tone and vocal filter sweep.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "6/10",
+            "Midrange": "7/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Model the small to mid tube combo sound, providing clarity and natural breakup.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is a good proxy for classic British combos (like AC30), which fit the vintage blues aesthetic better than US models for this specific tone.",
+          "alternatives": [
+            {
+              "model": "AC30 TB",
+              "reason": "If available, AC30 TB would be an even more accurate choice."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide a classic British cabinet voicing that complements the UK 50 amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/vibrato",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Medium",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle movement and 'singing' quality to the sustained notes.",
+          "matchQuality": "close",
+          "gap": "While Chorus is used here for vibrato effect, a dedicated Vibrato module would be ideal. However, Chorus provides sufficient depth variation.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Provide a smooth, open sense of space and sustain without sounding overly wet.",
+          "matchQuality": "close",
+          "gap": "The Plate reverb is chosen for its classic, controlled decay, fitting the vintage blues sound. Spring was also considered but Plate offers more control for lead work.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "EQ/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the mids and low-mids to ensure the lead voice cuts through the mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean-to-edge blues lead with vocal sustain",
+      "mustHave": [
+        "smooth singing sustain",
+        "slight amp breakup",
+        "wide vibrato",
+        "mid-forward lead",
+        "occasional wah"
+      ],
+      "avoid": [
+        "heavy distortion",
+        "modern delay",
+        "clean arpeggios"
+      ],
+      "gearClues": [
+        "ES-355 style humbuckers",
+        "small to mid tube combo",
+        "light spring reverb",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop E minor",
+        "replace crunch with smooth breakup",
+        "keep wah optional, not constant"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues",
+      "styleTags": [
+        "electric blues",
+        "chicago blues"
+      ],
+      "targetTone": "clean-to-edge blues lead with vocal sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall vintage character.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage British 4x12 IR (e.g., AC30)",
+          "reason": "Enhance the classic blues/British combo voicing for better realism.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Improved tone depth and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 100,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5",
+        "genreClassifier": "gemma4:latest"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  },
+  "genreClassification": {
+    "genre": "blues",
+    "subgenres": [
+      "electric blues",
+      "chicago blues"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of electric blues, confirmed by the source and tone profile."
+  }
+}

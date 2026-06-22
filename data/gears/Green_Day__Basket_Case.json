@@ -1,0 +1,1160 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 545,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Green_Day__Basket_Case.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Green Day",
+    "title": "Basket Case",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "pop punk",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Green Day's 'Basket Case' is a foundational track in the pop-punk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy punk rock rhythm tone (think early 90s pop-punk)",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-scooped)",
+        "Punchy attack",
+        "Fast strumming clarity",
+        "Punk grit"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "British style amp simulation (Marshall JCM family)",
+        "Bright, punchy cabinet emulation"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep modulation",
+        "Sustain-heavy delay/reverb"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Marshall crunch with punk bite",
+      "mustHave": [
+        "tight palm-muted attack",
+        "mid-forward crunch",
+        "dry rhythm",
+        "fast strum clarity"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "delay wash",
+        "big reverb"
+      ],
+      "gearClues": [
+        "Marshall JCM/Plexi",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Tube Screamer focus",
+        "avoid mid-scooped wording",
+        "keep it dry and aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Marshall crunch with punk bite",
+    "mustHave": [
+      "tight palm-muted attack",
+      "mid-forward crunch",
+      "dry rhythm",
+      "fast strum clarity"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "delay wash",
+      "big reverb"
+    ],
+    "gearClues": [
+      "Marshall JCM/Plexi",
+      "4x12 cab",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop Tube Screamer focus",
+      "avoid mid-scooped wording",
+      "keep it dry and aggressive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward crunch and tight rhythm tones suitable for punk rock.",
+          "bestMatchSummary": "A classic British stack simulation (UK 45/Plexi) paired with a Tube Screamer boost to achieve the required aggressive, mid-focused Marshall crunch, keeping effects minimal and dry.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in fast punk strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer focus (TS808 style) for tight, mid-forward crunch and attack enhancement.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated TS model, but Green OD provides the necessary boost character and midrange punch.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD",
+                  "reason": "A slightly different voicing, but still serves as a mid-boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core Marshall crunch and aggressive gain structure.",
+              "matchQuality": "close",
+              "gap": "Using general 'Distortion' to simulate Plexi/JCM-style breakup, as no specific British high-gain model is available.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, dirtier edge is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall Plexi/JCM tone and British rock character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound required for punk rock grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Boost the mid-frequencies to achieve the required 'mid-forward crunch' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this dry, aggressive rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects (like Chorus) as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0s",
+                "Feedback": "0%"
+              },
+              "purpose": "Keep the sound dry and aggressive; delay wash is explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, natural ambience (dry rhythm) without sounding washed out. Low mix setting is crucial.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list suggests avoiding big reverb, so the Room unit must be used with a very low wet/mix setting to maintain dryness.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "A slightly more controlled ambience if 'Room' is too much."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is punk rock, requiring a highly aggressive and mid-focused tone. The signal chain prioritizes tight gain (Green OD + Distortion) into the UK 45 amp model.",
+          "Reverb (Room) is used only at a very low mix level to provide minimal space without creating a 'delay wash' or sounding big."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and punch in the punk context.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+              "reason": "Enhance grit and tightness specific to punk rock genre.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Green Day - Basket Case - Valeton GP-180",
+        "song": {
+          "artist": "Green Day",
+          "title": "Basket Case",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Marshall crunch with punk bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British stack simulation (UK 45/Plexi) paired with a Tube Screamer boost to achieve the required aggressive, mid-focused Marshall crunch, keeping effects minimal and dry.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum inherent in fast punk strumming.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Simulate the Tube Screamer focus (TS808 style) for tight, mid-forward crunch and attack enhancement.",
+            "matchQuality": "close",
+            "gap": "The GP-180 does not have a dedicated TS model, but Green OD provides the necessary boost character and midrange punch.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Blues OD",
+                "reason": "A slightly different voicing, but still serves as a mid-boost."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "4.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the core Marshall crunch and aggressive gain structure.",
+            "matchQuality": "close",
+            "gap": "Using general 'Distortion' to simulate Plexi/JCM-style breakup, as no specific British high-gain model is available.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "RAT-style",
+                "reason": "If a more aggressive, dirtier edge is needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall Plexi/JCM tone and British rock character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound required for punk rock grit.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Boost the mid-frequencies to achieve the required 'mid-forward crunch' and cut through the mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah needed for this dry, aggressive rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects (like Chorus) as per the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0s",
+              "Feedback": "0%"
+            },
+            "purpose": "Keep the sound dry and aggressive; delay wash is explicitly avoided.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%"
+            },
+            "purpose": "Provide minimal, natural ambience (dry rhythm) without sounding washed out. Low mix setting is crucial.",
+            "matchQuality": "close",
+            "gap": "The 'avoid' list suggests avoiding big reverb, so the Room unit must be used with a very low wet/mix setting to maintain dryness.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate",
+                "reason": "A slightly more controlled ambience if 'Room' is too much."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Marshall crunch with punk bite",
+          "toneProfile": "bright Marshall crunch with punk bite",
+          "idealSignalChain": "Marshall JCM/Plexi | 4x12 cab | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall JCM/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-muted attack",
+            "mid-forward crunch",
+            "dry rhythm",
+            "fast strum clarity"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, mid-forward crunch and tight rhythm tones suitable for punk rock.",
+          "bestMatchSummary": "A classic British stack simulation (UK 45/Plexi) paired with a Tube Screamer boost to achieve the required aggressive, mid-focused Marshall crunch, keeping effects minimal and dry.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in fast punk strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Simulate the Tube Screamer focus (TS808 style) for tight, mid-forward crunch and attack enhancement.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated TS model, but Green OD provides the necessary boost character and midrange punch.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Blues OD",
+                  "reason": "A slightly different voicing, but still serves as a mid-boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the core Marshall crunch and aggressive gain structure.",
+              "matchQuality": "close",
+              "gap": "Using general 'Distortion' to simulate Plexi/JCM-style breakup, as no specific British high-gain model is available.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, dirtier edge is needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall Plexi/JCM tone and British rock character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound required for punk rock grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Boost the mid-frequencies to achieve the required 'mid-forward crunch' and cut through the mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah needed for this dry, aggressive rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects (like Chorus) as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0s",
+                "Feedback": "0%"
+              },
+              "purpose": "Keep the sound dry and aggressive; delay wash is explicitly avoided.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, natural ambience (dry rhythm) without sounding washed out. Low mix setting is crucial.",
+              "matchQuality": "close",
+              "gap": "The 'avoid' list suggests avoiding big reverb, so the Room unit must be used with a very low wet/mix setting to maintain dryness.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "A slightly more controlled ambience if 'Room' is too much."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better realism and punch in the punk context.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+              "reason": "Enhance grit and tightness specific to punk rock genre.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Tube Screamer focus",
+          "avoid mid-scooped wording",
+          "keep it dry and aggressive"
+        ],
+        "warnings": [
+          "The source material is punk rock, requiring a highly aggressive and mid-focused tone. The signal chain prioritizes tight gain (Green OD + Distortion) into the UK 45 amp model.",
+          "Reverb (Room) is used only at a very low mix level to provide minimal space without creating a 'delay wash' or sounding big."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.057,
+      "prompt_chars": 989,
+      "response_chars": 452,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 119,
+        "total_duration": 10036500300,
+        "prompt_eval_duration": 866574000,
+        "eval_duration": 1840464000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.762,
+      "prompt_chars": 5382,
+      "response_chars": 471,
+      "usage": {
+        "input_tokens": 1506,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1636
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.298,
+      "prompt_chars": 3533,
+      "response_chars": 6160,
+      "usage": {
+        "prompt_eval_count": 1199,
+        "eval_count": 1759,
+        "total_duration": 31278989500,
+        "prompt_eval_duration": 222668000,
+        "eval_duration": 30693554000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.438,
+      "prompt_chars": 8284,
+      "response_chars": 524,
+      "usage": {
+        "prompt_eval_count": 2315,
+        "eval_count": 143,
+        "total_duration": 18414181700,
+        "prompt_eval_duration": 319698000,
+        "eval_duration": 2291580000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.648,
+      "prompt_chars": 2839,
+      "response_chars": 180,
+      "usage": {
+        "prompt_eval_count": 908,
+        "eval_count": 51,
+        "total_duration": 8645001400,
+        "prompt_eval_duration": 165540000,
+        "eval_duration": 336881000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Green Day",
+      "title": "Basket Case",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Green Day - Basket Case - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Marshall crunch with punk bite",
+      "signalChainSummary": "A classic British stack simulation (UK 45/Plexi) paired with a Tube Screamer boost to achieve the required aggressive, mid-focused Marshall crunch, keeping effects minimal and dry.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum inherent in fast punk strumming.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Simulate the Tube Screamer focus (TS808 style) for tight, mid-forward crunch and attack enhancement.",
+          "matchQuality": "close",
+          "gap": "The GP-180 does not have a dedicated TS model, but Green OD provides the necessary boost character and midrange punch.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly different voicing, but still serves as a mid-boost."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "4.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the core Marshall crunch and aggressive gain structure.",
+          "matchQuality": "close",
+          "gap": "Using general 'Distortion' to simulate Plexi/JCM-style breakup, as no specific British high-gain model is available.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "If a more aggressive, dirtier edge is needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall Plexi/JCM tone and British rock character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound required for punk rock grit.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Boost the mid-frequencies to achieve the required 'mid-forward crunch' and cut through the mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah needed for this dry, aggressive rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects (like Chorus) as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0s",
+            "Feedback": "0%"
+          },
+          "purpose": "Keep the sound dry and aggressive; delay wash is explicitly avoided.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%"
+          },
+          "purpose": "Provide minimal, natural ambience (dry rhythm) without sounding washed out. Low mix setting is crucial.",
+          "matchQuality": "close",
+          "gap": "The 'avoid' list suggests avoiding big reverb, so the Room unit must be used with a very low wet/mix setting to maintain dryness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly more controlled ambience if 'Room' is too much."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Marshall crunch with punk bite",
+      "mustHave": [
+        "tight palm-muted attack",
+        "mid-forward crunch",
+        "dry rhythm",
+        "fast strum clarity"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "delay wash",
+        "big reverb"
+      ],
+      "gearClues": [
+        "Marshall JCM/Plexi",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Tube Screamer focus",
+        "avoid mid-scooped wording",
+        "keep it dry and aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "pop punk",
+        "alternative rock"
+      ],
+      "targetTone": "bright Marshall crunch with punk bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better realism and punch in the punk context.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., British 4x12)",
+          "reason": "Enhance grit and tightness specific to punk rock genre.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased punch and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 545,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

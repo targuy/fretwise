@@ -1,0 +1,1028 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1625,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Troggs__Wild_Thing.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Troggs",
+    "title": "Wild Thing",
+    "album": "",
+    "year": null,
+    "genre": "garage rock"
+  },
+  "genreClassification": {
+    "genre": "garage rock",
+    "subgenres": [
+      "60s",
+      "proto-punk"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of raw, fuzzy 60s garage rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, fuzzy blues rock tone with a thick, slightly overdriven crunch.",
+      "signatureElements": [
+        "Fuzz (mild to moderate)",
+        "Crunch/Overdrive (mid-focused)",
+        "Slightly scooped mids (for punchy rhythm)"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive",
+        "Big Muff style fuzz pedal",
+        "British single-coil amp simulation (e.g., Plexi or AC30 family)"
+      ],
+      "avoid": [
+        "Extreme high gain metal tones",
+        "Clean jazz sounds",
+        "Wah sweeps (unless used rhythmically)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "raw garage fuzz crunch with dirty mono bite",
+      "mustHave": [
+        "fuzzy guitar attack",
+        "dirty lo-fi edge",
+        "bright nasal mids",
+        "simple mono rhythm"
+      ],
+      "avoid": [
+        "blues-rock overdrive",
+        "smooth modern crunch",
+        "scooped Muff wall",
+        "polished high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "raw 60s garage amp",
+        "light fuzz"
+      ],
+      "corrections": [
+        "make it grittier and less bluesy",
+        "favor fuzz over overdrive",
+        "keep mids nasal, not scooped"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "raw garage fuzz crunch with dirty mono bite",
+    "mustHave": [
+      "fuzzy guitar attack",
+      "dirty lo-fi edge",
+      "bright nasal mids",
+      "simple mono rhythm"
+    ],
+    "avoid": [
+      "blues-rock overdrive",
+      "smooth modern crunch",
+      "scooped Muff wall",
+      "polished high gain"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "small combo amp",
+      "raw 60s garage amp",
+      "light fuzz"
+    ],
+    "corrections": [
+      "make it grittier and less bluesy",
+      "favor fuzz over overdrive",
+      "keep mids nasal, not scooped"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize fuzz and mid-range grit over modern polish.",
+          "bestMatchSummary": "A raw, fuzzy signal chain using a Fuzz distortion unit into an AC30-style amp, paired with a vintage cabinet to capture the dirty, nasal sound of 60s garage rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in raw fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Mid-Boost",
+                "Output": "Medium"
+              },
+              "purpose": "Provide the core fuzzy attack and raw grit required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Good alternative if Fuzz is too aggressive, offering more control."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Slightly boost the mids to ensure the 'nasal' bite cuts through the fuzz.",
+              "matchQuality": "close",
+              "gap": "The Boost module is general; a dedicated EQ might be better, but this keeps the chain simple and focused on raw tone.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 2",
+                  "reason": "More precise mid-range shaping."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Bass": "Medium",
+                "Presence": "Low"
+              },
+              "purpose": "Simulate the classic British combo amp sound (like a small 60s/70s rig) that handles fuzz well without sounding overly polished.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative for a smaller, punchier British sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ Curve": "Vintage"
+              },
+              "purpose": "Provide the classic British cabinet tone that complements the AC30 and adds necessary grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "A slightly more aggressive, dirty alternative."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "EQ/MOD/DLY/RVB/VOL",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "High",
+                "Mid Boost": "+3 dB (600 Hz)",
+                "High Cut": "Medium"
+              },
+              "purpose": "Fine-tune the mids to achieve the required 'bright nasal' bite and cut through the fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle modulation for texture, but kept off to maintain raw simplicity.",
+              "matchQuality": "close",
+              "gap": "The genre doesn't require modulation, so this is a placeholder/optional effect. It can be bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Kept off to maintain the raw, immediate feel of garage rock.",
+              "matchQuality": "close",
+              "gap": "None. Delay is generally unnecessary for this style.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (The Troggs) is raw 60s garage rock, which requires a highly aggressive and simple signal chain. The settings prioritize fuzz and mid-range grit over modern polish or complex effects."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the cabinet IR with a dirtier, more aggressive 60s/70s style speaker to enhance the raw garage fuzz bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage-dirty-4x12-ir",
+              "reason": "Needs a dirtier, more aggressive 60s/70s speaker sound to match the raw garage fuzz.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased grit and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Troggs - Wild Thing - Valeton GP-180",
+        "song": {
+          "artist": "The Troggs",
+          "title": "Wild Thing",
+          "album": "",
+          "year": null,
+          "genre": "garage rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "raw garage fuzz crunch with dirty mono bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A raw, fuzzy signal chain using a Fuzz distortion unit into an AC30-style amp, paired with a vintage cabinet to capture the dirty, nasal sound of 60s garage rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray noise inherent in raw fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "High",
+              "Tone": "Mid-Boost",
+              "Output": "Medium"
+            },
+            "purpose": "Provide the core fuzzy attack and raw grit required for garage rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Good alternative if Fuzz is too aggressive, offering more control."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Tone": "Mid-Focus"
+            },
+            "purpose": "Slightly boost the mids to ensure the 'nasal' bite cuts through the fuzz.",
+            "matchQuality": "close",
+            "gap": "The Boost module is general; a dedicated EQ might be better, but this keeps the chain simple and focused on raw tone.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 2",
+                "reason": "More precise mid-range shaping."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "Medium-High",
+              "Treble": "Mid",
+              "Bass": "Medium",
+              "Presence": "Low"
+            },
+            "purpose": "Simulate the classic British combo amp sound (like a small 60s/70s rig) that handles fuzz well without sounding overly polished.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A good alternative for a smaller, punchier British sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "EQ Curve": "Vintage"
+            },
+            "purpose": "Provide the classic British cabinet tone that complements the AC30 and adds necessary grit.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Mess 4x12",
+                "reason": "A slightly more aggressive, dirty alternative."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "EQ/MOD/DLY/RVB/VOL",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low Cut": "High",
+              "Mid Boost": "+3 dB (600 Hz)",
+              "High Cut": "Medium"
+            },
+            "purpose": "Fine-tune the mids to achieve the required 'bright nasal' bite and cut through the fuzz.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Optional subtle modulation for texture, but kept off to maintain raw simplicity.",
+            "matchQuality": "close",
+            "gap": "The genre doesn't require modulation, so this is a placeholder/optional effect. It can be bypassed entirely.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "Off",
+              "Feedback": "Low"
+            },
+            "purpose": "Kept off to maintain the raw, immediate feel of garage rock.",
+            "matchQuality": "close",
+            "gap": "None. Delay is generally unnecessary for this style.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "raw garage fuzz crunch with dirty mono bite",
+          "toneProfile": "raw garage fuzz crunch with dirty mono bite",
+          "idealSignalChain": "single-coil guitar | small combo amp | raw 60s garage amp | light fuzz",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "raw 60s garage amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light fuzz",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy guitar attack",
+            "dirty lo-fi edge",
+            "bright nasal mids",
+            "simple mono rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize fuzz and mid-range grit over modern polish.",
+          "bestMatchSummary": "A raw, fuzzy signal chain using a Fuzz distortion unit into an AC30-style amp, paired with a vintage cabinet to capture the dirty, nasal sound of 60s garage rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in raw fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Mid-Boost",
+                "Output": "Medium"
+              },
+              "purpose": "Provide the core fuzzy attack and raw grit required for garage rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Good alternative if Fuzz is too aggressive, offering more control."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Slightly boost the mids to ensure the 'nasal' bite cuts through the fuzz.",
+              "matchQuality": "close",
+              "gap": "The Boost module is general; a dedicated EQ might be better, but this keeps the chain simple and focused on raw tone.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 2",
+                  "reason": "More precise mid-range shaping."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Bass": "Medium",
+                "Presence": "Low"
+              },
+              "purpose": "Simulate the classic British combo amp sound (like a small 60s/70s rig) that handles fuzz well without sounding overly polished.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A good alternative for a smaller, punchier British sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ Curve": "Vintage"
+              },
+              "purpose": "Provide the classic British cabinet tone that complements the AC30 and adds necessary grit.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "A slightly more aggressive, dirty alternative."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "EQ/MOD/DLY/RVB/VOL",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "High",
+                "Mid Boost": "+3 dB (600 Hz)",
+                "High Cut": "Medium"
+              },
+              "purpose": "Fine-tune the mids to achieve the required 'bright nasal' bite and cut through the fuzz.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle modulation for texture, but kept off to maintain raw simplicity.",
+              "matchQuality": "close",
+              "gap": "The genre doesn't require modulation, so this is a placeholder/optional effect. It can be bypassed entirely.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "Off",
+                "Feedback": "Low"
+              },
+              "purpose": "Kept off to maintain the raw, immediate feel of garage rock.",
+              "matchQuality": "close",
+              "gap": "None. Delay is generally unnecessary for this style.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the cabinet IR with a dirtier, more aggressive 60s/70s style speaker to enhance the raw garage fuzz bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage-dirty-4x12-ir",
+              "reason": "Needs a dirtier, more aggressive 60s/70s speaker sound to match the raw garage fuzz.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased grit and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "make it grittier and less bluesy",
+          "favor fuzz over overdrive",
+          "keep mids nasal, not scooped"
+        ],
+        "warnings": [
+          "The source material (The Troggs) is raw 60s garage rock, which requires a highly aggressive and simple signal chain. The settings prioritize fuzz and mid-range grit over modern polish or complex effects."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.35,
+      "prompt_chars": 989,
+      "response_chars": 497,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 130,
+        "total_duration": 10322405800,
+        "prompt_eval_duration": 293011000,
+        "eval_duration": 2222763000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.259,
+      "prompt_chars": 5414,
+      "response_chars": 555,
+      "usage": {
+        "input_tokens": 1515,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 154,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1669
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 23.836,
+      "prompt_chars": 3624,
+      "response_chars": 5041,
+      "usage": {
+        "prompt_eval_count": 1216,
+        "eval_count": 1425,
+        "total_duration": 23824675500,
+        "prompt_eval_duration": 428495000,
+        "eval_duration": 22889516000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.404,
+      "prompt_chars": 7184,
+      "response_chars": 571,
+      "usage": {
+        "prompt_eval_count": 1998,
+        "eval_count": 169,
+        "total_duration": 4380323500,
+        "prompt_eval_duration": 349881000,
+        "eval_duration": 3482713000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 12.048,
+      "prompt_chars": 2599,
+      "response_chars": 159,
+      "usage": {
+        "prompt_eval_count": 829,
+        "eval_count": 51,
+        "total_duration": 12031428900,
+        "prompt_eval_duration": 438743000,
+        "eval_duration": 956943000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Troggs",
+      "title": "Wild Thing",
+      "album": "",
+      "year": null,
+      "genre": "garage rock"
+    },
+    "rig": {
+      "rigName": "The Troggs - Wild Thing - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "raw garage fuzz crunch with dirty mono bite",
+      "signalChainSummary": "A raw, fuzzy signal chain using a Fuzz distortion unit into an AC30-style amp, paired with a vintage cabinet to capture the dirty, nasal sound of 60s garage rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray noise inherent in raw fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "High",
+            "Tone": "Mid-Boost",
+            "Output": "Medium"
+          },
+          "purpose": "Provide the core fuzzy attack and raw grit required for garage rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Good alternative if Fuzz is too aggressive, offering more control."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Tone": "Mid-Focus"
+          },
+          "purpose": "Slightly boost the mids to ensure the 'nasal' bite cuts through the fuzz.",
+          "matchQuality": "close",
+          "gap": "The Boost module is general; a dedicated EQ might be better, but this keeps the chain simple and focused on raw tone.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 2",
+              "reason": "More precise mid-range shaping."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "Medium-High",
+            "Treble": "Mid",
+            "Bass": "Medium",
+            "Presence": "Low"
+          },
+          "purpose": "Simulate the classic British combo amp sound (like a small 60s/70s rig) that handles fuzz well without sounding overly polished.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A good alternative for a smaller, punchier British sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "EQ Curve": "Vintage"
+          },
+          "purpose": "Provide the classic British cabinet tone that complements the AC30 and adds necessary grit.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Mess 4x12",
+              "reason": "A slightly more aggressive, dirty alternative."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "EQ/MOD/DLY/RVB/VOL",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low Cut": "High",
+            "Mid Boost": "+3 dB (600 Hz)",
+            "High Cut": "Medium"
+          },
+          "purpose": "Fine-tune the mids to achieve the required 'bright nasal' bite and cut through the fuzz.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Optional subtle modulation for texture, but kept off to maintain raw simplicity.",
+          "matchQuality": "close",
+          "gap": "The genre doesn't require modulation, so this is a placeholder/optional effect. It can be bypassed entirely.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "Off",
+            "Feedback": "Low"
+          },
+          "purpose": "Kept off to maintain the raw, immediate feel of garage rock.",
+          "matchQuality": "close",
+          "gap": "None. Delay is generally unnecessary for this style.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "raw garage fuzz crunch with dirty mono bite",
+      "mustHave": [
+        "fuzzy guitar attack",
+        "dirty lo-fi edge",
+        "bright nasal mids",
+        "simple mono rhythm"
+      ],
+      "avoid": [
+        "blues-rock overdrive",
+        "smooth modern crunch",
+        "scooped Muff wall",
+        "polished high gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small combo amp",
+        "raw 60s garage amp",
+        "light fuzz"
+      ],
+      "corrections": [
+        "make it grittier and less bluesy",
+        "favor fuzz over overdrive",
+        "keep mids nasal, not scooped"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage rock",
+      "styleTags": [
+        "60s",
+        "proto-punk"
+      ],
+      "targetTone": "raw garage fuzz crunch with dirty mono bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the cabinet IR with a dirtier, more aggressive 60s/70s style speaker to enhance the raw garage fuzz bite.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage-dirty-4x12-ir",
+          "reason": "Needs a dirtier, more aggressive 60s/70s speaker sound to match the raw garage fuzz.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased grit and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1625,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1084 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 446,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Fleetwood_Mac__The_Chain.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Fleetwood Mac",
+    "title": "The Chain",
+    "album": "",
+    "year": null,
+    "genre": "classic rock"
+  },
+  "genreClassification": {
+    "genre": "classic rock",
+    "subgenres": [
+      "art rock",
+      "psychedelic rock"
+    ],
+    "confidence": "high",
+    "rationale": "Fleetwood Mac's 'The Chain' is a foundational track in classic and psychedelic rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven rock tone with pronounced bass and mid-range focus.",
+      "signatureElements": [
+        "Sustained, melodic lead lines (especially the bridge/outro)",
+        "Punchy rhythm chords (bass emphasis)",
+        "Subtle chorus or vibrato for texture"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (e.g., AC30 or Plexi family)",
+        "Low-gain overdrive pedal (for warmth and sustain)",
+        "Spring reverb or plate reverb simulation"
+      ],
+      "avoid": [
+        "Aggressive distortion/fuzz",
+        "Bright, scooped mids",
+        "High-gain metal tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry Plexi crunch with tight low end and biting mids",
+      "mustHave": [
+        "mid-forward rhythm crunch",
+        "clean-to-grit dynamics",
+        "tight bass",
+        "bridge/outro lead sustain"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "4x12",
+        "humbuckers",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop chorus",
+        "favor drier British crunch",
+        "keep lead sustain but not smooth high gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry Plexi crunch with tight low end and biting mids",
+    "mustHave": [
+      "mid-forward rhythm crunch",
+      "clean-to-grit dynamics",
+      "tight bass",
+      "bridge/outro lead sustain"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy reverb",
+      "fuzz",
+      "scooped mids"
+    ],
+    "gearClues": [
+      "Plexi/Marshall",
+      "4x12",
+      "humbuckers",
+      "light overdrive"
+    ],
+    "corrections": [
+      "drop chorus",
+      "favor drier British crunch",
+      "keep lead sustain but not smooth high gain"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Plexi/Marshall) with emphasis on mid-range punch and tight low end.",
+          "bestMatchSummary": "A vintage Plexi-style crunch tone, utilizing light overdrive for grit, a UK 45 amp model for the core sound, and a dry room simulation to maintain clarity while providing necessary depth. The signal chain is designed for rhythm work with clear lead capability.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain/overdrive tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the characteristic light, mid-forward crunch and grit associated with Plexi/Marshall tones.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general British tone booster; it approximates the desired 'Plexi' character without being a direct model.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more versatile option for blues/classic rock, but Green OD better targets the specific mid-punch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD and amp model for saturation.",
+              "matchQuality": "none",
+              "gap": "No specific DST module is needed; relying solely on PRE/AMP interaction for grit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile, providing mid-forward punch and tight response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary frequency response for the Plexi tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone by slightly boosting mids and tightening the low end to achieve 'biting mids' and 'tight bass'.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Disabled as per 'avoid' list (drop chorus).",
+              "matchQuality": "none",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle depth and sustain to the lead lines without sounding overly wet or distracting.",
+              "matchQuality": "close",
+              "gap": "A simpler, less noticeable delay is preferred over heavy reverb/chorus.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could provide a warmer, more vintage sustain effect if Digital Delay proves too clean."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space and depth (room ambience) without the washiness of heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is chosen over Plate/Spring to maintain clarity while adding necessary dimension.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock track, and the rig focuses on replicating the vintage British crunch tone (Plexi/Marshall) using available modules."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate, mid-focused British 4x12.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Plexi/Marshall 4x12 IR",
+              "reason": "Enhance the vintage British crunch tone and tighten low end response.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter lows, more mid focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Fleetwood Mac - The Chain - Valeton GP-180",
+        "song": {
+          "artist": "Fleetwood Mac",
+          "title": "The Chain",
+          "album": "",
+          "year": null,
+          "genre": "classic rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry Plexi crunch with tight low end and biting mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A vintage Plexi-style crunch tone, utilizing light overdrive for grit, a UK 45 amp model for the core sound, and a dry room simulation to maintain clarity while providing necessary depth. The signal chain is designed for rhythm work with clear lead capability.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise inherent in high-gain/overdrive tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the characteristic light, mid-forward crunch and grit associated with Plexi/Marshall tones.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general British tone booster; it approximates the desired 'Plexi' character without being a direct model.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more versatile option for blues/classic rock, but Green OD better targets the specific mid-punch."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the distortion section clean to rely on the Green OD and amp model for saturation.",
+            "matchQuality": "none",
+            "gap": "No specific DST module is needed; relying solely on PRE/AMP interaction for grit.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British Plexi/Marshall sound profile, providing mid-forward punch and tight response.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary frequency response for the Plexi tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Cut": "-2 dB",
+              "Mid Boost": "+3 dB",
+              "Treble Cut": "-1 dB"
+            },
+            "purpose": "Fine-tune the tone by slightly boosting mids and tightening the low end to achieve 'biting mids' and 'tight bass'.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Disabled as per 'avoid' list (drop chorus).",
+            "matchQuality": "none",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Level": "2"
+            },
+            "purpose": "Add subtle depth and sustain to the lead lines without sounding overly wet or distracting.",
+            "matchQuality": "close",
+            "gap": "A simpler, less noticeable delay is preferred over heavy reverb/chorus.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could provide a warmer, more vintage sustain effect if Digital Delay proves too clean."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/space",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a subtle sense of space and depth (room ambience) without the washiness of heavy reverb.",
+            "matchQuality": "close",
+            "gap": "The 'Room' setting is chosen over Plate/Spring to maintain clarity while adding necessary dimension.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment for optimal mix balance.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry Plexi crunch with tight low end and biting mids",
+          "toneProfile": "dry Plexi crunch with tight low end and biting mids",
+          "idealSignalChain": "Plexi/Marshall | 4x12 | humbuckers | light overdrive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward rhythm crunch",
+            "clean-to-grit dynamics",
+            "tight bass",
+            "bridge/outro lead sustain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on British classic rock tones (Plexi/Marshall) with emphasis on mid-range punch and tight low end.",
+          "bestMatchSummary": "A vintage Plexi-style crunch tone, utilizing light overdrive for grit, a UK 45 amp model for the core sound, and a dry room simulation to maintain clarity while providing necessary depth. The signal chain is designed for rhythm work with clear lead capability.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain/overdrive tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the characteristic light, mid-forward crunch and grit associated with Plexi/Marshall tones.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general British tone booster; it approximates the desired 'Plexi' character without being a direct model.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more versatile option for blues/classic rock, but Green OD better targets the specific mid-punch."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the distortion section clean to rely on the Green OD and amp model for saturation.",
+              "matchQuality": "none",
+              "gap": "No specific DST module is needed; relying solely on PRE/AMP interaction for grit.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Marshall sound profile, providing mid-forward punch and tight response.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary frequency response for the Plexi tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Cut": "-2 dB",
+                "Mid Boost": "+3 dB",
+                "Treble Cut": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone by slightly boosting mids and tightening the low end to achieve 'biting mids' and 'tight bass'.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Disabled as per 'avoid' list (drop chorus).",
+              "matchQuality": "none",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Level": "2"
+              },
+              "purpose": "Add subtle depth and sustain to the lead lines without sounding overly wet or distracting.",
+              "matchQuality": "close",
+              "gap": "A simpler, less noticeable delay is preferred over heavy reverb/chorus.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could provide a warmer, more vintage sustain effect if Digital Delay proves too clean."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space and depth (room ambience) without the washiness of heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The 'Room' setting is chosen over Plate/Spring to maintain clarity while adding necessary dimension.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate, mid-focused British 4x12.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Plexi/Marshall 4x12 IR",
+              "reason": "Enhance the vintage British crunch tone and tighten low end response.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter lows, more mid focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "favor drier British crunch",
+          "keep lead sustain but not smooth high gain"
+        ],
+        "warnings": [
+          "The source material is a classic rock track, and the rig focuses on replicating the vintage British crunch tone (Plexi/Marshall) using available modules."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.51,
+      "prompt_chars": 991,
+      "response_chars": 550,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 134,
+        "total_duration": 10507515900,
+        "prompt_eval_duration": 277835000,
+        "eval_duration": 2154217000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.388,
+      "prompt_chars": 5469,
+      "response_chars": 510,
+      "usage": {
+        "input_tokens": 1520,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1661
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.629,
+      "prompt_chars": 3581,
+      "response_chars": 5817,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1602,
+        "total_duration": 38624067300,
+        "prompt_eval_duration": 256466999,
+        "eval_duration": 25882540000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 4.284,
+      "prompt_chars": 7945,
+      "response_chars": 561,
+      "usage": {
+        "prompt_eval_count": 2170,
+        "eval_count": 155,
+        "total_duration": 4257857400,
+        "prompt_eval_duration": 340461000,
+        "eval_duration": 3446251000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.826,
+      "prompt_chars": 2922,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 904,
+        "eval_count": 52,
+        "total_duration": 10801844500,
+        "prompt_eval_duration": 400615000,
+        "eval_duration": 705838000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Fleetwood Mac",
+      "title": "The Chain",
+      "album": "",
+      "year": null,
+      "genre": "classic rock"
+    },
+    "rig": {
+      "rigName": "Fleetwood Mac - The Chain - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry Plexi crunch with tight low end and biting mids",
+      "signalChainSummary": "A vintage Plexi-style crunch tone, utilizing light overdrive for grit, a UK 45 amp model for the core sound, and a dry room simulation to maintain clarity while providing necessary depth. The signal chain is designed for rhythm work with clear lead capability.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise inherent in high-gain/overdrive tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the characteristic light, mid-forward crunch and grit associated with Plexi/Marshall tones.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general British tone booster; it approximates the desired 'Plexi' character without being a direct model.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more versatile option for blues/classic rock, but Green OD better targets the specific mid-punch."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the distortion section clean to rely on the Green OD and amp model for saturation.",
+          "matchQuality": "fallback",
+          "gap": "No specific DST module is needed; relying solely on PRE/AMP interaction for grit.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British Plexi/Marshall sound profile, providing mid-forward punch and tight response.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary frequency response for the Plexi tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Cut": "-2 dB",
+            "Mid Boost": "+3 dB",
+            "Treble Cut": "-1 dB"
+          },
+          "purpose": "Fine-tune the tone by slightly boosting mids and tightening the low end to achieve 'biting mids' and 'tight bass'.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Disabled as per 'avoid' list (drop chorus).",
+          "matchQuality": "fallback",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Level": "2"
+          },
+          "purpose": "Add subtle depth and sustain to the lead lines without sounding overly wet or distracting.",
+          "matchQuality": "close",
+          "gap": "A simpler, less noticeable delay is preferred over heavy reverb/chorus.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could provide a warmer, more vintage sustain effect if Digital Delay proves too clean."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/space",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a subtle sense of space and depth (room ambience) without the washiness of heavy reverb.",
+          "matchQuality": "close",
+          "gap": "The 'Room' setting is chosen over Plate/Spring to maintain clarity while adding necessary dimension.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment for optimal mix balance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry Plexi crunch with tight low end and biting mids",
+      "mustHave": [
+        "mid-forward rhythm crunch",
+        "clean-to-grit dynamics",
+        "tight bass",
+        "bridge/outro lead sustain"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy reverb",
+        "fuzz",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "4x12",
+        "humbuckers",
+        "light overdrive"
+      ],
+      "corrections": [
+        "drop chorus",
+        "favor drier British crunch",
+        "keep lead sustain but not smooth high gain"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "classic rock",
+      "styleTags": [
+        "art rock",
+        "psychedelic rock"
+      ],
+      "targetTone": "dry Plexi crunch with tight low end and biting mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more period-appropriate, mid-focused British 4x12.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage Plexi/Marshall 4x12 IR",
+          "reason": "Enhance the vintage British crunch tone and tighten low end response.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter lows, more mid focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 446,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

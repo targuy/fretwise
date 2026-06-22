@@ -1,0 +1,1079 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 849,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Lou_Reed__Walk_On_The_Wild_Side.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 3,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Lou Reed",
+    "title": "Walk On The Wild Side",
+    "album": "",
+    "year": null,
+    "genre": "art rock"
+  },
+  "genreClassification": {
+    "genre": "art rock",
+    "subgenres": [
+      "proto-punk",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "Lou Reed's style is foundational to art rock and proto-punk."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly dirty blues/rock tone with prominent mid-range and a touch of grit.",
+      "signatureElements": [
+        "Clean/Crunch foundation (early verses)",
+        "Slightly overdriven lead lines",
+        "Wah pedal use (rhythmic filtering)"
+      ],
+      "gearHypotheses": [
+        "British style amp simulation (e.g., AC30 or Plexi model)",
+        "Low-to-mid gain overdrive/distortion (for grit)",
+        "Delay and Reverb (for space and atmosphere)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High-gain metal distortion",
+        "Bright, scooped tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "dry 70s bassline groove, minimal guitar presence",
+      "mustHave": [
+        "subtle clean guitar if any",
+        "dry close-mic texture",
+        "no lead emphasis"
+      ],
+      "avoid": [
+        "wah",
+        "overdrive lead",
+        "ambient delay",
+        "big rock crunch"
+      ],
+      "gearClues": [
+        "likely bass-led track",
+        "simple clean electric if present"
+      ],
+      "corrections": [
+        "song is not guitar-signature driven",
+        "remove wah and lead assumptions",
+        "bias toward minimal/non-featured guitar"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "iconic track is bass-led and guitar texture is not decisive",
+      "draft invents wah/overdrive/amp family that would mislead GP-180",
+      "uncertain target guitar part for preset generation"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "minimal clean rhythm guitar, dry 70s studio texture",
+    "mustHave": [
+      "clean compressed tone",
+      "dry close-mic character",
+      "subtle presence behind bass"
+    ],
+    "avoid": [
+      "wah pedal",
+      "overdrive or grit",
+      "delay or reverb",
+      "lead emphasis"
+    ],
+    "gearClues": [
+      "simple clean amp",
+      "bass-led arrangement",
+      "1970s studio production"
+    ],
+    "corrections": [
+      "remove wah assumption entirely",
+      "remove overdrive and crunch",
+      "guitar is not signature element"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "minimal clean rhythm guitar, dry 70s studio texture",
+    "mustHave": [
+      "clean compressed tone",
+      "dry close-mic character",
+      "subtle presence behind bass"
+    ],
+    "avoid": [
+      "wah pedal",
+      "overdrive or grit",
+      "delay or reverb",
+      "lead emphasis"
+    ],
+    "gearClues": [
+      "simple clean amp",
+      "bass-led arrangement",
+      "1970s studio production"
+    ],
+    "corrections": [
+      "remove wah assumption entirely",
+      "remove overdrive and crunch",
+      "guitar is not signature element"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, compressed rhythm tones suitable for 70s studio production.",
+          "bestMatchSummary": "A pristine signal chain utilizing compression and a classic Fender-style clean amp (US Deluxe) paired with a small cab (US 2x12) to achieve the required dry, minimal, and highly controlled rhythmic texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight rhythmic feel.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Achieve the required clean compression and sustain for a consistent rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for 'clean compressed tone'.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all grit and overdrive as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Middle": "High",
+                "Bass": "Mid"
+              },
+              "purpose": "Simulate the clean, bright, and non-aggressive tone of a 70s studio setup.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for classic Fender/clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, dry, and intimate sound suitable for close-mic studio recording.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the 'dry close-mic character' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Subtly enhance the presence and clarity of the rhythm guitar without dominating the bass.",
+              "matchQuality": "close",
+              "gap": "The EQ is used to subtly carve out space for the bass, which is critical for this specific genre/arrangement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Explicitly avoid the wah pedal as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone minimal and dry; Chorus is unnecessary and could muddy the clean rhythm.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests a very 'dry' texture. If any modulation were needed, it would be subtle Plate Reverb instead of Chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects to maintain the dry, minimal studio sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (15%)",
+                "purpose": "Add a minimal amount of natural space and glue to the overall mix without sounding wet or lead-focused.",
+                "matchQuality": "close",
+                "gap": "The verdict asks for 'dry', but a tiny touch of Room reverb can simulate a real studio environment's ambience without adding noticeable tail.",
+                "alternatives": []
+              },
+              "warnings": [
+                "The source material is not guitar-centric; the role is purely rhythmic accompaniment. The rig prioritizes clean, controlled tones over expressive lead sounds."
+              ],
+              "confidence": "high",
+              "needsReview": false,
+              "purpose": "",
+              "alternatives": [],
+              "matchQuality": "fallback",
+              "gap": "Gemma omitted one or more GP-180 block details; this block needs manual review."
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the dry, close-mic 70s studio texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage studio IR (e.g., Neumann U47/U67)",
+              "reason": "Enhance the dry, close-mic 70s studio texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and vintage character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Lou Reed - Walk On The Wild Side - Valeton GP-180",
+        "song": {
+          "artist": "Lou Reed",
+          "title": "Walk On The Wild Side",
+          "album": "",
+          "year": null,
+          "genre": "art rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "minimal clean rhythm guitar, dry 70s studio texture",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A pristine signal chain utilizing compression and a classic Fender-style clean amp (US Deluxe) paired with a small cab (US 2x12) to achieve the required dry, minimal, and highly controlled rhythmic texture.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a tight rhythmic feel.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Achieve the required clean compression and sustain for a consistent rhythm tone.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for 'clean compressed tone'.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid all grit and overdrive as per the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "N/A. Explicitly avoided.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "Mid",
+              "Middle": "High",
+              "Bass": "Mid"
+            },
+            "purpose": "Simulate the clean, bright, and non-aggressive tone of a 70s studio setup.",
+            "matchQuality": "perfect",
+            "gap": "None. Best choice for classic Fender/clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, dry, and intimate sound suitable for close-mic studio recording.",
+            "matchQuality": "perfect",
+            "gap": "None. Matches the 'dry close-mic character' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "+2 dB",
+              "Mid Cut": "-1 dB",
+              "Treble Boost": "+1 dB"
+            },
+            "purpose": "Subtly enhance the presence and clarity of the rhythm guitar without dominating the bass.",
+            "matchQuality": "close",
+            "gap": "The EQ is used to subtly carve out space for the bass, which is critical for this specific genre/arrangement.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Explicitly avoid the wah pedal as per the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "N/A. Explicitly avoided.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone minimal and dry; Chorus is unnecessary and could muddy the clean rhythm.",
+            "matchQuality": "close",
+            "gap": "The verdict suggests a very 'dry' texture. If any modulation were needed, it would be subtle Plate Reverb instead of Chorus.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay effects to maintain the dry, minimal studio sound.",
+            "matchQuality": "perfect",
+            "gap": "N/A. Explicitly avoided.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "Low (15%)",
+              "purpose": "Add a minimal amount of natural space and glue to the overall mix without sounding wet or lead-focused.",
+              "matchQuality": "close",
+              "gap": "The verdict asks for 'dry', but a tiny touch of Room reverb can simulate a real studio environment's ambience without adding noticeable tail.",
+              "alternatives": []
+            },
+            "warnings": [
+              "The source material is not guitar-centric; the role is purely rhythmic accompaniment. The rig prioritizes clean, controlled tones over expressive lead sounds."
+            ],
+            "confidence": "high",
+            "needsReview": false,
+            "purpose": "",
+            "alternatives": [],
+            "matchQuality": "fallback",
+            "gap": "Gemma omitted one or more GP-180 block details; this block needs manual review."
+          }
+        ],
+        "general": {
+          "targetSound": "minimal clean rhythm guitar, dry 70s studio texture",
+          "toneProfile": "minimal clean rhythm guitar, dry 70s studio texture",
+          "idealSignalChain": "simple clean amp | bass-led arrangement | 1970s studio production",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "simple clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bass-led arrangement",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1970s studio production",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean compressed tone",
+            "dry close-mic character",
+            "subtle presence behind bass"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, compressed rhythm tones suitable for 70s studio production.",
+          "bestMatchSummary": "A pristine signal chain utilizing compression and a classic Fender-style clean amp (US Deluxe) paired with a small cab (US 2x12) to achieve the required dry, minimal, and highly controlled rhythmic texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight rhythmic feel.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Achieve the required clean compression and sustain for a consistent rhythm tone.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for 'clean compressed tone'.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all grit and overdrive as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Middle": "High",
+                "Bass": "Mid"
+              },
+              "purpose": "Simulate the clean, bright, and non-aggressive tone of a 70s studio setup.",
+              "matchQuality": "perfect",
+              "gap": "None. Best choice for classic Fender/clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, dry, and intimate sound suitable for close-mic studio recording.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the 'dry close-mic character' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "+2 dB",
+                "Mid Cut": "-1 dB",
+                "Treble Boost": "+1 dB"
+              },
+              "purpose": "Subtly enhance the presence and clarity of the rhythm guitar without dominating the bass.",
+              "matchQuality": "close",
+              "gap": "The EQ is used to subtly carve out space for the bass, which is critical for this specific genre/arrangement.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Explicitly avoid the wah pedal as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone minimal and dry; Chorus is unnecessary and could muddy the clean rhythm.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests a very 'dry' texture. If any modulation were needed, it would be subtle Plate Reverb instead of Chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects to maintain the dry, minimal studio sound.",
+              "matchQuality": "perfect",
+              "gap": "N/A. Explicitly avoided.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "Low (15%)",
+                "purpose": "Add a minimal amount of natural space and glue to the overall mix without sounding wet or lead-focused.",
+                "matchQuality": "close",
+                "gap": "The verdict asks for 'dry', but a tiny touch of Room reverb can simulate a real studio environment's ambience without adding noticeable tail.",
+                "alternatives": []
+              },
+              "warnings": [
+                "The source material is not guitar-centric; the role is purely rhythmic accompaniment. The rig prioritizes clean, controlled tones over expressive lead sounds."
+              ],
+              "confidence": "high",
+              "needsReview": false,
+              "purpose": "",
+              "alternatives": [],
+              "matchQuality": "fallback",
+              "gap": "Gemma omitted one or more GP-180 block details; this block needs manual review."
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the dry, close-mic 70s studio texture.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage studio IR (e.g., Neumann U47/U67)",
+              "reason": "Enhance the dry, close-mic 70s studio texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and vintage character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove wah assumption entirely",
+          "remove overdrive and crunch",
+          "guitar is not signature element"
+        ],
+        "warnings": [],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.472,
+      "prompt_chars": 998,
+      "response_chars": 521,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 135,
+        "total_duration": 10469167600,
+        "prompt_eval_duration": 340546000,
+        "eval_duration": 2543663000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.127,
+      "prompt_chars": 5447,
+      "response_chars": 705,
+      "usage": {
+        "input_tokens": 1519,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 174,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1693
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.214,
+      "prompt_chars": 4983,
+      "response_chars": 597,
+      "usage": {
+        "input_tokens": 1462,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 198,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.889,
+      "prompt_chars": 3601,
+      "response_chars": 5359,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1476,
+        "total_duration": 25876965100,
+        "prompt_eval_duration": 358568000,
+        "eval_duration": 24922871000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.381,
+      "prompt_chars": 7547,
+      "response_chars": 514,
+      "usage": {
+        "prompt_eval_count": 2048,
+        "eval_count": 147,
+        "total_duration": 5359432100,
+        "prompt_eval_duration": 499318000,
+        "eval_duration": 4294904999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.464,
+      "prompt_chars": 2818,
+      "response_chars": 170,
+      "usage": {
+        "prompt_eval_count": 875,
+        "eval_count": 49,
+        "total_duration": 9447625700,
+        "prompt_eval_duration": 222524000,
+        "eval_duration": 1133509000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Lou Reed",
+      "title": "Walk On The Wild Side",
+      "album": "",
+      "year": null,
+      "genre": "art rock"
+    },
+    "rig": {
+      "rigName": "Lou Reed - Walk On The Wild Side - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "minimal clean rhythm guitar, dry 70s studio texture",
+      "signalChainSummary": "A pristine signal chain utilizing compression and a classic Fender-style clean amp (US Deluxe) paired with a small cab (US 2x12) to achieve the required dry, minimal, and highly controlled rhythmic texture.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a tight rhythmic feel.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Achieve the required clean compression and sustain for a consistent rhythm tone.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for 'clean compressed tone'.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid all grit and overdrive as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A. Explicitly avoided.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "Mid",
+            "Middle": "High",
+            "Bass": "Mid"
+          },
+          "purpose": "Simulate the clean, bright, and non-aggressive tone of a 70s studio setup.",
+          "matchQuality": "exact",
+          "gap": "None. Best choice for classic Fender/clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, dry, and intimate sound suitable for close-mic studio recording.",
+          "matchQuality": "exact",
+          "gap": "None. Matches the 'dry close-mic character' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "+2 dB",
+            "Mid Cut": "-1 dB",
+            "Treble Boost": "+1 dB"
+          },
+          "purpose": "Subtly enhance the presence and clarity of the rhythm guitar without dominating the bass.",
+          "matchQuality": "close",
+          "gap": "The EQ is used to subtly carve out space for the bass, which is critical for this specific genre/arrangement.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Explicitly avoid the wah pedal as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A. Explicitly avoided.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone minimal and dry; Chorus is unnecessary and could muddy the clean rhythm.",
+          "matchQuality": "close",
+          "gap": "The verdict suggests a very 'dry' texture. If any modulation were needed, it would be subtle Plate Reverb instead of Chorus.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay effects to maintain the dry, minimal studio sound.",
+          "matchQuality": "exact",
+          "gap": "N/A. Explicitly avoided.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "Low (15%)",
+            "purpose": "Add a minimal amount of natural space and glue to the overall mix without sounding wet or lead-focused.",
+            "matchQuality": "close",
+            "gap": "The verdict asks for 'dry', but a tiny touch of Room reverb can simulate a real studio environment's ambience without adding noticeable tail.",
+            "alternatives": []
+          },
+          "purpose": "",
+          "matchQuality": "fallback",
+          "gap": "Gemma omitted one or more GP-180 block details; this block needs manual review.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "minimal clean rhythm guitar, dry 70s studio texture",
+      "mustHave": [
+        "clean compressed tone",
+        "dry close-mic character",
+        "subtle presence behind bass"
+      ],
+      "avoid": [
+        "wah pedal",
+        "overdrive or grit",
+        "delay or reverb",
+        "lead emphasis"
+      ],
+      "gearClues": [
+        "simple clean amp",
+        "bass-led arrangement",
+        "1970s studio production"
+      ],
+      "corrections": [
+        "remove wah assumption entirely",
+        "remove overdrive and crunch",
+        "guitar is not signature element"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "art rock",
+      "styleTags": [
+        "proto-punk",
+        "singer-songwriter"
+      ],
+      "targetTone": "minimal clean rhythm guitar, dry 70s studio texture",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the dry, close-mic 70s studio texture.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage studio IR (e.g., Neumann U47/U67)",
+          "reason": "Enhance the dry, close-mic 70s studio texture.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and vintage character.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 849,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

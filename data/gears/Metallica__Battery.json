@@ -1,0 +1,1125 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 911,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Metallica__Battery.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Metallica",
+    "title": "Battery",
+    "album": "",
+    "year": null,
+    "genre": "thrash metal"
+  },
+  "genreClassification": {
+    "genre": "thrash metal",
+    "subgenres": [
+      "heavy metal",
+      "speed metal"
+    ],
+    "confidence": "high",
+    "rationale": "Metallica's 'Battery' is a foundational track in the thrash genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive metal tone with tight low end and pronounced mid-range bite.",
+      "signatureElements": [
+        "Fuzz/Distortion (high gain)",
+        "Crunch (mid-scoop for rhythm parts)",
+        "Tight attack",
+        "Aggressive palm muting"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (for tightening the low end)",
+        "High-gain distortion pedal (for main riff tone)",
+        "Amp simulation with Marshall/Mesa family character"
+      ],
+      "avoid": [
+        "Flanger",
+        "Chorus",
+        "Wah (unless used for specific effect)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight 80s thrash crunch with scooped mids and fast attack",
+      "mustHave": [
+        "tight palm-mute",
+        "bright pick bite",
+        "scooped rhythm EQ",
+        "dry, percussive chugs"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "woolly low end"
+      ],
+      "gearClues": [
+        "high-gain Marshall/Plexi style",
+        "boosted distortion",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "replace fuzz with tight distortion",
+        "lean more scooped than mid-bite",
+        "keep rhythm dry and aggressive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight 80s thrash crunch with scooped mids and fast attack",
+    "mustHave": [
+      "tight palm-mute",
+      "bright pick bite",
+      "scooped rhythm EQ",
+      "dry, percussive chugs"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "flanger",
+      "woolly low end"
+    ],
+    "gearClues": [
+      "high-gain Marshall/Plexi style",
+      "boosted distortion",
+      "4x12 cab",
+      "humbucker bridge"
+    ],
+    "corrections": [
+      "replace fuzz with tight distortion",
+      "lean more scooped than mid-bite",
+      "keep rhythm dry and aggressive"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain distortion and scooped mids for aggressive thrash rhythm.",
+          "bestMatchSummary": "Gate -> Boost -> Distortion (RAT/Muff style) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Delay -> Volume",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and tighten up fast palm-muted chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tightening",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "100%"
+              },
+              "purpose": "Add aggressive attack and tighten the initial signal for fast picking.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "8"
+              },
+              "purpose": "Provide tight, aggressive distortion with a scooped character suitable for thrash metal.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general high-gain option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Mid": "3",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the high-gain Marshall/Plexi sound required for 80s thrash.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A slightly cleaner alternative if the distortion is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Mid": "-5 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Achieve the required scooped mids and bright pick bite for rhythm chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Placeholder for potential subtle movement if needed (kept off for pure rhythm).",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/rhythm accent",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "3",
+                "Mix": "4"
+              },
+              "purpose": "Add subtle rhythmic depth and definition to the chugs.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a minimal amount of space without muddying the tight rhythm.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control/master stage",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is aggressive thrash metal. The signal chain prioritizes maximum tightness and high-gain distortion over natural tone coloration."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the punchy, aggressive sound of 80s thrash metal.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain Marshall/British 4x12 IR",
+              "reason": "Enhance the specific grit and punch required for aggressive thrash chugs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased definition and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Metallica - Battery - Valeton GP-180",
+        "song": {
+          "artist": "Metallica",
+          "title": "Battery",
+          "album": "",
+          "year": null,
+          "genre": "thrash metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight 80s thrash crunch with scooped mids and fast attack",
+        "status": "draft",
+        "confidence": "high",
+        "signalChainSummary": "Gate -> Boost -> Distortion (RAT/Muff style) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Delay -> Volume",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Eliminate hum and tighten up fast palm-muted chugs.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/tightening",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "100%"
+            },
+            "purpose": "Add aggressive attack and tighten the initial signal for fast picking.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "7",
+              "Tone": "6",
+              "Output": "8"
+            },
+            "purpose": "Provide tight, aggressive distortion with a scooped character suitable for thrash metal.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A more general high-gain option."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 800",
+            "active": true,
+            "settings": {
+              "Gain": "7",
+              "Treble": "6",
+              "Mid": "3",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the high-gain Marshall/Plexi sound required for 80s thrash.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              {
+                "model": "UK SLP",
+                "reason": "A slightly cleaner alternative if the distortion is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet tone.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-3 dB",
+              "Mid": "-5 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Achieve the required scooped mids and bright pick bite for rhythm chugs.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%"
+            },
+            "purpose": "Placeholder for potential subtle movement if needed (kept off for pure rhythm).",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/rhythm accent",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "250 ms",
+              "Feedback": "3",
+              "Mix": "4"
+            },
+            "purpose": "Add subtle rhythmic depth and definition to the chugs.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined echo is preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/space",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a minimal amount of space without muddying the tight rhythm.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control/master stage",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight 80s thrash crunch with scooped mids and fast attack",
+          "toneProfile": "tight 80s thrash crunch with scooped mids and fast attack",
+          "idealSignalChain": "high-gain Marshall/Plexi style | boosted distortion | 4x12 cab | humbucker bridge",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "high-gain Marshall/Plexi style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "boosted distortion",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-mute",
+            "bright pick bite",
+            "scooped rhythm EQ",
+            "dry, percussive chugs"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain distortion and scooped mids for aggressive thrash rhythm.",
+          "bestMatchSummary": "Gate -> Boost -> Distortion (RAT/Muff style) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Delay -> Volume",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and tighten up fast palm-muted chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/tightening",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "100%"
+              },
+              "purpose": "Add aggressive attack and tighten the initial signal for fast picking.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Output": "8"
+              },
+              "purpose": "Provide tight, aggressive distortion with a scooped character suitable for thrash metal.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A more general high-gain option."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Mid": "3",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the high-gain Marshall/Plexi sound required for 80s thrash.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A slightly cleaner alternative if the distortion is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet tone.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Mid": "-5 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Achieve the required scooped mids and bright pick bite for rhythm chugs.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%"
+              },
+              "purpose": "Placeholder for potential subtle movement if needed (kept off for pure rhythm).",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/rhythm accent",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "3",
+                "Mix": "4"
+              },
+              "purpose": "Add subtle rhythmic depth and definition to the chugs.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined echo is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/space",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a minimal amount of space without muddying the tight rhythm.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control/master stage",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the punchy, aggressive sound of 80s thrash metal.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain Marshall/British 4x12 IR",
+              "reason": "Enhance the specific grit and punch required for aggressive thrash chugs.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased definition and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace fuzz with tight distortion",
+          "lean more scooped than mid-bite",
+          "keep rhythm dry and aggressive"
+        ],
+        "warnings": [
+          "The source material is aggressive thrash metal. The signal chain prioritizes maximum tightness and high-gain distortion over natural tone coloration."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.399,
+      "prompt_chars": 985,
+      "response_chars": 524,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 130,
+        "total_duration": 10396603300,
+        "prompt_eval_duration": 287612000,
+        "eval_duration": 2077060000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.815,
+      "prompt_chars": 5443,
+      "response_chars": 543,
+      "usage": {
+        "input_tokens": 1513,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 154,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1667
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.325,
+      "prompt_chars": 3608,
+      "response_chars": 5191,
+      "usage": {
+        "prompt_eval_count": 1222,
+        "eval_count": 1509,
+        "total_duration": 25315595400,
+        "prompt_eval_duration": 259301000,
+        "eval_duration": 24621985000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.655,
+      "prompt_chars": 7366,
+      "response_chars": 554,
+      "usage": {
+        "prompt_eval_count": 2088,
+        "eval_count": 152,
+        "total_duration": 5647775600,
+        "prompt_eval_duration": 419457000,
+        "eval_duration": 4762558000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.201,
+      "prompt_chars": 2841,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 914,
+        "eval_count": 50,
+        "total_duration": 11197473200,
+        "prompt_eval_duration": 364415000,
+        "eval_duration": 978659000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Metallica",
+      "title": "Battery",
+      "album": "",
+      "year": null,
+      "genre": "thrash metal"
+    },
+    "rig": {
+      "rigName": "Metallica - Battery - Valeton GP-180",
+      "status": "draft",
+      "confidence": "high",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight 80s thrash crunch with scooped mids and fast attack",
+      "signalChainSummary": "Gate -> Boost -> Distortion (RAT/Muff style) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Delay -> Volume",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Eliminate hum and tighten up fast palm-muted chugs.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/tightening",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "100%"
+          },
+          "purpose": "Add aggressive attack and tighten the initial signal for fast picking.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "7",
+            "Tone": "6",
+            "Output": "8"
+          },
+          "purpose": "Provide tight, aggressive distortion with a scooped character suitable for thrash metal.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A more general high-gain option."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 800",
+          "active": true,
+          "settings": {
+            "Gain": "7",
+            "Treble": "6",
+            "Mid": "3",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the high-gain Marshall/Plexi sound required for 80s thrash.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "A slightly cleaner alternative if the distortion is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet tone.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-3 dB",
+            "Mid": "-5 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Achieve the required scooped mids and bright pick bite for rhythm chugs.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%"
+          },
+          "purpose": "Placeholder for potential subtle movement if needed (kept off for pure rhythm).",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/rhythm accent",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "250 ms",
+            "Feedback": "3",
+            "Mix": "4"
+          },
+          "purpose": "Add subtle rhythmic depth and definition to the chugs.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined echo is preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/space",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a minimal amount of space without muddying the tight rhythm.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control/master stage",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight 80s thrash crunch with scooped mids and fast attack",
+      "mustHave": [
+        "tight palm-mute",
+        "bright pick bite",
+        "scooped rhythm EQ",
+        "dry, percussive chugs"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "woolly low end"
+      ],
+      "gearClues": [
+        "high-gain Marshall/Plexi style",
+        "boosted distortion",
+        "4x12 cab",
+        "humbucker bridge"
+      ],
+      "corrections": [
+        "replace fuzz with tight distortion",
+        "lean more scooped than mid-bite",
+        "keep rhythm dry and aggressive"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "thrash metal",
+      "styleTags": [
+        "heavy metal",
+        "speed metal"
+      ],
+      "targetTone": "tight 80s thrash crunch with scooped mids and fast attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the punchy, aggressive sound of 80s thrash metal.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-gain Marshall/British 4x12 IR",
+          "reason": "Enhance the specific grit and punch required for aggressive thrash chugs.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased definition and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 911,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

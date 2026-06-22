@@ -1,0 +1,1068 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 829,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Leonard_Cohen__Suzanne.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Leonard Cohen",
+    "title": "Suzanne",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "singer-songwriter",
+      "acoustic",
+      "ballad"
+    ],
+    "confidence": "high",
+    "rationale": "Leonard Cohen's 'Suzanne' is a classic example of poetic, acoustic folk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly dark clean tone with subtle reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "fingerpicking arpeggios",
+        "acoustic-electric feel"
+      ],
+      "gearHypotheses": [
+        "Clean Fender Twin/Jazzmaster style amp model",
+        "Plate Reverb",
+        "Tape Delay (dotted eighth notes)"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "distortion",
+        "wah",
+        "modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm dry folk clean with slight room",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "acoustic-like steel-string",
+        "very little effect",
+        "soft low end"
+      ],
+      "avoid": [
+        "delay",
+        "plate reverb",
+        "wah",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "acoustic or piezo-style electric",
+        "small clean amp",
+        "light room only"
+      ],
+      "corrections": [
+        "remove delay",
+        "reduce reverb",
+        "lean acoustic, not electric clean"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm dry folk clean with slight room",
+    "mustHave": [
+      "fingerpicked arpeggios",
+      "acoustic-like steel-string",
+      "very little effect",
+      "soft low end"
+    ],
+    "avoid": [
+      "delay",
+      "plate reverb",
+      "wah",
+      "fuzz",
+      "crunch"
+    ],
+    "gearClues": [
+      "acoustic or piezo-style electric",
+      "small clean amp",
+      "light room only"
+    ],
+    "corrections": [
+      "remove delay",
+      "reduce reverb",
+      "lean acoustic, not electric clean"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for fingerpicked folk arpeggios.",
+          "bestMatchSummary": "A gentle signal chain using a clean preamp (US Deluxe) paired with a classic British amp model (AC30 TB) and minimal room reverb to achieve an acoustic-like, dry, warm sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in folk recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "2:1"
+              },
+              "purpose": "Gentle compression to smooth out dynamics and enhance the fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated clean boost/preamp (like an EMT 140), but Comp provides necessary smoothing.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No drive or crunch is desired for the acoustic-like tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Bass": "6"
+              },
+              "purpose": "Provides a classic, warm, and articulate clean tone suitable for folk music.",
+              "matchQuality": "exact",
+              "gap": "None. Best choice for clean/folk tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {},
+              "purpose": "A smaller cabinet simulation to keep the sound intimate and focused, matching the folk genre.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is a good fit for clean tones, though UK Vintage 4x12 might offer more body if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly scoop the extreme frequencies to emphasize the warm, woody tone and reduce harshness.",
+              "matchQuality": "exact",
+              "gap": "None. Used for final tonal sculpting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Wah effects are explicitly avoided by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation effects are generally unnecessary and distracting for this dry folk style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay is explicitly avoided by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adds a subtle sense of space and warmth without sounding artificial or overly wet.",
+              "matchQuality": "exact",
+              "gap": "None. Room reverb is the best choice for natural ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure a balanced mix with the subtle reverb tail.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ],
+          "warnings": [
+            "The source material is folk/acoustic-like, requiring an electric guitar rig (GP-180) to imitate the sound. The settings prioritize warmth and dryness over raw power."
+          ],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Refine the cabinet simulation and reverb to achieve a more natural, acoustic-like warmth.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Woody IR (e.g., vintage mic on wood)",
+              "reason": "Enhance the woody, intimate sound required for folk arpeggios.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Warmer, less metallic tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Leonard Cohen - Suzanne - Valeton GP-180",
+        "song": {
+          "artist": "Leonard Cohen",
+          "title": "Suzanne",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm dry folk clean with slight room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gentle signal chain using a clean preamp (US Deluxe) paired with a classic British amp model (AC30 TB) and minimal room reverb to achieve an acoustic-like, dry, warm sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum inherent in folk recordings.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "2:1"
+            },
+            "purpose": "Gentle compression to smooth out dynamics and enhance the fingerpicked arpeggios.",
+            "matchQuality": "close",
+            "gap": "The ideal choice would be a dedicated clean boost/preamp (like an EMT 140), but Comp provides necessary smoothing.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No drive or crunch is desired for the acoustic-like tone.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "5",
+              "Bass": "6"
+            },
+            "purpose": "Provides a classic, warm, and articulate clean tone suitable for folk music.",
+            "matchQuality": "exact",
+            "gap": "None. Best choice for clean/folk tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {},
+            "purpose": "A smaller cabinet simulation to keep the sound intimate and focused, matching the folk genre.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is a good fit for clean tones, though UK Vintage 4x12 might offer more body if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Subtly scoop the extreme frequencies to emphasize the warm, woody tone and reduce harshness.",
+            "matchQuality": "exact",
+            "gap": "None. Used for final tonal sculpting.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Wah effects are explicitly avoided by the musical verdict.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Modulation effects are generally unnecessary and distracting for this dry folk style.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Delay is explicitly avoided by the musical verdict.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Adds a subtle sense of space and warmth without sounding artificial or overly wet.",
+            "matchQuality": "exact",
+            "gap": "None. Room reverb is the best choice for natural ambience.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment to ensure a balanced mix with the subtle reverb tail.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm dry folk clean with slight room",
+          "toneProfile": "warm dry folk clean with slight room",
+          "idealSignalChain": "acoustic or piezo-style electric | small clean amp | light room only",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic or piezo-style electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light room only",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fingerpicked arpeggios",
+            "acoustic-like steel-string",
+            "very little effect",
+            "soft low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for fingerpicked folk arpeggios.",
+          "bestMatchSummary": "A gentle signal chain using a clean preamp (US Deluxe) paired with a classic British amp model (AC30 TB) and minimal room reverb to achieve an acoustic-like, dry, warm sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum inherent in folk recordings.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "2:1"
+              },
+              "purpose": "Gentle compression to smooth out dynamics and enhance the fingerpicked arpeggios.",
+              "matchQuality": "close",
+              "gap": "The ideal choice would be a dedicated clean boost/preamp (like an EMT 140), but Comp provides necessary smoothing.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No drive or crunch is desired for the acoustic-like tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Bass": "6"
+              },
+              "purpose": "Provides a classic, warm, and articulate clean tone suitable for folk music.",
+              "matchQuality": "exact",
+              "gap": "None. Best choice for clean/folk tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {},
+              "purpose": "A smaller cabinet simulation to keep the sound intimate and focused, matching the folk genre.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is a good fit for clean tones, though UK Vintage 4x12 might offer more body if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly scoop the extreme frequencies to emphasize the warm, woody tone and reduce harshness.",
+              "matchQuality": "exact",
+              "gap": "None. Used for final tonal sculpting.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Wah effects are explicitly avoided by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation effects are generally unnecessary and distracting for this dry folk style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay is explicitly avoided by the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Adds a subtle sense of space and warmth without sounding artificial or overly wet.",
+              "matchQuality": "exact",
+              "gap": "None. Room reverb is the best choice for natural ambience.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure a balanced mix with the subtle reverb tail.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ],
+          "warnings": [
+            "The source material is folk/acoustic-like, requiring an electric guitar rig (GP-180) to imitate the sound. The settings prioritize warmth and dryness over raw power."
+          ],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "improvements": {
+          "summary": "Refine the cabinet simulation and reverb to achieve a more natural, acoustic-like warmth.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Woody IR (e.g., vintage mic on wood)",
+              "reason": "Enhance the woody, intimate sound required for folk arpeggios.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Warmer, less metallic tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove delay",
+          "reduce reverb",
+          "lean acoustic, not electric clean"
+        ],
+        "warnings": [],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.86,
+      "prompt_chars": 989,
+      "response_chars": 388,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 102,
+        "total_duration": 10857414900,
+        "prompt_eval_duration": 751514000,
+        "eval_duration": 2266983000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.701,
+      "prompt_chars": 5329,
+      "response_chars": 483,
+      "usage": {
+        "input_tokens": 1495,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 130,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1625
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 51.453,
+      "prompt_chars": 3552,
+      "response_chars": 4066,
+      "usage": {
+        "prompt_eval_count": 1258,
+        "eval_count": 1157,
+        "total_duration": 23342584800,
+        "prompt_eval_duration": 118533000,
+        "eval_duration": 22860505000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 39 column 8 (char 1408)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.44,
+      "prompt_chars": 7511,
+      "response_chars": 550,
+      "usage": {
+        "prompt_eval_count": 2094,
+        "eval_count": 154,
+        "total_duration": 4423109900,
+        "prompt_eval_duration": 837764000,
+        "eval_duration": 3062605000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 23.235,
+      "prompt_chars": 2817,
+      "response_chars": 192,
+      "usage": {
+        "prompt_eval_count": 890,
+        "eval_count": 53,
+        "total_duration": 23209550900,
+        "prompt_eval_duration": 424439000,
+        "eval_duration": 882206000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Leonard Cohen",
+      "title": "Suzanne",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Leonard Cohen - Suzanne - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm dry folk clean with slight room",
+      "signalChainSummary": "A gentle signal chain using a clean preamp (US Deluxe) paired with a classic British amp model (AC30 TB) and minimal room reverb to achieve an acoustic-like, dry, warm sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum inherent in folk recordings.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "2:1"
+          },
+          "purpose": "Gentle compression to smooth out dynamics and enhance the fingerpicked arpeggios.",
+          "matchQuality": "close",
+          "gap": "The ideal choice would be a dedicated clean boost/preamp (like an EMT 140), but Comp provides necessary smoothing.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No drive or crunch is desired for the acoustic-like tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "5",
+            "Bass": "6"
+          },
+          "purpose": "Provides a classic, warm, and articulate clean tone suitable for folk music.",
+          "matchQuality": "exact",
+          "gap": "None. Best choice for clean/folk tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {},
+          "purpose": "A smaller cabinet simulation to keep the sound intimate and focused, matching the folk genre.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is a good fit for clean tones, though UK Vintage 4x12 might offer more body if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Subtly scoop the extreme frequencies to emphasize the warm, woody tone and reduce harshness.",
+          "matchQuality": "exact",
+          "gap": "None. Used for final tonal sculpting.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Wah effects are explicitly avoided by the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Modulation effects are generally unnecessary and distracting for this dry folk style.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Delay is explicitly avoided by the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Adds a subtle sense of space and warmth without sounding artificial or overly wet.",
+          "matchQuality": "exact",
+          "gap": "None. Room reverb is the best choice for natural ambience.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment to ensure a balanced mix with the subtle reverb tail.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm dry folk clean with slight room",
+      "mustHave": [
+        "fingerpicked arpeggios",
+        "acoustic-like steel-string",
+        "very little effect",
+        "soft low end"
+      ],
+      "avoid": [
+        "delay",
+        "plate reverb",
+        "wah",
+        "fuzz",
+        "crunch"
+      ],
+      "gearClues": [
+        "acoustic or piezo-style electric",
+        "small clean amp",
+        "light room only"
+      ],
+      "corrections": [
+        "remove delay",
+        "reduce reverb",
+        "lean acoustic, not electric clean"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "singer-songwriter",
+        "acoustic",
+        "ballad"
+      ],
+      "targetTone": "warm dry folk clean with slight room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Refine the cabinet simulation and reverb to achieve a more natural, acoustic-like warmth.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Acoustic/Woody IR (e.g., vintage mic on wood)",
+          "reason": "Enhance the woody, intimate sound required for folk arpeggios.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Warmer, less metallic tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 829,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

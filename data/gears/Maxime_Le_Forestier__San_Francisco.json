@@ -1,0 +1,932 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 898,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Maxime_Le_Forestier__San_Francisco.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Maxime Le Forestier",
+    "title": "San Francisco",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The acoustic, intimate tone profile strongly suggests a folk or singer-songwriter genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, jangly indie pop/rock tone with a touch of vintage chime.",
+      "signatureElements": [
+        "Clean chorus modulation",
+        "Light reverb and delay",
+        "Jangly strumming rhythm"
+      ],
+      "gearHypotheses": [
+        "Chorus effect pedal (or digital emulation)",
+        "Spring reverb unit",
+        "Overdrive or clean boost for sparkle"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion/crunch",
+        "Wah sweeps"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm acoustic-style folk strum with dry room",
+      "mustHave": [
+        "clean picked/strummed acoustic-like attack",
+        "warm midrange",
+        "little or no drive",
+        "small room ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy delay",
+        "fuzz",
+        "rock crunch"
+      ],
+      "gearClues": [
+        "nylon or acoustic guitar feel",
+        "clean amp",
+        "short room reverb",
+        "flat EQ"
+      ],
+      "corrections": [
+        "replace indie pop chorus with folk acoustic texture",
+        "keep it dry and intimate",
+        "do not add electric shimmer"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm acoustic-style folk strum with dry room",
+    "mustHave": [
+      "clean picked/strummed acoustic-like attack",
+      "warm midrange",
+      "little or no drive",
+      "small room ambience"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy delay",
+      "fuzz",
+      "rock crunch"
+    ],
+    "gearClues": [
+      "nylon or acoustic guitar feel",
+      "clean amp",
+      "short room reverb",
+      "flat EQ"
+    ],
+    "corrections": [
+      "replace indie pop chorus with folk acoustic texture",
+      "keep it dry and intimate",
+      "do not add electric shimmer"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Folk/Acoustic Imitation: Focus on clean, warm tones using US Deluxe and Room reverb.",
+          "bestMatchSummary": "A gentle, intimate folk sound achieved with a clean preamp (US Deluxe), minimal compression for attack definition, and subtle room ambience to mimic acoustic warmth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick clicks.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the acoustic attack and sustain for a picked feel.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for mimicking the natural dynamics of an acoustic guitar strum/pick.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Maintain a neutral signal path before the clean amp model.",
+              "matchQuality": "exact",
+              "gap": "N/A (Using 'None' to ensure maximum transparency for the folk tone).",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provide a warm, clean, and articulate tone suitable for folk strumming.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe model is the best choice for a non-aggressive, vintage clean sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, intimate acoustic-style setup.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides a focused and non-boomy clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the extremes to enhance warm midrange and maintain a flat, natural tone.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the frequency response to achieve 'warmth' without sounding muddy.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, intimate room ambience to give the sound depth without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is perfect for 'small room ambience' as requested, keeping it dry and natural.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (folk/acoustic texture). The rig uses an electric guitar model to imitate the required clean, warm acoustic sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and warmth for a more authentic folk/acoustic tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic-focused IR (e.g., small room mic'd vintage PA)",
+              "reason": "Enhance acoustic warmth and intimacy beyond the US 2x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Maxime Le Forestier - San Francisco - Valeton GP-180",
+        "song": {
+          "artist": "Maxime Le Forestier",
+          "title": "San Francisco",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm acoustic-style folk strum with dry room",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gentle, intimate folk sound achieved with a clean preamp (US Deluxe), minimal compression for attack definition, and subtle room ambience to mimic acoustic warmth.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and pick clicks.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Enhance the acoustic attack and sustain for a picked feel.",
+            "matchQuality": "close",
+            "gap": "The Comp module is ideal for mimicking the natural dynamics of an acoustic guitar strum/pick.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "Maintain a neutral signal path before the clean amp model.",
+            "matchQuality": "exact",
+            "gap": "N/A (Using 'None' to ensure maximum transparency for the folk tone).",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "5",
+              "Midrange": "6",
+              "Bass": "4"
+            },
+            "purpose": "Provide a warm, clean, and articulate tone suitable for folk strumming.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe model is the best choice for a non-aggressive, vintage clean sound.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Simulate the sound of a small, intimate acoustic-style setup.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 provides a focused and non-boomy clean tone.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly scoop the extremes to enhance warm midrange and maintain a flat, natural tone.",
+            "matchQuality": "close",
+            "gap": "Used for fine-tuning the frequency response to achieve 'warmth' without sounding muddy.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle, intimate room ambience to give the sound depth without sounding artificial.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is perfect for 'small room ambience' as requested, keeping it dry and natural.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm acoustic-style folk strum with dry room",
+          "toneProfile": "warm acoustic-style folk strum with dry room",
+          "idealSignalChain": "nylon or acoustic guitar feel | clean amp | short room reverb | flat EQ",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "nylon or acoustic guitar feel",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "short room reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "flat EQ",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean picked/strummed acoustic-like attack",
+            "warm midrange",
+            "little or no drive",
+            "small room ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Folk/Acoustic Imitation: Focus on clean, warm tones using US Deluxe and Room reverb.",
+          "bestMatchSummary": "A gentle, intimate folk sound achieved with a clean preamp (US Deluxe), minimal compression for attack definition, and subtle room ambience to mimic acoustic warmth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and pick clicks.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Enhance the acoustic attack and sustain for a picked feel.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for mimicking the natural dynamics of an acoustic guitar strum/pick.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Maintain a neutral signal path before the clean amp model.",
+              "matchQuality": "exact",
+              "gap": "N/A (Using 'None' to ensure maximum transparency for the folk tone).",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "5",
+                "Midrange": "6",
+                "Bass": "4"
+              },
+              "purpose": "Provide a warm, clean, and articulate tone suitable for folk strumming.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe model is the best choice for a non-aggressive, vintage clean sound.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Simulate the sound of a small, intimate acoustic-style setup.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 provides a focused and non-boomy clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly scoop the extremes to enhance warm midrange and maintain a flat, natural tone.",
+              "matchQuality": "close",
+              "gap": "Used for fine-tuning the frequency response to achieve 'warmth' without sounding muddy.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle, intimate room ambience to give the sound depth without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is perfect for 'small room ambience' as requested, keeping it dry and natural.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and warmth for a more authentic folk/acoustic tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic-focused IR (e.g., small room mic'd vintage PA)",
+              "reason": "Enhance acoustic warmth and intimacy beyond the US 2x12.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace indie pop chorus with folk acoustic texture",
+          "keep it dry and intimate",
+          "do not add electric shimmer"
+        ],
+        "warnings": [
+          "The source material is non-guitar (folk/acoustic texture). The rig uses an electric guitar model to imitate the required clean, warm acoustic sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.357,
+      "prompt_chars": 1001,
+      "response_chars": 396,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 97,
+        "total_duration": 10353855100,
+        "prompt_eval_duration": 984551000,
+        "eval_duration": 1761726000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.761,
+      "prompt_chars": 5325,
+      "response_chars": 553,
+      "usage": {
+        "input_tokens": 1490,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1630
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 22.839,
+      "prompt_chars": 3634,
+      "response_chars": 4464,
+      "usage": {
+        "prompt_eval_count": 1213,
+        "eval_count": 1271,
+        "total_duration": 22812845100,
+        "prompt_eval_duration": 224348000,
+        "eval_duration": 22148319000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.448,
+      "prompt_chars": 6569,
+      "response_chars": 538,
+      "usage": {
+        "prompt_eval_count": 1841,
+        "eval_count": 152,
+        "total_duration": 5422052700,
+        "prompt_eval_duration": 267966999,
+        "eval_duration": 4633614000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.847,
+      "prompt_chars": 2682,
+      "response_chars": 192,
+      "usage": {
+        "prompt_eval_count": 837,
+        "eval_count": 47,
+        "total_duration": 11819541600,
+        "prompt_eval_duration": 681775000,
+        "eval_duration": 633224000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Maxime Le Forestier",
+      "title": "San Francisco",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Maxime Le Forestier - San Francisco - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm acoustic-style folk strum with dry room",
+      "signalChainSummary": "A gentle, intimate folk sound achieved with a clean preamp (US Deluxe), minimal compression for attack definition, and subtle room ambience to mimic acoustic warmth.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and pick clicks.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Enhance the acoustic attack and sustain for a picked feel.",
+          "matchQuality": "close",
+          "gap": "The Comp module is ideal for mimicking the natural dynamics of an acoustic guitar strum/pick.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "Maintain a neutral signal path before the clean amp model.",
+          "matchQuality": "exact",
+          "gap": "N/A (Using 'None' to ensure maximum transparency for the folk tone).",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "5",
+            "Midrange": "6",
+            "Bass": "4"
+          },
+          "purpose": "Provide a warm, clean, and articulate tone suitable for folk strumming.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe model is the best choice for a non-aggressive, vintage clean sound.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Simulate the sound of a small, intimate acoustic-style setup.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 provides a focused and non-boomy clean tone.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly scoop the extremes to enhance warm midrange and maintain a flat, natural tone.",
+          "matchQuality": "close",
+          "gap": "Used for fine-tuning the frequency response to achieve 'warmth' without sounding muddy.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle, intimate room ambience to give the sound depth without sounding artificial.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is perfect for 'small room ambience' as requested, keeping it dry and natural.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm acoustic-style folk strum with dry room",
+      "mustHave": [
+        "clean picked/strummed acoustic-like attack",
+        "warm midrange",
+        "little or no drive",
+        "small room ambience"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy delay",
+        "fuzz",
+        "rock crunch"
+      ],
+      "gearClues": [
+        "nylon or acoustic guitar feel",
+        "clean amp",
+        "short room reverb",
+        "flat EQ"
+      ],
+      "corrections": [
+        "replace indie pop chorus with folk acoustic texture",
+        "keep it dry and intimate",
+        "do not add electric shimmer"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "singer-songwriter"
+      ],
+      "targetTone": "warm acoustic-style folk strum with dry room",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and warmth for a more authentic folk/acoustic tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Acoustic-focused IR (e.g., small room mic'd vintage PA)",
+          "reason": "Enhance acoustic warmth and intimacy beyond the US 2x12.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more natural tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 898,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1138 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1570,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_National__Bloodbuzz_Ohio.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The National",
+    "title": "Bloodbuzz Ohio",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "baroque pop",
+      "art rock",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest sophisticated, atmospheric indie/alt-rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, atmospheric indie rock with a brooding, mid-range focus.",
+      "signatureElements": [
+        "Clean/Slightly Dirty Chorus or Tremolo for atmosphere",
+        "Subtle delay and reverb to create space",
+        "Mid-gain crunch (low saturation) for rhythm parts"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/JC style clean platform)",
+        "Low-to-mid gain overdrive pedal (for grit, not distortion)",
+        "Chorus or Tremolo effect unit"
+      ],
+      "avoid": [
+        "High-gain distortion",
+        "Bright treble frequencies",
+        "Aggressive modulation (like flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry indie rock drive with subdued midrange",
+      "mustHave": [
+        "tight low-gain crunch",
+        "slight nasal edge",
+        "modest room"
+      ],
+      "avoid": [
+        "chorus wash",
+        "heavy tremolo",
+        "high gain",
+        "bright chime"
+      ],
+      "gearClues": [
+        "Fender/JC clean base",
+        "mild overdrive",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop chorus/tremolo as signature",
+        "keep delay very subtle or none",
+        "favor dry rhythm crunch over atmospheric clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry indie rock drive with subdued midrange",
+    "mustHave": [
+      "tight low-gain crunch",
+      "slight nasal edge",
+      "modest room"
+    ],
+    "avoid": [
+      "chorus wash",
+      "heavy tremolo",
+      "high gain",
+      "bright chime"
+    ],
+    "gearClues": [
+      "Fender/JC clean base",
+      "mild overdrive",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "drop chorus/tremolo as signature",
+      "keep delay very subtle or none",
+      "favor dry rhythm crunch over atmospheric clean"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie rock/Americana tone, favoring clean headroom and controlled grit.",
+          "bestMatchSummary": "A tight signal chain using a mild overdrive (Green OD) into a Fender-style amp (US Deluxe), paired with a 2x12 cabinet for dry, punchy indie rhythm tones. Room reverb adds subtle space without wash.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in indie recording styles.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "50%",
+                "Level": "60%"
+              },
+              "purpose": "Provide the required tight low-gain crunch and mild overdrive without excessive coloration.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive, but Green OD better matches the 'mild' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient low-gain grit.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the clean headroom and punchy character of a Fender/JC base, avoiding high gain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar tone, but US Deluxe often provides better midrange punch for indie rock."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, punchy sound suitable for dry indie rhythm work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Too much British character; the US tone is required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly boost the midrange to achieve the 'nasal edge' and control low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is required for this dry indie tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid chorus wash and heavy tremolo as per the verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "20%",
+                "Mix": "15%"
+              },
+              "purpose": "Add a very subtle sense of space and depth without becoming distracting or wash-y.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests 'none' delay, but a minimal setting is used to add dimension if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide the required 'modest room' ambience without excessive wash.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (indie rock/alternative), so the rig focuses on capturing a dry, punchy rhythm tone rather than atmospheric leads."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and midrange focus.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+              "reason": "Enhance the punchy, dry indie tone with more realistic cabinet character.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and depth in the low-mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The National - Bloodbuzz Ohio - Valeton GP-180",
+        "song": {
+          "artist": "The National",
+          "title": "Bloodbuzz Ohio",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry indie rock drive with subdued midrange",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using a mild overdrive (Green OD) into a Fender-style amp (US Deluxe), paired with a 2x12 cabinet for dry, punchy indie rhythm tones. Room reverb adds subtle space without wash.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise inherent in indie recording styles.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "50%",
+              "Level": "60%"
+            },
+            "purpose": "Provide the required tight low-gain crunch and mild overdrive without excessive coloration.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more aggressive, but Green OD better matches the 'mild' requirement."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The Green OD provides sufficient low-gain grit.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "50%",
+              "Treble": "60%",
+              "Midrange": "70%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the clean headroom and punchy character of a Fender/JC base, avoiding high gain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Similar tone, but US Deluxe often provides better midrange punch for indie rock."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused, punchy sound suitable for dry indie rhythm work.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "Too much British character; the US tone is required."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Subtly boost the midrange to achieve the 'nasal edge' and control low-end muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No wah effect is required for this dry indie tone.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid chorus wash and heavy tremolo as per the verdict.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "20%",
+              "Mix": "15%"
+            },
+            "purpose": "Add a very subtle sense of space and depth without becoming distracting or wash-y.",
+            "matchQuality": "close",
+            "gap": "The verdict suggests 'none' delay, but a minimal setting is used to add dimension if needed.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Provide the required 'modest room' ambience without excessive wash.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry indie rock drive with subdued midrange",
+          "toneProfile": "dry indie rock drive with subdued midrange",
+          "idealSignalChain": "Fender/JC clean base | mild overdrive | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender/JC clean base",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mild overdrive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight low-gain crunch",
+            "slight nasal edge",
+            "modest room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie rock/Americana tone, favoring clean headroom and controlled grit.",
+          "bestMatchSummary": "A tight signal chain using a mild overdrive (Green OD) into a Fender-style amp (US Deluxe), paired with a 2x12 cabinet for dry, punchy indie rhythm tones. Room reverb adds subtle space without wash.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise inherent in indie recording styles.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "50%",
+                "Level": "60%"
+              },
+              "purpose": "Provide the required tight low-gain crunch and mild overdrive without excessive coloration.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive, but Green OD better matches the 'mild' requirement."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient low-gain grit.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "50%",
+                "Treble": "60%",
+                "Midrange": "70%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the clean headroom and punchy character of a Fender/JC base, avoiding high gain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Similar tone, but US Deluxe often provides better midrange punch for indie rock."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused, punchy sound suitable for dry indie rhythm work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "Too much British character; the US tone is required."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly boost the midrange to achieve the 'nasal edge' and control low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No wah effect is required for this dry indie tone.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid chorus wash and heavy tremolo as per the verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "20%",
+                "Mix": "15%"
+              },
+              "purpose": "Add a very subtle sense of space and depth without becoming distracting or wash-y.",
+              "matchQuality": "close",
+              "gap": "The verdict suggests 'none' delay, but a minimal setting is used to add dimension if needed.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Provide the required 'modest room' ambience without excessive wash.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and midrange focus.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+              "reason": "Enhance the punchy, dry indie tone with more realistic cabinet character.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and depth in the low-mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/tremolo as signature",
+          "keep delay very subtle or none",
+          "favor dry rhythm crunch over atmospheric clean"
+        ],
+        "warnings": [
+          "The source material is non-guitar (indie rock/alternative), so the rig focuses on capturing a dry, punchy rhythm tone rather than atmospheric leads."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.837,
+      "prompt_chars": 995,
+      "response_chars": 562,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 138,
+        "total_duration": 10832511400,
+        "prompt_eval_duration": 776710000,
+        "eval_duration": 2836742000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.704,
+      "prompt_chars": 5485,
+      "response_chars": 505,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1662
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 43.601,
+      "prompt_chars": 3566,
+      "response_chars": 5652,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1630,
+        "total_duration": 43594288400,
+        "prompt_eval_duration": 456780000,
+        "eval_duration": 28639545000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.558,
+      "prompt_chars": 7797,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 2191,
+        "eval_count": 152,
+        "total_duration": 5528979100,
+        "prompt_eval_duration": 388686000,
+        "eval_duration": 4692593000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 13.046,
+      "prompt_chars": 2856,
+      "response_chars": 237,
+      "usage": {
+        "prompt_eval_count": 905,
+        "eval_count": 74,
+        "total_duration": 13023352300,
+        "prompt_eval_duration": 247905000,
+        "eval_duration": 1349712000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The National",
+      "title": "Bloodbuzz Ohio",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "The National - Bloodbuzz Ohio - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry indie rock drive with subdued midrange",
+      "signalChainSummary": "A tight signal chain using a mild overdrive (Green OD) into a Fender-style amp (US Deluxe), paired with a 2x12 cabinet for dry, punchy indie rhythm tones. Room reverb adds subtle space without wash.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise inherent in indie recording styles.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "50%",
+            "Level": "60%"
+          },
+          "purpose": "Provide the required tight low-gain crunch and mild overdrive without excessive coloration.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more aggressive, but Green OD better matches the 'mild' requirement."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The Green OD provides sufficient low-gain grit.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "50%",
+            "Treble": "60%",
+            "Midrange": "70%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the clean headroom and punchy character of a Fender/JC base, avoiding high gain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Similar tone, but US Deluxe often provides better midrange punch for indie rock."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused, punchy sound suitable for dry indie rhythm work.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "Too much British character; the US tone is required."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Subtly boost the midrange to achieve the 'nasal edge' and control low-end muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No wah effect is required for this dry indie tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid chorus wash and heavy tremolo as per the verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "20%",
+            "Mix": "15%"
+          },
+          "purpose": "Add a very subtle sense of space and depth without becoming distracting or wash-y.",
+          "matchQuality": "close",
+          "gap": "The verdict suggests 'none' delay, but a minimal setting is used to add dimension if needed.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Provide the required 'modest room' ambience without excessive wash.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry indie rock drive with subdued midrange",
+      "mustHave": [
+        "tight low-gain crunch",
+        "slight nasal edge",
+        "modest room"
+      ],
+      "avoid": [
+        "chorus wash",
+        "heavy tremolo",
+        "high gain",
+        "bright chime"
+      ],
+      "gearClues": [
+        "Fender/JC clean base",
+        "mild overdrive",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop chorus/tremolo as signature",
+        "keep delay very subtle or none",
+        "favor dry rhythm crunch over atmospheric clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "baroque pop",
+        "art rock",
+        "alternative rock"
+      ],
+      "targetTone": "dry indie rock drive with subdued midrange",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and midrange focus.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage 2x12)",
+          "reason": "Enhance the punchy, dry indie tone with more realistic cabinet character.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and depth in the low-mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1570,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

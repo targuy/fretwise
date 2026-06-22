@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1501,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Cranberries__Zombie.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Cranberries",
+    "title": "Zombie",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "alt-rock",
+      "indie rock",
+      "post-grunge"
+    ],
+    "confidence": "high",
+    "rationale": "The song's sound and the target tone profile strongly suggest alternative rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly overdriven crunch with a pronounced chorus/modulation effect.",
+      "signatureElements": [
+        "Chorus/Modulation (key element)",
+        "Slightly dirty clean tone",
+        "Punchy mid-range"
+      ],
+      "gearHypotheses": [
+        "Amp: Fender Twin Reverb style (clean headroom)",
+        "Cab: 2x12 or 4x12 tweed style",
+        "Effect: Chorus/Vibrato pedal"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High gain distortion",
+        "Bright, scooped tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "driven alt-rock crunch with thick power-chord grind",
+      "mustHave": [
+        "dry, aggressive rhythm",
+        "mid-forward crunch",
+        "tight palm-muted punch",
+        "thick layered guitar"
+      ],
+      "avoid": [
+        "chorus",
+        "fender-clean",
+        "heavy fuzz",
+        "high gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi family",
+        "4x12 cab",
+        "humbucker bridge",
+        "light overdrive"
+      ],
+      "corrections": [
+        "remove chorus/modulation",
+        "lean more into dry distortion",
+        "keep it simple and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "driven alt-rock crunch with thick power-chord grind",
+    "mustHave": [
+      "dry, aggressive rhythm",
+      "mid-forward crunch",
+      "tight palm-muted punch",
+      "thick layered guitar"
+    ],
+    "avoid": [
+      "chorus",
+      "fender-clean",
+      "heavy fuzz",
+      "high gain"
+    ],
+    "gearClues": [
+      "Marshall/Plexi family",
+      "4x12 cab",
+      "humbucker bridge",
+      "light overdrive"
+    ],
+    "corrections": [
+      "remove chorus/modulation",
+      "lean more into dry distortion",
+      "keep it simple and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-forward, aggressive crunch using British voicing and tight distortion.",
+          "bestMatchSummary": "A punchy alt-rock rhythm tone achieved with a light boost/overdrive into a UK 45 or UK 50 amp model, paired with a classic Marshall-style cab for thick, dry power chords.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide a tight, mid-forward grit and punch without sounding like heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the 'light overdrive' clue while maintaining definition for palm-muting.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more open voicing, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Add the necessary 'crunch' and aggressive rhythm grit required for alt-rock power chords.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the desired mid-forward, non-fuzz crunch suggested by the Marshall/Plexi clue.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be too aggressive or dirty for the required 'punchy' sound."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi voicing and provide the core aggressive, mid-forward tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also excellent, but UK 45 is often cited for that specific punchy alt-rock sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet voicing and necessary punch for rhythm guitar.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Slightly boost the mids to enhance the 'mid-forward crunch' and cut through a mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "10 Hz",
+                "Resonance": "50%"
+              },
+              "purpose": "Included as a placeholder/optional effect; kept inactive to avoid unwanted modulation (as per 'avoid' list).",
+              "matchQuality": "close",
+              "gap": "The WAH is included for completeness but must be bypassed or set minimally to adhere to the 'no chorus/modulation' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and thickness to the rhythm chords without distracting from the main riff.",
+              "matchQuality": "close",
+              "gap": "Used minimally to add 'thick layered guitar' feel, but kept very low so it doesn't muddy the punchy core tone.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural sense of space and thickness to the overall sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a vocal/alt-rock track, so the rig focuses on creating an aggressive rhythm guitar tone suitable for power chords and rhythmic punch.",
+          "All modulation effects (Chorus, etc.) have been avoided or disabled to meet the 'corrections' specified in the musical verdict."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for more aggressive, punchy Marshall-style cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance the classic Plexi/Marshall crunch and mid-forward aggression for power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Punchier, more aggressive rhythm tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Cranberries - Zombie - Valeton GP-180",
+        "song": {
+          "artist": "The Cranberries",
+          "title": "Zombie",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "driven alt-rock crunch with thick power-chord grind",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A punchy alt-rock rhythm tone achieved with a light boost/overdrive into a UK 45 or UK 50 amp model, paired with a classic Marshall-style cab for thick, dry power chords.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide a tight, mid-forward grit and punch without sounding like heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate the 'light overdrive' clue while maintaining definition for palm-muting.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more open voicing, but still suitable."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "50%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Add the necessary 'crunch' and aggressive rhythm grit required for alt-rock power chords.",
+            "matchQuality": "close",
+            "gap": "Using a general Distortion model to achieve the desired mid-forward, non-fuzz crunch suggested by the Marshall/Plexi clue.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could be too aggressive or dirty for the required 'punchy' sound."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi voicing and provide the core aggressive, mid-forward tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also excellent, but UK 45 is often cited for that specific punchy alt-rock sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide the classic Marshall-style cabinet voicing and necessary punch for rhythm guitar.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+1 dB"
+            },
+            "purpose": "Slightly boost the mids to enhance the 'mid-forward crunch' and cut through a mix.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect (optional)",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "10 Hz",
+              "Resonance": "50%"
+            },
+            "purpose": "Included as a placeholder/optional effect; kept inactive to avoid unwanted modulation (as per 'avoid' list).",
+            "matchQuality": "close",
+            "gap": "The WAH is included for completeness but must be bypassed or set minimally to adhere to the 'no chorus/modulation' rule.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Add subtle depth and thickness to the rhythm chords without distracting from the main riff.",
+            "matchQuality": "close",
+            "gap": "Used minimally to add 'thick layered guitar' feel, but kept very low so it doesn't muddy the punchy core tone.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a natural sense of space and thickness to the overall sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "driven alt-rock crunch with thick power-chord grind",
+          "toneProfile": "driven alt-rock crunch with thick power-chord grind",
+          "idealSignalChain": "Marshall/Plexi family | 4x12 cab | humbucker bridge | light overdrive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi family",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "dry, aggressive rhythm",
+            "mid-forward crunch",
+            "tight palm-muted punch",
+            "thick layered guitar"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-forward, aggressive crunch using British voicing and tight distortion.",
+          "bestMatchSummary": "A punchy alt-rock rhythm tone achieved with a light boost/overdrive into a UK 45 or UK 50 amp model, paired with a classic Marshall-style cab for thick, dry power chords.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide a tight, mid-forward grit and punch without sounding like heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate the 'light overdrive' clue while maintaining definition for palm-muting.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more open voicing, but still suitable."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Add the necessary 'crunch' and aggressive rhythm grit required for alt-rock power chords.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the desired mid-forward, non-fuzz crunch suggested by the Marshall/Plexi clue.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could be too aggressive or dirty for the required 'punchy' sound."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi voicing and provide the core aggressive, mid-forward tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also excellent, but UK 45 is often cited for that specific punchy alt-rock sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide the classic Marshall-style cabinet voicing and necessary punch for rhythm guitar.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+1 dB"
+              },
+              "purpose": "Slightly boost the mids to enhance the 'mid-forward crunch' and cut through a mix.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "10 Hz",
+                "Resonance": "50%"
+              },
+              "purpose": "Included as a placeholder/optional effect; kept inactive to avoid unwanted modulation (as per 'avoid' list).",
+              "matchQuality": "close",
+              "gap": "The WAH is included for completeness but must be bypassed or set minimally to adhere to the 'no chorus/modulation' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Add subtle depth and thickness to the rhythm chords without distracting from the main riff.",
+              "matchQuality": "close",
+              "gap": "Used minimally to add 'thick layered guitar' feel, but kept very low so it doesn't muddy the punchy core tone.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a natural sense of space and thickness to the overall sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for more aggressive, punchy Marshall-style cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Brit)",
+              "reason": "Enhance the classic Plexi/Marshall crunch and mid-forward aggression for power chords.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Punchier, more aggressive rhythm tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus/modulation",
+          "lean more into dry distortion",
+          "keep it simple and punchy"
+        ],
+        "warnings": [
+          "The source material is a vocal/alt-rock track, so the rig focuses on creating an aggressive rhythm guitar tone suitable for power chords and rhythmic punch.",
+          "All modulation effects (Chorus, etc.) have been avoided or disabled to meet the 'corrections' specified in the musical verdict."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.958,
+      "prompt_chars": 990,
+      "response_chars": 436,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 119,
+        "total_duration": 9955760500,
+        "prompt_eval_duration": 360552000,
+        "eval_duration": 1853109000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.194,
+      "prompt_chars": 5354,
+      "response_chars": 529,
+      "usage": {
+        "input_tokens": 1503,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1642
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 42.816,
+      "prompt_chars": 3599,
+      "response_chars": 6112,
+      "usage": {
+        "prompt_eval_count": 1212,
+        "eval_count": 1721,
+        "total_duration": 42785246800,
+        "prompt_eval_duration": 429192000,
+        "eval_duration": 27199552000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 1.863,
+      "prompt_chars": 8284,
+      "response_chars": 519,
+      "usage": {
+        "prompt_eval_count": 2290,
+        "eval_count": 139,
+        "total_duration": 1857842300,
+        "prompt_eval_duration": 283625000,
+        "eval_duration": 1209568000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.259,
+      "prompt_chars": 2846,
+      "response_chars": 203,
+      "usage": {
+        "prompt_eval_count": 900,
+        "eval_count": 54,
+        "total_duration": 8255651200,
+        "prompt_eval_duration": 227779000,
+        "eval_duration": 1113622000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Cranberries",
+      "title": "Zombie",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "The Cranberries - Zombie - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "driven alt-rock crunch with thick power-chord grind",
+      "signalChainSummary": "A punchy alt-rock rhythm tone achieved with a light boost/overdrive into a UK 45 or UK 50 amp model, paired with a classic Marshall-style cab for thick, dry power chords.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from aggressive rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide a tight, mid-forward grit and punch without sounding like heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate the 'light overdrive' clue while maintaining definition for palm-muting.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more open voicing, but still suitable."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "50%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Add the necessary 'crunch' and aggressive rhythm grit required for alt-rock power chords.",
+          "matchQuality": "close",
+          "gap": "Using a general Distortion model to achieve the desired mid-forward, non-fuzz crunch suggested by the Marshall/Plexi clue.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could be too aggressive or dirty for the required 'punchy' sound."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi voicing and provide the core aggressive, mid-forward tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also excellent, but UK 45 is often cited for that specific punchy alt-rock sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide the classic Marshall-style cabinet voicing and necessary punch for rhythm guitar.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+1 dB"
+          },
+          "purpose": "Slightly boost the mids to enhance the 'mid-forward crunch' and cut through a mix.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect (optional)",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "10 Hz",
+            "Resonance": "50%"
+          },
+          "purpose": "Included as a placeholder/optional effect; kept inactive to avoid unwanted modulation (as per 'avoid' list).",
+          "matchQuality": "close",
+          "gap": "The WAH is included for completeness but must be bypassed or set minimally to adhere to the 'no chorus/modulation' rule.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Add subtle depth and thickness to the rhythm chords without distracting from the main riff.",
+          "matchQuality": "close",
+          "gap": "Used minimally to add 'thick layered guitar' feel, but kept very low so it doesn't muddy the punchy core tone.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a natural sense of space and thickness to the overall sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "driven alt-rock crunch with thick power-chord grind",
+      "mustHave": [
+        "dry, aggressive rhythm",
+        "mid-forward crunch",
+        "tight palm-muted punch",
+        "thick layered guitar"
+      ],
+      "avoid": [
+        "chorus",
+        "fender-clean",
+        "heavy fuzz",
+        "high gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi family",
+        "4x12 cab",
+        "humbucker bridge",
+        "light overdrive"
+      ],
+      "corrections": [
+        "remove chorus/modulation",
+        "lean more into dry distortion",
+        "keep it simple and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "alt-rock",
+        "indie rock",
+        "post-grunge"
+      ],
+      "targetTone": "driven alt-rock crunch with thick power-chord grind",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for more aggressive, punchy Marshall-style cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Brit)",
+          "reason": "Enhance the classic Plexi/Marshall crunch and mid-forward aggression for power chords.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Punchier, more aggressive rhythm tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1501,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

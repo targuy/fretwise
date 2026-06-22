@@ -1,0 +1,1115 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 438,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Fleet_Foxes__White_Winter_Hymnal.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Fleet Foxes",
+    "title": "White Winter Hymnal",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "indie folk",
+      "chamber pop"
+    ],
+    "confidence": "high",
+    "rationale": "The song is characterized by acoustic instrumentation and vocal harmonies, fitting the folk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, harmonically rich folk sound; fingerpicked acoustic feel with subtle electric warmth.",
+      "signatureElements": [
+        "Harmonies (close voicing)",
+        "Fingerpicking/Arpeggiation",
+        "Subtle reverb/delay wash",
+        "Mid-focused EQ curve"
+      ],
+      "gearHypotheses": [
+        "Clean amp simulation (e.g., Fender Twin/Acoustic model)",
+        "Light chorus or phaser for texture",
+        "EQ boost in the upper mids to cut through harmonies"
+      ],
+      "avoid": [
+        "Heavy distortion/fuzz",
+        "Aggressive compression",
+        "Bright, brittle high end"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "indie folk vocal-support clean",
+      "mustHave": [
+        "acoustic-like strum",
+        "soft picked transients",
+        "wide choral blend",
+        "natural room"
+      ],
+      "avoid": [
+        "electric warmth",
+        "chorus",
+        "phaser",
+        "delay wash"
+      ],
+      "gearClues": [
+        "acoustic or piezo-like clean",
+        "small room reverb",
+        "very light compression"
+      ],
+      "corrections": [
+        "track is largely vocal/acoustic, not electric",
+        "keep guitar understated and dry",
+        "avoid adding mod effects"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "likely acoustic-dominant non-guitar texture",
+      "draft adds electric warmth and modulation not clearly decisive",
+      "signature guitar part is not clearly captured"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "acoustic folk strum, vocal support only",
+    "mustHave": [
+      "acoustic-like clean",
+      "soft transients",
+      "natural room reverb"
+    ],
+    "avoid": [
+      "electric warmth",
+      "chorus or phaser",
+      "delay wash",
+      "mid boost"
+    ],
+    "gearClues": [
+      "piezo-style acoustic sim",
+      "small room reverb",
+      "minimal compression"
+    ],
+    "corrections": [
+      "track is vocal and acoustic dominant",
+      "no signature electric guitar part",
+      "avoid adding modulation"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "acoustic folk strum, vocal support only",
+    "mustHave": [
+      "acoustic-like clean",
+      "soft transients",
+      "natural room reverb"
+    ],
+    "avoid": [
+      "electric warmth",
+      "chorus or phaser",
+      "delay wash",
+      "mid boost"
+    ],
+    "gearClues": [
+      "piezo-style acoustic sim",
+      "small room reverb",
+      "minimal compression"
+    ],
+    "corrections": [
+      "track is vocal and acoustic dominant",
+      "no signature electric guitar part",
+      "avoid adding modulation"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic imitation rig for folk/vocal support.",
+          "bestMatchSummary": "Clean, natural acoustic tone using a clean preamp and small room reverb to mimic the gentle strumming of Fleet Foxes' vocal-driven folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise from acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out transients and provide gentle sustain for acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to mimic the natural dynamics of a piezo pickup, providing soft compression without sounding overly processed.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and natural.",
+              "matchQuality": "exact",
+              "gap": "No distortion is needed for this acoustic folk style.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp/tone shaping",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Bass": "High",
+                "Presence": "Medium"
+              },
+              "purpose": "Provide a clean, articulate, and non-aggressive tone suitable for folk music.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean headroom, mimicking the clarity of an acoustic guitar through a small PA system.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and intimate sound suitable for close-mic'd acoustic performance.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 offers a bright, articulate voicing that complements the clean folk style without adding excessive bass.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1.5 dB"
+              },
+              "purpose": "Slightly boost the upper mids and highs to cut through the vocal mix without sounding harsh.",
+              "matchQuality": "close",
+              "gap": "A subtle EQ lift is necessary to ensure the strumming remains audible beneath strong vocals, mimicking a natural acoustic pickup adjustment.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or wah effect is required for the natural folk sound.",
+              "matchQuality": "exact",
+              "gap": "The tone must remain pure and uncolored by filters.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all modulation effects (Chorus, Phaser) as per the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "Modulation would distract from the natural acoustic feel.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay wash to maintain the intimate and natural feel.",
+              "matchQuality": "exact",
+              "gap": "Delay is too distracting for this specific folk arrangement.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add a subtle, natural room ambience to glue the sound into the mix without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is ideal for simulating the small space of an intimate folk performance setting.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/output",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard final volume stage.",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is highly vocal and acoustic dominant, meaning the guitar part should function as subtle accompaniment rather than a lead instrument. The rig prioritizes clarity and natural room tone over aggressive electric tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the current IR with a smaller, more intimate cabinet simulation to better match the acoustic folk setting.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small room/vintage PA speaker IR",
+              "reason": "The US 2x12 is too large; a smaller, more intimate cab better suits the acoustic folk genre.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More natural and contained sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Fleet Foxes - White Winter Hymnal - Valeton GP-180",
+        "song": {
+          "artist": "Fleet Foxes",
+          "title": "White Winter Hymnal",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "acoustic folk strum, vocal support only",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Clean, natural acoustic tone using a clean preamp and small room reverb to mimic the gentle strumming of Fleet Foxes' vocal-driven folk sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray noise from acoustic strumming.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth out transients and provide gentle sustain for acoustic strumming.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used to mimic the natural dynamics of a piezo pickup, providing soft compression without sounding overly processed.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and natural.",
+            "matchQuality": "exact",
+            "gap": "No distortion is needed for this acoustic folk style.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amp/tone shaping",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "Mid",
+              "Bass": "High",
+              "Presence": "Medium"
+            },
+            "purpose": "Provide a clean, articulate, and non-aggressive tone suitable for folk music.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its classic clean headroom, mimicking the clarity of an acoustic guitar through a small PA system.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused and intimate sound suitable for close-mic'd acoustic performance.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 offers a bright, articulate voicing that complements the clean folk style without adding excessive bass.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/tonal shaping",
+            "module": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+1.5 dB"
+            },
+            "purpose": "Slightly boost the upper mids and highs to cut through the vocal mix without sounding harsh.",
+            "matchQuality": "close",
+            "gap": "A subtle EQ lift is necessary to ensure the strumming remains audible beneath strong vocals, mimicking a natural acoustic pickup adjustment.",
+            "alternatives": [],
+            "model": "None"
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No filtering or wah effect is required for the natural folk sound.",
+            "matchQuality": "exact",
+            "gap": "The tone must remain pure and uncolored by filters.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid all modulation effects (Chorus, Phaser) as per the musical verdict.",
+            "matchQuality": "exact",
+            "gap": "Modulation would distract from the natural acoustic feel.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay wash to maintain the intimate and natural feel.",
+            "matchQuality": "exact",
+            "gap": "Delay is too distracting for this specific folk arrangement.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Add a subtle, natural room ambience to glue the sound into the mix without sounding artificial.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is ideal for simulating the small space of an intimate folk performance setting.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/output",
+            "module": "VOL",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "exact",
+            "gap": "Standard final volume stage.",
+            "alternatives": [],
+            "model": "None"
+          }
+        ],
+        "general": {
+          "targetSound": "acoustic folk strum, vocal support only",
+          "toneProfile": "acoustic folk strum, vocal support only",
+          "idealSignalChain": "piezo-style acoustic sim | small room reverb | minimal compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "piezo-style acoustic sim",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "minimal compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic-like clean",
+            "soft transients",
+            "natural room reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Acoustic imitation rig for folk/vocal support.",
+          "bestMatchSummary": "Clean, natural acoustic tone using a clean preamp and small room reverb to mimic the gentle strumming of Fleet Foxes' vocal-driven folk sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise from acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth out transients and provide gentle sustain for acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used to mimic the natural dynamics of a piezo pickup, providing soft compression without sounding overly processed.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and natural.",
+              "matchQuality": "exact",
+              "gap": "No distortion is needed for this acoustic folk style.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amp/tone shaping",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "Mid",
+                "Bass": "High",
+                "Presence": "Medium"
+              },
+              "purpose": "Provide a clean, articulate, and non-aggressive tone suitable for folk music.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean headroom, mimicking the clarity of an acoustic guitar through a small PA system.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and intimate sound suitable for close-mic'd acoustic performance.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 offers a bright, articulate voicing that complements the clean folk style without adding excessive bass.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+1.5 dB"
+              },
+              "purpose": "Slightly boost the upper mids and highs to cut through the vocal mix without sounding harsh.",
+              "matchQuality": "close",
+              "gap": "A subtle EQ lift is necessary to ensure the strumming remains audible beneath strong vocals, mimicking a natural acoustic pickup adjustment.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No filtering or wah effect is required for the natural folk sound.",
+              "matchQuality": "exact",
+              "gap": "The tone must remain pure and uncolored by filters.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid all modulation effects (Chorus, Phaser) as per the musical verdict.",
+              "matchQuality": "exact",
+              "gap": "Modulation would distract from the natural acoustic feel.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay wash to maintain the intimate and natural feel.",
+              "matchQuality": "exact",
+              "gap": "Delay is too distracting for this specific folk arrangement.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Add a subtle, natural room ambience to glue the sound into the mix without sounding artificial.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is ideal for simulating the small space of an intimate folk performance setting.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/output",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "exact",
+              "gap": "Standard final volume stage.",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the current IR with a smaller, more intimate cabinet simulation to better match the acoustic folk setting.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "small room/vintage PA speaker IR",
+              "reason": "The US 2x12 is too large; a smaller, more intimate cab better suits the acoustic folk genre.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More natural and contained sound",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "track is vocal and acoustic dominant",
+          "no signature electric guitar part",
+          "avoid adding modulation"
+        ],
+        "warnings": [
+          "The source material is highly vocal and acoustic dominant, meaning the guitar part should function as subtle accompaniment rather than a lead instrument. The rig prioritizes clarity and natural room tone over aggressive electric tones."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.718,
+      "prompt_chars": 999,
+      "response_chars": 527,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 130,
+        "total_duration": 9705108500,
+        "prompt_eval_duration": 235556000,
+        "eval_duration": 2120282000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.332,
+      "prompt_chars": 5460,
+      "response_chars": 678,
+      "usage": {
+        "input_tokens": 1518,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 163,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1681
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.318,
+      "prompt_chars": 4987,
+      "response_chars": 568,
+      "usage": {
+        "input_tokens": 1455,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 189,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 25.553,
+      "prompt_chars": 3573,
+      "response_chars": 5792,
+      "usage": {
+        "prompt_eval_count": 1189,
+        "eval_count": 1561,
+        "total_duration": 25546971200,
+        "prompt_eval_duration": 258596999,
+        "eval_duration": 24895796000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.827,
+      "prompt_chars": 7908,
+      "response_chars": 597,
+      "usage": {
+        "prompt_eval_count": 2107,
+        "eval_count": 155,
+        "total_duration": 18800218100,
+        "prompt_eval_duration": 451914000,
+        "eval_duration": 2447628000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 7.594,
+      "prompt_chars": 2840,
+      "response_chars": 198,
+      "usage": {
+        "prompt_eval_count": 885,
+        "eval_count": 48,
+        "total_duration": 7578478700,
+        "prompt_eval_duration": 166514000,
+        "eval_duration": 322794000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Fleet Foxes",
+      "title": "White Winter Hymnal",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Fleet Foxes - White Winter Hymnal - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "acoustic folk strum, vocal support only",
+      "signalChainSummary": "Clean, natural acoustic tone using a clean preamp and small room reverb to mimic the gentle strumming of Fleet Foxes' vocal-driven folk sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray noise from acoustic strumming.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth out transients and provide gentle sustain for acoustic strumming.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used to mimic the natural dynamics of a piezo pickup, providing soft compression without sounding overly processed.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and natural.",
+          "matchQuality": "exact",
+          "gap": "No distortion is needed for this acoustic folk style.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amp/tone shaping",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "Mid",
+            "Bass": "High",
+            "Presence": "Medium"
+          },
+          "purpose": "Provide a clean, articulate, and non-aggressive tone suitable for folk music.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its classic clean headroom, mimicking the clarity of an acoustic guitar through a small PA system.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused and intimate sound suitable for close-mic'd acoustic performance.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 offers a bright, articulate voicing that complements the clean folk style without adding excessive bass.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/tonal shaping",
+          "module": "PRE",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+1.5 dB"
+          },
+          "purpose": "Slightly boost the upper mids and highs to cut through the vocal mix without sounding harsh.",
+          "matchQuality": "close",
+          "gap": "A subtle EQ lift is necessary to ensure the strumming remains audible beneath strong vocals, mimicking a natural acoustic pickup adjustment.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No filtering or wah effect is required for the natural folk sound.",
+          "matchQuality": "exact",
+          "gap": "The tone must remain pure and uncolored by filters.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid all modulation effects (Chorus, Phaser) as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "Modulation would distract from the natural acoustic feel.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay wash to maintain the intimate and natural feel.",
+          "matchQuality": "exact",
+          "gap": "Delay is too distracting for this specific folk arrangement.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Add a subtle, natural room ambience to glue the sound into the mix without sounding artificial.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is ideal for simulating the small space of an intimate folk performance setting.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/output",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "Standard final volume stage.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "acoustic folk strum, vocal support only",
+      "mustHave": [
+        "acoustic-like clean",
+        "soft transients",
+        "natural room reverb"
+      ],
+      "avoid": [
+        "electric warmth",
+        "chorus or phaser",
+        "delay wash",
+        "mid boost"
+      ],
+      "gearClues": [
+        "piezo-style acoustic sim",
+        "small room reverb",
+        "minimal compression"
+      ],
+      "corrections": [
+        "track is vocal and acoustic dominant",
+        "no signature electric guitar part",
+        "avoid adding modulation"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "indie folk",
+        "chamber pop"
+      ],
+      "targetTone": "acoustic folk strum, vocal support only",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the current IR with a smaller, more intimate cabinet simulation to better match the acoustic folk setting.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "small room/vintage PA speaker IR",
+          "reason": "The US 2x12 is too large; a smaller, more intimate cab better suits the acoustic folk genre.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More natural and contained sound",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 438,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

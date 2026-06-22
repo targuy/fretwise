@@ -1,0 +1,1027 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 939,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Morgan_Wallen__Whiskey_Glasses.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Morgan Wallen",
+    "title": "Whiskey Glasses",
+    "album": "",
+    "year": null,
+    "genre": "country pop"
+  },
+  "genreClassification": {
+    "genre": "country pop",
+    "subgenres": [
+      "country"
+    ],
+    "confidence": "high",
+    "rationale": "Morgan Wallen's style is modern country pop, matching the clean twang tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty country rock tone with a prominent mid-range punch and clear articulation.",
+      "signatureElements": [
+        "Crunch (mild overdrive)",
+        "Slightly scooped mids for modern pop feel",
+        "Clean delay/reverb wash",
+        "Bright treble presence"
+      ],
+      "gearHypotheses": [
+        "Small British style amp simulation (e.g., Vox AC30 or Fender Deluxe) for clarity and chime",
+        "Low-to-mid gain tube screamer type overdrive for grit without muddiness",
+        "Chorus or subtle modulation effect to add width"
+      ],
+      "avoid": [
+        "Heavy fuzz/distortion",
+        "Overly scooped bass frequencies",
+        "Aggressive, metallic high-gain tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean country pop with light edge-of-breakup twang",
+      "mustHave": [
+        "bright picked notes",
+        "tight low end",
+        "short delay",
+        "light room"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "chorus wash",
+        "big reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Fender clean",
+        "Tele bridge pickup",
+        "1x12 combo",
+        "slapback delay"
+      ],
+      "corrections": [
+        "drop chorus",
+        "reduce gain",
+        "favor twang over mid punch",
+        "keep effects subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean country pop with light edge-of-breakup twang",
+    "mustHave": [
+      "bright picked notes",
+      "tight low end",
+      "short delay",
+      "light room"
+    ],
+    "avoid": [
+      "heavy crunch",
+      "chorus wash",
+      "big reverb",
+      "fuzz"
+    ],
+    "gearClues": [
+      "Fender clean",
+      "Tele bridge pickup",
+      "1x12 combo",
+      "slapback delay"
+    ],
+    "corrections": [
+      "drop chorus",
+      "reduce gain",
+      "favor twang over mid punch",
+      "keep effects subtle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle breakup and twang.",
+          "bestMatchSummary": "A classic country/pop setup using a Fender-style clean amp (US Deluxe) paired with a bright 2x12 cab. The signal chain emphasizes compression for tightness, light OD for edge, and uses slapback delay and room reverb to achieve the desired space and twang.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Tighten the low end and increase sustain for bright picking.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/edge",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "65%"
+              },
+              "purpose": "Provide subtle, natural breakup and twang without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate the gentle grit of a worn tube amp rather than a specific pedal model.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could also provide clean breakup, but Blues OD better matches the 'country pop' feel."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Simulate the bright, clean tone of a Fender-style 1x12 combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused sound suitable for country twang.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright picked notes and cut unnecessary low-end mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Achieve the classic country/pop 'slap' echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without sounding washed out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is country pop, which requires a specific blend of clean tones and subtle grit. The chosen chain prioritizes clarity (Comp) and brightness (US Deluxe/EQ) over raw power."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better match the Telecaster-style bright, focused country sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Telecaster 2x12 IR",
+              "reason": "A dedicated Tele/country cab will enhance the required twang and brightness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Morgan Wallen - Whiskey Glasses - Valeton GP-180",
+        "song": {
+          "artist": "Morgan Wallen",
+          "title": "Whiskey Glasses",
+          "album": "",
+          "year": null,
+          "genre": "country pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean country pop with light edge-of-breakup twang",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic country/pop setup using a Fender-style clean amp (US Deluxe) paired with a bright 2x12 cab. The signal chain emphasizes compression for tightness, light OD for edge, and uses slapback delay and room reverb to achieve the desired space and twang.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain signal clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30 dB",
+              "Ratio": "4:1"
+            },
+            "purpose": "Tighten the low end and increase sustain for bright picking.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/edge",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "70%",
+              "Level": "65%"
+            },
+            "purpose": "Provide subtle, natural breakup and twang without heavy crunch.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used to simulate the gentle grit of a worn tube amp rather than a specific pedal model.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "Could also provide clean breakup, but Blues OD better matches the 'country pop' feel."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Midrange": "6/10",
+              "Bass": "4/10"
+            },
+            "purpose": "Simulate the bright, clean tone of a Fender-style 1x12 combo.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and focused sound suitable for country twang.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/EQ",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Enhance the bright picked notes and cut unnecessary low-end mud.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/delay",
+            "module": "DLY",
+            "model": "Slapback",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2",
+              "Level": "3"
+            },
+            "purpose": "Achieve the classic country/pop 'slap' echo effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and depth without sounding washed out.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean country pop with light edge-of-breakup twang",
+          "toneProfile": "clean country pop with light edge-of-breakup twang",
+          "idealSignalChain": "Fender clean | Tele bridge pickup | 1x12 combo | slapback delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender clean",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tele bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "slapback delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bright picked notes",
+            "tight low end",
+            "short delay",
+            "light room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones with subtle breakup and twang.",
+          "bestMatchSummary": "A classic country/pop setup using a Fender-style clean amp (US Deluxe) paired with a bright 2x12 cab. The signal chain emphasizes compression for tightness, light OD for edge, and uses slapback delay and room reverb to achieve the desired space and twang.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30 dB",
+                "Ratio": "4:1"
+              },
+              "purpose": "Tighten the low end and increase sustain for bright picking.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/edge",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "65%"
+              },
+              "purpose": "Provide subtle, natural breakup and twang without heavy crunch.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used to simulate the gentle grit of a worn tube amp rather than a specific pedal model.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "Could also provide clean breakup, but Blues OD better matches the 'country pop' feel."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "6/10",
+                "Bass": "4/10"
+              },
+              "purpose": "Simulate the bright, clean tone of a Fender-style 1x12 combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused sound suitable for country twang.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/EQ",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Enhance the bright picked notes and cut unnecessary low-end mud.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/delay",
+              "module": "DLY",
+              "model": "Slapback",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Level": "3"
+              },
+              "purpose": "Achieve the classic country/pop 'slap' echo effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth without sounding washed out.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to better match the Telecaster-style bright, focused country sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Telecaster 2x12 IR",
+              "reason": "A dedicated Tele/country cab will enhance the required twang and brightness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "reduce gain",
+          "favor twang over mid punch",
+          "keep effects subtle"
+        ],
+        "warnings": [
+          "The source material is country pop, which requires a specific blend of clean tones and subtle grit. The chosen chain prioritizes clarity (Comp) and brightness (US Deluxe/EQ) over raw power."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.428,
+      "prompt_chars": 997,
+      "response_chars": 639,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 150,
+        "total_duration": 10424158100,
+        "prompt_eval_duration": 698412000,
+        "eval_duration": 2498339000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.916,
+      "prompt_chars": 5570,
+      "response_chars": 485,
+      "usage": {
+        "input_tokens": 1539,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1671
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 38.55,
+      "prompt_chars": 3569,
+      "response_chars": 4738,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1383,
+        "total_duration": 38516848400,
+        "prompt_eval_duration": 390590000,
+        "eval_duration": 23755763000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.87,
+      "prompt_chars": 6824,
+      "response_chars": 537,
+      "usage": {
+        "prompt_eval_count": 1949,
+        "eval_count": 144,
+        "total_duration": 3843386000,
+        "prompt_eval_duration": 365186000,
+        "eval_duration": 3008257000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 20.395,
+      "prompt_chars": 2771,
+      "response_chars": 172,
+      "usage": {
+        "prompt_eval_count": 872,
+        "eval_count": 46,
+        "total_duration": 20371133600,
+        "prompt_eval_duration": 636200000,
+        "eval_duration": 560899000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Morgan Wallen",
+      "title": "Whiskey Glasses",
+      "album": "",
+      "year": null,
+      "genre": "country pop"
+    },
+    "rig": {
+      "rigName": "Morgan Wallen - Whiskey Glasses - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean country pop with light edge-of-breakup twang",
+      "signalChainSummary": "A classic country/pop setup using a Fender-style clean amp (US Deluxe) paired with a bright 2x12 cab. The signal chain emphasizes compression for tightness, light OD for edge, and uses slapback delay and room reverb to achieve the desired space and twang.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain signal clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30 dB",
+            "Ratio": "4:1"
+          },
+          "purpose": "Tighten the low end and increase sustain for bright picking.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/edge",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "70%",
+            "Level": "65%"
+          },
+          "purpose": "Provide subtle, natural breakup and twang without heavy crunch.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used to simulate the gentle grit of a worn tube amp rather than a specific pedal model.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "Could also provide clean breakup, but Blues OD better matches the 'country pop' feel."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Midrange": "6/10",
+            "Bass": "4/10"
+          },
+          "purpose": "Simulate the bright, clean tone of a Fender-style 1x12 combo.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and focused sound suitable for country twang.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/EQ",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Enhance the bright picked notes and cut unnecessary low-end mud.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/delay",
+          "module": "DLY",
+          "model": "Slapback",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2",
+            "Level": "3"
+          },
+          "purpose": "Achieve the classic country/pop 'slap' echo effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and depth without sounding washed out.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean country pop with light edge-of-breakup twang",
+      "mustHave": [
+        "bright picked notes",
+        "tight low end",
+        "short delay",
+        "light room"
+      ],
+      "avoid": [
+        "heavy crunch",
+        "chorus wash",
+        "big reverb",
+        "fuzz"
+      ],
+      "gearClues": [
+        "Fender clean",
+        "Tele bridge pickup",
+        "1x12 combo",
+        "slapback delay"
+      ],
+      "corrections": [
+        "drop chorus",
+        "reduce gain",
+        "favor twang over mid punch",
+        "keep effects subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "country pop",
+      "styleTags": [
+        "country"
+      ],
+      "targetTone": "clean country pop with light edge-of-breakup twang",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to better match the Telecaster-style bright, focused country sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Telecaster 2x12 IR",
+          "reason": "A dedicated Tele/country cab will enhance the required twang and brightness.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 939,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

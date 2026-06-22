@@ -1,0 +1,1009 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 481,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Frank_Sinatra__My_Way.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Frank Sinatra",
+    "title": "My Way",
+    "album": "",
+    "year": null,
+    "genre": "pop standards"
+  },
+  "genreClassification": {
+    "genre": "pop standards",
+    "subgenres": [
+      "jazz pop",
+      "big band",
+      "crooner"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic jazz-influenced ballad, fitting the 'pop standards' genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, rich, slightly vintage clean tone with subtle reverb and delay.",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "subtle chorus/modulation",
+        "vintage tube amp warmth"
+      ],
+      "gearHypotheses": [
+        "Modeling amplifier (e.g., Fender Twin Reverb model)",
+        "Spring or plate reverb unit",
+        "Analog delay effect"
+      ],
+      "avoid": [
+        "Fuzz",
+        "Crunch",
+        "Distortion",
+        "Wah pedal effects",
+        "Aggressive modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "warm orchestral clean with gentle sustain",
+      "mustHave": [
+        "clean electric support",
+        "soft sustain",
+        "light room",
+        "no lead bite"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "delay wash",
+        "chorus"
+      ],
+      "gearClues": [
+        "clean amp",
+        "smooth comp",
+        "light room reverb"
+      ],
+      "corrections": [
+        "piano/vocal lead context",
+        "guitar likely minor"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title is iconic and guitar is not clearly decisive",
+      "draft is generic and may miss the actual guitar role",
+      "possible non-guitar dominant arrangement"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "minimal clean electric pad behind orchestral vocal arrangement",
+    "mustHave": [
+      "pristine clean",
+      "soft sustain",
+      "orchestral blend"
+    ],
+    "avoid": [
+      "delay",
+      "chorus",
+      "reverb wash",
+      "any breakup"
+    ],
+    "gearClues": [
+      "clean amp headroom",
+      "light compression",
+      "subtle room only"
+    ],
+    "corrections": [
+      "guitar is background texture not lead voice",
+      "remove delay and chorus from draft",
+      "orchestral strings dominate not guitar"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "minimal clean electric pad behind orchestral vocal arrangement",
+    "mustHave": [
+      "pristine clean",
+      "soft sustain",
+      "orchestral blend"
+    ],
+    "avoid": [
+      "delay",
+      "chorus",
+      "reverb wash",
+      "any breakup"
+    ],
+    "gearClues": [
+      "clean amp headroom",
+      "light compression",
+      "subtle room only"
+    ],
+    "corrections": [
+      "guitar is background texture not lead voice",
+      "remove delay and chorus from draft",
+      "orchestral strings dominate not guitar"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones, subtle compression, and minimal ambience to act as a background pad for an orchestral vocal arrangement.",
+          "bestMatchSummary": "A highly controlled signal chain using light compression, followed by a clean preamp (US Deluxe/Silver Twin) into a clean British amp model, finished with gentle room reverb and EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate background hum and noise for a pristine recording environment.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide soft sustain and smooth out dynamics, mimicking light compression for a pad sound.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving the 'soft sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/gain stage",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "1",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Provide a clean boost and slight warmth without adding noticeable grit or breakup.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a transparent, low-gain booster to maintain headroom, rather than an overdrive effect. A dedicated 'Clean Boost' would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If available, the generic 'Boost' module would be more accurate for a clean pad."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the clean headroom and bright, articulate tone required for a background pad.",
+              "matchQuality": "perfect",
+              "gap": "None. The US Deluxe is ideal for pristine, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and articulate sound suitable for background textures.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the clean American tone of the US Deluxe amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly scoop the low end and tame the high end to ensure the guitar sits gently behind the dominant orchestral vocals.",
+              "matchQuality": "perfect",
+              "gap": "None. Necessary for blending into an existing mix.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and 'orchestral blend' without creating a noticeable reverb wash.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is the most natural choice for blending into an orchestral mix.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "50%"
+              },
+              "purpose": "Final level adjustment to ensure the background texture is appropriately mixed beneath the vocals.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final mixing stage.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (Frank Sinatra's 'My Way') is a vocal/orchestral arrangement, not guitar-centric. The resulting tone is designed purely as an atmospheric background pad and should be mixed very subtly.",
+          "Delay and Chorus were explicitly avoided per the musical verdict, focusing solely on clean sustain and room ambience."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Focus IR replacement to enhance natural blend and articulation for background pad.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 (e.g., Fender Tweed/Blackface)",
+              "reason": "Enhance vintage clean headroom and articulate background texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for this genre",
+              "expectedGain": "Improved natural blend",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Frank Sinatra - My Way - Valeton GP-180",
+        "song": {
+          "artist": "Frank Sinatra",
+          "title": "My Way",
+          "album": "",
+          "year": null,
+          "genre": "pop standards"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "minimal clean electric pad behind orchestral vocal arrangement",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly controlled signal chain using light compression, followed by a clean preamp (US Deluxe/Silver Twin) into a clean British amp model, finished with gentle room reverb and EQ shaping.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Eliminate background hum and noise for a pristine recording environment.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide soft sustain and smooth out dynamics, mimicking light compression for a pad sound.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for achieving the 'soft sustain' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/gain stage",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "1",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Provide a clean boost and slight warmth without adding noticeable grit or breakup.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here as a transparent, low-gain booster to maintain headroom, rather than an overdrive effect. A dedicated 'Clean Boost' would be ideal.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "If available, the generic 'Boost' module would be more accurate for a clean pad."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "6",
+              "Midrange": "5",
+              "Bass": "4"
+            },
+            "purpose": "Simulate the clean headroom and bright, articulate tone required for a background pad.",
+            "matchQuality": "perfect",
+            "gap": "None. The US Deluxe is ideal for pristine, non-aggressive tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a focused and articulate sound suitable for background textures.",
+            "matchQuality": "perfect",
+            "gap": "None. Matches the clean American tone of the US Deluxe amp model.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Subtly scoop the low end and tame the high end to ensure the guitar sits gently behind the dominant orchestral vocals.",
+            "matchQuality": "perfect",
+            "gap": "None. Necessary for blending into an existing mix.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "ambience/reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and 'orchestral blend' without creating a noticeable reverb wash.",
+            "matchQuality": "perfect",
+            "gap": "None. Room reverb is the most natural choice for blending into an orchestral mix.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "50%"
+            },
+            "purpose": "Final level adjustment to ensure the background texture is appropriately mixed beneath the vocals.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final mixing stage.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "minimal clean electric pad behind orchestral vocal arrangement",
+          "toneProfile": "minimal clean electric pad behind orchestral vocal arrangement",
+          "idealSignalChain": "clean amp headroom | light compression | subtle room only",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean amp headroom",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "subtle room only",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "pristine clean",
+            "soft sustain",
+            "orchestral blend"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on pristine clean tones, subtle compression, and minimal ambience to act as a background pad for an orchestral vocal arrangement.",
+          "bestMatchSummary": "A highly controlled signal chain using light compression, followed by a clean preamp (US Deluxe/Silver Twin) into a clean British amp model, finished with gentle room reverb and EQ shaping.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate background hum and noise for a pristine recording environment.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide soft sustain and smooth out dynamics, mimicking light compression for a pad sound.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for achieving the 'soft sustain' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/gain stage",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "1",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Provide a clean boost and slight warmth without adding noticeable grit or breakup.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here as a transparent, low-gain booster to maintain headroom, rather than an overdrive effect. A dedicated 'Clean Boost' would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "If available, the generic 'Boost' module would be more accurate for a clean pad."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "6",
+                "Midrange": "5",
+                "Bass": "4"
+              },
+              "purpose": "Simulate the clean headroom and bright, articulate tone required for a background pad.",
+              "matchQuality": "perfect",
+              "gap": "None. The US Deluxe is ideal for pristine, non-aggressive tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a focused and articulate sound suitable for background textures.",
+              "matchQuality": "perfect",
+              "gap": "None. Matches the clean American tone of the US Deluxe amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Subtly scoop the low end and tame the high end to ensure the guitar sits gently behind the dominant orchestral vocals.",
+              "matchQuality": "perfect",
+              "gap": "None. Necessary for blending into an existing mix.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "ambience/reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and 'orchestral blend' without creating a noticeable reverb wash.",
+              "matchQuality": "perfect",
+              "gap": "None. Room reverb is the most natural choice for blending into an orchestral mix.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "50%"
+              },
+              "purpose": "Final level adjustment to ensure the background texture is appropriately mixed beneath the vocals.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final mixing stage.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Focus IR replacement to enhance natural blend and articulation for background pad.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 (e.g., Fender Tweed/Blackface)",
+              "reason": "Enhance vintage clean headroom and articulate background texture.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for this genre",
+              "expectedGain": "Improved natural blend",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "guitar is background texture not lead voice",
+          "remove delay and chorus from draft",
+          "orchestral strings dominate not guitar"
+        ],
+        "warnings": [
+          "The source material (Frank Sinatra's 'My Way') is a vocal/orchestral arrangement, not guitar-centric. The resulting tone is designed purely as an atmospheric background pad and should be mixed very subtly.",
+          "Delay and Chorus were explicitly avoided per the musical verdict, focusing solely on clean sustain and room ambience."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 7.027,
+      "prompt_chars": 988,
+      "response_chars": 433,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 109,
+        "total_duration": 7004839900,
+        "prompt_eval_duration": 131048000,
+        "eval_duration": 742644000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.784,
+      "prompt_chars": 5373,
+      "response_chars": 566,
+      "usage": {
+        "input_tokens": 1500,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 144,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1644
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.194,
+      "prompt_chars": 4779,
+      "response_chars": 577,
+      "usage": {
+        "input_tokens": 1413,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 187,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.812,
+      "prompt_chars": 3571,
+      "response_chars": 5194,
+      "usage": {
+        "prompt_eval_count": 1190,
+        "eval_count": 1399,
+        "total_duration": 9789634500,
+        "prompt_eval_duration": 141155000,
+        "eval_duration": 9309866000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 1.464,
+      "prompt_chars": 7254,
+      "response_chars": 533,
+      "usage": {
+        "prompt_eval_count": 1946,
+        "eval_count": 137,
+        "total_duration": 1459568400,
+        "prompt_eval_duration": 177777000,
+        "eval_duration": 942534000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 7.567,
+      "prompt_chars": 2659,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 822,
+        "eval_count": 54,
+        "total_duration": 7563920800,
+        "prompt_eval_duration": 162436000,
+        "eval_duration": 362273000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Frank Sinatra",
+      "title": "My Way",
+      "album": "",
+      "year": null,
+      "genre": "pop standards"
+    },
+    "rig": {
+      "rigName": "Frank Sinatra - My Way - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "minimal clean electric pad behind orchestral vocal arrangement",
+      "signalChainSummary": "A highly controlled signal chain using light compression, followed by a clean preamp (US Deluxe/Silver Twin) into a clean British amp model, finished with gentle room reverb and EQ shaping.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Eliminate background hum and noise for a pristine recording environment.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide soft sustain and smooth out dynamics, mimicking light compression for a pad sound.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for achieving the 'soft sustain' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/gain stage",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "1",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Provide a clean boost and slight warmth without adding noticeable grit or breakup.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here as a transparent, low-gain booster to maintain headroom, rather than an overdrive effect. A dedicated 'Clean Boost' would be ideal.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "If available, the generic 'Boost' module would be more accurate for a clean pad."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "6",
+            "Midrange": "5",
+            "Bass": "4"
+          },
+          "purpose": "Simulate the clean headroom and bright, articulate tone required for a background pad.",
+          "matchQuality": "exact",
+          "gap": "None. The US Deluxe is ideal for pristine, non-aggressive tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a focused and articulate sound suitable for background textures.",
+          "matchQuality": "exact",
+          "gap": "None. Matches the clean American tone of the US Deluxe amp model.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Subtly scoop the low end and tame the high end to ensure the guitar sits gently behind the dominant orchestral vocals.",
+          "matchQuality": "exact",
+          "gap": "None. Necessary for blending into an existing mix.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and 'orchestral blend' without creating a noticeable reverb wash.",
+          "matchQuality": "exact",
+          "gap": "None. Room reverb is the most natural choice for blending into an orchestral mix.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "50%"
+          },
+          "purpose": "Final level adjustment to ensure the background texture is appropriately mixed beneath the vocals.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final mixing stage.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "minimal clean electric pad behind orchestral vocal arrangement",
+      "mustHave": [
+        "pristine clean",
+        "soft sustain",
+        "orchestral blend"
+      ],
+      "avoid": [
+        "delay",
+        "chorus",
+        "reverb wash",
+        "any breakup"
+      ],
+      "gearClues": [
+        "clean amp headroom",
+        "light compression",
+        "subtle room only"
+      ],
+      "corrections": [
+        "guitar is background texture not lead voice",
+        "remove delay and chorus from draft",
+        "orchestral strings dominate not guitar"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "pop standards",
+      "styleTags": [
+        "jazz pop",
+        "big band",
+        "crooner"
+      ],
+      "targetTone": "minimal clean electric pad behind orchestral vocal arrangement",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Focus IR replacement to enhance natural blend and articulation for background pad.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 (e.g., Fender Tweed/Blackface)",
+          "reason": "Enhance vintage clean headroom and articulate background texture.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always for this genre",
+          "expectedGain": "Improved natural blend",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 481,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

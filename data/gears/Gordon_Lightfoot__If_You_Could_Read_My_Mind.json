@@ -1,0 +1,1141 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 537,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Gordon_Lightfoot__If_You_Could_Read_My_Mind.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Gordon Lightfoot",
+    "title": "If You Could Read My Mind",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and song are classic examples of the folk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Acoustic/Clean Folk Ballad Tone",
+      "signatureElements": [
+        "clean",
+        "reverb",
+        "delay",
+        "fingerpicking arpeggios",
+        "warm acoustic sound"
+      ],
+      "gearHypotheses": [
+        "Modeling clean tube amp (e.g., Fender Twin style)",
+        "Plate reverb simulation",
+        "Tape delay effect"
+      ],
+      "avoid": [
+        "fuzz",
+        "crunch",
+        "distortion",
+        "overdrive",
+        "bright metallic tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "warm fingerpicked acoustic folk ballad",
+      "mustHave": [
+        "acoustic fingerpicking",
+        "natural body resonance",
+        "dry/warm close mic",
+        "light room only"
+      ],
+      "avoid": [
+        "electric amp clean",
+        "delay",
+        "plate reverb",
+        "heavy sheen"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "steel-string",
+        "small room"
+      ],
+      "corrections": [
+        "remove Fender Twin",
+        "remove tape delay",
+        "favor acoustic texture"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "song title strongly suggests acoustic-dominant signature",
+      "draft adds electric-clean amp and effects that may mislead GP-180",
+      "guitar part context is ambiguous enough to warrant higher-accuracy review"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "warm fingerpicked steel-string acoustic folk",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "natural body resonance",
+      "dry intimate mic placement",
+      "steel-string clarity"
+    ],
+    "avoid": [
+      "electric amp modeling",
+      "delay effects",
+      "reverb beyond subtle room",
+      "bright shimmer",
+      "any gain or drive"
+    ],
+    "gearClues": [
+      "steel-string acoustic",
+      "close mic studio recording",
+      "1970 folk production",
+      "fingerpicked arpeggios"
+    ],
+    "corrections": [
+      "remove Fender Twin reference",
+      "remove tape delay",
+      "remove plate reverb",
+      "prioritize acoustic sim over clean electric"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "warm fingerpicked steel-string acoustic folk",
+    "mustHave": [
+      "acoustic guitar simulation",
+      "natural body resonance",
+      "dry intimate mic placement",
+      "steel-string clarity"
+    ],
+    "avoid": [
+      "electric amp modeling",
+      "delay effects",
+      "reverb beyond subtle room",
+      "bright shimmer",
+      "any gain or drive"
+    ],
+    "gearClues": [
+      "steel-string acoustic",
+      "close mic studio recording",
+      "1970 folk production",
+      "fingerpicked arpeggios"
+    ],
+    "corrections": [
+      "remove Fender Twin reference",
+      "remove tape delay",
+      "remove plate reverb",
+      "prioritize acoustic sim over clean electric"
+    ],
+    "confidence": "high",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize acoustic simulation and clean, intimate tones.",
+          "bestMatchSummary": "Acoustic simulation chain focusing on warmth, natural resonance, and fingerpicked clarity, avoiding all gain stages.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain intimacy.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and add subtle body resonance to the acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used here to mimic the gentle compression of a close studio microphone, rather than traditional guitar comp.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No gain or drive is desired for this acoustic folk tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+1",
+                "Bass": "-1",
+                "Mids": "Flat"
+              },
+              "purpose": "Provide a clean, warm foundation that simulates the natural resonance of an acoustic instrument without sounding like an electric amp.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean circuit tone, which best approximates the 'natural body' sound required. The gain must be kept extremely low.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Simulate a close-mic studio recording environment and provide a focused, intimate sound.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most appropriate cabinet for simulating a small, controlled studio setting suitable for folk recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the warmth and body (low-mids) while slightly rolling off harsh high frequencies to maintain a vintage, warm folk sound.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal sculpting required by the genre, focusing on depth over brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or wah effect is appropriate for this delicate acoustic style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation is generally avoided in intimate acoustic folk settings unless specifically required.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay effects are explicitly avoided to maintain the dry, intimate feel.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short (1.5s)",
+                "Mix": "Low (10%)"
+              },
+              "purpose": "Provide the bare minimum of natural room ambience without sounding artificial or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used sparingly to simulate a real, small recording space, adhering to the 'subtle room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity (0 dB)"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic folk (Gordon Lightfoot). The GP-180 is an electric guitar modeler. While the chain prioritizes clean, natural tones and uses compression and US Deluxe/US 2x12 to simulate a close studio mic sound, true acoustic simulation requires dedicated modeling or physical acoustic input."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with one optimized for intimate, dry acoustic recording to enhance realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic body resonance/Studio intimacy",
+              "recommendedAsset": "Close-mic Acoustic Studio IR (e.g., Neumann U47 or vintage ribbon mic)",
+              "reason": "Enhance the natural, dry, and intimate sound required for folk recordings.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism/warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Gordon Lightfoot - If You Could Read My Mind - Valeton GP-180",
+        "song": {
+          "artist": "Gordon Lightfoot",
+          "title": "If You Could Read My Mind",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm fingerpicked steel-string acoustic folk",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Acoustic simulation chain focusing on warmth, natural resonance, and fingerpicked clarity, avoiding all gain stages.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain intimacy.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/tone shaping",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Smooth dynamics and add subtle body resonance to the acoustic simulation.",
+            "matchQuality": "close",
+            "gap": "The Comp module is used here to mimic the gentle compression of a close studio microphone, rather than traditional guitar comp.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No gain or drive is desired for this acoustic folk tone.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+1",
+              "Bass": "-1",
+              "Mids": "Flat"
+            },
+            "purpose": "Provide a clean, warm foundation that simulates the natural resonance of an acoustic instrument without sounding like an electric amp.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen for its classic clean circuit tone, which best approximates the 'natural body' sound required. The gain must be kept extremely low.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "Close"
+            },
+            "purpose": "Simulate a close-mic studio recording environment and provide a focused, intimate sound.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is the most appropriate cabinet for simulating a small, controlled studio setting suitable for folk recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+1 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Enhance the warmth and body (low-mids) while slightly rolling off harsh high frequencies to maintain a vintage, warm folk sound.",
+            "matchQuality": "close",
+            "gap": "Used for subtle tonal sculpting required by the genre, focusing on depth over brightness.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No filtering or wah effect is appropriate for this delicate acoustic style.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Modulation is generally avoided in intimate acoustic folk settings unless specifically required.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Delay effects are explicitly avoided to maintain the dry, intimate feel.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "Short (1.5s)",
+              "Mix": "Low (10%)"
+            },
+            "purpose": "Provide the bare minimum of natural room ambience without sounding artificial or overly wet.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is used sparingly to simulate a real, small recording space, adhering to the 'subtle room' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "Unity (0 dB)"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm fingerpicked steel-string acoustic folk",
+          "toneProfile": "warm fingerpicked steel-string acoustic folk",
+          "idealSignalChain": "steel-string acoustic | close mic studio recording | 1970 folk production | fingerpicked arpeggios",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "steel-string acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "close mic studio recording",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1970 folk production",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fingerpicked arpeggios",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic guitar simulation",
+            "natural body resonance",
+            "dry intimate mic placement",
+            "steel-string clarity"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize acoustic simulation and clean, intimate tones.",
+          "bestMatchSummary": "Acoustic simulation chain focusing on warmth, natural resonance, and fingerpicked clarity, avoiding all gain stages.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain intimacy.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/tone shaping",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Smooth dynamics and add subtle body resonance to the acoustic simulation.",
+              "matchQuality": "close",
+              "gap": "The Comp module is used here to mimic the gentle compression of a close studio microphone, rather than traditional guitar comp.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No gain or drive is desired for this acoustic folk tone.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+1",
+                "Bass": "-1",
+                "Mids": "Flat"
+              },
+              "purpose": "Provide a clean, warm foundation that simulates the natural resonance of an acoustic instrument without sounding like an electric amp.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen for its classic clean circuit tone, which best approximates the 'natural body' sound required. The gain must be kept extremely low.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "Close"
+              },
+              "purpose": "Simulate a close-mic studio recording environment and provide a focused, intimate sound.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is the most appropriate cabinet for simulating a small, controlled studio setting suitable for folk recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+1 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the warmth and body (low-mids) while slightly rolling off harsh high frequencies to maintain a vintage, warm folk sound.",
+              "matchQuality": "close",
+              "gap": "Used for subtle tonal sculpting required by the genre, focusing on depth over brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No filtering or wah effect is appropriate for this delicate acoustic style.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Modulation is generally avoided in intimate acoustic folk settings unless specifically required.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Delay effects are explicitly avoided to maintain the dry, intimate feel.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "Short (1.5s)",
+                "Mix": "Low (10%)"
+              },
+              "purpose": "Provide the bare minimum of natural room ambience without sounding artificial or overly wet.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used sparingly to simulate a real, small recording space, adhering to the 'subtle room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "Unity (0 dB)"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic cabinet IR with one optimized for intimate, dry acoustic recording to enhance realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic body resonance/Studio intimacy",
+              "recommendedAsset": "Close-mic Acoustic Studio IR (e.g., Neumann U47 or vintage ribbon mic)",
+              "reason": "Enhance the natural, dry, and intimate sound required for folk recordings.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism/warmth",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove Fender Twin reference",
+          "remove tape delay",
+          "remove plate reverb",
+          "prioritize acoustic sim over clean electric"
+        ],
+        "warnings": [
+          "The source material is acoustic folk (Gordon Lightfoot). The GP-180 is an electric guitar modeler. While the chain prioritizes clean, natural tones and uses compression and US Deluxe/US 2x12 to simulate a close studio mic sound, true acoustic simulation requires dedicated modeling or physical acoustic input."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.245,
+      "prompt_chars": 1010,
+      "response_chars": 374,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 101,
+        "total_duration": 9225586600,
+        "prompt_eval_duration": 309845000,
+        "eval_duration": 1854394000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.003,
+      "prompt_chars": 5336,
+      "response_chars": 673,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 161,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1658
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.648,
+      "prompt_chars": 4858,
+      "response_chars": 728,
+      "usage": {
+        "input_tokens": 1428,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 229,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 28.666,
+      "prompt_chars": 3752,
+      "response_chars": 5986,
+      "usage": {
+        "prompt_eval_count": 1230,
+        "eval_count": 1625,
+        "total_duration": 28638535400,
+        "prompt_eval_duration": 209387000,
+        "eval_duration": 28109162000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 18.706,
+      "prompt_chars": 8283,
+      "response_chars": 605,
+      "usage": {
+        "prompt_eval_count": 2212,
+        "eval_count": 155,
+        "total_duration": 18700586200,
+        "prompt_eval_duration": 357504000,
+        "eval_duration": 2605443000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 7.844,
+      "prompt_chars": 3027,
+      "response_chars": 163,
+      "usage": {
+        "prompt_eval_count": 921,
+        "eval_count": 43,
+        "total_duration": 7825596800,
+        "prompt_eval_duration": 167826000,
+        "eval_duration": 305562000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Gordon Lightfoot",
+      "title": "If You Could Read My Mind",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Gordon Lightfoot - If You Could Read My Mind - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm fingerpicked steel-string acoustic folk",
+      "signalChainSummary": "Acoustic simulation chain focusing on warmth, natural resonance, and fingerpicked clarity, avoiding all gain stages.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain intimacy.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/tone shaping",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Smooth dynamics and add subtle body resonance to the acoustic simulation.",
+          "matchQuality": "close",
+          "gap": "The Comp module is used here to mimic the gentle compression of a close studio microphone, rather than traditional guitar comp.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No gain or drive is desired for this acoustic folk tone.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+1",
+            "Bass": "-1",
+            "Mids": "Flat"
+          },
+          "purpose": "Provide a clean, warm foundation that simulates the natural resonance of an acoustic instrument without sounding like an electric amp.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen for its classic clean circuit tone, which best approximates the 'natural body' sound required. The gain must be kept extremely low.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "Close"
+          },
+          "purpose": "Simulate a close-mic studio recording environment and provide a focused, intimate sound.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is the most appropriate cabinet for simulating a small, controlled studio setting suitable for folk recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+1 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Enhance the warmth and body (low-mids) while slightly rolling off harsh high frequencies to maintain a vintage, warm folk sound.",
+          "matchQuality": "close",
+          "gap": "Used for subtle tonal sculpting required by the genre, focusing on depth over brightness.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No filtering or wah effect is appropriate for this delicate acoustic style.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Modulation is generally avoided in intimate acoustic folk settings unless specifically required.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Delay effects are explicitly avoided to maintain the dry, intimate feel.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "Short (1.5s)",
+            "Mix": "Low (10%)"
+          },
+          "purpose": "Provide the bare minimum of natural room ambience without sounding artificial or overly wet.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is used sparingly to simulate a real, small recording space, adhering to the 'subtle room' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "Unity (0 dB)"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm fingerpicked steel-string acoustic folk",
+      "mustHave": [
+        "acoustic guitar simulation",
+        "natural body resonance",
+        "dry intimate mic placement",
+        "steel-string clarity"
+      ],
+      "avoid": [
+        "electric amp modeling",
+        "delay effects",
+        "reverb beyond subtle room",
+        "bright shimmer",
+        "any gain or drive"
+      ],
+      "gearClues": [
+        "steel-string acoustic",
+        "close mic studio recording",
+        "1970 folk production",
+        "fingerpicked arpeggios"
+      ],
+      "corrections": [
+        "remove Fender Twin reference",
+        "remove tape delay",
+        "remove plate reverb",
+        "prioritize acoustic sim over clean electric"
+      ],
+      "confidence": "high",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "singer-songwriter"
+      ],
+      "targetTone": "warm fingerpicked steel-string acoustic folk",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic cabinet IR with one optimized for intimate, dry acoustic recording to enhance realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic body resonance/Studio intimacy",
+          "recommendedAsset": "Close-mic Acoustic Studio IR (e.g., Neumann U47 or vintage ribbon mic)",
+          "reason": "Enhance the natural, dry, and intimate sound required for folk recordings.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism/warmth",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 537,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

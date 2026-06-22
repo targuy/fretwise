@@ -1,0 +1,1061 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 678,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Jet__Are_You_Gonna_Be_My_Girl.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Jet",
+    "title": "Are You Gonna Be My Girl",
+    "album": "",
+    "year": null,
+    "genre": "garage rock"
+  },
+  "genreClassification": {
+    "genre": "garage rock",
+    "subgenres": [
+      "indie rock",
+      "punk revival",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a foundational track of the garage/pop-punk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy, slightly overdriven rhythm tone (think early 2000s garage rock)",
+      "signatureElements": [
+        "Crunch/light overdrive",
+        "Punchy mid-range focus",
+        "Slightly scooped bass"
+      ],
+      "gearHypotheses": [
+        "British style amp model (e.g., Vox AC30 or Marshall JCM family) for chime and bite",
+        "Overdrive pedal simulation (e.g., Tube Screamer type) for tightening the low end and adding grit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep modulation (chorus/flanger)",
+        "Dark, muddy tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright chunky garage-rock crunch with open upper mids",
+      "mustHave": [
+        "tight palm-muted chug",
+        "raw rhythm crunch",
+        "bright attack",
+        "slight edge-of-breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "dark mud",
+        "thin clean tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi crunch",
+        "single-coil or humbucker bridge",
+        "4x12"
+      ],
+      "corrections": [
+        "less generic early-2000s",
+        "more riff-forward bite",
+        "keep it dry and aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright chunky garage-rock crunch with open upper mids",
+    "mustHave": [
+      "tight palm-muted chug",
+      "raw rhythm crunch",
+      "bright attack",
+      "slight edge-of-breakup"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "dark mud",
+      "thin clean tone"
+    ],
+    "gearClues": [
+      "Marshall/Plexi crunch",
+      "single-coil or humbucker bridge",
+      "4x12"
+    ],
+    "corrections": [
+      "less generic early-2000s",
+      "more riff-forward bite",
+      "keep it dry and aggressive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British crunch tones (Plexi/Marshall style) to achieve the raw garage rock sound.",
+          "bestMatchSummary": "A tight signal chain utilizing a Boost for initial punch, followed by a Distortion pedal for core grit, feeding into a UK 45 or UK 50 amp model with a Marshall-style cabinet and minimal reverb for aggressive clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and sustain buzz inherent in aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial punch and tighten the attack for palm-muted chugging.",
+              "matchQuality": "close",
+              "gap": "The Boost pedal is used here to simulate a clean boost/overdrive effect without adding mud, focusing on transient response.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more grit than pure punch is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "7"
+              },
+              "purpose": "Establish the core raw rhythm crunch and edge-of-breakup required for garage rock.",
+              "matchQuality": "close",
+              "gap": "The general 'Distortion' model is chosen to emulate a classic Plexi/Marshall grit, avoiding modern metal tones or excessive fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If the tone needs slightly more vintage warmth."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "5"
+              },
+              "purpose": "Provide the classic British 'Plexi' crunch tone and open upper mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Simulate the classic Marshall-style cabinet and provide necessary mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Fine-tune the tone by boosting upper mids and trebles for maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Optional subtle thickening for verses (kept off for aggressive rhythm).",
+              "matchQuality": "close",
+              "gap": "Chorus is generally avoided, but a very subtle setting can add dimension without sounding '80s'. It's kept inactive by default.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a touch of natural room ambience without muddying the aggressive rhythm tone.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept low and short to maintain dryness, fulfilling the 'keep it dry' requirement while adding depth.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a garage rock track, requiring high-gain, mid-focused British crunch. The chain prioritizes the UK 45/Distortion combination for maximum bite and tightness."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to enhance upper mids and attack, crucial for bright garage-rock clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Upper Midrange Clarity/Attack",
+              "recommendedAsset": "Bright 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the 'bright attack' and open upper mids required for garage rock bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in chords/riffs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Jet - Are You Gonna Be My Girl - Valeton GP-180",
+        "song": {
+          "artist": "Jet",
+          "title": "Are You Gonna Be My Girl",
+          "album": "",
+          "year": null,
+          "genre": "garage rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright chunky garage-rock crunch with open upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain utilizing a Boost for initial punch, followed by a Distortion pedal for core grit, feeding into a UK 45 or UK 50 amp model with a Marshall-style cabinet and minimal reverb for aggressive clarity.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and sustain buzz inherent in aggressive rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide initial punch and tighten the attack for palm-muted chugging.",
+            "matchQuality": "close",
+            "gap": "The Boost pedal is used here to simulate a clean boost/overdrive effect without adding mud, focusing on transient response.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "If more grit than pure punch is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "7",
+              "Level": "7"
+            },
+            "purpose": "Establish the core raw rhythm crunch and edge-of-breakup required for garage rock.",
+            "matchQuality": "close",
+            "gap": "The general 'Distortion' model is chosen to emulate a classic Plexi/Marshall grit, avoiding modern metal tones or excessive fuzz.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "If the tone needs slightly more vintage warmth."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "5"
+            },
+            "purpose": "Provide the classic British 'Plexi' crunch tone and open upper mids.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Simulate the classic Marshall-style cabinet and provide necessary mid-range punch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+2"
+            },
+            "purpose": "Fine-tune the tone by boosting upper mids and trebles for maximum bite and clarity.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3"
+            },
+            "purpose": "Optional subtle thickening for verses (kept off for aggressive rhythm).",
+            "matchQuality": "close",
+            "gap": "Chorus is generally avoided, but a very subtle setting can add dimension without sounding '80s'. It's kept inactive by default.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a touch of natural room ambience without muddying the aggressive rhythm tone.",
+            "matchQuality": "close",
+            "gap": "The reverb is kept low and short to maintain dryness, fulfilling the 'keep it dry' requirement while adding depth.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly more controlled decay is preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "10"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright chunky garage-rock crunch with open upper mids",
+          "toneProfile": "bright chunky garage-rock crunch with open upper mids",
+          "idealSignalChain": "Marshall/Plexi crunch | single-coil or humbucker bridge | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi crunch",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-muted chug",
+            "raw rhythm crunch",
+            "bright attack",
+            "slight edge-of-breakup"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British crunch tones (Plexi/Marshall style) to achieve the raw garage rock sound.",
+          "bestMatchSummary": "A tight signal chain utilizing a Boost for initial punch, followed by a Distortion pedal for core grit, feeding into a UK 45 or UK 50 amp model with a Marshall-style cabinet and minimal reverb for aggressive clarity.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and sustain buzz inherent in aggressive rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial punch and tighten the attack for palm-muted chugging.",
+              "matchQuality": "close",
+              "gap": "The Boost pedal is used here to simulate a clean boost/overdrive effect without adding mud, focusing on transient response.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "If more grit than pure punch is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "7"
+              },
+              "purpose": "Establish the core raw rhythm crunch and edge-of-breakup required for garage rock.",
+              "matchQuality": "close",
+              "gap": "The general 'Distortion' model is chosen to emulate a classic Plexi/Marshall grit, avoiding modern metal tones or excessive fuzz.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "If the tone needs slightly more vintage warmth."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "5"
+              },
+              "purpose": "Provide the classic British 'Plexi' crunch tone and open upper mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Simulate the classic Marshall-style cabinet and provide necessary mid-range punch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+2"
+              },
+              "purpose": "Fine-tune the tone by boosting upper mids and trebles for maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Optional subtle thickening for verses (kept off for aggressive rhythm).",
+              "matchQuality": "close",
+              "gap": "Chorus is generally avoided, but a very subtle setting can add dimension without sounding '80s'. It's kept inactive by default.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a touch of natural room ambience without muddying the aggressive rhythm tone.",
+              "matchQuality": "close",
+              "gap": "The reverb is kept low and short to maintain dryness, fulfilling the 'keep it dry' requirement while adding depth.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "10"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to enhance upper mids and attack, crucial for bright garage-rock clarity.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Upper Midrange Clarity/Attack",
+              "recommendedAsset": "Bright 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance the 'bright attack' and open upper mids required for garage rock bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in chords/riffs.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "less generic early-2000s",
+          "more riff-forward bite",
+          "keep it dry and aggressive"
+        ],
+        "warnings": [
+          "The source material is a garage rock track, requiring high-gain, mid-focused British crunch. The chain prioritizes the UK 45/Distortion combination for maximum bite and tightness."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 11.739,
+      "prompt_chars": 996,
+      "response_chars": 507,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 137,
+        "total_duration": 11735677700,
+        "prompt_eval_duration": 466767000,
+        "eval_duration": 2904493000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.148,
+      "prompt_chars": 5425,
+      "response_chars": 505,
+      "usage": {
+        "input_tokens": 1519,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 30.796,
+      "prompt_chars": 3574,
+      "response_chars": 5490,
+      "usage": {
+        "prompt_eval_count": 1217,
+        "eval_count": 1524,
+        "total_duration": 30789047100,
+        "prompt_eval_duration": 536344000,
+        "eval_duration": 29828843000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 20.494,
+      "prompt_chars": 7603,
+      "response_chars": 581,
+      "usage": {
+        "prompt_eval_count": 2098,
+        "eval_count": 156,
+        "total_duration": 20478607700,
+        "prompt_eval_duration": 905046000,
+        "eval_duration": 2953612000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.638,
+      "prompt_chars": 2762,
+      "response_chars": 182,
+      "usage": {
+        "prompt_eval_count": 870,
+        "eval_count": 52,
+        "total_duration": 9616401300,
+        "prompt_eval_duration": 448123000,
+        "eval_duration": 888030000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Jet",
+      "title": "Are You Gonna Be My Girl",
+      "album": "",
+      "year": null,
+      "genre": "garage rock"
+    },
+    "rig": {
+      "rigName": "Jet - Are You Gonna Be My Girl - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright chunky garage-rock crunch with open upper mids",
+      "signalChainSummary": "A tight signal chain utilizing a Boost for initial punch, followed by a Distortion pedal for core grit, feeding into a UK 45 or UK 50 amp model with a Marshall-style cabinet and minimal reverb for aggressive clarity.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and sustain buzz inherent in aggressive rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide initial punch and tighten the attack for palm-muted chugging.",
+          "matchQuality": "close",
+          "gap": "The Boost pedal is used here to simulate a clean boost/overdrive effect without adding mud, focusing on transient response.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If more grit than pure punch is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "7",
+            "Level": "7"
+          },
+          "purpose": "Establish the core raw rhythm crunch and edge-of-breakup required for garage rock.",
+          "matchQuality": "close",
+          "gap": "The general 'Distortion' model is chosen to emulate a classic Plexi/Marshall grit, avoiding modern metal tones or excessive fuzz.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "If the tone needs slightly more vintage warmth."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "5"
+          },
+          "purpose": "Provide the classic British 'Plexi' crunch tone and open upper mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Simulate the classic Marshall-style cabinet and provide necessary mid-range punch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+2"
+          },
+          "purpose": "Fine-tune the tone by boosting upper mids and trebles for maximum bite and clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3"
+          },
+          "purpose": "Optional subtle thickening for verses (kept off for aggressive rhythm).",
+          "matchQuality": "close",
+          "gap": "Chorus is generally avoided, but a very subtle setting can add dimension without sounding '80s'. It's kept inactive by default.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a touch of natural room ambience without muddying the aggressive rhythm tone.",
+          "matchQuality": "close",
+          "gap": "The reverb is kept low and short to maintain dryness, fulfilling the 'keep it dry' requirement while adding depth.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more controlled decay is preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "10"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright chunky garage-rock crunch with open upper mids",
+      "mustHave": [
+        "tight palm-muted chug",
+        "raw rhythm crunch",
+        "bright attack",
+        "slight edge-of-breakup"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "dark mud",
+        "thin clean tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi crunch",
+        "single-coil or humbucker bridge",
+        "4x12"
+      ],
+      "corrections": [
+        "less generic early-2000s",
+        "more riff-forward bite",
+        "keep it dry and aggressive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage rock",
+      "styleTags": [
+        "indie rock",
+        "punk revival",
+        "pop punk"
+      ],
+      "targetTone": "bright chunky garage-rock crunch with open upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to enhance upper mids and attack, crucial for bright garage-rock clarity.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Upper Midrange Clarity/Attack",
+          "recommendedAsset": "Bright 4x12 (e.g., Celestion Greenback or similar)",
+          "reason": "Enhance the 'bright attack' and open upper mids required for garage rock bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and definition in chords/riffs.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 678,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

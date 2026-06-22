@@ -1,0 +1,1108 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1438,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_B__52s_Rock_Lobster_Simple_Drum.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "claude",
+    "openaiAction": "escalate",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 7,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "The B",
+    "title": "52s-Rock Lobster (Simple Drum)",
+    "album": "",
+    "year": null,
+    "genre": "post-punk"
+  },
+  "genreClassification": {
+    "genre": "post-punk",
+    "subgenres": [
+      "indie rock",
+      "new wave"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic post-punk track, and the tone profile confirms this genre's bass focus."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly compressed crunch with a touch of spring reverb and chorus.",
+      "signatureElements": [
+        "Crunch/Edge-of-breakup clean tone",
+        "Chorus modulation (subtle)",
+        "Spring Reverb",
+        "Mid-scooped EQ for punchy bass lines"
+      ],
+      "gearHypotheses": [
+        "Modeling Amp/Cab (e.g., Fender Twin or Vox AC30 style)",
+        "Overdrive pedal (for initial crunch boost)",
+        "Delay unit (optional, subtle rhythmic repeats)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion stacks",
+        "Deep modulation (flanger)",
+        "Dark, muddy tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "escalate",
+    "finalVerdict": {
+      "targetTone": "nervy post-punk bass guitar with rubbery attack",
+      "mustHave": [
+        "bass-forward line",
+        "clean to slight grit",
+        "tight low end",
+        "percussive pick attack",
+        "minimal ambience"
+      ],
+      "avoid": [
+        "guitar crunch",
+        "chorus",
+        "spring reverb",
+        "fender-style scoop",
+        "fuzz"
+      ],
+      "gearClues": [
+        "bass guitar",
+        "direct or clean amp",
+        "tight compression",
+        "flat cab sim"
+      ],
+      "corrections": [
+        "wrong instrument focus",
+        "omit guitar effects",
+        "target bass texture"
+      ],
+      "confidence": "low",
+      "needsManualReview": true
+    },
+    "escalationReasons": [
+      "title suggests bass-centric / non-guitar context",
+      "draft implies guitar chorus/reverb instead of bass",
+      "ambiguous metadata; high risk of wrong rig family"
+    ]
+  },
+  "claudeFallback": {
+    "targetTone": "nervy post-punk bass with rubbery pick attack",
+    "mustHave": [
+      "bass guitar not electric guitar",
+      "clean to slight grit",
+      "tight percussive low end",
+      "minimal ambience"
+    ],
+    "avoid": [
+      "guitar chorus or reverb",
+      "fender scoop",
+      "crunch overdrive",
+      "spring reverb"
+    ],
+    "gearClues": [
+      "bass direct or clean solid-state",
+      "tight compression",
+      "flat response cab sim"
+    ],
+    "corrections": [
+      "wrong instrument family entirely",
+      "remove all guitar-centric effects",
+      "GP-180 bass preset required not guitar"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "finalVerdict": {
+    "targetTone": "nervy post-punk bass with rubbery pick attack",
+    "mustHave": [
+      "bass guitar not electric guitar",
+      "clean to slight grit",
+      "tight percussive low end",
+      "minimal ambience"
+    ],
+    "avoid": [
+      "guitar chorus or reverb",
+      "fender scoop",
+      "crunch overdrive",
+      "spring reverb"
+    ],
+    "gearClues": [
+      "bass direct or clean solid-state",
+      "tight compression",
+      "flat response cab sim"
+    ],
+    "corrections": [
+      "wrong instrument family entirely",
+      "remove all guitar-centric effects",
+      "GP-180 bass preset required not guitar"
+    ],
+    "confidence": "medium",
+    "needsManualReview": true
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source material is fundamentally a bass performance, requiring the rig to emulate a clean, percussive, and tight bass tone using only guitar modules. The focus must be on compression, clarity, and low-end definition while avoiding typical 'guitar' coloration.",
+          "bestMatchSummary": "A highly compressed signal chain utilizing an OD boost for attack, followed by a clean solid-state amp model (US Deluxe) paired with a flat cabinet simulation to achieve the tight, percussive bass sound required for post-punk bass lines.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "To eliminate unwanted hum and noise inherent in the recording/performance style.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Crucial for achieving the 'tight compression' and consistent attack required for percussive bass playing.",
+              "matchQuality": "perfect",
+              "gap": "None. Compression is essential for this tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "To provide a slight grit and boost the pick attack (the 'rubbery pick attack') without adding excessive distortion.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used as a clean boost/overdrive, compensating for the lack of dedicated bass preamp models. The goal is clarity, not dirt.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-2 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "To shape the frequency response, emphasizing low-mids and high end for definition while maintaining a clean core.",
+              "matchQuality": "close",
+              "gap": "While dedicated bass EQ would be ideal, Guitar EQ 1 is used to sculpt the necessary punchy, defined low end.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "60%",
+                "Bass": "70%"
+              },
+              "purpose": "Selecting a clean, solid-state amp model that provides the necessary clarity and punch for post-punk bass tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen as it represents a classic, non-overdriven, solid-state tone suitable for tight, percussive sounds, mimicking a clean direct box feel.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "To provide a flat and controlled cabinet response, minimizing coloration and focusing on the fundamental frequencies of the bass.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its perceived neutrality and ability to handle clean signals without excessive warmth or scoop.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is needed; the focus must remain on pure percussive tone.",
+              "matchQuality": "perfect",
+              "gap": "The 'None' module ensures no unwanted coloration or sweep effects are introduced.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "120 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Minimal ambience to add subtle depth without muddying the tight low end. Used sparingly.",
+              "matchQuality": "close",
+              "gap": "The delay is kept very short and mixed low, fulfilling the 'minimal ambience' requirement while avoiding excessive reverb/chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "5%",
+                "Decay Time": "1.0s"
+              },
+              "purpose": "To provide the absolute minimum amount of space and body without sounding wet or muddy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used at a very low mix to simulate natural room tone, adhering to the 'minimal ambience' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a bass performance, not guitar. The rig emulates the required tone (tight, percussive, clean low end) using available guitar modules and amp models."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace generic IR with a flat, bass-focused cabinet simulation to maximize clarity and definition.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Flat/Neutral Bass Cab Sim (e.g., Ampeg 4x10 or DI)",
+              "reason": "The current IR may introduce coloration; a flat cab is needed for tight, percussive bass.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Immediately",
+              "expectedGain": "Increased clarity and definition in the low end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "The B - 52s-Rock Lobster (Simple Drum) - Valeton GP-180",
+        "song": {
+          "artist": "The B",
+          "title": "52s-Rock Lobster (Simple Drum)",
+          "album": "",
+          "year": null,
+          "genre": "post-punk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nervy post-punk bass with rubbery pick attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly compressed signal chain utilizing an OD boost for attack, followed by a clean solid-state amp model (US Deluxe) paired with a flat cabinet simulation to achieve the tight, percussive bass sound required for post-punk bass lines.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "To eliminate unwanted hum and noise inherent in the recording/performance style.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Crucial for achieving the 'tight compression' and consistent attack required for percussive bass playing.",
+            "matchQuality": "perfect",
+            "gap": "None. Compression is essential for this tone.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/boost",
+            "module": "PRE",
+            "model": "Blues OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "To provide a slight grit and boost the pick attack (the 'rubbery pick attack') without adding excessive distortion.",
+            "matchQuality": "close",
+            "gap": "The Blues OD is used as a clean boost/overdrive, compensating for the lack of dedicated bass preamp models. The goal is clarity, not dirt.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+3 dB",
+              "Mid": "-2 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "To shape the frequency response, emphasizing low-mids and high end for definition while maintaining a clean core.",
+            "matchQuality": "close",
+            "gap": "While dedicated bass EQ would be ideal, Guitar EQ 1 is used to sculpt the necessary punchy, defined low end.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Treble": "60%",
+              "Bass": "70%"
+            },
+            "purpose": "Selecting a clean, solid-state amp model that provides the necessary clarity and punch for post-punk bass tones.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is chosen as it represents a classic, non-overdriven, solid-state tone suitable for tight, percussive sounds, mimicking a clean direct box feel.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "To provide a flat and controlled cabinet response, minimizing coloration and focusing on the fundamental frequencies of the bass.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is selected for its perceived neutrality and ability to handle clean signals without excessive warmth or scoop.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No wah effect is needed; the focus must remain on pure percussive tone.",
+            "matchQuality": "perfect",
+            "gap": "The 'None' module ensures no unwanted coloration or sweep effects are introduced.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "120 ms",
+              "Feedback": "1",
+              "Mix": "15%"
+            },
+            "purpose": "Minimal ambience to add subtle depth without muddying the tight low end. Used sparingly.",
+            "matchQuality": "close",
+            "gap": "The delay is kept very short and mixed low, fulfilling the 'minimal ambience' requirement while avoiding excessive reverb/chorus.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "5%",
+              "Decay Time": "1.0s"
+            },
+            "purpose": "To provide the absolute minimum amount of space and body without sounding wet or muddy.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is used at a very low mix to simulate natural room tone, adhering to the 'minimal ambience' rule.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nervy post-punk bass with rubbery pick attack",
+          "toneProfile": "nervy post-punk bass with rubbery pick attack",
+          "idealSignalChain": "bass direct or clean solid-state | tight compression | flat response cab sim",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "bass direct or clean solid-state",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tight compression",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "flat response cab sim",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "bass guitar not electric guitar",
+            "clean to slight grit",
+            "tight percussive low end",
+            "minimal ambience"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source material is fundamentally a bass performance, requiring the rig to emulate a clean, percussive, and tight bass tone using only guitar modules. The focus must be on compression, clarity, and low-end definition while avoiding typical 'guitar' coloration.",
+          "bestMatchSummary": "A highly compressed signal chain utilizing an OD boost for attack, followed by a clean solid-state amp model (US Deluxe) paired with a flat cabinet simulation to achieve the tight, percussive bass sound required for post-punk bass lines.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "To eliminate unwanted hum and noise inherent in the recording/performance style.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Crucial for achieving the 'tight compression' and consistent attack required for percussive bass playing.",
+              "matchQuality": "perfect",
+              "gap": "None. Compression is essential for this tone.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Blues OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "To provide a slight grit and boost the pick attack (the 'rubbery pick attack') without adding excessive distortion.",
+              "matchQuality": "close",
+              "gap": "The Blues OD is used as a clean boost/overdrive, compensating for the lack of dedicated bass preamp models. The goal is clarity, not dirt.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-2 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "To shape the frequency response, emphasizing low-mids and high end for definition while maintaining a clean core.",
+              "matchQuality": "close",
+              "gap": "While dedicated bass EQ would be ideal, Guitar EQ 1 is used to sculpt the necessary punchy, defined low end.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "60%",
+                "Bass": "70%"
+              },
+              "purpose": "Selecting a clean, solid-state amp model that provides the necessary clarity and punch for post-punk bass tones.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is chosen as it represents a classic, non-overdriven, solid-state tone suitable for tight, percussive sounds, mimicking a clean direct box feel.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "To provide a flat and controlled cabinet response, minimizing coloration and focusing on the fundamental frequencies of the bass.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is selected for its perceived neutrality and ability to handle clean signals without excessive warmth or scoop.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No wah effect is needed; the focus must remain on pure percussive tone.",
+              "matchQuality": "perfect",
+              "gap": "The 'None' module ensures no unwanted coloration or sweep effects are introduced.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "120 ms",
+                "Feedback": "1",
+                "Mix": "15%"
+              },
+              "purpose": "Minimal ambience to add subtle depth without muddying the tight low end. Used sparingly.",
+              "matchQuality": "close",
+              "gap": "The delay is kept very short and mixed low, fulfilling the 'minimal ambience' requirement while avoiding excessive reverb/chorus.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "5%",
+                "Decay Time": "1.0s"
+              },
+              "purpose": "To provide the absolute minimum amount of space and body without sounding wet or muddy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is used at a very low mix to simulate natural room tone, adhering to the 'minimal ambience' rule.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace generic IR with a flat, bass-focused cabinet simulation to maximize clarity and definition.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Flat/Neutral Bass Cab Sim (e.g., Ampeg 4x10 or DI)",
+              "reason": "The current IR may introduce coloration; a flat cab is needed for tight, percussive bass.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Immediately",
+              "expectedGain": "Increased clarity and definition in the low end.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "wrong instrument family entirely",
+          "remove all guitar-centric effects",
+          "GP-180 bass preset required not guitar"
+        ],
+        "warnings": [
+          "The source material is a bass performance, not guitar. The rig emulates the required tone (tight, percussive, clean low end) using available guitar modules and amp models."
+        ],
+        "sources": [
+          "claude music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.429,
+      "prompt_chars": 1004,
+      "response_chars": 531,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 137,
+        "total_duration": 10412852600,
+        "prompt_eval_duration": 457831000,
+        "eval_duration": 2883533000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.837,
+      "prompt_chars": 5477,
+      "response_chars": 688,
+      "usage": {
+        "input_tokens": 1527,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 171,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1698
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "claude_music_fallback",
+      "provider": "claude",
+      "model": "claude-sonnet-4-5",
+      "seconds": 4.435,
+      "prompt_chars": 5041,
+      "response_chars": 655,
+      "usage": {
+        "input_tokens": 1502,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 216,
+        "service_tier": "standard",
+        "inference_geo": "not_available"
+      }
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 88.302,
+      "prompt_chars": 3667,
+      "response_chars": 6251,
+      "usage": {
+        "prompt_eval_count": 1277,
+        "eval_count": 1673,
+        "total_duration": 45809092500,
+        "prompt_eval_duration": 680140000,
+        "eval_duration": 32429529000
+      },
+      "attempts": 3,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 54 column 8 (char 2201)"
+        },
+        {
+          "attempt": 2,
+          "error": "Semantic validation failed: GP-180 result must contain at least 3 blocks"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 4.698,
+      "prompt_chars": 8449,
+      "response_chars": 598,
+      "usage": {
+        "prompt_eval_count": 2248,
+        "eval_count": 158,
+        "total_duration": 4687015600,
+        "prompt_eval_duration": 1042438000,
+        "eval_duration": 3202205000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 9.927,
+      "prompt_chars": 2950,
+      "response_chars": 195,
+      "usage": {
+        "prompt_eval_count": 901,
+        "eval_count": 56,
+        "total_duration": 9920790600,
+        "prompt_eval_duration": 612071000,
+        "eval_duration": 1170964000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The B",
+      "title": "52s-Rock Lobster (Simple Drum)",
+      "album": "",
+      "year": null,
+      "genre": "post-punk"
+    },
+    "rig": {
+      "rigName": "The B - 52s-Rock Lobster (Simple Drum) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nervy post-punk bass with rubbery pick attack",
+      "signalChainSummary": "A highly compressed signal chain utilizing an OD boost for attack, followed by a clean solid-state amp model (US Deluxe) paired with a flat cabinet simulation to achieve the tight, percussive bass sound required for post-punk bass lines.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "To eliminate unwanted hum and noise inherent in the recording/performance style.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Crucial for achieving the 'tight compression' and consistent attack required for percussive bass playing.",
+          "matchQuality": "exact",
+          "gap": "None. Compression is essential for this tone.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/boost",
+          "module": "PRE",
+          "model": "Blues OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "To provide a slight grit and boost the pick attack (the 'rubbery pick attack') without adding excessive distortion.",
+          "matchQuality": "close",
+          "gap": "The Blues OD is used as a clean boost/overdrive, compensating for the lack of dedicated bass preamp models. The goal is clarity, not dirt.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+3 dB",
+            "Mid": "-2 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "To shape the frequency response, emphasizing low-mids and high end for definition while maintaining a clean core.",
+          "matchQuality": "close",
+          "gap": "While dedicated bass EQ would be ideal, Guitar EQ 1 is used to sculpt the necessary punchy, defined low end.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Treble": "60%",
+            "Bass": "70%"
+          },
+          "purpose": "Selecting a clean, solid-state amp model that provides the necessary clarity and punch for post-punk bass tones.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is chosen as it represents a classic, non-overdriven, solid-state tone suitable for tight, percussive sounds, mimicking a clean direct box feel.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "To provide a flat and controlled cabinet response, minimizing coloration and focusing on the fundamental frequencies of the bass.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is selected for its perceived neutrality and ability to handle clean signals without excessive warmth or scoop.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No wah effect is needed; the focus must remain on pure percussive tone.",
+          "matchQuality": "exact",
+          "gap": "The 'None' module ensures no unwanted coloration or sweep effects are introduced.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "120 ms",
+            "Feedback": "1",
+            "Mix": "15%"
+          },
+          "purpose": "Minimal ambience to add subtle depth without muddying the tight low end. Used sparingly.",
+          "matchQuality": "close",
+          "gap": "The delay is kept very short and mixed low, fulfilling the 'minimal ambience' requirement while avoiding excessive reverb/chorus.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "5%",
+            "Decay Time": "1.0s"
+          },
+          "purpose": "To provide the absolute minimum amount of space and body without sounding wet or muddy.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is used at a very low mix to simulate natural room tone, adhering to the 'minimal ambience' rule.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nervy post-punk bass with rubbery pick attack",
+      "mustHave": [
+        "bass guitar not electric guitar",
+        "clean to slight grit",
+        "tight percussive low end",
+        "minimal ambience"
+      ],
+      "avoid": [
+        "guitar chorus or reverb",
+        "fender scoop",
+        "crunch overdrive",
+        "spring reverb"
+      ],
+      "gearClues": [
+        "bass direct or clean solid-state",
+        "tight compression",
+        "flat response cab sim"
+      ],
+      "corrections": [
+        "wrong instrument family entirely",
+        "remove all guitar-centric effects",
+        "GP-180 bass preset required not guitar"
+      ],
+      "confidence": "medium",
+      "needsManualReview": true
+    },
+    "musicalContext": {
+      "primaryGenre": "post-punk",
+      "styleTags": [
+        "indie rock",
+        "new wave"
+      ],
+      "targetTone": "nervy post-punk bass with rubbery pick attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace generic IR with a flat, bass-focused cabinet simulation to maximize clarity and definition.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Flat/Neutral Bass Cab Sim (e.g., Ampeg 4x10 or DI)",
+          "reason": "The current IR may introduce coloration; a flat cab is needed for tight, percussive bass.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Immediately",
+          "expectedGain": "Increased clarity and definition in the low end.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1438,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "claude",
+      "openaiAction": "escalate",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

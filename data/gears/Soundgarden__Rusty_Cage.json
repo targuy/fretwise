@@ -1,0 +1,1107 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1292,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Soundgarden__Rusty_Cage.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 6,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Soundgarden",
+    "title": "Rusty Cage",
+    "album": "",
+    "year": null,
+    "genre": "grunge"
+  },
+  "genreClassification": {
+    "genre": "grunge",
+    "subgenres": [
+      "alternative rock",
+      "heavy rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist, song, and tone profile strongly indicate classic grunge sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Heavy, distorted grunge rock tone with a thick, mid-scooped crunch and aggressive fuzz undertones.",
+      "signatureElements": [
+        "Fuzz/Distortion (thick, saturated)",
+        "Mid-scooped EQ profile",
+        "Crunchy attack",
+        "Slight chorus or tremolo modulation"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Big Muff style)",
+        "Amp simulation with Marshall JCM family character",
+        "Cabinet simulation for aggressive punch"
+      ],
+      "avoid": [
+        "Clean, jangly tones",
+        "Bright, scooped metal sounds",
+        "Overly modulated ambient effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "thick drop-D grunge crunch with buzzy fuzz edge",
+      "mustHave": [
+        "heavy low-end riff",
+        "buzzy fuzz",
+        "dry aggressive attack",
+        "slightly loose saturation"
+      ],
+      "avoid": [
+        "chorus",
+        "tremolo",
+        "clean jangle",
+        "polished metal scoop"
+      ],
+      "gearClues": [
+        "SG or humbucker guitar",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "drop the chorus/tremolo",
+        "lean fuzzier than overdrive",
+        "less mid-scoop, more raw grind"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "thick drop-D grunge crunch with buzzy fuzz edge",
+    "mustHave": [
+      "heavy low-end riff",
+      "buzzy fuzz",
+      "dry aggressive attack",
+      "slightly loose saturation"
+    ],
+    "avoid": [
+      "chorus",
+      "tremolo",
+      "clean jangle",
+      "polished metal scoop"
+    ],
+    "gearClues": [
+      "SG or humbucker guitar",
+      "Marshall/Plexi style amp",
+      "4x12 cab",
+      "fuzz pedal"
+    ],
+    "corrections": [
+      "drop the chorus/tremolo",
+      "lean fuzzier than overdrive",
+      "less mid-scoop, more raw grind"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high gain, raw fuzz, and classic grunge tones using Marshall/Plexi emulation.",
+          "bestMatchSummary": "A heavy, fuzzy signal chain utilizing a Fuzz distortion followed by a UK 45 amp model into a British cabinet, capturing the thick, aggressive sound of early grunge rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core buzzy fuzz and aggressive saturation required for grunge crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "If a slightly more defined, less raw fuzz is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0%",
+                "Level": "100%"
+              },
+              "purpose": "Used as a clean signal booster to maintain clarity through the fuzz stage without adding tone.",
+              "matchQuality": "close",
+              "gap": "The Boost module is generally used for volume/level control, but placing it here ensures maximum signal integrity before the amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "70%",
+                "Treble": "60%",
+                "Mid": "75%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for aggressive, raw rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly different flavor of British crunch if the UK 45 is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the necessary British cabinet tone and punch for grunge rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the low end and high end to emphasize the heavy riff while keeping the mids raw.",
+              "matchQuality": "close",
+              "gap": "The EQ is used post-amp/cab to fine-tune the overall tone, compensating for potential mid-scooping from the fuzz or amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Disabled as per the 'avoid' list (chorus). Included for completeness but bypassed.",
+              "matchQuality": "N/A",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Disabled to maintain a dry, aggressive attack and avoid adding space.",
+              "matchQuality": "N/A",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle amount of natural room ambience to ground the heavy tone without sounding polished.",
+              "matchQuality": "close",
+              "gap": "A very low mix is used to prevent the reverb from washing out the raw fuzz attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is grunge rock, requiring a raw and aggressive tone. The signal chain prioritizes fuzz distortion (Fuzz DST) over standard overdrive to achieve the required 'buzzy fuzz edge'.",
+          "Modules like Chorus and Digital Delay are explicitly bypassed or set to zero effect to adhere to the musical verdict's 'avoid' list."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the raw, aggressive punch needed for grunge low end.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Punchier lows and clearer attack",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Soundgarden - Rusty Cage - Valeton GP-180",
+        "song": {
+          "artist": "Soundgarden",
+          "title": "Rusty Cage",
+          "album": "",
+          "year": null,
+          "genre": "grunge"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "thick drop-D grunge crunch with buzzy fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A heavy, fuzzy signal chain utilizing a Fuzz distortion followed by a UK 45 amp model into a British cabinet, capturing the thick, aggressive sound of early grunge rock.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "70%",
+              "Tone": "65%",
+              "Level": "80%"
+            },
+            "purpose": "Provide the core buzzy fuzz and aggressive saturation required for grunge crunch.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "If a slightly more defined, less raw fuzz is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": false,
+            "settings": {
+              "Gain": "0%",
+              "Level": "100%"
+            },
+            "purpose": "Used as a clean signal booster to maintain clarity through the fuzz stage without adding tone.",
+            "matchQuality": "close",
+            "gap": "The Boost module is generally used for volume/level control, but placing it here ensures maximum signal integrity before the amp model.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "70%",
+              "Treble": "60%",
+              "Mid": "75%",
+              "Bass": "65%"
+            },
+            "purpose": "Emulate the classic Marshall/Plexi sound required for aggressive, raw rock tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A slightly different flavor of British crunch if the UK 45 is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the necessary British cabinet tone and punch for grunge rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "+3 dB",
+              "Mid": "-1 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Slightly boost the low end and high end to emphasize the heavy riff while keeping the mids raw.",
+            "matchQuality": "close",
+            "gap": "The EQ is used post-amp/cab to fine-tune the overall tone, compensating for potential mid-scooping from the fuzz or amp model.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0 Hz",
+              "Depth": "0%"
+            },
+            "purpose": "Disabled as per the 'avoid' list (chorus). Included for completeness but bypassed.",
+            "matchQuality": "N/A",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "0 ms",
+              "Feedback": "0%"
+            },
+            "purpose": "Disabled to maintain a dry, aggressive attack and avoid adding space.",
+            "matchQuality": "N/A",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add a subtle amount of natural room ambience to ground the heavy tone without sounding polished.",
+            "matchQuality": "close",
+            "gap": "A very low mix is used to prevent the reverb from washing out the raw fuzz attack.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "thick drop-D grunge crunch with buzzy fuzz edge",
+          "toneProfile": "thick drop-D grunge crunch with buzzy fuzz edge",
+          "idealSignalChain": "SG or humbucker guitar | Marshall/Plexi style amp | 4x12 cab | fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "SG or humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "heavy low-end riff",
+            "buzzy fuzz",
+            "dry aggressive attack",
+            "slightly loose saturation"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high gain, raw fuzz, and classic grunge tones using Marshall/Plexi emulation.",
+          "bestMatchSummary": "A heavy, fuzzy signal chain utilizing a Fuzz distortion followed by a UK 45 amp model into a British cabinet, capturing the thick, aggressive sound of early grunge rock.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "70%",
+                "Tone": "65%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core buzzy fuzz and aggressive saturation required for grunge crunch.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "If a slightly more defined, less raw fuzz is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": false,
+              "settings": {
+                "Gain": "0%",
+                "Level": "100%"
+              },
+              "purpose": "Used as a clean signal booster to maintain clarity through the fuzz stage without adding tone.",
+              "matchQuality": "close",
+              "gap": "The Boost module is generally used for volume/level control, but placing it here ensures maximum signal integrity before the amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "70%",
+                "Treble": "60%",
+                "Mid": "75%",
+                "Bass": "65%"
+              },
+              "purpose": "Emulate the classic Marshall/Plexi sound required for aggressive, raw rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly different flavor of British crunch if the UK 45 is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the necessary British cabinet tone and punch for grunge rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-1 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly boost the low end and high end to emphasize the heavy riff while keeping the mids raw.",
+              "matchQuality": "close",
+              "gap": "The EQ is used post-amp/cab to fine-tune the overall tone, compensating for potential mid-scooping from the fuzz or amp model.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0 Hz",
+                "Depth": "0%"
+              },
+              "purpose": "Disabled as per the 'avoid' list (chorus). Included for completeness but bypassed.",
+              "matchQuality": "N/A",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "0 ms",
+                "Feedback": "0%"
+              },
+              "purpose": "Disabled to maintain a dry, aggressive attack and avoid adding space.",
+              "matchQuality": "N/A",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle amount of natural room ambience to ground the heavy tone without sounding polished.",
+              "matchQuality": "close",
+              "gap": "A very low mix is used to prevent the reverb from washing out the raw fuzz attack.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the raw, aggressive punch needed for grunge low end.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Punchier lows and clearer attack",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop the chorus/tremolo",
+          "lean fuzzier than overdrive",
+          "less mid-scoop, more raw grind"
+        ],
+        "warnings": [
+          "The source material is grunge rock, requiring a raw and aggressive tone. The signal chain prioritizes fuzz distortion (Fuzz DST) over standard overdrive to achieve the required 'buzzy fuzz edge'.",
+          "Modules like Chorus and Digital Delay are explicitly bypassed or set to zero effect to adhere to the musical verdict's 'avoid' list."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.348,
+      "prompt_chars": 990,
+      "response_chars": 552,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 132,
+        "total_duration": 10320435900,
+        "prompt_eval_duration": 630632000,
+        "eval_duration": 2271893000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.023,
+      "prompt_chars": 5476,
+      "response_chars": 531,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 150,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1672
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 47.082,
+      "prompt_chars": 3601,
+      "response_chars": 5809,
+      "usage": {
+        "prompt_eval_count": 1219,
+        "eval_count": 1664,
+        "total_duration": 47074001400,
+        "prompt_eval_duration": 554792000,
+        "eval_duration": 31675408000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.489,
+      "prompt_chars": 7969,
+      "response_chars": 486,
+      "usage": {
+        "prompt_eval_count": 2240,
+        "eval_count": 131,
+        "total_duration": 3481513500,
+        "prompt_eval_duration": 348128000,
+        "eval_duration": 2607419000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.09,
+      "prompt_chars": 2862,
+      "response_chars": 181,
+      "usage": {
+        "prompt_eval_count": 934,
+        "eval_count": 45,
+        "total_duration": 10071141200,
+        "prompt_eval_duration": 418092000,
+        "eval_duration": 1096599000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Soundgarden",
+      "title": "Rusty Cage",
+      "album": "",
+      "year": null,
+      "genre": "grunge"
+    },
+    "rig": {
+      "rigName": "Soundgarden - Rusty Cage - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "thick drop-D grunge crunch with buzzy fuzz edge",
+      "signalChainSummary": "A heavy, fuzzy signal chain utilizing a Fuzz distortion followed by a UK 45 amp model into a British cabinet, capturing the thick, aggressive sound of early grunge rock.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise inherent in high-gain fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "70%",
+            "Tone": "65%",
+            "Level": "80%"
+          },
+          "purpose": "Provide the core buzzy fuzz and aggressive saturation required for grunge crunch.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "If a slightly more defined, less raw fuzz is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": false,
+          "settings": {
+            "Gain": "0%",
+            "Level": "100%"
+          },
+          "purpose": "Used as a clean signal booster to maintain clarity through the fuzz stage without adding tone.",
+          "matchQuality": "close",
+          "gap": "The Boost module is generally used for volume/level control, but placing it here ensures maximum signal integrity before the amp model.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "70%",
+            "Treble": "60%",
+            "Mid": "75%",
+            "Bass": "65%"
+          },
+          "purpose": "Emulate the classic Marshall/Plexi sound required for aggressive, raw rock tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly different flavor of British crunch if the UK 45 is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the necessary British cabinet tone and punch for grunge rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "+3 dB",
+            "Mid": "-1 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Slightly boost the low end and high end to emphasize the heavy riff while keeping the mids raw.",
+          "matchQuality": "close",
+          "gap": "The EQ is used post-amp/cab to fine-tune the overall tone, compensating for potential mid-scooping from the fuzz or amp model.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0 Hz",
+            "Depth": "0%"
+          },
+          "purpose": "Disabled as per the 'avoid' list (chorus). Included for completeness but bypassed.",
+          "matchQuality": "fallback",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "0 ms",
+            "Feedback": "0%"
+          },
+          "purpose": "Disabled to maintain a dry, aggressive attack and avoid adding space.",
+          "matchQuality": "fallback",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add a subtle amount of natural room ambience to ground the heavy tone without sounding polished.",
+          "matchQuality": "close",
+          "gap": "A very low mix is used to prevent the reverb from washing out the raw fuzz attack.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "thick drop-D grunge crunch with buzzy fuzz edge",
+      "mustHave": [
+        "heavy low-end riff",
+        "buzzy fuzz",
+        "dry aggressive attack",
+        "slightly loose saturation"
+      ],
+      "avoid": [
+        "chorus",
+        "tremolo",
+        "clean jangle",
+        "polished metal scoop"
+      ],
+      "gearClues": [
+        "SG or humbucker guitar",
+        "Marshall/Plexi style amp",
+        "4x12 cab",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "drop the chorus/tremolo",
+        "lean fuzzier than overdrive",
+        "less mid-scoop, more raw grind"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "grunge",
+      "styleTags": [
+        "alternative rock",
+        "heavy rock"
+      ],
+      "targetTone": "thick drop-D grunge crunch with buzzy fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance the raw, aggressive punch needed for grunge low end.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Punchier lows and clearer attack",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1292,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

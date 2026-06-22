@@ -1,0 +1,1081 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1210,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Saez__Jeune_Et_Con_Acoustique.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 8,
+    "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+    "workerEndpoint": "127.0.0.1:11535",
+    "workerNumCtx": 32768
+  },
+  "song": {
+    "artist": "Saez",
+    "title": "Jeune Et Con (Acoustique)",
+    "album": "",
+    "year": null,
+    "genre": "folk"
+  },
+  "genreClassification": {
+    "genre": "folk",
+    "subgenres": [
+      "acoustic",
+      "singer-songwriter"
+    ],
+    "confidence": "high",
+    "rationale": "The acoustic nature and artist suggest a folk or singer-songwriter style."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly compressed acoustic sound with subtle reverb and delay.",
+      "signatureElements": [
+        "Acoustic strumming rhythm",
+        "Subtle chorus/modulation for depth",
+        "Spring or plate reverb",
+        "Short delay (slapback)"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating a vintage tube clean tone (e.g., Fender Twin)",
+        "Chorus effect pedal",
+        "Reverb unit",
+        "Delay unit"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Fuzz",
+        "Crunch",
+        "Wah"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm acoustic strum, dry and natural",
+      "mustHave": [
+        "acoustic strumming",
+        "clear transient attack",
+        "light compression",
+        "minimal room"
+      ],
+      "avoid": [
+        "chorus",
+        "slapback delay",
+        "heavy reverb",
+        "electric crunch"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "piezo or mic",
+        "clean EQ",
+        "light comp"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "keep reverb very subtle"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm acoustic strum, dry and natural",
+    "mustHave": [
+      "acoustic strumming",
+      "clear transient attack",
+      "light compression",
+      "minimal room"
+    ],
+    "avoid": [
+      "chorus",
+      "slapback delay",
+      "heavy reverb",
+      "electric crunch"
+    ],
+    "gearClues": [
+      "acoustic guitar",
+      "piezo or mic",
+      "clean EQ",
+      "light comp"
+    ],
+    "corrections": [
+      "remove chorus",
+      "remove delay",
+      "keep reverb very subtle"
+    ],
+    "confidence": "high",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for acoustic strumming while maintaining the ability to handle an electric signal.",
+          "bestMatchSummary": "A clean, compressed chain using a gentle boost and compression into a classic Fender-style amp (US Deluxe) with minimal reverb, simulating a natural, dry acoustic sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide light compression to smooth out strumming dynamics and enhance sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the signal clean and transparent for acoustic tones.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Midrange": "+1",
+                "Bass": "+1"
+              },
+              "purpose": "Provide a warm, clean, and articulate tone reminiscent of classic acoustic recordings.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is an electric amp model; while it provides the necessary clean headroom, dedicated acoustic modeling would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Select a compact, bright cabinet simulation suitable for clear acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is designed for electric guitars; using it with an acoustic signal requires careful EQ to maintain warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "0 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize warmth and clarity while keeping the sound natural.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah pedal to maintain a natural acoustic timbre.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a very subtle sense of space without sounding artificial or heavy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is suitable, but the mix must be kept extremely low to meet the 'minimal room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is acoustic/non-electric. This rig uses an electric guitar model (US Deluxe) and cabinet (US 2x12). While the settings aim for a natural, clean sound, dedicated acoustic modeling would yield superior results.",
+          "All effects modules (Chorus, Delay, Wah) are explicitly bypassed or set to 'None' based on the musical verdict."
+        ],
+        "confidence": "medium",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Replace the generic electric cabinet with a dedicated acoustic IR for better realism and warmth.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic Cabinet Realism",
+              "recommendedAsset": "acoustic-grand-piano-ir",
+              "reason": "The US 2x12 is electric; a dedicated acoustic IR will improve realism and warmth.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for acoustic songs",
+              "expectedGain": "Improved natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Saez - Jeune Et Con (Acoustique) - Valeton GP-180",
+        "song": {
+          "artist": "Saez",
+          "title": "Jeune Et Con (Acoustique)",
+          "album": "",
+          "year": null,
+          "genre": "folk"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm acoustic strum, dry and natural",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean, compressed chain using a gentle boost and compression into a classic Fender-style amp (US Deluxe) with minimal reverb, simulating a natural, dry acoustic sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Medium"
+            },
+            "purpose": "Provide light compression to smooth out strumming dynamics and enhance sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the signal clean and transparent for acoustic tones.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Bypassed)",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2",
+              "Midrange": "+1",
+              "Bass": "+1"
+            },
+            "purpose": "Provide a warm, clean, and articulate tone reminiscent of classic acoustic recordings.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is an electric amp model; while it provides the necessary clean headroom, dedicated acoustic modeling would be ideal.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Select a compact, bright cabinet simulation suitable for clear acoustic strumming.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is designed for electric guitars; using it with an acoustic signal requires careful EQ to maintain warmth.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "0 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Fine-tune the tone to emphasize warmth and clarity while keeping the sound natural.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass the wah pedal to maintain a natural acoustic timbre.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Bypassed)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid modulation effects as per the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Bypassed)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoid delay effects as per the musical verdict.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Bypassed)",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add a very subtle sense of space without sounding artificial or heavy.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is suitable, but the mix must be kept extremely low to meet the 'minimal room' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "0 dB"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm acoustic strum, dry and natural",
+          "toneProfile": "warm acoustic strum, dry and natural",
+          "idealSignalChain": "acoustic guitar | piezo or mic | clean EQ | light comp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "acoustic guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "piezo or mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean EQ",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light comp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "acoustic strumming",
+            "clear transient attack",
+            "light compression",
+            "minimal room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, warm tones suitable for acoustic strumming while maintaining the ability to handle an electric signal.",
+          "bestMatchSummary": "A clean, compressed chain using a gentle boost and compression into a classic Fender-style amp (US Deluxe) with minimal reverb, simulating a natural, dry acoustic sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Medium"
+              },
+              "purpose": "Provide light compression to smooth out strumming dynamics and enhance sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the signal clean and transparent for acoustic tones.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2",
+                "Midrange": "+1",
+                "Bass": "+1"
+              },
+              "purpose": "Provide a warm, clean, and articulate tone reminiscent of classic acoustic recordings.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is an electric amp model; while it provides the necessary clean headroom, dedicated acoustic modeling would be ideal.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Select a compact, bright cabinet simulation suitable for clear acoustic strumming.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is designed for electric guitars; using it with an acoustic signal requires careful EQ to maintain warmth.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "0 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Fine-tune the tone to emphasize warmth and clarity while keeping the sound natural.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass the wah pedal to maintain a natural acoustic timbre.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid modulation effects as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoid delay effects as per the musical verdict.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Bypassed)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a very subtle sense of space without sounding artificial or heavy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is suitable, but the mix must be kept extremely low to meet the 'minimal room' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "0 dB"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Replace the generic electric cabinet with a dedicated acoustic IR for better realism and warmth.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Acoustic Cabinet Realism",
+              "recommendedAsset": "acoustic-grand-piano-ir",
+              "reason": "The US 2x12 is electric; a dedicated acoustic IR will improve realism and warmth.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always for acoustic songs",
+              "expectedGain": "Improved natural tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "remove delay",
+          "keep reverb very subtle"
+        ],
+        "warnings": [
+          "The source material is acoustic/non-electric. This rig uses an electric guitar model (US Deluxe) and cabinet (US 2x12). While the settings aim for a natural, clean sound, dedicated acoustic modeling would yield superior results.",
+          "All effects modules (Chorus, Delay, Wah) are explicitly bypassed or set to 'None' based on the musical verdict."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 10.234,
+      "prompt_chars": 998,
+      "response_chars": 453,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 114,
+        "total_duration": 10212103900,
+        "prompt_eval_duration": 473676000,
+        "eval_duration": 2459872000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.734,
+      "prompt_chars": 5397,
+      "response_chars": 464,
+      "usage": {
+        "input_tokens": 1509,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 123,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1632
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 32.267,
+      "prompt_chars": 3542,
+      "response_chars": 5546,
+      "usage": {
+        "prompt_eval_count": 1195,
+        "eval_count": 1550,
+        "total_duration": 32237076400,
+        "prompt_eval_duration": 538630000,
+        "eval_duration": 31220420000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 21.6,
+      "prompt_chars": 7633,
+      "response_chars": 556,
+      "usage": {
+        "prompt_eval_count": 2102,
+        "eval_count": 145,
+        "total_duration": 21576454000,
+        "prompt_eval_duration": 890395000,
+        "eval_duration": 2692804000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11535/api/generate",
+      "seconds": 8.679,
+      "prompt_chars": 2796,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 45,
+        "total_duration": 8653090600,
+        "prompt_eval_duration": 424695000,
+        "eval_duration": 751334000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Saez",
+      "title": "Jeune Et Con (Acoustique)",
+      "album": "",
+      "year": null,
+      "genre": "folk"
+    },
+    "rig": {
+      "rigName": "Saez - Jeune Et Con (Acoustique) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm acoustic strum, dry and natural",
+      "signalChainSummary": "A clean, compressed chain using a gentle boost and compression into a classic Fender-style amp (US Deluxe) with minimal reverb, simulating a natural, dry acoustic sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Medium"
+          },
+          "purpose": "Provide light compression to smooth out strumming dynamics and enhance sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the signal clean and transparent for acoustic tones.",
+          "matchQuality": "exact",
+          "gap": "N/A (Bypassed)",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2",
+            "Midrange": "+1",
+            "Bass": "+1"
+          },
+          "purpose": "Provide a warm, clean, and articulate tone reminiscent of classic acoustic recordings.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is an electric amp model; while it provides the necessary clean headroom, dedicated acoustic modeling would be ideal.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Select a compact, bright cabinet simulation suitable for clear acoustic strumming.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is designed for electric guitars; using it with an acoustic signal requires careful EQ to maintain warmth.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "0 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Fine-tune the tone to emphasize warmth and clarity while keeping the sound natural.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass the wah pedal to maintain a natural acoustic timbre.",
+          "matchQuality": "exact",
+          "gap": "N/A (Bypassed)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid modulation effects as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A (Bypassed)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoid delay effects as per the musical verdict.",
+          "matchQuality": "exact",
+          "gap": "N/A (Bypassed)",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add a very subtle sense of space without sounding artificial or heavy.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is suitable, but the mix must be kept extremely low to meet the 'minimal room' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "0 dB"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm acoustic strum, dry and natural",
+      "mustHave": [
+        "acoustic strumming",
+        "clear transient attack",
+        "light compression",
+        "minimal room"
+      ],
+      "avoid": [
+        "chorus",
+        "slapback delay",
+        "heavy reverb",
+        "electric crunch"
+      ],
+      "gearClues": [
+        "acoustic guitar",
+        "piezo or mic",
+        "clean EQ",
+        "light comp"
+      ],
+      "corrections": [
+        "remove chorus",
+        "remove delay",
+        "keep reverb very subtle"
+      ],
+      "confidence": "high",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk",
+      "styleTags": [
+        "acoustic",
+        "singer-songwriter"
+      ],
+      "targetTone": "warm acoustic strum, dry and natural",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Replace the generic electric cabinet with a dedicated acoustic IR for better realism and warmth.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Acoustic Cabinet Realism",
+          "recommendedAsset": "acoustic-grand-piano-ir",
+          "reason": "The US 2x12 is electric; a dedicated acoustic IR will improve realism and warmth.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always for acoustic songs",
+          "expectedGain": "Improved natural tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1210,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

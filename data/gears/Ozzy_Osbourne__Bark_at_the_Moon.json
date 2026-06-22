@@ -1,0 +1,1168 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1041,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Ozzy_Osbourne__Bark_at_the_Moon.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 5,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Ozzy Osbourne",
+    "title": "Bark at the Moon",
+    "album": "",
+    "year": null,
+    "genre": "heavy metal"
+  },
+  "genreClassification": {
+    "genre": "heavy metal",
+    "subgenres": [
+      "80s metal",
+      "hard rock",
+      "metal crunch"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic 80s heavy metal, matching the specified 'bright 80s metal crunch' tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive hard rock/metal tone with a pronounced mid-range bite and tight low end.",
+      "signatureElements": [
+        "Crunchy lead tones (mid-scooped)",
+        "Heavy rhythm chugging (tight palm mutes)",
+        "Slightly scooped mids on the main riff",
+        "Wah pedal usage"
+      ],
+      "gearHypotheses": [
+        "High-gain distortion/overdrive model (e.g., Mesa Boogie Rectifier style)",
+        "British amp simulation (Marshall JCM800 style) for mid-punch",
+        "Noise gate or compressor for tight rhythm playing"
+      ],
+      "avoid": [
+        "Overly scooped, muddy tones",
+        "Thin, brittle clean sounds",
+        "Excessive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s metal crunch with nasal lead bite",
+      "mustHave": [
+        "tight palm mutes",
+        "pronounced mid bite",
+        "wah lead color",
+        "clean note attack"
+      ],
+      "avoid": [
+        "modern Rectifier scoop",
+        "muddy bassy low end",
+        "chorus wash"
+      ],
+      "gearClues": [
+        "Marshall/JCM800 style",
+        "4x12 cab",
+        "humbucker guitar",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop Mesa bias",
+        "keep mids forward",
+        "make wah explicit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s metal crunch with nasal lead bite",
+    "mustHave": [
+      "tight palm mutes",
+      "pronounced mid bite",
+      "wah lead color",
+      "clean note attack"
+    ],
+    "avoid": [
+      "modern Rectifier scoop",
+      "muddy bassy low end",
+      "chorus wash"
+    ],
+    "gearClues": [
+      "Marshall/JCM800 style",
+      "4x12 cab",
+      "humbucker guitar",
+      "wah pedal"
+    ],
+    "corrections": [
+      "drop Mesa bias",
+      "keep mids forward",
+      "make wah explicit"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 80s British crunch and aggressive mid-range bite.",
+          "bestMatchSummary": "A tight, high-gain signal chain utilizing a Marshall-style preamp (UK SLP) for the core rhythm tone, enhanced with an OD boost for attack, followed by a wah filter and controlled ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tighten up the aggressive metal tone and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide aggressive note attack and mid-range punch for palm mutes.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a tight, biting boost characteristic of 80s metal leads.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but still provides necessary bite."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "60%",
+                "Tone": "55%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core high-gain crunch and sustain required for 80s metal.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the JCM800/Marshall saturation without excessive low end.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could provide more aggressive grit, but might be too harsh."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Mid-range sweep",
+                "Resonance": "High"
+              },
+              "purpose": "Provide the explicit wah lead color and vocal bite required for solos.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%"
+              },
+              "purpose": "Simulate the classic Marshall/JCM800 tone with pronounced mids and bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Further emphasize the mid-range bite and control excessive low end.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the frequency response, ensuring mids are forward without muddying the bass.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle thickening for leads (kept off by default to avoid wash).",
+              "matchQuality": "close",
+              "gap": "The Chorus is kept inactive/low depth as per 'avoid chorus wash' instruction, but included for completeness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle rhythmic depth to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used for structural support without distracting from the aggressive tone.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a natural sense of space without sounding overly wet or muddy.",
+              "matchQuality": "close",
+              "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the aggressive, dry feel of 80s metal.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic 80s metal track, requiring high-gain British crunch. The signal chain prioritizes the UK SLP amp model and mid-range EQ boosts to achieve the 'nasal lead bite' while avoiding modern scooped tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for authentic 80s British crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic Marshall/JCM800 sound and mid-range bite.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased authenticity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Ozzy Osbourne - Bark at the Moon - Valeton GP-180",
+        "song": {
+          "artist": "Ozzy Osbourne",
+          "title": "Bark at the Moon",
+          "album": "",
+          "year": null,
+          "genre": "heavy metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s metal crunch with nasal lead bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, high-gain signal chain utilizing a Marshall-style preamp (UK SLP) for the core rhythm tone, enhanced with an OD boost for attack, followed by a wah filter and controlled ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Tighten up the aggressive metal tone and eliminate hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide aggressive note attack and mid-range punch for palm mutes.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used to simulate a tight, biting boost characteristic of 80s metal leads.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly warmer, but still provides necessary bite."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "60%",
+              "Tone": "55%",
+              "Level": "75%"
+            },
+            "purpose": "Establish the core high-gain crunch and sustain required for 80s metal.",
+            "matchQuality": "close",
+            "gap": "Using a general Distortion model to achieve the JCM800/Marshall saturation without excessive low end.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "Could provide more aggressive grit, but might be too harsh."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "wah filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "Mid-range sweep",
+              "Resonance": "High"
+            },
+            "purpose": "Provide the explicit wah lead color and vocal bite required for solos.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%"
+            },
+            "purpose": "Simulate the classic Marshall/JCM800 tone with pronounced mids and bite.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the classic British 4x12 cabinet sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Further emphasize the mid-range bite and control excessive low end.",
+            "matchQuality": "close",
+            "gap": "Used to manually sculpt the frequency response, ensuring mids are forward without muddying the bass.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Optional subtle thickening for leads (kept off by default to avoid wash).",
+            "matchQuality": "close",
+            "gap": "The Chorus is kept inactive/low depth as per 'avoid chorus wash' instruction, but included for completeness.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "30%"
+            },
+            "purpose": "Add subtle rhythmic depth to the rhythm parts.",
+            "matchQuality": "close",
+            "gap": "A moderate delay is used for structural support without distracting from the aggressive tone.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide a natural sense of space without sounding overly wet or muddy.",
+            "matchQuality": "close",
+            "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the aggressive, dry feel of 80s metal.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s metal crunch with nasal lead bite",
+          "toneProfile": "bright 80s metal crunch with nasal lead bite",
+          "idealSignalChain": "Marshall/JCM800 style | 4x12 cab | humbucker guitar | wah pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/JCM800 style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm mutes",
+            "pronounced mid bite",
+            "wah lead color",
+            "clean note attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic 80s British crunch and aggressive mid-range bite.",
+          "bestMatchSummary": "A tight, high-gain signal chain utilizing a Marshall-style preamp (UK SLP) for the core rhythm tone, enhanced with an OD boost for attack, followed by a wah filter and controlled ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tighten up the aggressive metal tone and eliminate hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide aggressive note attack and mid-range punch for palm mutes.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used to simulate a tight, biting boost characteristic of 80s metal leads.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer, but still provides necessary bite."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "60%",
+                "Tone": "55%",
+                "Level": "75%"
+              },
+              "purpose": "Establish the core high-gain crunch and sustain required for 80s metal.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the JCM800/Marshall saturation without excessive low end.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "Could provide more aggressive grit, but might be too harsh."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Mid-range sweep",
+                "Resonance": "High"
+              },
+              "purpose": "Provide the explicit wah lead color and vocal bite required for solos.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%"
+              },
+              "purpose": "Simulate the classic Marshall/JCM800 tone with pronounced mids and bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British 4x12 cabinet sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Further emphasize the mid-range bite and control excessive low end.",
+              "matchQuality": "close",
+              "gap": "Used to manually sculpt the frequency response, ensuring mids are forward without muddying the bass.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle thickening for leads (kept off by default to avoid wash).",
+              "matchQuality": "close",
+              "gap": "The Chorus is kept inactive/low depth as per 'avoid chorus wash' instruction, but included for completeness.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Add subtle rhythmic depth to the rhythm parts.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used for structural support without distracting from the aggressive tone.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a natural sense of space without sounding overly wet or muddy.",
+              "matchQuality": "close",
+              "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the aggressive, dry feel of 80s metal.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for authentic 80s British crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (UK)",
+              "reason": "Enhance the classic Marshall/JCM800 sound and mid-range bite.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased authenticity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Mesa bias",
+          "keep mids forward",
+          "make wah explicit"
+        ],
+        "warnings": [
+          "The source material is a classic 80s metal track, requiring high-gain British crunch. The signal chain prioritizes the UK SLP amp model and mid-range EQ boosts to achieve the 'nasal lead bite' while avoiding modern scooped tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 11.278,
+      "prompt_chars": 998,
+      "response_chars": 615,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 154,
+        "total_duration": 11256316900,
+        "prompt_eval_duration": 172539000,
+        "eval_duration": 2710295000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.761,
+      "prompt_chars": 5547,
+      "response_chars": 482,
+      "usage": {
+        "input_tokens": 1545,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1684
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 32.513,
+      "prompt_chars": 3553,
+      "response_chars": 6201,
+      "usage": {
+        "prompt_eval_count": 1207,
+        "eval_count": 1748,
+        "total_duration": 32504368600,
+        "prompt_eval_duration": 327272000,
+        "eval_duration": 31650489000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 19.016,
+      "prompt_chars": 8343,
+      "response_chars": 464,
+      "usage": {
+        "prompt_eval_count": 2312,
+        "eval_count": 132,
+        "total_duration": 18993651900,
+        "prompt_eval_duration": 371612000,
+        "eval_duration": 2396322000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 8.281,
+      "prompt_chars": 2918,
+      "response_chars": 211,
+      "usage": {
+        "prompt_eval_count": 923,
+        "eval_count": 63,
+        "total_duration": 8251632600,
+        "prompt_eval_duration": 170586000,
+        "eval_duration": 438926000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Ozzy Osbourne",
+      "title": "Bark at the Moon",
+      "album": "",
+      "year": null,
+      "genre": "heavy metal"
+    },
+    "rig": {
+      "rigName": "Ozzy Osbourne - Bark at the Moon - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s metal crunch with nasal lead bite",
+      "signalChainSummary": "A tight, high-gain signal chain utilizing a Marshall-style preamp (UK SLP) for the core rhythm tone, enhanced with an OD boost for attack, followed by a wah filter and controlled ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Tighten up the aggressive metal tone and eliminate hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide aggressive note attack and mid-range punch for palm mutes.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used to simulate a tight, biting boost characteristic of 80s metal leads.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly warmer, but still provides necessary bite."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "60%",
+            "Tone": "55%",
+            "Level": "75%"
+          },
+          "purpose": "Establish the core high-gain crunch and sustain required for 80s metal.",
+          "matchQuality": "close",
+          "gap": "Using a general Distortion model to achieve the JCM800/Marshall saturation without excessive low end.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "Could provide more aggressive grit, but might be too harsh."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "wah filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "Mid-range sweep",
+            "Resonance": "High"
+          },
+          "purpose": "Provide the explicit wah lead color and vocal bite required for solos.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%"
+          },
+          "purpose": "Simulate the classic Marshall/JCM800 tone with pronounced mids and bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the classic British 4x12 cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Further emphasize the mid-range bite and control excessive low end.",
+          "matchQuality": "close",
+          "gap": "Used to manually sculpt the frequency response, ensuring mids are forward without muddying the bass.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Optional subtle thickening for leads (kept off by default to avoid wash).",
+          "matchQuality": "close",
+          "gap": "The Chorus is kept inactive/low depth as per 'avoid chorus wash' instruction, but included for completeness.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "30%"
+          },
+          "purpose": "Add subtle rhythmic depth to the rhythm parts.",
+          "matchQuality": "close",
+          "gap": "A moderate delay is used for structural support without distracting from the aggressive tone.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide a natural sense of space without sounding overly wet or muddy.",
+          "matchQuality": "close",
+          "gap": "A subtle Room reverb is preferred over Plate/Spring to maintain the aggressive, dry feel of 80s metal.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s metal crunch with nasal lead bite",
+      "mustHave": [
+        "tight palm mutes",
+        "pronounced mid bite",
+        "wah lead color",
+        "clean note attack"
+      ],
+      "avoid": [
+        "modern Rectifier scoop",
+        "muddy bassy low end",
+        "chorus wash"
+      ],
+      "gearClues": [
+        "Marshall/JCM800 style",
+        "4x12 cab",
+        "humbucker guitar",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop Mesa bias",
+        "keep mids forward",
+        "make wah explicit"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "heavy metal",
+      "styleTags": [
+        "80s metal",
+        "hard rock",
+        "metal crunch"
+      ],
+      "targetTone": "bright 80s metal crunch with nasal lead bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for authentic 80s British crunch.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (UK)",
+          "reason": "Enhance the classic Marshall/JCM800 sound and mid-range bite.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased authenticity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1041,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

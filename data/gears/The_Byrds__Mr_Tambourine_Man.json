@@ -1,0 +1,1143 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1485,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Byrds__Mr_Tambourine_Man.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 4,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Byrds",
+    "title": "Mr. Tambourine Man",
+    "album": "",
+    "year": null,
+    "genre": "folk rock"
+  },
+  "genreClassification": {
+    "genre": "folk rock",
+    "subgenres": [
+      "psychedelic folk",
+      "jangle pop"
+    ],
+    "confidence": "high",
+    "rationale": "The Byrds' signature sound is classic 12-string jangle folk rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, jangly folk-rock sound with clear harmonics and a slight chorus shimmer.",
+      "signatureElements": [
+        "jangly arpeggios",
+        "clean tone",
+        "chorus/vibrato modulation",
+        "bright treble focus",
+        "reverb"
+      ],
+      "gearHypotheses": [
+        "Chorus effect (for shimmering texture)",
+        "Bright clean amp model (e.g., Fender Twin-style)",
+        "Plate reverb simulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "crunch overdrive",
+        "distortion",
+        "scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 12-string jangle with clean treble bite",
+      "mustHave": [
+        "12-string shimmer",
+        "tight clean attack",
+        "arpeggiated picking",
+        "chimey top end"
+      ],
+      "avoid": [
+        "chorus",
+        "fuzz",
+        "overdrive",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "Rickenbacker-style 12-string",
+        "Vox chime or clean Fender",
+        "small room or dry"
+      ],
+      "corrections": [
+        "remove chorus",
+        "favor 12-string jangle",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 12-string jangle with clean treble bite",
+    "mustHave": [
+      "12-string shimmer",
+      "tight clean attack",
+      "arpeggiated picking",
+      "chimey top end"
+    ],
+    "avoid": [
+      "chorus",
+      "fuzz",
+      "overdrive",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "Rickenbacker-style 12-string",
+      "Vox chime or clean Fender",
+      "small room or dry"
+    ],
+    "corrections": [
+      "remove chorus",
+      "favor 12-string jangle",
+      "keep reverb minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones and jangle effects.",
+          "bestMatchSummary": "A chimey, bright signal chain utilizing a clean preamp (US Deluxe/Silver Twin) combined with Chorus-avoiding modulation (Tremolo or Delay) and a bright cab to emulate the classic Byrds 12-string sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Sustain": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Provide tight attack and sustain for arpeggiated picking.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for adding punch without coloring the bright tone, mimicking a clean boost pedal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple Boost could also provide necessary level lift."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and bright; no drive needed.",
+              "matchQuality": "perfect",
+              "gap": "The Byrds sound requires pure, uncolored signal path.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Emulate the clean, chimey Fender/Vox sound required for jangle.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice to capture the bright, articulate quality of classic 60s electric guitars.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for clean tones, but US Deluxe often has a slightly brighter character."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, articulate cabinet sound matching the clean Fender aesthetic.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its inherent brightness and clarity, essential for jangle tones.",
+              "alternatives": [
+                {
+                  "model": "UK Vintage 4x12",
+                  "reason": "Could work, but might add too much warmth or grit."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shimmer",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Treble Boost": "+4 dB",
+                "Mid Cut": "-3 dB",
+                "Bass Cut": "-2 dB"
+              },
+              "purpose": "Enhance the high-end 'chime' and treble bite characteristic of 12-string jangle.",
+              "matchQuality": "close",
+              "gap": "Using EQ to surgically boost the upper harmonics without adding excessive coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/jangle effect",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "Low",
+                "Rate": "Slow"
+              },
+              "purpose": "Add subtle movement and dimension to the arpeggios without sounding like a Chorus (which was avoided).",
+              "matchQuality": "close",
+              "gap": "Tremolo provides rhythmic movement while maintaining clarity, fitting the 'jangle' aesthetic better than other modulations.",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "Delay could also add space, but Tremolo adds a more organic shimmer."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space without heavy reverb, enhancing the arpeggiated feel.",
+              "matchQuality": "close",
+              "gap": "A short delay adds dimension crucial for complex fingerpicking patterns.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a minimal sense of space (dry room) as requested, avoiding heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting provides natural ambience without the washiness of Plate or Spring.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a slightly more defined, less 'dry' space is desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic 60s folk-rock sound, which requires extreme clarity and brightness. The signal chain prioritizes clean amplification (US Deluxe) and EQ boosts to achieve the 'chimey' jangle tone while avoiding any grit or saturation."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Enhance cabinet realism by swapping the US 2x12 for a more open, bright British-style cab to better capture the Rickenbacker/Vox chime.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Open Back Cab IR (e.g., Vox AC30 style)",
+              "reason": "The US 2x12 is too American; a British cab will enhance the required chime and open sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and 'jangle' character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Byrds - Mr. Tambourine Man - Valeton GP-180",
+        "song": {
+          "artist": "The Byrds",
+          "title": "Mr. Tambourine Man",
+          "album": "",
+          "year": null,
+          "genre": "folk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 12-string jangle with clean treble bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A chimey, bright signal chain utilizing a clean preamp (US Deluxe/Silver Twin) combined with Chorus-avoiding modulation (Tremolo or Delay) and a bright cab to emulate the classic Byrds 12-string sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain signal clarity.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Sustain": "Medium",
+              "Level": "High"
+            },
+            "purpose": "Provide tight attack and sustain for arpeggiated picking.",
+            "matchQuality": "close",
+            "gap": "The Comp module is ideal for adding punch without coloring the bright tone, mimicking a clean boost pedal.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "A simple Boost could also provide necessary level lift."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the tone clean and bright; no drive needed.",
+            "matchQuality": "perfect",
+            "gap": "The Byrds sound requires pure, uncolored signal path.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "High",
+              "Mid": "Medium",
+              "Bass": "Low"
+            },
+            "purpose": "Emulate the clean, chimey Fender/Vox sound required for jangle.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is the best choice to capture the bright, articulate quality of classic 60s electric guitars.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also suitable for clean tones, but US Deluxe often has a slightly brighter character."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, articulate cabinet sound matching the clean Fender aesthetic.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its inherent brightness and clarity, essential for jangle tones.",
+            "alternatives": [
+              {
+                "model": "UK Vintage 4x12",
+                "reason": "Could work, but might add too much warmth or grit."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization/shimmer",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Treble Boost": "+4 dB",
+              "Mid Cut": "-3 dB",
+              "Bass Cut": "-2 dB"
+            },
+            "purpose": "Enhance the high-end 'chime' and treble bite characteristic of 12-string jangle.",
+            "matchQuality": "close",
+            "gap": "Using EQ to surgically boost the upper harmonics without adding excessive coloration.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/jangle effect",
+            "module": "MOD",
+            "model": "Tremolo",
+            "active": true,
+            "settings": {
+              "Depth": "Low",
+              "Rate": "Slow"
+            },
+            "purpose": "Add subtle movement and dimension to the arpeggios without sounding like a Chorus (which was avoided).",
+            "matchQuality": "close",
+            "gap": "Tremolo provides rhythmic movement while maintaining clarity, fitting the 'jangle' aesthetic better than other modulations.",
+            "alternatives": [
+              {
+                "model": "Digital Delay",
+                "reason": "Delay could also add space, but Tremolo adds a more organic shimmer."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "delay/space",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle depth and space without heavy reverb, enhancing the arpeggiated feel.",
+            "matchQuality": "close",
+            "gap": "A short delay adds dimension crucial for complex fingerpicking patterns.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide a minimal sense of space (dry room) as requested, avoiding heavy reverb.",
+            "matchQuality": "close",
+            "gap": "The Room setting provides natural ambience without the washiness of Plate or Spring.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could be used if a slightly more defined, less 'dry' space is desired."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 12-string jangle with clean treble bite",
+          "toneProfile": "bright 12-string jangle with clean treble bite",
+          "idealSignalChain": "Rickenbacker-style 12-string | Vox chime or clean Fender | small room or dry",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Rickenbacker-style 12-string",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox chime or clean Fender",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room or dry",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "12-string shimmer",
+            "tight clean attack",
+            "arpeggiated picking",
+            "chimey top end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean, bright tones and jangle effects.",
+          "bestMatchSummary": "A chimey, bright signal chain utilizing a clean preamp (US Deluxe/Silver Twin) combined with Chorus-avoiding modulation (Tremolo or Delay) and a bright cab to emulate the classic Byrds 12-string sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain signal clarity.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Sustain": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Provide tight attack and sustain for arpeggiated picking.",
+              "matchQuality": "close",
+              "gap": "The Comp module is ideal for adding punch without coloring the bright tone, mimicking a clean boost pedal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple Boost could also provide necessary level lift."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the tone clean and bright; no drive needed.",
+              "matchQuality": "perfect",
+              "gap": "The Byrds sound requires pure, uncolored signal path.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "High",
+                "Mid": "Medium",
+                "Bass": "Low"
+              },
+              "purpose": "Emulate the clean, chimey Fender/Vox sound required for jangle.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is the best choice to capture the bright, articulate quality of classic 60s electric guitars.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for clean tones, but US Deluxe often has a slightly brighter character."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, articulate cabinet sound matching the clean Fender aesthetic.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its inherent brightness and clarity, essential for jangle tones.",
+              "alternatives": [
+                {
+                  "model": "UK Vintage 4x12",
+                  "reason": "Could work, but might add too much warmth or grit."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization/shimmer",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Treble Boost": "+4 dB",
+                "Mid Cut": "-3 dB",
+                "Bass Cut": "-2 dB"
+              },
+              "purpose": "Enhance the high-end 'chime' and treble bite characteristic of 12-string jangle.",
+              "matchQuality": "close",
+              "gap": "Using EQ to surgically boost the upper harmonics without adding excessive coloration.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/jangle effect",
+              "module": "MOD",
+              "model": "Tremolo",
+              "active": true,
+              "settings": {
+                "Depth": "Low",
+                "Rate": "Slow"
+              },
+              "purpose": "Add subtle movement and dimension to the arpeggios without sounding like a Chorus (which was avoided).",
+              "matchQuality": "close",
+              "gap": "Tremolo provides rhythmic movement while maintaining clarity, fitting the 'jangle' aesthetic better than other modulations.",
+              "alternatives": [
+                {
+                  "model": "Digital Delay",
+                  "reason": "Delay could also add space, but Tremolo adds a more organic shimmer."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space without heavy reverb, enhancing the arpeggiated feel.",
+              "matchQuality": "close",
+              "gap": "A short delay adds dimension crucial for complex fingerpicking patterns.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a minimal sense of space (dry room) as requested, avoiding heavy reverb.",
+              "matchQuality": "close",
+              "gap": "The Room setting provides natural ambience without the washiness of Plate or Spring.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a slightly more defined, less 'dry' space is desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Enhance cabinet realism by swapping the US 2x12 for a more open, bright British-style cab to better capture the Rickenbacker/Vox chime.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Open Back Cab IR (e.g., Vox AC30 style)",
+              "reason": "The US 2x12 is too American; a British cab will enhance the required chime and open sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and 'jangle' character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "remove chorus",
+          "favor 12-string jangle",
+          "keep reverb minimal"
+        ],
+        "warnings": [
+          "The source material is a classic 60s folk-rock sound, which requires extreme clarity and brightness. The signal chain prioritizes clean amplification (US Deluxe) and EQ boosts to achieve the 'chimey' jangle tone while avoiding any grit or saturation."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.874,
+      "prompt_chars": 996,
+      "response_chars": 455,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 116,
+        "total_duration": 9867188000,
+        "prompt_eval_duration": 196923000,
+        "eval_duration": 1811470000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.084,
+      "prompt_chars": 5397,
+      "response_chars": 487,
+      "usage": {
+        "input_tokens": 1511,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1650
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 31.742,
+      "prompt_chars": 3556,
+      "response_chars": 6408,
+      "usage": {
+        "prompt_eval_count": 1214,
+        "eval_count": 1744,
+        "total_duration": 31736906200,
+        "prompt_eval_duration": 299240000,
+        "eval_duration": 31086298000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 3.866,
+      "prompt_chars": 8543,
+      "response_chars": 618,
+      "usage": {
+        "prompt_eval_count": 2315,
+        "eval_count": 172,
+        "total_duration": 3859863500,
+        "prompt_eval_duration": 385827000,
+        "eval_duration": 3085856000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 16.344,
+      "prompt_chars": 2825,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 902,
+        "eval_count": 52,
+        "total_duration": 16323080400,
+        "prompt_eval_duration": 231213000,
+        "eval_duration": 926433000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Byrds",
+      "title": "Mr. Tambourine Man",
+      "album": "",
+      "year": null,
+      "genre": "folk rock"
+    },
+    "rig": {
+      "rigName": "The Byrds - Mr. Tambourine Man - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 12-string jangle with clean treble bite",
+      "signalChainSummary": "A chimey, bright signal chain utilizing a clean preamp (US Deluxe/Silver Twin) combined with Chorus-avoiding modulation (Tremolo or Delay) and a bright cab to emulate the classic Byrds 12-string sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain signal clarity.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Sustain": "Medium",
+            "Level": "High"
+          },
+          "purpose": "Provide tight attack and sustain for arpeggiated picking.",
+          "matchQuality": "close",
+          "gap": "The Comp module is ideal for adding punch without coloring the bright tone, mimicking a clean boost pedal.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "A simple Boost could also provide necessary level lift."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the tone clean and bright; no drive needed.",
+          "matchQuality": "exact",
+          "gap": "The Byrds sound requires pure, uncolored signal path.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "High",
+            "Mid": "Medium",
+            "Bass": "Low"
+          },
+          "purpose": "Emulate the clean, chimey Fender/Vox sound required for jangle.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is the best choice to capture the bright, articulate quality of classic 60s electric guitars.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable for clean tones, but US Deluxe often has a slightly brighter character."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, articulate cabinet sound matching the clean Fender aesthetic.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its inherent brightness and clarity, essential for jangle tones.",
+          "alternatives": [
+            {
+              "model": "UK Vintage 4x12",
+              "reason": "Could work, but might add too much warmth or grit."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization/shimmer",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Treble Boost": "+4 dB",
+            "Mid Cut": "-3 dB",
+            "Bass Cut": "-2 dB"
+          },
+          "purpose": "Enhance the high-end 'chime' and treble bite characteristic of 12-string jangle.",
+          "matchQuality": "close",
+          "gap": "Using EQ to surgically boost the upper harmonics without adding excessive coloration.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/jangle effect",
+          "module": "MOD",
+          "model": "Tremolo",
+          "active": true,
+          "settings": {
+            "Depth": "Low",
+            "Rate": "Slow"
+          },
+          "purpose": "Add subtle movement and dimension to the arpeggios without sounding like a Chorus (which was avoided).",
+          "matchQuality": "close",
+          "gap": "Tremolo provides rhythmic movement while maintaining clarity, fitting the 'jangle' aesthetic better than other modulations.",
+          "alternatives": [
+            {
+              "model": "Digital Delay",
+              "reason": "Delay could also add space, but Tremolo adds a more organic shimmer."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "delay/space",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle depth and space without heavy reverb, enhancing the arpeggiated feel.",
+          "matchQuality": "close",
+          "gap": "A short delay adds dimension crucial for complex fingerpicking patterns.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide a minimal sense of space (dry room) as requested, avoiding heavy reverb.",
+          "matchQuality": "close",
+          "gap": "The Room setting provides natural ambience without the washiness of Plate or Spring.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could be used if a slightly more defined, less 'dry' space is desired."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 12-string jangle with clean treble bite",
+      "mustHave": [
+        "12-string shimmer",
+        "tight clean attack",
+        "arpeggiated picking",
+        "chimey top end"
+      ],
+      "avoid": [
+        "chorus",
+        "fuzz",
+        "overdrive",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "Rickenbacker-style 12-string",
+        "Vox chime or clean Fender",
+        "small room or dry"
+      ],
+      "corrections": [
+        "remove chorus",
+        "favor 12-string jangle",
+        "keep reverb minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "folk rock",
+      "styleTags": [
+        "psychedelic folk",
+        "jangle pop"
+      ],
+      "targetTone": "bright 12-string jangle with clean treble bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Enhance cabinet realism by swapping the US 2x12 for a more open, bright British-style cab to better capture the Rickenbacker/Vox chime.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British Open Back Cab IR (e.g., Vox AC30 style)",
+          "reason": "The US 2x12 is too American; a British cab will enhance the required chime and open sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and 'jangle' character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1485,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

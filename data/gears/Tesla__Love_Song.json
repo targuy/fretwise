@@ -1,0 +1,1091 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1406,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Tesla__Love_Song.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+    "workerEndpoint": "127.0.0.1:11534",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Tesla",
+    "title": "Love Song",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "power pop",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "Tesla's sound is classic 80s/90s arena-style pop rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight nasal bite and pronounced mid-range presence.",
+      "signatureElements": [
+        "Crunch/mid-gain overdrive",
+        "Slightly scooped mids (relative to pure crunch)",
+        "Punchy attack for rhythm playing",
+        "Controlled amount of natural reverb"
+      ],
+      "gearHypotheses": [
+        "British style amp emulation (Marshall JCM family or similar)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Extreme clean tones",
+        "Overuse of modulation effects"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright acoustic-style clean with slight chorus shimmer",
+      "mustHave": [
+        "clean picked sheen",
+        "12-string-like jangle",
+        "light chorus shimmer",
+        "wide open chords"
+      ],
+      "avoid": [
+        "mid-gain crunch",
+        "nasal bite",
+        "Marshall drive",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "clean Fender/JC style amp",
+        "12-string or chorus",
+        "bright single-coil"
+      ],
+      "corrections": [
+        "replace crunch with clean jangle",
+        "add chorus shimmer",
+        "drop British amp guess"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright acoustic-style clean with slight chorus shimmer",
+    "mustHave": [
+      "clean picked sheen",
+      "12-string-like jangle",
+      "light chorus shimmer",
+      "wide open chords"
+    ],
+    "avoid": [
+      "mid-gain crunch",
+      "nasal bite",
+      "Marshall drive",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "clean Fender/JC style amp",
+      "12-string or chorus",
+      "bright single-coil"
+    ],
+    "corrections": [
+      "replace crunch with clean jangle",
+      "add chorus shimmer",
+      "drop British amp guess"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, bright tones and chorus effects to emulate the acoustic/jangle sound.",
+          "bestMatchSummary": "A pristine signal chain featuring a boost for clarity, followed by Chorus for shimmer, leading into a Fender-style US Deluxe amp setup with a clear cab, finished with light reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for delicate picking.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/clarity",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide initial lift and brightness to enhance the 'picked sheen' and jangle.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general clarity enhancement, as a dedicated clean boost (like an Acoustic Booster) is unavailable.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation/jangle",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Placeholder for potential wah use; kept inactive as the primary jangle comes from Chorus.",
+              "matchQuality": "none",
+              "gap": "No specific module is required here, but WAH slot must be filled. Kept off to avoid coloring the clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Ensure zero grit or crunch is introduced into the clean signal.",
+              "matchQuality": "none",
+              "gap": "No drive required. Module kept off to maintain pristine clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Bass": "4",
+                "Mid": "5"
+              },
+              "purpose": "Simulate the clean, bright Fender/JC style amp tone required for jangle and open chords.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open sound suitable for clean electric guitar tones.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/shimmer",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Introduce the required 'light chorus shimmer' and enhance the 12-string jangle effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Slightly boost the high end and scoop the low mids to maximize clarity and 'sheen'.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ for clean tones is used, as no specific tone-shaping EQ was requested.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle depth and space to the clean chords without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A light delay is used instead of heavy reverb, as per 'avoid' list (heavy reverb).",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "2"
+              },
+              "purpose": "Provide a subtle, natural room ambience to give the chords 'wide open' feel.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that complements clean jangle tones.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal performance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, but the target tone requires an acoustic/clean jangle sound. The rig focuses heavily on clean modulation and bright amp simulation to achieve this specific contrast."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more open, vintage-style Fender cab.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR",
+              "reason": "Enhance the bright, open sound required for jangle and clean chords.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Tesla - Love Song - Valeton GP-180",
+        "song": {
+          "artist": "Tesla",
+          "title": "Love Song",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright acoustic-style clean with slight chorus shimmer",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A pristine signal chain featuring a boost for clarity, followed by Chorus for shimmer, leading into a Fender-style US Deluxe amp setup with a clear cab, finished with light reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain clarity for delicate picking.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/clarity",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Bright"
+            },
+            "purpose": "Provide initial lift and brightness to enhance the 'picked sheen' and jangle.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used for general clarity enhancement, as a dedicated clean boost (like an Acoustic Booster) is unavailable.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "modulation/jangle",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Placeholder for potential wah use; kept inactive as the primary jangle comes from Chorus.",
+            "matchQuality": "none",
+            "gap": "No specific module is required here, but WAH slot must be filled. Kept off to avoid coloring the clean tone.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Ensure zero grit or crunch is introduced into the clean signal.",
+            "matchQuality": "none",
+            "gap": "No drive required. Module kept off to maintain pristine clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Treble": "7",
+              "Bass": "4",
+              "Mid": "5"
+            },
+            "purpose": "Simulate the clean, bright Fender/JC style amp tone required for jangle and open chords.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, open sound suitable for clean electric guitar tones.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/shimmer",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "4",
+              "Feedback": "2"
+            },
+            "purpose": "Introduce the required 'light chorus shimmer' and enhance the 12-string jangle effect.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Slightly boost the high end and scoop the low mids to maximize clarity and 'sheen'.",
+            "matchQuality": "close",
+            "gap": "A dedicated EQ for clean tones is used, as no specific tone-shaping EQ was requested.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add subtle depth and space to the clean chords without sounding distracting.",
+            "matchQuality": "close",
+            "gap": "A light delay is used instead of heavy reverb, as per 'avoid' list (heavy reverb).",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "2"
+            },
+            "purpose": "Provide a subtle, natural room ambience to give the chords 'wide open' feel.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that complements clean jangle tones.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment for optimal performance.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright acoustic-style clean with slight chorus shimmer",
+          "toneProfile": "bright acoustic-style clean with slight chorus shimmer",
+          "idealSignalChain": "clean Fender/JC style amp | 12-string or chorus | bright single-coil",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean Fender/JC style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-string or chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bright single-coil",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean picked sheen",
+            "12-string-like jangle",
+            "light chorus shimmer",
+            "wide open chords"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize clean, bright tones and chorus effects to emulate the acoustic/jangle sound.",
+          "bestMatchSummary": "A pristine signal chain featuring a boost for clarity, followed by Chorus for shimmer, leading into a Fender-style US Deluxe amp setup with a clear cab, finished with light reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain clarity for delicate picking.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/clarity",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide initial lift and brightness to enhance the 'picked sheen' and jangle.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used for general clarity enhancement, as a dedicated clean boost (like an Acoustic Booster) is unavailable.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "modulation/jangle",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Placeholder for potential wah use; kept inactive as the primary jangle comes from Chorus.",
+              "matchQuality": "none",
+              "gap": "No specific module is required here, but WAH slot must be filled. Kept off to avoid coloring the clean tone.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Ensure zero grit or crunch is introduced into the clean signal.",
+              "matchQuality": "none",
+              "gap": "No drive required. Module kept off to maintain pristine clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Treble": "7",
+                "Bass": "4",
+                "Mid": "5"
+              },
+              "purpose": "Simulate the clean, bright Fender/JC style amp tone required for jangle and open chords.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, open sound suitable for clean electric guitar tones.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/shimmer",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Introduce the required 'light chorus shimmer' and enhance the 12-string jangle effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Slightly boost the high end and scoop the low mids to maximize clarity and 'sheen'.",
+              "matchQuality": "close",
+              "gap": "A dedicated EQ for clean tones is used, as no specific tone-shaping EQ was requested.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle depth and space to the clean chords without sounding distracting.",
+              "matchQuality": "close",
+              "gap": "A light delay is used instead of heavy reverb, as per 'avoid' list (heavy reverb).",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "2"
+              },
+              "purpose": "Provide a subtle, natural room ambience to give the chords 'wide open' feel.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that complements clean jangle tones.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal performance.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more open, vintage-style Fender cab.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR",
+              "reason": "Enhance the bright, open sound required for jangle and clean chords.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace crunch with clean jangle",
+          "add chorus shimmer",
+          "drop British amp guess"
+        ],
+        "warnings": [
+          "The source material is a rock song, but the target tone requires an acoustic/clean jangle sound. The rig focuses heavily on clean modulation and bright amp simulation to achieve this specific contrast."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 9.774,
+      "prompt_chars": 983,
+      "response_chars": 472,
+      "usage": {
+        "prompt_eval_count": 319,
+        "eval_count": 109,
+        "total_duration": 9771906100,
+        "prompt_eval_duration": 205751000,
+        "eval_duration": 2095174000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.772,
+      "prompt_chars": 5377,
+      "response_chars": 532,
+      "usage": {
+        "input_tokens": 1492,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1625
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 30.509,
+      "prompt_chars": 3588,
+      "response_chars": 5839,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1628,
+        "total_duration": 30502666100,
+        "prompt_eval_duration": 242662000,
+        "eval_duration": 29731856000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 5.57,
+      "prompt_chars": 7982,
+      "response_chars": 549,
+      "usage": {
+        "prompt_eval_count": 2189,
+        "eval_count": 146,
+        "total_duration": 5538534500,
+        "prompt_eval_duration": 399252000,
+        "eval_duration": 4695348000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://127.0.0.1:11534/api/generate",
+      "seconds": 10.186,
+      "prompt_chars": 2940,
+      "response_chars": 156,
+      "usage": {
+        "prompt_eval_count": 911,
+        "eval_count": 52,
+        "total_duration": 10137218800,
+        "prompt_eval_duration": 463579000,
+        "eval_duration": 827473000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Tesla",
+      "title": "Love Song",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Tesla - Love Song - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright acoustic-style clean with slight chorus shimmer",
+      "signalChainSummary": "A pristine signal chain featuring a boost for clarity, followed by Chorus for shimmer, leading into a Fender-style US Deluxe amp setup with a clear cab, finished with light reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain clarity for delicate picking.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/clarity",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Bright"
+          },
+          "purpose": "Provide initial lift and brightness to enhance the 'picked sheen' and jangle.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used for general clarity enhancement, as a dedicated clean boost (like an Acoustic Booster) is unavailable.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "modulation/jangle",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Placeholder for potential wah use; kept inactive as the primary jangle comes from Chorus.",
+          "matchQuality": "fallback",
+          "gap": "No specific module is required here, but WAH slot must be filled. Kept off to avoid coloring the clean tone.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Ensure zero grit or crunch is introduced into the clean signal.",
+          "matchQuality": "fallback",
+          "gap": "No drive required. Module kept off to maintain pristine clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Treble": "7",
+            "Bass": "4",
+            "Mid": "5"
+          },
+          "purpose": "Simulate the clean, bright Fender/JC style amp tone required for jangle and open chords.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, open sound suitable for clean electric guitar tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/shimmer",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "4",
+            "Feedback": "2"
+          },
+          "purpose": "Introduce the required 'light chorus shimmer' and enhance the 12-string jangle effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Slightly boost the high end and scoop the low mids to maximize clarity and 'sheen'.",
+          "matchQuality": "close",
+          "gap": "A dedicated EQ for clean tones is used, as no specific tone-shaping EQ was requested.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add subtle depth and space to the clean chords without sounding distracting.",
+          "matchQuality": "close",
+          "gap": "A light delay is used instead of heavy reverb, as per 'avoid' list (heavy reverb).",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "2"
+          },
+          "purpose": "Provide a subtle, natural room ambience to give the chords 'wide open' feel.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is chosen over Plate/Spring for its natural, non-metallic decay that complements clean jangle tones.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment for optimal performance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright acoustic-style clean with slight chorus shimmer",
+      "mustHave": [
+        "clean picked sheen",
+        "12-string-like jangle",
+        "light chorus shimmer",
+        "wide open chords"
+      ],
+      "avoid": [
+        "mid-gain crunch",
+        "nasal bite",
+        "Marshall drive",
+        "heavy reverb"
+      ],
+      "gearClues": [
+        "clean Fender/JC style amp",
+        "12-string or chorus",
+        "bright single-coil"
+      ],
+      "corrections": [
+        "replace crunch with clean jangle",
+        "add chorus shimmer",
+        "drop British amp guess"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "power pop",
+        "arena rock"
+      ],
+      "targetTone": "bright acoustic-style clean with slight chorus shimmer",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more open, vintage-style Fender cab.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage Fender 2x12 IR",
+          "reason": "Enhance the bright, open sound required for jangle and clean chords.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1406,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}
