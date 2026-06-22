@@ -58,6 +58,19 @@ class BiomechanicalSeverity(StrEnum):
     LOW = "low"
 
 
+# Codes that are data/tuning/bend artefacts rather than fingering-choice
+# problems — the player cannot fix them by picking a different finger.
+# BIO-STATE-003 in particular used to fire on every note of a dropped/capo'd/
+# half-step-down track before tuning was derived from the source (see
+# ``derive_open_string_pitches``); it still fires on genuine bends/harmonics,
+# where the sounding pitch legitimately differs from the fretted position.
+# Shared by every consumer (review list, audit verdict, per-note highlight)
+# so they all agree on what counts as an actionable violation.
+NON_ACTIONABLE_CODES: frozenset[str] = frozenset(
+    {"BIO-STATE-001", "BIO-STATE-002", "BIO-STATE-003"}
+)
+
+
 @dataclass(frozen=True)
 class BiomechanicalRuleConfig:
     """Configuration for biomechanical validation.
@@ -126,6 +139,31 @@ class BiomechanicalReport:
         return dict(grouped)
 
 
+def derive_open_string_pitches(results: Sequence[FingeringResult]) -> tuple[int, ...]:
+    """Infer per-string open-string MIDI pitches from source tab hints.
+
+    GP tabs encode the real (possibly non-standard / dropped / capo'd / half-
+    step-down) tuning implicitly: ``open_pitch[string] = note.pitch -
+    note.fret_hint``. Using this — not the hard-coded standard tuning — keeps
+    BIO-STATE-003 ("pitch does not match the selected string and fret")
+    honest for any tuning instead of misfiring on every note of a track that
+    isn't in standard E. Strings never seen in the source hints (e.g. MIDI
+    input with no tab data) fall back to standard tuning.
+    """
+    tuning = list(STANDARD_TUNING)
+    seen: dict[int, int] = {}
+    for result in results:
+        note = result.note_event
+        if (
+            note.string_hint is not None and note.fret_hint is not None
+            and 1 <= note.string_hint <= len(tuning) and note.string_hint not in seen
+        ):
+            seen[note.string_hint] = note.pitch - note.fret_hint
+    for string_num, open_pitch in seen.items():
+        tuning[string_num - 1] = open_pitch
+    return tuple(tuning)
+
+
 def validate_fingering_results(
     results: Sequence[FingeringResult],
     *,
@@ -135,12 +173,17 @@ def validate_fingering_results(
 
     Args:
         results: Final fingerings from the pipeline.
-        config: Optional validation policy.
+        config: Optional validation policy. When omitted, the open-string
+            tuning is derived from the source tab hints in ``results``
+            (see :func:`derive_open_string_pitches`) instead of assuming
+            standard tuning.
 
     Returns:
         A deterministic report containing all detected violations.
     """
-    rule_config = config or BiomechanicalRuleConfig()
+    rule_config = config or BiomechanicalRuleConfig(
+        open_string_pitches=derive_open_string_pitches(results),
+    )
     violations: list[BiomechanicalViolation] = []
     violations.extend(_validate_states(results, rule_config))
     violations.extend(_validate_chords(results, rule_config))

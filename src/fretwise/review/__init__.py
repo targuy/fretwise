@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 
 from fretwise.biomechanics import (
+    NON_ACTIONABLE_CODES,
     BiomechanicalReport,
     BiomechanicalSeverity,
     validate_fingering_results,
@@ -78,14 +79,6 @@ _SEVERITY_RANK: dict[Severity, int] = {
     Severity.SUSPECT: 2,
     Severity.HIGH_COST: 1,
 }
-
-# Biomechanical codes that are data/tuning artefacts rather than fingering-choice
-# problems — the user cannot fix them by picking a finger, so they are noise in
-# the review list. BIO-STATE-003 in particular fires on every bend/harmonic and
-# on any non-standard tuning (it compares pitch to standard open-string + fret).
-_NON_ACTIONABLE_CODES: frozenset[str] = frozenset(
-    {"BIO-STATE-001", "BIO-STATE-002", "BIO-STATE-003"}
-)
 
 
 @dataclass(frozen=True)
@@ -188,7 +181,7 @@ def flag_fingerings(
 
     # Signal 1 — biomechanical violations (FATAL → impossible, HIGH → suspect).
     for v in biomech_report.violations:
-        if v.code in _NON_ACTIONABLE_CODES:
+        if v.code in NON_ACTIONABLE_CODES:
             continue  # data/tuning/bend artefact, not a fingering-choice issue
         if v.severity == BiomechanicalSeverity.FATAL:
             sev = Severity.IMPOSSIBLE
