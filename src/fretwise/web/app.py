@@ -63,6 +63,8 @@ from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
+from fretwise.gears import gears_key_from_filename, song_output_to_view
+from fretwise.gears.naming import gears_key as _gears_key
 from fretwise.rig import (
     build_rig_index,
     default_rig_path,
@@ -415,7 +417,15 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/rig/{filename}")
     async def get_rig(filename: str) -> JSONResponse:
-        """Return parsed Valeton GP-180 rig data for a score file (404 if none)."""
+        """Return Valeton GP-180 rig data for a score file (404 if none).
+
+        A "new format" gears sheet (``data/gears/<artist__title>.json`` in the
+        shared SongsGears schema) takes precedence over the legacy ``.md`` sheet,
+        so dropping a JSON in supersedes the old curated data for that song.
+        """
+        view = _gears_view_for(filename)
+        if view is not None:
+            return JSONResponse(view)
         rigs_dir = find_rigs_dir(app.state.fixtures_dir)
         if not rigs_dir:
             raise HTTPException(404, "No rigs directory found")
@@ -2571,6 +2581,73 @@ def _rig_bank_json_path(app: FastAPI) -> Path:
     if rigs_dir is None:
         rigs_dir = app.state.fixtures_dir / "rigs"
     return rig_bank_path(rigs_dir)
+
+
+def _gears_root() -> Path:
+    """Return the flat ``data/gears`` directory holding new-format rig sheets.
+
+    Honours a ``gears_dir`` setting so the library can be relocated (and tests can
+    point at a temp dir); defaults to ``<repo>/data/gears``.
+    """
+
+    configured = (_settings.load().get("gears_dir") or "").strip()
+    if configured:
+        return Path(configured)
+    return Path(__file__).resolve().parents[3] / "data" / "gears"
+
+
+def _gears_canonical_key(stem: str) -> str:
+    """Canonicalize a gears filename stem to the shared ``artist__title`` key.
+
+    Tolerates either naming style — kebab (``ac-dc__highway-to-hell``) or the
+    SongsGear export's underscored Title Case (``AC_DC__Highway_To_Hell``) — by
+    splitting on ``__`` and re-slugifying each half.
+    """
+
+    if "__" in stem:
+        artist, title = stem.split("__", 1)
+        return _gears_key(artist, title)
+    return _gears_key("", stem)
+
+
+def _gears_index(root: Path) -> dict[str, Path]:
+    """Map canonical ``artist__title`` keys to gears files in ``root``.
+
+    Built per request (cheap for the expected catalog sizes); the first file
+    wins on a key collision so a clean name beats a malformed duplicate.
+    """
+
+    index: dict[str, Path] = {}
+    for path in sorted(root.glob("*.json")):
+        index.setdefault(_gears_canonical_key(path.stem), path)
+    return index
+
+
+def _gears_view_for(filename: str) -> dict | None:
+    """Load the new-format gears sheet for a score filename, or None if absent.
+
+    Resolves by the canonical ``artist__title`` key (naming-style agnostic);
+    falls back to a title-slug-only match so a song whose score file omits the
+    artist still resolves when exactly one sheet matches.
+    """
+
+    root = _gears_root()
+    if not root.is_dir():
+        return None
+    key = gears_key_from_filename(filename)
+    index = _gears_index(root)
+    candidate = index.get(key)
+    if candidate is None:
+        title_slug = key.split("__", 1)[-1]
+        matches = [p for k, p in index.items() if title_slug and k.split("__", 1)[-1] == title_slug]
+        if len(matches) != 1:
+            return None
+        candidate = matches[0]
+    try:
+        doc = _json.loads(candidate.read_text(encoding="utf-8"))
+    except (OSError, _json.JSONDecodeError):
+        return None
+    return song_output_to_view(doc)
 
 
 def _resolve_rig_bank_request(

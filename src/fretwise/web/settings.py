@@ -37,6 +37,7 @@ _DEFAULTS: dict[str, Any] = {
     "rig_ai_python": "",          # "" = the running interpreter (sys.executable)
     "rig_ai_tools_dir": "",       # "" = <repo>/tools
     "rig_ai_timeout": 0,          # 0 = service default (300s)
+    "gears_dir": "",              # "" = <repo>/data/gears (per-model rig sheets)
 }
 
 
