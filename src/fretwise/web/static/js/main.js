@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, generateRig, recommendRigProfile, saveRig, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, recommendRigProfile, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
@@ -314,9 +314,6 @@ const btnHeaderMusicXml = $('#btn-header-musicxml');
 const btnLegend     = $('#btn-legend');
 const legendOverlay = $('#legend-overlay');
 const legendClose   = $('#legend-close');
-const prefSameFingerPenalty = $('#pref-same-finger-penalty');
-const prefInferLegato = $('#pref-infer-legato');
-const prefHandOverlay = $('#pref-hand-overlay');
 const btnHandViz           = $('#btn-hand-viz');
 const btnInsertFingerings  = $('#btn-insert-fingerings');
 const btnRig               = $('#btn-rig');
@@ -870,10 +867,21 @@ async function _showSongInfo(f) {
   // Bookkeeping/key columns that should never show as displayable metadata.
   const HIDE = new Set(['filename', 'file', 'name', 'stem', 'title']);
   // Preferred display order for the known catalog fields.
-  const ORDER = ['artist', 'album', 'genre', 'year', 'notes'];
+  const ORDER = [
+    'artist', 'album', 'genre', 'year',
+    'guitarists', 'original_guitar', 'guitar_type',
+    'target_tone', 'gear_confidence', 'rig_grade',
+    'notes',
+  ];
   const LABELS = {
     artist: 'Artist', album: 'Album', genre: 'Genre',
     year: 'Year', notes: 'Notes',
+    guitarists: 'Guitariste(s)',
+    original_guitar: 'Guitare originale',
+    guitar_type: 'Type guitare',
+    target_tone: 'Son cible',
+    gear_confidence: 'Confiance gear',
+    rig_grade: 'Fiabilité rig',
   };
 
   const seen = new Set();
@@ -1441,10 +1449,12 @@ function getSelectedRepresentationMode() {
 }
 
 function getRulePreferences() {
+  // The prefs panel was removed from the toolbar; these keep the former
+  // defaults (penalty + legato inference on, hand-overlay lane off).
   return {
-    sameFingerPenalty: prefSameFingerPenalty?.checked !== false,
-    inferImplicitLegato: prefInferLegato?.checked !== false,
-    showHandOverlay: prefHandOverlay?.checked !== false,
+    sameFingerPenalty: true,
+    inferImplicitLegato: true,
+    showHandOverlay: false,
   };
 }
 
@@ -1524,10 +1534,6 @@ function _applyTrackKindLock() {
   for (const el of fingeringControls) {
     if (el) el.style.display = guitar ? '' : 'none';
   }
-  // The hand-movement-lane preference lives inside the prefs panel.
-  const handPrefItem = document.querySelector('.tb-pref-hand-overlay');
-  if (handPrefItem && !guitar) handPrefItem.style.display = 'none';
-
   // Close the floating fretboard panel if it was left open from a guitar
   // track — it has nothing to show for a non-guitar one.
   if (!guitar && handVizPanel && handVizPanel.style.display !== 'none') {
@@ -3173,27 +3179,19 @@ function _toggleRig() {
   }
 }
 
-// Last rig shown in the panel — supplies artist/song to the AI generator.
+// Last rig shown in the panel.
 let _lastRig = null;
-// Score filename the panel was opened for (used to locate the .md on save).
+// Score filename the panel was opened for.
 let _lastRigFile = null;
-// The most recent generated view (what gets saved to .md). Null until generated.
-let _lastGenerated = null;
-// True once a generation has been shown for the current rig. The next click is a
-// "Régénérer" and must bypass the wrapper cache (otherwise it returns the same
-// cached JSON — the source of "always the same answer").
-let _rigGenDone = false;
 let _rigBank = null;
 let _lastRigResolution = null;
 
 async function _loadRig(filename) {
+  // The server returns the new-format gears sheet when one exists for this song,
+  // otherwise the legacy .md; a stub covers songs with neither.
   const data = await fetchRig(filename) || _fallbackRigView(filename);
   _lastRig = data;
   _lastRigFile = filename;
-  _rigGenDone = false;
-  _lastGenerated = null;
-  const saveBtn = document.getElementById('rig-save-btn');
-  if (saveBtn) saveBtn.style.display = 'none';
   _renderRig(data);
   await _loadRigBankControl(filename, data);
 }
@@ -3454,80 +3452,6 @@ async function _activateSelectedRigProfile() {
   }
 }
 
-async function _generateRigForCurrent() {
-  const btn = document.getElementById('rig-gen-btn');
-  const status = document.getElementById('rig-gen-status');
-  const artist = _lastRig?.artist;
-  const song = _lastRig?.song;
-  if (!artist || !song) {
-    if (status) {
-      status.style.display = '';
-      status.className = 'rig-gen-status error';
-      status.textContent = 'Artiste/chanson introuvables pour ce morceau.';
-    }
-    return;
-  }
-  const targetGuitar = _lastRig?.guitare_cible || null;
-  const genre = _lastRig?.genre || null;
-  if (btn) { btn.disabled = true; btn.textContent = '… génération'; }
-  if (status) {
-    status.style.display = '';
-    status.className = 'rig-gen-status busy';
-    status.textContent = `Génération du rig pour « ${artist} · ${song} »… (peut prendre une minute)`;
-  }
-  try {
-    // The endpoint returns the unified view shape (same as /api/rig), so the
-    // generated rig is rendered by the exact same graphical renderer, replacing
-    // the displayed sheet in place — one single representation.
-    const gen = await generateRig(artist, song, { genre, targetGuitar, refresh: _rigGenDone });
-    _rigGenDone = true;
-    _lastGenerated = gen;
-    _lastRig = gen;
-    if (status) { status.style.display = 'none'; status.textContent = ''; }
-    _renderRig(gen);
-    await _loadRigBankControl(_lastRigFile, gen);
-    // Show the save button. Must set an explicit display (not '') — the default
-    // CSS rule is `.rig-save-btn { display: none }`, so '' would fall back to it.
-    const saveBtn = document.getElementById('rig-save-btn');
-    if (saveBtn) { saveBtn.style.display = 'flex'; saveBtn.disabled = false; saveBtn.textContent = '💾 Sauver'; }
-  } catch (err) {
-    // Non-blocking error: keep the currently displayed rig, surface the detail.
-    if (status) {
-      status.style.display = '';
-      status.className = 'rig-gen-status error';
-      status.textContent = `Échec de la génération : ${err.message || err}`;
-    }
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '⚡ Régénérer'; }
-  }
-}
-
-async function _saveGeneratedRig() {
-  const btn = document.getElementById('rig-save-btn');
-  const status = document.getElementById('rig-gen-status');
-  if (!_lastGenerated || !_lastRigFile) return;
-  if (!window.confirm('Remplacer la fiche actuelle par ce rig généré ?\n(une sauvegarde .bak de la fiche originale est conservée)')) return;
-  if (btn) { btn.disabled = true; btn.textContent = '… sauvegarde'; }
-  try {
-    const res = await saveRig(_lastRigFile, _lastGenerated);
-    if (status) {
-      status.style.display = '';
-      status.className = 'rig-gen-status busy';
-      status.textContent = res.backup
-        ? `Fiche enregistrée (${res.saved}). Sauvegarde de l'originale : ${res.backup}.`
-        : `Fiche enregistrée (${res.saved}).`;
-    }
-  } catch (err) {
-    if (status) {
-      status.style.display = '';
-      status.className = 'rig-gen-status error';
-      status.textContent = `Échec de la sauvegarde : ${err.message || err}`;
-    }
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '💾 Sauver'; }
-  }
-}
-
 function _renderRig(data) {
   const generated = data.is_generated === true;
   const title = document.getElementById('rig-panel-title');
@@ -3537,22 +3461,39 @@ function _renderRig(data) {
   if (meta) {
     const grade = (data.fiabilite || 'D').toUpperCase();
     const gradeClass = grade === 'A' ? 'grade-a' : grade === 'B' ? 'grade-b' : grade === 'C' ? 'grade-c' : '';
-    // Generated rigs carry a recommended guitar; sheets carry the original one.
-    const guitarLabel = generated ? 'Guitare recommandée' : 'Guitare originale';
-    const guitarVal = generated ? data.recommended_guitar : data.guitare_originale;
-    const guitarImgName = generated ? data.recommended_guitar_image : data.guitare_originale_image;
-    const guitarImg = guitarImgName
-      ? `<img class="rig-guitar-img" src="/api/rig-image/${encodeURIComponent(guitarImgName)}" alt="${_esc(guitarVal || '')}" loading="lazy">`
+    const research = data.original_gear_research || {};
+    const isGenericGuitar = (value) => {
+      const text = String(value || '').trim().toLowerCase();
+      return !text || text === 'default electric guitar' || text === 'electric guitar' || text === 'guitare electrique generique' || text === 'guitare électrique générique';
+    };
+    const originalGuitar = research.guitar_model || research.guitar_type || data.guitare_originale;
+    const originalGuitarImg = data.guitare_originale_image
+      ? `<img class="rig-guitar-img" src="/api/rig-image/${encodeURIComponent(data.guitare_originale_image)}" alt="${_esc(originalGuitar || '')}" loading="lazy">`
       : '';
-    // Each value is individually escaped or built from safe HTML before being
-    // injected raw by the map below (XSS-safe).
-    meta.innerHTML = [
+    const recommendedGuitar = !isGenericGuitar(data.recommended_guitar) ? data.recommended_guitar : null;
+    const recommendedGuitarImg = recommendedGuitar && data.recommended_guitar_image
+      ? `<img class="rig-guitar-img" src="/api/rig-image/${encodeURIComponent(data.recommended_guitar_image)}" alt="${_esc(recommendedGuitar)}" loading="lazy">`
+      : '';
+    const metaRows = [
       ['Accordage', _esc(data.accordage != null ? String(data.accordage) : '—')],
       ['Capo', _esc(data.capo != null ? String(data.capo) : '—')],
       ['Genre', _esc(data.genre != null && data.genre !== '' ? String(data.genre) : '—')],
-      [guitarLabel, `${_esc(guitarVal != null ? String(guitarVal) : '—')}${guitarImg}`],
-      ['Fiabilité', `<span class="rig-fiabilite-badge ${gradeClass}">${_esc(grade)}</span>`],
-    ].map(([lbl, val]) => `
+    ];
+    if (research.guitarist) metaRows.push(['Guitariste(s)', _esc(String(research.guitarist))]);
+    metaRows.push([
+      'Guitare originale',
+      `${_esc(originalGuitar != null && originalGuitar !== '' ? String(originalGuitar) : '—')}${originalGuitarImg}`,
+    ]);
+    if (research.guitar_type && research.guitar_model) {
+      metaRows.push(['Type guitare', _esc(String(research.guitar_type))]);
+    }
+    if (recommendedGuitar && recommendedGuitar !== originalGuitar) {
+      metaRows.push(['Guitare recommandée', `${_esc(String(recommendedGuitar))}${recommendedGuitarImg}`]);
+    }
+    metaRows.push(['Fiabilité', `<span class="rig-fiabilite-badge ${gradeClass}">${_esc(grade)}</span>`]);
+    // Each value is individually escaped or built from safe HTML before being
+    // injected raw by the map below (XSS-safe).
+    meta.innerHTML = metaRows.map(([lbl, val]) => `
       <div class="rig-meta-item">
         <span class="rig-meta-label">${_esc(lbl)}</span>
         <span class="rig-meta-value">${val}</span>
@@ -3606,6 +3547,38 @@ function _renderRig(data) {
   if (commentsDetails) commentsDetails.style.display = data.comments ? '' : 'none';
   const hasAny = !!(data.notes || data.limites || data.comments);
   if (notesWrap) notesWrap.style.display = hasAny ? '' : 'none';
+
+  _renderRigImprovements(data.improvements);
+}
+
+function _renderRigImprovements(improvements) {
+  const wrap = document.getElementById('rig-improvements-wrap');
+  const el = document.getElementById('rig-improvements');
+  if (!wrap || !el) return;
+  const proposals = Array.isArray(improvements?.proposals) ? improvements.proposals : [];
+  if (!improvements || (!proposals.length && !improvements.summary)) {
+    wrap.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  const summaryHtml = improvements.summary
+    ? `<p class="rig-improve-summary">${_esc(improvements.summary)}</p>` : '';
+  const rows = proposals.map((p) => {
+    const prio = String(p.priority || '').toUpperCase();
+    const prioClass = prio === 'P1' ? 'prio-p1' : prio === 'P2' ? 'prio-p2' : prio === 'P3' ? 'prio-p3' : '';
+    const bits = [
+      p.type ? _esc(String(p.type)) : '',
+      p.target ? `→ ${_esc(String(p.target))}` : '',
+    ].filter(Boolean).join(' ');
+    const asset = p.recommendedAsset ? `<div class="rig-improve-asset">${_esc(String(p.recommendedAsset))}</div>` : '';
+    const reason = p.reason ? `<div class="rig-improve-reason">${_esc(String(p.reason))}</div>` : '';
+    return `<div class="rig-improve-item">
+      <span class="rig-improve-prio ${prioClass}">${_esc(prio || '—')}</span>
+      <div class="rig-improve-body"><div class="rig-improve-head">${bits}</div>${asset}${reason}</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = summaryHtml + rows;
+  wrap.style.display = '';
 }
 
 if (btnRig) btnRig.addEventListener('click', _toggleRig);
@@ -3615,10 +3588,6 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
     if (rigPanel) rigPanel.style.display = 'none';
     if (btnRig) btnRig.classList.remove('tb-btn-active');
   });
-  const rigGenBtn = document.getElementById('rig-gen-btn');
-  if (rigGenBtn) rigGenBtn.addEventListener('click', _generateRigForCurrent);
-  const rigSaveBtn = document.getElementById('rig-save-btn');
-  if (rigSaveBtn) rigSaveBtn.addEventListener('click', _saveGeneratedRig);
   const rigProfileSelect = document.getElementById('rig-profile-select');
   if (rigProfileSelect) rigProfileSelect.addEventListener('change', _previewSelectedRigProfile);
   const rigMidiOutputSelect = document.getElementById('rig-midi-output-select');
@@ -3736,37 +3705,6 @@ document.querySelectorAll('.view-seg-btn').forEach(btn => {
 });
 
 _syncViewSegPills();
-
-if (prefSameFingerPenalty) {
-  prefSameFingerPenalty.addEventListener('change', () => {
-    if (currentFile && currentTrackId != null) {
-      _notesCache.clear();
-      _solveCache.clear();
-      selectTrack(currentTrackId, songArtist.textContent);
-    }
-  });
-}
-
-if (prefInferLegato) {
-  prefInferLegato.addEventListener('change', () => {
-    if (currentFile && currentTrackId != null) {
-      _notesCache.clear();
-      _solveCache.clear();
-      selectTrack(currentTrackId, songArtist.textContent);
-    }
-  });
-}
-
-if (prefHandOverlay) {
-  prefHandOverlay.addEventListener('change', () => {
-    if (!renderer) return;
-    if (getSelectedRepresentationMode() === MODES.TABLATURE) {
-      renderer.render();
-      return;
-    }
-    _syncCoreSvgHandOverlay();
-  });
-}
 
 // ── Floating hand-visualization panel ──────────────────────────────────
 // Available in ALL representation modes. The panel hosts an iframe that

@@ -948,31 +948,6 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .tb-btn:hover { background: var(--bg-3); }
 .tb-btn.active { background: var(--signal-soft); border-color: var(--signal); color: var(--signal); }
 
-/* Prefs dropdown */
-.tb-prefs { position: relative; }
-.tb-prefs > summary {
-  list-style: none; cursor: pointer;
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg-2); border: 1px solid var(--line-2);
-  border-radius: var(--r-2); color: var(--fg-2); user-select: none;
-  transition: background 0.12s;
-}
-.tb-prefs > summary::-webkit-details-marker { display: none; }
-.tb-prefs[open] > summary { background: var(--bg-3); color: var(--fg-0); }
-.tb-prefs-body {
-  position: absolute; left: 0; bottom: calc(100% + 8px);
-  min-width: 260px;
-  background: var(--bg-1); border: 1px solid var(--line-1);
-  border-radius: var(--r-3); box-shadow: 0 8px 28px rgba(0,0,0,0.4);
-  padding: 10px 12px; z-index: 180;
-}
-.tb-pref-item {
-  display: flex; align-items: center; gap: 8px;
-  color: var(--fg-1); font-size: 12px; padding: 5px 0; cursor: pointer;
-}
-.tb-pref-item input { accent-color: var(--signal); }
-
 /* View segmented control */
 .view-seg {
   display: flex; align-items: center; gap: 3px;
@@ -2650,30 +2625,6 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   flex: 1;
 }
 
-/* AI generation: header buttons + status banner (single unified view).
-   Override .tx-btn's fixed 32x32 square so the text label is not clipped and
-   does not overflow onto the close (×) button. */
-.rig-gen-btn, .rig-save-btn {
-  width: auto;
-  height: auto;
-  min-height: 26px;
-  padding: 3px 10px;
-  font-size: 11px;
-  white-space: nowrap;
-}
-.rig-gen-btn:disabled, .rig-save-btn:disabled { opacity: 0.6; cursor: progress; }
-.rig-save-btn { display: none; }  /* shown only once a rig is generated */
-
-.rig-gen-status {
-  font-size: 11px;
-  line-height: 1.4;
-  padding: 6px 8px;
-  border-radius: 5px;
-  white-space: pre-wrap;
-}
-.rig-gen-status.busy { background: rgba(28, 96, 180, 0.12); color: #1a548c; border: 1px solid rgba(28, 96, 180, 0.30); }
-.rig-gen-status.error { background: rgba(180, 40, 40, 0.12); color: #9a2a2a; border: 1px solid rgba(180, 40, 40, 0.35); }
-
 .rig-bank-control {
   border: 1px solid rgba(120, 84, 46, 0.34);
   border-radius: 6px;
@@ -2723,6 +2674,35 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   white-space: pre-wrap;
 }
 .rig-bank-status.error { color: #9a2a2a; }
+
+/* Improvements (NAM / SnapTone / IR) */
+.rig-improvements-wrap { margin-top: 8px; }
+.rig-improve-summary { font-size: 12px; color: #3a2a16; margin: 2px 0 8px; line-height: 1.4; }
+.rig-improve-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 0;
+  border-top: 1px solid rgba(120, 84, 46, 0.18);
+}
+.rig-improve-prio {
+  flex: 0 0 auto;
+  min-width: 30px;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  padding: 2px 5px;
+  background: rgba(120, 84, 46, 0.14);
+  color: #6b4f30;
+  border: 1px solid rgba(120, 84, 46, 0.3);
+}
+.rig-improve-prio.prio-p1 { background: rgba(180, 40, 40, 0.16); color: #9a2a2a; border-color: rgba(180, 40, 40, 0.4); }
+.rig-improve-prio.prio-p2 { background: rgba(180, 120, 10, 0.18); color: #7a5e08; border-color: rgba(180, 120, 10, 0.4); }
+.rig-improve-prio.prio-p3 { background: rgba(28, 96, 180, 0.16); color: #1a548c; border-color: rgba(28, 96, 180, 0.4); }
+.rig-improve-head { font-size: 12px; font-weight: 700; color: #211708; }
+.rig-improve-asset { font-size: 12px; color: #2a1f12; margin-top: 2px; }
+.rig-improve-reason { font-size: 11px; color: #5a452c; margin-top: 2px; line-height: 1.35; }
 
 /* Guitar meta strip */
 .rig-meta {
