@@ -36,7 +36,8 @@ export async function streamFiles(onItem) {
 }
 
 export async function fetchRig(filename) {
-  // Valeton GP-180 rig for a song; null when the song has no rig.
+  // Valeton GP-180 rig for a song; null when the song has no rig. The server
+  // prefers a new-format gears sheet over the legacy .md when both exist.
   try {
     const res = await fetch(`/api/rig/${encodeURIComponent(filename)}`);
     if (!res.ok) return null;
@@ -125,47 +126,6 @@ export async function saveRigBinding(binding) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(binding || {}),
-  });
-  if (!res.ok) {
-    let detail = `HTTP ${res.status}`;
-    try { const b = await res.json(); if (b && b.detail) detail = b.detail; } catch (_e) { /* keep */ }
-    throw new Error(detail);
-  }
-  return await res.json();
-}
-
-export async function generateRig(
-  artist,
-  title,
-  { genre = null, targetGuitar = null, refresh = false } = {},
-) {
-  // Run the local AI wrapper to generate a GP-180 rig. Slow (spawns Codex).
-  // Returns the generated rig object on success. Throws an Error carrying the
-  // server detail on failure so the caller can show it without losing the
-  // currently displayed rig.
-  const res = await fetch('/api/rig/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ artist, title, genre, target_guitar: targetGuitar, refresh }),
-  });
-  if (!res.ok) {
-    let detail = `HTTP ${res.status}`;
-    try {
-      const body = await res.json();
-      if (body && body.detail) detail = body.detail;
-    } catch (_e) { /* keep status-only detail */ }
-    throw new Error(detail);
-  }
-  return await res.json();
-}
-
-export async function saveRig(filename, rig) {
-  // Persist a generated rig as the song's GP-180 .md sheet (replaces the old).
-  // Returns { saved, backup }. Throws an Error with the server detail on failure.
-  const res = await fetch('/api/rig/save', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ filename, rig }),
   });
   if (!res.ok) {
     let detail = `HTTP ${res.status}`;
