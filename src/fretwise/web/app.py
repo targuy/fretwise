@@ -2141,10 +2141,14 @@ def _register_routes(app: FastAPI) -> None:
 
     @app.get("/api/song-info/{filename}")
     async def get_song_info(filename: str) -> JSONResponse:
-        """Get full metadata for a specific song from the index."""
+        """Get full metadata for a specific song from the index and gears sheet."""
         songs = _load_catalog(app)
         stem = Path(filename).stem
-        info = songs.get(filename) or songs.get(stem) or {}
+        info = dict(songs.get(filename) or songs.get(stem) or {})
+        gear_info = _gears_song_info_for(filename)
+        for key, value in gear_info.items():
+            if value is not None and str(value).strip() and not str(info.get(key, "")).strip():
+                info[key] = value
         if not info:
             raise HTTPException(404, f"No metadata found for '{filename}'")
         return JSONResponse(info)
@@ -2593,7 +2597,12 @@ def _gears_root() -> Path:
 
     configured = (_settings.load().get("gears_dir") or "").strip()
     if configured:
-        return Path(configured)
+        path = Path(configured)
+        # An explicitly configured directory is honoured as-is (even when empty):
+        # the user/library chose it. Only fall back to the bundled sheets when the
+        # configured path is missing or not a directory (mis-configuration).
+        if path.is_dir():
+            return path
     return Path(__file__).resolve().parents[3] / "data" / "gears"
 
 
@@ -2649,6 +2658,29 @@ def _gears_view_for(filename: str) -> dict | None:
     except (OSError, _json.JSONDecodeError):
         return None
     return song_output_to_view(doc)
+
+
+def _gears_song_info_for(filename: str) -> dict[str, Any]:
+    """Build song-info metadata from the renderable gears sheet, when present."""
+
+    view = _gears_view_for(filename)
+    if view is None:
+        return {}
+    research = view.get("original_gear_research")
+    research = research if isinstance(research, dict) else {}
+    return {
+        "title": view.get("song"),
+        "artist": view.get("artist"),
+        "album": view.get("album"),
+        "genre": view.get("genre"),
+        "year": view.get("year"),
+        "guitarists": research.get("guitarist"),
+        "original_guitar": research.get("guitar_model") or research.get("guitar_type") or view.get("guitare_originale"),
+        "guitar_type": research.get("guitar_type"),
+        "gear_confidence": research.get("confidence") or view.get("confidence"),
+        "target_tone": view.get("comments"),
+        "rig_grade": view.get("fiabilite"),
+    }
 
 
 def _resolve_rig_bank_request(

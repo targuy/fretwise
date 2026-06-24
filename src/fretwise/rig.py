@@ -305,6 +305,7 @@ _EFFECT_ALIASES: dict[str, str] = {
     "CAB / IR": "CAB/IR",
     "CAB/IR": "CAB/IR",
     "N>S": "N→S",
+    "N->S": "N→S",
     "N→S": "N→S",
 }
 

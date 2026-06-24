@@ -42,6 +42,35 @@ def _doc(artist: str, title: str, confidence: str = "high") -> dict:
     }
 
 
+def _doc_v2(artist: str, title: str, confidence: str = "high") -> dict:
+    return {
+        "schemaVersion": "songsgear.fretwise.gear.v2",
+        "song": {"artist": artist, "title": title, "genre": "hard rock"},
+        "credits": {
+            "guitar": {
+                "guitaristsText": "Angus Young / Malcolm Young",
+                "type": "Solid-body electric",
+                "modelsText": "Gibson SG (Angus) / Gretsch Jet Firebird (Malcolm)",
+                "confidence": "high",
+            }
+        },
+        "tone": {"target": "Crunch.", "profile": "Crunch.", "summary": "UK SLP.", "confidence": confidence},
+        "rig": {
+            "name": f"{artist} - {title} - Valeton GP-180",
+            "confidence": confidence,
+            "equipment": {"model": "Valeton GP-180"},
+            "output": "FRFR / headphones",
+            "blocks": [
+                {"order": 6, "role": "Amplifier", "module": "AMP", "model": "UK SLP",
+                 "active": True, "settings": {"gain": 42}, "purpose": "", "matchQuality": "exact",
+                 "gap": "", "alternatives": []},
+            ],
+        },
+        "improvements": {"summary": "ok", "proposals": []},
+        "audit": {"validation": {"ok": True, "errors": [], "warnings": []}},
+    }
+
+
 _LEGACY_MD = """# Rig GP-180 — AC/DC · Highway to Hell
 
 Artiste : AC/DC
@@ -81,6 +110,27 @@ def test_gears_json_is_served_as_view(tmp_path: Path, monkeypatch) -> None:
     assert view["fiabilite"] == "A"  # high -> A
     assert view["reglages"]["AMP"]["preset"] == "UK SLP"
     assert view["improvements"]["proposals"]
+
+
+def test_song_info_falls_back_to_gears_metadata(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(web_settings, "_CONFIG_DIR", tmp_path / ".fretwise")
+    monkeypatch.setattr(web_settings, "_CONFIG_FILE", tmp_path / ".fretwise" / "config.json")
+    gears = tmp_path / "gears"
+    gears.mkdir()
+    (gears / "ac-dc__highway-to-hell.json").write_text(
+        json.dumps(_doc_v2("AC/DC", "Highway to Hell")), encoding="utf-8"
+    )
+    web_settings.save({"gears_dir": str(gears), "index_path": ""})
+    client = TestClient(create_app(fixtures_dir=tmp_path))
+
+    res = client.get("/api/song-info/AC_DC - Highway to Hell.gp5")
+
+    assert res.status_code == 200
+    info = res.json()
+    assert info["artist"] == "AC/DC"
+    assert info["title"] == "Highway to Hell"
+    assert info["guitarists"] == "Angus Young / Malcolm Young"
+    assert info["original_guitar"] == "Gibson SG (Angus) / Gretsch Jet Firebird (Malcolm)"
 
 
 def test_gears_json_preferred_over_legacy_md(tmp_path: Path, monkeypatch) -> None:

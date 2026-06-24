@@ -1,10 +1,11 @@
 """Convert a SongsGear/Fretwise rig export into the FretWise rig view dict.
 
-Primary format is ``songsgear.fretwise.rig.v1`` (blocks under ``rig.blocks``,
-``musicalVerdict``/``musicalContext`` sidecars). The older assembled-rig shape
-(blocks under ``gp180.blocks`` with a ``general`` section) is still accepted so
-earlier samples keep working. Both map onto the same view dict the web renderer
-consumes for ``.md`` sheets — see :func:`song_output_to_view`.
+Primary formats are ``songsgear.fretwise.rig.v1`` (blocks under ``rig.blocks``,
+``musicalVerdict``/``musicalContext`` sidecars) and the compact render-oriented
+``songsgear.fretwise.gear.v2``. The older assembled-rig shape (blocks under
+``gp180.blocks`` with a ``general`` section) is still accepted so earlier
+samples keep working. All map onto the same view dict the web renderer consumes
+for ``.md`` sheets — see :func:`song_output_to_view`.
 """
 
 from __future__ import annotations
@@ -192,6 +193,79 @@ def _view_from_v1(doc: dict) -> dict:
     }
 
 
+def _research_from_v2(doc: dict) -> dict | None:
+    credits = doc.get("credits") if isinstance(doc.get("credits"), dict) else {}
+    guitar = credits.get("guitar") if isinstance(credits.get("guitar"), dict) else {}
+    if not guitar:
+        return None
+    return {
+        "guitarist": guitar.get("guitaristsText") or " / ".join(guitar.get("guitarists") or []),
+        "guitar_type": guitar.get("type"),
+        "guitar_model": guitar.get("modelsText") or " / ".join(guitar.get("models") or []),
+        "confidence": guitar.get("confidence"),
+        "evidence_basis": guitar.get("evidence"),
+        "notes": guitar.get("notes"),
+        "source": guitar.get("source"),
+    }
+
+
+def _view_from_v2(doc: dict) -> dict:
+    """Adapter for compact render sheets.
+
+    The compact shape removes generation history but carries the same final
+    rendering data. Rehydrate the v1 sidecars and reuse the v1 renderer so the
+    web UI gets identical field names.
+    """
+    song = doc.get("song") if isinstance(doc.get("song"), dict) else {}
+    tone = doc.get("tone") if isinstance(doc.get("tone"), dict) else {}
+    rig = doc.get("rig") if isinstance(doc.get("rig"), dict) else {}
+    audit = doc.get("audit") if isinstance(doc.get("audit"), dict) else {}
+    validation = audit.get("validation") if isinstance(audit.get("validation"), dict) else {}
+
+    v1_doc = {
+        "schemaVersion": "songsgear.fretwise.rig.v1",
+        "song": {
+            "artist": song.get("artist"),
+            "title": song.get("title"),
+            "album": song.get("album"),
+            "year": song.get("year"),
+            "genre": song.get("genre"),
+        },
+        "rig": {
+            "rigName": rig.get("name"),
+            "status": None,
+            "confidence": rig.get("confidence") or tone.get("confidence"),
+            "needsReview": bool(tone.get("needsReview")),
+            "equipment": rig.get("equipment") or {"model": "Valeton GP-180"},
+            "guitar": rig.get("recommendedGuitar"),
+            "output": rig.get("output"),
+            "toneProfile": tone.get("profile"),
+            "signalChainSummary": tone.get("summary"),
+            "blocks": rig.get("blocks") if isinstance(rig.get("blocks"), list) else [],
+        },
+        "musicalVerdict": {
+            "targetTone": tone.get("target"),
+            "mustHave": tone.get("mustHave") or [],
+            "avoid": tone.get("avoid") or [],
+            "gearClues": tone.get("gearClues") or [],
+            "corrections": tone.get("corrections") or [],
+            "confidence": tone.get("confidence"),
+            "needsManualReview": bool(tone.get("needsReview")),
+        },
+        "musicalContext": {
+            "primaryGenre": song.get("genre"),
+            "styleTags": song.get("subgenres") or [],
+            "targetTone": tone.get("target"),
+            "confidence": song.get("genreConfidence") or tone.get("confidence"),
+        },
+        "improvements": doc.get("improvements") if isinstance(doc.get("improvements"), dict) else {},
+        "validation": validation,
+        "source": {key: value for key, value in audit.items() if key != "validation"},
+        "originalGearResearch": _research_from_v2(doc),
+    }
+    return _view_from_v1(v1_doc)
+
+
 def _best_equipment(general: dict, role_keyword: str) -> str | None:
     for entry in general.get("bestPossibleEquipment") or []:
         if isinstance(entry, dict) and role_keyword.lower() in str(entry.get("role", "")).lower():
@@ -295,6 +369,8 @@ def song_output_to_view(doc: dict) -> dict:
         doc = doc["fretwiseExport"]
     schema = str(doc.get("schemaVersion") or "")
     rig = doc.get("rig")
+    if schema == "songsgear.fretwise.gear.v2":
+        return _view_from_v2(doc)
     if schema.startswith("songsgear.fretwise.rig") or (isinstance(rig, dict) and "blocks" in rig):
         return _view_from_v1(doc)
     return _view_from_legacy(doc)
