@@ -129,6 +129,69 @@ def test_v1_grade_table():
         assert song_output_to_view(_v1(confidence))["fiabilite"] == expected, confidence
 
 
+# --- adapter: songsgear.fretwise.gear.v2 compact ----------------------------
+
+def test_compact_v2_maps_to_same_render_view():
+    doc = {
+        "schemaVersion": "songsgear.fretwise.gear.v2",
+        "id": "AC_DC__Highway_To_Hell",
+        "song": {
+            "artist": "AC/DC",
+            "title": "Highway To Hell",
+            "genre": "hard rock",
+            "subgenres": ["classic rock"],
+            "genreConfidence": "high",
+        },
+        "credits": {
+            "guitar": {
+                "guitaristsText": "Angus Young / Malcolm Young",
+                "guitarists": ["Angus Young", "Malcolm Young"],
+                "type": "Solid-body electric",
+                "modelsText": "Gibson SG (Angus) / Gretsch Jet Firebird (Malcolm)",
+                "models": ["Gibson SG (Angus)", "Gretsch Jet Firebird (Malcolm)"],
+                "confidence": "high",
+                "evidence": "trained knowledge",
+                "notes": "Iconic pairing.",
+                "source": "songs_guitar_enriched_audited.json",
+            }
+        },
+        "tone": {
+            "target": "Classic AC/DC crunch.",
+            "profile": "Medium gain crunch.",
+            "summary": "UK SLP into UK Vintage 4x12.",
+            "mustHave": ["Power-amp drive"],
+            "avoid": ["High gain"],
+            "gearClues": ["Marshall Plexi"],
+            "corrections": [],
+            "confidence": "high",
+            "needsReview": True,
+        },
+        "rig": {
+            "name": "AC/DC - Highway To Hell - Valeton GP-180",
+            "confidence": "high",
+            "equipment": {"model": "Valeton GP-180"},
+            "recommendedGuitar": "Default electric guitar",
+            "output": "FRFR / headphones",
+            "blocks": [
+                {"order": 6, "role": "Amplifier", "module": "AMP", "model": "UK SLP", "active": True,
+                 "settings": {"gain": 42}, "purpose": "Plexi.", "matchQuality": "exact", "gap": "",
+                 "alternatives": []},
+            ],
+        },
+        "improvements": {"summary": "Strong match.", "proposals": []},
+        "audit": {"validation": {"ok": True, "errors": [], "warnings": ["Multi-track studio."]}},
+    }
+
+    view = song_output_to_view(doc)
+    assert view["artist"] == "AC/DC"
+    assert view["song"] == "Highway To Hell"
+    assert view["fiabilite"] == "A"
+    assert view["reglages"]["AMP"]["preset"] == "UK SLP"
+    assert "À garder : Power-amp drive" in view["notes"]
+    assert "Multi-track studio." in view["limites"]
+    assert view["guitare_originale"] == "Gibson SG (Angus) / Gretsch Jet Firebird (Malcolm) (Angus Young / Malcolm Young)"
+
+
 # --- adapter: legacy assembled-rig shape (back-compat) ----------------------
 
 def test_legacy_gp180_shape_still_supported():
