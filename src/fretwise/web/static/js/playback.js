@@ -3,6 +3,13 @@
  * metronome, A/B loop selection, and beat-level scheduling.
  */
 
+// Single-entry in-memory cache of the last fetched SF2/SF3 ArrayBuffer, keyed by
+// its (versioned, immutable) URL. Lets a re-created engine — or a genuine bank
+// switch back to a previously loaded bank — skip the multi-hundred-MB download.
+// Bounded to ONE bank so we never retain 2× a 400 MB buffer; switching banks
+// drops the previous one. Module-level so it survives engine re-creation.
+const _SF2_BUFFER_CACHE = new Map();
+
 export class PlaybackEngine {
   /**
    * @param {import('./renderer.js').TabRenderer} renderer
@@ -19,6 +26,12 @@ export class PlaybackEngine {
     // fallback (MusicXML/MIDI). Drives a meter-aware timeline so the cursor, the
     // audio and every track stay aligned across meter changes / pickup bars.
     this._measureBeats = Array.isArray(opts.measureBeats) ? opts.measureBeats : null;
+    // Per-measure tempo in BPM (index i = measure i+1), from the real per-note
+    // tempo shipped by the backend. null ⇒ single-tempo fallback (this.tempo
+    // everywhere), which reproduces the legacy behaviour exactly. Drives a
+    // tempo-aware timeline so a mid-song tempo change (ritardando, faster chorus)
+    // no longer desyncs the cursor and the audio from the music.
+    this._measureTempos = Array.isArray(opts.measureTempos) ? opts.measureTempos : null;
     this._slotStartBeat = null;  // lazily (re)built slot timeline; see _ensureTimeline()
     this.speed = 1.0;       // playback speed multiplier
     this.loopStart = -1;
@@ -35,6 +48,20 @@ export class PlaybackEngine {
     this._primaryVolume = 0.8; // current/open-track volume (CC7 on ch 0); balances
                                // it against the 0.8 backing tracks instead of dominating
     this._lastScheduledMeasure = -1;
+    // ── Lookahead scheduler (see _pumpScheduler) ──────────────────────
+    // Notes are queued on the AudioContext clock up to _lookaheadSec ahead of
+    // "now", from a per-play anchor mapping song-position → AudioContext time —
+    // instead of being scheduled at t=now the instant the cursor crosses a bar
+    // (which the browser then plays late, and which coupled audio timing to the
+    // render frame). _schedLeadSec is the startup head-start given to the first
+    // downbeat so it is placed slightly in the future.
+    this._schedLeadSec = 0.12;
+    this._lookaheadSec = 0.25;
+    this._audioAnchorTime = 0;      // AudioContext time mapped to _audioAnchorSongSec
+    this._audioAnchorSongSec = 0;   // song position (speed-1 seconds) at the anchor
+    this._schedulerMeasure = 0;     // next measure the pump will schedule
+    this._skipMeasure = -1;         // measure the sub-measure resume-skip applies to
+    this._firstScheduleSkipSec = 0; // seconds to skip inside _skipMeasure (resume/seek)
     this._spessa = null;          // SpessaSynth Synthetizer (shared, all MIDI channels)
     this._synth = null;           // 'spessa' sentinel | soundfont-player Player | null (osc)
     this._synthLoading = false;   // loading guard to avoid double-init
@@ -62,6 +89,7 @@ export class PlaybackEngine {
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
     this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
     this.onSynthProgress = null;     // (frac|null, loadedMB, totalMB) → void, during SF download
+    this.onSoundfontWarning = null;  // (message, {presetCount, url}) → void, when the active bank is not General MIDI
     this.onTimeChange = null;     // (seconds) → void, called on every tick
 
     // Audio resilience: browsers suspend/interrupt the AudioContext (tab
@@ -140,12 +168,16 @@ export class PlaybackEngine {
     this.tempo = opts.tempo || renderer.tempo || 120;
     this.bpm = opts.beatsPerMeasure || renderer.bpm || 4;
     this._measureBeats = Array.isArray(opts.measureBeats) ? opts.measureBeats : null;
+    this._measureTempos = Array.isArray(opts.measureTempos) ? opts.measureTempos : null;
     this._slotStartBeat = null;  // force timeline rebuild for the new score
     this.speed = 1.0;
     this.loopStart = -1;
     this.loopEnd = -1;
     this._startMeasure = 0;
     this._lastScheduledMeasure = -1;
+    this._schedulerMeasure = 0;
+    this._skipMeasure = -1;
+    this._firstScheduleSkipSec = 0;
     this._resumeSubMeasureSec = 0;
     // Default to canvas scrolling; main.js re-asserts this per render once it
     // knows whether an SvgCursorDriver was created for the new view mode.
@@ -181,31 +213,47 @@ export class PlaybackEngine {
   _ensureTimeline() {
     const n = this.totalMeasures;
     const beats = this._measureBeats;
+    const tempos = this._measureTempos;
     if (this._slotStartBeat
         && this._slotStartBeat.length === n + 1
         && this._timelineBeatsRef === beats
+        && this._timelineTemposRef === tempos
         && this._timelineRendererRef === this.renderer
-        && this._timelineBpm === this.bpm) {
+        && this._timelineBpm === this.bpm
+        && this._timelineTempo === this.tempo) {
       return;
     }
     const nums = this.renderer ? this.renderer.measureNumbers : null;
     const minMeasure = (nums && nums.length) ? nums[0] : 1;
     const beatsFor = (globalIdx0) =>
       (beats && beats[globalIdx0] > 0) ? beats[globalIdx0] : this.bpm;
+    const tempoFor = (globalIdx0) =>
+      (tempos && tempos[globalIdx0] > 0) ? tempos[globalIdx0] : this.tempo;
     // Absolute onset of the first rendered measure = beats of all measures before it.
     let base = 0;
     for (let i = 0; i < minMeasure - 1; i++) base += beatsFor(i);
-    const start = new Array(n + 1);
+    const start = new Array(n + 1);     // cumulative quarter-beats at slot start
+    const startSec = new Array(n + 1);  // cumulative seconds at slot start (speed 1)
+    const secPerBeat = new Array(n);    // per-slot seconds/quarter-beat (speed 1)
     start[0] = 0;
+    startSec[0] = 0;
     for (let s = 0; s < n; s++) {
       const globalIdx0 = ((nums && nums[s] != null) ? nums[s] : (minMeasure + s)) - 1;
-      start[s + 1] = start[s] + beatsFor(globalIdx0);
+      const slotBeats = beatsFor(globalIdx0);
+      const spb = 60 / tempoFor(globalIdx0);   // seconds per quarter-beat, speed 1
+      start[s + 1] = start[s] + slotBeats;
+      startSec[s + 1] = startSec[s] + slotBeats * spb;
+      secPerBeat[s] = spb;
     }
     this._slotStartBeat = start;
+    this._slotStartSecBase = startSec;
+    this._slotSecPerBeatBase = secPerBeat;
     this._measureBaseBeat = base;
     this._timelineBeatsRef = beats;
+    this._timelineTemposRef = tempos;
     this._timelineRendererRef = this.renderer;
     this._timelineBpm = this.bpm;
+    this._timelineTempo = this.tempo;
   }
 
   /** Onset (quarter beats relative to the first measure) at the start of slot `m`. */
@@ -215,9 +263,28 @@ export class PlaybackEngine {
     return this._slotStartBeat[i];
   }
 
-  /** Wall-clock seconds (from the first measure) at the start of cursor slot `m`. */
+  /** Wall-clock seconds (from the first measure) at the start of cursor slot `m`.
+   *  Tempo-aware: sums each preceding measure's own duration, so a mid-song
+   *  tempo change places every later measure at its true time. Speed is applied
+   *  at read time (uniform multiplier) so changing speed needs no rebuild. */
   _measureStartSec(m) {
-    return this._slotStartBeatAt(m) * this._secPerBeat;
+    this._ensureTimeline();
+    const i = Math.max(0, Math.min(m, this.totalMeasures));
+    return this._slotStartSecBase[i] / this.speed;
+  }
+
+  /** Seconds per quarter-beat inside cursor slot `m` (tempo of that measure). */
+  _measureSecPerBeat(m) {
+    this._ensureTimeline();
+    const i = Math.max(0, Math.min(m, this.totalMeasures - 1));
+    const spb = this._slotSecPerBeatBase[i];
+    return (spb > 0 ? spb : (60 / this.tempo)) / this.speed;
+  }
+
+  /** AudioContext time at which song position `songSec` (speed-scaled seconds
+   *  from the first measure) should sound, per the current play anchor. */
+  _songSecToAudioTime(songSec) {
+    return this._audioAnchorTime + (songSec - this._audioAnchorSongSec);
   }
 
   /** Absolute measure-start onset (note-onset units) for cursor slot `m`.
@@ -232,12 +299,12 @@ export class PlaybackEngine {
    *  bound signals past-the-end so the play loop can stop). */
   _secToMeasure(sec) {
     this._ensureTimeline();
-    const beat = Math.max(0, sec / this._secPerBeat);
-    const starts = this._slotStartBeat;
-    let lo = 0, hi = starts.length - 1;          // largest m with starts[m] <= beat
+    const target = Math.max(0, sec * this.speed);   // seconds at speed 1
+    const starts = this._slotStartSecBase;
+    let lo = 0, hi = starts.length - 1;          // largest m with starts[m] <= target
     while (lo < hi) {
       const mid = (lo + hi + 1) >> 1;
-      if (starts[mid] <= beat) lo = mid; else hi = mid - 1;
+      if (starts[mid] <= target) lo = mid; else hi = mid - 1;
     }
     return lo;
   }
@@ -339,25 +406,61 @@ export class PlaybackEngine {
   }
 
   /**
+   * Pick the lowest free MIDI channel for a secondary track.
+   * Channel 0 is the primary track and channel 9 is the GM percussion channel
+   * (a melodic part placed there plays as drums) — both are skipped. Reuses
+   * channels freed by removed tracks; overflows past 14 melodic channels share
+   * channel 15 rather than colliding with primary/percussion.
+   * @returns {number} MIDI channel index (1-8, 10-15)
+   */
+  _allocateMidiChannel() {
+    const used = new Set(this._secondaryChannels.map((c) => c.midiChannel));
+    for (let ch = 1; ch <= 15; ch += 1) {
+      if (ch === 9) continue;        // GM percussion channel — never melodic
+      if (!used.has(ch)) return ch;
+    }
+    return 15;                        // >14 backing tracks: share the last channel
+  }
+
+  /**
+   * Heuristic: is this a drum/percussion track? Such tracks must play on GM
+   * channel 9 (the drum kit) — a melodic program (the GP file often stores 0 for
+   * them, i.e. Acoustic Grand Piano) makes the kit sound like a piano.
+   * @param {string} name
+   * @returns {boolean}
+   */
+  static _isPercussionTrack(name) {
+    return /\b(drums?|percussion|batterie|claps?|cymbals?|snare|kick|hi-?hat|toms?)\b/i.test(name || '');
+  }
+
+  /**
    * Add a secondary audio channel for a track (plays alongside the primary).
    * @param {number} trackId
    * @param {string} trackName
    * @param {Array}  results — note objects from /api/notes
    * @param {number} beatsPerMeasure
    * @param {number} [midiProgram] — GM program number (0-127); inferred from name if absent
+   * @param {string} [kind] — backend track kind ("guitar"|"bass"|"drums"|…); the
+   *   authoritative percussion signal (a mis-named drum track no longer plays as piano)
    */
-  addSecondaryChannel(trackId, trackName, results, beatsPerMeasure, midiProgram) {
+  addSecondaryChannel(trackId, trackName, results, beatsPerMeasure, midiProgram, kind) {
     this.removeSecondaryChannel(trackId); // remove if already present
     const bpm = beatsPerMeasure || this.bpm;
     const measures = PlaybackEngine._buildMeasures(results, bpm);
-    // MIDI channels 1-15 for secondary tracks (0 is reserved for primary)
-    const midiChannel = Math.min(15, this._secondaryChannels.length + 1);
+    // Trust the backend kind first (GP 7/8 carries a real per-track instrument
+    // kind); fall back to the name heuristic for adapters that don't (MusicXML/
+    // MIDI). Drums MUST play on GM channel 9 or the kit sounds like a piano.
+    const percussion = String(kind || '').toLowerCase() === 'drums'
+      || PlaybackEngine._isPercussionTrack(trackName);
+    // Percussion always plays on GM channel 9 (the drum kit); melodic tracks get
+    // the next free non-9 channel.
+    const midiChannel = percussion ? 9 : this._allocateMidiChannel();
     const resolvedProgram = (Number.isInteger(midiProgram) && midiProgram >= 0)
       ? midiProgram
       : PlaybackEngine._instrumentToMidiProgram(PlaybackEngine._inferInstrument(trackName));
     const ch = {
       trackId, trackName, measures, synth: null, gain: 0.8, enabled: true, _loading: false,
-      midiChannel, midiProgram: resolvedProgram,
+      midiChannel, midiProgram: resolvedProgram, percussion,
     };
     this._secondaryChannels.push(ch);
     if (this.audioEnabled && this._audioCtx) {
@@ -390,13 +493,20 @@ export class PlaybackEngine {
     if (ch._loading || ch.synth) return;
 
     if (this._spessa) {
-      this._spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
-      this._ensurePitchBendRange(ch.midiChannel);
-      ch.synth = 'spessa';
-      console.log(`[FretWise] secondary "${ch.trackName}" → GM ${ch.midiProgram} (ch ${ch.midiChannel})`);
-      if (this.isPlaying && this._lastScheduledMeasure >= 0) {
-        this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
+      // Channel 9 is the GM drum kit: do NOT send a melodic programChange (it would
+      // turn the kit into a piano/guitar). Pitch-bend range is set lazily, only when
+      // a note actually bends (see _schedulePitchAutomation), to avoid flooding the
+      // synth with RPN messages it logs as "Unrecognized RPN" for silent channels.
+      if (!ch.percussion) {
+        this._spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
       }
+      // Track volume via CC7 (like the primary), so velocity carries only the
+      // note dynamics/expression and the mixer slider works live on held notes.
+      try { this._spessa.controllerChange(ch.midiChannel, 7, Math.round((ch.gain ?? 0.8) * 127)); } catch (_) {}
+      ch.synth = 'spessa';
+      console.log(`[FretWise] secondary "${ch.trackName}" → `
+        + (ch.percussion ? 'percussion (ch 9)' : `GM ${ch.midiProgram} (ch ${ch.midiChannel})`));
+      this._catchUpChannel(ch);
       return;
     }
 
@@ -433,9 +543,7 @@ export class PlaybackEngine {
         }
       );
       console.log(`[FretWise] secondary "${ch.trackName}" ready (${instName})`);
-      if (this.isPlaying && this._lastScheduledMeasure >= 0) {
-        this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
-      }
+      this._catchUpChannel(ch);
     } catch (err) {
       console.warn(`[FretWise] secondary "${ch.trackName}" load failed:`, err);
       ch.synth = null;
@@ -488,7 +596,6 @@ export class PlaybackEngine {
     this._midiProgram = program;
     if (this._spessa) {
       this._spessa.programChange(0, this._resolveProgram(program));
-      this._ensurePitchBendRange(0);
       return;
     }
     // Soundfont fallback: map GM program to nearest MusyngKite instrument
@@ -516,10 +623,52 @@ export class PlaybackEngine {
     if (!presets || !presets.length) return desired;  // not loaded yet: trust caller
     const bank0 = presets.filter((p) => (p.bank ?? 0) === 0);
     const pool = bank0.length ? bank0 : presets;
+    // 1. Exact GM program present → use it.
     if (pool.some((p) => p.program === desired)) return desired;
+    // 2. Any preset in the same GM family (the 8-program block: guitars 24-31,
+    //    basses 32-39, pianos 0-7, …). Keeps a bass/keys/strings part on its own
+    //    family instead of collapsing every channel onto a guitar (or preset 0,
+    //    often DRUMS) when a non-GM / single-instrument bank is loaded.
+    const famStart = Math.floor(Math.max(0, Math.min(127, desired)) / 8) * 8;
+    const sameFamily = pool.find((p) => p.program >= famStart && p.program <= famStart + 7);
+    if (sameFamily) return sameFamily.program;
+    // 3. Last resort: a guitar-named preset, else the first available.
     const guitar = pool.find((p) => /guitar|gtr/i.test(p.presetName || p.name || ''));
     if (guitar) return guitar.program;
     return pool[0].program;
+  }
+
+  /**
+   * Fire onSoundfontWarning when the loaded bank does not look like General MIDI.
+   * A GM bank exposes presets spanning many families (bass 32-39, keys, strings,
+   * a drum kit); a single-instrument / guitar-only pack has a handful. On such a
+   * bank, non-guitar tracks have nowhere to map and everything collapses onto one
+   * timbre — the "wrong instruments whatever the soundfont" symptom. Heuristic,
+   * best-effort: never throws, only advisory.
+   * @param {string} [url] — resolved soundfont URL (for the diagnostic message)
+   */
+  _warnIfNotGeneralMidi(url) {
+    try {
+      const presets = this._spessaPresets || [];
+      if (!presets.length) return;
+      const bank0 = presets.filter((p) => (p.bank ?? 0) === 0);
+      const programs = new Set(bank0.map((p) => p.program));
+      const hasBass = [...programs].some((p) => p >= 32 && p <= 39);
+      const hasDrums = presets.some((p) => (p.bank ?? 0) === 128)
+        || presets.some((p) => /drum|kit|percussion/i.test(p.presetName || p.name || ''));
+      // A real GM bank has dozens of distinct programs; < 12 or no bass family is
+      // a strong "single-instrument / non-GM pack" signal.
+      const looksGm = programs.size >= 12 && hasBass;
+      if (looksGm) return;
+      const name = (() => { try { return decodeURIComponent(new URL(url, location.href).searchParams.get('name') || ''); } catch (_) { return ''; } })();
+      const msg = `Le soundfont actif${name ? ` « ${name} »` : ''} n'est pas un banc `
+        + `General MIDI complet (${programs.size} instrument(s)`
+        + `${hasDrums ? '' : ', pas de batterie'}${hasBass ? '' : ', pas de basse'}). `
+        + `Les pistes autres que guitare sonneront faux. Choisissez un banc GM `
+        + `(ex. GeneralUser-GS) dans les réglages.`;
+      console.warn('[FretWise]', msg);
+      this.onSoundfontWarning?.(msg, { presetCount: programs.size, url });
+    } catch (_) { /* advisory only */ }
   }
 
   /**
@@ -567,7 +716,6 @@ export class PlaybackEngine {
     // Secondary channels
     if (this._spessa) {
       try { this._spessa.programChange(channel, program); } catch (_) {}
-      this._ensurePitchBendRange(channel);
     }
     // Update the stored midiProgram for the matching secondary channel
     const ch = this._secondaryChannels.find(c => c.midiChannel === channel);
@@ -599,7 +747,13 @@ export class PlaybackEngine {
    */
   setChannelVolume(channel, vol) {
     const v = Math.max(0, Math.min(1, vol));
-    if (channel === 0) this._primaryVolume = v;
+    if (channel === 0) {
+      this._primaryVolume = v;
+    } else {
+      // Persist on the secondary channel so re-scheduling / catch-up keeps the level.
+      const ch = this._secondaryChannels.find((c) => c.midiChannel === channel);
+      if (ch) ch.gain = v;
+    }
     if (this._spessa) {
       try { this._spessa.controllerChange(channel, 7, Math.round(v * 127)); } catch (_) { /* pre-init */ }
     }
@@ -617,9 +771,7 @@ export class PlaybackEngine {
     // so a pause+resume mid-measure picks up exactly where it stopped instead
     // of restarting the current measure from beat 0.
     const resumeOffsetSec = this._resumeSubMeasureSec || 0;
-    this._startTime = performance.now() - resumeOffsetSec * 1000;
     this._resumeSubMeasureSec = 0;  // consumed
-    this._lastScheduledMeasure = -1;
 
     if ((this.metronome || this.audioEnabled) && !this._audioCtx) {
       this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -633,17 +785,112 @@ export class PlaybackEngine {
       this._audioCtx.resume();
     }
 
-    // Schedule the first measure immediately (cursor hasn't moved yet).
-    // skipBeforeMeasureSec drops the notes that have already played before
-    // the pause point so they don't replay on resume.
-    const m0 = this._startMeasure;
-    this._lastScheduledMeasure = m0;
-    if (this.metronome) this._scheduleMetronomeMeasure(m0);
-    if (this.audioEnabled) {
-      this._scheduleMeasureNotes(m0, 0, resumeOffsetSec);
-    }
+    // Anchor the audio clock to the current song position, plus a small startup
+    // lead so the very first downbeat is queued slightly in the future (never at
+    // t=now, which the browser plays late). The cursor clock is offset by the
+    // same lead so the moving cursor and the sound stay aligned. The lookahead
+    // pump (_pumpScheduler), driven every tick, then queues each measure at its
+    // true absolute AudioContext time — timing is no longer tied to when the
+    // cursor happens to cross a bar line during a (possibly janky) render frame.
+    const lead = (this._audioCtx && this.audioEnabled) ? this._schedLeadSec : 0;
+    this._startTime = performance.now() + lead * 1000 - resumeOffsetSec * 1000;
+    this._audioAnchorSongSec = this._measureStartSec(this._startMeasure) + resumeOffsetSec;
+    this._audioAnchorTime = (this._audioCtx ? this._audioCtx.currentTime : 0) + lead;
+    this._schedulerMeasure = this._startMeasure;
+    this._skipMeasure = this._startMeasure;
+    this._firstScheduleSkipSec = resumeOffsetSec;
+    this._lastScheduledMeasure = this._startMeasure - 1;
+
+    // Prime the pump once so the first measures are queued before the first
+    // animation frame (a delayed first RAF must not create a startup gap).
+    if (this.audioEnabled || this.metronome) this._pumpScheduler();
 
     this._tick();
+  }
+
+  /**
+   * Lookahead scheduler pump. Queues every measure whose start falls within
+   * `_lookaheadSec` of the AudioContext clock, at its true absolute time derived
+   * from the play anchor. Idempotent per measure (advances `_schedulerMeasure`),
+   * cheap enough to call on every animation frame. This is the decoupling that
+   * keeps notes on time regardless of render-frame jitter.
+   */
+  _pumpScheduler() {
+    if (!this._audioCtx) return;
+    const horizon = this._audioCtx.currentTime + this._lookaheadSec;
+    let guard = 0;
+    while (this._schedulerMeasure < this.totalMeasures && guard++ < 1024) {
+      const m = this._schedulerMeasure;
+      const absStart = this._songSecToAudioTime(this._measureStartSec(m));
+      if (absStart > horizon) break;   // not due yet
+      const skip = (m === this._skipMeasure) ? (this._firstScheduleSkipSec || 0) : 0;
+      if (this.metronome) this._scheduleMetronomeMeasure(m, absStart, skip);
+      if (this.audioEnabled) this._scheduleMeasureNotes(m, absStart, skip);
+      this._lastScheduledMeasure = m;
+      this._schedulerMeasure = m + 1;
+    }
+  }
+
+  /**
+   * Re-anchor and restart the scheduler at `measure` (used on A/B loop wrap).
+   * Cuts notes already queued past the loop point so they don't ring over the
+   * restart, and resets the cursor clock so the two stay aligned.
+   */
+  _restartSegment(measure) {
+    const lead = (this._audioCtx && this.audioEnabled) ? this._schedLeadSec : 0;
+    this._startMeasure = measure;
+    this._startTime = performance.now() + lead * 1000;
+    this._audioAnchorSongSec = this._measureStartSec(measure);
+    this._audioAnchorTime = (this._audioCtx ? this._audioCtx.currentTime : 0) + lead;
+    this._schedulerMeasure = measure;
+    this._skipMeasure = measure;
+    this._firstScheduleSkipSec = 0;
+    this._lastScheduledMeasure = measure - 1;
+    if (this._spessa) {
+      try { this._spessa.stopAll?.(); } catch (_) {}
+      this._resetPitchBends();
+    } else if (this._synth && this._synth !== 'spessa') {
+      try { this._synth.stop(); } catch (_) {}
+    }
+  }
+
+  /**
+   * Schedule ONE just-loaded secondary channel to catch up the measures the pump
+   * has already queued for the other channels, using the shared anchor so it
+   * lands in sync. Used when a backing track's instrument resolves mid-playback.
+   * @param {Object} ch
+   */
+  _catchUpChannel(ch) {
+    if (!this.isPlaying || !this._audioCtx || !ch || !ch.synth) return;
+    const cur = this.renderer ? this.renderer.cursorMeasure : this._startMeasure;
+    const elapsed = (performance.now() - this._startTime) / 1000;
+    const curSongSec = this._measureStartSec(this._startMeasure) + elapsed;
+    const skipInCur = Math.max(0, curSongSec - this._measureStartSec(cur));
+    const upTo = Math.max(cur, this._schedulerMeasure - 1);
+    for (let m = cur; m <= upTo && m < this.totalMeasures; m += 1) {
+      const absStart = this._songSecToAudioTime(this._measureStartSec(m));
+      this._scheduleChannelNotes(ch, m, absStart, (m === cur) ? skipInCur : 0);
+    }
+  }
+
+  /**
+   * Rewind the pump to the current playhead so every channel (re)schedules from
+   * the present. Safe ONLY when nothing is currently sounding (all channels were
+   * silent because the synth was still loading) — used when SpessaSynth finishes
+   * loading mid-playback. Re-scheduling audible notes this way would double them.
+   */
+  _resyncSchedulerToNow() {
+    if (!this.isPlaying || !this._audioCtx) return;
+    const cur = this.renderer ? this.renderer.cursorMeasure : this._startMeasure;
+    const elapsed = (performance.now() - this._startTime) / 1000;
+    const curSongSec = this._measureStartSec(this._startMeasure) + elapsed;
+    this._audioAnchorTime = this._audioCtx.currentTime;
+    this._audioAnchorSongSec = curSongSec;
+    this._schedulerMeasure = cur;
+    this._skipMeasure = cur;
+    this._firstScheduleSkipSec = Math.max(0, curSongSec - this._measureStartSec(cur));
+    this._lastScheduledMeasure = cur - 1;
+    this._pumpScheduler();
   }
 
   /** Pause playback */
@@ -804,15 +1051,15 @@ export class PlaybackEngine {
     // each measure consumes its own real duration, so the cursor no longer
     // drifts from the audio after a meter change or pickup bar.
     let targetMeasure = this._secToMeasure(this._measureStartSec(this._startMeasure) + elapsed);
+    // During the startup lead (elapsed < 0) `targetMeasure` can fall below the
+    // start; hold the cursor at the start measure until real playback begins.
+    if (targetMeasure < this._startMeasure) targetMeasure = this._startMeasure;
 
-    // Loop handling
+    // Loop handling — re-anchor the scheduler at the loop start (cuts ringing
+    // notes past the loop point) and reset the cursor clock in one place.
     if (this.loopStart >= 0 && this.loopEnd >= this.loopStart) {
-      const loopLen = this.loopEnd - this.loopStart + 1;
       if (targetMeasure > this.loopEnd) {
-        // Loop back: restart from loopStart
-        this._startMeasure = this.loopStart;
-        this._startTime = performance.now();
-        this._lastScheduledMeasure = -1;
+        this._restartSegment(this.loopStart);
         targetMeasure = this.loopStart;
       }
     }
@@ -826,23 +1073,19 @@ export class PlaybackEngine {
       return;
     }
 
-    // Update cursor if changed
+    // Update cursor if changed (rendering only — audio scheduling is decoupled)
     if (targetMeasure !== this.renderer.cursorMeasure) {
       this.renderer.cursorMeasure = targetMeasure;
       this.renderer.render();
       if (this.onMeasureChange) this.onMeasureChange(targetMeasure);
       if (this.onPositionChange) this.onPositionChange(targetMeasure / Math.max(1, this.totalMeasures - 1));
-
-      // Scroll cursor into view
       this._scrollCursorIntoView();
-
-      // Schedule audio for this measure
-      if (targetMeasure !== this._lastScheduledMeasure) {
-        this._lastScheduledMeasure = targetMeasure;
-        if (this.metronome) this._scheduleMetronomeMeasure(targetMeasure);
-        if (this.audioEnabled) this._scheduleMeasureNotes(targetMeasure);
-      }
     }
+
+    // Lookahead audio scheduling — runs every tick, independent of cursor
+    // crossings and of the render above, so a heavy render frame or GC pause can
+    // no longer make notes fire late.
+    if (this.audioEnabled || this.metronome) this._pumpScheduler();
 
     // Fire per-tick time callback (sub-measure resolution) for external
     // consumers like the floating hand-visualization panel.
@@ -884,16 +1127,24 @@ export class PlaybackEngine {
   // ── Metronome click ───────────────────────────────────────────────
 
   /** Schedule one metronome click per beat for the given measure, using that
-   *  measure's real beat count (so a 2/4 or 6/8 bar clicks the right number). */
-  _scheduleMetronomeMeasure(measureIdx) {
+   *  measure's real beat count (so a 2/4 or 6/8 bar clicks the right number)
+   *  and that measure's own tempo. Clicks are placed on the absolute audio
+   *  timeline (`absStart`), matching the lookahead note scheduler.
+   *  @param {number} measureIdx
+   *  @param {number} absStart — AudioContext time of the measure's first beat
+   *  @param {number} [skipSec=0] — skip clicks before this offset (resume/seek)
+   */
+  _scheduleMetronomeMeasure(measureIdx, absStart, skipSec = 0) {
     if (!this._audioCtx) return;
     this._ensureTimeline();
+    const base = Number.isFinite(absStart) ? absStart : this._audioCtx.currentTime;
     const slotBeats = this._slotStartBeat[measureIdx + 1] - this._slotStartBeat[measureIdx];
     const clicks = Math.max(1, Math.round(slotBeats > 0 ? slotBeats : this.bpm));
-    const secPerBeat = this._secPerBeat;
-    const now = this._audioCtx.currentTime;
+    const secPerBeat = this._measureSecPerBeat(measureIdx);
     for (let b = 0; b < clicks; b++) {
-      this._click(now + b * secPerBeat, b === 0);
+      const off = b * secPerBeat;
+      if (off < skipSec) continue;
+      this._click(base + off, b === 0);
     }
   }
 
@@ -934,12 +1185,37 @@ export class PlaybackEngine {
         '/static/js/vendor/synthetizer/worklet_processor.min.js'
       );
 
+      // ── Soundfont fetch (diagnostic-instrumented; see point #1) ──────────
+      // `/api/soundfont` 307-redirects to a versioned, immutable URL, so resp.url
+      // identifies the actual bank. We log fetch-vs-parse timing separately and
+      // reuse the bytes from the module-level cache when the same bank is loaded
+      // again (engine re-creation, or switching back to a previously seen bank),
+      // which is the difference between a multi-second reload and an instant one.
       console.log('[FretWise] SpessaSynth: fetching SF2 soundfont…');
+      const tFetch = performance.now();
       const resp = await fetch('/api/soundfont');
       if (!resp.ok) throw new Error(`SF2 fetch: HTTP ${resp.status}`);
-      const sf2Buffer = await this._fetchWithProgress(resp);
+      let sf2Buffer = _SF2_BUFFER_CACHE.get(resp.url);
+      if (sf2Buffer) {
+        this.onSynthProgress?.(1, (sf2Buffer.byteLength / 1048576).toFixed(1),
+          (sf2Buffer.byteLength / 1048576).toFixed(1));
+        console.log(`[FretWise] SF2 reused from in-memory cache: ${resp.url} `
+          + `(${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB, no download)`);
+      } else {
+        sf2Buffer = await this._fetchWithProgress(resp);
+        _SF2_BUFFER_CACHE.clear();                       // keep at most one bank
+        _SF2_BUFFER_CACHE.set(resp.url, sf2Buffer);
+        console.log(`[FretWise] SF2 downloaded in ${(performance.now() - tFetch).toFixed(0)} ms: `
+          + `${resp.url} (${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB)`);
+      }
+      if (this._lastSf2Url && this._lastSf2Url !== resp.url) {
+        console.warn(`[FretWise] active soundfont bank CHANGED `
+          + `(${this._lastSf2Url} → ${resp.url}) — this forces a synth reload.`);
+      }
+      this._lastSf2Url = resp.url;
 
       const dest = this._masterGain || this._audioCtx.destination;
+      const tParse = performance.now();
       const spessa = new Synthetizer(dest, sf2Buffer);
 
       // Wait for the worklet to finish parsing the soundfont, then snapshot its
@@ -961,6 +1237,8 @@ export class PlaybackEngine {
           new Promise((r) => setTimeout(r, readyCapMs)),
         ]);
       } catch (_) { /* isReady rejected — proceed with whatever presets exist */ }
+      console.log(`[FretWise] SF2 parsed/ready in ${(performance.now() - tParse).toFixed(0)} ms `
+        + `(worklet decode; cap was ${(readyCapMs / 1000).toFixed(0)} s)`);
       this._spessaPresets = Array.isArray(spessa.presetList) ? spessa.presetList.slice() : [];
 
       this._spessa = spessa;
@@ -969,24 +1247,37 @@ export class PlaybackEngine {
       // Set the (resolved) GM program for primary and any registered secondary channels
       const primaryProg = this._resolveProgram(this._midiProgram);
       spessa.programChange(0, primaryProg);
-      this._ensurePitchBendRange(0);
       // Balance the open track against the backing tracks (CC7 on channel 0).
       try { spessa.controllerChange(0, 7, Math.round(this._primaryVolume * 127)); } catch (_) { /* */ }
       for (const ch of this._secondaryChannels) {
-        spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
-        this._ensurePitchBendRange(ch.midiChannel);
-        ch.synth = 'spessa';
-        // Catch up any missed notes in the current measure (SpessaSynth finished
-        // loading while the song was already playing, so secondary channels were
-        // silent for the first few bars).
-        if (this.isPlaying && this._lastScheduledMeasure >= 0) {
-          this._scheduleChannelNotes(ch, this._lastScheduledMeasure, 0);
+        if (!ch.percussion) {
+          spessa.programChange(ch.midiChannel, this._resolveProgram(ch.midiProgram));
         }
+        try { spessa.controllerChange(ch.midiChannel, 7, Math.round((ch.gain ?? 0.8) * 127)); } catch (_) {}
+        ch.synth = 'spessa';
       }
+      // SpessaSynth finished loading while the song was already playing: every
+      // channel was silent until now (primary stayed silent during load, and
+      // secondaries deferred), so rewind the pump to the present and reschedule
+      // all channels from here. Safe against doubling precisely because nothing
+      // was audible yet.
+      if (this.isPlaying) this._resyncSchedulerToNow();
 
       console.log(`[FretWise] SpessaSynth ready — ${this._spessaPresets.length} presets; `
         + `GM ${this._midiProgram}`
         + (primaryProg !== this._midiProgram ? ` → ${primaryProg} (mapped; ${this._midiProgram} absent)` : ''));
+      // Warn when the active bank is not General MIDI: without GM programs for
+      // bass/drums/keys, the browser synth collapses every track onto a guitar
+      // (or preset 0 = drums), so tabs sound wrong whatever soundfont is tried.
+      this._warnIfNotGeneralMidi(resp.url);
+      // DIAGNOSTIC: confirm what the synth itself thinks is on each channel after
+      // our programChange calls, vs what we asked for — exposes any internal
+      // override (e.g. drum-channel auto-reset, preset-not-found fallback).
+      try {
+        spessa.eventHandler.addEvent('programchange', 'fretwise-diag', (e) =>
+          console.log(`[FretWise][diag] programchange event: channel ${e.channel} → `
+            + `bank ${e.bank} program ${e.program}`));
+      } catch (_) { /* diagnostic only */ }
       if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
       console.warn('[FretWise] SpessaSynth unavailable, falling back to MusyngKite:', err.message);
@@ -1173,7 +1464,11 @@ export class PlaybackEngine {
   }
 
   _pitchSamplesForNote(note, measureNotes, startTime, durationSec) {
-    const hasBend = Number.isFinite(Number(note.bend_value));
+    // Number.isFinite (no coercion) is deliberate: bend_value is null for the
+    // overwhelming majority of notes, and Number(null) === 0 — Number.isFinite
+    // would then wrongly call every un-bent note "bent". Number.isFinite alone
+    // returns false for null/undefined without coercing them to 0 first.
+    const hasBend = Number.isFinite(note.bend_value);
     const hasSlide = !!note.slide_type || note.articulation === 'slide';
     const hasVibrato = note.articulation === 'vibrato'
       || note.articulation === 'wide_vibrato'
@@ -1284,7 +1579,17 @@ export class PlaybackEngine {
   }
 
   _hasPitchExpression(note) {
-    return Number.isFinite(Number(note?.bend_value))
+    // Number.isFinite (no coercion) — see the comment in _pitchSamplesForNote.
+    // The bug this guards against: Number(null) === 0, so wrapping in Number()
+    // made every un-bent note (bend_value === null, the overwhelming majority)
+    // register as "has pitch expression". Every chord note on every track —
+    // including simultaneous drum hits, whose GM program is a meaningless
+    // placeholder (0 = Acoustic Piano) since percussion always plays on channel
+    // 9 — then grabbed a shared auxiliary MIDI channel and reprogrammed it,
+    // stepping on whatever real instrument (guitar, strings…) was using that
+    // channel for its own chord bends. Audible symptom: random piano bleed-through
+    // on tracks that have no piano at all.
+    return Number.isFinite(note?.bend_value)
       || !!note?.slide_type
       || note?.articulation === 'slide'
       || note?.articulation === 'vibrato'
@@ -1357,33 +1662,58 @@ export class PlaybackEngine {
     return out.buffer;
   }
 
+  /** Earliest later-onset same-pitch note offset (seconds from measure start),
+   *  or Infinity if none. Two notes of the same pitch on one MIDI channel cannot
+   *  both ring — the second's noteOn (or the first's noteOff) cuts the other — so
+   *  the scheduler trims the earlier note to end just before the later restrikes,
+   *  turning a swallowed/half-cut re-attack into a clean one (the audible
+   *  "cacophony" from overlapping voices on channel 0). */
+  _nextSamePitchOffsetSec(note, measureNotes, measureOnset, secPerBeat, playbackPitch, myOffsetSec) {
+    let best = Infinity;
+    for (const other of measureNotes) {
+      if (other === note) continue;
+      if (this._playbackPitch(other) !== playbackPitch) continue;
+      const off = (Number(other.onset) - measureOnset) * secPerBeat;
+      if (off > myOffsetSec + 1e-6 && off < best) best = off;
+    }
+    return best;
+  }
+
+  /** Cap a note's duration so it ends just before the same pitch restrikes. */
+  _capSamePitchDuration(rawDuration, when, absStart, nextSameOffsetSec) {
+    if (!Number.isFinite(nextSameOffsetSec)) return rawDuration;
+    const cap = (absStart + nextSameOffsetSec) - when - 0.006;
+    return Math.max(0.03, Math.min(rawDuration, cap));
+  }
+
   /** Schedule all notes in a measure to play at correct times.
    *  Dispatches to SpessaSynth (SF2) when loaded, oscillator otherwise.
    *  @param {number} measureIdx
-   *  @param {number} [offsetSec=0] — extra delay (seconds) before first note
+   *  @param {number} absStart — AudioContext time of the measure's first beat
+   *  @param {number} [skipBeforeMeasureSec=0] — drop notes before this offset (resume/seek)
    */
-  _scheduleMeasureNotes(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
+  _scheduleMeasureNotes(measureIdx, absStart, skipBeforeMeasureSec = 0) {
     // Audio dispatch must never throw into play()/_tick() and freeze the
     // playhead. Swallow + log here; the warning names the real failure (e.g.
     // a synth/worklet API mismatch) so it can be fixed without losing the cursor.
     try {
-      this._scheduleMeasureNotesImpl(measureIdx, offsetSec, skipBeforeMeasureSec);
+      this._scheduleMeasureNotesImpl(measureIdx, absStart, skipBeforeMeasureSec);
     } catch (err) {
       console.warn('[FretWise] note scheduling failed (playhead continues):', err);
     }
   }
 
-  _scheduleMeasureNotesImpl(measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
+  _scheduleMeasureNotesImpl(measureIdx, absStart, skipBeforeMeasureSec = 0) {
     if (!this._audioCtx || !this.audioEnabled) return;
+    const base = Number.isFinite(absStart) ? absStart : this._audioCtx.currentTime;
     const notes = this.renderer.measures[measureIdx];
+    const measureOnset = this._measureOnsetBeats(measureIdx);
+    const secPerBeat = this._measureSecPerBeat(measureIdx);
 
     // Primary track scheduling (skipped for rest bars, but secondary always runs below).
     if (notes && notes.length) {
       if (this._spessa) {
         // SpessaSynth: precise AudioContext-time scheduling via noteOn/noteOff
-        const measureOnset = this._measureOnsetBeats(measureIdx);
-        const secPerBeat = this._secPerBeat;
-        const now = this._audioCtx.currentTime;
         const pitchChannelFor = this._createPitchChannelAllocator(
           0, this._midiProgram, this._primaryVolume,
         );
@@ -1392,36 +1722,39 @@ export class PlaybackEngine {
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
-          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+          const when = base + noteOffsetInMeasure + strumOffset;
           const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const nextSame = this._nextSamePitchOffsetSec(
+            note, notes, measureOnset, secPerBeat, playbackPitch, noteOffsetInMeasure);
+          const dur = this._capSamePitchDuration(expr.duration, when, base, nextSame);
           const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
-          const pitchChannel = pitchChannelFor(note, notes, when, expr.duration);
+          const pitchChannel = pitchChannelFor(note, notes, when, dur);
           const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : 0;
           if (Number.isInteger(pitchChannel)) {
-            this._schedulePitchAutomation(pitchChannel, note, notes, when, expr.duration);
+            this._schedulePitchAutomation(pitchChannel, note, notes, when, dur);
           }
           // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
           // (debug, startTime) pair. Passing a boolean makes the lib do
           // `'time' in false` and throw on every note → total silence.
-          for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {
+          for (const attack of this._noteAttacks(note, when, dur, secPerBeat)) {
             this._spessa.noteOn(playChannel, playbackPitch, velocity, { time: attack.when });
             this._spessa.noteOff(playChannel, playbackPitch, false, { time: attack.when + attack.duration });
           }
         }
       } else if (this._synth) {
         // soundfont-player fallback
-        const measureOnset = this._measureOnsetBeats(measureIdx);
-        const secPerBeat = this._secPerBeat;
-        const now = this._audioCtx.currentTime;
         for (const note of notes) {
           const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
-          const when = now + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+          const when = base + noteOffsetInMeasure + strumOffset;
           const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const nextSame = this._nextSamePitchOffsetSec(
+            note, notes, measureOnset, secPerBeat, playbackPitch, noteOffsetInMeasure);
+          const dur = this._capSamePitchDuration(expr.duration, when, base, nextSame);
           const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * expr.velocityScale);
-          for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {
+          for (const attack of this._noteAttacks(note, when, dur, secPerBeat)) {
             this._synth.play(playbackPitch, attack.when, { duration: attack.duration, gain });
           }
         }
@@ -1433,7 +1766,7 @@ export class PlaybackEngine {
       } else {
         // Synth definitively unavailable (SpessaSynth + MusyngKite both failed):
         // last-resort oscillator so playback is never completely silent.
-        this._scheduleMeasureNotesOscillator(measureIdx, offsetSec);
+        this._scheduleMeasureNotesOscillator(measureIdx, base);
       }
     }
 
@@ -1441,17 +1774,19 @@ export class PlaybackEngine {
     // Runs even when the primary measure is empty so backing tracks play through rest bars.
     for (const ch of this._secondaryChannels) {
       if (!ch.enabled || !ch.synth) continue;
-      this._scheduleChannelNotes(ch, measureIdx, offsetSec, skipBeforeMeasureSec);
+      this._scheduleChannelNotes(ch, measureIdx, base, skipBeforeMeasureSec);
     }
   }
 
   /** Schedule notes for a single secondary channel at a given measure.
    * @param {Object} ch - secondary channel object
    * @param {number} measureIdx
-   * @param {number} [offsetSec=0]
+   * @param {number} absStart — AudioContext time of the measure's first beat
+   * @param {number} [skipBeforeMeasureSec=0]
    */
-  _scheduleChannelNotes(ch, measureIdx, offsetSec = 0, skipBeforeMeasureSec = 0) {
+  _scheduleChannelNotes(ch, measureIdx, absStart, skipBeforeMeasureSec = 0) {
     if (!ch.synth || !ch.enabled || !this._audioCtx || !this.audioEnabled) return;
+    const base = Number.isFinite(absStart) ? absStart : this._audioCtx.currentTime;
     // ch.measures is indexed by (1-based measure_index − 1), built from all
     // measures starting at 1.  The primary renderer's slot `measureIdx` maps to
     // global measure number `measureNumbers[measureIdx]` (which can be > 1 when
@@ -1465,27 +1800,41 @@ export class PlaybackEngine {
     // Same shared measure-onset reference the primary track uses — keeps secondary
     // tracks locked to the primary even when meters change.
     const chMeasureOnset = this._measureOnsetBeats(measureIdx);
-    const chSpb = this._secPerBeat;
-    const chNow = this._audioCtx.currentTime;
+    const chSpb = this._measureSecPerBeat(measureIdx);
 
     if (this._spessa) {
-      const pitchChannelFor = this._createPitchChannelAllocator(
-        ch.midiChannel, ch.midiProgram, ch.gain,
-      );
+      // Percussion never needs an auxiliary pitch-bend channel — GM channel 9
+      // keys are fixed drum-kit slots, pitch automation is musically meaningless
+      // there, and ch.midiProgram for a drum track is a meaningless placeholder
+      // (typically 0 = Acoustic Piano) that must never be programChange'd onto a
+      // shared auxiliary channel another (melodic) track's chord bends are using.
+      // Defense in depth alongside the _hasPitchExpression null-coercion fix.
+      const pitchChannelFor = ch.percussion
+        ? (() => null)
+        : this._createPitchChannelAllocator(ch.midiChannel, ch.midiProgram, ch.gain);
       for (const note of chNotes) {
         const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
         if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
         const playbackPitch = this._playbackPitch(note);
         const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
-        const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+        const when = base + noteOffsetInMeasure + strumOffset;
         const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
-        const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * ch.gain * expr.velocityScale);
-        const pitchChannel = pitchChannelFor(note, chNotes, when, expr.duration);
+        const nextSame = this._nextSamePitchOffsetSec(
+          note, chNotes, chMeasureOnset, chSpb, playbackPitch, noteOffsetInMeasure);
+        // Drums (channel 9) restrike the same GM key constantly (hi-hat, snare);
+        // trimming there would choke the kit, so cap only melodic channels.
+        const dur = ch.percussion
+          ? expr.duration
+          : this._capSamePitchDuration(expr.duration, when, base, nextSame);
+        // ch.gain is applied as CC7 channel volume (see _loadChannelInstrument);
+        // velocity carries only dynamics × expression so it is not double-counted.
+        const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
+        const pitchChannel = pitchChannelFor(note, chNotes, when, dur);
         const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : ch.midiChannel;
         if (Number.isInteger(pitchChannel)) {
-          this._schedulePitchAutomation(pitchChannel, note, chNotes, when, expr.duration);
+          this._schedulePitchAutomation(pitchChannel, note, chNotes, when, dur);
         }
-        for (const attack of this._noteAttacks(note, when, expr.duration, chSpb)) {
+        for (const attack of this._noteAttacks(note, when, dur, chSpb)) {
           this._spessa.noteOn(playChannel, playbackPitch, velocity, { time: attack.when });
           this._spessa.noteOff(playChannel, playbackPitch, false, { time: attack.when + attack.duration });
         }
@@ -1498,7 +1847,7 @@ export class PlaybackEngine {
       if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
       const playbackPitch = this._playbackPitch(note);
       const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
-      const when = chNow + offsetSec + (noteOffsetInMeasure - skipBeforeMeasureSec) + strumOffset;
+      const when = base + noteOffsetInMeasure + strumOffset;
       const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
       const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain * expr.velocityScale);
       for (const attack of this._noteAttacks(note, when, expr.duration, chSpb)) {
@@ -1507,24 +1856,26 @@ export class PlaybackEngine {
     }
   }
 
-  /** Original oscillator-based note scheduler (fallback). */
-  _scheduleMeasureNotesOscillator(measureIdx, offsetSec = 0) {
+  /** Original oscillator-based note scheduler (fallback).
+   *  @param {number} measureIdx
+   *  @param {number} absStart — AudioContext time of the measure's first beat */
+  _scheduleMeasureNotesOscillator(measureIdx, absStart) {
     if (!this._audioCtx || !this.audioEnabled) return;
     const notes = this.renderer.measures[measureIdx];
     if (!notes || !notes.length) return;
 
+    const base = Number.isFinite(absStart) ? absStart : this._audioCtx.currentTime;
     const measureOnset = this._measureOnsetBeats(measureIdx);
-    const secPerBeat = this._secPerBeat;
-    const now = this._audioCtx.currentTime;
+    const secPerBeat = this._measureSecPerBeat(measureIdx);
 
     for (const note of notes) {
       const beatInMeasure = note.onset - measureOnset;
       const playbackPitch = this._playbackPitch(note);
       const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
-      const delay = offsetSec + beatInMeasure * secPerBeat + strumOffset;
+      const when = base + beatInMeasure * secPerBeat + strumOffset;
       const expr = this._expressionForNote(note, note.duration * secPerBeat);
-      const pitchSamples = this._pitchSamplesForNote(note, notes, now + delay, expr.duration);
-      for (const attack of this._noteAttacks(note, now + delay, expr.duration, secPerBeat)) {
+      const pitchSamples = this._pitchSamplesForNote(note, notes, when, expr.duration);
+      for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {
         this._scheduleNote(playbackPitch, attack.when, attack.duration, pitchSamples);
       }
     }
